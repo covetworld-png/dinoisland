@@ -1,44 +1,44 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zalo 调起测试</title>
+    <title>Zalo 唤起修复版</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 50px 20px; background: #f4f4f9; }
-        .btn { 
-            display: inline-block; width: 100%; max-width: 300px; padding: 15px; margin: 10px 0;
-            background-color: #0084FF; color: white; text-align: center; 
-            text-decoration: none; border-radius: 8px; font-weight: bold; cursor: pointer;
-            border: none; font-size: 16px;
+        .chat-btn {
+            background: #0084FF; color: white; padding: 15px 25px;
+            border-radius: 10px; text-decoration: none; display: inline-block;
+            font-weight: bold; margin: 20px;
         }
-        .btn-oa { background-color: #0065d1; }
-        .note { font-size: 12px; color: #666; margin-top: 20px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <h2>Zalo H5 唤起测试</h2>
+    <button onclick="openZaloChat('8490xxxxxx')" class="chat-btn">直接私聊 (个人)</button>
 
-    <a href="https://zalo.me/+8618221025062" class="btn">通过手机号聊天 (推荐)</a>
-
-    <a href="https://zalo.me/n1ududvv3d2g" class="btn">通过 Zalo ID 聊天</a>
-
-    <a href="https://zalo.me/n1ududvv3d2g" class="btn btn-oa">联系官方客服 (OA)</a>
-
-    <div class="note">
-        <p>注意：手机号需要带国际区号（如越南 +84）。</p>
-        <p>如果手机未安装 Zalo，浏览器通常会跳转到 Zalo 的下载页或网页版。</p>
-    </div>
+    <button onclick="openZaloOA('2468458835296197922')" class="chat-btn">联系客服 (OA)</button>
 
     <script>
-        // 高级用法：通过 JS 自动检测并唤起
-        function openZalo(id) {
-            const url = `https://zalo.me/${id}`;
-            window.location.href = url;
-            
-            // 某些特殊环境（如微信内置浏览器）可能会屏蔽 schema
-            // 建议引导用户在系统浏览器打开
+        function openZaloChat(phone) {
+            // 尝试直接使用私有协议跳转到拨号/搜索界面，或直接对话
+            // 注意：部分 Android 版本对私有协议有严格限制
+            const scheme = `zalo://qr/p/${phone}`; 
+            const webUrl = `https://zalo.me/${phone}`;
+
+            // 尝试执行私有协议
+            window.location.href = scheme;
+
+            // 延时检测：如果 2秒后页面没跳走，说明协议失效，切换到网页版引导
+            setTimeout(() => {
+                if (!document.hidden) {
+                    window.location.href = webUrl;
+                }
+            }, 2000);
+        }
+
+        function openZaloOA(oaId) {
+            // OA 的跳转通常非常稳定
+            window.location.href = `https://zalo.me/${oaId}`;
         }
     </script>
 </body>
