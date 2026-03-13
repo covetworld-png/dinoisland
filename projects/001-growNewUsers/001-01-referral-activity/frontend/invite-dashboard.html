@@ -441,16 +441,8 @@
             </div>
             <h3 class="lg:hidden text-white font-bold text-lg mb-4 section-title-shadow" data-vi="Chọn tin nhắn mẫu" data-cn="选择分享话术">Chọn tin nhắn mẫu</h3>
             
-            <div class="space-y-3 mb-4">
-                <button onclick="copyTemplate(0)" class="w-full p-4 bg-jungle-700/50 rounded-xl text-left hover:bg-jungle-700 transition-colors cursor-pointer active:scale-[0.99] border border-mist/10">
-                    <p class="text-white text-sm leading-relaxed">"Nhanh tay tham gia Đảo Khủng Long! Dùng mã mờI <span class="text-gold font-mono">13218392</span> đăng ký, cả hai đều nhận 50 vàng! Cùng nhau khám phá thế giới tiền sử!"</p>
-                </button>
-                <button onclick="copyTemplate(1)" class="w-full p-4 bg-jungle-700/50 rounded-xl text-left hover:bg-jungle-700 transition-colors cursor-pointer active:scale-[0.99] border border-mist/10">
-                    <p class="text-white text-sm leading-relaxed">"Phát hiện game khủng long cực hay! Đăng ký nhập mã <span class="text-gold font-mono">13218392</span>, nhận ngay 50 vàng + quà tân thủ!"</p>
-                </button>
-                <button onclick="copyTemplate(2)" class="w-full p-4 bg-jungle-700/50 rounded-xl text-left hover:bg-jungle-700 transition-colors cursor-pointer active:scale-[0.99] border border-mist/10">
-                    <p class="text-white text-sm leading-relaxed">"Thiếu đồng đội thám hiểm! Dùng mã <span class="text-gold font-mono">13218392</span> tham gia, nhận ngay thưởng vàng, cùng nhau thống trị đảo khủng long!"</p>
-                </button>
+            <div class="space-y-3 mb-4" id="message-templates-list">
+                <!-- Templates will be rendered dynamically based on language -->
             </div>
             
             <button onclick="closeMessageModal()" class="w-full h-12 bg-jungle-700 text-white rounded-xl font-medium active:scale-95 transition-all cursor-pointer hover:bg-jungle-600" data-vi="Hủy" data-cn="取消">
@@ -676,7 +668,20 @@
         }
 
         function showMessageTemplates() {
+            renderMessageTemplates();
             document.getElementById('message-modal').classList.remove('hidden');
+        }
+
+        function renderMessageTemplates() {
+            const container = document.getElementById('message-templates-list');
+            container.innerHTML = messageTemplates.map((template, index) => {
+                const message = currentLang === 'vi' ? template.vi : template.cn;
+                return `
+                    <button onclick="copyTemplate(${index})" class="w-full p-4 bg-jungle-700/50 rounded-xl text-left hover:bg-jungle-700 transition-colors cursor-pointer active:scale-[0.99] border border-mist/10">
+                        <p class="text-white text-sm leading-relaxed">"${message}"</p>
+                    </button>
+                `;
+            }).join('');
         }
 
         function startInviting() {
