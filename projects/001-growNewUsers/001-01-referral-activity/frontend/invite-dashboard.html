@@ -18,10 +18,10 @@
 
         // Sample players with masked Vietnamese phone numbers
         const players = [
-            { id: 1, name: '098****123', avatar: '0', status: 'activated', date: '2026-03-10', recharged: true, amount: 68, reward: 30, bonus: 13 },
-            { id: 2, name: '091****456', avatar: '0', status: 'activated', date: '2026-03-11', recharged: false, amount: 0, reward: 30, bonus: 0 },
-            { id: 3, name: '097****789', avatar: '0', status: 'pending', date: '2026-03-11', recharged: false, amount: 0, reward: 0, bonus: 0 },
-            { id: 4, name: '093****321', avatar: '0', status: 'pending', date: '2026-03-12', recharged: false, amount: 0, reward: 0, bonus: 0 },
+            { id: 1, name: '098****123', avatar: 'user', status: 'activated', date: '2026-03-10', recharged: true, amount: 68, reward: 30, bonus: 13 },
+            { id: 2, name: '091****456', avatar: 'user', status: 'activated', date: '2026-03-11', recharged: false, amount: 0, reward: 30, bonus: 0 },
+            { id: 3, name: '097****789', avatar: 'user', status: 'pending', date: '2026-03-11', recharged: false, amount: 0, reward: 0, bonus: 0 },
+            { id: 4, name: '093****321', avatar: 'user', status: 'pending', date: '2026-03-12', recharged: false, amount: 0, reward: 0, bonus: 0 },
         ];
 
         // Message templates for poster
@@ -710,7 +710,7 @@
                     <div class="player-item lg:grid lg:grid-cols-12 lg:gap-4 lg:items-center lg:px-4 lg:py-4 card-glass lg:bg-none lg:hover:bg-jungle-700/30 rounded-xl lg:rounded-none p-4 lg:p-0 border border-mist/10 lg:border-0 lg:border-b transition-colors duration-200 cursor-pointer" data-status="${player.status}">
                         <!-- Mobile Layout -->
                         <div class="lg:hidden flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-lg">${player.avatar}</div>
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white">${player.avatar === 'user' ? '<i class="fas fa-user text-lg"></i>' : `<span class="font-bold text-lg">${player.avatar}</span>`}</div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2">
                                     <span class="text-white font-semibold text-sm truncate section-title-shadow">${player.name}</span>
@@ -737,7 +737,7 @@
                         <!-- Desktop Layout -->
                         <div class="hidden lg:contents">
                             <div class="col-span-4 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm">${player.avatar}</div>
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white">${player.avatar === 'user' ? '<i class="fas fa-user text-sm"></i>' : `<span class="font-bold text-sm">${player.avatar}</span>`}</div>
                                 <span class="text-white font-medium section-title-shadow">${player.name}</span>
                             </div>
                             <div class="col-span-2 text-center text-sm text-gray-300">${player.date}</div>
