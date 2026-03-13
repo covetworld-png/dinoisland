@@ -415,50 +415,6 @@
             }
         }
 
-        // 页面初始化
-        window.onload = function() {
-            const device = detectDevice();
-            const tipElement = document.querySelector('.tip');
-
-            if (!device.isMobile) {
-                tipElement.innerHTML = '⚠️ 提示：该功能仅支持手机端（需安装Zalo App）<br>' +
-                                     '请在手机浏览器中打开此页面进行测试';
-                tipElement.style.color = '#ff6b6b';
-            } else {
-                // 移动端显示设备信息
-                const platform = device.isAndroid ? 'Android' : device.isIOS ? 'iOS' : '移动设备';
-                tipElement.innerHTML = `📱 检测到：${platform} 设备<br>` +
-                                     '点击按钮测试Zalo调起功能';
-                tipElement.style.color = '#2ecc71';
-
-                // 添加测试选项
-                const testOptions = document.createElement('div');
-                testOptions.innerHTML = `
-                    <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px;">
-                        <strong>测试选项：</strong><br>
-                        <button onclick="openZaloChat(false)" style="margin: 5px; padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            越南格式 (0开头)
-                        </button>
-                        <button onclick="openZaloChat(true)" style="margin: 5px; padding: 8px 12px; background: #9b59b6; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            国际格式 (+84)
-                        </button>
-                    </div>
-                `;
-                tipElement.parentNode.insertBefore(testOptions, tipElement.nextSibling);
-            }
-
-            // 更新链接的href
-            document.querySelector('a[href*="zalo://chat"]').href = `zalo://chat?phone=${TEST_PHONE}`;
-            document.querySelector('a[href*="zalo://oa"]').href = `zalo://oa?oaid=${TEST_OA_ID}`;
-
-            // 更新按钮事件
-            const jsBtn = document.querySelector('button[onclick="openZaloChat()"]');
-            if (jsBtn) {
-                jsBtn.setAttribute('onclick', 'openZaloChat(false)');
-                jsBtn.textContent = 'JS方式打开Zalo聊天 (越南格式)';
-            }
-        };
-
         // 测试自定义手机号
         async function testCustomPhone() {
             const phoneInput = document.getElementById('customPhone');
