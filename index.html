@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zalo 对话框调起示例</title>
+    <style>
+        /* 按钮样式优化，贴近Zalo视觉风格 */
+        .zalo-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #0066FF;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+        }
+        .zalo-btn:hover {
+            background-color: #0052CC;
+        }
+        .tip {
+            margin-top: 16px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h2>点击按钮调起Zalo对话框</h2>
+    
+    <!-- 1. 调起指定Zalo账号的聊天对话框（最常用） -->
+    <a href="zalo://chat?phone=0912345678" class="zalo-btn">
+        打开Zalo聊天（指定手机号）
+    </a>
+
+    <!-- 2. 调起指定Zalo OA账号的对话框（OA ID形式） -->
+    <a href="zalo://oa?oaid=123456789" class="zalo-btn" style="margin-left: 10px;">
+        打开Zalo OA聊天
+    </a>
+
+    <!-- 3. 点击按钮触发（兼容JS调用） -->
+    <button onclick="openZaloChat()" class="zalo-btn" style="margin-top: 10px;">
+        JS方式打开Zalo聊天
+    </button>
+
+    <div class="tip">
+        提示：需在手机端打开（已安装Zalo），PC端会提示无法打开；手机号需带国家码（越南0开头，国际版+84）
+    </div>
+
+    <script>
+        // JS调用Zalo链接的方法（带异常处理）
+        function openZaloChat() {
+            // 目标Zalo账号（手机号）
+            const phoneNumber = "0912345678";
+            const zaloUrl = `zalo://chat?phone=${phoneNumber}`;
+
+            // 尝试打开Zalo
+            const link = document.createElement('a');
+            link.href = zaloUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // 检测是否打开失败（延迟判断）
+            setTimeout(() => {
+                // 简单判断：如果500ms后页面还在，提示用户
+                alert('若未打开Zalo，请检查是否已安装App，或手动打开Zalo搜索该号码');
+            }, 500);
+        }
+
+        // 可选：页面加载时检测是否支持Zalo协议
+        window.onload = function() {
+            const isMobile = /Android|iPhone/i.test(navigator.userAgent);
+            if (!isMobile) {
+                document.querySelector('.tip').textContent = '提示：该功能仅支持手机端（需安装Zalo App）';
+            }
+        };
+    </script>
+</body>
+</html>
