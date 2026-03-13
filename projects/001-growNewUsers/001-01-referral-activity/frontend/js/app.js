@@ -17,10 +17,10 @@ const servers = [
 ];
 
 const players = [
-    { id: 1, name: 'Nguyễn_Văn_Anh', avatar: 'N', status: 'activated', date: '10/03/2026', recharged: true, amount: 68, reward: 30, bonus: 13 },
-    { id: 2, name: 'Trần_Thị_Minh', avatar: 'T', status: 'activated', date: '11/03/2026', recharged: false, amount: 0, reward: 30, bonus: 0 },
-    { id: 3, name: 'Lê_Hoàng_Phúc', avatar: 'L', status: 'pending', date: '11/03/2026', recharged: false, amount: 0, reward: 0, bonus: 0 },
-    { id: 4, name: 'Phạm_Thanh_Hương', avatar: 'P', status: 'pending', date: '12/03/2026', recharged: false, amount: 0, reward: 0, bonus: 0 },
+    { id: 1, name: 'Nguyễn_Văn_Anh', avatar: 'N', status: 'activated', date: '2026-03-10', recharged: true, amount: 68, reward: 30, bonus: 13 },
+    { id: 2, name: 'Trần_Thị_Minh', avatar: 'T', status: 'activated', date: '2026-03-11', recharged: false, amount: 0, reward: 30, bonus: 0 },
+    { id: 3, name: 'Lê_Hoàng_Phúc', avatar: 'L', status: 'pending', date: '2026-03-11', recharged: false, amount: 0, reward: 0, bonus: 0 },
+    { id: 4, name: 'Phạm_Thanh_Hương', avatar: 'P', status: 'pending', date: '2026-03-12', recharged: false, amount: 0, reward: 0, bonus: 0 },
 ];
 
 // State
