@@ -1,0 +1,62 @@
+{
+  "inviteCode": "13218392",
+  "templates": [
+    {
+      "id": 1,
+      "vi": "Nhanh tay tham gia Đảo Khủng Long! Dùng mã mờI {{code}} đăng ký, cả hai đều nhận 50 vàng! Cùng nhau khám phá thế giới tiền sử!",
+      "cn": "快来加入恐龙世界！用我的邀请码 {{code}} 注册，双方都能获得50金币！一起探索史前世界吧！"
+    },
+    {
+      "id": 2,
+      "vi": "Phát hiện game khủng long cực hay! Đăng ký nhập mã {{code}}, nhận ngay 50 vàng + quà tân thủ!",
+      "cn": "发现一款超好玩的恐龙游戏！注册填我的邀请码 {{code}}，新手礼包+50金币直接到账！"
+    },
+    {
+      "id": 3,
+      "vi": "Thiếu đồng đội thám hiểm! Dùng mã {{code}} tham gia, nhận ngay thưởng vàng, cùng nhau thống trị đảo khủng long!",
+      "cn": "组队探险缺队友！用邀请码 {{code}} 加入，开局就有金币奖励，快来一起称霸恐龙岛！"
+    },
+    {
+      "id": 4,
+      "vi": "Game khủng long hot nhất 2024! Nhập mã {{code}} nhận ngay 50 vàng miễn phí!",
+      "cn": "2024最火爆的恐龙游戏！输入邀请码 {{code}} 立即领取50免费金币！"
+    },
+    {
+      "id": 5,
+      "vi": "Bạn tôi ơi, vào chơi game khủng long với mình đi! Dùng mã {{code}} có quà 50 vàng đó!",
+      "cn": "朋友，来跟我一起玩恐龙游戏吧！用邀请码 {{code}} 有50金币礼包哦！"
+    }
+  ],
+  "poster": {
+    "title": {
+      "vi": "Đảo Khủng Long",
+      "cn": "恐龙世界"
+    },
+    "subtitle": {
+      "vi": "MờI bạn cùng khám phá thế giới tiền sử",
+      "cn": "邀请你一起探索史前世界"
+    },
+    "codeLabel": {
+      "vi": "Mã mờI của tôi",
+      "cn": "我的邀请码"
+    },
+    "scanText": {
+      "vi": "Quét mã để tham gia ngay",
+      "cn": "扫码立即加入"
+    }
+  },
+  "rewards": {
+    "base": {
+      "vi": "Mỗi lờI mờI thành công nhận {{amount}} vàng",
+      "cn": "每成功邀请一位好友可获得 {{amount}} 金币"
+    },
+    "recharge": {
+      "vi": "Hoàn thành nạp đầu nhận {{percent}}% hoàn trả",
+      "cn": "完成首充可获得 {{percent}}% 返点"
+    },
+    "newbie": {
+      "vi": "NgườI mới kích hoạt nhận {{amount}} vàng",
+      "cn": "新用户激活可获得 {{amount}} 金币"
+    }
+  }
+}
