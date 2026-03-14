@@ -157,12 +157,50 @@
             display: flex;
             align-items: center;
             gap: 16px;
-            margin-bottom: 20px;
+        }
+
+        /* Hero Info Block */
+        .hero-info-block {
+            background: rgba(10, 30, 25, 0.6);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 16px;
+        }
+
+        .hero-reward-inline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hero-reward-inline .icon {
+            font-size: 18px;
+        }
+
+        .hero-reward-inline .reward-text {
+            font-size: 13px;
+            color: var(--gold);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .hero-reward-inline .divider {
+            color: var(--mist);
+            margin: 0 4px;
+        }
+
+        .hero-reward-inline .reward-slogan {
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
         .anchor-avatar {
-            width: 64px;
-            height: 64px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             border: 3px solid var(--gold);
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
@@ -549,7 +587,7 @@
     </div>
 
     <div class="container">
-        <!-- Hero Section: Anchor + Reward Text -->
+        <!-- Hero Section: Anchor + Reward -->
         <div class="hero-card">
             <div class="hero-content">
                 <div class="anchor-header">
@@ -559,9 +597,13 @@
                         <div class="subtitle" data-i18n="anchor.subtitle">🎮 Streamer Đảo Khủng Long</div>
                     </div>
                 </div>
-                <div class="hero-reward">
-                    <div class="reward-text" data-i18n="reward.badge">QUÀ TẶNG ĐỘC QUYỀN</div>
-                    <div class="reward-slogan" data-i18n="reward.slogan">Tặng Khủng Long Khởi Đầu</div>
+                <div class="hero-info-block">
+                    <div class="hero-reward-inline">
+                        <span class="icon">🎁</span>
+                        <span class="reward-text" data-i18n="reward.badge">QUÀ TẶNG ĐỘC QUYỀN</span>
+                        <span class="divider">|</span>
+                        <span class="reward-slogan" data-i18n="reward.slogan">Tặng Khủng Long Khởi Đầu</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -569,7 +611,7 @@
         <!-- Video Player -->
         <div class="glass-card">
             <div class="video-container">
-                <div class="video-cover" id="videoCover" style="background-image: url('../../assets/anchor/heni/heni_cover_360x640.webp');" onclick="playVideo()">
+                <div class="video-cover" id="videoCover" style="background-image: url('../../assets/anchor/heni/heni_cover_576x1024.png');" onclick="playVideo()">
                     <div class="play-button"></div>
                 </div>
                 <video id="videoPlayer" loop playsinline muted>
