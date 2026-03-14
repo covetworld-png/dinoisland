@@ -37,7 +37,7 @@
             overflow-x: hidden;
         }
 
-        /* Global background with texture */
+        /* Global background with texture - clearer */
         body::before {
             content: '';
             position: fixed;
@@ -46,7 +46,7 @@
             right: 0;
             bottom: 0;
             background: 
-                linear-gradient(180deg, rgba(10, 26, 21, 0.85) 0%, rgba(10, 26, 21, 0.92) 100%),
+                linear-gradient(180deg, rgba(10, 26, 21, 0.6) 0%, rgba(10, 26, 21, 0.75) 100%),
                 url('../../assets/anchor/heni/heni_bg_compressed.jpg');
             background-size: cover;
             background-position: center;
@@ -69,6 +69,29 @@
             position: relative;
             z-index: 1;
             padding: 24px 20px;
+        }
+
+        .hero-reward {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(74, 154, 138, 0.2);
+            text-align: center;
+        }
+
+        .hero-reward .reward-text {
+            font-size: 12px;
+            color: var(--gold);
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .hero-reward .reward-slogan {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
         }
 
         .container {
@@ -526,17 +549,19 @@
     </div>
 
     <div class="container">
-        <!-- Hero Section with Background -->
+        <!-- Hero Section: Anchor + Reward Text -->
         <div class="hero-card">
-            <div class="hero-bg"></div>
             <div class="hero-content">
-                <!-- Anchor Header -->
                 <div class="anchor-header">
                     <img src="../../assets/anchor/heni/heni_avatar_720x720.webp" alt="Heni" class="anchor-avatar">
                     <div class="anchor-info">
                         <h1>HENI</h1>
                         <div class="subtitle" data-i18n="anchor.subtitle">🎮 Streamer Đảo Khủng Long</div>
                     </div>
+                </div>
+                <div class="hero-reward">
+                    <div class="reward-text" data-i18n="reward.badge">QUÀ TẶNG ĐỘC QUYỀN</div>
+                    <div class="reward-slogan" data-i18n="reward.slogan">Tặng Khủng Long Khởi Đầu</div>
                 </div>
             </div>
         </div>
@@ -553,29 +578,12 @@
             </div>
         </div>
 
-        <!-- Reward Section -->
-        <div class="glass-card reward-section">
-            <div class="reward-badge">
-                <span class="icon">🎁</span>
-                <span data-i18n="reward.badge">QUÀ TẶNG ĐỘC QUYỀN</span>
-            </div>
-            
-            <h2 class="reward-title" data-i18n="reward.title">Tặng Khủng Long Khởi Đầu</h2>
-            
-            <div class="reward-item">
-                <span class="dino-icon">🦕</span>
-                <div class="reward-details">
-                    <div class="name" data-i18n="reward.item">Khủng Long Miễn Phí</div>
-                </div>
-            </div>
-        </div>
-
         <!-- CTA Section -->
         <div class="glass-card cta-section">
             <!-- Zalo Primary CTA -->
             <a href="https://zalo.me/0987654321" class="btn-primary animate-pulse-glow" id="zaloBtn">
                 <span class="icon">💬</span>
-                <span data-i18n="cta.zalo">Thêm Zalo Ngay</span>
+                <span data-i18n="cta.zalo">Thêm Zalo Miễn Phí Nhận Khủng Long</span>
             </a>
 
             <div class="divider" data-i18n="divider">hoặc</div>
@@ -627,9 +635,8 @@
                 'page.title': 'Heni - Quà Tặng Độc Quyền',
                 'anchor.subtitle': '🎮 Streamer Đảo Khủng Long',
                 'reward.badge': 'QUÀ TẶNG ĐỘC QUYỀN',
-                'reward.title': 'Tặng Khủng Long Khởi Đầu',
-                'reward.item': 'Khủng Long Miễn Phí',
-                'cta.zalo': 'Thêm Zalo Ngay',
+                'reward.slogan': 'Tặng Khủng Long Khởi Đầu',
+                'cta.zalo': 'Thêm Zalo Miễn Phí Nhận Khủng Long',
                 'divider': 'hoặc',
                 'zalo.label': 'Số Zalo',
                 'cta.copy': 'Sao chép số',
@@ -643,9 +650,8 @@
                 'page.title': 'Heni - 专属福利',
                 'anchor.subtitle': '🎮 恐龙岛主播',
                 'reward.badge': '专属福利',
-                'reward.title': '开局送恐龙',
-                'reward.item': '免费领恐龙',
-                'cta.zalo': '立即添加 Zalo',
+                'reward.slogan': '开局送恐龙',
+                'cta.zalo': '添加 Zalo 免费领恐龙',
                 'divider': '或',
                 'zalo.label': 'Zalo 号码',
                 'cta.copy': '复制号码',
