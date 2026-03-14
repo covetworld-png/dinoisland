@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-i18n="page.title">Heni - Quà Tặng Độc Quyền</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #FFD700;
+            --gold-dark: #B8860B;
+            --gold-light: #FFE55C;
+            --jungle-900: #0a1a15;
+            --jungle-800: rgba(10, 30, 25, 0.85);
+            --jungle-700: rgba(15, 45, 38, 0.9);
+            --jungle-600: #1a4a3a;
+            --mist: #4a9a8a;
+            --mist-light: #6abaaa;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--jungle-900);
+            min-height: 100vh;
+            color: var(--text-primary);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background - dark jungle gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 50% 0%, rgba(74, 154, 138, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #0d2a20 0%, #0a1a15 50%, #081512 100%);
+            z-index: -2;
+        }
+
+        /* Hero Card with background image */
+        .hero-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(74, 154, 138, 0.2);
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(180deg, rgba(10, 26, 21, 0.2) 0%, rgba(10, 30, 25, 0.95) 100%),
+                url('../../assets/anchor/heni/heni_bg_1328x569.png');
+            background-size: cover;
+            background-position: center 30%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            padding: 24px 20px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+            position: relative;
+        }
+
+        /* Language Switcher */
+        .lang-switcher {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+            background: var(--jungle-800);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(74, 154, 138, 0.2);
+            border-radius: 20px;
+            padding: 4px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .lang-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: var(--jungle-900);
+        }
+
+        /* Glass Card Style */
+        .glass-card {
+            background: var(--jungle-800);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(74, 154, 138, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Anchor Header */
+        .anchor-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .anchor-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 3px solid var(--gold);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .anchor-info h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--gold);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 4px;
+        }
+
+        .anchor-info .subtitle {
+            font-size: 13px;
+            color: var(--mist-light);
+            font-weight: 500;
+        }
+
+        /* Video Section */
+        .video-container {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid rgba(74, 154, 138, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            background: var(--jungle-700);
+            aspect-ratio: 9 / 16;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .video-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+            border: 2px dashed rgba(255, 215, 0, 0.5);
+        }
+
+        .video-cover.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .play-button {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .play-button:active {
+            transform: scale(0.95);
+        }
+
+        .play-button::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 18px solid var(--jungle-900);
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            margin-left: 4px;
+        }
+
+        /* Reward Section */
+        .reward-section {
+            text-align: center;
+            padding: 24px 20px;
+        }
+
+        .reward-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 9999px;
+            margin-bottom: 16px;
+        }
+
+        .reward-badge .icon {
+            font-size: 18px;
+        }
+
+        .reward-badge span {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .reward-title {
+            font-family: 'Cinzel', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .reward-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(255, 215, 0, 0.08);
+            border-radius: 12px;
+            border: 1px dashed rgba(255, 215, 0, 0.3);
+        }
+
+        .dino-icon {
+            font-size: 40px;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+        }
+
+        .reward-details {
+            text-align: left;
+        }
+
+        .reward-details .name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(74, 154, 138, 0.5), transparent);
+        }
+
+        /* Primary Button */
+        .btn-primary {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            border: none;
+            border-radius: 28px;
+            color: var(--jungle-900);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+            transition: all 0.15s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary .icon {
+            font-size: 20px;
+        }
+
+        /* Secondary Button */
+        .btn-secondary {
+            width: 100%;
+            padding: 14px 24px;
+            background: transparent;
+            border: 2px solid var(--gold);
+            border-radius: 28px;
+            color: var(--gold);
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+        }
+
+        /* Zalo Number Display */
+        .zalo-number-section {
+            text-align: center;
+            padding-top: 8px;
+        }
+
+        .zalo-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .zalo-number {
+            font-family: 'Cinzel', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            margin-bottom: 12px;
+        }
+
+        /* Steps Section */
+        .steps-section {
+            margin-top: 8px;
+        }
+
+        .steps-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--mist-light);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(74, 154, 138, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(74, 154, 138, 0.15);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--mist) 0%, var(--jungle-600) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content .text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--jungle-700);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid rgba(74, 154, 138, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 4px 30px rgba(255, 215, 0, 0.5); }
+        }
+
+        .animate-pulse-glow {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 360px) {
+            .container {
+                padding: 16px 12px 32px;
+            }
+
+            .lang-switcher {
+                top: 12px;
+                right: 12px;
+            }
+
+            .anchor-avatar {
+                width: 56px;
+                height: 56px;
+            }
+
+            .anchor-info h1 {
+                font-size: 20px;
+            }
+
+            .reward-title {
+                font-size: 18px;
+            }
+
+            .zalo-number {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="vi">TIẾNG VIỆT</button>
+        <button class="lang-btn" data-lang="cn">中文</button>
+    </div>
+
+    <div class="container">
+        <!-- Hero Section with Background -->
+        <div class="hero-card">
+            <div class="hero-bg"></div>
+            <div class="hero-content">
+                <!-- Anchor Header -->
+                <div class="anchor-header">
+                    <img src="../../assets/anchor/heni/heni_avatar_720x720.webp" alt="Heni" class="anchor-avatar">
+                    <div class="anchor-info">
+                        <h1>HENI</h1>
+                        <div class="subtitle" data-i18n="anchor.subtitle">🎮 Streamer Đảo Khủng Long</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Player -->
+        <div class="glass-card">
+            <div class="video-container">
+                <div class="video-cover" id="videoCover" style="background-image: url('../../assets/anchor/heni/heni_cover_360x640.webp');" onclick="playVideo()">
+                    <div class="play-button"></div>
+                </div>
+                <video id="videoPlayer" loop playsinline muted>
+                    <source src="../../assets/anchor/heni/heni_video.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+
+        <!-- Reward Section -->
+        <div class="glass-card reward-section">
+            <div class="reward-badge">
+                <span class="icon">🎁</span>
+                <span data-i18n="reward.badge">QUÀ TẶNG ĐỘC QUYỀN</span>
+            </div>
+            
+            <h2 class="reward-title" data-i18n="reward.title">Tặng Khủng Long Khởi Đầu</h2>
+            
+            <div class="reward-item">
+                <span class="dino-icon">🦕</span>
+                <div class="reward-details">
+                    <div class="name" data-i18n="reward.item">Khủng Long Miễn Phí</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="glass-card cta-section">
+            <!-- Zalo Primary CTA -->
+            <a href="https://zalo.me/0987654321" class="btn-primary animate-pulse-glow" id="zaloBtn">
+                <span class="icon">💬</span>
+                <span data-i18n="cta.zalo">Thêm Zalo Ngay</span>
+            </a>
+
+            <div class="divider" data-i18n="divider">hoặc</div>
+
+            <!-- Zalo Number & Copy -->
+            <div class="zalo-number-section">
+                <div class="zalo-label" data-i18n="zalo.label">Số Zalo</div>
+                <div class="zalo-number">0987-654-321</div>
+                <button class="btn-secondary" id="copyBtn">
+                    <span>📋</span>
+                    <span data-i18n="cta.copy">Sao chép số</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Steps Section -->
+        <div class="glass-card steps-section">
+            <div class="steps-title" data-i18n="steps.title">📋 CÁC BƯỚC NHẬN QUÀ</div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="text" data-i18n="steps.step1">Thêm Zalo + Gửi "Lãnh Long"</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="text" data-i18n="steps.step2">Streamer hướng dẫn nhận quà</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="text" data-i18n="steps.step3">Nhận khủng long, gia nhập đảo!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Internationalization
+        const i18n = {
+            vi: {
+                'page.title': 'Heni - Quà Tặng Độc Quyền',
+                'anchor.subtitle': '🎮 Streamer Đảo Khủng Long',
+                'reward.badge': 'QUÀ TẶNG ĐỘC QUYỀN',
+                'reward.title': 'Tặng Khủng Long Khởi Đầu',
+                'reward.item': 'Khủng Long Miễn Phí',
+                'cta.zalo': 'Thêm Zalo Ngay',
+                'divider': 'hoặc',
+                'zalo.label': 'Số Zalo',
+                'cta.copy': 'Sao chép số',
+                'steps.title': '📋 CÁC BƯỚC NHẬN QUÀ',
+                'steps.step1': 'Thêm Zalo + Gửi "Lãnh Long"',
+                'steps.step2': 'Streamer hướng dẫn nhận quà',
+                'steps.step3': 'Nhận khủng long, gia nhập đảo!',
+                'toast.copied': 'Đã sao chép!'
+            },
+            cn: {
+                'page.title': 'Heni - 专属福利',
+                'anchor.subtitle': '🎮 恐龙岛主播',
+                'reward.badge': '专属福利',
+                'reward.title': '开局送恐龙',
+                'reward.item': '免费领恐龙',
+                'cta.zalo': '立即添加 Zalo',
+                'divider': '或',
+                'zalo.label': 'Zalo 号码',
+                'cta.copy': '复制号码',
+                'steps.title': '📋 领取步骤',
+                'steps.step1': '添加 Zalo + 发送"领龙"',
+                'steps.step2': '主播引导领取奖励',
+                'steps.step3': '领取恐龙，进驻恐龙岛！',
+                'toast.copied': '已复制！'
+            }
+        };
+
+        let currentLang = 'vi';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            
+            // Update all translatable elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) {
+                    el.textContent = i18n[lang][key];
+                }
+            });
+
+            // Update page title
+            document.title = i18n[lang]['page.title'];
+
+            // Update active button state
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            // Save preference
+            localStorage.setItem('landing-lang', lang);
+        }
+
+        // Language switcher event listeners
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setLanguage(btn.dataset.lang);
+            });
+        });
+
+        // Load saved language preference
+        const savedLang = localStorage.getItem('landing-lang');
+        if (savedLang && i18n[savedLang]) {
+            setLanguage(savedLang);
+        }
+
+        // Video Player
+        const videoCover = document.getElementById('videoCover');
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        // Handle video errors
+        videoPlayer.addEventListener('error', function() {
+            showToast('Lỗi video / 视频加载失败');
+            videoCover.classList.remove('hidden');
+        });
+
+        // Global play function for onclick
+        window.playVideo = async function() {
+            videoCover.classList.add('hidden');
+            
+            try {
+                // Muted first for autoplay policy, then unmute
+                videoPlayer.muted = true;
+                await videoPlayer.play();
+                videoPlayer.muted = false;
+            } catch (err) {
+                showToast('Không thể phát video / 无法播放视频');
+                videoCover.classList.remove('hidden');
+            }
+        };
+
+        // Copy Zalo Number
+        const copyBtn = document.getElementById('copyBtn');
+        const toast = document.getElementById('toast');
+        const zaloNumber = '0987654321';
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        copyBtn.addEventListener('click', async function() {
+            try {
+                await navigator.clipboard.writeText(zaloNumber);
+                showToast(i18n[currentLang]['toast.copied']);
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = zaloNumber;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast(i18n[currentLang]['toast.copied']);
+            }
+        });
+
+        // Zalo Button Click Tracking
+        const zaloBtn = document.getElementById('zaloBtn');
+        zaloBtn.addEventListener('click', function() {
+            console.log('Zalo button clicked');
+        });
+
+        // Device detection for Zalo deep link
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isIOS = /iphone|ipad|ipod/.test(userAgent);
+        const isAndroid = /android/.test(userAgent);
+
+        // Update Zalo link based on device
+        if (isIOS) {
+            zaloBtn.href = 'zalo://qr/p/0987654321';
+        } else if (isAndroid) {
+            zaloBtn.href = 'intent://zalo.me/0987654321#Intent;package=com.zing.zalo;scheme=https;end';
+        }
+    </script>
+</body>
+</html>
