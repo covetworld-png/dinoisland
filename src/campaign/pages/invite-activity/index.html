@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LỜi MỜi CỦa Tôi - Đảo Khủng Long</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Server list - easy to extend
+        const servers = [
+            { id: 'S1', name: 'Máy chủ 1', nameCN: '服务器 1', players: 2847 },
+            { id: 'S2', name: 'Máy chủ 2', nameCN: '服务器 2', players: 1956 },
+            { id: 'S3', name: 'Máy chủ 3', nameCN: '服务器 3', players: 3124 },
+            { id: 'S4', name: 'Máy chủ 4', nameCN: '服务器 4', players: 2531 },
+        ];
+
+        // Sample players with masked Vietnamese phone numbers
+        const players = [
+            { id: 1, name: '098****123', avatar: 'user', status: 'activated', date: '2026-03-10', recharged: true, amount: 68, reward: 30, bonus: 13 },
+            { id: 2, name: '091****456', avatar: 'user', status: 'activated', date: '2026-03-11', recharged: false, amount: 0, reward: 30, bonus: 0 },
+            { id: 3, name: '097****789', avatar: 'user', status: 'pending', date: '2026-03-11', recharged: false, amount: 0, reward: 0, bonus: 0 },
+            { id: 4, name: '093****321', avatar: 'user', status: 'pending', date: '2026-03-12', recharged: false, amount: 0, reward: 0, bonus: 0 },
+        ];
+
+        // Message templates for poster
+        const messageTemplates = [
+            { vi: 'Nhanh tay tham gia Đảo Khủng Long! Dùng mã mờI 13218392 đăng ký, cả hai đều nhận 50 vàng!', cn: '快来加入恐龙世界！用我的邀请码 13218392 注册，双方都能获得50金币！' },
+            { vi: 'Phát hiện game khủng long cực hay! Đăng ký nhập mã 13218392, nhận ngay 50 vàng + quà tân thủ!', cn: '发现一款超好玩的恐龙游戏！注册填我的邀请码 13218392，新手礼包+50金币直接到账！' },
+            { vi: 'Thiếu đồng đội thám hiểm! Dùng mã 13218392 tham gia, nhận ngay thưởng vàng!', cn: '组队探险缺队友！用邀请码 13218392 加入，开局就有金币奖励！' },
+        ];
+
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'jungle': {
+                            900: '#0a1a15',
+                            800: 'rgba(10, 30, 25, 0.85)',
+                            700: 'rgba(15, 45, 38, 0.9)',
+                            600: '#1a4a3a',
+                            500: 'rgba(30, 80, 65, 0.6)',
+                        },
+                        'mist': {
+                            DEFAULT: '#4a9a8a',
+                            light: '#6abaaa',
+                            dark: '#2a6a5a',
+                        },
+                        'gold': {
+                            DEFAULT: '#FFD700',
+                            dark: '#B8860B',
+                            light: '#FFE55C',
+                        },
+                        'dino': {
+                            brown: '#8B7355',
+                            dark: '#5a4a3a',
+                        }
+                    },
+                    fontFamily: {
+                        'display': ['Cinzel', 'serif'],
+                        'body': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.2s ease-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a1a15;
+            min-height: 100vh;
+        }
+        .bg-dino {
+            background-image: url('assets/banner-BSZ_6Ncr.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .font-display {
+            font-family: 'Cinzel', serif;
+        }
+        .gold-glow {
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.3);
+        }
+        .gold-button-glow {
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+        }
+        .card-glass {
+            background: rgba(10, 30, 25, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(74, 154, 138, 0.2);
+        }
+        .card-hover {
+            transition: all 0.25s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border-color: rgba(74, 154, 138, 0.4);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 80, 65, 0.3);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(74, 154, 138, 0.5);
+            border-radius: 3px;
+        }
+        .invite-code {
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 3px;
+        }
+        /* Custom Select Styling */
+        .custom-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23FFD700'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+        }
+        .section-title-shadow {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        /* Desktop Layout Styles */
+        .desktop-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .desktop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        @media (min-width: 1024px) {
+            .desktop-grid {
+                grid-template-columns: 420px 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .desktop-container {
+                padding: 0;
+            }
+            .desktop-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-100 bg-dino">
+    
+    <!-- Desktop Header -->
+    <header class="hidden lg:block bg-jungle-800/90 backdrop-blur-md border-b border-mist/20 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="assets/banner-BSZ_6Ncr.png" alt="Logo" class="w-10 h-10 rounded-lg object-cover">
+                <span class="font-display text-xl font-bold text-mist-light">Đảo Khủng Long</span>
+            </div>
+            <nav class="flex items-center gap-6">
+                <a href="#" class="text-gray-400 hover:text-mist-light transition-colors">Trang Chủ</a>
+                <a href="#" class="text-gray-400 hover:text-mist-light transition-colors">Cá Nhân</a>
+                <a href="#" class="text-mist-light font-medium">MỜi Bạn</a>
+                <a href="#" class="text-gray-400 hover:text-mist-light transition-colors">Nạp Tiền</a>
+            </nav>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 bg-jungle-700 px-4 py-2 rounded-full">
+                    <i class="fas fa-coins text-gold"></i>
+                    <span class="font-bold">12,580</span>
+                </div>
+                <!-- Desktop Language Toggle -->
+                <button onclick="toggleLanguage()" class="w-10 h-10 rounded-full bg-jungle-700 flex items-center justify-center text-mist-light text-sm font-bold hover:bg-jungle-600 transition-colors cursor-pointer border border-mist/30">
+                    <span id="lang-btn-desktop">CN</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Header -->
+    <nav class="lg:hidden sticky top-0 z-50 h-14 bg-jungle-800/95 backdrop-blur-md border-b border-mist/20 flex items-center justify-between px-4">
+        <button onclick="goBack()" class="w-10 h-10 flex items-center justify-center cursor-pointer active:scale-95 transition-transform duration-150 rounded-lg hover:bg-white/5">
+            <i class="fas fa-chevron-left text-mist-light text-lg"></i>
+        </button>
+        <h1 class="font-display text-lg font-bold text-mist-light">LỜi MỜi CỦa Tôi</h1>
+        <button onclick="toggleLanguage()" class="w-10 h-10 flex items-center justify-center cursor-pointer active:scale-95 transition-transform duration-150 rounded-lg hover:bg-white/5 text-mist-light text-sm font-bold">
+            <span id="lang-btn-mobile">CN</span>
+        </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="desktop-container">
+        <div class="desktop-grid">
+            
+            <!-- Left Column: Stats & Actions -->
+            <div class="space-y-4 lg:space-y-6">
+                
+                <!-- Desktop Page Title -->
+                <div class="hidden lg:block">
+                    <h1 class="font-display text-3xl font-bold text-white mb-2 section-title-shadow">MỜi Bạn Bè</h1>
+                    <p class="text-gray-200">MỜi bạn bè tham gia Đảo Khủng Long, cả hai đều nhận thưởng hậu hĩnh</p>
+                </div>
+
+                <!-- Hero Stats Section -->
+                <section>
+                    <div class="card-glass rounded-2xl p-5 lg:p-6 card-hover">
+                        <div class="flex justify-between items-start mb-4 lg:mb-6">
+                            <!-- Pending Gold -->
+                            <div class="flex-1 text-center">
+                                <div class="flex items-center justify-center gap-1 mb-1">
+                                    <i class="fas fa-coins text-gold text-sm animate-pulse-slow"></i>
+                                    <span class="text-gray-300 text-xs lg:text-sm" data-vi="Chờ nhận" data-cn="待领取">Chờ nhận</span>
+                                </div>
+                                <div class="text-3xl lg:text-4xl font-bold text-gold gold-glow font-display">1,250</div>
+                                <div class="text-xs text-gray-300 mt-1" data-vi="Có thể nhận" data-cn="可领取">Có thể nhận</div>
+                            </div>
+                            
+                            <!-- Divider -->
+                            <div class="w-px h-16 lg:h-20 bg-mist/20 mx-2 lg:mx-4"></div>
+                            
+                            <!-- Claimed Gold -->
+                            <div class="flex-1 text-center">
+                                <div class="flex items-center justify-center gap-1 mb-1">
+                                    <i class="fas fa-check-circle text-emerald-400 text-sm"></i>
+                                    <span class="text-gray-300 text-xs lg:text-sm" data-vi="Đã nhận" data-cn="已领取">Đã nhận</span>
+                                </div>
+                                <div class="text-3xl lg:text-4xl font-bold text-white font-display">890</div>
+                                <div class="text-xs text-gray-300 mt-1" data-vi="Tổng đã nhận" data-cn="累计已获得">Tổng đã nhận</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Claim Button -->
+                        <button onclick="showServerModal()" class="w-full h-12 lg:h-14 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer hover:brightness-110 text-base lg:text-lg">
+                            <i class="fas fa-gift"></i>
+                            <span data-vi="Nhận tất cả" data-cn="一键领取全部">Nhận tất cả</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Invitation Code Card -->
+                <section>
+                    <div class="card-glass rounded-2xl p-5 lg:p-6 card-hover">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-white font-semibold text-sm lg:text-base section-title-shadow" data-vi="Mã mời của tôi" data-cn="我的专属邀请码">Mã mời của tôi</h2>
+                            <i class="fas fa-copy text-gold text-sm cursor-pointer hover:brightness-125 transition-all" onclick="copyCode()"></i>
+                        </div>
+                        
+                        <div class="bg-jungle-900/60 rounded-xl p-4 lg:p-5 mb-3 border border-mist/20">
+                            <div class="invite-code text-2xl lg:text-3xl font-bold text-gold text-center">13218392</div>
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <button onclick="copyCode()" class="flex-1 h-10 lg:h-12 bg-gold/10 border border-gold text-gold rounded-full text-sm font-medium active:scale-95 transition-all duration-150 cursor-pointer hover:bg-gold/20 flex items-center justify-center gap-1">
+                                <i class="fas fa-copy text-xs"></i>
+                                <span data-vi="Sao chép mã" data-cn="复制邀请码">Sao chép mã</span>
+                            </button>
+                            <button onclick="copyLink()" class="flex-1 h-10 lg:h-12 bg-gold/10 border border-gold text-gold rounded-full text-sm font-medium active:scale-95 transition-all duration-150 cursor-pointer hover:bg-gold/20 flex items-center justify-center gap-1">
+                                <i class="fas fa-link text-xs"></i>
+                                <span data-vi="Sao chép link" data-cn="复制链接">Sao chép link</span>
+                            </button>
+                        </div>
+                        
+                        <p class="text-xs text-gray-300 text-center mt-3">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <span data-vi="Người mới nhập mã mời, cả hai đều nhận 50 vàng" data-cn="新玩家注册时填写此邀请码，双方各得50金币">Người mới nhập mã mời, cả hai đều nhận 50 vàng</span>
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Quick Share Grid - Simplified -->
+                <section>
+                    <div class="card-glass rounded-2xl p-4 lg:p-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="generatePoster()" class="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-jungle-700/50 active:scale-95 transition-all duration-150 cursor-pointer border border-mist/10">
+                                <div class="w-14 h-14 rounded-full bg-mist/20 flex items-center justify-center">
+                                    <i class="fas fa-image text-gold text-2xl"></i>
+                                </div>
+                                <span class="text-sm text-white section-title-shadow" data-vi="Tạo poster" data-cn="生成海报">Tạo poster</span>
+                            </button>
+                            <button onclick="showMessageTemplates()" class="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-jungle-700/50 active:scale-95 transition-all duration-150 cursor-pointer border border-mist/10">
+                                <div class="w-14 h-14 rounded-full bg-mist/20 flex items-center justify-center">
+                                    <i class="fas fa-comment-dots text-gold text-2xl"></i>
+                                </div>
+                                <span class="text-sm text-white section-title-shadow" data-vi="Tin nhắn mẫu" data-cn="分享话术">Tin nhắn mẫu</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Desktop: Activity Rules Card -->
+                <section class="hidden lg:block">
+                    <div class="card-glass rounded-2xl p-6 card-hover">
+                        <h3 class="font-bold text-white mb-4 flex items-center gap-2 section-title-shadow">
+                            <i class="fas fa-file-alt text-gold"></i>
+                            <span data-vi="Thể lệ" data-cn="活动规则">Thể lệ</span>
+                        </h3>
+                        <div class="space-y-3 text-sm text-gray-200">
+                            <div class="flex gap-3">
+                                <span class="text-gold font-bold">1.</span>
+                                <p data-vi="Mỗi lời mời thành công nhận 30 vàng" data-cn="每成功邀请一位好友完成注册并进入游戏激活，您可获得 30金币">Mỗi lời mời thành công nhận 30 vàng</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="text-gold font-bold">2.</span>
+                                <p data-vi="Bạn bè nạp đầu, bạn nhận 20% hoàn trả" data-cn="好友首充金额的 20% 作为返点奖励给您">Bạn bè nạp đầu, bạn nhận 20% hoàn trả</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="text-gold font-bold">3.</span>
+                                <p data-vi="Người mới nhận 50 vàng thưởng" data-cn="好友进入游戏也可获得 50金币 新手奖励">Người mới nhận 50 vàng thưởng</p>
+                            </div>
+                        </div>
+                        <button onclick="showRules()" class="mt-4 text-gold text-sm hover:underline" data-vi="Xem chi tiết" data-cn="查看完整规则">Xem chi tiết</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Invited Players List -->
+            <div class="lg:card-glass lg:rounded-2xl lg:p-6">
+                
+                <!-- Invited Players List Header -->
+                <div class="px-4 lg:px-0 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-white font-bold text-base lg:text-lg section-title-shadow" data-vi="Bạn bè đã mời" data-cn="已邀请好友">Bạn bè đã mời</h2>
+                            <span class="bg-gold/20 text-gold text-xs px-2 py-0.5 rounded-full font-bold">12</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Tabs -->
+                    <div class="flex gap-2 mt-3 lg:mt-4">
+                        <button onclick="filterList('all')" id="tab-all" class="filter-tab px-4 py-1.5 lg:px-6 lg:py-2 rounded-full text-xs lg:text-sm font-medium bg-gold text-jungle-900 active:scale-95 transition-all duration-150 cursor-pointer" data-vi="Tất cả" data-cn="全部">Tất cả</button>
+                        <button onclick="filterList('activated')" id="tab-activated" class="filter-tab px-4 py-1.5 lg:px-6 lg:py-2 rounded-full text-xs lg:text-sm font-medium bg-jungle-700 text-gray-300 hover:text-white active:scale-95 transition-all duration-150 cursor-pointer" data-vi="Đã kích hoạt" data-cn="已激活">Đã kích hoạt</button>
+                        <button onclick="filterList('pending')" id="tab-pending" class="filter-tab px-4 py-1.5 lg:px-6 lg:py-2 rounded-full text-xs lg:text-sm font-medium bg-jungle-700 text-gray-300 hover:text-white active:scale-95 transition-all duration-150 cursor-pointer" data-vi="Chờ kích hoạt" data-cn="待激活">Chờ kích hoạt</button>
+                    </div>
+                </div>
+
+                <!-- Desktop Table Header -->
+                <div class="hidden lg:grid grid-cols-12 gap-4 px-4 py-3 text-sm text-gray-300 border-b border-mist/20">
+                    <div class="col-span-4 font-medium" data-vi="Thông tin" data-cn="好友信息">Thông tin</div>
+                    <div class="col-span-2 text-center font-medium" data-vi="Ngày đăng ký" data-cn="注册时间">Ngày đăng ký</div>
+                    <div class="col-span-2 text-center font-medium" data-vi="Trạng thái" data-cn="激活状态">Trạng thái</div>
+                    <div class="col-span-2 text-center font-medium" data-vi="Nạp đầu" data-cn="首充状态">Nạp đầu</div>
+                    <div class="col-span-2 text-right font-medium" data-vi="Thưởng" data-cn="我的奖励">Thưởng</div>
+                </div>
+
+                <!-- Invited Players List -->
+                <section class="px-4 lg:px-0 space-y-2 lg:space-y-0" id="player-list">
+                    <!-- Players will be rendered by JS -->
+                </section>
+
+                <!-- More players indicator -->
+                <div class="text-center py-4">
+                    <button class="text-gray-300 text-sm hover:text-white transition-colors cursor-pointer flex items-center justify-center gap-2 mx-auto">
+                        <span data-vi="Xem tất cả 12 bạn" data-cn="查看全部 12 位好友">Xem tất cả 12 bạn</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <!-- Mobile: Rules Link -->
+                <section class="px-4 lg:hidden mt-4 mb-20">
+                    <button onclick="showRules()" class="w-full py-3 text-gray-300 text-sm hover:text-white transition-colors cursor-pointer flex items-center justify-center gap-2">
+                        <i class="fas fa-file-alt"></i>
+                        <span data-vi="Xem thể lệ" data-cn="查看活动规则">Xem thể lệ</span>
+                    </button>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Action Bar -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-jungle-800/95 backdrop-blur-md border-t border-mist/20 flex items-center px-4 gap-3 z-40">
+        <button onclick="showRules()" class="flex-1 h-11 border border-gold/50 text-gold rounded-full text-sm font-medium active:scale-95 transition-all duration-150 cursor-pointer hover:bg-gold/10" data-vi="Thể lệ" data-cn="查看规则">
+            Thể lệ
+        </button>
+        <button onclick="startInviting()" class="flex-1 h-11 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow active:scale-95 transition-all duration-150 cursor-pointer hover:brightness-110 flex items-center justify-center gap-2">
+            <i class="fas fa-share-alt text-sm"></i>
+            <span data-vi="MỜi ngay" data-cn="去邀请">MỜi ngay</span>
+        </button>
+    </div>
+
+    <!-- Server Selection Modal - Simplified with Select -->
+    <div id="server-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeServerModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-5 animate-slide-up lg:animate-fade-in border border-mist/20">
+            <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
+            <div class="hidden lg:flex items-center justify-between mb-4">
+                <h3 class="text-white font-bold text-lg section-title-shadow" data-vi="Chọn máy chủ nhận thưởng" data-cn="选择领取服务器">Chọn máy chủ nhận thưởng</h3>
+                <button onclick="closeServerModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <h3 class="lg:hidden text-white font-bold text-lg mb-4 text-center section-title-shadow" data-vi="Chọn máy chủ nhận thưởng" data-cn="选择领取服务器">Chọn máy chủ nhận thưởng</h3>
+            
+            <div class="space-y-4 mb-4">
+                <!-- Server Select -->
+                <div>
+                    <label class="block text-gray-300 text-sm mb-2" data-vi="Máy chủ" data-cn="服务器">Máy chủ</label>
+                    <select id="server-select" class="custom-select w-full h-12 bg-jungle-700 border border-mist/30 rounded-xl px-4 text-white focus:outline-none focus:border-gold cursor-pointer">
+                        <option value="" data-vi="-- Chọn máy chủ --" data-cn="-- 选择服务器 --">-- Chọn máy chủ --</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button onclick="confirmClaim()" id="confirm-claim-btn" class="w-full h-12 bg-jungle-600 text-gray-400 rounded-xl font-medium cursor-not-allowed flex items-center justify-center gap-2" disabled>
+                <span data-vi="Vui lòng chọn máy chủ" data-cn="请选择服务器">Vui lòng chọn máy chủ</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Message Templates Modal -->
+    <div id="message-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeMessageModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[500px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl lg:rounded-t-2xl p-5 animate-slide-up lg:animate-fade-in border border-mist/20">
+            <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
+            <div class="hidden lg:flex items-center justify-between mb-4">
+                <h3 class="text-white font-bold text-lg section-title-shadow" data-vi="Chọn tin nhắn mẫu" data-cn="选择分享话术">Chọn tin nhắn mẫu</h3>
+                <button onclick="closeMessageModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <h3 class="lg:hidden text-white font-bold text-lg mb-4 section-title-shadow" data-vi="Chọn tin nhắn mẫu" data-cn="选择分享话术">Chọn tin nhắn mẫu</h3>
+            
+            <div class="space-y-3 mb-4" id="message-templates-list">
+                <!-- Templates will be rendered dynamically based on language -->
+            </div>
+            
+            <button onclick="closeMessageModal()" class="w-full h-12 bg-jungle-700 text-white rounded-xl font-medium active:scale-95 transition-all cursor-pointer hover:bg-jungle-600" data-vi="Hủy" data-cn="取消">
+                Hủy
+            </button>
+        </div>
+    </div>
+
+    <!-- Poster Preview Modal -->
+    <div id="poster-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closePosterModal()"></div>
+        <div class="absolute inset-x-4 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-[400px] top-20 lg:top-24 bottom-20 lg:bottom-24 bg-jungle-800/95 backdrop-blur-md rounded-2xl p-6 flex flex-col animate-fade-in border border-mist/20">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-white font-bold text-lg section-title-shadow" data-vi="Poster chia sẻ" data-cn="分享海报">Poster chia sẻ</h3>
+                <button onclick="closePosterModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Poster Preview -->
+            <div class="flex-1 rounded-xl overflow-hidden relative">
+                <img src="assets/banner-BSZ_6Ncr.png" alt="Poster" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900/90 via-transparent to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-4">
+                    <!-- Random Message -->
+                    <div class="bg-jungle-900/90 backdrop-blur-sm rounded-xl p-3 mb-3 border border-gold/30">
+                        <p id="poster-message" class="text-white text-sm leading-relaxed text-center"></p>
+                    </div>
+                    <div class="bg-jungle-900/80 backdrop-blur-sm rounded-xl p-3 border border-gold/30 text-center">
+                        <p class="text-gray-400 text-xs mb-1" data-vi="Mã mời của tôi" data-cn="我的邀请码">Mã mời của tôi</p>
+                        <p class="text-gold font-mono text-xl tracking-wider">13218392</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="savePoster()" class="w-full h-12 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-xl active:scale-95 transition-all cursor-pointer hover:brightness-110 flex items-center justify-center gap-2 mt-4">
+                <i class="fas fa-download"></i>
+                <span data-vi="Lưu poster" data-cn="保存海报">Lưu poster</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div id="rules-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeRulesModal()"></div>
+        <div class="absolute inset-x-0 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-[600px] lg:max-h-[80vh] lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl top-0 bottom-0 bg-jungle-800/95 backdrop-blur-md flex flex-col animate-slide-up lg:animate-fade-in border border-mist/20">
+            <div class="h-14 flex items-center justify-between px-4 border-b border-mist/20">
+                <h3 class="text-white font-bold text-lg section-title-shadow" data-vi="Thể lệ hoạt động" data-cn="活动规则">Thể lệ hoạt động</h3>
+                <button onclick="closeRulesModal()" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 lg:p-6 custom-scrollbar">
+                <div class="space-y-4 text-white text-sm leading-relaxed">
+                    <div class="card-glass rounded-xl p-4">
+                        <h4 class="font-bold text-gold mb-2"><i class="fas fa-gift mr-2"></i><span data-vi="Thưởng cơ bản" data-cn="基础奖励">Thưởng cơ bản</span></h4>
+                        <p class="text-gray-200" data-vi="Mỗi lời mời thành công nhận 30 vàng" data-cn="每成功邀请一位好友完成注册、绑定手机号并产生游戏行为，您可获得 30金币 奖励">Mỗi lời mời thành công nhận <span class="text-gold font-bold">30 vàng</span>.</p>
+                    </div>
+                    
+                    <div class="card-glass rounded-xl p-4">
+                        <h4 class="font-bold text-gold mb-2"><i class="fas fa-coins mr-2"></i><span data-vi="Hoàn trả nạp đầu" data-cn="首充返点">Hoàn trả nạp đầu</span></h4>
+                        <p class="text-gray-200" data-vi="Người được mời nạp đầu, bạn nhận 20% hoàn trả" data-cn="被邀请人完成首次充值后，您可获得首充金额 20% 的金币返点，不设上限">Người được mời hoàn thành nạp đầu, bạn nhận <span class="text-gold font-bold">20%</span> hoàn trả, không giới hạn!</p>
+                    </div>
+                    
+                    <div class="card-glass rounded-xl p-4">
+                        <h4 class="font-bold text-gold mb-2"><i class="fas fa-user-friends mr-2"></i><span data-vi="Thưởng người mới" data-cn="好友奖励">Thưởng người mới</span></h4>
+                        <p class="text-gray-200" data-vi="Người mới kích hoạt nhận 50 vàng" data-cn="被邀请人完成注册并进入游戏激活后，可获得 50金币 新手奖励">Người mới kích hoạt nhận <span class="text-gold font-bold">50 vàng</span>.</p>
+                    </div>
+                    
+                    <div class="card-glass rounded-xl p-4">
+                        <h4 class="font-bold text-gold mb-2"><i class="fas fa-shield-alt mr-2"></i><span data-vi="Chống gian lận" data-cn="防刷说明">Chống gian lận</span></h4>
+                        <p class="text-gray-200" data-vi="Mỗi số điện thoại chỉ bind một tài khoản" data-cn="每个手机号只能绑定一个账号。系统会检测异常注册行为，违规者将被取消奖励资格">Mỗi số điện thoại chỉ bind một tài khoản. Phát hiện gian lận sẽ hủy thưởng.</p>
+                    </div>
+                    
+                    <div class="card-glass rounded-xl p-4">
+                        <h4 class="font-bold text-gold mb-2"><i class="fas fa-wallet mr-2"></i><span data-vi="Cách nhận" data-cn="领取方式">Cách nhận</span></h4>
+                        <p class="text-gray-200" data-vi="Vào kho vàng, chọn máy chủ để nhận" data-cn="奖励金币进入您的专属金币池，可在本页面一键领取到指定游戏服务器">Vào kho vàng, chọn máy chủ để nhận.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-jungle-800/95 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm shadow-lg opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2 border border-mist/20">
+        <i class="fas fa-check-circle text-emerald-400"></i>
+        <span id="toast-message">Thành công</span>
+    </div>
+
+    <script>
+        // Language state
+        let currentLang = 'vi';
+        let selectedServerId = null;
+
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'vi' ? 'cn' : 'vi';
+            document.getElementById('lang-btn-desktop').textContent = currentLang === 'vi' ? 'CN' : 'VN';
+            document.getElementById('lang-btn-mobile').textContent = currentLang === 'vi' ? 'CN' : 'VN';
+            
+            // Update all elements with data-vi and data-cn
+            document.querySelectorAll('[data-vi][data-cn]').forEach(el => {
+                if (el.tagName === 'INPUT') {
+                    el.placeholder = currentLang === 'vi' ? el.dataset.vi : el.dataset.cn;
+                } else if (el.tagName === 'OPTION') {
+                    el.textContent = currentLang === 'vi' ? el.dataset.vi : el.dataset.cn;
+                } else {
+                    el.textContent = currentLang === 'vi' ? el.dataset.vi : el.dataset.cn;
+                }
+            });
+            
+            // Re-render dynamic content
+            renderPlayers();
+            renderServerOptions();
+            
+            showToast(currentLang === 'vi' ? 'Đã chuyển sang tiếng Việt' : '已切换到中文');
+        }
+
+        // Toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+                toast.classList.remove('opacity-100');
+            }, 2000);
+        }
+
+        // Navigation
+        function goBack() {
+            showToast(currentLang === 'vi' ? 'Quay lại' : '返回上一页');
+        }
+
+        // Server selection with select component
+        function renderServerOptions() {
+            const select = document.getElementById('server-select');
+            const defaultOption = select.options[0];
+            
+            // Clear existing options except default
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            // Add server options
+            servers.forEach(server => {
+                const option = document.createElement('option');
+                option.value = server.id;
+                option.textContent = currentLang === 'vi' ? server.name : server.nameCN;
+                select.appendChild(option);
+            });
+        }
+
+        function showServerModal() {
+            renderServerOptions();
+            selectedServerId = null;
+            updateConfirmButton();
+            document.getElementById('server-modal').classList.remove('hidden');
+        }
+
+        function closeServerModal() {
+            document.getElementById('server-modal').classList.add('hidden');
+        }
+
+        // Server select change handler
+        document.getElementById('server-select').addEventListener('change', function() {
+            selectedServerId = this.value;
+            updateConfirmButton();
+        });
+
+        function updateConfirmButton() {
+            const confirmBtn = document.getElementById('confirm-claim-btn');
+            if (selectedServerId) {
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('bg-jungle-600', 'text-gray-400', 'cursor-not-allowed');
+                confirmBtn.classList.add('bg-gradient-to-r', 'from-gold', 'to-gold-dark', 'text-jungle-900', 'cursor-pointer', 'hover:brightness-110');
+                confirmBtn.innerHTML = `<span>${currentLang === 'vi' ? 'Nhận 1,250 vàng' : '领取 1,250 金币'}</span>`;
+            } else {
+                confirmBtn.disabled = true;
+                confirmBtn.classList.add('bg-jungle-600', 'text-gray-400', 'cursor-not-allowed');
+                confirmBtn.classList.remove('bg-gradient-to-r', 'from-gold', 'to-gold-dark', 'text-jungle-900', 'cursor-pointer', 'hover:brightness-110');
+                confirmBtn.innerHTML = `<span data-vi="Vui lòng chọn máy chủ" data-cn="请选择服务器">${currentLang === 'vi' ? 'Vui lòng chọn máy chủ' : '请选择服务器'}</span>`;
+            }
+        }
+
+        function confirmClaim() {
+            if (selectedServerId) {
+                const server = servers.find(s => s.id === selectedServerId);
+                const serverName = currentLang === 'vi' ? server.name : server.nameCN;
+                showToast(currentLang === 'vi' ? `Đã nhận 1,250 vàng vào ${serverName}` : `成功领取 1,250 金币到 ${serverName}`);
+                closeServerModal();
+            }
+        }
+
+        // Copy functions
+        function copyCode() {
+            navigator.clipboard.writeText('13218392').then(() => {
+                showToast(currentLang === 'vi' ? 'Đã sao chép mã mời' : '邀请码已复制');
+            }).catch(() => {
+                showToast(currentLang === 'vi' ? 'Sao chép thất bại' : '复制失败');
+            });
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText('https://dinogame.com/invite/13218392').then(() => {
+                showToast(currentLang === 'vi' ? 'Đã sao chép link' : '链接已复制');
+            }).catch(() => {
+                showToast(currentLang === 'vi' ? 'Sao chép thất bại' : '复制失败');
+            });
+        }
+
+        // Quick actions
+        function generatePoster() {
+            // Randomly select a message template
+            const randomIndex = Math.floor(Math.random() * messageTemplates.length);
+            const template = messageTemplates[randomIndex];
+            document.getElementById('poster-message').textContent = currentLang === 'vi' ? template.vi : template.cn;
+            document.getElementById('poster-modal').classList.remove('hidden');
+        }
+
+        function showMessageTemplates() {
+            renderMessageTemplates();
+            document.getElementById('message-modal').classList.remove('hidden');
+        }
+
+        function renderMessageTemplates() {
+            const container = document.getElementById('message-templates-list');
+            container.innerHTML = messageTemplates.map((template, index) => {
+                const message = currentLang === 'vi' ? template.vi : template.cn;
+                return `
+                    <button onclick="copyTemplate(${index})" class="w-full p-4 bg-jungle-700/50 rounded-xl text-left hover:bg-jungle-700 transition-colors cursor-pointer active:scale-[0.99] border border-mist/10">
+                        <p class="text-white text-sm leading-relaxed">"${message}"</p>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function startInviting() {
+            showMessageTemplates();
+        }
+
+        // Render players
+        function renderPlayers() {
+            const container = document.getElementById('player-list');
+            
+            container.innerHTML = players.map((player, index) => {
+                const activated = player.status === 'activated';
+                const recharged = player.recharged;
+                const colors = ['from-emerald-600 to-emerald-800', 'from-amber-600 to-amber-800', 'from-slate-600 to-slate-800', 'from-stone-600 to-stone-800'];
+                const colorClass = colors[index % colors.length];
+                
+                const statusText = activated 
+                    ? (currentLang === 'vi' ? 'Đã kích hoạt' : '已激活')
+                    : (currentLang === 'vi' ? 'Chờ kích hoạt' : '待激活');
+                const statusColor = activated ? 'emerald' : 'amber';
+                
+                const rechargeText = recharged
+                    ? `${currentLang === 'vi' ? 'Đã nạp' : '已首充'} ¥${player.amount}`
+                    : (currentLang === 'vi' ? 'Chưa nạp' : '未首充');
+                
+                const rewardText = activated
+                    ? `+${player.reward}`
+                    : (currentLang === 'vi' ? 'Chờ phát' : '待发放');
+                
+                return `
+                    <div class="player-item lg:grid lg:grid-cols-12 lg:gap-4 lg:items-center lg:px-4 lg:py-4 card-glass lg:bg-none lg:hover:bg-jungle-700/30 rounded-xl lg:rounded-none p-4 lg:p-0 border border-mist/10 lg:border-0 lg:border-b transition-colors duration-200 cursor-pointer" data-status="${player.status}">
+                        <!-- Mobile Layout -->
+                        <div class="lg:hidden flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white">${player.avatar === 'user' ? '<i class="fas fa-user text-lg"></i>' : `<span class="font-bold text-lg">${player.avatar}</span>`}</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-white font-semibold text-sm truncate section-title-shadow">${player.name}</span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-gray-300">${player.date}</span>
+                                    <span class="flex items-center gap-1 text-xs text-${statusColor}-400">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-${statusColor}-400"></span>
+                                        ${statusText}
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    ${recharged 
+                                        ? `<span class="text-xs text-gold flex items-center gap-1"><i class="fas fa-coins text-[10px]"></i>${rechargeText}</span>`
+                                        : `<span class="text-xs text-gray-400">${rechargeText}</span>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="${activated ? 'text-gold' : 'text-gray-400'} font-bold text-sm">${rewardText}</div>
+                                ${recharged ? `<div class="text-gold/70 text-xs">+${player.bonus}</div>` : ''}
+                            </div>
+                        </div>
+                        <!-- Desktop Layout -->
+                        <div class="hidden lg:contents">
+                            <div class="col-span-4 flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white">${player.avatar === 'user' ? '<i class="fas fa-user text-sm"></i>' : `<span class="font-bold text-sm">${player.avatar}</span>`}</div>
+                                <span class="text-white font-medium section-title-shadow">${player.name}</span>
+                            </div>
+                            <div class="col-span-2 text-center text-sm text-gray-300">${player.date}</div>
+                            <div class="col-span-2 text-center">
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-${statusColor}-500/20 text-${statusColor}-400 text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-${statusColor}-400"></span>
+                                    ${statusText}
+                                </span>
+                            </div>
+                            <div class="col-span-2 text-center">
+                                ${recharged 
+                                    ? `<span class="inline-flex items-center gap-1 text-gold text-xs"><i class="fas fa-coins text-[10px]"></i>${rechargeText}</span>`
+                                    : `<span class="text-gray-400 text-xs">${rechargeText}</span>`
+                                }
+                            </div>
+                            <div class="col-span-2 text-right">
+                                <div class="${activated ? 'text-gold' : 'text-gray-400'} font-bold">${rewardText}</div>
+                                ${recharged ? `<div class="text-gold/70 text-xs">+${player.bonus} ${currentLang === 'vi' ? 'hoàn trả' : '返点'}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filter functionality
+        function filterList(status) {
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('bg-gold', 'text-jungle-900');
+                tab.classList.add('bg-jungle-700', 'text-gray-300');
+            });
+            document.getElementById(`tab-${status}`).classList.remove('bg-jungle-700', 'text-gray-300');
+            document.getElementById(`tab-${status}`).classList.add('bg-gold', 'text-jungle-900');
+
+            const items = document.querySelectorAll('.player-item');
+            items.forEach(item => {
+                if (status === 'all' || item.dataset.status === status) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+
+        // Modal controls
+        function closeMessageModal() {
+            document.getElementById('message-modal').classList.add('hidden');
+        }
+
+        function closePosterModal() {
+            document.getElementById('poster-modal').classList.add('hidden');
+        }
+
+        function closeRulesModal() {
+            document.getElementById('rules-modal').classList.add('hidden');
+        }
+
+        function showRules() {
+            document.getElementById('rules-modal').classList.remove('hidden');
+        }
+
+        // Template copying
+        function copyTemplate(index) {
+            const template = messageTemplates[index];
+            const text = currentLang === 'vi' ? template.vi : template.cn;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(currentLang === 'vi' ? `Đã sao chép mẫu ${index + 1}` : `话术模板${index + 1}已复制`);
+                closeMessageModal();
+            });
+        }
+
+        // Poster actions
+        function savePoster() {
+            showToast(currentLang === 'vi' ? 'Đã lưu poster' : '海报已保存');
+            closePosterModal();
+        }
+
+        function sharePoster() {
+            showToast(currentLang === 'vi' ? 'Chọn kênh chia sẻ' : '请选择分享渠道');
+        }
+
+        // Close modals on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMessageModal();
+                closePosterModal();
+                closeRulesModal();
+                closeServerModal();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPlayers();
+            renderServerOptions();
+        });
+    </script>
+</body>
+</html>
