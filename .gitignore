@@ -1,0 +1,17 @@
+# Ignore everything by default
+*
+
+# Except src (frontend source code)
+!src/
+!src/**
+
+# Except root index.html
+!index.html
+
+# Except .gitignore itself
+!.gitignore
+
+# Ignore unnecessary files
+**/.DS_Store
+**/*.zip
+**/README.md
