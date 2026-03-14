@@ -1,0 +1,44 @@
+# Ignore everything by default
+*
+
+# Except .gitignore itself
+!.gitignore
+
+# Except src (frontend source code)
+!src/
+!src/**
+
+# Except data (charts and exports)
+!data/
+!data/**
+
+# Except public (static assets)
+!public/
+!public/**
+
+# Except versions (backup versions)
+!versions/
+!versions/**
+
+# docs/ and AGENTS.md are local only, not committed
+
+# Except frontend directory
+!projects/
+!projects/001-growNewUsers/
+!projects/001-growNewUsers/001-01-referral-activity/
+!projects/001-growNewUsers/001-01-referral-activity/frontend/
+!projects/001-growNewUsers/001-01-referral-activity/frontend/**
+!projects/001-growNewUsers/001-01-referral-activity/docs/
+!projects/001-growNewUsers/001-01-referral-activity/docs/**
+
+# Except root claude.md for project reference
+!projects/001-growNewUsers/claude.md
+
+
+# Except root index.html
+!index.html
+
+# Ignore unnecessary files
+**/.DS_Store
+**/*.zip
+**/README.md
