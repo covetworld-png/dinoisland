@@ -37,7 +37,7 @@
             overflow-x: hidden;
         }
 
-        /* Background - dark jungle gradient */
+        /* Global background with texture */
         body::before {
             content: '';
             position: fixed;
@@ -46,12 +46,15 @@
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(ellipse at 50% 0%, rgba(74, 154, 138, 0.1) 0%, transparent 50%),
-                linear-gradient(180deg, #0d2a20 0%, #0a1a15 50%, #081512 100%);
+                linear-gradient(180deg, rgba(10, 26, 21, 0.85) 0%, rgba(10, 26, 21, 0.92) 100%),
+                url('../../assets/anchor/heni/heni_bg_compressed.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             z-index: -2;
         }
 
-        /* Hero Card with background image */
+        /* Hero Card */
         .hero-card {
             position: relative;
             border-radius: 16px;
@@ -59,20 +62,7 @@
             margin-bottom: 16px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(74, 154, 138, 0.2);
-        }
-
-        .hero-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                linear-gradient(180deg, rgba(10, 26, 21, 0.2) 0%, rgba(10, 30, 25, 0.95) 100%),
-                url('../../assets/anchor/heni/heni_bg_1328x569.png');
-            background-size: cover;
-            background-position: center 30%;
-            z-index: 0;
+            background: linear-gradient(180deg, rgba(10, 30, 25, 0.3) 0%, rgba(10, 30, 25, 0.8) 100%);
         }
 
         .hero-content {
@@ -608,13 +598,13 @@
                 <div class="step">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <div class="text" data-i18n="steps.step1">Thêm Zalo + Gửi "Lãnh Long"</div>
+                        <div class="text" data-i18n="steps.step1">Thêm Zalo</div>
                     </div>
                 </div>
                 <div class="step">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <div class="text" data-i18n="steps.step2">Streamer hướng dẫn nhận quà</div>
+                        <div class="text" data-i18n="steps.step2">Gửi "Lãnh Long"</div>
                     </div>
                 </div>
                 <div class="step">
@@ -644,8 +634,8 @@
                 'zalo.label': 'Số Zalo',
                 'cta.copy': 'Sao chép số',
                 'steps.title': '📋 CÁC BƯỚC NHẬN QUÀ',
-                'steps.step1': 'Thêm Zalo + Gửi "Lãnh Long"',
-                'steps.step2': 'Streamer hướng dẫn nhận quà',
+                'steps.step1': 'Thêm Zalo',
+                'steps.step2': 'Gửi "Lãnh Long"',
                 'steps.step3': 'Nhận khủng long, gia nhập đảo!',
                 'toast.copied': 'Đã sao chép!'
             },
@@ -660,8 +650,8 @@
                 'zalo.label': 'Zalo 号码',
                 'cta.copy': '复制号码',
                 'steps.title': '📋 领取步骤',
-                'steps.step1': '添加 Zalo + 发送"领龙"',
-                'steps.step2': '主播引导领取奖励',
+                'steps.step1': '添加 Zalo',
+                'steps.step2': '发送"领龙"',
                 'steps.step3': '领取恐龙，进驻恐龙岛！',
                 'toast.copied': '已复制！'
             }
