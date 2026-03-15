@@ -725,7 +725,7 @@
                 'zalo.label': 'Số Zalo',
                 'cta.copy': 'Sao chép số',
                 'steps.title': '📋 CÁC BƯỚC NHẬN QUÀ',
-                'steps.step1': 'Thêm Zalo',
+                'steps.step1': 'Thêm Zalo bạn bè',
                 'steps.step2': 'Gửi "Lãnh Long"',
                 'steps.step3': 'Nhận khủng long, gia nhập đảo!',
                 'toast.copied': 'Đã sao chép!'
@@ -740,7 +740,7 @@
                 'zalo.label': 'Zalo 号码',
                 'cta.copy': '复制号码',
                 'steps.title': '📋 领取步骤',
-                'steps.step1': '添加 Zalo',
+                'steps.step1': '添加 Zalo 好友',
                 'steps.step2': '发送"领龙"',
                 'steps.step3': '领取恐龙，进驻恐龙岛！',
                 'toast.copied': '已复制！'
@@ -877,23 +877,29 @@
             }
         });
 
-        // Zalo Button Click Tracking
+        // Zalo Button Click - Intent 方案 (来自 src/common/index.html)
         const zaloBtn = document.getElementById('zaloBtn');
-        zaloBtn.addEventListener('click', function() {
-            console.log('Zalo button clicked');
+        const phone = '8618717777125';
+        
+        zaloBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            let finalUrl = '';
+            
+            if (isAndroid) {
+                // Android 使用 Intent 强力方案，解决死循环
+                finalUrl = `intent://zalo.me/${phone}#Intent;scheme=https;package=com.zing.zalo;S.browser_fallback_url=https%3A%2F%2Fzalo.me%2F${phone};end`;
+            } else if (isiOS) {
+                // iOS 使用标准的 HTTPS (Universal Link)
+                finalUrl = `https://zalo.me/${phone}`;
+            } else {
+                finalUrl = `https://zalo.me/${phone}`;
+            }
+            
+            window.location.href = finalUrl;
         });
-
-        // Device detection for Zalo deep link
-        const userAgent = navigator.userAgent.toLowerCase();
-        const isIOS = /iphone|ipad|ipod/.test(userAgent);
-        const isAndroid = /android/.test(userAgent);
-
-        // Update Zalo link based on device
-        if (isIOS) {
-            zaloBtn.href = 'zalo://qr/p/0987654321';
-        } else if (isAndroid) {
-            zaloBtn.href = 'intent://zalo.me/0987654321#Intent;package=com.zing.zalo;scheme=https;end';
-        }
     </script>
 </body>
 </html>
