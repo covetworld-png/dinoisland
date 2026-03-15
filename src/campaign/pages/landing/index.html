@@ -290,6 +290,44 @@
             margin-left: 4px;
         }
 
+        /* Video Controls */
+        .video-controls {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            gap: 8px;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-container:hover .video-controls,
+        .video-container.playing .video-controls {
+            opacity: 1;
+        }
+
+        .video-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(10, 26, 21, 0.8);
+            border: 1px solid rgba(74, 154, 138, 0.3);
+            color: var(--text-primary);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .video-btn:hover {
+            background: rgba(74, 154, 138, 0.3);
+            border-color: var(--mist);
+        }
+
         /* Reward Section */
         .reward-section {
             text-align: center;
@@ -610,13 +648,17 @@
 
         <!-- Video Player -->
         <div class="glass-card">
-            <div class="video-container">
+            <div class="video-container" id="videoContainer">
                 <div class="video-cover" id="videoCover" style="background-image: url('../../assets/anchor/heni/heni_cover_576x1024.png');" onclick="playVideo()">
                     <div class="play-button"></div>
                 </div>
                 <video id="videoPlayer" loop playsinline muted>
                     <source src="../../assets/anchor/heni/heni_video.mp4" type="video/mp4">
                 </video>
+                <div class="video-controls">
+                    <button class="video-btn" id="pauseBtn" onclick="togglePause()" title="Pause/Play">⏸</button>
+                    <button class="video-btn" id="muteBtn" onclick="toggleMute()" title="Mute/Unmute">🔇</button>
+                </div>
             </div>
         </div>
 
@@ -747,27 +789,65 @@
         // Video Player
         const videoCover = document.getElementById('videoCover');
         const videoPlayer = document.getElementById('videoPlayer');
+        const videoContainer = document.getElementById('videoContainer');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const muteBtn = document.getElementById('muteBtn');
 
         // Handle video errors
         videoPlayer.addEventListener('error', function() {
             showToast('Lỗi video / 视频加载失败');
             videoCover.classList.remove('hidden');
+            videoContainer.classList.remove('playing');
         });
+
+        // Update button states
+        function updatePauseButton() {
+            pauseBtn.textContent = videoPlayer.paused ? '▶' : '⏸';
+        }
+
+        function updateMuteButton() {
+            muteBtn.textContent = videoPlayer.muted ? '🔇' : '🔊';
+        }
 
         // Global play function for onclick
         window.playVideo = async function() {
             videoCover.classList.add('hidden');
+            videoContainer.classList.add('playing');
             
             try {
                 // Muted first for autoplay policy, then unmute
                 videoPlayer.muted = true;
                 await videoPlayer.play();
                 videoPlayer.muted = false;
+                updatePauseButton();
+                updateMuteButton();
             } catch (err) {
                 showToast('Không thể phát video / 无法播放视频');
                 videoCover.classList.remove('hidden');
+                videoContainer.classList.remove('playing');
             }
         };
+
+        // Pause toggle
+        window.togglePause = function() {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+            } else {
+                videoPlayer.pause();
+            }
+            updatePauseButton();
+        };
+
+        // Mute toggle
+        window.toggleMute = function() {
+            videoPlayer.muted = !videoPlayer.muted;
+            updateMuteButton();
+        };
+
+        // Update buttons when video state changes
+        videoPlayer.addEventListener('play', updatePauseButton);
+        videoPlayer.addEventListener('pause', updatePauseButton);
+        videoPlayer.addEventListener('volumechange', updateMuteButton);
 
         // Copy Zalo Number
         const copyBtn = document.getElementById('copyBtn');
