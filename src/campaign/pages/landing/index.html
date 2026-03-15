@@ -328,25 +328,12 @@
         }
 
         .video-indicator.pause::after {
-            border: none;
-            width: 20px;
-            height: 20px;
-            background: transparent;
-            position: relative;
-        }
-
-        .video-indicator.pause::before {
             content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            background: transparent;
-            box-shadow: 
-                -5px 0 0 #fff,
-                5px 0 0 #fff;
+            width: 4px;
+            height: 18px;
+            background: #fff;
+            border-radius: 1px;
+            box-shadow: 8px 0 0 #fff;
         }
 
         .video-controls {
