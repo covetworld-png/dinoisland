@@ -5,6 +5,11 @@
 !src/
 !src/**
 
+# Except projects/004-video-downloader
+!projects/
+!projects/004-video-downloader/
+!projects/004-video-downloader/**
+
 # Except root index.html
 !index.html
 
@@ -15,3 +20,8 @@
 **/.DS_Store
 **/*.zip
 **/README.md
+
+# Ignore other projects
+projects/001-growNewUsers/
+projects/002-meetings/
+projects/003-activation/
