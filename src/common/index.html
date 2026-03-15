@@ -26,7 +26,12 @@
     <div class="card">
         <h3 style="margin-top:0">Zalo 导流诊断</h3>
         <p style="font-size:13px; color:#666">目标：引导用户安装 PC 客户端</p>
-        <button onclick="launchZalo('8618221025062')" class="btn-main">唤起 Zalo (8618221025062)</button>
+        <button onclick="launchZalo('8618221025062')" class="btn-main">唤起 Zalo - Intent 方案 (8618221025062)</button>
+        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+            <button onclick="testReferrerClean('8618717777125')" class="btn-main" style="background: #52c41a;">方案一：清理 Referer (rel=noreferrer)</button>
+            <button onclick="testZaloAppApi('8618717777125')" class="btn-main" style="background: #722ed1;">方案二：zaloapp.com API 路径</button>
+            <button onclick="testTikTokWebView('8618717777125')" class="btn-main" style="background: #eb2f96;">方案三：TikTok WebView 兼容</button>
+        </div>
     </div>
 
     <div class="debug-header">
@@ -99,6 +104,95 @@
             document.body.removeChild(el);
             log("手机号已复制");
             alert("已复制手机号，请去 Zalo 搜索");
+        }
+
+        // ========== 方案一：清理 Referer ==========
+        function testReferrerClean(phone) {
+            log("方案一：清理 Referer (rel=noreferrer)");
+            
+            const link = document.createElement('a');
+            link.href = `https://zalo.me/${phone}`;
+            link.rel = 'noreferrer'; // 隐藏来源，绕过 Zalo 的域名校验
+            link.target = '_blank';
+            
+            log("创建隐藏 referer 链接:", link.href);
+            
+            // 触发点击
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            log("已触发无 referer 跳转");
+            
+            // 失败检测
+            setTimeout(() => {
+                if (!document.hidden) {
+                    log("方案一 !!! 检测到页面未跳转，显示保底提示");
+                    document.getElementById('fallback-card').style.display = 'block';
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }
+            }, 3000);
+        }
+
+        // ========== 方案二：zaloapp.com API 路径 ==========
+        function testZaloAppApi(phone) {
+            log("方案二：zaloapp.com API 路径");
+            
+            // zaloapp.com 是 App 的直接解析接口，通常比短链更稳定
+            const apiUrl = `https://zaloapp.com/qr/p/${phone}`;
+            
+            log("跳转 URL:", apiUrl);
+            
+            window.location.href = apiUrl;
+            
+            // 失败检测
+            setTimeout(() => {
+                if (!document.hidden) {
+                    log("方案二 !!! 检测到页面未跳转，显示保底提示");
+                    document.getElementById('fallback-card').style.display = 'block';
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }
+            }, 3000);
+        }
+
+        // ========== 方案三：TikTok WebView 兼容 ==========
+        function testTikTokWebView(phone) {
+            log("方案三：TikTok WebView 兼容代码");
+            
+            const isTikTok = /Bytedance|TTWebView|TikTok/i.test(navigator.userAgent);
+            log("检测到 TikTok WebView:", isTikTok ? "是" : "否");
+            
+            // TikTok 内置浏览器非常严格，建议使用"点击即触发"逻辑，不要有任何延时
+            // 直接用纯净的 window.open 方式，避免被拦截
+            
+            const zaloUrl = `https://zalo.me/${phone}`;
+            
+            // 尝试多种方式
+            try {
+                // 方式 1：直接修改 location
+                window.location.href = zaloUrl;
+                log("已执行 location.href 跳转:", zaloUrl);
+                
+                // 方式 2：同时尝试 open（TikTok 可能拦截）
+                setTimeout(() => {
+                    const newWin = window.open(zaloUrl, '_blank');
+                    if (newWin) {
+                        log("已尝试 window.open 新标签页");
+                    }
+                }, 50);
+                
+            } catch (e) {
+                log("跳转异常:", e.message);
+            }
+            
+            // 失败检测（延长到5秒，TikTok 响应较慢）
+            setTimeout(() => {
+                if (!document.hidden) {
+                    log("方案三 !!! 检测到页面未跳转，显示保底提示");
+                    document.getElementById('fallback-card').style.display = 'block';
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }
+            }, 5000);
         }
     </script>
 </body>
