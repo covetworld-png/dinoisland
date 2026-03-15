@@ -291,6 +291,50 @@
         }
 
         /* Video Controls */
+        /* Video indicator */
+        .video-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 15;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-indicator.show {
+            opacity: 1;
+        }
+
+        .video-indicator::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .video-indicator.play::after {
+            border-width: 12px 0 12px 20px;
+            border-color: transparent transparent transparent #fff;
+            margin-left: 4px;
+        }
+
+        .video-indicator.pause::after {
+            border: none;
+            width: 6px;
+            height: 20px;
+            background: #fff;
+            box-shadow: 10px 0 0 #fff;
+        }
+
         .video-controls {
             position: absolute;
             bottom: 12px;
@@ -655,6 +699,9 @@
                 <video id="videoPlayer" loop playsinline muted>
                     <source src="../../assets/anchor/heni/heni_video.mp4" type="video/mp4">
                 </video>
+                <!-- Play/Pause indicator -->
+                <div class="video-indicator" id="videoIndicator"></div>
+                
                 <div class="video-controls">
                     <button class="video-btn" id="muteBtn" onclick="toggleMute(event)" title="Mute/Unmute">🔇</button>
                 </div>
@@ -821,6 +868,23 @@
             }
         };
 
+        // Video indicator
+        const videoIndicator = document.getElementById('videoIndicator');
+        let indicatorTimeout;
+
+        function showIndicator(state) {
+            // Clear existing timeout
+            if (indicatorTimeout) clearTimeout(indicatorTimeout);
+            
+            // Set icon state
+            videoIndicator.className = 'video-indicator show ' + state;
+            
+            // Auto hide after 1.5 seconds
+            indicatorTimeout = setTimeout(() => {
+                videoIndicator.classList.remove('show');
+            }, 1500);
+        }
+
         // Click video area to toggle play/pause
         videoContainer.addEventListener('click', function(e) {
             // Only toggle if not clicking on controls
@@ -828,8 +892,10 @@
             
             if (videoPlayer.paused) {
                 videoPlayer.play();
+                showIndicator('pause');
             } else {
                 videoPlayer.pause();
+                showIndicator('play');
             }
         });
 
