@@ -815,10 +815,9 @@
             videoContainer.classList.add('playing');
             
             try {
-                // Muted first for autoplay policy, then unmute
+                // Keep muted for default autoplay
                 videoPlayer.muted = true;
                 await videoPlayer.play();
-                videoPlayer.muted = false;
                 updatePauseButton();
                 updateMuteButton();
             } catch (err) {
