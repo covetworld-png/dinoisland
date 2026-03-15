@@ -656,8 +656,7 @@
                     <source src="../../assets/anchor/heni/heni_video.mp4" type="video/mp4">
                 </video>
                 <div class="video-controls">
-                    <button class="video-btn" id="pauseBtn" onclick="togglePause()" title="Pause/Play">⏸</button>
-                    <button class="video-btn" id="muteBtn" onclick="toggleMute()" title="Mute/Unmute">🔇</button>
+                    <button class="video-btn" id="muteBtn" onclick="toggleMute(event)" title="Mute/Unmute">🔇</button>
                 </div>
             </div>
         </div>
@@ -800,11 +799,7 @@
             videoContainer.classList.remove('playing');
         });
 
-        // Update button states
-        function updatePauseButton() {
-            pauseBtn.textContent = videoPlayer.paused ? '▶' : '⏸';
-        }
-
+        // Update mute button state
         function updateMuteButton() {
             muteBtn.textContent = videoPlayer.muted ? '🔇' : '🔊';
         }
@@ -818,7 +813,6 @@
                 // Keep muted for default autoplay
                 videoPlayer.muted = true;
                 await videoPlayer.play();
-                updatePauseButton();
                 updateMuteButton();
             } catch (err) {
                 showToast('Không thể phát video / 无法播放视频');
@@ -827,25 +821,26 @@
             }
         };
 
-        // Pause toggle
-        window.togglePause = function() {
+        // Click video area to toggle play/pause
+        videoContainer.addEventListener('click', function(e) {
+            // Only toggle if not clicking on controls
+            if (e.target.closest('.video-controls')) return;
+            
             if (videoPlayer.paused) {
                 videoPlayer.play();
             } else {
                 videoPlayer.pause();
             }
-            updatePauseButton();
-        };
+        });
 
         // Mute toggle
-        window.toggleMute = function() {
+        window.toggleMute = function(event) {
+            event.stopPropagation();
             videoPlayer.muted = !videoPlayer.muted;
             updateMuteButton();
         };
 
         // Update buttons when video state changes
-        videoPlayer.addEventListener('play', updatePauseButton);
-        videoPlayer.addEventListener('pause', updatePauseButton);
         videoPlayer.addEventListener('volumechange', updateMuteButton);
 
         // Copy Zalo Number
