@@ -460,6 +460,9 @@ async function loadData() {
     
     allVideos = parseCSV(text);
     
+    // 按 id 排序（升序）
+    allVideos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+    
     // 填充类型筛选器
     const types = getUniqueTypes(allVideos);
     populateTypeFilter(types);
