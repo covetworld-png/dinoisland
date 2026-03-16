@@ -15,6 +15,7 @@ let currentVideo = null;
 let selectedVideos = new Set();
 let isBatchMode = false;
 let currentView = localStorage.getItem('video_lib_view') || 'card'; // 'card' 或 'list'
+let currentSort = localStorage.getItem('video_lib_sort') || 'vid'; // 'vid' 或 'id'
 
 // ========== 登录模块 ==========
 
@@ -173,6 +174,7 @@ function renderVideos(videos) {
         <h3 class="video-title"><span class="video-id">[${video.id}]</span> ${video.title}</h3>
         <div class="video-meta">
           <span class="video-type">${video.type}</span>
+          <span class="video-vid">VID: ${video.vid}</span>
           <span>⏱ ${formatStartTime(parseInt(video.start) || 0)}</span>
         </div>
         <p class="video-desc">${video.content}</p>
@@ -218,7 +220,7 @@ function renderVideos(videos) {
   });
 }
 
-// ========== 筛选 ==========
+// ========== 筛选与排序 ==========
 
 function filterVideos() {
   const search = document.getElementById('search-input').value.toLowerCase().trim();
@@ -236,6 +238,31 @@ function filterVideos() {
   });
   
   renderVideos(filtered);
+}
+
+function sortVideos(sortBy) {
+  currentSort = sortBy;
+  localStorage.setItem('video_lib_sort', sortBy);
+  
+  if (sortBy === 'id') {
+    allVideos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+  } else {
+    // 按 VID 排序（字符串字典序）
+    allVideos.sort((a, b) => a.vid.localeCompare(b.vid));
+  }
+  
+  // 重新应用筛选
+  filterVideos();
+}
+
+function initSortFilter() {
+  const sortFilter = document.getElementById('sort-filter');
+  if (sortFilter) {
+    sortFilter.value = currentSort;
+    sortFilter.addEventListener('change', (e) => {
+      sortVideos(e.target.value);
+    });
+  }
 }
 
 // ========== 批量下载功能 ==========
@@ -460,8 +487,8 @@ async function loadData() {
     
     allVideos = parseCSV(text);
     
-    // 按 id 排序（升序）
-    allVideos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+    // 默认按 VID 排序
+    sortVideos(currentSort);
     
     // 填充类型筛选器
     const types = getUniqueTypes(allVideos);
@@ -511,6 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // 视图切换
   initViewToggle();
+  initSortFilter();
   
   // 初始化
   checkAuth();

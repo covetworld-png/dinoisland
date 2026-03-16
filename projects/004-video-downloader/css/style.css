@@ -366,6 +366,11 @@ body::before {
   margin-right: 6px;
 }
 
+.video-grid.list-view .video-vid {
+  font-size: 11px;
+  padding: 1px 6px;
+}
+
 .video-grid.list-view .video-desc {
   display: none;
 }
@@ -632,6 +637,21 @@ body::before {
 .video-type {
   background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
   color: #3b82f6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.video-vid {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'SF Mono', Monaco, monospace;
+}
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 12px;
