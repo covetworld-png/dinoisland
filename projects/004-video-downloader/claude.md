@@ -116,3 +116,73 @@ python3 scripts/generate_thumbnails.py
 - [x] 缩略图生成工具
 - [ ] 下载按钮（原链接添加 download 属性）
 - [ ] 分页加载（视频数量 > 100 时）
+
+---
+
+## 操作指令（Agent 执行参考）
+
+### 替换 CSV 数据源
+
+```bash
+# 1. 备份旧 CSV
+cp data/videos.csv data/videos.csv.backup.$(date +%Y%m%d)
+
+# 2. 替换 CSV（需用户确认路径）
+cp {新CSV路径} data/videos.csv
+
+# 3. 编码转换（如从 Excel/Windows 导出）
+iconv -f GBK -t UTF-8 data/videos.csv > data/videos_utf8.csv
+mv data/videos_utf8.csv data/videos.csv
+
+# 4. 更新 JS 内嵌数据
+echo '// 封面路径配置
+const THUMBNAIL_PATH = '"'"'data/thumbnails/'"'"';
+
+function getThumbnailPath(video) {
+  const url = video.url;
+  const filename = url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
+  return `${THUMBNAIL_PATH}${filename}.jpg`;
+}
+
+const CSV_DATA = `' > js/csv_data.js
+cat data/videos.csv >> js/csv_data.js
+echo '`;' >> js/csv_data.js
+```
+
+### 重新生成封面
+
+```bash
+# 1. 可选：清空旧封面
+rm -rf data/thumbnails/*
+
+# 2. 执行生成（依赖 FFmpeg）
+python3 scripts/generate_thumbnails.py
+
+# 3. 检查失败数量
+ls data/thumbnails/*.jpg | wc -l
+wc -l data/videos.csv
+# 差值应为 1（表头行）
+
+# 4. 重试失败（如有）
+python3 -c "
+import csv, subprocess
+from pathlib import Path
+existing = set(p.stem for p in Path('data/thumbnails').glob('*.jpg'))
+with open('data/videos.csv') as f:
+    videos = list(csv.DictReader(f))
+failed = [v for v in videos if v['url'].split('/')[-1].rsplit('.',1)[0] not in existing]
+for v in failed:
+    fn = v['url'].split('/')[-1].rsplit('.',1)[0]
+    subprocess.run(['ffmpeg','-y','-i',v['url'],'-ss','00:00:01','-vframes','1','-q:v','2','-vf','scale=480:-1',f'data/thumbnails/{fn}.jpg'], timeout=120)
+"
+```
+
+### 命名规则
+
+| 来源 | 命名 | 示例 |
+|------|------|------|
+| 视频 URL | `vid_start_end.mp4` | `Z5klxK5CebQ_0103_0300.mp4` |
+| 封面文件 | `{URL文件名}.jpg` | `Z5klxK5CebQ_0103_0300.jpg` |
+| 唯一标识 | URL 最后一段（不含扩展名）| `Z5klxK5CebQ_0103_0300` |
+
+**关键：** 同一 `vid` 可能有多个切片，使用 `{URL文件名}` 确保唯一性。
