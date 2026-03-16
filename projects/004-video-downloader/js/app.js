@@ -245,10 +245,19 @@ function sortVideos(sortBy) {
   localStorage.setItem('video_lib_sort', sortBy);
   
   if (sortBy === 'id') {
-    allVideos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+    // 先按 ID 排序，ID 相同则按 VID 排序
+    allVideos.sort((a, b) => {
+      const idDiff = parseInt(a.id) - parseInt(b.id);
+      if (idDiff !== 0) return idDiff;
+      return a.vid.localeCompare(b.vid);
+    });
   } else {
-    // 按 VID 排序（字符串字典序）
-    allVideos.sort((a, b) => a.vid.localeCompare(b.vid));
+    // 先按 VID 排序，VID 相同则按 ID 排序
+    allVideos.sort((a, b) => {
+      const vidDiff = a.vid.localeCompare(b.vid);
+      if (vidDiff !== 0) return vidDiff;
+      return parseInt(a.id) - parseInt(b.id);
+    });
   }
   
   // 重新应用筛选
