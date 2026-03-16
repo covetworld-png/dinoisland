@@ -170,7 +170,7 @@ function renderVideos(videos) {
         <span class="duration">${formatDuration(parseInt(video.duration) || 0)}</span>
       </div>
       <div class="video-info">
-        <h3 class="video-title">${video.title}</h3>
+        <h3 class="video-title"><span class="video-id">[${video.id}]</span> ${video.title}</h3>
         <div class="video-meta">
           <span class="video-type">${video.type}</span>
           <span>⏱ ${formatStartTime(parseInt(video.start) || 0)}</span>

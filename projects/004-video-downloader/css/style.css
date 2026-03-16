@@ -360,6 +360,12 @@ body::before {
   -webkit-line-clamp: 1;
 }
 
+.video-grid.list-view .video-id {
+  font-size: 11px;
+  padding: 1px 6px;
+  margin-right: 6px;
+}
+
 .video-grid.list-view .video-desc {
   display: none;
 }
@@ -600,6 +606,19 @@ body::before {
   -webkit-box-orient: vertical;
   overflow: hidden;
   color: #1e293b;
+}
+
+.video-id {
+  display: inline-block;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-right: 8px;
+  vertical-align: middle;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
 .video-meta {
