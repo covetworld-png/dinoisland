@@ -375,6 +375,9 @@
             overflow: hidden;
             background: linear-gradient(180deg, rgba(15, 45, 38, 0.6) 0%, rgba(10, 30, 25, 0.8) 100%);
             border: 1px solid rgba(74, 154, 138, 0.2);
+            touch-action: pan-y;  /* 允许垂直滚动，水平滑动用于切换 */
+            user-select: none;     /* 防止图片被选中 */
+            -webkit-user-drag: none; /* 防止图片被拖拽 */
         }
 
         .carousel-slide {
@@ -1286,13 +1289,33 @@
                     });
                 });
 
-                // Touch swipe support
+                // Touch swipe support - enhanced
                 this.container.addEventListener('touchstart', (e) => {
                     this.touchStartX = e.changedTouches[0].screenX;
+                    this.touchStartY = e.changedTouches[0].screenY;
+                    this.isDragging = true;
+                }, { passive: true });
+
+                this.container.addEventListener('touchmove', (e) => {
+                    if (!this.isDragging) return;
+                    
+                    const moveX = e.changedTouches[0].screenX;
+                    const moveY = e.changedTouches[0].screenY;
+                    const diffX = this.touchStartX - moveX;
+                    const diffY = this.touchStartY - moveY;
+                    
+                    // 如果水平滑动距离大于垂直滑动，阻止默认滚动行为
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+                        // 水平滑动主导，可以添加视觉反馈
+                    }
                 }, { passive: true });
 
                 this.container.addEventListener('touchend', (e) => {
+                    if (!this.isDragging) return;
+                    this.isDragging = false;
+                    
                     this.touchEndX = e.changedTouches[0].screenX;
+                    this.touchEndY = e.changedTouches[0].screenY;
                     this.handleSwipe();
                 }, { passive: true });
 
@@ -1307,16 +1330,27 @@
             },
 
             handleSwipe() {
-                const swipeThreshold = 50;
-                const diff = this.touchStartX - this.touchEndX;
-
-                if (Math.abs(diff) > swipeThreshold) {
-                    if (diff > 0) {
+                const swipeThreshold = 50;      // 水平滑动阈值
+                const verticalThreshold = 80;  // 垂直滑动阈值
+                
+                const diffX = this.touchStartX - this.touchEndX;
+                const diffY = this.touchStartY - this.touchEndY;
+                
+                // 如果垂直滑动超过阈值，认为是滚动页面，不切换图片
+                if (Math.abs(diffY) > verticalThreshold) {
+                    return;
+                }
+                
+                // 只有当水平滑动超过阈值且主导时才切换
+                if (Math.abs(diffX) > swipeThreshold && Math.abs(diffX) > Math.abs(diffY) * 0.5) {
+                    if (diffX > 0) {
                         // Swipe left - next slide
                         this.nextSlide();
+                        Analytics.track('carousel_slide', { direction: 'next', index: this.currentIndex });
                     } else {
                         // Swipe right - previous slide
                         this.prevSlide();
+                        Analytics.track('carousel_slide', { direction: 'prev', index: this.currentIndex });
                     }
                     this.resetAutoPlay();
                 }
