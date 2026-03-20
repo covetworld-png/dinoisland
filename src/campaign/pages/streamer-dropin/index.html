@@ -148,18 +148,30 @@
             position: fixed;
             top: 80px;
             right: 16px;
-            z-index: 100;
-            opacity: 0.4;
+            z-index: 1000;
+            opacity: 0.6;
             transition: opacity 0.3s;
         }
         .test-mode-btn:hover {
             opacity: 1;
+        }
+        /* 测试菜单 - PC在按钮下方，Mobile在按钮上方 */
+        #test-menu {
+            position: absolute;
+            top: 48px;
+            right: 0;
+            bottom: auto;
         }
         @media (max-width: 1023px) {
             .test-mode-btn {
                 top: auto;
                 bottom: 20px;
                 right: 16px;
+            }
+            #test-menu {
+                top: auto;
+                bottom: 48px;
+                right: 0;
             }
         }
         /* VS 卡片样式 */
@@ -1007,7 +1019,7 @@
         <button onclick="toggleTestMenu()" class="w-10 h-10 rounded-full bg-jungle-700 border border-mist/30 text-gray-400 hover:text-white flex items-center justify-center cursor-pointer" title="Test Mode">
             <i class="fas fa-cog"></i>
         </button>
-        <div id="test-menu" class="hidden absolute bottom-12 right-0 w-48 bg-jungle-800/95 backdrop-blur-md rounded-xl border border-mist/30 p-2 shadow-lg">
+        <div id="test-menu" class="hidden w-48 bg-jungle-800/95 backdrop-blur-md rounded-xl border border-mist/30 p-2 shadow-lg">
             <div class="text-xs text-gray-400 px-3 py-2 border-b border-mist/20" data-vi="Chế độ Test" data-cn="测试模式">Chế độ Test</div>
             <button onclick="setTestMode('loggedOut')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Chưa đăng nhập" data-cn="未登录">Chưa đăng nhập</button>
             <button onclick="setTestMode('noCharacter')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Chưa vào game" data-cn="未进游戏">Chưa vào game</button>
