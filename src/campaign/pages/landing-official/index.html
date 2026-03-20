@@ -147,9 +147,7 @@
         .official-logo {
             width: 260px;
             height: auto;
-            filter: brightness(1.7) contrast(1.2) drop-shadow(0 0 30px rgba(255, 215, 0, 0.35));
-            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.25));
         }
 
         /* Hero Section */
@@ -428,6 +426,49 @@
             border-radius: 4px;
         }
 
+        /* Carousel Navigation Arrows */
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            background: rgba(10, 26, 21, 0.7);
+            border: 1px solid rgba(74, 154, 138, 0.3);
+            border-radius: 50%;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .carousel-arrow:hover {
+            background: rgba(74, 154, 138, 0.3);
+            border-color: var(--mist);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .carousel-arrow:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .carousel-arrow-prev {
+            left: 12px;
+        }
+
+        .carousel-arrow-next {
+            right: 12px;
+        }
+
+        .carousel-arrow svg {
+            width: 20px;
+            height: 20px;
+        }
+
         /* Benefits Section */
         .benefits-list {
             display: flex;
@@ -583,6 +624,18 @@
         <!-- Dinosaur Carousel -->
         <div class="glass-card carousel-section">
             <div class="carousel-container" id="carousel">
+                <!-- Navigation Arrows -->
+                <button class="carousel-arrow carousel-arrow-prev" aria-label="Previous slide">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <button class="carousel-arrow carousel-arrow-next" aria-label="Next slide">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                
                 <div class="carousel-slide active">
                     <img src="../../assets/official/dino_1_spino.png" alt="Spinosaurus">
                 </div>
@@ -836,19 +889,79 @@
         // Dinosaur Carousel
         // ============================================
         const carousel = {
+            container: document.getElementById('carousel'),
             slides: document.querySelectorAll('.carousel-slide'),
             dots: document.querySelectorAll('.carousel-dot'),
+            prevBtn: document.querySelector('.carousel-arrow-prev'),
+            nextBtn: document.querySelector('.carousel-arrow-next'),
             currentIndex: 0,
             interval: null,
+            touchStartX: 0,
+            touchEndX: 0,
 
             init() {
                 this.startAutoPlay();
+                this.bindEvents();
+            },
+
+            bindEvents() {
+                // Dot indicators
                 this.dots.forEach((dot, index) => {
                     dot.addEventListener('click', () => {
                         this.goToSlide(index);
                         this.resetAutoPlay();
                     });
                 });
+
+                // Arrow buttons
+                if (this.prevBtn) {
+                    this.prevBtn.addEventListener('click', () => {
+                        this.prevSlide();
+                        this.resetAutoPlay();
+                    });
+                }
+
+                if (this.nextBtn) {
+                    this.nextBtn.addEventListener('click', () => {
+                        this.nextSlide();
+                        this.resetAutoPlay();
+                    });
+                }
+
+                // Touch swipe support
+                this.container.addEventListener('touchstart', (e) => {
+                    this.touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                this.container.addEventListener('touchend', (e) => {
+                    this.touchEndX = e.changedTouches[0].screenX;
+                    this.handleSwipe();
+                }, { passive: true });
+
+                // Pause on hover
+                this.container.addEventListener('mouseenter', () => {
+                    clearInterval(this.interval);
+                });
+
+                this.container.addEventListener('mouseleave', () => {
+                    this.startAutoPlay();
+                });
+            },
+
+            handleSwipe() {
+                const swipeThreshold = 50;
+                const diff = this.touchStartX - this.touchEndX;
+
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        // Swipe left - next slide
+                        this.nextSlide();
+                    } else {
+                        // Swipe right - previous slide
+                        this.prevSlide();
+                    }
+                    this.resetAutoPlay();
+                }
             },
 
             goToSlide(index) {
@@ -864,6 +977,11 @@
             nextSlide() {
                 const nextIndex = (this.currentIndex + 1) % this.slides.length;
                 this.goToSlide(nextIndex);
+            },
+
+            prevSlide() {
+                const prevIndex = (this.currentIndex - 1 + this.slides.length) % this.slides.length;
+                this.goToSlide(prevIndex);
             },
 
             startAutoPlay() {
