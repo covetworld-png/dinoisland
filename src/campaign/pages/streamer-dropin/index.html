@@ -480,7 +480,173 @@
                 <div class="bg-gradient-to-r from-gold/10 via-gold/5 to-gold/10 rounded-xl p-4 mb-6 border border-gold/30">
                     <div class="flex items-center justify-center gap-3">
                         <i class="fas fa-medal text-gold text-xl"></i>
-                        <p class="text-gold-light text-sm font-medium" data-vi="Gia nhập phe Streamer → Mở khóa quyền mua độc quyền" data-cn="加入主播阵营 → 解锁专属购买资格">Gia nhập phe Streamer → Mở khóa quyền mua độc quyền</p>
+                        <p class="text-gold-light text-sm font-medium" data-vi="Gia nhập phe → Mở khóa ưu đãi độc quyền" data-cn="加入阵营 → 解锁专属优惠">Gia nhập phe → Mở khóa ưu đãi độc quyền</p>
+                    </div>
+                </div>
+
+                <!-- 阵营皮肤提醒区 -->
+                <div class="mb-6 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-exclamation-circle text-amber-500 text-xl mt-0.5"></i>
+                        <div>
+                            <h4 class="text-amber-400 font-bold text-sm mb-1" data-vi="Yêu cầu Skin Phe" data-cn="阵营皮肤要求">Yêu cầu Skin Phe</h4>
+                            <p class="text-gray-300 text-xs leading-relaxed" data-vi="Để tham gia sự kiện, bạn cần mua Skin Phe tương ứng trong cửa hàng game. Skin phe sẽ giúp phân biệt các chiến binh thuộc phe khác nhau trong cuộc chiến." data-cn="参与活动需要在游戏商城购买对应的阵营皮肤。阵营皮肤将帮助区分不同阵营的战士。">Để tham gia sự kiện, bạn cần mua Skin Phe tương ứng trong cửa hàng game. Skin phe sẽ giúp phân biệt các chiến binh thuộc phe khác nhau trong cuộc chiến.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 阵营皮肤展示区 -->
+                <div class="mb-8">
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2 section-title-shadow">
+                        <i class="fas fa-shield-alt text-gold"></i>
+                        <span data-vi="Skin Phe Chiến" data-cn="阵营战斗皮肤">Skin Phe Chiến</span>
+                        <span class="px-2 py-0.5 bg-gold/20 text-gold text-xs rounded-full" data-vi="4 loại" data-cn="4 款">4 loại</span>
+                        <span class="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded-full" data-vi="Mua trong game" data-cn="游戏内购买">Mua trong game</span>
+                    </h4>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Q服 - heni 阵营 -->
+                        <div class="bg-gradient-to-b from-blue-900/30 to-jungle-800/40 rounded-xl border border-blue-400/30 overflow-hidden group">
+                            <div class="relative w-full aspect-square overflow-hidden bg-black">
+                                <img src="assets/faction-skin-q-heni.png" alt="Phe heni" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/warrior-gold.png'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <div class="absolute top-2 left-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/80 text-white text-xs font-bold rounded-full">Q</span>
+                                </div>
+                                <div class="absolute bottom-2 right-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/90 text-jungle-900 text-xs font-bold rounded-full">
+                                        <i class="fas fa-coins"></i> 10
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <h5 class="text-blue-300 font-bold text-sm" data-vi="Phe heni" data-cn="heni阵营">Phe heni</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Quân Đoàn Chiến" data-cn="军团战">Quân Đoàn Chiến</p>
+                            </div>
+                        </div>
+                        <!-- Q服 - ricon 阵营 -->
+                        <div class="bg-gradient-to-b from-blue-900/30 to-jungle-800/40 rounded-xl border border-blue-400/30 overflow-hidden group">
+                            <div class="relative w-full aspect-square overflow-hidden bg-black">
+                                <img src="assets/faction-skin-q-ricon.png" alt="Phe ricon" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/warrior-gold.png'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <div class="absolute top-2 left-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/80 text-white text-xs font-bold rounded-full">Q</span>
+                                </div>
+                                <div class="absolute bottom-2 right-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/90 text-jungle-900 text-xs font-bold rounded-full">
+                                        <i class="fas fa-coins"></i> 10
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <h5 class="text-blue-300 font-bold text-sm" data-vi="Phe ricon" data-cn="ricon阵营">Phe ricon</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Quân Đoàn Chiến" data-cn="军团战">Quân Đoàn Chiến</p>
+                            </div>
+                        </div>
+                        <!-- K服 - Sữa Chua 阵营 -->
+                        <div class="bg-gradient-to-b from-purple-900/30 to-jungle-800/40 rounded-xl border border-purple-400/30 overflow-hidden group">
+                            <div class="relative w-full aspect-square overflow-hidden bg-black">
+                                <img src="assets/faction-skin-k-suachua.png" alt="Phe Sữa Chua" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/overlord-red.png'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <div class="absolute top-2 left-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/80 text-white text-xs font-bold rounded-full">K</span>
+                                </div>
+                                <div class="absolute bottom-2 right-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/90 text-jungle-900 text-xs font-bold rounded-full">
+                                        <i class="fas fa-coins"></i> 10
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <h5 class="text-purple-300 font-bold text-sm" data-vi="Phe Sữa Chua" data-cn="Sữa Chua阵营">Phe Sữa Chua</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Khủng Long Chi Chiến" data-cn="恐龙之战">Khủng Long Chi Chiến</p>
+                            </div>
+                        </div>
+                        <!-- K服 - MiuMiu 阵营 -->
+                        <div class="bg-gradient-to-b from-purple-900/30 to-jungle-800/40 rounded-xl border border-purple-400/30 overflow-hidden group">
+                            <div class="relative w-full aspect-square overflow-hidden bg-black">
+                                <img src="assets/faction-skin-k-miumiu.png" alt="Phe MiuMiu" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/overlord-red.png'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <div class="absolute top-2 left-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/80 text-white text-xs font-bold rounded-full">K</span>
+                                </div>
+                                <div class="absolute bottom-2 right-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/90 text-jungle-900 text-xs font-bold rounded-full">
+                                        <i class="fas fa-coins"></i> 10
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <h5 class="text-purple-300 font-bold text-sm" data-vi="Phe MiuMiu" data-cn="MiuMiu阵营">Phe MiuMiu</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Khủng Long Chi Chiến" data-cn="恐龙之战">Khủng Long Chi Chiến</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主播皮肤（亲卫勇士礼包）展示区 -->
+                <div class="mb-8">
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2 section-title-shadow">
+                        <i class="fas fa-star text-gold"></i>
+                        <span data-vi="Skin Dũng Sĩ Cận Vệ - Độc quyền Streamer" data-cn="亲卫勇士皮肤 - 主播限定">Skin Dũng Sĩ Cận Vệ - Độc quyền Streamer</span>
+                        <span class="px-2 py-0.5 bg-gold/20 text-gold text-xs rounded-full" data-vi="4 loại" data-cn="4 款">4 loại</span>
+                    </h4>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- heni 皮肤 -->
+                        <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-blue-500/30 overflow-hidden group">
+                            <div class="relative w-full aspect-square overflow-hidden bg-black">
+                                <img src="assets/streamer-skin-heni.png" alt="heni Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/warrior-gold.png'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <div class="absolute top-2 left-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/90 text-white text-xs font-bold rounded-full">Q</span>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <h5 class="text-gold font-bold text-sm">heni</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Giá: Theo phe đã chọn" data-cn="价格：根据所选阵营">Độc quyền phe</p>
+                            </div>
+                        </div>
+                        <!-- ricon 皮肤 -->
+                        <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-blue-500/30 overflow-hidden group">
+                            <div class="relative w-full aspect-square overflow-hidden bg-black">
+                                <img src="assets/streamer-skin-ricon.png" alt="ricon Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/warrior-gold.png'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <div class="absolute top-2 left-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/90 text-white text-xs font-bold rounded-full">Q</span>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <h5 class="text-gold font-bold text-sm">ricon</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Giá: Theo phe đã chọn" data-cn="价格：根据所选阵营">Độc quyền phe</p>
+                            </div>
+                        </div>
+                        <!-- Sữa Chua 皮肤 -->
+                        <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-purple-500/30 overflow-hidden group">
+                            <div class="relative w-full aspect-square overflow-hidden bg-black">
+                                <img src="assets/streamer-skin-suachua.png" alt="Sữa Chua Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/overlord-red.png'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <div class="absolute top-2 left-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/90 text-white text-xs font-bold rounded-full">K</span>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <h5 class="text-gold font-bold text-sm">Sữa Chua</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Giá: Theo phe đã chọn" data-cn="价格：根据所选阵营">Độc quyền phe</p>
+                            </div>
+                        </div>
+                        <!-- MiuMiu 皮肤 -->
+                        <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-purple-500/30 overflow-hidden group">
+                            <div class="relative w-full aspect-square overflow-hidden bg-black">
+                                <img src="assets/streamer-skin-miumiu.png" alt="MiuMiu Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/overlord-red.png'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <div class="absolute top-2 left-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/90 text-white text-xs font-bold rounded-full">K</span>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <h5 class="text-gold font-bold text-sm">MiuMiu</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Giá: Theo phe đã chọn" data-cn="价格：根据所选阵营">Độc quyền phe</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
