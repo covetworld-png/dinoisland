@@ -1171,6 +1171,10 @@
             <button onclick="setTestMode('skinComingSoon')" class="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 rounded-lg transition-colors" data-vi="Sắp ra mắt" data-cn="即将上线">Sắp ra mắt</button>
             <button onclick="setTestMode('skinRevealed')" class="w-full text-left px-3 py-2 text-sm text-cyan-400 hover:bg-cyan-950/30 rounded-lg transition-colors" data-vi="Đã công bố skin" data-cn="已公开皮肤">Đã công bố skin</button>
             <button onclick="setTestMode('skinOnSale')" class="w-full text-left px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-950/30 rounded-lg transition-colors" data-vi="Đang mở bán" data-cn="开放销售中">Đang mở bán</button>
+            <div class="border-t border-mist/20 my-1"></div>
+            <button onclick="toggleFactionResult('q')" class="w-full text-left px-3 py-2 text-sm text-orange-400 hover:bg-orange-950/30 rounded-lg transition-colors" data-vi="Đổi kết quả Q (heni↔ricon)" data-cn="切换Q服结果">Đổi kết quả Q (heni↔ricon)</button>
+            <button onclick="toggleFactionResult('k')" class="w-full text-left px-3 py-2 text-sm text-pink-400 hover:bg-pink-950/30 rounded-lg transition-colors" data-vi="Đổi kết quả K (Sữa Chua↔MiuMiu)" data-cn="切换K服结果">Đổi kết quả K (Sữa Chua↔MiuMiu)</button>
+            <div class="border-t border-mist/20 my-1"></div>
             <button onclick="setTestMode('eventEnded')" class="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-blue-950/30 rounded-lg transition-colors" data-vi="Kết thúc phát skin" data-cn="皮肤发放结束">Kết thúc phát skin</button>
         </div>
     </div>
@@ -1586,6 +1590,31 @@
             showToast(currentLang === 'vi' ? 'Đã chuyển chế độ test' : '已切换测试模式');
         }
 
+        // Toggle faction winner for testing
+        function toggleFactionResult(server) {
+            if (server === 'q') {
+                // 切换 Q 服胜负
+                if (factionResults.q.winner === 'heni') {
+                    factionResults.q = { winner: 'ricon', discount: { heni: 20, ricon: 30 } };
+                    showToast(currentLang === 'vi' ? 'ricon thắng (-30%), heni thua (-20%)' : 'ricon获胜(-30%)，heni落败(-20%)');
+                } else {
+                    factionResults.q = { winner: 'heni', discount: { heni: 30, ricon: 20 } };
+                    showToast(currentLang === 'vi' ? 'heni thắng (-30%), ricon thua (-20%)' : 'heni获胜(-30%)，ricon落败(-20%)');
+                }
+            } else if (server === 'k') {
+                // 切换 K 服胜负
+                if (factionResults.k.winner === 'suachua') {
+                    factionResults.k = { winner: 'miumiu', discount: { suachua: 20, miumiu: 30 } };
+                    showToast(currentLang === 'vi' ? 'MiuMiu thắng (-30%), Sữa Chua thua (-20%)' : 'MiuMiu获胜(-30%)，Sữa Chua落败(-20%)');
+                } else {
+                    factionResults.k = { winner: 'suachua', discount: { suachua: 30, miumiu: 20 } };
+                    showToast(currentLang === 'vi' ? 'Sữa Chua thắng (-30%), MiuMiu thua (-20%)' : 'Sữa Chua获胜(-30%)，MiuMiu落败(-20%)');
+                }
+            }
+            // 刷新显示
+            updateSkinDisplayState();
+        }
+
         // State - Registration Deadline & Battle Time
         const REGISTRATION_DEADLINE = new Date('2026-04-01T00:00:00+07:00');
         const BATTLE_START_TIME = new Date('2026-04-01T20:00:00+07:00');
@@ -1596,6 +1625,13 @@
         let skinDisplayState = 'comingSoon';
         let selectedServer = null;
         let currentPurchaseItem = null;
+        
+        // 模拟阵营胜负状态（用于开放销售测试）
+        // 胜者 7 折，败者 8 折
+        let factionResults = {
+            q: { winner: 'heni', discount: { heni: 30, ricon: 20 } },  // heni 胜 7折，ricon 败 8折
+            k: { winner: 'suachua', discount: { suachua: 30, miumiu: 20 } }  // Sữa Chua 胜 7折，MiuMiu 败 8折
+        };
         
         // Skin Pricing Config - 金币:越南盾 = 1:1800
         const EXCHANGE_RATE = 1800;
@@ -1676,8 +1712,16 @@
                     const finalPrice = SKIN_PRICES.warrior.original * 0.5;
                     currentPriceEl.textContent = formatPrice(finalPrice);
                     discountEl.textContent = '-50%';
+                } else if (skinDisplayState === 'onSale') {
+                    // 开放销售期间（根据阵营胜负显示折扣）
+                    const server = ['heni', 'ricon'].includes(streamer) ? 'q' : 'k';
+                    const discount = factionResults[server].discount[streamer];
+                    const finalPrice = SKIN_PRICES.warrior.original * (100 - discount) / 100;
+                    currentPriceEl.textContent = formatPrice(finalPrice);
+                    currentPriceEl.className = 'text-red-400 font-bold text-lg';
+                    discountEl.textContent = `-${discount}%`;
                 } else {
-                    // 开放销售期间（亲卫勇士价格悬念）
+                    // 其他状态（悬念）
                     currentPriceEl.textContent = currentLang === 'vi' ? 'Công bố sau' : '稍后公布';
                     currentPriceEl.className = 'text-amber-400 font-bold text-lg';
                     discountEl.textContent = '?';
@@ -1840,15 +1884,27 @@
                             </div>`;
                         break;
                     case 'onSale':
-                        // 开放销售：显示原价+悬念，有购买按钮
+                        // 开放销售：显示原价+模拟折扣价（根据阵营胜负）
+                        const server = ['heni', 'ricon'].includes(streamer) ? 'q' : 'k';
+                        const discount = factionResults[server].discount[streamer];
+                        const finalPrice = SKIN_PRICES.warrior.original * (100 - discount) / 100;
+                        const isWinner = factionResults[server].winner === streamer;
+                        const resultBadge = isWinner 
+                            ? `<span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-full">${currentLang === 'vi' ? 'Phe thắng' : '获胜阵营'}</span>`
+                            : `<span class="px-2 py-0.5 bg-gray-500/20 text-gray-400 text-xs rounded-full">${currentLang === 'vi' ? 'Phe thua' : '落败阵营'}</span>`;
+                        
                         priceEl.innerHTML = `
-                            <div class="mt-2">
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-gray-400 text-xs">${originalLabel}:</span>
-                                    <span class="text-gray-300 text-sm line-through">${formatPrice(SKIN_PRICES.warrior.original)}</span>
+                            <div class="mt-2 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    ${resultBadge}
+                                    <span class="text-gray-400 text-xs line-through">${originalLabel}: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
                                 </div>
-                                <div class="mt-2 p-2 bg-amber-500/10 rounded-lg mb-2">
-                                    <span class="text-amber-400 text-xs">${suspenseText}</span>
+                                <div class="flex items-center justify-between bg-gold/10 p-2 rounded-lg">
+                                    <div>
+                                        <span class="text-gold text-xs">${currentLang === 'vi' ? 'Giá ưu đãi:' : '优惠售价:'}</span>
+                                        <span class="text-red-400 font-bold text-lg ml-2">${formatPrice(finalPrice)}</span>
+                                    </div>
+                                    <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">-${discount}%</span>
                                 </div>
                                 <button onclick="showPurchaseModal('warrior', '${streamer}')" class="w-full py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-sm font-bold rounded-full hover:brightness-110 transition-all">${buyText}</button>
                             </div>`;
