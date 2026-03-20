@@ -677,7 +677,7 @@
                         <!-- 礼包图片 -->
                         <div class="relative w-full aspect-square max-h-64 overflow-hidden bg-black">
                             <video autoplay loop muted playsinline class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" poster="assets/overlord-skin-default.png">
-                                <source src="../../../public/pic/动态流光恐龙皮肤视频.mp4" type="video/mp4">
+                                <source src="assets/overlord-preview.mp4" type="video/mp4">
                                 <img src="assets/overlord-red.png" alt="Bá Chủ Thờii Tiền Sử" class="w-full h-full object-contain" onerror="this.src='assets/overlord-skin-default.png'">
                             </video>
                             <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
@@ -729,9 +729,9 @@
                             <div id="overlord-price-section" class="bg-gradient-to-r from-red-950/50 to-jungle-900/50 rounded-lg p-3 border border-red-500/20 mb-3">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: <span id="overlord-original-price">5,888,000đ</span></span>
+                                        <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: <span id="overlord-original-price"></span></span>
                                         <div class="flex items-center gap-2 mt-1">
-                                            <span class="text-red-400 font-bold text-lg" id="overlord-current-price">3,888,000đ</span>
+                                            <span class="text-red-400 font-bold text-lg" id="overlord-current-price"></span>
                                             <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full" id="overlord-discount">-34%</span>
                                         </div>
                                     </div>
@@ -1530,16 +1530,19 @@
         let selectedServer = null;
         let currentPurchaseItem = null;
         
-        // Skin Pricing Config
+        // Skin Pricing Config - 金币:越南盾 = 1:1800
+        const EXCHANGE_RATE = 1800;
         const SKIN_PRICES = {
             warrior: {
-                original: 3888000, // 3,888,000 VND
+                gold: 3888, // 金币
+                get original() { return this.gold * EXCHANGE_RATE; }, // 6,998,400 VND
                 // Final price depends on faction victory - revealed after event
                 discountPercent: null // Will be calculated based on victory
             },
             overlord: {
-                original: 5888000, // 5,888,000 VND
-                current: 3888000,  // 3,888,000 VND
+                gold: 18888, // 金币
+                get original() { return this.gold * EXCHANGE_RATE; }, // 33,998,400 VND
+                get current() { return this.original * 0.66; }, // 22,438,944 VND (34% off)
                 discountPercent: 34
             }
         };
@@ -1704,16 +1707,17 @@
                         // Show final price with discount
                         const finalPrice = SKIN_PRICES.warrior.original * 0.5;
                         const discount = 50;
+                        const buyText = currentLang === 'vi' ? 'Mua ngay' : '立即购买';
                         priceEl.innerHTML = `
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <span class="text-gray-400 text-xs line-through">Giá gốc: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
+                                    <span class="text-gray-400 text-xs line-through">${currentLang === 'vi' ? 'Giá gốc' : '原价'}: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
                                     <div class="flex items-center gap-2 mt-1">
                                         <span class="text-gold font-bold">${formatPrice(finalPrice)}</span>
                                         <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">-${discount}%</span>
                                     </div>
                                 </div>
-                                <button onclick="showPurchaseModal('warrior', '${streamer}')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all">Mua ngay</button>
+                                <button onclick="showPurchaseModal('warrior', '${streamer}')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all">${buyText}</button>
                             </div>`;
                     }
                     // Otherwise keep suspense state
@@ -1723,8 +1727,15 @@
             // Update Overlord display
             const overlordSection = document.getElementById('overlord-price-section');
             if (overlordSection && purchasedOverlord) {
-                overlordSection.innerHTML = `<div class="text-center py-2"><span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${currentLang === 'vi' ? 'Đã sở hữu' : '已拥有'}</span></div>`;
+                const ownedText = currentLang === 'vi' ? 'Đã sở hữu' : '已拥有';
+                overlordSection.innerHTML = `<div class="text-center py-2"><span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${ownedText}</span></div>`;
             }
+            
+            // Update Overlord prices display
+            const overlordOriginalPrice = document.getElementById('overlord-original-price');
+            const overlordCurrentPrice = document.getElementById('overlord-current-price');
+            if (overlordOriginalPrice) overlordOriginalPrice.textContent = formatPrice(SKIN_PRICES.overlord.original);
+            if (overlordCurrentPrice) overlordCurrentPrice.textContent = formatPrice(SKIN_PRICES.overlord.current);
         }
 
         // Countdown Timer
