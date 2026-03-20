@@ -278,30 +278,45 @@
             margin-bottom: 12px;
         }
 
-        /* Secondary Button */
+        /* Secondary Button (Copy) */
         .btn-secondary {
             width: 100%;
             padding: 14px 24px;
             background: transparent;
+            background-color: transparent;
             border: 2px solid var(--gold);
             border-radius: 28px;
             color: var(--gold);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
+            display: -webkit-box;
+            display: -webkit-flex;
             display: flex;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
             align-items: center;
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
             justify-content: center;
             gap: 8px;
+            -webkit-transition: all 0.15s ease;
             transition: all 0.15s ease;
+            -webkit-appearance: none;
+            appearance: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:hover,
+        .btn-secondary:active {
             background: rgba(255, 215, 0, 0.1);
+            background-color: rgba(255, 215, 0, 0.1);
         }
 
         .btn-secondary:active {
+            -webkit-transform: scale(0.98);
             transform: scale(0.98);
         }
 
@@ -580,6 +595,57 @@
             margin-bottom: 16px;
         }
 
+        /* QR Code Fallback */
+        .qrcode-fallback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 26, 21, 0.95);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .qrcode-fallback-modal {
+            background: var(--jungle-800);
+            border: 1px solid rgba(74, 154, 138, 0.3);
+            border-radius: 20px;
+            padding: 28px;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .qrcode-fallback-modal .qrcode-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .qrcode-fallback-modal h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            color: var(--gold);
+            margin: 0 0 20px;
+        }
+
+        .qrcode-fallback-modal .qrcode-placeholder {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .qrcode-fallback-modal .qrcode-phone {
+            font-family: 'Cinzel', serif;
+            font-size: 20px;
+            color: var(--gold);
+            margin: 16px 0;
+            letter-spacing: 2px;
+        }
+
         /* Responsive */
         @media (max-width: 360px) {
             .container {
@@ -805,67 +871,76 @@
         }
 
         // ============================================
-        // Source & Campaign Tracking
+        // Source Tracking (Simplified)
         // ============================================
         const SourceTracker = {
-            // 获取所有来源参数
-            getSourceParams() {
+            // 主播列表
+            anchors: ['heni', 'ricon', 'suachua', 'miumiu'],
+            
+            // 从 URL 或 Referrer 自动识别来源
+            detectSource() {
                 const params = new URLSearchParams(window.location.search);
+                const referrer = document.referrer.toLowerCase();
+                
+                // 1. 优先从 URL 参数读取
+                let source = params.get('source');
+                if (source) return this.parseSource(source);
+                
+                // 2. 从 Referrer 自动识别
+                if (referrer.includes('tiktok.com')) {
+                    return { source: 'tiktok_auto', ref: 'tiktok_auto', channel: 'none' };
+                }
+                if (referrer.includes('facebook.com') || referrer.includes('fb.com')) {
+                    return { source: 'facebook_auto', ref: 'facebook_auto', channel: 'none' };
+                }
+                
+                // 3. 默认来源
+                return { source: 'organic', ref: 'organic', channel: 'none' };
+            },
+            
+            // 解析 source 参数 (格式: 主播名_channel)
+            parseSource(sourceStr) {
+                const parts = sourceStr.split('_');
+                const anchor = parts[0];
+                const channel = parts[1] || 'none';
+                
+                // 验证主播名
+                if (!this.anchors.includes(anchor)) {
+                    return { source: sourceStr, ref: sourceStr, channel };
+                }
+                
                 return {
-                    // 主要来源标识
-                    ref: params.get('ref') || 'organic',
-                    source: params.get('source') || params.get('utm_source') || 'direct',
-                    medium: params.get('medium') || params.get('utm_medium') || 'none',
-                    campaign: params.get('campaign') || params.get('utm_campaign') || 'none',
-                    content: params.get('content') || params.get('utm_content') || 'none',
-                    term: params.get('term') || params.get('utm_term') || 'none',
-                    
-                    // 广告相关
-                    ad_id: params.get('ad_id') || 'none',
-                    adset_id: params.get('adset_id') || 'none',
-                    campaign_id: params.get('campaign_id') || 'none',
-                    creative_id: params.get('creative_id') || params.get('cid') || 'none',
-                    
-                    // 主播/推广者标识
-                    anchor: params.get('anchor') || 'none',
-                    promoter: params.get('promoter') || 'none',
-                    code: params.get('code') || 'none',
-                    
-                    // 渠道细分
-                    channel: params.get('channel') || 'none',
-                    placement: params.get('placement') || 'none',
-                    
-                    // 时间戳（用于去重）
-                    ts: params.get('ts') || Date.now()
+                    source: sourceStr,
+                    ref: sourceStr,
+                    anchor: anchor,
+                    channel: channel
                 };
             },
             
-            // 保存到 sessionStorage，确保会话内一致
+            // 获取来源参数
+            getSourceParams() {
+                const detected = this.detectSource();
+                return {
+                    source: detected.source,
+                    ref: detected.ref,
+                    anchor: detected.anchor || 'none',
+                    channel: detected.channel || 'none',
+                    timestamp: Date.now()
+                };
+            },
+            
+            // 保存到 sessionStorage
             saveSourceParams() {
                 const params = this.getSourceParams();
-                sessionStorage.setItem('landing_source', JSON.stringify(params));
+                sessionStorage.setItem('landing_source_v2', JSON.stringify(params));
                 return params;
             },
             
-            // 获取（优先从 storage，fallback 到 URL）
+            // 获取（优先从 storage）
             getSavedParams() {
-                const saved = sessionStorage.getItem('landing_source');
-                if (saved) {
-                    return JSON.parse(saved);
-                }
+                const saved = sessionStorage.getItem('landing_source_v2');
+                if (saved) return JSON.parse(saved);
                 return this.saveSourceParams();
-            },
-            
-            // 生成来源摘要（用于快速查看）
-            getSourceSummary() {
-                const p = this.getSavedParams();
-                return {
-                    primary: p.ref,
-                    channel: p.channel,
-                    campaign: p.campaign,
-                    anchor: p.anchor,
-                    creative: p.creative_id
-                };
             }
         };
 
@@ -873,13 +948,11 @@
         const sourceParams = SourceTracker.saveSourceParams();
 
         // ============================================
-        // Analytics Module (Enhanced)
+        // Analytics Module (Simplified)
         // ============================================
         const Analytics = {
             init() {
                 this.trackPageView();
-                this.trackScrollDepth();
-                this.trackDeviceInfo();
             },
 
             track(event, params = {}) {
@@ -889,16 +962,20 @@
                     lang: currentLang,
                     sessionId: this.getSessionId(),
                     timestamp: Date.now(),
-                    // 来源参数（全量）
-                    ...source
+                    // 简化后的来源参数
+                    source: source.source,
+                    ref: source.ref,
+                    anchor: source.anchor,
+                    channel: source.channel
                 };
                 
                 const finalParams = { ...baseParams, ...params };
                 
-                // GA4
-                if (window.gtag) {
-                    gtag('event', event, finalParams);
-                }
+                // 发送到自建接口（替换此处）
+                this.sendToEndpoint(event, finalParams);
+                
+                // Console log for debugging
+                console.log('[Analytics]', event, finalParams);
                 
                 // 自建统计接口（可选）
                 // this.sendToCustomEndpoint(event, finalParams);
@@ -917,47 +994,25 @@
                 return sessionId;
             },
 
+            // 发送到自建接口（需替换为实际 API 地址）
+            sendToEndpoint(event, params) {
+                // 示例实现：
+                // fetch('https://your-api.com/track', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ event, params }),
+                //     keepalive: true
+                // });
+            },
+
             trackPageView() {
                 const env = new VietnamZaloLauncher().detectEnvironment();
-                const source = SourceTracker.getSavedParams();
                 this.track('page_view', {
                     webview_type: env.type,
                     is_webview: env.isWebView,
                     user_agent: navigator.userAgent.slice(0, 100),
-                    referrer: document.referrer || 'direct',
-                    // 来源摘要
-                    source_summary: SourceTracker.getSourceSummary()
+                    referrer: document.referrer || 'direct'
                 });
-            },
-
-            trackDeviceInfo() {
-                const screen = window.screen;
-                this.track('device_info', {
-                    screen_width: screen.width,
-                    screen_height: screen.height,
-                    viewport_width: window.innerWidth,
-                    viewport_height: window.innerHeight,
-                    device_pixel_ratio: window.devicePixelRatio,
-                    platform: navigator.platform
-                });
-            },
-
-            trackScrollDepth() {
-                const depths = [25, 50, 75, 100];
-                const tracked = new Set();
-                
-                window.addEventListener('scroll', throttle(() => {
-                    const scrollPercent = Math.round(
-                        (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100
-                    );
-                    
-                    depths.forEach(depth => {
-                        if (scrollPercent >= depth && !tracked.has(depth)) {
-                            tracked.add(depth);
-                            this.track('scroll_depth', { percent: depth });
-                        }
-                    });
-                }, 500));
             },
 
             // Zalo 调起相关打点
@@ -1049,6 +1104,7 @@
                 const isSafari = /safari/i.test(ua) && !ua.includes('chrome') && !ua.includes('crios');
                 const isSamsung = ua.includes('samsungbrowser');
                 const isCocCoc = ua.includes('coccoc');
+                const isMiBrowser = ua.includes('miuibrowser') || ua.includes('xiaomi');
                 
                 // Android / iOS
                 const isAndroid = /android/i.test(ua);
@@ -1059,10 +1115,12 @@
                 else if (isFB) type = 'FACEBOOK';
                 else if (isIG) type = 'INSTAGRAM';
                 else if (isWeChat) type = 'WECHAT';
+                else if (isMiBrowser) type = 'MI_BROWSER';
+                else if (isSafari) type = 'SAFARI';
                 
                 return {
                     isTikTok, isFB, isIG, isWeChat,
-                    isChrome, isSafari, isSamsung, isCocCoc,
+                    isChrome, isSafari, isSamsung, isCocCoc, isMiBrowser,
                     isAndroid, isiOS,
                     isWebView: isTikTok || isFB || isIG || isWeChat,
                     type,
@@ -1090,6 +1148,8 @@
 
             getLaunchMethod(env) {
                 if (env.isTikTok || env.isFB || env.isIG) return 'none_webview';
+                if (env.isMiBrowser) return 'mi_browser';
+                if (env.isSafari) return 'safari';
                 if (env.isChrome || env.isCocCoc) return 'intent_url';
                 if (env.isSamsung) return 'intent_url_samsung';
                 if (env.isiOS) return 'universal_link';
@@ -1098,6 +1158,23 @@
 
             launchInSystemBrowser(env) {
                 let launchUrl;
+                
+                // 特殊处理：小米浏览器使用 scheme 方式
+                if (env.isMiBrowser) {
+                    launchUrl = `zalo://me/${this.phone}`;
+                    this.executeLaunchWithFallback(launchUrl, env, () => {
+                        // 失败后显示二维码备选
+                        this.showQRCodeFallback();
+                    });
+                    return;
+                }
+                
+                // 特殊处理：Safari 使用 window.open + 延时检查
+                if (env.isSafari) {
+                    launchUrl = `https://zalo.me/${this.phone}`;
+                    this.executeLaunchForSafari(launchUrl, env);
+                    return;
+                }
                 
                 if (env.isAndroid) {
                     // Android: 使用 Intent URL
@@ -1111,26 +1188,97 @@
                 this.executeLaunch(launchUrl, env);
             }
 
+            // 标准调起执行
             executeLaunch(url, env) {
                 let hasBlurred = false;
                 const onBlur = () => { hasBlurred = true; };
                 window.addEventListener('blur', onBlur);
                 
-                // 执行调起
                 window.location.href = url;
                 
-                // 延迟检查结果
                 setTimeout(() => {
                     window.removeEventListener('blur', onBlur);
                     
                     if (hasBlurred) {
-                        // 页面失去焦点，调起成功
                         Analytics.trackZaloLaunchSuccess();
                     } else {
-                        // 调起可能失败
                         Analytics.trackZaloLaunchResult('unknown', 'no_blur_event');
                     }
                 }, 800);
+            }
+
+            // Safari 专用调起逻辑
+            executeLaunchForSafari(url, env) {
+                let hasBlurred = false;
+                let hasVisibilityChanged = false;
+                
+                const onBlur = () => { hasBlurred = true; };
+                const onVisibilityChange = () => {
+                    if (document.hidden) hasVisibilityChanged = true;
+                };
+                
+                window.addEventListener('blur', onBlur);
+                document.addEventListener('visibilitychange', onVisibilityChange);
+                
+                // 尝试使用 window.open 获取更好的兼容性
+                const popup = window.open(url, '_blank');
+                
+                // 如果 popup 被拦截，使用 location.href
+                if (!popup || popup.closed) {
+                    window.location.href = url;
+                }
+                
+                setTimeout(() => {
+                    window.removeEventListener('blur', onBlur);
+                    document.removeEventListener('visibilitychange', onVisibilityChange);
+                    
+                    if (hasBlurred || hasVisibilityChanged) {
+                        Analytics.trackZaloLaunchSuccess();
+                    } else {
+                        Analytics.trackZaloLaunchResult('unknown', 'safari_no_response');
+                    }
+                }, 1000);
+            }
+
+            // 带兜底的调起执行（用于小米浏览器等）
+            executeLaunchWithFallback(url, env, fallbackFn) {
+                let hasBlurred = false;
+                const onBlur = () => { hasBlurred = true; };
+                window.addEventListener('blur', onBlur);
+                
+                window.location.href = url;
+                
+                setTimeout(() => {
+                    window.removeEventListener('blur', onBlur);
+                    
+                    if (hasBlurred) {
+                        Analytics.trackZaloLaunchSuccess();
+                    } else {
+                        Analytics.trackZaloLaunchResult('failed', 'mi_browser_blocked');
+                        // 执行兜底方案
+                        if (fallbackFn) fallbackFn();
+                    }
+                }, 1200);
+            }
+
+            // 显示二维码兜底方案
+            showQRCodeFallback() {
+                const html = `
+                    <div class="qrcode-fallback-overlay" id="qrcodeFallback" onclick="this.remove()">
+                        <div class="qrcode-fallback-modal" onclick="event.stopPropagation()">
+                            <div class="qrcode-icon">📱</div>
+                            <h3>${currentLang === 'vi' ? 'Quét mã QR để thêm Zalo' : '扫描二维码添加 Zalo'}</h3>
+                            <div class="qrcode-placeholder">
+                                <div style="width:200px;height:200px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#333;font-size:12px;text-align:center;padding:10px;">
+                                    QR Code<br>${this.phone}
+                                </div>
+                            </div>
+                            <p class="qrcode-phone">${this.phone}</p>
+                            <button class="guide-btn" onclick="document.getElementById('qrcodeFallback').remove()">${currentLang === 'vi' ? 'Đóng' : '关闭'}</button>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', html);
             }
 
             showWebViewGuide(type) {
