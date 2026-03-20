@@ -273,6 +273,7 @@
             font-size: 26px;
             font-weight: 700;
             color: var(--gold);
+            -webkit-text-fill-color: var(--gold);
             letter-spacing: 2px;
             text-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
             margin-bottom: 12px;
@@ -871,60 +872,39 @@
         }
 
         // ============================================
-        // Source Tracking (Simplified)
+        // Source Tracking (Ref = source_anchor_channel)
         // ============================================
         const SourceTracker = {
-            // 主播列表
-            anchors: ['heni', 'ricon', 'suachua', 'miumiu'],
-            
-            // 从 URL 或 Referrer 自动识别来源
+            // 从 URL 识别来源
             detectSource() {
                 const params = new URLSearchParams(window.location.search);
                 const referrer = document.referrer.toLowerCase();
                 
-                // 1. 优先从 URL 参数读取
-                let source = params.get('source');
-                if (source) return this.parseSource(source);
+                // 读取标准参数
+                const source = params.get('source') || 'organic';   // 平台: tiktok, facebook
+                const anchor = params.get('anchor') || 'none';      // 主播: heni, ricon...
+                const channel = params.get('channel') || 'unknown'; // 位置: profile, comment...
                 
-                // 2. 从 Referrer 自动识别
-                if (referrer.includes('tiktok.com')) {
-                    return { source: 'tiktok_auto', ref: 'tiktok_auto', channel: 'none' };
-                }
-                if (referrer.includes('facebook.com') || referrer.includes('fb.com')) {
-                    return { source: 'facebook_auto', ref: 'facebook_auto', channel: 'none' };
-                }
+                // 生成 ref = source_anchor_channel
+                const ref = `${source}_${anchor}_${channel}`;
                 
-                // 3. 默认来源
-                return { source: 'organic', ref: 'organic', channel: 'none' };
-            },
-            
-            // 解析 source 参数 (格式: 主播名_channel)
-            parseSource(sourceStr) {
-                const parts = sourceStr.split('_');
-                const anchor = parts[0];
-                const channel = parts[1] || 'none';
-                
-                // 验证主播名
-                if (!this.anchors.includes(anchor)) {
-                    return { source: sourceStr, ref: sourceStr, channel };
+                // 从 Referrer 补充识别（如果 URL 没传）
+                if (source === 'organic' && anchor === 'none') {
+                    if (referrer.includes('tiktok.com')) {
+                        return { source: 'tiktok', anchor: 'unknown', channel: 'auto', ref: 'tiktok_unknown_auto' };
+                    }
+                    if (referrer.includes('facebook.com') || referrer.includes('fb.com')) {
+                        return { source: 'facebook', anchor: 'unknown', channel: 'auto', ref: 'facebook_unknown_auto' };
+                    }
                 }
                 
-                return {
-                    source: sourceStr,
-                    ref: sourceStr,
-                    anchor: anchor,
-                    channel: channel
-                };
+                return { source, anchor, channel, ref };
             },
             
             // 获取来源参数
             getSourceParams() {
-                const detected = this.detectSource();
                 return {
-                    source: detected.source,
-                    ref: detected.ref,
-                    anchor: detected.anchor || 'none',
-                    channel: detected.channel || 'none',
+                    ...this.detectSource(),
                     timestamp: Date.now()
                 };
             },
@@ -932,13 +912,13 @@
             // 保存到 sessionStorage
             saveSourceParams() {
                 const params = this.getSourceParams();
-                sessionStorage.setItem('landing_source_v2', JSON.stringify(params));
+                sessionStorage.setItem('landing_source_ref', JSON.stringify(params));
                 return params;
             },
             
             // 获取（优先从 storage）
             getSavedParams() {
-                const saved = sessionStorage.getItem('landing_source_v2');
+                const saved = sessionStorage.getItem('landing_source_ref');
                 if (saved) return JSON.parse(saved);
                 return this.saveSourceParams();
             }
