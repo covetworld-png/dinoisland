@@ -998,9 +998,6 @@
             <button onclick="setTestMode('loggedOut')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Chưa đăng nhập" data-cn="未登录">Chưa đăng nhập</button>
             <button onclick="setTestMode('noCharacter')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Chưa vào game" data-cn="未进游戏">Chưa vào game</button>
             <button onclick="setTestMode('hasCharacter')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Đã vào game" data-cn="已进游戏">Đã vào game</button>
-            <button onclick="setTestMode('registeredQ')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Đã tham gia Q" data-cn="已加入Q服">Đã tham gia Q</button>
-            <button onclick="setTestMode('registeredK')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Đã tham gia K" data-cn="已加入K服">Đã tham gia K</button>
-            <button onclick="setTestMode('registeredBoth')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Đã tham gia cả hai" data-cn="已加入双服">Đã tham gia cả hai</button>
             <div class="border-t border-mist/20 my-2"></div>
             <button onclick="setTestMode('registrationClosed')" class="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/30 rounded-lg transition-colors" data-vi="Đăng ký đã đóng" data-cn="报名已截止">Đăng ký đã đóng</button>
         </div>
@@ -1323,32 +1320,6 @@
                     isLoggedIn = true;
                     hasCharacter = true;
                     updateFactionView();
-                    break;
-                case 'registeredQ':
-                    isLoggedIn = true;
-                    hasCharacter = true;
-                    registrations.q = 'heni';
-                    updateFactionView();
-                    updateStreamerCards('q');
-                    document.getElementById('reward-preview').classList.remove('hidden');
-                    break;
-                case 'registeredK':
-                    isLoggedIn = true;
-                    hasCharacter = true;
-                    registrations.k = 'suachua';
-                    updateFactionView();
-                    updateStreamerCards('k');
-                    document.getElementById('reward-preview').classList.remove('hidden');
-                    break;
-                case 'registeredBoth':
-                    isLoggedIn = true;
-                    hasCharacter = true;
-                    registrations.q = 'ricon';
-                    registrations.k = 'miumiu';
-                    updateFactionView();
-                    updateStreamerCards('q');
-                    updateStreamerCards('k');
-                    document.getElementById('reward-preview').classList.remove('hidden');
                     break;
                 case 'registrationClosed':
                     isLoggedIn = true;
