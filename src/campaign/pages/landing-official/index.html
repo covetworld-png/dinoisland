@@ -489,6 +489,94 @@
             opacity: 1;
         }
 
+        /* WebView Guide Modal */
+        .webview-guide-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 26, 21, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .webview-guide-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .webview-guide-modal {
+            background: var(--jungle-800);
+            border: 1px solid rgba(74, 154, 138, 0.3);
+            border-radius: 20px;
+            padding: 28px;
+            max-width: 340px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .webview-guide-modal h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            color: var(--gold);
+            margin: 0 0 20px;
+        }
+
+        .webview-guide-modal ol {
+            text-align: left;
+            margin: 0 0 20px;
+            padding-left: 20px;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .webview-guide-modal li {
+            margin: 10px 0;
+        }
+
+        .webview-guide-modal .copy-notice {
+            color: var(--gold);
+            font-size: 13px;
+            margin: 12px 0;
+            padding: 10px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 215, 0, 0.3);
+        }
+
+        .webview-guide-modal .guide-btn {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: var(--jungle-900);
+            border: none;
+            padding: 14px 32px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .webview-guide-modal .guide-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        .webview-guide-modal .guide-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
         /* Responsive */
         @media (max-width: 360px) {
             .container {
@@ -620,6 +708,22 @@
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
+    <!-- WebView Guide Modal -->
+    <div class="webview-guide-overlay" id="webviewGuide">
+        <div class="webview-guide-modal">
+            <div class="guide-icon" id="guideIcon">🌐</div>
+            <h3 id="guideTitle">Mở trong trình duyệt</h3>
+            <ol id="guideSteps">
+                <li>Nhấn vào biểu tượng ⋮ ở góc trên</li>
+                <li>Chọn "Mở trong Chrome"</li>
+            </ol>
+            <div class="copy-notice" id="guideCopyNotice" style="display: none;">
+                🔗 Đã sao chép liên kết!
+            </div>
+            <button class="guide-btn" id="guideBtn" onclick="closeWebViewGuide()">Đã hiểu</button>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // Internationalization
@@ -698,12 +802,13 @@
         }
 
         // ============================================
-        // Analytics Module
+        // Analytics Module (Enhanced)
         // ============================================
         const Analytics = {
             init() {
                 this.trackPageView();
                 this.trackScrollDepth();
+                this.trackDeviceInfo();
             },
 
             track(event, params = {}) {
@@ -711,7 +816,8 @@
                     page: 'landing-official',
                     lang: currentLang,
                     ref: this.getParam('ref') || 'organic',
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    sessionId: this.getSessionId()
                 };
                 
                 const finalParams = { ...baseParams, ...params };
@@ -721,15 +827,44 @@
                     gtag('event', event, finalParams);
                 }
                 
+                // 自建统计接口（可选）
+                // this.sendToCustomEndpoint(event, finalParams);
+                
                 // Console log for debugging
                 console.log('[Analytics]', event, finalParams);
             },
 
+            // 生成/获取会话ID
+            getSessionId() {
+                let sessionId = sessionStorage.getItem('landing_session_id');
+                if (!sessionId) {
+                    sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    sessionStorage.setItem('landing_session_id', sessionId);
+                }
+                return sessionId;
+            },
+
             trackPageView() {
+                const env = new VietnamZaloLauncher().detectEnvironment();
                 this.track('page_view', {
                     utm_source: this.getParam('utm_source'),
                     utm_campaign: this.getParam('utm_campaign'),
-                    cid: this.getParam('cid')
+                    cid: this.getParam('cid'),
+                    webview_type: env.type,
+                    is_webview: env.isWebView,
+                    user_agent: navigator.userAgent.slice(0, 100)
+                });
+            },
+
+            trackDeviceInfo() {
+                const screen = window.screen;
+                this.track('device_info', {
+                    screen_width: screen.width,
+                    screen_height: screen.height,
+                    viewport_width: window.innerWidth,
+                    viewport_height: window.innerHeight,
+                    device_pixel_ratio: window.devicePixelRatio,
+                    platform: navigator.platform
                 });
             },
 
@@ -751,6 +886,29 @@
                 }, 500));
             },
 
+            // Zalo 调起相关打点
+            trackZaloLaunchAttempt(webviewType, launchMethod) {
+                this.track('zalo_launch_attempt', {
+                    webview_type: webviewType,
+                    launch_method: launchMethod,
+                    phone: '8618717777125'
+                });
+            },
+
+            trackZaloLaunchResult(result, reason = '') {
+                this.track('zalo_launch_result', {
+                    result: result, // 'success', 'failed', 'webview_blocked'
+                    reason: reason,
+                    time_since_attempt: Date.now() - (window._zaloLaunchStartTime || Date.now())
+                });
+            },
+
+            trackZaloLaunchSuccess() {
+                this.track('zalo_launch_success', {
+                    time_to_success: Date.now() - (window._zaloLaunchStartTime || Date.now())
+                });
+            },
+
             getParam(name) {
                 return new URLSearchParams(window.location.search).get(name);
             }
@@ -768,34 +926,220 @@
         }
 
         // ============================================
+        // Vietnam Zalo Launcher (WebView Aware)
+        // ============================================
+        class VietnamZaloLauncher {
+            constructor() {
+                this.packageName = 'com.zing.zalo';
+                this.scheme = 'zalo';
+                this.webUrl = 'https://zalo.me';
+                this.storeUrl = 'https://play.google.com/store/apps/details?id=com.zing.zalo';
+                this.phone = '8618717777125';
+            }
+
+            detectEnvironment() {
+                const ua = navigator.userAgent.toLowerCase();
+                
+                // TikTok WebView 检测
+                const isTikTok = /tiktok|musical_ly|bytedance|ttwebview|snssdk/i.test(ua) &&
+                                 !ua.includes('chrome') && 
+                                 !ua.includes('safari');
+                
+                // Facebook WebView 检测
+                const isFB = /fb_iab|fbav\/[\d.]+/i.test(ua) ||
+                             (typeof window.FB_IAB !== 'undefined');
+                
+                // Instagram WebView
+                const isIG = /instagram/i.test(ua);
+                
+                // 微信
+                const isWeChat = /micromessenger/i.test(ua);
+                
+                // 系统浏览器
+                const isChrome = ua.includes('chrome') && !ua.includes('edg') && !ua.includes('samsung');
+                const isSafari = /safari/i.test(ua) && !ua.includes('chrome') && !ua.includes('crios');
+                const isSamsung = ua.includes('samsungbrowser');
+                const isCocCoc = ua.includes('coccoc');
+                
+                // Android / iOS
+                const isAndroid = /android/i.test(ua);
+                const isiOS = /iphone|ipad|ipod/i.test(ua);
+                
+                let type = 'SYSTEM_BROWSER';
+                if (isTikTok) type = 'TIKTOK';
+                else if (isFB) type = 'FACEBOOK';
+                else if (isIG) type = 'INSTAGRAM';
+                else if (isWeChat) type = 'WECHAT';
+                
+                return {
+                    isTikTok, isFB, isIG, isWeChat,
+                    isChrome, isSafari, isSamsung, isCocCoc,
+                    isAndroid, isiOS,
+                    isWebView: isTikTok || isFB || isIG || isWeChat,
+                    type,
+                    userAgent: ua
+                };
+            }
+
+            launch() {
+                const env = this.detectEnvironment();
+                window._zaloLaunchStartTime = Date.now();
+                
+                // 记录调起尝试
+                Analytics.trackZaloLaunchAttempt(env.type, this.getLaunchMethod(env));
+                
+                if (env.isWebView) {
+                    // WebView 环境：显示引导层
+                    Analytics.trackZaloLaunchResult('webview_blocked', env.type);
+                    this.showWebViewGuide(env.type);
+                    return;
+                }
+                
+                // 系统浏览器环境：执行调起
+                this.launchInSystemBrowser(env);
+            }
+
+            getLaunchMethod(env) {
+                if (env.isTikTok || env.isFB || env.isIG) return 'none_webview';
+                if (env.isChrome || env.isCocCoc) return 'intent_url';
+                if (env.isSamsung) return 'intent_url_samsung';
+                if (env.isiOS) return 'universal_link';
+                return 'scheme_fallback';
+            }
+
+            launchInSystemBrowser(env) {
+                let launchUrl;
+                
+                if (env.isAndroid) {
+                    // Android: 使用 Intent URL
+                    launchUrl = `intent://zalo.me/${this.phone}#Intent;scheme=https;package=com.zing.zalo;S.browser_fallback_url=https%3A%2F%2Fzalo.me%2F${this.phone};end`;
+                } else {
+                    // iOS: 使用 Universal Link
+                    launchUrl = `https://zalo.me/${this.phone}`;
+                }
+
+                // 执行调起并监听结果
+                this.executeLaunch(launchUrl, env);
+            }
+
+            executeLaunch(url, env) {
+                let hasBlurred = false;
+                const onBlur = () => { hasBlurred = true; };
+                window.addEventListener('blur', onBlur);
+                
+                // 执行调起
+                window.location.href = url;
+                
+                // 延迟检查结果
+                setTimeout(() => {
+                    window.removeEventListener('blur', onBlur);
+                    
+                    if (hasBlurred) {
+                        // 页面失去焦点，调起成功
+                        Analytics.trackZaloLaunchSuccess();
+                    } else {
+                        // 调起可能失败
+                        Analytics.trackZaloLaunchResult('unknown', 'no_blur_event');
+                    }
+                }, 800);
+            }
+
+            showWebViewGuide(type) {
+                const guides = {
+                    'TIKTOK': {
+                        icon: '🎵',
+                        title: currentLang === 'vi' ? 'Mở trong trình duyệt để tiếp tục' : '在浏览器中打开以继续',
+                        steps: currentLang === 'vi' ? [
+                            'Nhấn vào biểu tượng chia sẻ (→)',
+                            'Chọn "Mở trong Chrome" hoặc "Mở trong Safari"',
+                            'Quay lại trang này và nhấn nút thêm Zalo'
+                        ] : [
+                            '点击分享按钮 (→)',
+                            '选择"在 Chrome 中打开"或"在 Safari 中打开"',
+                            '返回本页面点击添加 Zalo 按钮'
+                        ],
+                        showCopy: false
+                    },
+                    'FACEBOOK': {
+                        icon: '📘',
+                        title: currentLang === 'vi' ? 'Mở trong trình duyệt để tiếp tục' : '在浏览器中打开以继续',
+                        steps: currentLang === 'vi' ? [
+                            'Nhấn vào biểu tượng ⋮ (ba chấm) ở góc trên bên phải',
+                            'Chọn "Mở trong Chrome" hoặc "Mở trong trình duyệt"',
+                            'Quay lại trang này và nhấn nút thêm Zalo'
+                        ] : [
+                            '点击右上角菜单按钮 (⋮)',
+                            '选择"在 Chrome 中打开"或"在浏览器中打开"',
+                            '返回本页面点击添加 Zalo 按钮'
+                        ],
+                        showCopy: false
+                    },
+                    'INSTAGRAM': {
+                        icon: '📷',
+                        title: currentLang === 'vi' ? 'Mở trong trình duyệt để tiếp tục' : '在浏览器中打开以继续',
+                        steps: currentLang === 'vi' ? [
+                            'Nhấn vào biểu tượng ⋮ (ba chấm) ở góc trên bên phải',
+                            'Chọn "Mở trong trình duyệt"',
+                            'Quay lại trang này và nhấn nút thêm Zalo'
+                        ] : [
+                            '点击右上角菜单按钮 (⋮)',
+                            '选择"在浏览器中打开"',
+                            '返回本页面点击添加 Zalo 按钮'
+                        ],
+                        showCopy: false
+                    },
+                    'WECHAT': {
+                        icon: '💬',
+                        title: currentLang === 'vi' ? 'Mở trong trình duyệt để tiếp tục' : '在浏览器中打开以继续',
+                        steps: currentLang === 'vi' ? [
+                            'Nhấn vào biểu tượng ⋮ ở góc trên bên phải',
+                            'Chọn "Mở trong trình duyệt"',
+                            'Quay lại trang này và nhấn nút thêm Zalo'
+                        ] : [
+                            '点击右上角菜单按钮 (⋮)',
+                            '选择"在浏览器中打开"',
+                            '返回本页面点击添加 Zalo 按钮'
+                        ],
+                        showCopy: true
+                    }
+                };
+
+                const guide = guides[type] || guides['FACEBOOK'];
+                
+                // 更新 Modal 内容
+                document.getElementById('guideIcon').textContent = guide.icon;
+                document.getElementById('guideTitle').textContent = guide.title;
+                document.getElementById('guideSteps').innerHTML = guide.steps.map(s => `<li>${s}</li>`).join('');
+                document.getElementById('guideCopyNotice').style.display = guide.showCopy ? 'block' : 'none';
+                
+                // 显示 Modal
+                document.getElementById('webviewGuide').classList.add('show');
+            }
+        }
+
+        // 关闭 WebView 引导
+        window.closeWebViewGuide = function() {
+            document.getElementById('webviewGuide').classList.remove('show');
+        };
+
+        // ============================================
         // Zalo Button Handler
         // ============================================
         const zaloBtn = document.getElementById('zaloBtn');
-        const phone = '8618717777125';
+        const zaloLauncher = new VietnamZaloLauncher();
         
         zaloBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
-            Analytics.track('cta_click', { type: 'zalo_primary', position: 'hero' });
+            // 记录 CTA 点击
+            Analytics.track('cta_click', { 
+                type: 'zalo_primary', 
+                position: 'hero',
+                webview_type: zaloLauncher.detectEnvironment().type
+            });
             
-            const isAndroid = /Android/i.test(navigator.userAgent);
-            const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-            let finalUrl = '';
-            
-            if (isAndroid) {
-                finalUrl = `intent://zalo.me/${phone}#Intent;scheme=https;package=com.zing.zalo;S.browser_fallback_url=https%3A%2F%2Fzalo.me%2F${phone};end`;
-            } else {
-                finalUrl = `https://zalo.me/${phone}`;
-            }
-            
-            window.location.href = finalUrl;
-            
-            // Track app open attempt
-            setTimeout(() => {
-                Analytics.track('zalo_app_open', { 
-                    platform: isAndroid ? 'android' : (isiOS ? 'ios' : 'other')
-                });
-            }, 1000);
+            // 使用增强版调起
+            zaloLauncher.launch();
         });
 
         // ============================================
