@@ -676,7 +676,10 @@
                         
                         <!-- 礼包图片 -->
                         <div class="relative w-full aspect-square max-h-64 overflow-hidden bg-black">
-                            <img src="assets/overlord-red.png" alt="Bá Chủ Thờii Tiền Sử" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/overlord-skin-default.png'">
+                            <video autoplay loop muted playsinline class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" poster="assets/overlord-skin-default.png">
+                                <source src="../../../public/pic/动态流光恐龙皮肤视频.mp4" type="video/mp4">
+                                <img src="assets/overlord-red.png" alt="Bá Chủ Thờii Tiền Sử" class="w-full h-full object-contain" onerror="this.src='assets/overlord-skin-default.png'">
+                            </video>
                             <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
                             <!-- 即将公布 - 至尊版（史前霸主专属） -->
                             <div class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
@@ -1604,7 +1607,7 @@
                 }
             } else if (type === 'overlord') {
                 // 霸主皮肤
-                itemImage.src = 'assets/overlord-red.png';
+                itemImage.src = 'assets/overlord-skin-default.png'; // 购买弹窗使用静态图
                 itemImage.onerror = function() { this.src = 'assets/overlord-skin-default.png'; };
                 itemName.textContent = currentLang === 'vi' ? 'Bá Chủ Thờii Tiền Sử Gói' : '史前霸主礼包';
                 itemPrice.innerHTML = `<span class="line-through text-gray-400">${formatPrice(SKIN_PRICES.overlord.original)}</span> <span class="text-gold font-bold">${formatPrice(SKIN_PRICES.overlord.current)}</span> <span class="text-red-400">-${SKIN_PRICES.overlord.discountPercent}%</span>`;
