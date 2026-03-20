@@ -530,6 +530,7 @@
                         <i class="fas fa-star text-gold"></i>
                         <span data-vi="Skin Dũng Sĩ Cận Vệ - Độc quyền Streamer" data-cn="亲卫勇士皮肤 - 主播限定">Skin Dũng Sĩ Cận Vệ - Độc quyền Streamer</span>
                         <span class="px-2 py-0.5 bg-gold/20 text-gold text-xs rounded-full" data-vi="4 loại" data-cn="4 款">4 loại</span>
+                        <span class="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs rounded-full" data-vi="Ưu Đãi Có Hạn" data-cn="限时福利特惠">Ưu Đãi Có Hạn</span>
                     </h4>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- heni 皮肤 -->
@@ -551,7 +552,18 @@
                             </div>
                             <div class="p-3">
                                 <h5 class="text-gold font-bold text-sm">heni</h5>
-                                <p class="text-gray-400 text-xs mt-1" data-vi="Giá ưu đãi theo phe" data-cn="阵营专属优惠价">Giá ưu đãi theo phe</p>
+                                <!-- 亲卫勇士价格 - 悬念状态 -->
+                                <div id="warrior-price-heni" class="mt-2">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: 3,888,000đ</span>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-gold font-bold text-sm" data-vi="Giá cuối cùng phụ thuộc kết quả phe" data-cn="最终售价取决于阵营结果">Giá cuối cùng phụ thuộc kết quả phe</span>
+                                            </div>
+                                        </div>
+                                        <button onclick="showPurchaseModal('warrior', 'heni')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-vi="Mua ngay" data-cn="立即购买">Mua ngay</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- ricon 皮肤 -->
@@ -573,7 +585,18 @@
                             </div>
                             <div class="p-3">
                                 <h5 class="text-gold font-bold text-sm">ricon</h5>
-                                <p class="text-gray-400 text-xs mt-1" data-vi="Giá ưu đãi theo phe" data-cn="阵营专属优惠价">Giá ưu đãi theo phe</p>
+                                <!-- 亲卫勇士价格 - 悬念状态 -->
+                                <div id="warrior-price-ricon" class="mt-2">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: 3,888,000đ</span>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-gold font-bold text-sm" data-vi="Giá cuối cùng phụ thuộc kết quả phe" data-cn="最终售价取决于阵营结果">Giá cuối cùng phụ thuộc kết quả phe</span>
+                                            </div>
+                                        </div>
+                                        <button onclick="showPurchaseModal('warrior', 'ricon')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-vi="Mua ngay" data-cn="立即购买">Mua ngay</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- Sữa Chua 皮肤 -->
@@ -595,7 +618,18 @@
                             </div>
                             <div class="p-3">
                                 <h5 class="text-gold font-bold text-sm">Sữa Chua</h5>
-                                <p class="text-gray-400 text-xs mt-1" data-vi="Giá ưu đãi theo phe" data-cn="阵营专属优惠价">Giá ưu đãi theo phe</p>
+                                <!-- 亲卫勇士价格 - 悬念状态 -->
+                                <div id="warrior-price-suachua" class="mt-2">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: 3,888,000đ</span>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-gold font-bold text-sm" data-vi="Giá cuối cùng phụ thuộc kết quả phe" data-cn="最终售价取决于阵营结果">Giá cuối cùng phụ thuộc kết quả phe</span>
+                                            </div>
+                                        </div>
+                                        <button onclick="showPurchaseModal('warrior', 'suachua')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-vi="Mua ngay" data-cn="立即购买">Mua ngay</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- MiuMiu 皮肤 -->
@@ -617,7 +651,18 @@
                             </div>
                             <div class="p-3">
                                 <h5 class="text-gold font-bold text-sm">MiuMiu</h5>
-                                <p class="text-gray-400 text-xs mt-1" data-vi="Giá ưu đãi theo phe" data-cn="阵营专属优惠价">Giá ưu đãi theo phe</p>
+                                <!-- 亲卫勇士价格 - 悬念状态 -->
+                                <div id="warrior-price-miumiu" class="mt-2">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: 3,888,000đ</span>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-gold font-bold text-sm" data-vi="Giá cuối cùng phụ thuộc kết quả phe" data-cn="最终售价取决于阵营结果">Giá cuối cùng phụ thuộc kết quả phe</span>
+                                            </div>
+                                        </div>
+                                        <button onclick="showPurchaseModal('warrior', 'miumiu')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-vi="Mua ngay" data-cn="立即购买">Mua ngay</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -658,11 +703,11 @@
                                     <span data-vi="Cực Hiếm" data-cn="超稀有">Cực Hiếm</span>
                                 </span>
                             </div>
-                            <!-- 限定标签 -->
+                            <!-- 限时福利特惠标签 -->
                             <div class="absolute top-3 right-3">
-                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-purple-500/90 text-white text-xs font-bold rounded-full shadow-lg">
-                                    <i class="fas fa-gem"></i>
-                                    <span data-vi="Giới Hạn" data-cn="限定">Giới Hạn</span>
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
+                                    <i class="fas fa-clock"></i>
+                                    <span data-vi="Ưu Đãi Có Hạn" data-cn="限时福利特惠">Ưu Đãi Có Hạn</span>
                                 </span>
                             </div>
                         </div>
@@ -675,6 +720,20 @@
                             
                             <div class="space-y-2 mb-4">
                                 <p class="text-gray-300 text-sm leading-relaxed" data-vi="Quyền uy tuyệt đối — Biểu tượng của sức mạnh vô song, chỉ dành cho kẻ đứng đầu" data-cn="绝对权威 —— 无双力量的象征，只为登顶者">Quyền uy tuyệt đối — Biểu tượng của sức mạnh vô song, chỉ dành cho kẻ đứng đầu</p>
+                            </div>
+                            
+                            <!-- 霸主价格显示 -->
+                            <div id="overlord-price-section" class="bg-gradient-to-r from-red-950/50 to-jungle-900/50 rounded-lg p-3 border border-red-500/20 mb-3">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: <span id="overlord-original-price">5,888,000đ</span></span>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="text-red-400 font-bold text-lg" id="overlord-current-price">3,888,000đ</span>
+                                            <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full" id="overlord-discount">-34%</span>
+                                        </div>
+                                    </div>
+                                    <button onclick="showPurchaseModal('overlord')" class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold rounded-full hover:brightness-110 transition-all" data-vi="Mua ngay" data-cn="立即购买">Mua ngay</button>
+                                </div>
                             </div>
                             
                             <div class="bg-gradient-to-r from-red-950/50 to-jungle-900/50 rounded-lg p-3 border border-red-500/20">
@@ -760,11 +819,111 @@
                             <p class="text-gray-200" data-vi="2. Mỗi tài khoản chỉ được tham gia 1 phe trong mỗi server" data-cn="2. 每个账号每服限加入一个阵营">2. Mỗi tài khoản chỉ được tham gia 1 phe trong mỗi server</p>
                             <p class="text-gray-200" data-vi="3. Vui lòng tham gia Discord ngay sau khi chọn phe để không bỏ lỡ thông tin chiến thuật" data-cn="3. 选择阵营后请立即加入 Discord，以免错过战术信息">3. Vui lòng tham gia Discord ngay sau khi chọn phe để không bỏ lỡ thông tin chiến thuật</p>
                         </div>
+                        
+                        <div class="card-glass rounded-xl p-4">
+                            <h4 class="font-bold text-gold mb-3"><i class="fas fa-headset mr-2"></i><span data-vi="Hỗ trợ & Liên hệ" data-cn="客服支持">Hỗ trợ & Liên hệ</span></h4>
+                            <div class="flex flex-col lg:flex-row items-center gap-4">
+                                <div class="text-center lg:text-left">
+                                    <p class="text-gray-300 text-sm mb-2" data-vi="Quét mã QR để liên hệ CSKH qua Zalo" data-cn="扫码通过 Zalo 联系客服">Quét mã QR để liên hệ CSKH qua Zalo</p>
+                                    <p class="text-gray-400 text-xs" data-vi="Hoặc tìm kiếm: Khủng Long Chi Chiến Official" data-cn="或搜索：Khủng Long Chi Chiến Official">Hoặc tìm kiếm: Khủng Long Chi Chiến Official</p>
+                                </div>
+                                <div class="w-24 h-24 bg-white rounded-xl p-2 flex items-center justify-center">
+                                    <img src="assets/zalo-qr.png" alt="Zalo QR Code" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="hidden w-full h-full bg-gray-200 rounded-lg items-center justify-center text-gray-400 text-xs text-center p-2">
+                                        <i class="fas fa-qrcode text-2xl mb-1"></i>
+                                        <span>Zalo QR</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
+
+    <!-- Purchase Modal -->
+    <div id="purchase-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closePurchaseModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-mist/20">
+            <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
+            <div class="hidden lg:flex items-center justify-between mb-6">
+                <h3 class="text-white font-bold text-xl section-title-shadow" data-vi="Xác nhận mua hàng" data-cn="确认购买">Xác nhận mua hàng</h3>
+                <button onclick="closePurchaseModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-vi="Xác nhận mua hàng" data-cn="确认购买">Xác nhận mua hàng</h3>
+            
+            <!-- 商品信息 -->
+            <div class="bg-jungle-700/50 rounded-xl p-4 mb-4 border border-mist/20">
+                <div class="flex items-center gap-3">
+                    <div class="w-16 h-16 rounded-lg bg-black flex items-center justify-center overflow-hidden">
+                        <img id="purchase-item-image" src="" alt="" class="w-full h-full object-contain">
+                    </div>
+                    <div>
+                        <h4 id="purchase-item-name" class="text-white font-bold"></h4>
+                        <p id="purchase-item-price" class="text-gold text-sm"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 服务器选择 -->
+            <div class="mb-4">
+                <label class="block text-gray-300 text-sm mb-2" data-vi="Chọn máy chủ" data-cn="选择服务器">Chọn máy chủ</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="selectServer('Q')" id="server-q-btn" class="py-3 rounded-xl border border-mist/30 text-gray-300 hover:bg-jungle-700 transition-all flex items-center justify-center gap-2" data-vi="Máy chủ Q" data-cn="Q服务器">
+                        <i class="fas fa-server text-blue-400"></i> Q
+                    </button>
+                    <button onclick="selectServer('K')" id="server-k-btn" class="py-3 rounded-xl border border-mist/30 text-gray-300 hover:bg-jungle-700 transition-all flex items-center justify-center gap-2" data-vi="Máy chủ K" data-cn="K服务器">
+                        <i class="fas fa-server text-purple-400"></i> K
+                    </button>
+                </div>
+                <p class="text-amber-400 text-xs mt-2" data-vi="⚠️ Vui lòng chọn đúng máy chủ có nhân vật. Chọn sai sẽ không được hoàn tiền." data-cn="⚠️ 请选择有角色的正确服务器。选错将不予退款。">⚠️ Vui lòng chọn đúng máy chủ có nhân vật. Chọn sai sẽ không được hoàn tiền.</p>
+            </div>
+            
+            <!-- 支付提示 -->
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 mb-4">
+                <div class="flex items-start gap-2">
+                    <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
+                    <p class="text-amber-400 text-xs" data-vi="Mỗi đơn hàng chỉ được quét mã thanh toán một lần. Vui lòng không tạo nhiều đơn hàng cho cùng một sản phẩm." data-cn="每个订单只能扫码支付一次。请不要为同一产品创建多个订单。">Mỗi đơn hàng chỉ được quét mã thanh toán một lần. Vui lòng không tạo nhiều đơn hàng cho cùng một sản phẩm.</p>
+                </div>
+            </div>
+            
+            <button onclick="proceedToPayment()" id="pay-btn" class="w-full h-12 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow hover:brightness-110 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" data-vi="Thanh toán ngay" data-cn="立即支付" disabled>Thanh toán ngay</button>
+            
+            <p class="text-center text-gray-400 text-xs mt-4" data-vi="Sau khi thanh toán thành công, skin sẽ được gửi vào túi đồ trong game" data-cn="支付成功后，皮肤将发送至游戏背包">Sau khi thanh toán thành công, skin sẽ được gửi vào túi đồ trong game</p>
+        </div>
+    </div>
+
+    <!-- Payment Processing Modal -->
+    <div id="payment-processing-modal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-gold/30">
+            <div class="text-center py-8">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gold/20 flex items-center justify-center animate-pulse">
+                    <i class="fas fa-spinner fa-spin text-gold text-3xl"></i>
+                </div>
+                <h3 class="text-white font-bold text-xl mb-2" data-vi="Đang xử lý thanh toán" data-cn="正在处理支付">Đang xử lý thanh toán</h3>
+                <p class="text-gray-400 text-sm" data-vi="Vui lòng không đóng trang này..." data-cn="请不要关闭此页面...">Vui lòng không đóng trang này...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Success Modal -->
+    <div id="payment-success-modal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closePaymentSuccessModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-emerald-500/30">
+            <div class="text-center py-6">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <i class="fas fa-check-circle text-emerald-400 text-3xl"></i>
+                </div>
+                <h3 class="text-white font-bold text-xl mb-2" data-vi="Thanh toán thành công!" data-cn="支付成功！">Thanh toán thành công!</h3>
+                <p class="text-gray-400 text-sm mb-4" data-vi="Skin đã được gửi vào túi đồ trong game của bạn" data-cn="皮肤已发送至您的游戏背包">Skin đã được gửi vào túi đồ trong game của bạn</p>
+                <button onclick="closePaymentSuccessModal()" class="px-6 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:brightness-110 transition-all" data-vi="Đóng" data-cn="关闭">Đóng</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 z-50 hidden">
@@ -968,6 +1127,9 @@
             <button onclick="setTestMode('hasCharacter')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Đã vào game" data-cn="已进游戏">Đã vào game</button>
             <div class="border-t border-mist/20 my-2"></div>
             <button onclick="setTestMode('registrationClosed')" class="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/30 rounded-lg transition-colors" data-vi="Đăng ký đã đóng" data-cn="报名已截止">Đăng ký đã đóng</button>
+            <div class="border-t border-mist/20 my-2"></div>
+            <button onclick="setTestMode('skinOnSale')" class="w-full text-left px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-950/30 rounded-lg transition-colors" data-vi="Skin đã mở bán" data-cn="皮肤已开售">Skin đã mở bán</button>
+            <button onclick="setTestMode('eventEnded')" class="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-blue-950/30 rounded-lg transition-colors" data-vi="Sự kiện đã kết thúc" data-cn="活动已结束">Sự kiện đã kết thúc</button>
         </div>
     </div>
 
@@ -1321,6 +1483,33 @@
                     // Disable all buttons
                     disableAllFactionButtons();
                     break;
+                case 'skinOnSale':
+                    // 皮肤已开售状态
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    registrations.q = 'heni';
+                    registrations.k = 'suachua';
+                    isSkinsOnSale = true;
+                    updateFactionView();
+                    updateStreamerCards('q');
+                    updateStreamerCards('k');
+                    updateSkinDisplayState();
+                    showToast(currentLang === 'vi' ? 'Skin đã mở bán' : '皮肤已开售');
+                    break;
+                case 'eventEnded':
+                    // 活动已结束状态 - 显示亲卫勇士最终折扣
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    registrations.q = 'heni';
+                    registrations.k = 'suachua';
+                    isEventEnded = true;
+                    isSkinsOnSale = true;
+                    updateFactionView();
+                    updateStreamerCards('q');
+                    updateStreamerCards('k');
+                    updateSkinDisplayState();
+                    showToast(currentLang === 'vi' ? 'Sự kiện đã kết thúc - Hiển thị giá cuối' : '活动已结束 - 显示最终售价');
+                    break;
             }
             
             document.getElementById('test-menu').classList.add('hidden');
@@ -1331,6 +1520,26 @@
         const REGISTRATION_DEADLINE = new Date('2026-04-01T00:00:00+07:00');
         const BATTLE_START_TIME = new Date('2026-04-01T20:00:00+07:00');
         let isRegistrationOpen = true;
+        
+        // Skin Sales State
+        let isSkinsOnSale = false;
+        let isEventEnded = false;
+        let selectedServer = null;
+        let currentPurchaseItem = null;
+        
+        // Skin Pricing Config
+        const SKIN_PRICES = {
+            warrior: {
+                original: 3888000, // 3,888,000 VND
+                // Final price depends on faction victory - revealed after event
+                discountPercent: null // Will be calculated based on victory
+            },
+            overlord: {
+                original: 5888000, // 5,888,000 VND
+                current: 3888000,  // 3,888,000 VND
+                discountPercent: 34
+            }
+        };
 
         // Check if registration is still open
         function checkRegistrationStatus() {
@@ -1363,6 +1572,156 @@
                     btn.className = 'w-full py-1.5 rounded-full text-xs font-medium bg-gray-700 text-gray-500 cursor-not-allowed';
                 }
             });
+        }
+
+        // Purchase Modal Functions
+        function showPurchaseModal(type, streamer = null) {
+            currentPurchaseItem = { type, streamer };
+            const modal = document.getElementById('purchase-modal');
+            const itemImage = document.getElementById('purchase-item-image');
+            const itemName = document.getElementById('purchase-item-name');
+            const itemPrice = document.getElementById('purchase-item-price');
+            
+            // Reset server selection
+            selectedServer = null;
+            updateServerButtons();
+            document.getElementById('pay-btn').disabled = true;
+            
+            if (type === 'warrior') {
+                // 亲卫勇士皮肤
+                itemImage.src = `assets/streamer-skin-${streamer}.png`;
+                itemImage.onerror = function() { this.src = 'assets/warrior-skin-default.png'; };
+                itemName.textContent = `Skin Dũng Sĩ Cận Vệ - ${streamer}`;
+                
+                if (isEventEnded) {
+                    // 活动结束后显示最终价格
+                    const finalPrice = SKIN_PRICES.warrior.original * 0.5; // 假设最终5折
+                    const discount = 50;
+                    itemPrice.innerHTML = `<span class="line-through text-gray-400">${formatPrice(SKIN_PRICES.warrior.original)}</span> <span class="text-gold font-bold">${formatPrice(finalPrice)}</span> <span class="text-red-400">-${discount}%</span>`;
+                } else {
+                    // 活动期间显示悬念
+                    itemPrice.innerHTML = `<span class="line-through text-gray-400">${formatPrice(SKIN_PRICES.warrior.original)}</span> <span class="text-amber-400">${currentLang === 'vi' ? 'Giá cuối công bố sau sự kiện' : '活动后公布最终售价'}</span>`;
+                }
+            } else if (type === 'overlord') {
+                // 霸主皮肤
+                itemImage.src = 'assets/overlord-red.png';
+                itemImage.onerror = function() { this.src = 'assets/overlord-skin-default.png'; };
+                itemName.textContent = currentLang === 'vi' ? 'Bá Chủ Thờii Tiền Sử Gói' : '史前霸主礼包';
+                itemPrice.innerHTML = `<span class="line-through text-gray-400">${formatPrice(SKIN_PRICES.overlord.original)}</span> <span class="text-gold font-bold">${formatPrice(SKIN_PRICES.overlord.current)}</span> <span class="text-red-400">-${SKIN_PRICES.overlord.discountPercent}%</span>`;
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function closePurchaseModal() {
+            document.getElementById('purchase-modal').classList.add('hidden');
+            currentPurchaseItem = null;
+            selectedServer = null;
+        }
+        
+        function selectServer(server) {
+            selectedServer = server;
+            updateServerButtons();
+            document.getElementById('pay-btn').disabled = false;
+        }
+        
+        function updateServerButtons() {
+            const qBtn = document.getElementById('server-q-btn');
+            const kBtn = document.getElementById('server-k-btn');
+            
+            if (selectedServer === 'Q') {
+                qBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+                qBtn.classList.remove('text-gray-300', 'border-mist/30');
+                kBtn.classList.remove('bg-purple-500', 'text-white', 'border-purple-500');
+                kBtn.classList.add('text-gray-300', 'border-mist/30');
+            } else if (selectedServer === 'K') {
+                kBtn.classList.add('bg-purple-500', 'text-white', 'border-purple-500');
+                kBtn.classList.remove('text-gray-300', 'border-mist/30');
+                qBtn.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                qBtn.classList.add('text-gray-300', 'border-mist/30');
+            } else {
+                qBtn.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                qBtn.classList.add('text-gray-300', 'border-mist/30');
+                kBtn.classList.remove('bg-purple-500', 'text-white', 'border-purple-500');
+                kBtn.classList.add('text-gray-300', 'border-mist/30');
+            }
+        }
+        
+        function formatPrice(price) {
+            return price.toLocaleString('vi-VN') + 'đ';
+        }
+        
+        function proceedToPayment() {
+            if (!selectedServer || !currentPurchaseItem) return;
+            
+            // Show processing modal
+            document.getElementById('purchase-modal').classList.add('hidden');
+            document.getElementById('payment-processing-modal').classList.remove('hidden');
+            
+            // Simulate payment processing (3 seconds)
+            setTimeout(() => {
+                document.getElementById('payment-processing-modal').classList.add('hidden');
+                document.getElementById('payment-success-modal').classList.remove('hidden');
+                
+                // Mark item as purchased
+                if (currentPurchaseItem.type === 'warrior') {
+                    purchasedWarriorSkins[currentPurchaseItem.streamer] = true;
+                } else if (currentPurchaseItem.type === 'overlord') {
+                    purchasedOverlord = true;
+                }
+                updateSkinDisplayState();
+            }, 3000);
+        }
+        
+        function closePaymentSuccessModal() {
+            document.getElementById('payment-success-modal').classList.add('hidden');
+        }
+        
+        // Track purchased skins
+        let purchasedWarriorSkins = {
+            heni: false,
+            ricon: false,
+            suachua: false,
+            miumiu: false
+        };
+        let purchasedOverlord = false;
+        
+        function updateSkinDisplayState() {
+            // Update Warrior skins display
+            ['heni', 'ricon', 'suachua', 'miumiu'].forEach(streamer => {
+                const priceEl = document.getElementById(`warrior-price-${streamer}`);
+                if (!priceEl) return;
+                
+                if (purchasedWarriorSkins[streamer]) {
+                    // Already purchased
+                    priceEl.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${currentLang === 'vi' ? 'Đã sở hữu' : '已拥有'}</span>`;
+                } else if (isSkinsOnSale) {
+                    // On sale
+                    if (isEventEnded) {
+                        // Show final price with discount
+                        const finalPrice = SKIN_PRICES.warrior.original * 0.5;
+                        const discount = 50;
+                        priceEl.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-gray-400 text-xs line-through">Giá gốc: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-gold font-bold">${formatPrice(finalPrice)}</span>
+                                        <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">-${discount}%</span>
+                                    </div>
+                                </div>
+                                <button onclick="showPurchaseModal('warrior', '${streamer}')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all">Mua ngay</button>
+                            </div>`;
+                    }
+                    // Otherwise keep suspense state
+                }
+            });
+            
+            // Update Overlord display
+            const overlordSection = document.getElementById('overlord-price-section');
+            if (overlordSection && purchasedOverlord) {
+                overlordSection.innerHTML = `<div class="text-center py-2"><span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${currentLang === 'vi' ? 'Đã sở hữu' : '已拥有'}</span></div>`;
+            }
         }
 
         // Countdown Timer
