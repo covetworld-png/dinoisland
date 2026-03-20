@@ -818,6 +818,13 @@
                             <p class="text-gray-200" data-vi="3. Phúc lợi chỉ dành cho ngườii chơi đã tham gia phe" data-cn="3. 福利仅限加入阵营玩家购买">3. Phúc lợi chỉ dành cho ngườii chơi đã tham gia phe</p>
                         </div>
                         
+                        <div class="card-glass rounded-xl p-4 bg-amber-500/10 border border-amber-500/30">
+                            <h4 class="font-bold text-amber-400 mb-2"><i class="fas fa-calendar-alt mr-2"></i><span data-vi="Thờii gian phát phúc lợi" data-cn="福利发放时间">Thờii gian phát phúc lợi</span></h4>
+                            <p class="text-gray-200" data-vi="• 01/04/2026: Sự kiện kết thúc, bắt đầu mở bán phúc lợi" data-cn="• 2026年4月1日：活动结束，开始开放福利购买">• 01/04/2026: Sự kiện kết thúc, bắt đầu mở bán phúc lợi</p>
+                            <p class="text-gray-200" data-vi="• 15/04/2026: Kết thúc thờii gian mua phúc lợi (2 tuần)" data-cn="• 2026年4月15日：福利购买结束（两周）">• 15/04/2026: Kết thúc thờii gian mua phúc lợi (2 tuần)</p>
+                            <p class="text-amber-400 text-sm mt-2 font-medium" data-vi="📦 Skin sẽ được phát sau khi sự kiện kết thúc (01/04), vui lòng kiểm tra túi đồ trong game sau ngày đó." data-cn="📦 皮肤将在活动结束后（4月1日）统一发放，请于该日期后检查游戏背包。">📦 Skin sẽ được phát sau khi sự kiện kết thúc (01/04), vui lòng kiểm tra túi đồ trong game sau ngày đó.</p>
+                        </div>
+                        
                         <div class="card-glass rounded-xl p-4">
                             <h4 class="font-bold text-gold mb-2"><i class="fas fa-exclamation-circle mr-2"></i><span data-vi="Lưu ý" data-cn="注意事项">Lưu ý</span></h4>
                             <p class="text-gray-200" data-vi="1. Sau khi tham gia phe thành công không thể đổi phe" data-cn="1. 加入阵营成功后不可更改阵营">1. Sau khi tham gia phe thành công không thể đổi phe</p>
@@ -866,9 +873,26 @@
                     <div class="w-16 h-16 rounded-lg bg-black flex items-center justify-center overflow-hidden">
                         <img id="purchase-item-image" src="" alt="" class="w-full h-full object-contain">
                     </div>
-                    <div>
-                        <h4 id="purchase-item-name" class="text-white font-bold"></h4>
-                        <p id="purchase-item-price" class="text-gold text-sm"></p>
+                    <div class="flex-1">
+                        <h4 id="purchase-item-name" class="text-white font-bold mb-2"></h4>
+                        <!-- 价格信息 - 改进布局 -->
+                        <div id="purchase-price-section" class="space-y-2">
+                            <!-- 原价 -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-400 text-xs w-16" data-vi="Giá gốc:" data-cn="原价：">Giá gốc:</span>
+                                <span id="purchase-original-price" class="text-gray-400 text-sm line-through"></span>
+                            </div>
+                            <!-- 现价 -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-gold text-xs w-16 font-medium" data-vi="Giá bán:" data-cn="售价：">Giá bán:</span>
+                                <span id="purchase-current-price" class="text-red-400 font-bold text-lg"></span>
+                            </div>
+                            <!-- 折扣标签 -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-400 text-xs w-16" data-vi="Giảm giá:" data-cn="折扣：">Giảm giá:</span>
+                                <span id="purchase-discount" class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -877,14 +901,14 @@
             <div class="mb-4">
                 <label class="block text-gray-300 text-sm mb-2" data-vi="Chọn máy chủ" data-cn="选择服务器">Chọn máy chủ</label>
                 <div class="grid grid-cols-2 gap-3">
-                    <button onclick="selectServer('Q')" id="server-q-btn" class="py-3 rounded-xl border border-mist/30 text-gray-300 hover:bg-jungle-700 transition-all flex items-center justify-center gap-2" data-vi="Máy chủ Q" data-cn="Q服务器">
-                        <i class="fas fa-server text-blue-400"></i> Q
+                    <button onclick="selectServer('Q')" id="server-q-btn" class="py-3 rounded-xl border border-mist/30 text-gray-300 hover:bg-jungle-700 transition-all flex items-center justify-center gap-2 text-sm" data-vi="Quân Đoàn Chiến" data-cn="军团战服务器">
+                        <i class="fas fa-server text-blue-400"></i> Quân Đoàn Chiến
                     </button>
-                    <button onclick="selectServer('K')" id="server-k-btn" class="py-3 rounded-xl border border-mist/30 text-gray-300 hover:bg-jungle-700 transition-all flex items-center justify-center gap-2" data-vi="Máy chủ K" data-cn="K服务器">
-                        <i class="fas fa-server text-purple-400"></i> K
+                    <button onclick="selectServer('K')" id="server-k-btn" class="py-3 rounded-xl border border-mist/30 text-gray-300 hover:bg-jungle-700 transition-all flex items-center justify-center gap-2 text-sm" data-vi="Khủng Long Chi Chiến" data-cn="恐龙之战服务器">
+                        <i class="fas fa-server text-purple-400"></i> Khủng Long Chi Chiến
                     </button>
                 </div>
-                <p class="text-amber-400 text-xs mt-2" data-vi="⚠️ Vui lòng chọn đúng máy chủ có nhân vật. Chọn sai sẽ không được hoàn tiền." data-cn="⚠️ 请选择有角色的正确服务器。选错将不予退款。">⚠️ Vui lòng chọn đúng máy chủ có nhân vật. Chọn sai sẽ không được hoàn tiền.</p>
+                <p class="text-amber-400 text-xs mt-2" data-vi="💡 Vui lòng chọn đúng máy chủ có nhân vật của bạn. Nếu chọn sai, skin sẽ không thể chuyển đổi sang máy chủ khác." data-cn="💡 请选择您拥有角色的正确服务器。如选择错误，皮肤将无法转移到其他服务器。">💡 Vui lòng chọn đúng máy chủ có nhân vật của bạn. Nếu chọn sai, skin sẽ không thể chuyển đổi sang máy chủ khác.</p>
             </div>
             
             <!-- 支付提示 -->
@@ -924,7 +948,18 @@
                     <i class="fas fa-check-circle text-emerald-400 text-3xl"></i>
                 </div>
                 <h3 class="text-white font-bold text-xl mb-2" data-vi="Thanh toán thành công!" data-cn="支付成功！">Thanh toán thành công!</h3>
-                <p class="text-gray-400 text-sm mb-4" data-vi="Skin đã được gửi vào túi đồ trong game của bạn" data-cn="皮肤已发送至您的游戏背包">Skin đã được gửi vào túi đồ trong game của bạn</p>
+                
+                <!-- 显著提醒：活动结束后统一发放 -->
+                <div class="bg-amber-500/10 border-2 border-amber-500/50 rounded-xl p-4 mb-4">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-gift text-amber-400 text-xl mt-0.5"></i>
+                        <div class="text-left">
+                            <p class="text-amber-400 font-bold text-sm mb-1" data-vi="📦 Thờii gian phát skin" data-cn="📦 皮肤发放时间">📦 Thờii gian phát skin</p>
+                            <p class="text-gray-300 text-sm" data-vi="Skin sẽ được phát sau khi sự kiện kết thúc (01/04). Vui lòng kiểm tra túi đồ trong game sau ngày đó." data-cn="皮肤将在活动结束后（4月1日）统一发放。请于该日期后检查游戏背包。">Skin sẽ được phát sau khi sự kiện kết thúc (01/04). Vui lòng kiểm tra túi đồ trong game sau ngày đó.</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <button onclick="closePaymentSuccessModal()" class="px-6 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:brightness-110 transition-all" data-vi="Đóng" data-cn="关闭">Đóng</button>
             </div>
         </div>
@@ -1136,7 +1171,7 @@
             <button onclick="setTestMode('skinComingSoon')" class="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 rounded-lg transition-colors" data-vi="Sắp ra mắt" data-cn="即将上线">Sắp ra mắt</button>
             <button onclick="setTestMode('skinRevealed')" class="w-full text-left px-3 py-2 text-sm text-cyan-400 hover:bg-cyan-950/30 rounded-lg transition-colors" data-vi="Đã công bố skin" data-cn="已公开皮肤">Đã công bố skin</button>
             <button onclick="setTestMode('skinOnSale')" class="w-full text-left px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-950/30 rounded-lg transition-colors" data-vi="Đang mở bán" data-cn="开放销售中">Đang mở bán</button>
-            <button onclick="setTestMode('eventEnded')" class="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-blue-950/30 rounded-lg transition-colors" data-vi="Sự kiện đã kết thúc" data-cn="活动已结束">Sự kiện đã kết thúc</button>
+            <button onclick="setTestMode('eventEnded')" class="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-blue-950/30 rounded-lg transition-colors" data-vi="Kết thúc phát skin" data-cn="皮肤发放结束">Kết thúc phát skin</button>
         </div>
     </div>
 
@@ -1618,7 +1653,9 @@
             const modal = document.getElementById('purchase-modal');
             const itemImage = document.getElementById('purchase-item-image');
             const itemName = document.getElementById('purchase-item-name');
-            const itemPrice = document.getElementById('purchase-item-price');
+            const originalPriceEl = document.getElementById('purchase-original-price');
+            const currentPriceEl = document.getElementById('purchase-current-price');
+            const discountEl = document.getElementById('purchase-discount');
             
             // Reset server selection
             selectedServer = null;
@@ -1631,21 +1668,31 @@
                 itemImage.onerror = function() { this.src = 'assets/warrior-skin-default.png'; };
                 itemName.textContent = `Skin Dũng Sĩ Cận Vệ - ${streamer}`;
                 
-                if (isEventEnded) {
+                // 设置价格显示
+                originalPriceEl.textContent = formatPrice(SKIN_PRICES.warrior.original);
+                
+                if (skinDisplayState === 'eventEnded') {
                     // 活动结束后显示最终价格
-                    const finalPrice = SKIN_PRICES.warrior.original * 0.5; // 假设最终5折
-                    const discount = 50;
-                    itemPrice.innerHTML = `<span class="line-through text-gray-400">${formatPrice(SKIN_PRICES.warrior.original)}</span> <span class="text-gold font-bold">${formatPrice(finalPrice)}</span> <span class="text-red-400">-${discount}%</span>`;
+                    const finalPrice = SKIN_PRICES.warrior.original * 0.5;
+                    currentPriceEl.textContent = formatPrice(finalPrice);
+                    discountEl.textContent = '-50%';
                 } else {
-                    // 活动期间显示悬念
-                    itemPrice.innerHTML = `<span class="line-through text-gray-400">${formatPrice(SKIN_PRICES.warrior.original)}</span> <span class="text-amber-400">${currentLang === 'vi' ? 'Giá cuối công bố sau sự kiện' : '活动后公布最终售价'}</span>`;
+                    // 开放销售期间（亲卫勇士价格悬念）
+                    currentPriceEl.textContent = currentLang === 'vi' ? 'Công bố sau' : '稍后公布';
+                    currentPriceEl.className = 'text-amber-400 font-bold text-lg';
+                    discountEl.textContent = '?';
                 }
             } else if (type === 'overlord') {
                 // 霸主皮肤
-                itemImage.src = 'assets/overlord-skin-default.png'; // 购买弹窗使用静态图
+                itemImage.src = 'assets/overlord-skin-default.png';
                 itemImage.onerror = function() { this.src = 'assets/overlord-skin-default.png'; };
                 itemName.textContent = currentLang === 'vi' ? 'Bá Chủ Thờii Tiền Sử Gói' : '史前霸主礼包';
-                itemPrice.innerHTML = `<span class="line-through text-gray-400">${formatPrice(SKIN_PRICES.overlord.original)}</span> <span class="text-gold font-bold">${formatPrice(SKIN_PRICES.overlord.current)}</span> <span class="text-red-400">-${SKIN_PRICES.overlord.discountPercent}%</span>`;
+                
+                // 霸主直接显示折扣价
+                originalPriceEl.textContent = formatPrice(SKIN_PRICES.overlord.original);
+                currentPriceEl.textContent = formatPrice(SKIN_PRICES.overlord.current);
+                currentPriceEl.className = 'text-red-400 font-bold text-lg';
+                discountEl.textContent = `-${SKIN_PRICES.overlord.discountPercent}%`;
             }
             
             modal.classList.remove('hidden');
@@ -1725,6 +1772,17 @@
         let purchasedOverlord = false;
         
         function updateSkinDisplayState() {
+            // 状态说明：
+            // comingSoon - 即将上线：全部遮罩，不显示价格和购买按钮
+            // revealed - 已公开皮肤：去掉遮罩，显示原价，不显示购买按钮
+            // onSale - 开放销售：显示原价/折扣价，显示购买按钮
+            // eventEnded - 活动已结束：不显示购买，显示活动结束提示
+            
+            const originalLabel = currentLang === 'vi' ? 'Giá gốc' : '原价';
+            const suspenseText = currentLang === 'vi' ? 'Giá cuối cùng phụ thuộc kết quả phe' : '最终售价取决于阵营结果';
+            const buyText = currentLang === 'vi' ? 'Mua ngay' : '立即购买';
+            const eventEndedText = currentLang === 'vi' ? 'Sự kiện đã kết thúc' : '活动已结束';
+            
             // 更新亲卫勇士皮肤显示
             ['heni', 'ricon', 'suachua', 'miumiu'].forEach(streamer => {
                 const priceEl = document.getElementById(`warrior-price-${streamer}`);
@@ -1732,7 +1790,16 @@
                 const overlayEl = document.getElementById(`warrior-overlay-${streamer}`);
                 if (!priceEl) return;
                 
-                // 更新图片（根据状态显示默认图或真实图）
+                // 已购买状态 - 所有状态都显示已拥有
+                if (purchasedWarriorSkins[streamer]) {
+                    const ownedText = currentLang === 'vi' ? 'Đã sở hữu' : '已拥有';
+                    priceEl.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${ownedText}</span>`;
+                    if (imgEl) imgEl.src = `assets/streamer-skin-${streamer}.png`;
+                    if (overlayEl) overlayEl.classList.add('hidden');
+                    return;
+                }
+                
+                // 更新图片
                 if (imgEl) {
                     if (skinDisplayState === 'comingSoon') {
                         imgEl.src = 'assets/warrior-skin-default.png';
@@ -1741,7 +1808,7 @@
                     }
                 }
                 
-                // 更新"即将揭晓"遮罩
+                // 更新遮罩
                 if (overlayEl) {
                     if (skinDisplayState === 'comingSoon') {
                         overlayEl.classList.remove('hidden');
@@ -1750,62 +1817,44 @@
                     }
                 }
                 
-                // 已购买状态
-                if (purchasedWarriorSkins[streamer]) {
-                    const ownedText = currentLang === 'vi' ? 'Đã sở hữu' : '已拥有';
-                    priceEl.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${ownedText}</span>`;
-                    return;
-                }
-                
-                // 根据状态显示不同价格信息
-                const originalLabel = currentLang === 'vi' ? 'Giá gốc' : '原价';
-                const suspenseText = currentLang === 'vi' ? 'Giá cuối cùng phụ thuộc kết quả phe' : '最终售价取决于阵营结果';
-                const buyText = currentLang === 'vi' ? 'Mua ngay' : '立即购买';
-                
+                // 根据状态显示价格和按钮
                 switch(skinDisplayState) {
                     case 'comingSoon':
-                        // 即将上线：不显示价格，只显示悬念
-                        priceEl.innerHTML = `<span class="text-amber-400 text-xs">${suspenseText}</span>`;
+                        // 即将上线：完全不显示价格区域
+                        priceEl.innerHTML = '';
                         break;
                     case 'revealed':
-                        // 公开信息：显示原价，不能购买
+                        // 已公开皮肤：显示原价，无购买按钮
                         priceEl.innerHTML = `
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <span class="text-gray-400 text-xs line-through">${originalLabel}: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
-                                    <div class="mt-1">
-                                        <span class="text-amber-400 text-xs">${suspenseText}</span>
-                                    </div>
+                            <div class="mt-2">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-gray-400 text-xs">${originalLabel}:</span>
+                                    <span class="text-gray-300 text-sm line-through">${formatPrice(SKIN_PRICES.warrior.original)}</span>
+                                </div>
+                                <div class="mt-2 p-2 bg-amber-500/10 rounded-lg">
+                                    <span class="text-amber-400 text-xs">${suspenseText}</span>
                                 </div>
                             </div>`;
                         break;
                     case 'onSale':
-                        // 开放销售：显示折扣价（霸主直接折扣，亲卫勇士悬念）
+                        // 开放销售：显示原价+悬念，有购买按钮
                         priceEl.innerHTML = `
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <span class="text-gray-400 text-xs line-through">${originalLabel}: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
-                                    <div class="mt-1">
-                                        <span class="text-amber-400 text-xs">${suspenseText}</span>
-                                    </div>
+                            <div class="mt-2">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-gray-400 text-xs">${originalLabel}:</span>
+                                    <span class="text-gray-300 text-sm line-through">${formatPrice(SKIN_PRICES.warrior.original)}</span>
                                 </div>
-                                <button onclick="showPurchaseModal('warrior', '${streamer}')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all">${buyText}</button>
+                                <div class="mt-2 p-2 bg-amber-500/10 rounded-lg mb-2">
+                                    <span class="text-amber-400 text-xs">${suspenseText}</span>
+                                </div>
+                                <button onclick="showPurchaseModal('warrior', '${streamer}')" class="w-full py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-sm font-bold rounded-full hover:brightness-110 transition-all">${buyText}</button>
                             </div>`;
                         break;
                     case 'eventEnded':
-                        // 活动结束：显示最终折扣价
-                        const finalPrice = SKIN_PRICES.warrior.original * 0.5; // 假设最终5折
-                        const discount = 50;
+                        // 活动已结束
                         priceEl.innerHTML = `
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <span class="text-gray-400 text-xs line-through">${originalLabel}: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <span class="text-gold font-bold">${formatPrice(finalPrice)}</span>
-                                        <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">-${discount}%</span>
-                                    </div>
-                                </div>
-                                <button onclick="showPurchaseModal('warrior', '${streamer}')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all">${buyText}</button>
+                            <div class="mt-2 text-center p-3 bg-gray-700/50 rounded-lg">
+                                <span class="text-gray-400 text-sm">${eventEndedText}</span>
                             </div>`;
                         break;
                 }
@@ -1817,14 +1866,14 @@
             const overlordDefaultEl = document.getElementById('overlord-default-img');
             const overlordOverlayEl = document.getElementById('overlord-overlay');
             
-            // 更新霸主图片（视频 vs 默认图）
+            // 更新霸主图片
             if (overlordVideoEl && overlordDefaultEl) {
                 if (skinDisplayState === 'comingSoon') {
-                    overlordVideoEl.classList.add('hidden'); // 隐藏视频
-                    overlordDefaultEl.classList.remove('hidden'); // 显示默认图
+                    overlordVideoEl.classList.add('hidden');
+                    overlordDefaultEl.classList.remove('hidden');
                 } else {
-                    overlordVideoEl.classList.remove('hidden'); // 显示视频
-                    overlordDefaultEl.classList.add('hidden'); // 隐藏默认图
+                    overlordVideoEl.classList.remove('hidden');
+                    overlordDefaultEl.classList.add('hidden');
                 }
             }
             
@@ -1837,26 +1886,56 @@
                 }
             }
             
-            // 霸主价格显示
+            // 霸主价格和按钮
             if (overlordSection) {
                 if (purchasedOverlord) {
                     const ownedText = currentLang === 'vi' ? 'Đã sở hữu' : '已拥有';
                     overlordSection.innerHTML = `<div class="text-center py-2"><span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${ownedText}</span></div>`;
-                } else if (skinDisplayState !== 'comingSoon') {
-                    // 显示霸主价格
-                    const originalLabel = currentLang === 'vi' ? 'Giá gốc' : '原价';
-                    const buyText = currentLang === 'vi' ? 'Mua ngay' : '立即购买';
-                    overlordSection.innerHTML = `
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-gray-400 text-xs line-through">${originalLabel}: <span id="overlord-original-price">${formatPrice(SKIN_PRICES.overlord.original)}</span></span>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-red-400 font-bold text-lg" id="overlord-current-price">${formatPrice(SKIN_PRICES.overlord.current)}</span>
-                                    <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full" id="overlord-discount">-${SKIN_PRICES.overlord.discountPercent}%</span>
-                                </div>
-                            </div>
-                            <button onclick="showPurchaseModal('overlord')" class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold rounded-full hover:brightness-110 transition-all">${buyText}</button>
-                        </div>`;
+                } else {
+                    switch(skinDisplayState) {
+                        case 'comingSoon':
+                            overlordSection.innerHTML = '';
+                            break;
+                        case 'revealed':
+                            // 已公开：只显示原价，无购买按钮
+                            overlordSection.innerHTML = `
+                                <div class="mt-3 space-y-3">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-gray-400 text-xs">${originalLabel}:</span>
+                                        <span class="text-gray-300 text-lg line-through">${formatPrice(SKIN_PRICES.overlord.original)}</span>
+                                    </div>
+                                    <div class="p-3 bg-amber-500/10 rounded-lg">
+                                        <span class="text-amber-400 text-sm">${currentLang === 'vi' ? 'Ưu đãi đặc biệt sẽ được công bố khi mở bán' : '特别优惠将在开售时公布'}</span>
+                                    </div>
+                                </div>`;
+                            break;
+                        case 'onSale':
+                            // 开放销售：显示原价、现价、折扣，有购买按钮
+                            overlordSection.innerHTML = `
+                                <div class="mt-3 space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="flex flex-col gap-1">
+                                            <span class="text-gray-400 text-xs">${originalLabel}</span>
+                                            <span class="text-gray-400 text-base line-through">${formatPrice(SKIN_PRICES.overlord.original)}</span>
+                                        </div>
+                                        <div class="flex flex-col gap-1">
+                                            <span class="text-gold text-xs font-medium">${currentLang === 'vi' ? 'Giá ưu đãi' : '优惠售价'}</span>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-red-400 font-bold text-xl">${formatPrice(SKIN_PRICES.overlord.current)}</span>
+                                                <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">-${SKIN_PRICES.overlord.discountPercent}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="showPurchaseModal('overlord')" class="w-full py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold rounded-full hover:brightness-110 transition-all">${buyText}</button>
+                                </div>`;
+                            break;
+                        case 'eventEnded':
+                            overlordSection.innerHTML = `
+                                <div class="text-center py-3 bg-gray-700/50 rounded-lg mt-3">
+                                    <span class="text-gray-400 text-sm">${eventEndedText}</span>
+                                </div>`;
+                            break;
+                    }
                 }
             }
         }
