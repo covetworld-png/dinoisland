@@ -476,7 +476,7 @@
         </section>
 
         <!-- 福利预告区 -->
-        <section id="reward-preview" class="hidden mb-8">
+        <section id="reward-preview" class="mb-8">
             <div class="card-glass rounded-2xl p-6 border border-gold/20">
                 <!-- Tab Header -->
                 <div class="text-center mb-6">
@@ -1285,10 +1285,6 @@
             const streamerName = getStreamerName(server, streamer);
             showToast(currentLang === 'vi' ? `Đã tham gia phe ${streamerName}` : `已成功加入${streamerName}阵营`);
             
-            if (registrations.q || registrations.k) {
-                document.getElementById('reward-preview').classList.remove('hidden');
-            }
-            
             closeConfirmModal();
         }
 
@@ -1354,7 +1350,6 @@
             document.getElementById('header-login-btn').classList.remove('hidden');
             document.getElementById('mobile-login-btn').classList.remove('hidden');
             document.getElementById('header-user-info').classList.add('hidden');
-            document.getElementById('reward-preview').classList.add('hidden');
             document.getElementById('q-registered-hint').classList.add('hidden');
             document.getElementById('k-registered-hint').classList.add('hidden');
             
@@ -1403,8 +1398,6 @@
                     updateStreamerCards('k');
                     // Disable all buttons
                     disableAllFactionButtons();
-                    // Show reward preview
-                    document.getElementById('reward-preview').classList.remove('hidden');
                     break;
             }
             
