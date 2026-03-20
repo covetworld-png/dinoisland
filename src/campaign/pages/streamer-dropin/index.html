@@ -146,14 +146,21 @@
         /* 测试模式按钮 */
         .test-mode-btn {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            top: 80px;
+            right: 16px;
             z-index: 100;
-            opacity: 0.3;
+            opacity: 0.4;
             transition: opacity 0.3s;
         }
         .test-mode-btn:hover {
             opacity: 1;
+        }
+        @media (max-width: 1023px) {
+            .test-mode-btn {
+                top: auto;
+                bottom: 20px;
+                right: 16px;
+            }
         }
         /* VS 卡片样式 */
         .vs-card {
@@ -180,7 +187,7 @@
     <header class="hidden lg:block bg-jungle-800/90 backdrop-blur-md border-b border-mist/20 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <a href="/" class="w-10 h-10 rounded-lg bg-jungle-700 flex items-center justify-center text-mist-light hover:bg-jungle-600 transition-colors border border-mist/30" title="返回首页">
+                <a href="https://account.monster-lair.vn/#/index" class="w-10 h-10 rounded-lg bg-jungle-700 flex items-center justify-center text-mist-light hover:bg-jungle-600 transition-colors border border-mist/30" title="返回首页">
                     <i class="fas fa-home"></i>
                 </a>
                 <img src="assets/logo.png" alt="Logo" class="h-10 w-auto object-contain">
@@ -205,7 +212,7 @@
     <!-- Mobile Header -->
     <nav class="lg:hidden sticky top-0 z-50 h-14 bg-jungle-800/95 backdrop-blur-md border-b border-mist/20 flex items-center justify-between px-4">
         <div class="flex items-center gap-2">
-            <a href="/" class="w-9 h-9 rounded-lg bg-jungle-700 flex items-center justify-center text-mist-light hover:bg-jungle-600 transition-colors border border-mist/30" title="返回首页">
+            <a href="https://account.monster-lair.vn/#/index" class="w-9 h-9 rounded-lg bg-jungle-700 flex items-center justify-center text-mist-light hover:bg-jungle-600 transition-colors border border-mist/30" title="返回首页">
                 <i class="fas fa-home text-sm"></i>
             </a>
             <img src="assets/logo.png" alt="Logo" class="h-8 w-auto object-contain">
