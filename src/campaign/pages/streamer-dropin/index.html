@@ -505,7 +505,7 @@
                         <span class="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded-full" data-vi="Dùng 7 ngày" data-cn="限时7天">Dùng 7 ngày</span>
                     </h4>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <!-- Q服 - heni 阵营 -->
+                        <!-- heni 阵营 -->
                         <div class="bg-gradient-to-b from-blue-900/30 to-jungle-800/40 rounded-xl border border-blue-400/30 overflow-hidden group" id="faction-skin-q-heni">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
                                 <img src="assets/faction-skin-q-heni.png" alt="Phe heni" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/warrior-gold.png'">
@@ -514,8 +514,11 @@
                                 <div id="coming-soon-q-heni" class="coming-soon-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
                                     <span class="px-3 py-1.5 bg-gold text-jungle-900 text-xs font-bold rounded-full" data-vi="Sắp mở bán" data-cn="即将上架">Sắp mở bán</span>
                                 </div>
-                                <div class="absolute top-2 left-2">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/80 text-white text-xs font-bold rounded-full">Q</span>
+                                <!-- 已上架状态（上架日期后显示） -->
+                                <div id="available-q-heni" class="hidden absolute top-2 right-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/90 text-white text-xs font-bold rounded-full">
+                                        <i class="fas fa-check-circle"></i> <span data-vi="Đã có" data-cn="已上架">Đã có</span>
+                                    </span>
                                 </div>
                                 <div class="absolute bottom-2 right-2">
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/90 text-jungle-900 text-xs font-bold rounded-full">
@@ -525,10 +528,11 @@
                             </div>
                             <div class="p-3">
                                 <h5 class="text-blue-300 font-bold text-sm" data-vi="Phe heni" data-cn="heni阵营">Phe heni</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Mua trong cửa hàng game" data-cn="游戏商城购买">Mua trong cửa hàng game</p>
                                 <p class="text-amber-400 text-xs mt-1" data-vi="Mở bán: 25/03/2026" data-cn="上架: 2026/03/25">🗓️ 25/03/2026</p>
                             </div>
                         </div>
-                        <!-- Q服 - ricon 阵营 -->
+                        <!-- ricon 阵营 -->
                         <div class="bg-gradient-to-b from-blue-900/30 to-jungle-800/40 rounded-xl border border-blue-400/30 overflow-hidden group" id="faction-skin-q-ricon">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
                                 <img src="assets/faction-skin-q-ricon.png" alt="Phe ricon" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/warrior-gold.png'">
@@ -536,8 +540,11 @@
                                 <div id="coming-soon-q-ricon" class="coming-soon-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
                                     <span class="px-3 py-1.5 bg-gold text-jungle-900 text-xs font-bold rounded-full" data-vi="Sắp mở bán" data-cn="即将上架">Sắp mở bán</span>
                                 </div>
-                                <div class="absolute top-2 left-2">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/80 text-white text-xs font-bold rounded-full">Q</span>
+                                <!-- 已上架状态（上架日期后显示） -->
+                                <div id="available-q-ricon" class="hidden absolute top-2 right-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/90 text-white text-xs font-bold rounded-full">
+                                        <i class="fas fa-check-circle"></i> <span data-vi="Đã có" data-cn="已上架">Đã có</span>
+                                    </span>
                                 </div>
                                 <div class="absolute bottom-2 right-2">
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/90 text-jungle-900 text-xs font-bold rounded-full">
@@ -547,10 +554,11 @@
                             </div>
                             <div class="p-3">
                                 <h5 class="text-blue-300 font-bold text-sm" data-vi="Phe ricon" data-cn="ricon阵营">Phe ricon</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Mua trong cửa hàng game" data-cn="游戏商城购买">Mua trong cửa hàng game</p>
                                 <p class="text-amber-400 text-xs mt-1" data-vi="Mở bán: 25/03/2026" data-cn="上架: 2026/03/25">🗓️ 25/03/2026</p>
                             </div>
                         </div>
-                        <!-- K服 - Sữa Chua 阵营 -->
+                        <!-- Sữa Chua 阵营 -->
                         <div class="bg-gradient-to-b from-purple-900/30 to-jungle-800/40 rounded-xl border border-purple-400/30 overflow-hidden group" id="faction-skin-k-suachua">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
                                 <img src="assets/faction-skin-k-suachua.png" alt="Phe Sữa Chua" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/overlord-red.png'">
@@ -558,8 +566,11 @@
                                 <div id="coming-soon-k-suachua" class="coming-soon-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
                                     <span class="px-3 py-1.5 bg-gold text-jungle-900 text-xs font-bold rounded-full" data-vi="Sắp mở bán" data-cn="即将上架">Sắp mở bán</span>
                                 </div>
-                                <div class="absolute top-2 left-2">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/80 text-white text-xs font-bold rounded-full">K</span>
+                                <!-- 已上架状态（上架日期后显示） -->
+                                <div id="available-k-suachua" class="hidden absolute top-2 right-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/90 text-white text-xs font-bold rounded-full">
+                                        <i class="fas fa-check-circle"></i> <span data-vi="Đã có" data-cn="已上架">Đã có</span>
+                                    </span>
                                 </div>
                                 <div class="absolute bottom-2 right-2">
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/90 text-jungle-900 text-xs font-bold rounded-full">
@@ -569,10 +580,11 @@
                             </div>
                             <div class="p-3">
                                 <h5 class="text-purple-300 font-bold text-sm" data-vi="Phe Sữa Chua" data-cn="Sữa Chua阵营">Phe Sữa Chua</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Mua trong cửa hàng game" data-cn="游戏商城购买">Mua trong cửa hàng game</p>
                                 <p class="text-amber-400 text-xs mt-1" data-vi="Mở bán: 25/03/2026" data-cn="上架: 2026/03/25">🗓️ 25/03/2026</p>
                             </div>
                         </div>
-                        <!-- K服 - MiuMiu 阵营 -->
+                        <!-- MiuMiu 阵营 -->
                         <div class="bg-gradient-to-b from-purple-900/30 to-jungle-800/40 rounded-xl border border-purple-400/30 overflow-hidden group" id="faction-skin-k-miumiu">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
                                 <img src="assets/faction-skin-k-miumiu.png" alt="Phe MiuMiu" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/overlord-red.png'">
@@ -580,8 +592,11 @@
                                 <div id="coming-soon-k-miumiu" class="coming-soon-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
                                     <span class="px-3 py-1.5 bg-gold text-jungle-900 text-xs font-bold rounded-full" data-vi="Sắp mở bán" data-cn="即将上架">Sắp mở bán</span>
                                 </div>
-                                <div class="absolute top-2 left-2">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/80 text-white text-xs font-bold rounded-full">K</span>
+                                <!-- 已上架状态（上架日期后显示） -->
+                                <div id="available-k-miumiu" class="hidden absolute top-2 right-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/90 text-white text-xs font-bold rounded-full">
+                                        <i class="fas fa-check-circle"></i> <span data-vi="Đã có" data-cn="已上架">Đã có</span>
+                                    </span>
                                 </div>
                                 <div class="absolute bottom-2 right-2">
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/90 text-jungle-900 text-xs font-bold rounded-full">
@@ -591,6 +606,7 @@
                             </div>
                             <div class="p-3">
                                 <h5 class="text-purple-300 font-bold text-sm" data-vi="Phe MiuMiu" data-cn="MiuMiu阵营">Phe MiuMiu</h5>
+                                <p class="text-gray-400 text-xs mt-1" data-vi="Mua trong cửa hàng game" data-cn="游戏商城购买">Mua trong cửa hàng game</p>
                                 <p class="text-amber-400 text-xs mt-1" data-vi="Mở bán: 25/03/2026" data-cn="上架: 2026/03/25">🗓️ 25/03/2026</p>
                             </div>
                         </div>
@@ -1368,6 +1384,36 @@
         const BATTLE_START_TIME = new Date('2026-04-01T20:00:00');
         let isRegistrationOpen = true;
 
+        // Check if faction skins are available
+        const FACTION_SKIN_RELEASE_DATE = new Date('2026-03-25T00:00:00');
+        
+        function checkFactionSkinAvailability() {
+            const now = new Date();
+            const isAvailable = now >= FACTION_SKIN_RELEASE_DATE;
+            
+            const skins = [
+                { id: 'q-heni', name: 'heni' },
+                { id: 'q-ricon', name: 'ricon' },
+                { id: 'k-suachua', name: 'suachua' },
+                { id: 'k-miumiu', name: 'miumiu' }
+            ];
+            
+            skins.forEach(skin => {
+                const comingSoonEl = document.getElementById(`coming-soon-${skin.id}`);
+                const availableEl = document.getElementById(`available-${skin.id}`);
+                
+                if (comingSoonEl && availableEl) {
+                    if (isAvailable) {
+                        comingSoonEl.classList.add('hidden');
+                        availableEl.classList.remove('hidden');
+                    } else {
+                        comingSoonEl.classList.remove('hidden');
+                        availableEl.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
         // Check if registration is still open
         function checkRegistrationStatus() {
             const now = new Date();
@@ -1426,6 +1472,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Check registration status first
             checkRegistrationStatus();
+            
+            // Check faction skin availability
+            checkFactionSkinAvailability();
             
             updateCountdown();
             setInterval(updateCountdown, 1000);
