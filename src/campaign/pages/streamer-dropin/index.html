@@ -536,10 +536,10 @@
                         <!-- heni 皮肤 -->
                         <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-gold/30 overflow-hidden group">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
-                                <img src="assets/streamer-skin-heni.png" alt="heni Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/warrior-skin-default.png'">
+                                <img id="warrior-img-heni" src="assets/warrior-skin-default.png" alt="heni Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                                 <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
                                 <!-- 即将公布 - 尊贵版 -->
-                                <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                                <div id="warrior-overlay-heni" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
                                     <div class="px-4 py-2 bg-gradient-to-r from-purple-600/90 via-gold/80 to-purple-600/90 rounded-full shadow-lg border border-gold/50 animate-pulse">
                                         <span class="flex items-center gap-2 text-white text-xs font-bold">
                                             <i class="fas fa-crown text-gold"></i>
@@ -569,10 +569,10 @@
                         <!-- ricon 皮肤 -->
                         <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-gold/30 overflow-hidden group">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
-                                <img src="assets/streamer-skin-ricon.png" alt="ricon Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/warrior-skin-default.png'">
+                                <img id="warrior-img-ricon" src="assets/warrior-skin-default.png" alt="ricon Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                                 <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
                                 <!-- 即将公布 - 尊贵版 -->
-                                <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                                <div id="warrior-overlay-ricon" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
                                     <div class="px-4 py-2 bg-gradient-to-r from-purple-600/90 via-gold/80 to-purple-600/90 rounded-full shadow-lg border border-gold/50 animate-pulse">
                                         <span class="flex items-center gap-2 text-white text-xs font-bold">
                                             <i class="fas fa-crown text-gold"></i>
@@ -602,10 +602,10 @@
                         <!-- Sữa Chua 皮肤 -->
                         <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-gold/30 overflow-hidden group">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
-                                <img src="assets/streamer-skin-suachua.png" alt="Sữa Chua Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/warrior-skin-default.png'">
+                                <img id="warrior-img-suachua" src="assets/warrior-skin-default.png" alt="Sữa Chua Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                                 <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
                                 <!-- 即将公布 - 尊贵版 -->
-                                <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                                <div id="warrior-overlay-suachua" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
                                     <div class="px-4 py-2 bg-gradient-to-r from-purple-600/90 via-gold/80 to-purple-600/90 rounded-full shadow-lg border border-gold/50 animate-pulse">
                                         <span class="flex items-center gap-2 text-white text-xs font-bold">
                                             <i class="fas fa-crown text-gold"></i>
@@ -635,10 +635,10 @@
                         <!-- MiuMiu 皮肤 -->
                         <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-gold/30 overflow-hidden group">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
-                                <img src="assets/streamer-skin-miumiu.png" alt="MiuMiu Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='assets/warrior-skin-default.png'">
+                                <img id="warrior-img-miumiu" src="assets/warrior-skin-default.png" alt="MiuMiu Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                                 <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
                                 <!-- 即将公布 - 尊贵版 -->
-                                <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                                <div id="warrior-overlay-miumiu" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
                                     <div class="px-4 py-2 bg-gradient-to-r from-purple-600/90 via-gold/80 to-purple-600/90 rounded-full shadow-lg border border-gold/50 animate-pulse">
                                         <span class="flex items-center gap-2 text-white text-xs font-bold">
                                             <i class="fas fa-crown text-gold"></i>
@@ -676,13 +676,15 @@
                         
                         <!-- 礼包图片 -->
                         <div class="relative w-full aspect-square max-h-64 overflow-hidden bg-black">
-                            <video autoplay loop muted playsinline class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" poster="assets/overlord-skin-default.png">
+                            <video id="overlord-img" autoplay loop muted playsinline class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 hidden" poster="assets/overlord-skin-default.png">
                                 <source src="assets/overlord-preview.mp4" type="video/mp4">
-                                <img src="assets/overlord-red.png" alt="Bá Chủ Thờii Tiền Sử" class="w-full h-full object-contain" onerror="this.src='assets/overlord-skin-default.png'">
+                                <img src="assets/overlord-red.png" alt="Bá Chủ Thờii Tiền Sử" class="w-full h-full object-contain">
                             </video>
+                            <!-- 默认占位图 -->
+                            <img id="overlord-default-img" src="assets/overlord-skin-default.png" alt="Bá Chủ Thờii Tiền Sử" class="w-full h-full object-contain">
                             <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
                             <!-- 即将公布 - 至尊版（史前霸主专属） -->
-                            <div class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
+                            <div id="overlord-overlay" class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
                                 <div class="px-6 py-3 bg-gradient-to-r from-red-600/90 via-gold/90 to-red-600/90 rounded-xl shadow-2xl border-2 border-gold animate-pulse">
                                     <span class="flex items-center gap-3 text-white font-bold text-sm">
                                         <i class="fas fa-gem text-gold text-lg"></i>
@@ -1131,7 +1133,9 @@
             <div class="border-t border-mist/20 my-2"></div>
             <button onclick="setTestMode('registrationClosed')" class="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/30 rounded-lg transition-colors" data-vi="Đăng ký đã đóng" data-cn="报名已截止">Đăng ký đã đóng</button>
             <div class="border-t border-mist/20 my-2"></div>
-            <button onclick="setTestMode('skinOnSale')" class="w-full text-left px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-950/30 rounded-lg transition-colors" data-vi="Skin đã mở bán" data-cn="皮肤已开售">Skin đã mở bán</button>
+            <button onclick="setTestMode('skinComingSoon')" class="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 rounded-lg transition-colors" data-vi="Sắp ra mắt" data-cn="即将上线">Sắp ra mắt</button>
+            <button onclick="setTestMode('skinRevealed')" class="w-full text-left px-3 py-2 text-sm text-cyan-400 hover:bg-cyan-950/30 rounded-lg transition-colors" data-vi="Đã công bố skin" data-cn="已公开皮肤">Đã công bố skin</button>
+            <button onclick="setTestMode('skinOnSale')" class="w-full text-left px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-950/30 rounded-lg transition-colors" data-vi="Đang mở bán" data-cn="开放销售中">Đang mở bán</button>
             <button onclick="setTestMode('eventEnded')" class="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-blue-950/30 rounded-lg transition-colors" data-vi="Sự kiện đã kết thúc" data-cn="活动已结束">Sự kiện đã kết thúc</button>
         </div>
     </div>
@@ -1486,27 +1490,52 @@
                     // Disable all buttons
                     disableAllFactionButtons();
                     break;
-                case 'skinOnSale':
-                    // 皮肤已开售状态
+                case 'skinComingSoon':
+                    // 即将上线 - 使用默认占位图，显示"即将揭晓"
                     isLoggedIn = true;
                     hasCharacter = true;
                     registrations.q = 'heni';
                     registrations.k = 'suachua';
-                    isSkinsOnSale = true;
+                    skinDisplayState = 'comingSoon';
                     updateFactionView();
                     updateStreamerCards('q');
                     updateStreamerCards('k');
                     updateSkinDisplayState();
-                    showToast(currentLang === 'vi' ? 'Skin đã mở bán' : '皮肤已开售');
+                    showToast(currentLang === 'vi' ? 'Skin sắp ra mắt - Ẩn thông tin' : '即将上线 - 隐藏信息');
                     break;
-                case 'eventEnded':
-                    // 活动已结束状态 - 显示亲卫勇士最终折扣
+                case 'skinRevealed':
+                    // 公开信息 - 显示真实皮肤图，显示原价，但不能购买
                     isLoggedIn = true;
                     hasCharacter = true;
                     registrations.q = 'heni';
                     registrations.k = 'suachua';
-                    isEventEnded = true;
-                    isSkinsOnSale = true;
+                    skinDisplayState = 'revealed';
+                    updateFactionView();
+                    updateStreamerCards('q');
+                    updateStreamerCards('k');
+                    updateSkinDisplayState();
+                    showToast(currentLang === 'vi' ? 'Đã công bố skin - Chỉ hiển thị giá gốc' : '已公开皮肤 - 仅显示原价');
+                    break;
+                case 'skinOnSale':
+                    // 开放销售 - 显示真实皮肤图，显示折扣价，可以购买
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    registrations.q = 'heni';
+                    registrations.k = 'suachua';
+                    skinDisplayState = 'onSale';
+                    updateFactionView();
+                    updateStreamerCards('q');
+                    updateStreamerCards('k');
+                    updateSkinDisplayState();
+                    showToast(currentLang === 'vi' ? 'Đang mở bán - Hiển thị giá ưu đãi' : '开放销售中 - 显示折扣价');
+                    break;
+                case 'eventEnded':
+                    // 活动已结束 - 显示亲卫勇士最终折扣（基于阵营胜负）
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    registrations.q = 'heni';
+                    registrations.k = 'suachua';
+                    skinDisplayState = 'eventEnded';
                     updateFactionView();
                     updateStreamerCards('q');
                     updateStreamerCards('k');
@@ -1525,8 +1554,8 @@
         let isRegistrationOpen = true;
         
         // Skin Sales State
-        let isSkinsOnSale = false;
-        let isEventEnded = false;
+        // skinDisplayState: 'comingSoon' | 'revealed' | 'onSale' | 'eventEnded'
+        let skinDisplayState = 'comingSoon';
         let selectedServer = null;
         let currentPurchaseItem = null;
         
@@ -1693,25 +1722,81 @@
         let purchasedOverlord = false;
         
         function updateSkinDisplayState() {
-            // Update Warrior skins display
+            // 更新亲卫勇士皮肤显示
             ['heni', 'ricon', 'suachua', 'miumiu'].forEach(streamer => {
                 const priceEl = document.getElementById(`warrior-price-${streamer}`);
+                const imgEl = document.getElementById(`warrior-img-${streamer}`);
+                const overlayEl = document.getElementById(`warrior-overlay-${streamer}`);
                 if (!priceEl) return;
                 
+                // 更新图片（根据状态显示默认图或真实图）
+                if (imgEl) {
+                    if (skinDisplayState === 'comingSoon') {
+                        imgEl.src = 'assets/warrior-skin-default.png';
+                    } else {
+                        imgEl.src = `assets/streamer-skin-${streamer}.png`;
+                    }
+                }
+                
+                // 更新"即将揭晓"遮罩
+                if (overlayEl) {
+                    if (skinDisplayState === 'comingSoon') {
+                        overlayEl.classList.remove('hidden');
+                    } else {
+                        overlayEl.classList.add('hidden');
+                    }
+                }
+                
+                // 已购买状态
                 if (purchasedWarriorSkins[streamer]) {
-                    // Already purchased
-                    priceEl.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${currentLang === 'vi' ? 'Đã sở hữu' : '已拥有'}</span>`;
-                } else if (isSkinsOnSale) {
-                    // On sale
-                    if (isEventEnded) {
-                        // Show final price with discount
-                        const finalPrice = SKIN_PRICES.warrior.original * 0.5;
-                        const discount = 50;
-                        const buyText = currentLang === 'vi' ? 'Mua ngay' : '立即购买';
+                    const ownedText = currentLang === 'vi' ? 'Đã sở hữu' : '已拥有';
+                    priceEl.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${ownedText}</span>`;
+                    return;
+                }
+                
+                // 根据状态显示不同价格信息
+                const originalLabel = currentLang === 'vi' ? 'Giá gốc' : '原价';
+                const suspenseText = currentLang === 'vi' ? 'Giá cuối cùng phụ thuộc kết quả phe' : '最终售价取决于阵营结果';
+                const buyText = currentLang === 'vi' ? 'Mua ngay' : '立即购买';
+                
+                switch(skinDisplayState) {
+                    case 'comingSoon':
+                        // 即将上线：不显示价格，只显示悬念
+                        priceEl.innerHTML = `<span class="text-amber-400 text-xs">${suspenseText}</span>`;
+                        break;
+                    case 'revealed':
+                        // 公开信息：显示原价，不能购买
                         priceEl.innerHTML = `
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <span class="text-gray-400 text-xs line-through">${currentLang === 'vi' ? 'Giá gốc' : '原价'}: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
+                                    <span class="text-gray-400 text-xs line-through">${originalLabel}: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
+                                    <div class="mt-1">
+                                        <span class="text-amber-400 text-xs">${suspenseText}</span>
+                                    </div>
+                                </div>
+                            </div>`;
+                        break;
+                    case 'onSale':
+                        // 开放销售：显示折扣价（霸主直接折扣，亲卫勇士悬念）
+                        priceEl.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-gray-400 text-xs line-through">${originalLabel}: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
+                                    <div class="mt-1">
+                                        <span class="text-amber-400 text-xs">${suspenseText}</span>
+                                    </div>
+                                </div>
+                                <button onclick="showPurchaseModal('warrior', '${streamer}')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all">${buyText}</button>
+                            </div>`;
+                        break;
+                    case 'eventEnded':
+                        // 活动结束：显示最终折扣价
+                        const finalPrice = SKIN_PRICES.warrior.original * 0.5; // 假设最终5折
+                        const discount = 50;
+                        priceEl.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-gray-400 text-xs line-through">${originalLabel}: ${formatPrice(SKIN_PRICES.warrior.original)}</span>
                                     <div class="flex items-center gap-2 mt-1">
                                         <span class="text-gold font-bold">${formatPrice(finalPrice)}</span>
                                         <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">-${discount}%</span>
@@ -1719,23 +1804,58 @@
                                 </div>
                                 <button onclick="showPurchaseModal('warrior', '${streamer}')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all">${buyText}</button>
                             </div>`;
-                    }
-                    // Otherwise keep suspense state
+                        break;
                 }
             });
             
-            // Update Overlord display
+            // 更新霸主皮肤显示
             const overlordSection = document.getElementById('overlord-price-section');
-            if (overlordSection && purchasedOverlord) {
-                const ownedText = currentLang === 'vi' ? 'Đã sở hữu' : '已拥有';
-                overlordSection.innerHTML = `<div class="text-center py-2"><span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${ownedText}</span></div>`;
+            const overlordVideoEl = document.getElementById('overlord-img');
+            const overlordDefaultEl = document.getElementById('overlord-default-img');
+            const overlordOverlayEl = document.getElementById('overlord-overlay');
+            
+            // 更新霸主图片（视频 vs 默认图）
+            if (overlordVideoEl && overlordDefaultEl) {
+                if (skinDisplayState === 'comingSoon') {
+                    overlordVideoEl.classList.add('hidden'); // 隐藏视频
+                    overlordDefaultEl.classList.remove('hidden'); // 显示默认图
+                } else {
+                    overlordVideoEl.classList.remove('hidden'); // 显示视频
+                    overlordDefaultEl.classList.add('hidden'); // 隐藏默认图
+                }
             }
             
-            // Update Overlord prices display
-            const overlordOriginalPrice = document.getElementById('overlord-original-price');
-            const overlordCurrentPrice = document.getElementById('overlord-current-price');
-            if (overlordOriginalPrice) overlordOriginalPrice.textContent = formatPrice(SKIN_PRICES.overlord.original);
-            if (overlordCurrentPrice) overlordCurrentPrice.textContent = formatPrice(SKIN_PRICES.overlord.current);
+            // 更新霸主遮罩
+            if (overlordOverlayEl) {
+                if (skinDisplayState === 'comingSoon') {
+                    overlordOverlayEl.classList.remove('hidden');
+                } else {
+                    overlordOverlayEl.classList.add('hidden');
+                }
+            }
+            
+            // 霸主价格显示
+            if (overlordSection) {
+                if (purchasedOverlord) {
+                    const ownedText = currentLang === 'vi' ? 'Đã sở hữu' : '已拥有';
+                    overlordSection.innerHTML = `<div class="text-center py-2"><span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${ownedText}</span></div>`;
+                } else if (skinDisplayState !== 'comingSoon') {
+                    // 显示霸主价格
+                    const originalLabel = currentLang === 'vi' ? 'Giá gốc' : '原价';
+                    const buyText = currentLang === 'vi' ? 'Mua ngay' : '立即购买';
+                    overlordSection.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-gray-400 text-xs line-through">${originalLabel}: <span id="overlord-original-price">${formatPrice(SKIN_PRICES.overlord.original)}</span></span>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-red-400 font-bold text-lg" id="overlord-current-price">${formatPrice(SKIN_PRICES.overlord.current)}</span>
+                                    <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full" id="overlord-discount">-${SKIN_PRICES.overlord.discountPercent}%</span>
+                                </div>
+                            </div>
+                            <button onclick="showPurchaseModal('overlord')" class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold rounded-full hover:brightness-110 transition-all">${buyText}</button>
+                        </div>`;
+                }
+            }
         }
 
         // Countdown Timer
@@ -1767,6 +1887,9 @@
             updateCountdown();
             setInterval(updateCountdown, 1000);
             updateFactionView();
+            
+            // 初始化皮肤显示状态
+            updateSkinDisplayState();
             
             // Only initialize buttons if registration is still open
             if (isRegistrationOpen) {
