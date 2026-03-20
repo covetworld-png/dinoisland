@@ -802,6 +802,74 @@
         }
 
         // ============================================
+        // Source & Campaign Tracking
+        // ============================================
+        const SourceTracker = {
+            // 获取所有来源参数
+            getSourceParams() {
+                const params = new URLSearchParams(window.location.search);
+                return {
+                    // 主要来源标识
+                    ref: params.get('ref') || 'organic',
+                    source: params.get('source') || params.get('utm_source') || 'direct',
+                    medium: params.get('medium') || params.get('utm_medium') || 'none',
+                    campaign: params.get('campaign') || params.get('utm_campaign') || 'none',
+                    content: params.get('content') || params.get('utm_content') || 'none',
+                    term: params.get('term') || params.get('utm_term') || 'none',
+                    
+                    // 广告相关
+                    ad_id: params.get('ad_id') || 'none',
+                    adset_id: params.get('adset_id') || 'none',
+                    campaign_id: params.get('campaign_id') || 'none',
+                    creative_id: params.get('creative_id') || params.get('cid') || 'none',
+                    
+                    // 主播/推广者标识
+                    anchor: params.get('anchor') || 'none',
+                    promoter: params.get('promoter') || 'none',
+                    code: params.get('code') || 'none',
+                    
+                    // 渠道细分
+                    channel: params.get('channel') || 'none',
+                    placement: params.get('placement') || 'none',
+                    
+                    // 时间戳（用于去重）
+                    ts: params.get('ts') || Date.now()
+                };
+            },
+            
+            // 保存到 sessionStorage，确保会话内一致
+            saveSourceParams() {
+                const params = this.getSourceParams();
+                sessionStorage.setItem('landing_source', JSON.stringify(params));
+                return params;
+            },
+            
+            // 获取（优先从 storage，fallback 到 URL）
+            getSavedParams() {
+                const saved = sessionStorage.getItem('landing_source');
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+                return this.saveSourceParams();
+            },
+            
+            // 生成来源摘要（用于快速查看）
+            getSourceSummary() {
+                const p = this.getSavedParams();
+                return {
+                    primary: p.ref,
+                    channel: p.channel,
+                    campaign: p.campaign,
+                    anchor: p.anchor,
+                    creative: p.creative_id
+                };
+            }
+        };
+
+        // 初始化来源追踪
+        const sourceParams = SourceTracker.saveSourceParams();
+
+        // ============================================
         // Analytics Module (Enhanced)
         // ============================================
         const Analytics = {
@@ -812,12 +880,14 @@
             },
 
             track(event, params = {}) {
+                const source = SourceTracker.getSavedParams();
                 const baseParams = {
                     page: 'landing-official',
                     lang: currentLang,
-                    ref: this.getParam('ref') || 'organic',
+                    sessionId: this.getSessionId(),
                     timestamp: Date.now(),
-                    sessionId: this.getSessionId()
+                    // 来源参数（全量）
+                    ...source
                 };
                 
                 const finalParams = { ...baseParams, ...params };
@@ -846,13 +916,14 @@
 
             trackPageView() {
                 const env = new VietnamZaloLauncher().detectEnvironment();
+                const source = SourceTracker.getSavedParams();
                 this.track('page_view', {
-                    utm_source: this.getParam('utm_source'),
-                    utm_campaign: this.getParam('utm_campaign'),
-                    cid: this.getParam('cid'),
                     webview_type: env.type,
                     is_webview: env.isWebView,
-                    user_agent: navigator.userAgent.slice(0, 100)
+                    user_agent: navigator.userAgent.slice(0, 100),
+                    referrer: document.referrer || 'direct',
+                    // 来源摘要
+                    source_summary: SourceTracker.getSourceSummary()
                 });
             },
 
@@ -891,7 +962,8 @@
                 this.track('zalo_launch_attempt', {
                     webview_type: webviewType,
                     launch_method: launchMethod,
-                    phone: '8618717777125'
+                    phone: '8618717777125',
+                    source: SourceTracker.getSourceSummary()
                 });
             },
 
@@ -899,13 +971,27 @@
                 this.track('zalo_launch_result', {
                     result: result, // 'success', 'failed', 'webview_blocked'
                     reason: reason,
-                    time_since_attempt: Date.now() - (window._zaloLaunchStartTime || Date.now())
+                    time_since_attempt: Date.now() - (window._zaloLaunchStartTime || Date.now()),
+                    source: SourceTracker.getSourceSummary()
                 });
             },
 
             trackZaloLaunchSuccess() {
                 this.track('zalo_launch_success', {
-                    time_to_success: Date.now() - (window._zaloLaunchStartTime || Date.now())
+                    time_to_success: Date.now() - (window._zaloLaunchStartTime || Date.now()),
+                    source: SourceTracker.getSourceSummary()
+                });
+            },
+
+            // 按来源统计的核心指标
+            trackConversionEvent(eventType, extraParams = {}) {
+                const source = SourceTracker.getSavedParams();
+                this.track(`conversion_${eventType}`, {
+                    ...extraParams,
+                    source_ref: source.ref,
+                    source_channel: source.channel,
+                    source_campaign: source.campaign,
+                    source_anchor: source.anchor
                 });
             },
 
