@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamer Đột Kích Đảo Khủng Long - MonsterLair</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'jungle': {
+                            900: '#0a1a15',
+                            800: 'rgba(10, 30, 25, 0.6)',
+                            700: 'rgba(15, 45, 38, 0.7)',
+                            600: '#1a4a3a',
+                            500: 'rgba(30, 80, 65, 0.6)',
+                        },
+                        'mist': {
+                            DEFAULT: '#4a9a8a',
+                            light: '#6abaaa',
+                            dark: '#2a6a5a',
+                        },
+                        'gold': {
+                            DEFAULT: '#FFD700',
+                            dark: '#B8860B',
+                            light: '#FFE55C',
+                        },
+                    },
+                    fontFamily: {
+                        'display': ['Cinzel', 'serif'],
+                        'body': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.2s ease-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a1a15;
+            min-height: 100vh;
+        }
+        .bg-dino {
+            background-image: url('assets/banner-BSZ_6Ncr.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .font-display {
+            font-family: 'Cinzel', serif;
+        }
+        .gold-glow {
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.3);
+        }
+        .gold-button-glow {
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+        }
+        .card-glass {
+            background: rgba(10, 30, 25, 0.55);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(74, 154, 138, 0.15);
+        }
+        .card-hover {
+            transition: all 0.25s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border-color: rgba(74, 154, 138, 0.3);
+            background: rgba(10, 30, 25, 0.65);
+        }
+        .section-title-shadow {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 80, 65, 0.3);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(74, 154, 138, 0.5);
+            border-radius: 3px;
+        }
+        .desktop-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        @media (max-width: 768px) {
+            .desktop-container {
+                padding: 16px;
+            }
+        }
+        /* 阵营卡片选中态 */
+        .streamer-card {
+            transition: all 0.3s ease;
+        }
+        .streamer-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(10, 30, 25, 0.7);
+        }
+        .streamer-card.selected {
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            background: rgba(10, 30, 25, 0.75);
+        }
+        .streamer-card.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        /* 倒计时数字样式 - 弱化 */
+        .countdown-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 6px;
+            padding: 6px 10px;
+            min-width: 48px;
+            text-align: center;
+        }
+        /* 测试模式按钮 */
+        .test-mode-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+        .test-mode-btn:hover {
+            opacity: 1;
+        }
+        /* VS 卡片样式 */
+        .vs-card {
+            transition: all 0.3s ease;
+        }
+        .vs-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+        }
+        /* 福利卡片展开动画 */
+        .reward-detail {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .reward-detail.expanded {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="text-gray-100 bg-dino">
+    
+    <!-- Desktop Header -->
+    <header class="hidden lg:block bg-jungle-800/90 backdrop-blur-md border-b border-mist/20 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="assets/logo.png" alt="Logo" class="h-10 w-auto object-contain">
+            </div>
+            <nav class="flex items-center gap-6">
+                <a href="#" class="text-mist-light font-medium" data-vi="Trang Chủ" data-cn="活动首页">Trang Chủ</a>
+                <a href="#" onclick="showRules()" class="text-gray-400 hover:text-mist-light transition-colors" data-vi="Thể Lệ" data-cn="活动规则">Thể Lệ</a>
+            </nav>
+            <div class="flex items-center gap-3">
+                <button onclick="toggleLanguage()" class="w-10 h-10 rounded-full bg-jungle-700 flex items-center justify-center text-mist-light text-sm font-bold hover:bg-jungle-600 transition-colors cursor-pointer border border-mist/30">
+                    <span id="lang-btn-desktop">CN</span>
+                </button>
+                <div id="header-user-info" class="hidden flex items-center gap-2 bg-jungle-700 px-4 py-2 rounded-full">
+                    <i class="fas fa-user text-mist"></i>
+                    <span class="font-medium text-sm" id="header-username">user_123456</span>
+                </div>
+                <button id="header-login-btn" onclick="showLoginModal()" class="px-4 py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all cursor-pointer" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Header -->
+    <nav class="lg:hidden sticky top-0 z-50 h-14 bg-jungle-800/95 backdrop-blur-md border-b border-mist/20 flex items-center justify-between px-4">
+        <div class="flex items-center gap-2">
+            <img src="assets/logo.png" alt="Logo" class="h-8 w-auto object-contain">
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleLanguage()" class="w-10 h-10 flex items-center justify-center cursor-pointer active:scale-95 transition-transform duration-150 rounded-lg hover:bg-white/5 text-mist-light text-sm font-bold">
+                <span id="lang-btn-mobile">CN</span>
+            </button>
+            <button id="mobile-login-btn" onclick="showLoginModal()" class="px-3 py-1.5 bg-gold/20 border border-gold text-gold rounded-full text-xs font-medium" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="desktop-container">
+        
+        <!-- Hero Section -->
+        <section class="mb-8">
+            <div class="card-glass rounded-2xl p-6 lg:p-8 relative overflow-hidden">
+                <!-- 装饰背景 -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-gold/10 to-transparent rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-mist/10 to-transparent rounded-full blur-2xl"></div>
+                
+                <div class="relative z-10">
+                    <!-- 活动标题 -->
+                    <div class="text-center mb-4">
+                        <h1 class="font-display text-3xl lg:text-5xl font-bold text-white mb-2 section-title-shadow gold-glow">
+                            <span data-vi="1-4 Streamer Đột Kích Đảo Khủng Long" data-cn="1-4 主播空降恐龙岛">1-4 Streamer Đột Kích Đảo Khủng Long</span>
+                        </h1>
+                    </div>
+                    
+                    <!-- 倒计时 -->
+                    <div id="countdown-section" class="flex flex-col items-center mb-6">
+                        <p class="text-gray-400 text-sm mb-3" id="countdown-label" data-vi="Còn 01/04 — Hạn chót đăng ký" data-cn="距离 1/4 — 报名截止">Còn 01/04 — Hạn chót đăng ký</p>
+                        <div class="flex items-center justify-center gap-2 text-sm" id="countdown-timer">
+                            <div class="countdown-box">
+                                <span class="text-gold font-display text-lg" id="countdown-days">14</span>
+                                <span class="text-xs text-gray-500 block" data-vi="ngày" data-cn="天">ngày</span>
+                            </div>
+                            <span class="text-gold text-xl">:</span>
+                            <div class="countdown-box">
+                                <span class="text-gold font-display text-lg" id="countdown-hours">05</span>
+                                <span class="text-xs text-gray-500 block" data-vi="giờ" data-cn="时">giờ</span>
+                            </div>
+                            <span class="text-gold text-xl">:</span>
+                            <div class="countdown-box">
+                                <span class="text-gold font-display text-lg" id="countdown-minutes">32</span>
+                                <span class="text-xs text-gray-500 block" data-vi="phút" data-cn="分">phút</span>
+                            </div>
+                            <span class="text-gold text-xl">:</span>
+                            <div class="countdown-box">
+                                <span class="text-gold font-display text-lg" id="countdown-seconds">18</span>
+                                <span class="text-xs text-gray-500 block" data-vi="giây" data-cn="秒">giây</span>
+                            </div>
+                        </div>
+                        <!-- 报名截止提示 -->
+                        <p class="text-xs text-amber-400 mt-3" id="registration-deadline-hint" data-vi="* Đăng ký sẽ đóng khi đếm ngược kết thúc" data-cn="* 倒计时结束后停止加入阵营">* Đăng ký sẽ đóng khi đếm ngược kết thúc</p>
+                    </div>
+                    
+                    <!-- 报名已截止 / 活动开始状态 (倒计时结束后显示) -->
+                    <div id="event-started-section" class="hidden flex flex-col items-center mb-6">
+                        <div class="bg-gradient-to-r from-red-500/20 via-red-500/10 to-red-500/20 border border-red-500/40 rounded-2xl px-8 py-6 text-center">
+                            <div class="flex items-center justify-center gap-3 mb-2">
+                                <i class="fas fa-lock text-red-400 text-xl"></i>
+                                <span class="text-red-400 font-bold text-lg" data-vi="ĐĂNG KÝ ĐÃ ĐÓNG" data-cn="报名已截止">ĐĂNG KÝ ĐÃ ĐÓNG</span>
+                            </div>
+                            <p class="text-gray-300 text-sm mb-4" data-vi="Phe chiến đã định, cuộc chiến sắp bắt đầu" data-cn="阵营已定，战役即将开启">Phe chiến đã định, cuộc chiến sắp bắt đầu</p>
+                            
+                            <div class="border-t border-red-500/20 pt-4 mt-4">
+                                <p class="text-gold text-xs mb-2" data-vi="THỜI GIAN CHIẾN ĐẤU" data-cn="对抗开战时间">THỜI GIAN CHIẾN ĐẤU</p>
+                                <p class="text-white font-display text-2xl font-bold">01/04/2026</p>
+                                <p class="text-gold font-bold text-lg">20:00 (GMT+7)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 未登录/未激活提示 -->
+                    <div id="status-bar" class="hidden mb-6">
+                        <!-- 未登录 -->
+                        <div id="status-not-logged" class="hidden card-glass rounded-xl p-4 border-l-4 border-amber-500">
+                            <div class="flex flex-col lg:flex-row items-center justify-center gap-4 text-center">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-lock text-amber-500 text-xl"></i>
+                                    <span class="text-gray-300" data-vi="Vui lòng đăng nhập để tham gia phe" data-cn="请先登录以加入阵营">Vui lòng đăng nhập để tham gia phe</span>
+                                </div>
+                                <button onclick="showLoginModal()" class="px-6 py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all cursor-pointer" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</button>
+                            </div>
+                        </div>
+                        <!-- 未激活 -->
+                        <div id="status-no-character" class="hidden card-glass rounded-xl p-4 border-l-4 border-amber-500">
+                            <div class="flex flex-col lg:flex-row items-center justify-center gap-4 text-center">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-exclamation-triangle text-amber-500 text-xl"></i>
+                                    <span class="text-gray-300" data-vi="Cần vào game tạo nhân vật để tham gia phe" data-cn="需要进入游戏创建角色才能加入阵营">Cần vào game tạo nhân vật để tham gia phe</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="showDownloadModal()" class="px-4 py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all cursor-pointer" data-vi="Tải game" data-cn="下载游戏">Tải game</button>
+                                    <button onclick="showHowToPlay()" class="px-4 py-2 border border-mist text-mist rounded-full text-sm font-medium hover:bg-mist/10 transition-all cursor-pointer" data-vi="Hướng dẫn" data-cn="如何进入">Hướng dẫn</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 阵营区域 (根据状态显示不同内容) -->
+        <section id="faction-section" class="mb-8">
+            <!-- 未满足条件时：只显示 VS 卡片 -->
+            <div id="vs-only-view" class="grid lg:grid-cols-2 gap-6">
+                <!-- Q服 VS -->
+                <div class="vs-card card-glass rounded-2xl p-6 border border-mist/20">
+                    <div class="flex items-center justify-center gap-6 mb-4">
+                        <div class="text-center">
+                            <div class="w-20 h-20 mx-auto mb-2 rounded-full overflow-hidden border-2 border-blue-500/50">
+                                <img src="assets/heni.jpeg" alt="heni" class="w-full h-full object-cover">
+                            </div>
+                            <span class="text-gold font-bold text-lg">heni</span>
+                        </div>
+                        <div class="text-4xl font-bold text-gold">VS</div>
+                        <div class="text-center">
+                            <div class="w-20 h-20 mx-auto mb-2 rounded-full overflow-hidden border-2 border-blue-500/50">
+                                <img src="assets/ricon.jpeg" alt="ricon" class="w-full h-full object-cover">
+                            </div>
+                            <span class="text-gold font-bold text-lg">ricon</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-sm">
+                            <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                            Quân Đoàn Chiến
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- K服 VS -->
+                <div class="vs-card card-glass rounded-2xl p-6 border border-mist/20">
+                    <div class="flex items-center justify-center gap-6 mb-4">
+                        <div class="text-center">
+                            <div class="w-20 h-20 mx-auto mb-2 rounded-full overflow-hidden border-2 border-purple-500/50">
+                                <img src="assets/Sữa%20Chua.jpeg" alt="Sữa Chua" class="w-full h-full object-cover">
+                            </div>
+                            <span class="text-gold font-bold text-lg">Sữa Chua</span>
+                        </div>
+                        <div class="text-4xl font-bold text-gold">VS</div>
+                        <div class="text-center">
+                            <div class="w-20 h-20 mx-auto mb-2 rounded-full overflow-hidden border-2 border-purple-500/50">
+                                <img src="assets/miumiu.jpeg" alt="MiuMiu" class="w-full h-full object-cover">
+                            </div>
+                            <span class="text-gold font-bold text-lg">MiuMiu</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm">
+                            <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                            Khủng Long Chi Chiến
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 满足条件后：显示完整加入阵营卡片 -->
+            <div id="join-faction-view" class="hidden grid lg:grid-cols-2 gap-6">
+                <!-- Q服阵营区 -->
+                <div class="card-glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+                                <span class="text-white font-bold text-sm">Q</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-white section-title-shadow">Quân Đoàn Chiến</h2>
+                        </div>
+                        <span class="text-xs text-gray-400" data-vi="Chọn 1 phe" data-cn="只能选择一个">Chọn 1 phe</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- heni -->
+                        <div class="streamer-card card-glass rounded-xl p-4 text-center cursor-pointer relative" id="q-heni" onclick="handleStreamerClick('q', 'heni')">
+                            <div class="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-mist/30">
+                                <img src="assets/heni.jpeg" alt="heni" class="w-full h-full object-cover">
+                            </div>
+                            <h3 class="text-gold font-bold text-base mb-1">heni</h3>
+                            <p class="text-white text-xs mb-2" id="q-heni-count">523 <span class="text-xs text-gray-400" data-vi="ngườii" data-cn="人">ngườii</span></p>
+                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="q-heni-btn" data-vi="Tham gia" data-cn="加入阵营">Tham gia</button>
+                        </div>
+                        
+                        <!-- ricon -->
+                        <div class="streamer-card card-glass rounded-xl p-4 text-center cursor-pointer relative" id="q-ricon" onclick="handleStreamerClick('q', 'ricon')">
+                            <div class="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-mist/30">
+                                <img src="assets/ricon.jpeg" alt="ricon" class="w-full h-full object-cover">
+                            </div>
+                            <h3 class="text-gold font-bold text-base mb-1">ricon</h3>
+                            <p class="text-white text-xs mb-2" id="q-ricon-count">689 <span class="text-xs text-gray-400" data-vi="ngườii" data-cn="人">ngườii</span></p>
+                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="q-ricon-btn" data-vi="Tham gia" data-cn="加入阵营">Tham gia</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Q服已加入状态提示 -->
+                    <div id="q-registered-hint" class="hidden mt-3 p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-center">
+                        <span class="text-emerald-400 text-xs">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            <span id="q-registered-text">Bạn đã tham gia phe heni</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- K服阵营区 -->
+                <div class="card-glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center">
+                                <span class="text-white font-bold text-sm">K</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-white section-title-shadow">Khủng Long Chi Chiến</h2>
+                        </div>
+                        <span class="text-xs text-gray-400" data-vi="Chọn 1 phe" data-cn="只能选择一个">Chọn 1 phe</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Sữa Chua -->
+                        <div class="streamer-card card-glass rounded-xl p-4 text-center cursor-pointer relative" id="k-suachua" onclick="handleStreamerClick('k', 'suachua')">
+                            <div class="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-mist/30">
+                                <img src="assets/Sữa%20Chua.jpeg" alt="Sữa Chua" class="w-full h-full object-cover">
+                            </div>
+                            <h3 class="text-gold font-bold text-base mb-1">Sữa Chua</h3>
+                            <p class="text-white text-xs mb-2" id="k-suachua-count">892 <span class="text-xs text-gray-400" data-vi="ngườii" data-cn="人">ngườii</span></p>
+                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="k-suachua-btn" data-vi="Tham gia" data-cn="加入阵营">Tham gia</button>
+                        </div>
+                        
+                        <!-- MiuMiu -->
+                        <div class="streamer-card card-glass rounded-xl p-4 text-center cursor-pointer relative" id="k-miumiu" onclick="handleStreamerClick('k', 'miumiu')">
+                            <div class="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-mist/30">
+                                <img src="assets/miumiu.jpeg" alt="MiuMiu" class="w-full h-full object-cover">
+                            </div>
+                            <h3 class="text-gold font-bold text-base mb-1">MiuMiu</h3>
+                            <p class="text-white text-xs mb-2" id="k-miumiu-count">456 <span class="text-xs text-gray-400" data-vi="ngườii" data-cn="人">ngườii</span></p>
+                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="k-miumiu-btn" data-vi="Tham gia" data-cn="加入阵营">Tham gia</button>
+                        </div>
+                    </div>
+                    
+                    <!-- K服已加入状态提示 -->
+                    <div id="k-registered-hint" class="hidden mt-3 p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-center">
+                        <span class="text-emerald-400 text-xs">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            <span id="k-registered-text">Bạn đã tham gia phe Sữa Chua</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 福利预告区 -->
+        <section id="reward-preview" class="hidden mb-8">
+            <div class="card-glass rounded-2xl p-6 border border-gold/20">
+                <!-- Tab Header -->
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-gold font-display mb-2 section-title-shadow">
+                        <i class="fas fa-crown mr-2"></i>
+                        <span data-vi="Phúc Lợi Quý Hiếm" data-cn="尊贵福利">Phúc Lợi Quý Hiếm</span>
+                    </h3>
+                    <p class="text-gold-light text-sm" data-vi="Độc quyền dành cho chiến binh trung thành" data-cn="专属忠诚战士的荣耀">Độc quyền dành cho chiến binh trung thành</p>
+                    <div class="w-24 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mt-3"></div>
+                </div>
+                
+                <!-- 加入阵营提示 -->
+                <div class="bg-gradient-to-r from-gold/10 via-gold/5 to-gold/10 rounded-xl p-4 mb-6 border border-gold/30">
+                    <div class="flex items-center justify-center gap-3">
+                        <i class="fas fa-medal text-gold text-xl"></i>
+                        <p class="text-gold-light text-sm font-medium" data-vi="Gia nhập phe Streamer → Mở khóa quyền mua độc quyền" data-cn="加入主播阵营 → 解锁专属购买资格">Gia nhập phe Streamer → Mở khóa quyền mua độc quyền</p>
+                    </div>
+                </div>
+                
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <!-- 亲卫勇士礼包 -->
+                    <div class="bg-gradient-to-b from-jungle-700/80 to-jungle-800/50 rounded-xl border border-gold/30 overflow-hidden group">
+                        <!-- 礼包图片 -->
+                        <div class="relative w-full aspect-square max-h-64 overflow-hidden bg-black">
+                            <img src="assets/warrior-gold.png" alt="Dũng Sĩ Cận Vệ" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                            <!-- 限定标签 -->
+                            <div class="absolute top-3 left-3">
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/90 text-jungle-900 text-xs font-bold rounded-full shadow-lg">
+                                    <i class="fas fa-certificate"></i>
+                                    <span data-vi="Giới Hạn Sự Kiện" data-cn="活动限定">Giới Hạn Sự Kiện</span>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-gold font-bold text-lg" data-vi="Dũng Sĩ Cận Vệ Gói" data-cn="亲卫勇士礼包">Dũng Sĩ Cận Vệ Gói</h4>
+                                <i class="fas fa-shield-alt text-gold/60"></i>
+                            </div>
+                            
+                            <div class="space-y-2 mb-4">
+                                <p class="text-gray-300 text-sm leading-relaxed" data-vi="Vinh dự phụng sự chủ nhân — Tôn vinh những chiến binh kiên trung bậc nhất" data-cn="效忠主人的荣耀 —— 致敬最忠诚的战士">Vinh dự phụng sự chủ nhân — Tôn vinh những chiến binh kiên trung bậc nhất</p>
+                            </div>
+                            
+                            <div class="bg-jungle-900/50 rounded-lg p-3 border border-gold/10">
+                                <div class="flex items-center gap-2 text-xs text-gold/80 mb-2">
+                                    <i class="fas fa-star"></i>
+                                    <span class="font-medium" data-vi="Giá trị độc quyền" data-cn="专属价值">Giá trị độc quyền</span>
+                                </div>
+                                <ul class="text-xs text-gray-400 space-y-1">
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-emerald-500 mt-0.5 text-[10px]"></i>
+                                        <span data-vi="Chỉ thành viên phe mới được mua" data-cn="仅限阵营成员购买">Chỉ thành viên phe mới được mua</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-emerald-500 mt-0.5 text-[10px]"></i>
+                                        <span data-vi="Chỉ bán trong thờii gian sự kiện" data-cn="活动期间限定发售">Chỉ bán trong thờii gian sự kiện</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 史前霸主礼包 -->
+                    <div class="bg-gradient-to-b from-jungle-700/80 to-jungle-800/50 rounded-xl border border-red-500/30 overflow-hidden group relative">
+                        <!-- 绝版光环 -->
+                        <div class="absolute -top-20 -right-20 w-40 h-40 bg-red-500/10 rounded-full blur-3xl"></div>
+                        
+                        <!-- 礼包图片 -->
+                        <div class="relative w-full aspect-square max-h-64 overflow-hidden bg-black">
+                            <img src="assets/overlord-red.png" alt="Bá Chủ Thờii Tiền Sử" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                            <!-- 超稀有标签 -->
+                            <div class="absolute top-3 left-3 flex gap-2">
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full shadow-lg">
+                                    <i class="fas fa-fire"></i>
+                                    <span data-vi="Cực Hiếm" data-cn="超稀有">Cực Hiếm</span>
+                                </span>
+                            </div>
+                            <!-- 限定标签 -->
+                            <div class="absolute top-3 right-3">
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-purple-500/90 text-white text-xs font-bold rounded-full shadow-lg">
+                                    <i class="fas fa-gem"></i>
+                                    <span data-vi="Giới Hạn" data-cn="限定">Giới Hạn</span>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="p-5 relative">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-red-400 font-bold text-lg" data-vi="Bá Chủ Thờii Tiền Sử Gói" data-cn="史前霸主礼包">Bá Chủ Thờii Tiền Sử Gói</h4>
+                                <i class="fas fa-crown text-red-400/60"></i>
+                            </div>
+                            
+                            <div class="space-y-2 mb-4">
+                                <p class="text-gray-300 text-sm leading-relaxed" data-vi="Quyền uy tuyệt đối — Biểu tượng của sức mạnh vô song, chỉ dành cho kẻ đứng đầu" data-cn="绝对权威 —— 无双力量的象征，只为登顶者">Quyền uy tuyệt đối — Biểu tượng của sức mạnh vô song, chỉ dành cho kẻ đứng đầu</p>
+                            </div>
+                            
+                            <div class="bg-gradient-to-r from-red-950/50 to-jungle-900/50 rounded-lg p-3 border border-red-500/20">
+                                <div class="flex items-center gap-2 text-xs text-red-400 mb-2">
+                                    <i class="fas fa-crown"></i>
+                                    <span class="font-medium" data-vi="Báu vật thượng đẳng" data-cn="至高珍宝">Báu vật thượng đẳng</span>
+                                </div>
+                                <ul class="text-xs text-gray-400 space-y-1">
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-red-500 mt-0.5 text-[10px]"></i>
+                                        <span data-vi="Siêu phẩm chỉ dành cho ngườii chơi phe" data-cn="阵营玩家专属超品">Siêu phẩm chỉ dành cho ngườii chơi phe</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i class="fas fa-check text-red-500 mt-0.5 text-[10px]"></i>
+                                        <span data-vi="Cơ hội sở hữu duy nhất trong sự kiện" data-cn="活动期间唯一获取机会">Cơ hội sở hữu duy nhất trong sự kiện</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 底部提示 -->
+                <div class="mt-6 text-center">
+                    <p class="text-xs text-gray-500" data-vi="* Chi tiết phúc lợi sẽ được cập nhật theo từng giai đoạn. Vui lòng theo dõi trang chính thức." data-cn="* 福利详情将分阶段公布，请关注官方主页">* Chi tiết phúc lợi sẽ được cập nhật theo từng giai đoạn. Vui lòng theo dõi trang chính thức.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Activity Rules Section -->
+        <section class="mt-8">
+            <div class="card-glass rounded-2xl overflow-hidden">
+                <button onclick="toggleRules()" class="w-full p-6 flex items-center justify-between hover:bg-jungle-700/30 transition-colors cursor-pointer">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2 section-title-shadow">
+                        <i class="fas fa-file-alt text-gold"></i>
+                        <span data-vi="Thể Lệ Sự Kiện" data-cn="活动规则">Thể Lệ Sự Kiện</span>
+                    </h3>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform" id="rules-icon"></i>
+                </button>
+                <div id="rules-content" class="hidden border-t border-mist/20">
+                    <div class="p-6 space-y-4 text-sm text-gray-200">
+                        <div class="card-glass rounded-xl p-4">
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-clock mr-2"></i><span data-vi="Thờii gian sự kiện" data-cn="活动时间">Thờii gian sự kiện</span></h4>
+                            <p class="text-gray-200" data-vi="01/04/2026 (thờii gian cụ thể sẽ thông báo sau)" data-cn="2026年4月1日（具体时间请关注后续公告）">01/04/2026 (thờii gian cụ thể sẽ thông báo sau)</p>
+                        </div>
+                        
+                        <div class="card-glass rounded-xl p-4">
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-users mr-2"></i><span data-vi="Cách tham gia" data-cn="参与方式">Cách tham gia</span></h4>
+                            <p class="text-gray-200" data-vi="1. Đăng nhập tài khoản game và chọn phe tham gia" data-cn="1. 登录游戏账号并选择阵营加入">1. Đăng nhập tài khoản game và chọn phe tham gia</p>
+                            <p class="text-gray-200" data-vi="2. Mỗi server có 2 phe streamer đối đầu, chọn phe bạn ủng hộ" data-cn="2. 每个服务器有2个主播阵营对决，选择您支持的主播阵营">2. Mỗi server có 2 phe streamer đối đầu, chọn phe bạn ủng hộ</p>
+                            <p class="text-gray-200" data-vi="3. Cần có nhân vật ở server tương ứng mới có thể tham gia phe đó" data-cn="3. 需要在对应服务器拥有角色才能加入该阵营">3. Cần có nhân vật ở server tương ứng mới có thể tham gia phe đó</p>
+                        </div>
+                        
+                        <div class="card-glass rounded-xl p-4">
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-shield-alt mr-2"></i><span data-vi="Điều kiện tham gia" data-cn="参与资格">Điều kiện tham gia</span></h4>
+                            <p class="text-gray-200" data-vi="Chỉ ngườii chơi đã vào game và tạo nhân vật mới có thể tham gia phe" data-cn="仅限已进入游戏并创建角色的玩家加入阵营">Chỉ ngườii chơi đã vào game và tạo nhân vật mới có thể tham gia phe</p>
+                            <p class="text-gray-300 mt-2 text-sm" data-vi="Cần mua skin phe trong game (10 vàng) để tham gia, skin phe chỉ sử dụng trong thờii gian sự kiện và sẽ bị thu hồi sau khi sự kiện kết thúc" data-cn="需在游戏内购买阵营皮肤（10金币）方可参与活动，阵营皮肤仅在活动期间有效，活动结束后回收">Cần mua skin phe trong game (10 vàng) để tham gia, skin phe chỉ sử dụng trong thờii gian sự kiện và sẽ bị thu hồi sau khi sự kiện kết thúc</p>
+                        </div>
+                        
+                        <div class="card-glass rounded-xl p-4">
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-swords mr-2"></i><span data-vi="Đối kháng phe" data-cn="阵营对决">Đối kháng phe</span></h4>
+                            <p class="text-gray-200">Quân Đoàn Chiến: <span class="text-gold font-bold">heni vs ricon</span></p>
+                            <p class="text-gray-200">Khủng Long Chi Chiến: <span class="text-gold font-bold">Sữa Chua vs MiuMiu</span></p>
+                        </div>
+                        
+                        <div class="card-glass rounded-xl p-4">
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-gift mr-2"></i><span data-vi="Phúc lợi sự kiện" data-cn="活动福利">Phúc lợi sự kiện</span></h4>
+                            <p class="text-gray-200" data-vi="1. Sau khi tham gia phe thành công, mở khóa quyền mua Dũng Sĩ Cận Vệ Gói" data-cn="1. 加入阵营成功后解锁亲卫勇士礼包购买资格">1. Sau khi tham gia phe thành công, mở khóa quyền mua Dũng Sĩ Cận Vệ Gói</p>
+                            <p class="text-gray-200" data-vi="2. Có thể mua Bá Chủ Thờii Tiền Sử Gói" data-cn="2. 可购买史前霸主礼包">2. Có thể mua Bá Chủ Thờii Tiền Sử Gói</p>
+                            <p class="text-gray-200" data-vi="3. Phúc lợi chỉ dành cho ngườii chơi đã tham gia phe" data-cn="3. 福利仅限加入阵营玩家购买">3. Phúc lợi chỉ dành cho ngườii chơi đã tham gia phe</p>
+                        </div>
+                        
+                        <div class="card-glass rounded-xl p-4">
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-exclamation-circle mr-2"></i><span data-vi="Lưu ý" data-cn="注意事项">Lưu ý</span></h4>
+                            <p class="text-gray-200" data-vi="1. Sau khi tham gia phe thành công không thể đổi phe" data-cn="1. 加入阵营成功后不可更改阵营">1. Sau khi tham gia phe thành công không thể đổi phe</p>
+                            <p class="text-gray-200" data-vi="2. Mỗi tài khoản chỉ được tham gia 1 phe trong mỗi server" data-cn="2. 每个账号每服限加入一个阵营">2. Mỗi tài khoản chỉ được tham gia 1 phe trong mỗi server</p>
+                            <p class="text-gray-200" data-vi="3. Skin sẽ được phát sau khi sự kiện kết thúc, vui lòng theo dõi thông báo trên trang sự kiện" data-cn="3. 皮肤在活动结束后统一发放，请留意活动主页的皮肤发放时间公告">3. Skin sẽ được phát sau khi sự kiện kết thúc, vui lòng theo dõi thông báo trên trang sự kiện</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeLoginModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-mist/20">
+            <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
+            <div class="hidden lg:flex items-center justify-between mb-6">
+                <h3 class="text-white font-bold text-xl section-title-shadow" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</h3>
+                <button onclick="closeLoginModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-300 text-sm mb-2" data-vi="Tên đăng nhập" data-cn="用户名">Tên đăng nhập</label>
+                    <input type="text" id="login-username" class="w-full h-12 bg-jungle-700 border border-mist/30 rounded-xl px-4 text-white focus:outline-none focus:border-gold" placeholder="Username">
+                </div>
+                <div>
+                    <label class="block text-gray-300 text-sm mb-2" data-vi="Mật khẩu" data-cn="密码">Mật khẩu</label>
+                    <input type="password" id="login-password" class="w-full h-12 bg-jungle-700 border border-mist/30 rounded-xl px-4 text-white focus:outline-none focus:border-gold" placeholder="Password">
+                </div>
+            </div>
+            
+            <button onclick="doLogin()" class="w-full h-12 mt-6 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow hover:brightness-110 transition-all cursor-pointer active:scale-95" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</button>
+            
+            <p class="text-center text-gray-400 text-sm mt-4" data-vi="Chưa có tài khoản?" data-cn="还没有账号？">Chưa có tài khoản? <a href="#" class="text-gold hover:underline" data-vi="Đăng ký ngay" data-cn="立即注册">Đăng ký ngay</a></p>
+        </div>
+    </div>
+
+    <!-- Download Game Modal -->
+    <div id="download-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeDownloadModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-mist/20">
+            <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
+            <div class="hidden lg:flex items-center justify-between mb-6">
+                <h3 class="text-white font-bold text-xl section-title-shadow" data-vi="Tải Game" data-cn="下载游戏">Tải Game</h3>
+                <button onclick="closeDownloadModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-vi="Tải Game" data-cn="下载游戏">Tải Game</h3>
+            
+            <p class="text-gray-400 text-sm mb-4 text-center" data-vi="Chọn một trong các nguồn tải bên dưới" data-cn="请选择以下任意下载源">Chọn một trong các nguồn tải bên dưới</p>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <a href="https://www.mediafire.com/file/h35uc0bhc5gv15z/QuanDoanChien.zip/file" target="_blank" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
+                    <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center">
+                        <i class="fab fa-windows text-white text-xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-white text-sm font-medium" data-vi="Tải 1" data-cn="下载 1">Tải 1</span>
+                        <span class="text-xs text-gray-400 block">MediaFire</span>
+                    </div>
+                </a>
+                <a href="https://drive.google.com/file/d/1n7JHQkX-bnmKX3vpXB7Cw41c929MeTWq/view?usp=drivesdk" target="_blank" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
+                    <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center">
+                        <i class="fab fa-windows text-white text-xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-white text-sm font-medium" data-vi="Tải 2" data-cn="下载 2">Tải 2</span>
+                        <span class="text-xs text-gray-400 block">Google Drive</span>
+                    </div>
+                </a>
+                <a href="https://drive.google.com/file/d/11Yj793DCdpEPvFhKj-jpYFIdGf1wyoAi/view?usp=drive_link" target="_blank" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
+                    <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center">
+                        <i class="fab fa-windows text-white text-xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-white text-sm font-medium" data-vi="Tải 3" data-cn="下载 3">Tải 3</span>
+                        <span class="text-xs text-gray-400 block">Google Drive</span>
+                    </div>
+                </a>
+                <a href="https://drive.google.com/file/d/1o4YeZ2JyVoeDaueaaWzABJhDAfTrDj9b/view?usp=drivesd" target="_blank" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
+                    <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center">
+                        <i class="fab fa-windows text-white text-xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-white text-sm font-medium" data-vi="Tải 4" data-cn="下载 4">Tải 4</span>
+                        <span class="text-xs text-gray-400 block">Google Drive</span>
+                    </div>
+                </a>
+            </div>
+            
+            <p class="text-center text-gray-400 text-xs mt-4" data-vi="Tất cả đều là phiên bản Windows PC" data-cn="均为Windows PC版本">Tất cả đều là phiên bản Windows PC</p>
+        </div>
+    </div>
+
+    <!-- Confirm Registration Modal -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeConfirmModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-mist/20">
+            <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
+            <div class="hidden lg:flex items-center justify-between mb-6">
+                <h3 class="text-white font-bold text-xl section-title-shadow" data-vi="Xác nhận tham gia" data-cn="确认加入">Xác nhận tham gia</h3>
+                <button onclick="closeConfirmModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-vi="Xác nhận tham gia" data-cn="确认加入">Xác nhận tham gia</h3>
+            
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-2 border-gold/50">
+                    <img id="confirm-avatar" src="" alt="" class="w-full h-full object-cover">
+                </div>
+                <p class="text-gray-300 mb-2" data-vi="Bạn sắp tham gia phe" data-cn="您即将加入阵营">Bạn sắp tham gia phe</p>
+                <h4 id="confirm-streamer-name" class="text-2xl font-bold text-gold mb-2"></h4>
+                <p id="confirm-server-name" class="text-mist text-sm"></p>
+            </div>
+            
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-6">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
+                    <div>
+                        <p class="text-amber-400 text-sm font-medium mb-1" data-vi="Lưu ý quan trọng" data-cn="重要提示">Lưu ý quan trọng</p>
+                        <p class="text-gray-300 text-xs" data-vi="Sau khi xác nhận, bạn không thể thay đổi phe. Vui lòng kiểm tra kỹ thông tin trước khi xác nhận." data-cn="确认后不可更改阵营，请仔细核对信息后再确认。">Sau khi xác nhận, bạn không thể thay đổi phe. Vui lòng kiểm tra kỹ thông tin trước khi xác nhận.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 h-12 border border-mist text-mist rounded-full font-medium hover:bg-mist/10 transition-all cursor-pointer active:scale-95" data-vi="Hủy" data-cn="取消">Hủy</button>
+                <button onclick="confirmRegistration()" class="flex-1 h-12 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow hover:brightness-110 transition-all cursor-pointer active:scale-95" data-vi="Xác nhận" data-cn="确认">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- How to Play Modal -->
+    <div id="how-to-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeHowToModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[600px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-mist/20 max-h-[80vh] flex flex-col">
+            <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
+            <div class="hidden lg:flex items-center justify-between mb-4">
+                <h3 class="text-white font-bold text-xl section-title-shadow" data-vi="Hướng dẫn vào game" data-cn="如何进入游戏">Hướng dẫn vào game</h3>
+                <button onclick="closeHowToModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <h3 class="lg:hidden text-white font-bold text-xl mb-4 text-center section-title-shadow" data-vi="Hướng dẫn vào game" data-cn="如何进入游戏">Hướng dẫn vào game</h3>
+            
+            <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+                <div class="space-y-4 text-gray-200">
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 text-gold font-bold">1</div>
+                        <div>
+                            <h4 class="text-white font-semibold mb-1" data-vi="Tải game client" data-cn="下载游戏客户端">Tải game client</h4>
+                            <p class="text-sm text-gray-400" data-vi="Nhấn nút 'Tải game' để tải bộ cài đặt" data-cn="点击'下载游戏'按钮获取安装包">Nhấn nút 'Tải game' để tải bộ cài đặt</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 text-gold font-bold">2</div>
+                        <div>
+                            <h4 class="text-white font-semibold mb-1" data-vi="Cài đặt game" data-cn="安装游戏">Cài đặt game</h4>
+                            <p class="text-sm text-gray-400" data-vi="Chạy file cài đặt và làm theo hướng dẫn" data-cn="运行安装程序，按提示完成安装">Chạy file cài đặt và làm theo hướng dẫn</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 text-gold font-bold">3</div>
+                        <div>
+                            <h4 class="text-white font-semibold mb-1" data-vi="Đăng nhập game" data-cn="登录游戏">Đăng nhập game</h4>
+                            <p class="text-sm text-gray-400" data-vi="Mở game và đăng nhập bằng tài khoản của bạn" data-cn="打开游戏，使用您的账号登录">Mở game và đăng nhập bằng tài khoản của bạn</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 text-gold font-bold">4</div>
+                        <div>
+                            <h4 class="text-white font-semibold mb-1" data-vi="Tạo nhân vật" data-cn="创建角色">Tạo nhân vật</h4>
+                            <p class="text-sm text-gray-400" data-vi="Chọn server và tạo nhân vật đầu tiên" data-cn="选择服务器并创建您的第一个角色">Chọn server và tạo nhân vật đầu tiên</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 text-gold font-bold">5</div>
+                        <div>
+                            <h4 class="text-white font-semibold mb-1" data-vi="Hoàn tất" data-cn="完成">Hoàn tất</h4>
+                            <p class="text-sm text-gray-400" data-vi="Quay lại trang này để tham gia phe" data-cn="返回本页面即可加入阵营">Quay lại trang này để tham gia phe</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="closeHowToModal()" class="w-full h-12 mt-4 bg-jungle-700 text-white font-medium rounded-full hover:bg-jungle-600 transition-all cursor-pointer active:scale-95" data-vi="Đã hiểu" data-cn="明白了">Đã hiểu</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-jungle-800/95 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm shadow-lg opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2 border border-mist/20">
+        <i class="fas fa-check-circle text-emerald-400"></i>
+        <span id="toast-message">Thành công</span>
+    </div>
+
+    <!-- Test Mode Button -->
+    <div class="test-mode-btn">
+        <button onclick="toggleTestMenu()" class="w-10 h-10 rounded-full bg-jungle-700 border border-mist/30 text-gray-400 hover:text-white flex items-center justify-center cursor-pointer" title="Test Mode">
+            <i class="fas fa-cog"></i>
+        </button>
+        <div id="test-menu" class="hidden absolute bottom-12 right-0 w-48 bg-jungle-800/95 backdrop-blur-md rounded-xl border border-mist/30 p-2 shadow-lg">
+            <div class="text-xs text-gray-400 px-3 py-2 border-b border-mist/20" data-vi="Chế độ Test" data-cn="测试模式">Chế độ Test</div>
+            <button onclick="setTestMode('loggedOut')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Chưa đăng nhập" data-cn="未登录">Chưa đăng nhập</button>
+            <button onclick="setTestMode('noCharacter')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Chưa vào game" data-cn="未进游戏">Chưa vào game</button>
+            <button onclick="setTestMode('hasCharacter')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Đã vào game" data-cn="已进游戏">Đã vào game</button>
+            <button onclick="setTestMode('registeredQ')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Đã tham gia Q" data-cn="已加入Q服">Đã tham gia Q</button>
+            <button onclick="setTestMode('registeredK')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Đã tham gia K" data-cn="已加入K服">Đã tham gia K</button>
+            <button onclick="setTestMode('registeredBoth')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Đã tham gia cả hai" data-cn="已加入双服">Đã tham gia cả hai</button>
+            <div class="border-t border-mist/20 my-2"></div>
+            <button onclick="setTestMode('registrationClosed')" class="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/30 rounded-lg transition-colors" data-vi="Đăng ký đã đóng" data-cn="报名已截止">Đăng ký đã đóng</button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentLang = 'vi';
+        let isLoggedIn = false;
+        let hasCharacter = false;
+        let registrations = {
+            q: null,  // 'heni' or 'ricon'
+            k: null   // 'suachua' or 'miumiu'
+        };
+        let pendingRegistration = null; // { server, streamer }
+
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'vi' ? 'cn' : 'vi';
+            document.getElementById('lang-btn-desktop').textContent = currentLang === 'vi' ? 'CN' : 'VN';
+            document.getElementById('lang-btn-mobile').textContent = currentLang === 'vi' ? 'CN' : 'VN';
+            
+            document.querySelectorAll('[data-vi][data-cn]').forEach(el => {
+                if (el.tagName === 'INPUT') {
+                    el.placeholder = el.getAttribute(`data-${currentLang}`);
+                } else if (el.tagName === 'OPTION') {
+                    el.textContent = el.getAttribute(`data-${currentLang}`);
+                } else {
+                    el.textContent = el.getAttribute(`data-${currentLang}`);
+                }
+            });
+            
+            showToast(currentLang === 'vi' ? 'Đã chuyển sang tiếng Việt' : '已切换到中文');
+        }
+
+        // Toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+                toast.classList.remove('opacity-100');
+            }, 2000);
+        }
+
+        // Login Modal
+        function showLoginModal() {
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+
+        function doLogin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!username || !password) {
+                showToast(currentLang === 'vi' ? 'Vui lòng nhập đầy đủ thông tin' : '请输入完整信息');
+                return;
+            }
+            
+            isLoggedIn = true;
+            closeLoginModal();
+            
+            document.getElementById('header-login-btn').classList.add('hidden');
+            document.getElementById('mobile-login-btn').classList.add('hidden');
+            document.getElementById('header-user-info').classList.remove('hidden');
+            document.getElementById('header-username').textContent = username;
+            
+            updateFactionView();
+            showToast(currentLang === 'vi' ? 'Đăng nhập thành công' : '登录成功');
+        }
+
+        // Download Modal
+        function showDownloadModal() {
+            document.getElementById('download-modal').classList.remove('hidden');
+        }
+
+        function closeDownloadModal() {
+            document.getElementById('download-modal').classList.add('hidden');
+        }
+
+        // How to Play Modal
+        function showHowToPlay() {
+            document.getElementById('how-to-modal').classList.remove('hidden');
+        }
+
+        function closeHowToModal() {
+            document.getElementById('how-to-modal').classList.add('hidden');
+        }
+
+        // Toggle Rules
+        function toggleRules() {
+            const content = document.getElementById('rules-content');
+            const icon = document.getElementById('rules-icon');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function showRules() {
+            const content = document.getElementById('rules-content');
+            const icon = document.getElementById('rules-icon');
+            content.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+            document.getElementById('rules-content').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Toggle Reward Detail
+        function toggleRewardDetail(id) {
+            const detail = document.getElementById(`${id}-detail`);
+            const icon = document.getElementById(`${id}-icon`);
+            
+            if (detail.classList.contains('expanded')) {
+                detail.classList.remove('expanded');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                detail.classList.add('expanded');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // Update faction section view based on state
+        function updateFactionView() {
+            const vsOnlyView = document.getElementById('vs-only-view');
+            const joinFactionView = document.getElementById('join-faction-view');
+            const statusBar = document.getElementById('status-bar');
+            const notLogged = document.getElementById('status-not-logged');
+            const noCharacter = document.getElementById('status-no-character');
+            
+            // Reset
+            statusBar.classList.add('hidden');
+            notLogged.classList.add('hidden');
+            noCharacter.classList.add('hidden');
+            
+            if (!isLoggedIn) {
+                // Not logged in: show VS only + login prompt
+                vsOnlyView.classList.remove('hidden');
+                joinFactionView.classList.add('hidden');
+                statusBar.classList.remove('hidden');
+                notLogged.classList.remove('hidden');
+            } else if (!hasCharacter) {
+                // Logged in but no character: show VS only + activate prompt
+                vsOnlyView.classList.remove('hidden');
+                joinFactionView.classList.add('hidden');
+                statusBar.classList.remove('hidden');
+                noCharacter.classList.remove('hidden');
+            } else {
+                // Fully activated: show join faction view
+                vsOnlyView.classList.add('hidden');
+                joinFactionView.classList.remove('hidden');
+            }
+        }
+
+        // Handle Streamer Click
+        function handleStreamerClick(server, streamer) {
+            // Check if registration is closed
+            if (!isRegistrationOpen) {
+                showToast(currentLang === 'vi' ? 'Đăng ký đã đóng' : '报名已截止');
+                return;
+            }
+            
+            if (!isLoggedIn) {
+                showLoginModal();
+                return;
+            }
+            
+            if (!hasCharacter) {
+                showToast(currentLang === 'vi' ? 'Vui lòng vào game trước' : '请先进入游戏');
+                return;
+            }
+            
+            if (registrations[server]) {
+                showToast(currentLang === 'vi' ? 'Bạn đã tham gia phe này' : '您已加入该阵营');
+                return;
+            }
+            
+            // Store pending registration
+            pendingRegistration = { server, streamer };
+            
+            // Show confirm modal
+            showConfirmModal(server, streamer);
+        }
+
+        // Confirm Modal
+        function showConfirmModal(server, streamer) {
+            const streamerName = getStreamerName(server, streamer);
+            const serverName = server === 'q' ? 'Quân Đoàn Chiến' : 'Khủng Long Chi Chiến';
+            const avatarSrc = document.getElementById(`${server}-${streamer}`).querySelector('img').src;
+            
+            document.getElementById('confirm-avatar').src = avatarSrc;
+            document.getElementById('confirm-streamer-name').textContent = streamerName;
+            document.getElementById('confirm-server-name').textContent = serverName;
+            
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            pendingRegistration = null;
+        }
+
+        function confirmRegistration() {
+            if (!pendingRegistration) return;
+            
+            const { server, streamer } = pendingRegistration;
+            
+            registrations[server] = streamer;
+            
+            updateStreamerCards(server);
+            
+            const streamerName = getStreamerName(server, streamer);
+            showToast(currentLang === 'vi' ? `Đã tham gia phe ${streamerName}` : `已成功加入${streamerName}阵营`);
+            
+            if (registrations.q || registrations.k) {
+                document.getElementById('reward-preview').classList.remove('hidden');
+            }
+            
+            closeConfirmModal();
+        }
+
+        function getStreamerName(server, streamer) {
+            const names = {
+                q: { heni: 'heni', ricon: 'ricon' },
+                k: { suachua: 'Sữa Chua', miumiu: 'MiuMiu' }
+            };
+            return names[server][streamer];
+        }
+
+        function updateStreamerCards(server) {
+            const registeredStreamer = registrations[server];
+            const serverStreamers = server === 'q' ? ['heni', 'ricon'] : ['suachua', 'miumiu'];
+            
+            serverStreamers.forEach(streamer => {
+                const card = document.getElementById(`${server}-${streamer}`);
+                const btn = document.getElementById(`${server}-${streamer}-btn`);
+                
+                if (registeredStreamer === streamer) {
+                    // Selected
+                    card.classList.add('selected');
+                    btn.textContent = currentLang === 'vi' ? 'Đã tham gia ✓' : '已加入 ✓';
+                    btn.className = 'w-full py-1.5 rounded-full text-xs font-medium transition-all bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 cursor-default';
+                } else if (registeredStreamer) {
+                    // Disabled (other streamer in same server selected)
+                    card.classList.add('disabled');
+                    btn.textContent = currentLang === 'vi' ? 'Không thể chọn' : '不可选择';
+                    btn.className = 'w-full py-1.5 rounded-full text-xs font-medium transition-all bg-gray-700/50 text-gray-500 cursor-not-allowed';
+                } else {
+                    // Available
+                    card.classList.remove('selected', 'disabled');
+                    btn.textContent = currentLang === 'vi' ? 'Tham gia' : '加入阵营';
+                    btn.className = 'w-full py-1.5 rounded-full text-xs font-medium transition-all bg-gradient-to-r from-gold to-gold-dark text-jungle-900 hover:brightness-110 cursor-pointer';
+                }
+            });
+            
+            // Show registered hint with streamer name
+            if (registeredStreamer) {
+                const hint = document.getElementById(`${server}-registered-hint`);
+                const hintText = document.getElementById(`${server}-registered-text`);
+                const streamerName = getStreamerName(server, registeredStreamer);
+                hintText.textContent = currentLang === 'vi' 
+                    ? `Bạn đã tham gia phe ${streamerName}` 
+                    : `您已加入${streamerName}阵营`;
+                hint.classList.remove('hidden');
+            }
+        }
+
+        // Test Mode
+        function toggleTestMenu() {
+            const menu = document.getElementById('test-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function setTestMode(mode) {
+            // Reset state
+            isLoggedIn = false;
+            hasCharacter = false;
+            registrations = { q: null, k: null };
+            
+            // Reset UI
+            document.getElementById('header-login-btn').classList.remove('hidden');
+            document.getElementById('mobile-login-btn').classList.remove('hidden');
+            document.getElementById('header-user-info').classList.add('hidden');
+            document.getElementById('reward-preview').classList.add('hidden');
+            document.getElementById('q-registered-hint').classList.add('hidden');
+            document.getElementById('k-registered-hint').classList.add('hidden');
+            
+            // Reset all cards
+            ['q-heni', 'q-ricon', 'k-suachua', 'k-miumiu'].forEach(id => {
+                const card = document.getElementById(id);
+                const btn = document.getElementById(`${id}-btn`);
+                if (card && btn) {
+                    card.classList.remove('selected', 'disabled');
+                    btn.textContent = currentLang === 'vi' ? 'Tham gia' : '加入阵营';
+                    btn.className = 'w-full py-1.5 rounded-full text-xs font-medium transition-all bg-gradient-to-r from-gold to-gold-dark text-jungle-900 hover:brightness-110 cursor-pointer';
+                }
+            });
+            
+            // Apply test mode
+            switch(mode) {
+                case 'loggedOut':
+                    updateFactionView();
+                    break;
+                case 'noCharacter':
+                    isLoggedIn = true;
+                    updateFactionView();
+                    break;
+                case 'hasCharacter':
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    updateFactionView();
+                    break;
+                case 'registeredQ':
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    registrations.q = 'heni';
+                    updateFactionView();
+                    updateStreamerCards('q');
+                    document.getElementById('reward-preview').classList.remove('hidden');
+                    break;
+                case 'registeredK':
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    registrations.k = 'suachua';
+                    updateFactionView();
+                    updateStreamerCards('k');
+                    document.getElementById('reward-preview').classList.remove('hidden');
+                    break;
+                case 'registeredBoth':
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    registrations.q = 'ricon';
+                    registrations.k = 'miumiu';
+                    updateFactionView();
+                    updateStreamerCards('q');
+                    updateStreamerCards('k');
+                    document.getElementById('reward-preview').classList.remove('hidden');
+                    break;
+                case 'registrationClosed':
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    isRegistrationOpen = false;
+                    registrations.q = 'heni';
+                    registrations.k = 'suachua';
+                    // Show event started UI
+                    document.getElementById('countdown-section').classList.add('hidden');
+                    document.getElementById('event-started-section').classList.remove('hidden');
+                    document.getElementById('event-started-section').classList.add('flex');
+                    // Hide status bar
+                    document.getElementById('status-bar').classList.add('hidden');
+                    // Show full faction view but disable buttons
+                    document.getElementById('vs-only-view').classList.add('hidden');
+                    document.getElementById('join-faction-view').classList.remove('hidden');
+                    // Update cards to show registered state
+                    updateStreamerCards('q');
+                    updateStreamerCards('k');
+                    // Disable all buttons
+                    disableAllFactionButtons();
+                    // Show reward preview
+                    document.getElementById('reward-preview').classList.remove('hidden');
+                    break;
+            }
+            
+            document.getElementById('test-menu').classList.add('hidden');
+            showToast(currentLang === 'vi' ? 'Đã chuyển chế độ test' : '已切换测试模式');
+        }
+
+        // State - Registration Deadline & Battle Time
+        const REGISTRATION_DEADLINE = new Date('2026-04-01T00:00:00');
+        const BATTLE_START_TIME = new Date('2026-04-01T20:00:00');
+        let isRegistrationOpen = true;
+
+        // Check if registration is still open
+        function checkRegistrationStatus() {
+            const now = new Date();
+            isRegistrationOpen = now < REGISTRATION_DEADLINE;
+            
+            if (!isRegistrationOpen) {
+                // Hide countdown, show event started section
+                document.getElementById('countdown-section').classList.add('hidden');
+                document.getElementById('event-started-section').classList.remove('hidden');
+                document.getElementById('event-started-section').classList.add('flex');
+                
+                // Disable all faction buttons
+                disableAllFactionButtons();
+            }
+            
+            return isRegistrationOpen;
+        }
+
+        // Disable all faction buttons when registration closes
+        function disableAllFactionButtons() {
+            ['q-heni', 'q-ricon', 'k-suachua', 'k-miumiu'].forEach(id => {
+                const card = document.getElementById(id);
+                const btn = document.getElementById(`${id}-btn`);
+                
+                if (card && btn) {
+                    card.classList.add('disabled');
+                    card.onclick = null;
+                    btn.textContent = currentLang === 'vi' ? 'Đã đóng' : '已截止';
+                    btn.className = 'w-full py-1.5 rounded-full text-xs font-medium bg-gray-700 text-gray-500 cursor-not-allowed';
+                }
+            });
+        }
+
+        // Countdown Timer
+        function updateCountdown() {
+            const now = new Date();
+            const diff = REGISTRATION_DEADLINE - now;
+            
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                document.getElementById('countdown-days').textContent = String(days).padStart(2, '0');
+                document.getElementById('countdown-hours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('countdown-minutes').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('countdown-seconds').textContent = String(seconds).padStart(2, '0');
+            } else {
+                // Registration closed
+                checkRegistrationStatus();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check registration status first
+            checkRegistrationStatus();
+            
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+            updateFactionView();
+            
+            // Only initialize buttons if registration is still open
+            if (isRegistrationOpen) {
+                ['q-heni', 'q-ricon', 'k-suachua', 'k-miumiu'].forEach(id => {
+                    const btn = document.getElementById(`${id}-btn`);
+                    if (btn) {
+                        btn.className = 'w-full py-1.5 rounded-full text-xs font-medium transition-all bg-gradient-to-r from-gold to-gold-dark text-jungle-900 hover:brightness-110 cursor-pointer';
+                    }
+                });
+            }
+        });
+
+        // Close modals on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeLoginModal();
+                closeDownloadModal();
+                closeHowToModal();
+                closeConfirmModal();
+            }
+        });
+    </script>
+</body>
+</html>
