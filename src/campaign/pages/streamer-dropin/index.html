@@ -1820,8 +1820,11 @@
                 // 根据状态显示价格和按钮
                 switch(skinDisplayState) {
                     case 'comingSoon':
-                        // 即将上线：完全不显示价格区域
-                        priceEl.innerHTML = '';
+                        // 即将上线：只显示悬念文案，不显示价格和按钮
+                        priceEl.innerHTML = `
+                            <div class="mt-2 p-2 bg-amber-500/10 rounded-lg">
+                                <span class="text-amber-400 text-xs">${suspenseText}</span>
+                            </div>`;
                         break;
                     case 'revealed':
                         // 已公开皮肤：显示原价，无购买按钮
