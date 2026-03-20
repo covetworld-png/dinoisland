@@ -426,49 +426,6 @@
             border-radius: 4px;
         }
 
-        /* Carousel Navigation Arrows */
-        .carousel-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 44px;
-            height: 44px;
-            background: rgba(10, 26, 21, 0.7);
-            border: 1px solid rgba(74, 154, 138, 0.3);
-            border-radius: 50%;
-            color: var(--text-primary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(4px);
-        }
-
-        .carousel-arrow:hover {
-            background: rgba(74, 154, 138, 0.3);
-            border-color: var(--mist);
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        .carousel-arrow:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-
-        .carousel-arrow-prev {
-            left: 12px;
-        }
-
-        .carousel-arrow-next {
-            right: 12px;
-        }
-
-        .carousel-arrow svg {
-            width: 20px;
-            height: 20px;
-        }
-
         /* Benefits Section */
         .benefits-list {
             display: flex;
@@ -624,18 +581,6 @@
         <!-- Dinosaur Carousel -->
         <div class="glass-card carousel-section">
             <div class="carousel-container" id="carousel">
-                <!-- Navigation Arrows -->
-                <button class="carousel-arrow carousel-arrow-prev" aria-label="Previous slide">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                </button>
-                <button class="carousel-arrow carousel-arrow-next" aria-label="Next slide">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </button>
-                
                 <div class="carousel-slide active">
                     <img src="../../assets/official/dino_1_spino.png" alt="Spinosaurus">
                 </div>
@@ -892,8 +837,6 @@
             container: document.getElementById('carousel'),
             slides: document.querySelectorAll('.carousel-slide'),
             dots: document.querySelectorAll('.carousel-dot'),
-            prevBtn: document.querySelector('.carousel-arrow-prev'),
-            nextBtn: document.querySelector('.carousel-arrow-next'),
             currentIndex: 0,
             interval: null,
             touchStartX: 0,
@@ -912,21 +855,6 @@
                         this.resetAutoPlay();
                     });
                 });
-
-                // Arrow buttons
-                if (this.prevBtn) {
-                    this.prevBtn.addEventListener('click', () => {
-                        this.prevSlide();
-                        this.resetAutoPlay();
-                    });
-                }
-
-                if (this.nextBtn) {
-                    this.nextBtn.addEventListener('click', () => {
-                        this.nextSlide();
-                        this.resetAutoPlay();
-                    });
-                }
 
                 // Touch swipe support
                 this.container.addEventListener('touchstart', (e) => {
