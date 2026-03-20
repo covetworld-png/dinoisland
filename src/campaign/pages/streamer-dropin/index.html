@@ -428,6 +428,20 @@
                             <span id="q-registered-text">Bạn đã tham gia phe heni</span>
                         </span>
                     </div>
+                    
+                    <!-- Q服 Discord 入口 -->
+                    <div id="q-discord-hint" class="hidden mt-3">
+                        <!-- heni Discord -->
+                        <a id="q-heni-discord" href="https://discord.gg/PxyhPqTMu" target="_blank" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
+                            <i class="fab fa-discord"></i>
+                            <span data-vi="Tham gia Discord heni" data-cn="加入 heni Discord">Tham gia Discord heni</span>
+                        </a>
+                        <!-- ricon Discord -->
+                        <a id="q-ricon-discord" href="https://discord.gg/hbn4y6nwR" target="_blank" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
+                            <i class="fab fa-discord"></i>
+                            <span data-vi="Tham gia Discord ricon" data-cn="加入 ricon Discord">Tham gia Discord ricon</span>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- K服阵营区 -->
@@ -470,6 +484,20 @@
                             <i class="fas fa-check-circle mr-1"></i>
                             <span id="k-registered-text">Bạn đã tham gia phe Sữa Chua</span>
                         </span>
+                    </div>
+                    
+                    <!-- K服 Discord 入口 -->
+                    <div id="k-discord-hint" class="hidden mt-3">
+                        <!-- Sữa Chua Discord -->
+                        <a id="k-suachua-discord" href="https://discord.gg/5ujDrmCHa" target="_blank" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
+                            <i class="fab fa-discord"></i>
+                            <span data-vi="Tham gia Discord Sữa Chua" data-cn="加入 Sữa Chua Discord">Tham gia Discord Sữa Chua</span>
+                        </a>
+                        <!-- MiuMiu Discord -->
+                        <a id="k-miumiu-discord" href="https://discord.gg/zaU4tf2Rd" target="_blank" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
+                            <i class="fab fa-discord"></i>
+                            <span data-vi="Tham gia Discord MiuMiu" data-cn="加入 MiuMiu Discord">Tham gia Discord MiuMiu</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1331,6 +1359,14 @@
                     ? `Bạn đã tham gia phe ${streamerName}` 
                     : `您已加入${streamerName}阵营`;
                 hint.classList.remove('hidden');
+                
+                // Show Discord button for registered streamer
+                const discordHint = document.getElementById(`${server}-discord-hint`);
+                const discordBtn = document.getElementById(`${server}-${registeredStreamer}-discord`);
+                if (discordHint && discordBtn) {
+                    discordHint.classList.remove('hidden');
+                    discordBtn.classList.remove('hidden');
+                }
             }
         }
 
@@ -1352,6 +1388,14 @@
             document.getElementById('header-user-info').classList.add('hidden');
             document.getElementById('q-registered-hint').classList.add('hidden');
             document.getElementById('k-registered-hint').classList.add('hidden');
+            
+            // Reset Discord buttons
+            document.getElementById('q-discord-hint').classList.add('hidden');
+            document.getElementById('k-discord-hint').classList.add('hidden');
+            ['q-heni', 'q-ricon', 'k-suachua', 'k-miumiu'].forEach(id => {
+                const discordBtn = document.getElementById(`${id}-discord`);
+                if (discordBtn) discordBtn.classList.add('hidden');
+            });
             
             // Reset all cards
             ['q-heni', 'q-ricon', 'k-suachua', 'k-miumiu'].forEach(id => {
