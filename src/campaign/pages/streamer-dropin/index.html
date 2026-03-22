@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streamer Đột Kích Đảo Khủng Long - MonsterLair</title>
+    <title data-i18n="common.page_title">Streamer Đột Kích Đảo Khủng Long - MonsterLair</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -205,8 +205,8 @@
                 <img src="assets/logo.png" alt="Logo" class="h-10 w-auto object-contain">
             </div>
             <nav class="flex items-center gap-6">
-                <a href="#" class="text-mist-light font-medium" data-vi="Trang Chủ" data-cn="活动首页">Trang Chủ</a>
-                <a href="#" onclick="showRules()" class="text-gray-400 hover:text-mist-light transition-colors" data-vi="Thể Lệ" data-cn="活动规则">Thể Lệ</a>
+                <a href="#" class="text-mist-light font-medium" data-i18n="common.活动首页">Trang Chủ</a>
+                <a href="#" onclick="showRules()" class="text-gray-400 hover:text-mist-light transition-colors" data-i18n="rules.活动规则">Thể Lệ</a>
             </nav>
             <div class="flex items-center gap-3">
                 <button onclick="toggleLanguage()" class="w-10 h-10 rounded-full bg-jungle-700 flex items-center justify-center text-mist-light text-sm font-bold hover:bg-jungle-600 transition-colors cursor-pointer border border-mist/30">
@@ -216,7 +216,7 @@
                     <i class="fas fa-user text-mist"></i>
                     <span class="font-medium text-sm" id="header-username">user_123456</span>
                 </div>
-                <button id="header-login-btn" onclick="showLoginModal()" class="px-4 py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all cursor-pointer" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</button>
+                <button id="header-login-btn" onclick="showLoginModal()" class="px-4 py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all cursor-pointer" data-i18n="common.登录_5">Đăng nhập</button>
             </div>
         </div>
     </header>
@@ -233,7 +233,7 @@
             <button onclick="toggleLanguage()" class="w-10 h-10 flex items-center justify-center cursor-pointer active:scale-95 transition-transform duration-150 rounded-lg hover:bg-white/5 text-mist-light text-sm font-bold">
                 <span id="lang-btn-mobile">CN</span>
             </button>
-            <button id="mobile-login-btn" onclick="showLoginModal()" class="px-3 py-1.5 bg-gold/20 border border-gold text-gold rounded-full text-xs font-medium" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</button>
+            <button id="mobile-login-btn" onclick="showLoginModal()" class="px-3 py-1.5 bg-gold/20 border border-gold text-gold rounded-full text-xs font-medium" data-i18n="common.登录_5">Đăng nhập</button>
         </div>
     </nav>
 
@@ -251,36 +251,36 @@
                     <!-- 活动标题 -->
                     <div class="text-center mb-4">
                         <h1 class="font-display text-3xl lg:text-5xl font-bold text-white mb-2 section-title-shadow gold-glow">
-                            <span data-vi="1-4 Streamer Đột Kích Đảo Khủng Long" data-cn="1-4 主播空降恐龙岛">1-4 Streamer Đột Kích Đảo Khủng Long</span>
+                            <span data-i18n="common.14_主播空降恐龙岛">1-4 Streamer Đột Kích Đảo Khủng Long</span>
                         </h1>
                     </div>
                     
                     <!-- 倒计时 -->
                     <div id="countdown-section" class="flex flex-col items-center mb-6">
-                        <p class="text-gray-400 text-sm mb-3" id="countdown-label" data-vi="Còn 01/04 — Hạn chót đăng ký" data-cn="距离 1/4 — 报名截止">Còn 01/04 — Hạn chót đăng ký</p>
+                        <p class="text-gray-400 text-sm mb-3" id="countdown-label" data-i18n="common.距离_14__报名截止">Còn 01/04 — Hạn chót đăng ký</p>
                         <div class="flex items-center justify-center gap-2 text-sm" id="countdown-timer">
                             <div class="countdown-box">
                                 <span class="text-gold font-display text-lg" id="countdown-days">14</span>
-                                <span class="text-xs text-gray-500 block" data-vi="ngày" data-cn="天">ngày</span>
+                                <span class="text-xs text-gray-500 block" data-i18n="common.天">ngày</span>
                             </div>
                             <span class="text-gold text-xl">:</span>
                             <div class="countdown-box">
                                 <span class="text-gold font-display text-lg" id="countdown-hours">05</span>
-                                <span class="text-xs text-gray-500 block" data-vi="giờ" data-cn="时">giờ</span>
+                                <span class="text-xs text-gray-500 block" data-i18n="common.时">giờ</span>
                             </div>
                             <span class="text-gold text-xl">:</span>
                             <div class="countdown-box">
                                 <span class="text-gold font-display text-lg" id="countdown-minutes">32</span>
-                                <span class="text-xs text-gray-500 block" data-vi="phút" data-cn="分">phút</span>
+                                <span class="text-xs text-gray-500 block" data-i18n="common.分">phút</span>
                             </div>
                             <span class="text-gold text-xl">:</span>
                             <div class="countdown-box">
                                 <span class="text-gold font-display text-lg" id="countdown-seconds">18</span>
-                                <span class="text-xs text-gray-500 block" data-vi="giây" data-cn="秒">giây</span>
+                                <span class="text-xs text-gray-500 block" data-i18n="common.秒">giây</span>
                             </div>
                         </div>
                         <!-- 报名截止提示 -->
-                        <p class="text-xs text-amber-400 mt-3" id="registration-deadline-hint" data-vi="* Đăng ký sẽ đóng khi đếm ngược kết thúc" data-cn="* 倒计时结束后停止加入阵营">* Đăng ký sẽ đóng khi đếm ngược kết thúc</p>
+                        <p class="text-xs text-amber-400 mt-3" id="registration-deadline-hint" data-i18n="streamers.倒计时结束后停止加入阵营">* Đăng ký sẽ đóng khi đếm ngược kết thúc</p>
                     </div>
                     
                     <!-- 报名已截止 / 活动开始状态 (倒计时结束后显示) -->
@@ -288,12 +288,12 @@
                         <div class="bg-gradient-to-r from-red-500/20 via-red-500/10 to-red-500/20 border border-red-500/40 rounded-2xl px-8 py-6 text-center">
                             <div class="flex items-center justify-center gap-3 mb-2">
                                 <i class="fas fa-lock text-red-400 text-xl"></i>
-                                <span class="text-red-400 font-bold text-lg" data-vi="ĐĂNG KÝ ĐÃ ĐÓNG" data-cn="报名已截止">ĐĂNG KÝ ĐÃ ĐÓNG</span>
+                                <span class="text-red-400 font-bold text-lg" data-i18n="common.报名已截止">ĐĂNG KÝ ĐÃ ĐÓNG</span>
                             </div>
-                            <p class="text-gray-300 text-sm mb-4" data-vi="Phe chiến đã định, cuộc chiến sắp bắt đầu" data-cn="阵营已定，战役即将开启">Phe chiến đã định, cuộc chiến sắp bắt đầu</p>
+                            <p class="text-gray-300 text-sm mb-4" data-i18n="streamers.阵营已定战役即将开启">Phe chiến đã định, cuộc chiến sắp bắt đầu</p>
                             
                             <div class="border-t border-red-500/20 pt-4 mt-4">
-                                <p class="text-gold text-xs mb-2" data-vi="THỜI GIAN CHIẾN ĐẤU" data-cn="对抗开战时间">THỜI GIAN CHIẾN ĐẤU</p>
+                                <p class="text-gold text-xs mb-2" data-i18n="common.对抗开战时间">THỜI GIAN CHIẾN ĐẤU</p>
                                 <p class="text-white font-display text-2xl font-bold">01/04/2026</p>
                                 <p class="text-gold font-bold text-lg">20:00 (GMT+7)</p>
                             </div>
@@ -307,9 +307,9 @@
                             <div class="flex flex-col lg:flex-row items-center justify-center gap-4 text-center">
                                 <div class="flex items-center gap-3">
                                     <i class="fas fa-lock text-amber-500 text-xl"></i>
-                                    <span class="text-gray-300" data-vi="Vui lòng đăng nhập để tham gia phe" data-cn="请先登录以加入阵营">Vui lòng đăng nhập để tham gia phe</span>
+                                    <span class="text-gray-300" data-i18n="common.请先登录以加入阵营">Vui lòng đăng nhập để tham gia phe</span>
                                 </div>
-                                <button onclick="showLoginModal()" class="px-6 py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all cursor-pointer" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</button>
+                                <button onclick="showLoginModal()" class="px-6 py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all cursor-pointer" data-i18n="common.登录_5">Đăng nhập</button>
                             </div>
                         </div>
                         <!-- 未激活 -->
@@ -317,11 +317,11 @@
                             <div class="flex flex-col lg:flex-row items-center justify-center gap-4 text-center">
                                 <div class="flex items-center gap-3">
                                     <i class="fas fa-exclamation-triangle text-amber-500 text-xl"></i>
-                                    <span class="text-gray-300" data-vi="Cần vào game tạo nhân vật để tham gia phe" data-cn="需要进入游戏创建角色才能加入阵营">Cần vào game tạo nhân vật để tham gia phe</span>
+                                    <span class="text-gray-300" data-i18n="streamers.需要进入游戏创建角色才能加入阵营">Cần vào game tạo nhân vật để tham gia phe</span>
                                 </div>
                                 <div class="flex gap-2">
-                                    <button onclick="showDownloadModal()" class="px-4 py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all cursor-pointer" data-vi="Tải game" data-cn="下载游戏">Tải game</button>
-                                    <button onclick="showHowToPlay()" class="px-4 py-2 border border-mist text-mist rounded-full text-sm font-medium hover:bg-mist/10 transition-all cursor-pointer" data-vi="Hướng dẫn" data-cn="如何进入">Hướng dẫn</button>
+                                    <button onclick="showDownloadModal()" class="px-4 py-2 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all cursor-pointer" data-i18n="common.下载游戏">Tải game</button>
+                                    <button onclick="showHowToPlay()" class="px-4 py-2 border border-mist text-mist rounded-full text-sm font-medium hover:bg-mist/10 transition-all cursor-pointer" data-i18n="common.如何进入">Hướng dẫn</button>
                                 </div>
                             </div>
                         </div>
@@ -396,7 +396,7 @@
                             </div>
                             <h2 class="text-xl font-bold text-white section-title-shadow">Quân Đoàn Chiến</h2>
                         </div>
-                        <span class="text-xs text-gray-400" data-vi="Chọn 1 phe" data-cn="只能选择一个">Chọn 1 phe</span>
+                        <span class="text-xs text-gray-400" data-i18n="common.只能选择一个_1">Chọn 1 phe</span>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
@@ -406,8 +406,8 @@
                                 <img src="assets/heni.jpeg" alt="heni" class="w-full h-full object-cover">
                             </div>
                             <h3 class="text-gold font-bold text-base mb-1">heni</h3>
-                            <p class="text-white text-xs mb-2" id="q-heni-count">523 <span class="text-xs text-gray-400" data-vi="ngườii" data-cn="人">ngườii</span></p>
-                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="q-heni-btn" data-vi="Tham gia" data-cn="加入阵营">Tham gia</button>
+                            <p class="text-white text-xs mb-2" id="q-heni-count">523 <span class="text-xs text-gray-400" data-i18n="common.人_3">ngườii</span></p>
+                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="q-heni-btn" data-i18n="streamers.加入阵营_3">Tham gia</button>
                         </div>
                         
                         <!-- ricon -->
@@ -416,8 +416,8 @@
                                 <img src="assets/ricon.jpeg" alt="ricon" class="w-full h-full object-cover">
                             </div>
                             <h3 class="text-gold font-bold text-base mb-1">ricon</h3>
-                            <p class="text-white text-xs mb-2" id="q-ricon-count">689 <span class="text-xs text-gray-400" data-vi="ngườii" data-cn="人">ngườii</span></p>
-                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="q-ricon-btn" data-vi="Tham gia" data-cn="加入阵营">Tham gia</button>
+                            <p class="text-white text-xs mb-2" id="q-ricon-count">689 <span class="text-xs text-gray-400" data-i18n="common.人_3">ngườii</span></p>
+                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="q-ricon-btn" data-i18n="streamers.加入阵营_3">Tham gia</button>
                         </div>
                     </div>
                     
@@ -432,14 +432,14 @@
                     <!-- Q服 Discord 入口 -->
                     <div id="q-discord-hint" class="hidden mt-3">
                         <!-- heni Discord -->
-                        <a id="q-heni-discord" href="https://discord.gg/9BGHDX56U" target="_blank" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
+                        <a id="q-heni-discord" href="https://discord.gg/9BGHDX56U" target="_blank" onclick="Analytics.track('discord_click', {server:'q', streamer:'heni'})" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
                             <i class="fab fa-discord"></i>
-                            <span data-vi="Tham gia Discord heni" data-cn="加入 heni Discord">Tham gia Discord heni</span>
+                            <span data-i18n="streamers.加入_heni_Discord">Tham gia Discord heni</span>
                         </a>
                         <!-- ricon Discord -->
-                        <a id="q-ricon-discord" href="https://discord.gg/hbn4y6nwR" target="_blank" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
+                        <a id="q-ricon-discord" href="https://discord.gg/hbn4y6nwR" target="_blank" onclick="Analytics.track('discord_click', {server:'q', streamer:'ricon'})" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
                             <i class="fab fa-discord"></i>
-                            <span data-vi="Tham gia Discord ricon" data-cn="加入 ricon Discord">Tham gia Discord ricon</span>
+                            <span data-i18n="streamers.加入_ricon_Discord">Tham gia Discord ricon</span>
                         </a>
                     </div>
                 </div>
@@ -453,7 +453,7 @@
                             </div>
                             <h2 class="text-xl font-bold text-white section-title-shadow">Khủng Long Chi Chiến</h2>
                         </div>
-                        <span class="text-xs text-gray-400" data-vi="Chọn 1 phe" data-cn="只能选择一个">Chọn 1 phe</span>
+                        <span class="text-xs text-gray-400" data-i18n="common.只能选择一个_1">Chọn 1 phe</span>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
@@ -463,8 +463,8 @@
                                 <img src="assets/sua-chua.jpeg" alt="Sữa Chua" class="w-full h-full object-cover">
                             </div>
                             <h3 class="text-gold font-bold text-base mb-1">Sữa Chua</h3>
-                            <p class="text-white text-xs mb-2" id="k-suachua-count">892 <span class="text-xs text-gray-400" data-vi="ngườii" data-cn="人">ngườii</span></p>
-                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="k-suachua-btn" data-vi="Tham gia" data-cn="加入阵营">Tham gia</button>
+                            <p class="text-white text-xs mb-2" id="k-suachua-count">892 <span class="text-xs text-gray-400" data-i18n="common.人_3">ngườii</span></p>
+                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="k-suachua-btn" data-i18n="streamers.加入阵营_3">Tham gia</button>
                         </div>
                         
                         <!-- MiuMiu -->
@@ -473,8 +473,8 @@
                                 <img src="assets/miumiu.jpeg" alt="MiuMiu" class="w-full h-full object-cover">
                             </div>
                             <h3 class="text-gold font-bold text-base mb-1">MiuMiu</h3>
-                            <p class="text-white text-xs mb-2" id="k-miumiu-count">456 <span class="text-xs text-gray-400" data-vi="ngườii" data-cn="人">ngườii</span></p>
-                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="k-miumiu-btn" data-vi="Tham gia" data-cn="加入阵营">Tham gia</button>
+                            <p class="text-white text-xs mb-2" id="k-miumiu-count">456 <span class="text-xs text-gray-400" data-i18n="common.人_3">ngườii</span></p>
+                            <button class="w-full py-1.5 rounded-full text-xs font-medium transition-all" id="k-miumiu-btn" data-i18n="streamers.加入阵营_3">Tham gia</button>
                         </div>
                     </div>
                     
@@ -489,14 +489,14 @@
                     <!-- K服 Discord 入口 -->
                     <div id="k-discord-hint" class="hidden mt-3">
                         <!-- Sữa Chua Discord -->
-                        <a id="k-suachua-discord" href="https://discord.gg/5ujDrmCHa" target="_blank" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
+                        <a id="k-suachua-discord" href="https://discord.gg/5ujDrmCHa" target="_blank" onclick="Analytics.track('discord_click', {server:'k', streamer:'suachua'})" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
                             <i class="fab fa-discord"></i>
-                            <span data-vi="Tham gia Discord Sữa Chua" data-cn="加入 Sữa Chua Discord">Tham gia Discord Sữa Chua</span>
+                            <span data-i18n="streamers.加入_Sữa_Chua_Discord">Tham gia Discord Sữa Chua</span>
                         </a>
                         <!-- MiuMiu Discord -->
-                        <a id="k-miumiu-discord" href="https://discord.gg/zaU4tf2Rd" target="_blank" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
+                        <a id="k-miumiu-discord" href="https://discord.gg/zaU4tf2Rd" target="_blank" onclick="Analytics.track('discord_click', {server:'k', streamer:'miumiu'})" class="hidden flex items-center justify-center gap-2 w-full py-2 bg-[#5865F2]/20 hover:bg-[#5865F2]/30 border border-[#5865F2]/50 rounded-lg text-[#5865F2] text-sm font-medium transition-all">
                             <i class="fab fa-discord"></i>
-                            <span data-vi="Tham gia Discord MiuMiu" data-cn="加入 MiuMiu Discord">Tham gia Discord MiuMiu</span>
+                            <span data-i18n="streamers.加入_MiuMiu_Discord">Tham gia Discord MiuMiu</span>
                         </a>
                     </div>
                 </div>
@@ -510,9 +510,9 @@
                 <div class="text-center mb-6">
                     <h3 class="text-2xl font-bold text-gold font-display mb-2 section-title-shadow">
                         <i class="fas fa-crown mr-2"></i>
-                        <span data-vi="Phúc Lợi Quý Hiếm" data-cn="尊贵福利">Phúc Lợi Quý Hiếm</span>
+                        <span data-i18n="common.尊贵福利">Phúc Lợi Quý Hiếm</span>
                     </h3>
-                    <p class="text-gold-light text-sm" data-vi="Độc quyền dành cho chiến binh trung thành" data-cn="专属忠诚战士的荣耀">Độc quyền dành cho chiến binh trung thành</p>
+                    <p class="text-gold-light text-sm" data-i18n="common.专属忠诚战士的荣耀">Độc quyền dành cho chiến binh trung thành</p>
                     <div class="w-24 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mt-3"></div>
                 </div>
                 
@@ -520,7 +520,7 @@
                 <div class="bg-gradient-to-r from-gold/10 via-gold/5 to-gold/10 rounded-xl p-4 mb-6 border border-gold/30">
                     <div class="flex items-center justify-center gap-3">
                         <i class="fas fa-medal text-gold text-xl"></i>
-                        <p class="text-gold-light text-sm font-medium" data-vi="Gia nhập phe → Mở khóa ưu đãi độc quyền" data-cn="加入阵营 → 解锁专属优惠">Gia nhập phe → Mở khóa ưu đãi độc quyền</p>
+                        <p class="text-gold-light text-sm font-medium" data-i18n="streamers.加入阵营__解锁专属优惠">Gia nhập phe → Mở khóa ưu đãi độc quyền</p>
                     </div>
                 </div>
 
@@ -528,22 +528,28 @@
                 <div class="mb-8">
                     <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2 section-title-shadow">
                         <i class="fas fa-star text-gold"></i>
-                        <span data-vi="Skin Dũng Sĩ Cận Vệ - Độc quyền Streamer" data-cn="亲卫勇士皮肤 - 主播限定">Skin Dũng Sĩ Cận Vệ - Độc quyền Streamer</span>
-                        <span class="px-2 py-0.5 bg-gold/20 text-gold text-xs rounded-full" data-vi="4 loại" data-cn="4 款">4 loại</span>
-                        <span class="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs rounded-full" data-vi="Ưu Đãi Có Hạn" data-cn="限时福利特惠">Ưu Đãi Có Hạn</span>
+                        <span data-i18n="skins.亲卫勇士皮肤__主播限定">Skin Dũng Sĩ Cận Vệ - Độc quyền Streamer</span>
+                        <span class="px-2 py-0.5 bg-gold/20 text-gold text-xs rounded-full" data-i18n="common.4_款">4 loại</span>
+                        <span class="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs rounded-full" data-i18n="common.限时福利特惠_1">Ưu Đãi Có Hạn</span>
                     </h4>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- heni 皮肤 -->
                         <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-gold/30 overflow-hidden group">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
-                                <img id="warrior-img-heni" src="assets/warrior-skin-default.png" alt="heni Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
-                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <img id="warrior-img-heni" src="assets/streamer-skin-heni.png" alt="heni Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900/30 via-transparent to-transparent"></div>
+                                <!-- 限定标签 - 遮罩隐藏时显示 -->
+                                <div class="absolute top-2 left-2 z-0">
+                                    <span class="px-2 py-0.5 bg-gold/90 text-jungle-900 text-[10px] font-bold rounded-full shadow-lg border border-white/20">
+                                        <i class="fas fa-star mr-1"></i>限定
+                                    </span>
+                                </div>
                                 <!-- 即将公布 - 尊贵版 -->
-                                <div id="warrior-overlay-heni" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                                <div id="warrior-overlay-heni" class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center z-10">
                                     <div class="px-4 py-2 bg-gradient-to-r from-purple-600/90 via-gold/80 to-purple-600/90 rounded-full shadow-lg border border-gold/50 animate-pulse">
                                         <span class="flex items-center gap-2 text-white text-xs font-bold">
                                             <i class="fas fa-crown text-gold"></i>
-                                            <span data-vi="Sắp tiết lộ" data-cn="即将揭晓">Sắp tiết lộ</span>
+                                            <span data-i18n="common.即将揭晓_3">Sắp tiết lộ</span>
                                             <i class="fas fa-crown text-gold"></i>
                                         </span>
                                     </div>
@@ -556,12 +562,12 @@
                                 <div id="warrior-price-heni" class="mt-2">
                                     <div class="flex items-center justify-between">
                                         <div>
-                                            <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: 3,888,000đ</span>
+                                            <span class="text-gray-400 text-xs line-through" data-i18n="common.原价_4">Giá gốc: 3,888,000đ</span>
                                             <div class="flex items-center gap-2 mt-1">
-                                                <span class="text-gold font-bold text-sm" data-vi="Giá cuối cùng phụ thuộc kết quả phe" data-cn="最终售价取决于阵营结果">Giá cuối cùng phụ thuộc kết quả phe</span>
+                                                <span class="text-gold font-bold text-sm" data-i18n="streamers.最终售价取决于阵营结果_3">Giá cuối cùng phụ thuộc kết quả phe</span>
                                             </div>
                                         </div>
-                                        <button onclick="showPurchaseModal('warrior', 'heni')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-vi="Mua ngay" data-cn="立即购买">Mua ngay</button>
+                                        <button onclick="showPurchaseModal('warrior', 'heni')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-i18n="common.立即购买_4">Mua ngay</button>
                                     </div>
                                 </div>
                             </div>
@@ -569,14 +575,20 @@
                         <!-- ricon 皮肤 -->
                         <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-gold/30 overflow-hidden group">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
-                                <img id="warrior-img-ricon" src="assets/warrior-skin-default.png" alt="ricon Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
-                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <img id="warrior-img-ricon" src="assets/streamer-skin-ricon.png" alt="ricon Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900/30 via-transparent to-transparent"></div>
+                                <!-- 限定标签 - 遮罩隐藏时显示 -->
+                                <div class="absolute top-2 left-2 z-0">
+                                    <span class="px-2 py-0.5 bg-gold/90 text-jungle-900 text-[10px] font-bold rounded-full shadow-lg border border-white/20">
+                                        <i class="fas fa-star mr-1"></i>限定
+                                    </span>
+                                </div>
                                 <!-- 即将公布 - 尊贵版 -->
-                                <div id="warrior-overlay-ricon" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                                <div id="warrior-overlay-ricon" class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center z-10">
                                     <div class="px-4 py-2 bg-gradient-to-r from-purple-600/90 via-gold/80 to-purple-600/90 rounded-full shadow-lg border border-gold/50 animate-pulse">
                                         <span class="flex items-center gap-2 text-white text-xs font-bold">
                                             <i class="fas fa-crown text-gold"></i>
-                                            <span data-vi="Sắp tiết lộ" data-cn="即将揭晓">Sắp tiết lộ</span>
+                                            <span data-i18n="common.即将揭晓_3">Sắp tiết lộ</span>
                                             <i class="fas fa-crown text-gold"></i>
                                         </span>
                                     </div>
@@ -589,12 +601,12 @@
                                 <div id="warrior-price-ricon" class="mt-2">
                                     <div class="flex items-center justify-between">
                                         <div>
-                                            <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: 3,888,000đ</span>
+                                            <span class="text-gray-400 text-xs line-through" data-i18n="common.原价_4">Giá gốc: 3,888,000đ</span>
                                             <div class="flex items-center gap-2 mt-1">
-                                                <span class="text-gold font-bold text-sm" data-vi="Giá cuối cùng phụ thuộc kết quả phe" data-cn="最终售价取决于阵营结果">Giá cuối cùng phụ thuộc kết quả phe</span>
+                                                <span class="text-gold font-bold text-sm" data-i18n="streamers.最终售价取决于阵营结果_3">Giá cuối cùng phụ thuộc kết quả phe</span>
                                             </div>
                                         </div>
-                                        <button onclick="showPurchaseModal('warrior', 'ricon')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-vi="Mua ngay" data-cn="立即购买">Mua ngay</button>
+                                        <button onclick="showPurchaseModal('warrior', 'ricon')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-i18n="common.立即购买_4">Mua ngay</button>
                                     </div>
                                 </div>
                             </div>
@@ -602,14 +614,20 @@
                         <!-- Sữa Chua 皮肤 -->
                         <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-gold/30 overflow-hidden group">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
-                                <img id="warrior-img-suachua" src="assets/warrior-skin-default.png" alt="Sữa Chua Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
-                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <img id="warrior-img-suachua" src="assets/streamer-skin-suachua.png" alt="Sữa Chua Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900/30 via-transparent to-transparent"></div>
+                                <!-- 限定标签 - 遮罩隐藏时显示 -->
+                                <div class="absolute top-2 left-2 z-0">
+                                    <span class="px-2 py-0.5 bg-gold/90 text-jungle-900 text-[10px] font-bold rounded-full shadow-lg border border-white/20">
+                                        <i class="fas fa-star mr-1"></i>限定
+                                    </span>
+                                </div>
                                 <!-- 即将公布 - 尊贵版 -->
-                                <div id="warrior-overlay-suachua" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                                <div id="warrior-overlay-suachua" class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center z-10">
                                     <div class="px-4 py-2 bg-gradient-to-r from-purple-600/90 via-gold/80 to-purple-600/90 rounded-full shadow-lg border border-gold/50 animate-pulse">
                                         <span class="flex items-center gap-2 text-white text-xs font-bold">
                                             <i class="fas fa-crown text-gold"></i>
-                                            <span data-vi="Sắp tiết lộ" data-cn="即将揭晓">Sắp tiết lộ</span>
+                                            <span data-i18n="common.即将揭晓_3">Sắp tiết lộ</span>
                                             <i class="fas fa-crown text-gold"></i>
                                         </span>
                                     </div>
@@ -622,12 +640,12 @@
                                 <div id="warrior-price-suachua" class="mt-2">
                                     <div class="flex items-center justify-between">
                                         <div>
-                                            <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: 3,888,000đ</span>
+                                            <span class="text-gray-400 text-xs line-through" data-i18n="common.原价_4">Giá gốc: 3,888,000đ</span>
                                             <div class="flex items-center gap-2 mt-1">
-                                                <span class="text-gold font-bold text-sm" data-vi="Giá cuối cùng phụ thuộc kết quả phe" data-cn="最终售价取决于阵营结果">Giá cuối cùng phụ thuộc kết quả phe</span>
+                                                <span class="text-gold font-bold text-sm" data-i18n="streamers.最终售价取决于阵营结果_3">Giá cuối cùng phụ thuộc kết quả phe</span>
                                             </div>
                                         </div>
-                                        <button onclick="showPurchaseModal('warrior', 'suachua')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-vi="Mua ngay" data-cn="立即购买">Mua ngay</button>
+                                        <button onclick="showPurchaseModal('warrior', 'suachua')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-i18n="common.立即购买_4">Mua ngay</button>
                                     </div>
                                 </div>
                             </div>
@@ -635,14 +653,20 @@
                         <!-- MiuMiu 皮肤 -->
                         <div class="bg-gradient-to-b from-jungle-700/60 to-jungle-800/40 rounded-xl border border-gold/30 overflow-hidden group">
                             <div class="relative w-full aspect-square overflow-hidden bg-black">
-                                <img id="warrior-img-miumiu" src="assets/warrior-skin-default.png" alt="MiuMiu Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
-                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                                <img id="warrior-img-miumiu" src="assets/streamer-skin-miumiu.png" alt="MiuMiu Skin" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-t from-jungle-900/30 via-transparent to-transparent"></div>
+                                <!-- 限定标签 - 遮罩隐藏时显示 -->
+                                <div class="absolute top-2 left-2 z-0">
+                                    <span class="px-2 py-0.5 bg-gold/90 text-jungle-900 text-[10px] font-bold rounded-full shadow-lg border border-white/20">
+                                        <i class="fas fa-star mr-1"></i>限定
+                                    </span>
+                                </div>
                                 <!-- 即将公布 - 尊贵版 -->
-                                <div id="warrior-overlay-miumiu" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                                <div id="warrior-overlay-miumiu" class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center z-10">
                                     <div class="px-4 py-2 bg-gradient-to-r from-purple-600/90 via-gold/80 to-purple-600/90 rounded-full shadow-lg border border-gold/50 animate-pulse">
                                         <span class="flex items-center gap-2 text-white text-xs font-bold">
                                             <i class="fas fa-crown text-gold"></i>
-                                            <span data-vi="Sắp tiết lộ" data-cn="即将揭晓">Sắp tiết lộ</span>
+                                            <span data-i18n="common.即将揭晓_3">Sắp tiết lộ</span>
                                             <i class="fas fa-crown text-gold"></i>
                                         </span>
                                     </div>
@@ -655,12 +679,12 @@
                                 <div id="warrior-price-miumiu" class="mt-2">
                                     <div class="flex items-center justify-between">
                                         <div>
-                                            <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: 3,888,000đ</span>
+                                            <span class="text-gray-400 text-xs line-through" data-i18n="common.原价_4">Giá gốc: 3,888,000đ</span>
                                             <div class="flex items-center gap-2 mt-1">
-                                                <span class="text-gold font-bold text-sm" data-vi="Giá cuối cùng phụ thuộc kết quả phe" data-cn="最终售价取决于阵营结果">Giá cuối cùng phụ thuộc kết quả phe</span>
+                                                <span class="text-gold font-bold text-sm" data-i18n="streamers.最终售价取决于阵营结果_3">Giá cuối cùng phụ thuộc kết quả phe</span>
                                             </div>
                                         </div>
-                                        <button onclick="showPurchaseModal('warrior', 'miumiu')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-vi="Mua ngay" data-cn="立即购买">Mua ngay</button>
+                                        <button onclick="showPurchaseModal('warrior', 'miumiu')" class="px-3 py-1.5 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 text-xs font-bold rounded-full hover:brightness-110 transition-all" data-i18n="common.立即购买_4">Mua ngay</button>
                                     </div>
                                 </div>
                             </div>
@@ -676,19 +700,19 @@
                         
                         <!-- 礼包图片 -->
                         <div class="relative w-full aspect-square max-h-64 overflow-hidden bg-black">
-                            <video id="overlord-img" autoplay loop muted playsinline class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 hidden" poster="assets/overlord-skin-default.png">
+                            <video id="overlord-img" autoplay loop muted playsinline class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 hidden" poster="assets/overlord-red.png">
                                 <source src="assets/overlord-preview.mp4" type="video/mp4">
                                 <img src="assets/overlord-red.png" alt="Bá Chủ Thờii Tiền Sử" class="w-full h-full object-contain">
                             </video>
                             <!-- 默认占位图 -->
-                            <img id="overlord-default-img" src="assets/overlord-skin-default.png" alt="Bá Chủ Thờii Tiền Sử" class="w-full h-full object-contain">
-                            <div class="absolute inset-0 bg-gradient-to-t from-jungle-900 via-transparent to-transparent"></div>
+                            <img id="overlord-default-img" src="assets/overlord-red.png" alt="Bá Chủ Thờii Tiền Sử" class="w-full h-full object-contain">
+                            <div class="absolute inset-0 bg-gradient-to-t from-jungle-900/30 via-transparent to-transparent"></div>
                             <!-- 即将公布 - 至尊版（史前霸主专属） -->
                             <div id="overlord-overlay" class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
                                 <div class="px-6 py-3 bg-gradient-to-r from-red-600/90 via-gold/90 to-red-600/90 rounded-xl shadow-2xl border-2 border-gold animate-pulse">
                                     <span class="flex items-center gap-3 text-white font-bold text-sm">
                                         <i class="fas fa-gem text-gold text-lg"></i>
-                                        <span data-vi="Sắp trình làng" data-cn="即将登场">Sắp trình làng</span>
+                                        <span data-i18n="common.即将登场">Sắp trình làng</span>
                                         <i class="fas fa-gem text-gold text-lg"></i>
                                     </span>
                                 </div>
@@ -705,55 +729,55 @@
                             <div class="absolute top-3 left-3 flex gap-2">
                                 <span class="inline-flex items-center gap-1 px-3 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full shadow-lg">
                                     <i class="fas fa-fire"></i>
-                                    <span data-vi="Cực Hiếm" data-cn="超稀有">Cực Hiếm</span>
+                                    <span data-i18n="common.超稀有">Cực Hiếm</span>
                                 </span>
                             </div>
                             <!-- 限时福利特惠标签 -->
                             <div class="absolute top-3 right-3">
                                 <span class="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
                                     <i class="fas fa-clock"></i>
-                                    <span data-vi="Ưu Đãi Có Hạn" data-cn="限时福利特惠">Ưu Đãi Có Hạn</span>
+                                    <span data-i18n="common.限时福利特惠_1">Ưu Đãi Có Hạn</span>
                                 </span>
                             </div>
                         </div>
                         
                         <div class="p-5 relative">
                             <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-red-400 font-bold text-lg" data-vi="Bá Chủ Thờii Tiền Sử Gói" data-cn="史前霸主礼包">Bá Chủ Thờii Tiền Sử Gói</h4>
+                                <h4 class="text-red-400 font-bold text-lg" data-i18n="common.史前霸主礼包">Bá Chủ Thờii Tiền Sử Gói</h4>
                                 <i class="fas fa-crown text-red-400/60"></i>
                             </div>
                             
                             <div class="space-y-2 mb-4">
-                                <p class="text-gray-300 text-sm leading-relaxed" data-vi="Quyền uy tuyệt đối — Biểu tượng của sức mạnh vô song, chỉ dành cho kẻ đứng đầu" data-cn="绝对权威 —— 无双力量的象征，只为登顶者">Quyền uy tuyệt đối — Biểu tượng của sức mạnh vô song, chỉ dành cho kẻ đứng đầu</p>
+                                <p class="text-gray-300 text-sm leading-relaxed" data-i18n="common.绝对权威__无双力量的象征只为登顶者">Quyền uy tuyệt đối — Biểu tượng của sức mạnh vô song, chỉ dành cho kẻ đứng đầu</p>
                             </div>
                             
                             <!-- 霸主价格显示 -->
                             <div id="overlord-price-section" class="bg-gradient-to-r from-red-950/50 to-jungle-900/50 rounded-lg p-3 border border-red-500/20 mb-3">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <span class="text-gray-400 text-xs line-through" data-vi="Giá gốc" data-cn="原价">Giá gốc: <span id="overlord-original-price"></span></span>
+                                        <span class="text-gray-400 text-xs line-through" data-i18n="common.原价_4">Giá gốc: <span id="overlord-original-price"></span></span>
                                         <div class="flex items-center gap-2 mt-1">
                                             <span class="text-red-400 font-bold text-lg" id="overlord-current-price"></span>
                                             <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full" id="overlord-discount">-34%</span>
                                         </div>
                                     </div>
-                                    <button onclick="showPurchaseModal('overlord')" class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold rounded-full hover:brightness-110 transition-all" data-vi="Mua ngay" data-cn="立即购买">Mua ngay</button>
+                                    <button onclick="showPurchaseModal('overlord')" class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold rounded-full hover:brightness-110 transition-all" data-i18n="common.立即购买_4">Mua ngay</button>
                                 </div>
                             </div>
                             
                             <div class="bg-gradient-to-r from-red-950/50 to-jungle-900/50 rounded-lg p-3 border border-red-500/20">
                                 <div class="flex items-center gap-2 text-xs text-red-400 mb-2">
                                     <i class="fas fa-crown"></i>
-                                    <span class="font-medium" data-vi="Báu vật thượng đẳng" data-cn="至高珍宝">Báu vật thượng đẳng</span>
+                                    <span class="font-medium" data-i18n="common.至高珍宝">Báu vật thượng đẳng</span>
                                 </div>
                                 <ul class="text-xs text-gray-400 space-y-1">
                                     <li class="flex items-start gap-2">
                                         <i class="fas fa-check text-red-500 mt-0.5 text-[10px]"></i>
-                                        <span data-vi="Siêu phẩm chỉ dành cho ngườii chơi phe" data-cn="阵营玩家专属超品">Siêu phẩm chỉ dành cho ngườii chơi phe</span>
+                                        <span data-i18n="streamers.阵营玩家专属超品">Siêu phẩm chỉ dành cho ngườii chơi phe</span>
                                     </li>
                                     <li class="flex items-start gap-2">
                                         <i class="fas fa-check text-red-500 mt-0.5 text-[10px]"></i>
-                                        <span data-vi="Cơ hội sở hữu duy nhất trong sự kiện" data-cn="活动期间唯一获取机会">Cơ hội sở hữu duy nhất trong sự kiện</span>
+                                        <span data-i18n="common.活动期间唯一获取机会">Cơ hội sở hữu duy nhất trong sự kiện</span>
                                     </li>
                                 </ul>
                             </div>
@@ -763,7 +787,7 @@
                 
                 <!-- 底部提示 -->
                 <div class="mt-6 text-center">
-                    <p class="text-xs text-gray-500" data-vi="* Chi tiết phúc lợi sẽ được cập nhật theo từng giai đoạn. Vui lòng theo dõi trang chính thức." data-cn="* 福利详情将分阶段公布，请关注官方主页">* Chi tiết phúc lợi sẽ được cập nhật theo từng giai đoạn. Vui lòng theo dõi trang chính thức.</p>
+                    <p class="text-xs text-gray-500" data-i18n="common.福利详情将分阶段公布请关注官方主页">* Chi tiết phúc lợi sẽ được cập nhật theo từng giai đoạn. Vui lòng theo dõi trang chính thức.</p>
                 </div>
             </div>
         </section>
@@ -774,76 +798,82 @@
                 <button onclick="toggleRules()" class="w-full p-6 flex items-center justify-between hover:bg-jungle-700/30 transition-colors cursor-pointer">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2 section-title-shadow">
                         <i class="fas fa-file-alt text-gold"></i>
-                        <span data-vi="Thể Lệ Sự Kiện" data-cn="活动规则">Thể Lệ Sự Kiện</span>
+                        <span data-i18n="rules.活动规则_1">Thể Lệ Sự Kiện</span>
                     </h3>
                     <i class="fas fa-chevron-down text-gray-400 transition-transform" id="rules-icon"></i>
                 </button>
                 <div id="rules-content" class="hidden border-t border-mist/20">
                     <div class="p-6 space-y-4 text-sm text-gray-200">
                         <div class="card-glass rounded-xl p-4">
-                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-clock mr-2"></i><span data-vi="Thờii gian sự kiện" data-cn="活动时间">Thờii gian sự kiện</span></h4>
-                            <p class="text-gray-200" data-vi="01/04/2026 (thờii gian cụ thể sẽ thông báo sau)" data-cn="2026年4月1日（具体时间请关注后续公告）">01/04/2026 (thờii gian cụ thể sẽ thông báo sau)</p>
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-clock mr-2"></i><span data-i18n="common.活动时间">Thờii gian sự kiện</span></h4>
+                            <p class="text-gray-200" data-i18n="common.2026年4月1日具体时间请关注后续公告">01/04/2026 (thờii gian cụ thể sẽ thông báo sau)</p>
                         </div>
                         
                         <div class="card-glass rounded-xl p-4">
-                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-users mr-2"></i><span data-vi="Cách tham gia" data-cn="参与方式">Cách tham gia</span></h4>
-                            <p class="text-gray-200" data-vi="1. Đăng nhập tài khoản game và chọn phe tham gia" data-cn="1. 登录游戏账号并选择阵营加入">1. Đăng nhập tài khoản game và chọn phe tham gia</p>
-                            <p class="text-gray-200" data-vi="2. Mỗi server có 2 phe streamer đối đầu, chọn phe bạn ủng hộ" data-cn="2. 每个服务器有2个主播阵营对决，选择您支持的主播阵营">2. Mỗi server có 2 phe streamer đối đầu, chọn phe bạn ủng hộ</p>
-                            <p class="text-gray-200" data-vi="3. Sau khi gia nhập phe, tham gia Discord của streamer để nhận chỉ đạo chiến thuật" data-cn="3. 加入阵营后，进入主播 Discord 接收战术指挥">3. Sau khi gia nhập phe, tham gia Discord của streamer để nhận chỉ đạo chiến thuật</p>
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-users mr-2"></i><span data-i18n="common.参与方式">Cách tham gia</span></h4>
+                            <p class="text-gray-200" data-i18n="common.1_登录游戏账号并选择阵营加入">1. Đăng nhập tài khoản game và chọn phe tham gia</p>
+                            <p class="text-gray-200" data-i18n="streamers.2_每个服务器有2个主播阵营对决选择您支持的主播阵营">2. Mỗi server có 2 phe streamer đối đầu, chọn phe bạn ủng hộ</p>
+                            <p class="text-gray-200" data-i18n="streamers.3_加入阵营后进入主播_Discord_接收战术指挥">3. Sau khi gia nhập phe, tham gia Discord của streamer để nhận chỉ đạo chiến thuật</p>
                         </div>
                         
                         <div class="card-glass rounded-xl p-4">
-                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-shield-alt mr-2"></i><span data-vi="Điều kiện tham gia" data-cn="参与资格">Điều kiện tham gia</span></h4>
-                            <p class="text-gray-200" data-vi="Chỉ ngườii chơi đã vào game và tạo nhân vật mới có thể tham gia phe" data-cn="仅限已进入游戏并创建角色的玩家加入阵营">Chỉ ngườii chơi đã vào game và tạo nhân vật mới có thể tham gia phe</p>
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-shield-alt mr-2"></i><span data-i18n="common.参与资格">Điều kiện tham gia</span></h4>
+                            <p class="text-gray-200" data-i18n="streamers.仅限已进入游戏并创建角色的玩家加入阵营">Chỉ ngườii chơi đã vào game và tạo nhân vật mới có thể tham gia phe</p>
                             <div class="mt-3 bg-[#5865F2]/10 border border-[#5865F2]/30 rounded-lg p-3">
-                                <p class="text-[#5865F2] text-sm font-medium mb-1" data-vi="📌 Về Tổ Chức Qua Discord" data-cn="📌 关于 Discord 组织">📌 Về Tổ Chức Qua Discord</p>
+                                <p class="text-[#5865F2] text-sm font-medium mb-1" data-i18n="streamers.关于_Discord_组织">📌 Về Tổ Chức Qua Discord</p>
                                 <ul class="text-gray-300 text-xs space-y-1">
-                                    <li data-vi="• Tất cả chiến binh sau khi gia nhập phe cần vào Discord của streamer" data-cn="• 所有战士加入阵营后需进入主播 Discord">• Tất cả chiến binh sau khi gia nhập phe cần vào Discord của streamer</li>
-                                    <li data-vi="• Discord là nơi chỉ huy chiến thuật và phân công nhiệm vụ trong sự kiện" data-cn="• Discord 是活动中的战术指挥和任务分配场所">• Discord là nơi chỉ huy chiến thuật và phân công nhiệm vụ trong sự kiện</li>
-                                    <li data-vi="• Streamer sẽ thông báo thờii gian, địa điểm tập trung và chiến thuật qua Discord" data-cn="• 主播将通过 Discord 通知集合时间、地点和战术">• Streamer sẽ thông báo thờii gian, địa điểm tập trung và chiến thuật qua Discord</li>
+                                    <li data-i18n="streamers.所有战士加入阵营后需进入主播_Discord">• Tất cả chiến binh sau khi gia nhập phe cần vào Discord của streamer</li>
+                                    <li data-i18n="streamers.Discord_是活动中的战术指挥和任务分配场所">• Discord là nơi chỉ huy chiến thuật và phân công nhiệm vụ trong sự kiện</li>
+                                    <li data-i18n="streamers.主播将通过_Discord_通知集合时间地点和战术">• Streamer sẽ thông báo thờii gian, địa điểm tập trung và chiến thuật qua Discord</li>
                                 </ul>
                             </div>
                         </div>
                         
                         <div class="card-glass rounded-xl p-4">
-                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-swords mr-2"></i><span data-vi="Đối kháng phe" data-cn="阵营对决">Đối kháng phe</span></h4>
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-swords mr-2"></i><span data-i18n="streamers.阵营对决">Đối kháng phe</span></h4>
                             <p class="text-gray-200">Quân Đoàn Chiến: <span class="text-gold font-bold">heni vs ricon</span></p>
                             <p class="text-gray-200">Khủng Long Chi Chiến: <span class="text-gold font-bold">Sữa Chua vs MiuMiu</span></p>
                         </div>
                         
                         <div class="card-glass rounded-xl p-4">
-                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-gift mr-2"></i><span data-vi="Phúc lợi sự kiện" data-cn="活动福利">Phúc lợi sự kiện</span></h4>
-                            <p class="text-gray-200" data-vi="1. Sau khi tham gia phe thành công, mở khóa quyền mua Dũng Sĩ Cận Vệ Gói" data-cn="1. 加入阵营成功后解锁亲卫勇士礼包购买资格">1. Sau khi tham gia phe thành công, mở khóa quyền mua Dũng Sĩ Cận Vệ Gói</p>
-                            <p class="text-gray-200" data-vi="2. Có thể mua Bá Chủ Thờii Tiền Sử Gói" data-cn="2. 可购买史前霸主礼包">2. Có thể mua Bá Chủ Thờii Tiền Sử Gói</p>
-                            <p class="text-gray-200" data-vi="3. Phúc lợi chỉ dành cho ngườii chơi đã tham gia phe" data-cn="3. 福利仅限加入阵营玩家购买">3. Phúc lợi chỉ dành cho ngườii chơi đã tham gia phe</p>
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-gift mr-2"></i><span data-i18n="common.活动福利">Phúc lợi sự kiện</span></h4>
+                            <p class="text-gray-200" data-i18n="skins.1_加入阵营成功后解锁亲卫勇士礼包购买资格">1. Sau khi tham gia phe thành công, mở khóa quyền mua Dũng Sĩ Cận Vệ Gói</p>
+                            <p class="text-gray-200" data-i18n="common.2_可购买史前霸主礼包">2. Có thể mua Bá Chủ Thờii Tiền Sử Gói</p>
+                            <p class="text-gray-200" data-i18n="streamers.3_福利仅限加入阵营玩家购买">3. Phúc lợi chỉ dành cho ngườii chơi đã tham gia phe</p>
                         </div>
                         
                         <div class="card-glass rounded-xl p-4 bg-amber-500/10 border border-amber-500/30">
-                            <h4 class="font-bold text-amber-400 mb-2"><i class="fas fa-calendar-alt mr-2"></i><span data-vi="Thờii gian phát phúc lợi" data-cn="福利发放时间">Thờii gian phát phúc lợi</span></h4>
-                            <p class="text-gray-200" data-vi="• 01/04/2026: Hạn chót đăng ký, bắt đầu đối kháng 20:00" data-cn="• 2026年4月1日：报名截止，晚间20:00开放对抗">• 01/04/2026: Hạn chót đăng ký, bắt đầu đối kháng 20:00</p>
-                            <p class="text-gray-200" data-vi="• Thờii gian kết thúc sự kiện: Vui lòng xem thông báo chính thức" data-cn="• 活动结束时间：请关注官方公告">• Thờii gian kết thúc sự kiện: Vui lòng xem thông báo chính thức</p>
-                            <p class="text-gray-200" data-vi="• Sau khi sự kiện kết thúc: Mở bán phúc lợi trong 2 tuần" data-cn="• 活动结束后：开放福利购买两周">• Sau khi sự kiện kết thúc: Mở bán phúc lợi trong 2 tuần</p>
-                            <p class="text-amber-400 text-sm mt-2 font-medium" data-vi="📦 Skin sẽ được phát sau khi sự kiện kết thúc. Vui lòng theo dõi thông báo chính thức." data-cn="📦 皮肤将在活动结束后统一发放。请留意官方公告。">📦 Skin sẽ được phát sau khi sự kiện kết thúc. Vui lòng theo dõi thông báo chính thức.</p>
+                            <h4 class="font-bold text-amber-400 mb-2"><i class="fas fa-calendar-alt mr-2"></i><span data-i18n="common.福利发放时间">Thờii gian phát phúc lợi</span></h4>
+                            <p class="text-gray-200" data-i18n="common.2026年4月1日报名截止晚间2000开放对抗">• 01/04/2026: Hạn chót đăng ký, bắt đầu đối kháng 20:00</p>
+                            <p class="text-gray-200" data-i18n="common.活动结束时间请关注官方公告">• Thờii gian kết thúc sự kiện: Vui lòng xem thông báo chính thức</p>
+                            <p class="text-gray-200" data-i18n="common.活动结束后开放福利购买两周">• Sau khi sự kiện kết thúc: Mở bán phúc lợi trong 2 tuần</p>
+                            <p class="text-amber-400 text-sm mt-2 font-medium" data-i18n="skins.皮肤将在活动结束后统一发放请留意官方公告">📦 Skin sẽ được phát sau khi sự kiện kết thúc. Vui lòng theo dõi thông báo chính thức.</p>
                         </div>
                         
                         <div class="card-glass rounded-xl p-4">
-                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-exclamation-circle mr-2"></i><span data-vi="Lưu ý" data-cn="注意事项">Lưu ý</span></h4>
-                            <p class="text-gray-200" data-vi="1. Sau khi tham gia phe thành công không thể đổi phe" data-cn="1. 加入阵营成功后不可更改阵营">1. Sau khi tham gia phe thành công không thể đổi phe</p>
-                            <p class="text-gray-200" data-vi="2. Mỗi tài khoản chỉ được tham gia 1 phe trong mỗi server" data-cn="2. 每个账号每服限加入一个阵营">2. Mỗi tài khoản chỉ được tham gia 1 phe trong mỗi server</p>
-                            <p class="text-gray-200" data-vi="3. Vui lòng tham gia Discord ngay sau khi chọn phe để không bỏ lỡ thông tin chiến thuật" data-cn="3. 选择阵营后请立即加入 Discord，以免错过战术信息">3. Vui lòng tham gia Discord ngay sau khi chọn phe để không bỏ lỡ thông tin chiến thuật</p>
+                            <h4 class="font-bold text-gold mb-2"><i class="fas fa-exclamation-circle mr-2"></i><span data-i18n="common.注意事项">Lưu ý</span></h4>
+                            <p class="text-gray-200" data-i18n="streamers.1_加入阵营成功后不可更改阵营">1. Sau khi tham gia phe thành công không thể đổi phe</p>
+                            <p class="text-gray-200" data-i18n="streamers.2_每个账号每服限加入一个阵营">2. Mỗi tài khoản chỉ được tham gia 1 phe trong mỗi server</p>
+                            <p class="text-gray-200" data-i18n="streamers.3_选择阵营后请立即加入_Discord以免错过战术信息">3. Vui lòng tham gia Discord ngay sau khi chọn phe để không bỏ lỡ thông tin chiến thuật</p>
                         </div>
                         
                         <div class="card-glass rounded-xl p-4">
-                            <h4 class="font-bold text-gold mb-3"><i class="fas fa-headset mr-2"></i><span data-vi="Hỗ trợ & Liên hệ" data-cn="客服支持">Hỗ trợ & Liên hệ</span></h4>
+                            <h4 class="font-bold text-gold mb-3"><i class="fas fa-headset mr-2"></i><span data-i18n="common.客服支持">Hỗ trợ & Liên hệ</span></h4>
                             <div class="flex flex-col lg:flex-row items-center gap-4">
                                 <div class="text-center lg:text-left">
-                                    <p class="text-gray-300 text-sm mb-2" data-vi="Quét mã QR để liên hệ CSKH" data-cn="扫码联系客服">Quét mã QR để liên hệ CSKH</p>
+                                    <p class="text-gray-300 text-sm mb-2" data-i18n="common.扫码联系客服">Quét mã QR để liên hệ CSKH</p>
                                 </div>
-                                <div class="w-24 h-24 bg-white rounded-xl p-2 flex items-center justify-center">
-                                    <img src="assets/cskh-qr.png" alt="CSKH QR" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="w-24 h-24 bg-jungle-700/60 backdrop-blur-sm rounded-xl p-2 flex items-center justify-center group relative cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-gold hover:shadow-lg hover:shadow-gold/20 active:scale-95 border border-mist/20" onclick="showQRModal()" title="点击放大查看">
+                                    <div class="w-full h-full bg-white rounded-lg p-1 shadow-inner">
+                                        <img src="assets/cskh-qr.png" alt="CSKH QR" class="w-full h-full object-contain transition-transform duration-200 group-hover:scale-105" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    </div>
                                     <div class="hidden w-full h-full bg-gray-200 rounded-lg items-center justify-center text-gray-400 text-xs text-center p-2">
                                         <i class="fas fa-qrcode text-2xl mb-1"></i>
                                         <span>Zalo QR</span>
+                                    </div>
+                                    <!-- Hover 提示 -->
+                                    <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                        点击放大
                                     </div>
                                 </div>
                             </div>
@@ -860,12 +890,12 @@
         <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-mist/20">
             <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
             <div class="hidden lg:flex items-center justify-between mb-6">
-                <h3 class="text-white font-bold text-xl section-title-shadow" data-vi="Xác nhận mua hàng" data-cn="确认购买">Xác nhận mua hàng</h3>
+                <h3 class="text-white font-bold text-xl section-title-shadow" data-i18n="common.确认购买_1">Xác nhận mua hàng</h3>
                 <button onclick="closePurchaseModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-vi="Xác nhận mua hàng" data-cn="确认购买">Xác nhận mua hàng</h3>
+            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-i18n="common.确认购买_1">Xác nhận mua hàng</h3>
             
             <!-- 商品信息 -->
             <div class="bg-jungle-700/50 rounded-xl p-4 mb-4 border border-mist/20">
@@ -879,17 +909,17 @@
                         <div id="purchase-price-section" class="space-y-2">
                             <!-- 原价 -->
                             <div class="flex items-center gap-2">
-                                <span class="text-gray-400 text-xs w-16" data-vi="Giá gốc:" data-cn="原价：">Giá gốc:</span>
+                                <span class="text-gray-400 text-xs w-16" data-i18n="common.原价_5">Giá gốc:</span>
                                 <span id="purchase-original-price" class="text-gray-400 text-sm line-through"></span>
                             </div>
                             <!-- 现价 -->
                             <div class="flex items-center gap-2">
-                                <span class="text-gold text-xs w-16 font-medium" data-vi="Giá bán:" data-cn="售价：">Giá bán:</span>
+                                <span class="text-gold text-xs w-16 font-medium" data-i18n="common.售价">Giá bán:</span>
                                 <span id="purchase-current-price" class="text-red-400 font-bold text-lg"></span>
                             </div>
                             <!-- 折扣标签 -->
                             <div class="flex items-center gap-2">
-                                <span class="text-gray-400 text-xs w-16" data-vi="Giảm giá:" data-cn="折扣：">Giảm giá:</span>
+                                <span class="text-gray-400 text-xs w-16" data-i18n="common.折扣">Giảm giá:</span>
                                 <span id="purchase-discount" class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full"></span>
                             </div>
                         </div>
@@ -899,7 +929,7 @@
             
             <!-- 服务器选择 -->
             <div class="mb-4">
-                <label class="block text-gray-300 text-sm mb-3" data-vi="💡 Chọn máy chủ có nhân vật của bạn:" data-cn="💡 请选择您拥有角色的服务器：">💡 Chọn máy chủ có nhân vật của bạn:</label>
+                <label class="block text-gray-300 text-sm mb-3" data-i18n="common.请选择您拥有角色的服务器">💡 Chọn máy chủ có nhân vật của bạn:</label>
                 <div class="grid grid-cols-2 gap-3">
                     <button onclick="selectServer('Q')" id="server-q-btn" class="py-3 rounded-xl border border-mist/30 text-gray-300 hover:bg-jungle-700 transition-all flex items-center justify-center gap-2 text-sm">
                         <i class="fas fa-server text-blue-400"></i> Quân Đoàn Chiến
@@ -914,13 +944,13 @@
             <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 mb-4">
                 <div class="flex items-start gap-2">
                     <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
-                    <p class="text-amber-400 text-xs" data-vi="Mỗi đơn hàng chỉ được quét mã thanh toán một lần." data-cn="每个订单只能扫码支付一次。">Mỗi đơn hàng chỉ được quét mã thanh toán một lần.</p>
+                    <p class="text-amber-400 text-xs" data-i18n="common.每个订单只能扫码支付一次">Mỗi đơn hàng chỉ được quét mã thanh toán một lần.</p>
                 </div>
             </div>
             
-            <button onclick="proceedToPayment()" id="pay-btn" class="w-full h-12 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow hover:brightness-110 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" data-vi="Thanh toán ngay" data-cn="立即支付" disabled>Thanh toán ngay</button>
+            <button onclick="proceedToPayment()" id="pay-btn" class="w-full h-12 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow hover:brightness-110 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" data-i18n="common.立即支付" disabled>Thanh toán ngay</button>
             
-            <p class="text-center text-amber-400 text-xs mt-4" data-vi="✓ Thanh toán thành công. Skin sẽ được phát sau khi sự kiện kết thúc." data-cn="✓ 支付成功。皮肤将在活动结束后统一发放。">✓ Thanh toán thành công. Skin sẽ được phát sau khi sự kiện kết thúc.</p>
+            <p class="text-center text-amber-400 text-xs mt-4" data-i18n="skins.支付成功皮肤将在活动结束后统一发放">✓ Thanh toán thành công. Skin sẽ được phát sau khi sự kiện kết thúc.</p>
         </div>
     </div>
 
@@ -932,8 +962,8 @@
                 <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gold/20 flex items-center justify-center animate-pulse">
                     <i class="fas fa-spinner fa-spin text-gold text-3xl"></i>
                 </div>
-                <h3 class="text-white font-bold text-xl mb-2" data-vi="Đang xử lý thanh toán" data-cn="正在处理支付">Đang xử lý thanh toán</h3>
-                <p class="text-gray-400 text-sm" data-vi="Vui lòng không đóng trang này..." data-cn="请不要关闭此页面...">Vui lòng không đóng trang này...</p>
+                <h3 class="text-white font-bold text-xl mb-2" data-i18n="common.正在处理支付">Đang xử lý thanh toán</h3>
+                <p class="text-gray-400 text-sm" data-i18n="common.请不要关闭此页面">Vui lòng không đóng trang này...</p>
             </div>
         </div>
     </div>
@@ -946,20 +976,20 @@
                 <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
                     <i class="fas fa-check-circle text-emerald-400 text-3xl"></i>
                 </div>
-                <h3 class="text-white font-bold text-xl mb-2" data-vi="Thanh toán thành công!" data-cn="支付成功！">Thanh toán thành công!</h3>
+                <h3 class="text-white font-bold text-xl mb-2" data-i18n="common.支付成功">Thanh toán thành công!</h3>
                 
                 <!-- 显著提醒：活动结束后统一发放 -->
                 <div class="bg-amber-500/10 border-2 border-amber-500/50 rounded-xl p-4 mb-4">
                     <div class="flex items-start gap-3">
                         <i class="fas fa-gift text-amber-400 text-xl mt-0.5"></i>
                         <div class="text-left">
-                            <p class="text-amber-400 font-bold text-sm mb-1" data-vi="📦 Thờii gian phát skin" data-cn="📦 皮肤发放时间">📦 Thờii gian phát skin</p>
-                            <p class="text-gray-300 text-sm" data-vi="Skin sẽ được phát sau khi sự kiện kết thúc. Vui lòng theo dõi thông báo chính thức." data-cn="皮肤将在活动结束后统一发放。请留意官方公告。">Skin sẽ được phát sau khi sự kiện kết thúc. Vui lòng theo dõi thông báo chính thức.</p>
+                            <p class="text-amber-400 font-bold text-sm mb-1" data-i18n="skins.皮肤发放时间">📦 Thờii gian phát skin</p>
+                            <p class="text-gray-300 text-sm" data-i18n="skins.皮肤将在活动结束后统一发放请留意官方公告_1">Skin sẽ được phát sau khi sự kiện kết thúc. Vui lòng theo dõi thông báo chính thức.</p>
                         </div>
                     </div>
                 </div>
                 
-                <button onclick="closePaymentSuccessModal()" class="px-6 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:brightness-110 transition-all" data-vi="Đóng" data-cn="关闭">Đóng</button>
+                <button onclick="closePaymentSuccessModal()" class="px-6 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:brightness-110 transition-all" data-i18n="common.关闭">Đóng</button>
             </div>
         </div>
     </div>
@@ -976,31 +1006,56 @@
                     </div>
                     
                     <!-- 标题 -->
-                    <h2 class="text-2xl font-bold text-white mb-3 section-title-shadow" data-vi="🎉 Skin đã được phát!" data-cn="🎉 皮肤已发放！">🎉 Skin đã được phát!</h2>
+                    <h2 class="text-2xl font-bold text-white mb-3 section-title-shadow" data-i18n="skins.皮肤已发放">🎉 Skin đã được phát!</h2>
                     
                     <!-- 说明文字 -->
-                    <p class="text-gray-300 text-sm mb-6" data-vi="Vui lòng đăng nhập game và kiểm tra túi đồ của bạn. Nếu chưa nhận được skin, vui lòng liên hệ CSKH để được hỗ trợ." data-cn="请登录游戏并检查您的背包。如未收到皮肤，请联系客服获取帮助。">Vui lòng đăng nhập game và kiểm tra túi đồ của bạn. Nếu chưa nhận được skin, vui lòng liên hệ CSKH để được hỗ trợ.</p>
+                    <p class="text-gray-300 text-sm mb-6" data-i18n="common.请登录游戏并检查您的背包如未收到皮肤请联系客服获取帮助">Vui lòng đăng nhập game và kiểm tra túi đồ của bạn. Nếu chưa nhận được skin, vui lòng liên hệ CSKH để được hỗ trợ.</p>
                     
                     <!-- 客服信息卡片 -->
                     <div class="bg-jungle-700/50 rounded-xl p-5 border border-mist/20 mb-6">
-                        <p class="text-gold text-sm font-bold mb-3" data-vi="📞 Liên hệ CSKH" data-cn="📞 联系客服">📞 Liên hệ CSKH</p>
-                        
-                        <div class="flex items-center gap-4">
-                            <!-- 二维码 -->
-                            <div class="w-20 h-20 bg-white rounded-lg p-1.5 flex-shrink-0">
-                                <img src="assets/cskh-qr.png" alt="CSKH QR" class="w-full h-full object-contain" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs\'>QR</div>';">
-                            </div>
-                            
-                            <!-- 联系信息 -->
-                            <div class="text-left flex-1">
-                                <p class="text-gray-300 text-sm" data-vi="Quét mã QR để liên hệ CSKH" data-cn="扫码联系客服">Quét mã QR để liên hệ CSKH</p>
+                        <!-- 二维码居中 -->
+                        <div class="flex justify-center">
+                            <div class="w-28 h-28 bg-jungle-700/60 backdrop-blur-sm rounded-xl p-2 group relative cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-gold hover:shadow-lg hover:shadow-gold/20 active:scale-95 border border-mist/20" onclick="showQRModal()" title="点击放大查看">
+                                <div class="w-full h-full bg-white rounded-lg p-1 shadow-inner">
+                                    <img src="assets/cskh-qr.png" alt="CSKH QR" class="w-full h-full object-contain transition-transform duration-200 group-hover:scale-105" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs\'>QR</div>';">
+                                </div>
+                                <!-- Hover 提示 -->
+                                <div class="absolute -bottom-7 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                    点击放大
+                                </div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- 关闭按钮 -->
-                    <button onclick="closeSkinDeliveredModal()" class="px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:brightness-110 transition-all" data-vi="Tôi đã hiểu" data-cn="我知道了">Tôi đã hiểu</button>
+                    <button onclick="closeSkinDeliveredModal()" class="px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:brightness-110 transition-all" data-i18n="common.我知道了">Tôi đã hiểu</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Zoom Modal (二维码放大查看) -->
+    <div id="qr-modal" class="fixed inset-0 z-[80] hidden">
+        <div class="absolute inset-0 bg-black/85 backdrop-blur-md" onclick="closeQRModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="relative bg-jungle-800/95 backdrop-blur-md rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-mist/20">
+                <!-- 关闭按钮 -->
+                <button onclick="closeQRModal()" class="absolute -top-3 -right-3 w-8 h-8 bg-jungle-700 text-white rounded-full flex items-center justify-center hover:bg-jungle-600 transition-colors shadow-lg border border-mist/30">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <!-- 标题 -->
+                <h3 class="text-white font-bold text-lg mb-4 text-center section-title-shadow" data-i18n="common.扫码联系客服_1">扫码联系客服</h3>
+                
+                <!-- 大图 -->
+                <div class="aspect-square bg-jungle-700/50 rounded-xl overflow-hidden border border-mist/20 p-3">
+                    <div class="w-full h-full bg-white rounded-lg p-2 shadow-inner">
+                        <img id="qr-modal-img" src="assets/cskh-qr.png" alt="CSKH QR Large" class="w-full h-full object-contain" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-gray-400\'>QR Code Error</div>';">
+                    </div>
+                </div>
+                
+                <!-- 提示文字 -->
+                <p class="text-gray-300 text-sm text-center mt-4" data-i18n="common.使用_Zalo_或扫码应用联系">使用 Zalo 或扫码应用联系</p>
             </div>
         </div>
     </div>
@@ -1011,27 +1066,27 @@
         <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-mist/20">
             <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
             <div class="hidden lg:flex items-center justify-between mb-6">
-                <h3 class="text-white font-bold text-xl section-title-shadow" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</h3>
+                <h3 class="text-white font-bold text-xl section-title-shadow" data-i18n="common.登录_5">Đăng nhập</h3>
                 <button onclick="closeLoginModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</h3>
+            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-i18n="common.登录_5">Đăng nhập</h3>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-gray-300 text-sm mb-2" data-vi="Tên đăng nhập" data-cn="用户名">Tên đăng nhập</label>
+                    <label class="block text-gray-300 text-sm mb-2" data-i18n="common.用户名">Tên đăng nhập</label>
                     <input type="text" id="login-username" class="w-full h-12 bg-jungle-700 border border-mist/30 rounded-xl px-4 text-white focus:outline-none focus:border-gold" placeholder="Username">
                 </div>
                 <div>
-                    <label class="block text-gray-300 text-sm mb-2" data-vi="Mật khẩu" data-cn="密码">Mật khẩu</label>
+                    <label class="block text-gray-300 text-sm mb-2" data-i18n="common.密码">Mật khẩu</label>
                     <input type="password" id="login-password" class="w-full h-12 bg-jungle-700 border border-mist/30 rounded-xl px-4 text-white focus:outline-none focus:border-gold" placeholder="Password">
                 </div>
             </div>
             
-            <button onclick="doLogin()" class="w-full h-12 mt-6 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow hover:brightness-110 transition-all cursor-pointer active:scale-95" data-vi="Đăng nhập" data-cn="登录">Đăng nhập</button>
+            <button onclick="doLogin()" class="w-full h-12 mt-6 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow hover:brightness-110 transition-all cursor-pointer active:scale-95" data-i18n="common.登录_5">Đăng nhập</button>
             
-            <p class="text-center text-gray-400 text-sm mt-4" data-vi="Chưa có tài khoản?" data-cn="还没有账号？">Chưa có tài khoản? <a href="#" class="text-gold hover:underline" data-vi="Đăng ký ngay" data-cn="立即注册">Đăng ký ngay</a></p>
+            <p class="text-center text-gray-400 text-sm mt-4" data-i18n="common.还没有账号">Chưa có tài khoản? <a href="#" class="text-gold hover:underline" data-i18n="common.立即注册">Đăng ký ngay</a></p>
         </div>
     </div>
 
@@ -1041,55 +1096,55 @@
         <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-mist/20">
             <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
             <div class="hidden lg:flex items-center justify-between mb-6">
-                <h3 class="text-white font-bold text-xl section-title-shadow" data-vi="Tải Game" data-cn="下载游戏">Tải Game</h3>
+                <h3 class="text-white font-bold text-xl section-title-shadow" data-i18n="common.下载游戏_2">Tải Game</h3>
                 <button onclick="closeDownloadModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-vi="Tải Game" data-cn="下载游戏">Tải Game</h3>
+            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-i18n="common.下载游戏_2">Tải Game</h3>
             
-            <p class="text-gray-400 text-sm mb-4 text-center" data-vi="Chọn một trong các nguồn tải bên dưới" data-cn="请选择以下任意下载源">Chọn một trong các nguồn tải bên dưới</p>
+            <p class="text-gray-400 text-sm mb-4 text-center" data-i18n="common.请选择以下任意下载源">Chọn một trong các nguồn tải bên dưới</p>
             
             <div class="grid grid-cols-2 gap-4">
-                <a href="https://www.mediafire.com/file/h35uc0bhc5gv15z/QuanDoanChien.zip/file" target="_blank" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
+                <a href="https://www.mediafire.com/file/h35uc0bhc5gv15z/QuanDoanChien.zip/file" target="_blank" onclick="Analytics.track('download_click', {source:'MediaFire', url:'https://www.mediafire.com/...'})" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
                     <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center">
                         <i class="fab fa-windows text-white text-xl"></i>
                     </div>
                     <div class="text-center">
-                        <span class="text-white text-sm font-medium" data-vi="Tải 1" data-cn="下载 1">Tải 1</span>
+                        <span class="text-white text-sm font-medium" data-i18n="common.下载_1">Tải 1</span>
                         <span class="text-xs text-gray-400 block">MediaFire</span>
                     </div>
                 </a>
-                <a href="https://drive.google.com/file/d/1n7JHQkX-bnmKX3vpXB7Cw41c929MeTWq/view?usp=drivesdk" target="_blank" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
+                <a href="https://drive.google.com/file/d/1n7JHQkX-bnmKX3vpXB7Cw41c929MeTWq/view?usp=drivesdk" target="_blank" onclick="Analytics.track('download_click', {source:'Google Drive 1', url:'https://drive.google.com/...'})" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
                     <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center">
                         <i class="fab fa-windows text-white text-xl"></i>
                     </div>
                     <div class="text-center">
-                        <span class="text-white text-sm font-medium" data-vi="Tải 2" data-cn="下载 2">Tải 2</span>
+                        <span class="text-white text-sm font-medium" data-i18n="common.下载_2">Tải 2</span>
                         <span class="text-xs text-gray-400 block">Google Drive</span>
                     </div>
                 </a>
-                <a href="https://drive.google.com/file/d/11Yj793DCdpEPvFhKj-jpYFIdGf1wyoAi/view?usp=drive_link" target="_blank" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
+                <a href="https://drive.google.com/file/d/11Yj793DCdpEPvFhKj-jpYFIdGf1wyoAi/view?usp=drive_link" target="_blank" onclick="Analytics.track('download_click', {source:'Google Drive 2', url:'https://drive.google.com/...'})" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
                     <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center">
                         <i class="fab fa-windows text-white text-xl"></i>
                     </div>
                     <div class="text-center">
-                        <span class="text-white text-sm font-medium" data-vi="Tải 3" data-cn="下载 3">Tải 3</span>
+                        <span class="text-white text-sm font-medium" data-i18n="common.下载_3">Tải 3</span>
                         <span class="text-xs text-gray-400 block">Google Drive</span>
                     </div>
                 </a>
-                <a href="https://drive.google.com/file/d/1o4YeZ2JyVoeDaueaaWzABJhDAfTrDj9b/view?usp=drivesd" target="_blank" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
+                <a href="https://drive.google.com/file/d/1o4YeZ2JyVoeDaueaaWzABJhDAfTrDj9b/view?usp=drivesd" target="_blank" onclick="Analytics.track('download_click', {source:'Google Drive 3', url:'https://drive.google.com/...'})" class="flex flex-col items-center gap-3 p-4 bg-jungle-700/50 rounded-xl hover:bg-jungle-700 transition-all cursor-pointer border border-mist/20">
                     <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center">
                         <i class="fab fa-windows text-white text-xl"></i>
                     </div>
                     <div class="text-center">
-                        <span class="text-white text-sm font-medium" data-vi="Tải 4" data-cn="下载 4">Tải 4</span>
+                        <span class="text-white text-sm font-medium" data-i18n="common.下载_4">Tải 4</span>
                         <span class="text-xs text-gray-400 block">Google Drive</span>
                     </div>
                 </a>
             </div>
             
-            <p class="text-center text-gray-400 text-xs mt-4" data-vi="Tất cả đều là phiên bản Windows PC" data-cn="均为Windows PC版本">Tất cả đều là phiên bản Windows PC</p>
+            <p class="text-center text-gray-400 text-xs mt-4" data-i18n="common.均为Windows_PC版本">Tất cả đều là phiên bản Windows PC</p>
         </div>
     </div>
 
@@ -1099,18 +1154,18 @@
         <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[480px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-mist/20">
             <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
             <div class="hidden lg:flex items-center justify-between mb-6">
-                <h3 class="text-white font-bold text-xl section-title-shadow" data-vi="Xác nhận tham gia" data-cn="确认加入">Xác nhận tham gia</h3>
+                <h3 class="text-white font-bold text-xl section-title-shadow" data-i18n="streamers.确认加入_1">Xác nhận tham gia</h3>
                 <button onclick="closeConfirmModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-vi="Xác nhận tham gia" data-cn="确认加入">Xác nhận tham gia</h3>
+            <h3 class="lg:hidden text-white font-bold text-xl mb-6 text-center section-title-shadow" data-i18n="streamers.确认加入_1">Xác nhận tham gia</h3>
             
             <div class="text-center mb-6">
                 <div class="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-2 border-gold/50">
                     <img id="confirm-avatar" src="" alt="" class="w-full h-full object-cover">
                 </div>
-                <p class="text-gray-300 mb-2" data-vi="Bạn sắp tham gia phe" data-cn="您即将加入阵营">Bạn sắp tham gia phe</p>
+                <p class="text-gray-300 mb-2" data-i18n="streamers.您即将加入阵营">Bạn sắp tham gia phe</p>
                 <h4 id="confirm-streamer-name" class="text-2xl font-bold text-gold mb-2"></h4>
                 <p id="confirm-server-name" class="text-mist text-sm"></p>
             </div>
@@ -1119,15 +1174,15 @@
                 <div class="flex items-start gap-3">
                     <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
                     <div>
-                        <p class="text-amber-400 text-sm font-medium mb-1" data-vi="Lưu ý quan trọng" data-cn="重要提示">Lưu ý quan trọng</p>
-                        <p class="text-gray-300 text-xs" data-vi="Sau khi xác nhận, bạn không thể thay đổi phe. Vui lòng kiểm tra kỹ thông tin trước khi xác nhận." data-cn="确认后不可更改阵营，请仔细核对信息后再确认。">Sau khi xác nhận, bạn không thể thay đổi phe. Vui lòng kiểm tra kỹ thông tin trước khi xác nhận.</p>
+                        <p class="text-amber-400 text-sm font-medium mb-1" data-i18n="common.重要提示">Lưu ý quan trọng</p>
+                        <p class="text-gray-300 text-xs" data-i18n="streamers.确认后不可更改阵营请仔细核对信息后再确认">Sau khi xác nhận, bạn không thể thay đổi phe. Vui lòng kiểm tra kỹ thông tin trước khi xác nhận.</p>
                     </div>
                 </div>
             </div>
             
             <div class="flex gap-3">
-                <button onclick="closeConfirmModal()" class="flex-1 h-12 border border-mist text-mist rounded-full font-medium hover:bg-mist/10 transition-all cursor-pointer active:scale-95" data-vi="Hủy" data-cn="取消">Hủy</button>
-                <button onclick="confirmRegistration()" class="flex-1 h-12 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow hover:brightness-110 transition-all cursor-pointer active:scale-95" data-vi="Xác nhận" data-cn="确认">Xác nhận</button>
+                <button onclick="closeConfirmModal()" class="flex-1 h-12 border border-mist text-mist rounded-full font-medium hover:bg-mist/10 transition-all cursor-pointer active:scale-95" data-i18n="common.取消">Hủy</button>
+                <button onclick="confirmRegistration()" class="flex-1 h-12 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full gold-button-glow hover:brightness-110 transition-all cursor-pointer active:scale-95" data-i18n="common.确认">Xác nhận</button>
             </div>
         </div>
     </div>
@@ -1138,54 +1193,54 @@
         <div class="absolute bottom-0 left-0 right-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[600px] lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:rounded-2xl bg-jungle-800/95 backdrop-blur-md rounded-t-3xl p-6 animate-slide-up lg:animate-fade-in border border-mist/20 max-h-[80vh] flex flex-col">
             <div class="w-12 h-1 bg-mist/30 rounded-full mx-auto mb-5 lg:hidden"></div>
             <div class="hidden lg:flex items-center justify-between mb-4">
-                <h3 class="text-white font-bold text-xl section-title-shadow" data-vi="Hướng dẫn vào game" data-cn="如何进入游戏">Hướng dẫn vào game</h3>
+                <h3 class="text-white font-bold text-xl section-title-shadow" data-i18n="common.如何进入游戏_1">Hướng dẫn vào game</h3>
                 <button onclick="closeHowToModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white cursor-pointer">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <h3 class="lg:hidden text-white font-bold text-xl mb-4 text-center section-title-shadow" data-vi="Hướng dẫn vào game" data-cn="如何进入游戏">Hướng dẫn vào game</h3>
+            <h3 class="lg:hidden text-white font-bold text-xl mb-4 text-center section-title-shadow" data-i18n="common.如何进入游戏_1">Hướng dẫn vào game</h3>
             
             <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
                 <div class="space-y-4 text-gray-200">
                     <div class="flex gap-4">
                         <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 text-gold font-bold">1</div>
                         <div>
-                            <h4 class="text-white font-semibold mb-1" data-vi="Tải game client" data-cn="下载游戏客户端">Tải game client</h4>
-                            <p class="text-sm text-gray-400" data-vi="Nhấn nút 'Tải game' để tải bộ cài đặt" data-cn="点击'下载游戏'按钮获取安装包">Nhấn nút 'Tải game' để tải bộ cài đặt</p>
+                            <h4 class="text-white font-semibold mb-1" data-i18n="common.下载游戏客户端">Tải game client</h4>
+                            <p class="text-sm text-gray-400" data-i18n="common.点击下载游戏按钮获取安装包">Nhấn nút 'Tải game' để tải bộ cài đặt</p>
                         </div>
                     </div>
                     <div class="flex gap-4">
                         <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 text-gold font-bold">2</div>
                         <div>
-                            <h4 class="text-white font-semibold mb-1" data-vi="Cài đặt game" data-cn="安装游戏">Cài đặt game</h4>
-                            <p class="text-sm text-gray-400" data-vi="Chạy file cài đặt và làm theo hướng dẫn" data-cn="运行安装程序，按提示完成安装">Chạy file cài đặt và làm theo hướng dẫn</p>
+                            <h4 class="text-white font-semibold mb-1" data-i18n="common.安装游戏">Cài đặt game</h4>
+                            <p class="text-sm text-gray-400" data-i18n="common.运行安装程序按提示完成安装">Chạy file cài đặt và làm theo hướng dẫn</p>
                         </div>
                     </div>
                     <div class="flex gap-4">
                         <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 text-gold font-bold">3</div>
                         <div>
-                            <h4 class="text-white font-semibold mb-1" data-vi="Đăng nhập game" data-cn="登录游戏">Đăng nhập game</h4>
-                            <p class="text-sm text-gray-400" data-vi="Mở game và đăng nhập bằng tài khoản của bạn" data-cn="打开游戏，使用您的账号登录">Mở game và đăng nhập bằng tài khoản của bạn</p>
+                            <h4 class="text-white font-semibold mb-1" data-i18n="common.登录游戏">Đăng nhập game</h4>
+                            <p class="text-sm text-gray-400" data-i18n="common.打开游戏使用您的账号登录">Mở game và đăng nhập bằng tài khoản của bạn</p>
                         </div>
                     </div>
                     <div class="flex gap-4">
                         <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 text-gold font-bold">4</div>
                         <div>
-                            <h4 class="text-white font-semibold mb-1" data-vi="Tạo nhân vật" data-cn="创建角色">Tạo nhân vật</h4>
-                            <p class="text-sm text-gray-400" data-vi="Chọn server và tạo nhân vật đầu tiên" data-cn="选择服务器并创建您的第一个角色">Chọn server và tạo nhân vật đầu tiên</p>
+                            <h4 class="text-white font-semibold mb-1" data-i18n="common.创建角色">Tạo nhân vật</h4>
+                            <p class="text-sm text-gray-400" data-i18n="common.选择服务器并创建您的第一个角色">Chọn server và tạo nhân vật đầu tiên</p>
                         </div>
                     </div>
                     <div class="flex gap-4">
                         <div class="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0 text-gold font-bold">5</div>
                         <div>
-                            <h4 class="text-white font-semibold mb-1" data-vi="Hoàn tất" data-cn="完成">Hoàn tất</h4>
-                            <p class="text-sm text-gray-400" data-vi="Quay lại trang này để tham gia phe" data-cn="返回本页面即可加入阵营">Quay lại trang này để tham gia phe</p>
+                            <h4 class="text-white font-semibold mb-1" data-i18n="common.完成">Hoàn tất</h4>
+                            <p class="text-sm text-gray-400" data-i18n="streamers.返回本页面即可加入阵营">Quay lại trang này để tham gia phe</p>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <button onclick="closeHowToModal()" class="w-full h-12 mt-4 bg-jungle-700 text-white font-medium rounded-full hover:bg-jungle-600 transition-all cursor-pointer active:scale-95" data-vi="Đã hiểu" data-cn="明白了">Đã hiểu</button>
+            <button onclick="closeHowToModal()" class="w-full h-12 mt-4 bg-jungle-700 text-white font-medium rounded-full hover:bg-jungle-600 transition-all cursor-pointer active:scale-95" data-i18n="common.明白了">Đã hiểu</button>
         </div>
     </div>
 
@@ -1201,28 +1256,29 @@
             <i class="fas fa-cog"></i>
         </button>
         <div id="test-menu" class="hidden w-48 bg-jungle-800/95 backdrop-blur-md rounded-xl border border-mist/30 p-2 shadow-lg">
-            <div class="text-xs text-gray-400 px-3 py-2 border-b border-mist/20" data-vi="Chế độ Test" data-cn="测试模式">Chế độ Test</div>
-            <button onclick="setTestMode('loggedOut')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Chưa đăng nhập" data-cn="未登录">Chưa đăng nhập</button>
-            <button onclick="setTestMode('noCharacter')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Chưa vào game" data-cn="未进游戏">Chưa vào game</button>
-            <button onclick="setTestMode('hasCharacter')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-vi="Đã vào game" data-cn="已进游戏">Đã vào game</button>
+            <div class="text-xs text-gray-400 px-3 py-2 border-b border-mist/20" data-i18n="common.测试模式">Chế độ Test</div>
+            <button onclick="setTestMode('loggedOut')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-i18n="common.未登录">Chưa đăng nhập</button>
+            <button onclick="setTestMode('noCharacter')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-i18n="common.未进游戏">Chưa vào game</button>
+            <button onclick="setTestMode('hasCharacter')" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-jungle-700 rounded-lg transition-colors" data-i18n="common.已进游戏">Đã vào game</button>
             <div class="border-t border-mist/20 my-2"></div>
-            <button onclick="setTestMode('registrationClosed')" class="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/30 rounded-lg transition-colors" data-vi="Đăng ký đã đóng" data-cn="报名已截止">Đăng ký đã đóng</button>
+            <button onclick="setTestMode('registrationClosed')" class="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-950/30 rounded-lg transition-colors" data-i18n="common.报名已截止_1">Đăng ký đã đóng</button>
             <div class="border-t border-mist/20 my-2"></div>
-            <button onclick="setTestMode('skinComingSoon')" class="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 rounded-lg transition-colors" data-vi="Sắp ra mắt" data-cn="即将上线">Sắp ra mắt</button>
-            <button onclick="setTestMode('skinRevealed')" class="w-full text-left px-3 py-2 text-sm text-cyan-400 hover:bg-cyan-950/30 rounded-lg transition-colors" data-vi="Đã công bố skin" data-cn="已公开皮肤">Đã công bố skin</button>
-            <button onclick="setTestMode('skinOnSale')" class="w-full text-left px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-950/30 rounded-lg transition-colors" data-vi="Đang mở bán" data-cn="开放销售中">Đang mở bán</button>
+            <button onclick="setTestMode('skinComingSoon')" class="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 rounded-lg transition-colors" data-i18n="common.即将上线">Sắp ra mắt</button>
+            <button onclick="setTestMode('skinRevealed')" class="w-full text-left px-3 py-2 text-sm text-cyan-400 hover:bg-cyan-950/30 rounded-lg transition-colors" data-i18n="skins.已公开皮肤">Đã công bố skin</button>
+            <button onclick="setTestMode('skinOnSale')" class="w-full text-left px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-950/30 rounded-lg transition-colors" data-i18n="common.开放销售中">Đang mở bán</button>
             <div class="border-t border-mist/20 my-1"></div>
-            <button onclick="toggleFactionResult('q')" class="w-full text-left px-3 py-2 text-sm text-orange-400 hover:bg-orange-950/30 rounded-lg transition-colors" data-vi="Đổi kết quả Q (heni↔ricon)" data-cn="切换Q服结果">Đổi kết quả Q (heni↔ricon)</button>
-            <button onclick="toggleFactionResult('k')" class="w-full text-left px-3 py-2 text-sm text-pink-400 hover:bg-pink-950/30 rounded-lg transition-colors" data-vi="Đổi kết quả K (Sữa Chua↔MiuMiu)" data-cn="切换K服结果">Đổi kết quả K (Sữa Chua↔MiuMiu)</button>
+            <button onclick="toggleFactionResult('q')" class="w-full text-left px-3 py-2 text-sm text-orange-400 hover:bg-orange-950/30 rounded-lg transition-colors" data-i18n="common.切换Q服结果">Đổi kết quả Q (heni↔ricon)</button>
+            <button onclick="toggleFactionResult('k')" class="w-full text-left px-3 py-2 text-sm text-pink-400 hover:bg-pink-950/30 rounded-lg transition-colors" data-i18n="common.切换K服结果">Đổi kết quả K (Sữa Chua↔MiuMiu)</button>
             <div class="border-t border-mist/20 my-1"></div>
-            <button onclick="setTestMode('eventEnded')" class="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-blue-950/30 rounded-lg transition-colors" data-vi="Kết thúc phát skin" data-cn="皮肤发放结束">Kết thúc phát skin</button>
-            <button onclick="setTestMode('skinDelivered')" class="w-full text-left px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-950/30 rounded-lg transition-colors" data-vi="Đã phát skin - Kiểm tra" data-cn="已发放皮肤-检查">Đã phát skin - Kiểm tra</button>
+            <button onclick="setTestMode('eventEnded')" class="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-blue-950/30 rounded-lg transition-colors" data-i18n="skins.皮肤发放结束">Kết thúc phát skin</button>
+            <button onclick="setTestMode('skinDelivered')" class="w-full text-left px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-950/30 rounded-lg transition-colors" data-i18n="skins.已发放皮肤检查">Đã phát skin - Kiểm tra</button>
         </div>
     </div>
 
     <script>
         // State
         let currentLang = 'vi';
+        let i18nData = null;
         let isLoggedIn = false;
         let hasCharacter = false;
         let registrations = {
@@ -1230,29 +1286,920 @@
             k: null   // 'suachua' or 'miumiu'
         };
         let pendingRegistration = null; // { server, streamer }
+        let skinDisplayState = 'comingSoon'; // 'comingSoon', 'revealed', 'onSale', 'eventEnded', 'skinDelivered'
+        let selectedServer = null;
+        let currentPurchaseItem = null;
+        
+        // Faction results for testing
+        let factionResults = {
+            q: { winner: 'heni', discount: { heni: 50, ricon: 10 } },
+            k: { winner: 'suachua', discount: { suachua: 50, miumiu: 10 } }
+        };
 
-        // Toggle language
+        // 内嵌翻译数据（避免外部文件依赖）
+        const EMBEDDED_I18N = {
+  "header": {},
+  "hero": {},
+  "countdown": {},
+  "status": {},
+  "streamers": {
+    "倒计时结束后停止加入阵营": {
+      "vi": "* Đăng ký sẽ đóng khi đếm ngược kết thúc",
+      "cn": "* 倒计时结束后停止加入阵营"
+    },
+    "阵营已定战役即将开启": {
+      "vi": "Phe chiến đã định, cuộc chiến sắp bắt đầu",
+      "cn": "阵营已定，战役即将开启"
+    },
+    "需要进入游戏创建角色才能加入阵营": {
+      "vi": "Cần vào game tạo nhân vật để tham gia phe",
+      "cn": "需要进入游戏创建角色才能加入阵营"
+    },
+    "加入阵营": {
+      "vi": "Tham gia",
+      "cn": "加入阵营"
+    },
+    "加入阵营_1": {
+      "vi": "Tham gia",
+      "cn": "加入阵营"
+    },
+    "加入_heni_Discord": {
+      "vi": "Tham gia Discord heni",
+      "cn": "加入 heni Discord"
+    },
+    "加入_ricon_Discord": {
+      "vi": "Tham gia Discord ricon",
+      "cn": "加入 ricon Discord"
+    },
+    "加入阵营_2": {
+      "vi": "Tham gia",
+      "cn": "加入阵营"
+    },
+    "加入阵营_3": {
+      "vi": "Tham gia",
+      "cn": "加入阵营"
+    },
+    "加入_Sữa_Chua_Discord": {
+      "vi": "Tham gia Discord Sữa Chua",
+      "cn": "加入 Sữa Chua Discord"
+    },
+    "加入_MiuMiu_Discord": {
+      "vi": "Tham gia Discord MiuMiu",
+      "cn": "加入 MiuMiu Discord"
+    },
+    "加入阵营__解锁专属优惠": {
+      "vi": "Gia nhập phe → Mở khóa ưu đãi độc quyền",
+      "cn": "加入阵营 → 解锁专属优惠"
+    },
+    "最终售价取决于阵营结果": {
+      "vi": "Giá cuối cùng phụ thuộc kết quả phe",
+      "cn": "最终售价取决于阵营结果"
+    },
+    "最终售价取决于阵营结果_1": {
+      "vi": "Giá cuối cùng phụ thuộc kết quả phe",
+      "cn": "最终售价取决于阵营结果"
+    },
+    "最终售价取决于阵营结果_2": {
+      "vi": "Giá cuối cùng phụ thuộc kết quả phe",
+      "cn": "最终售价取决于阵营结果"
+    },
+    "最终售价取决于阵营结果_3": {
+      "vi": "Giá cuối cùng phụ thuộc kết quả phe",
+      "cn": "最终售价取决于阵营结果"
+    },
+    "阵营玩家专属超品": {
+      "vi": "Siêu phẩm chỉ dành cho ngườii chơi phe",
+      "cn": "阵营玩家专属超品"
+    },
+    "2_每个服务器有2个主播阵营对决选择您支持的主播阵营": {
+      "vi": "2. Mỗi server có 2 phe streamer đối đầu, chọn phe bạn ủng hộ",
+      "cn": "2. 每个服务器有2个主播阵营对决，选择您支持的主播阵营"
+    },
+    "3_加入阵营后进入主播_Discord_接收战术指挥": {
+      "vi": "3. Sau khi gia nhập phe, tham gia Discord của streamer để nhận chỉ đạo chiến thuật",
+      "cn": "3. 加入阵营后，进入主播 Discord 接收战术指挥"
+    },
+    "仅限已进入游戏并创建角色的玩家加入阵营": {
+      "vi": "Chỉ ngườii chơi đã vào game và tạo nhân vật mới có thể tham gia phe",
+      "cn": "仅限已进入游戏并创建角色的玩家加入阵营"
+    },
+    "关于_Discord_组织": {
+      "vi": "📌 Về Tổ Chức Qua Discord",
+      "cn": "📌 关于 Discord 组织"
+    },
+    "所有战士加入阵营后需进入主播_Discord": {
+      "vi": "• Tất cả chiến binh sau khi gia nhập phe cần vào Discord của streamer",
+      "cn": "• 所有战士加入阵营后需进入主播 Discord"
+    },
+    "Discord_是活动中的战术指挥和任务分配场所": {
+      "vi": "• Discord là nơi chỉ huy chiến thuật và phân công nhiệm vụ trong sự kiện",
+      "cn": "• Discord 是活动中的战术指挥和任务分配场所"
+    },
+    "主播将通过_Discord_通知集合时间地点和战术": {
+      "vi": "• Streamer sẽ thông báo thờii gian, địa điểm tập trung và chiến thuật qua Discord",
+      "cn": "• 主播将通过 Discord 通知集合时间、地点和战术"
+    },
+    "阵营对决": {
+      "vi": "Đối kháng phe",
+      "cn": "阵营对决"
+    },
+    "3_福利仅限加入阵营玩家购买": {
+      "vi": "3. Phúc lợi chỉ dành cho ngườii chơi đã tham gia phe",
+      "cn": "3. 福利仅限加入阵营玩家购买"
+    },
+    "1_加入阵营成功后不可更改阵营": {
+      "vi": "1. Sau khi tham gia phe thành công không thể đổi phe",
+      "cn": "1. 加入阵营成功后不可更改阵营"
+    },
+    "2_每个账号每服限加入一个阵营": {
+      "vi": "2. Mỗi tài khoản chỉ được tham gia 1 phe trong mỗi server",
+      "cn": "2. 每个账号每服限加入一个阵营"
+    },
+    "3_选择阵营后请立即加入_Discord以免错过战术信息": {
+      "vi": "3. Vui lòng tham gia Discord ngay sau khi chọn phe để không bỏ lỡ thông tin chiến thuật",
+      "cn": "3. 选择阵营后请立即加入 Discord，以免错过战术信息"
+    },
+    "确认加入": {
+      "vi": "Xác nhận tham gia",
+      "cn": "确认加入"
+    },
+    "确认加入_1": {
+      "vi": "Xác nhận tham gia",
+      "cn": "确认加入"
+    },
+    "您即将加入阵营": {
+      "vi": "Bạn sắp tham gia phe",
+      "cn": "您即将加入阵营"
+    },
+    "确认后不可更改阵营请仔细核对信息后再确认": {
+      "vi": "Sau khi xác nhận, bạn không thể thay đổi phe. Vui lòng kiểm tra kỹ thông tin trước khi xác nhận.",
+      "cn": "确认后不可更改阵营，请仔细核对信息后再确认。"
+    },
+    "返回本页面即可加入阵营": {
+      "vi": "Quay lại trang này để tham gia phe",
+      "cn": "返回本页面即可加入阵营"
+    }
+  },
+  "skins": {
+    "亲卫勇士皮肤__主播限定": {
+      "vi": "Skin Dũng Sĩ Cận Vệ - Độc quyền Streamer",
+      "cn": "亲卫勇士皮肤 - 主播限定"
+    },
+    "1_加入阵营成功后解锁亲卫勇士礼包购买资格": {
+      "vi": "1. Sau khi tham gia phe thành công, mở khóa quyền mua Dũng Sĩ Cận Vệ Gói",
+      "cn": "1. 加入阵营成功后解锁亲卫勇士礼包购买资格"
+    },
+    "皮肤将在活动结束后统一发放请留意官方公告": {
+      "vi": "📦 Skin sẽ được phát sau khi sự kiện kết thúc. Vui lòng theo dõi thông báo chính thức.",
+      "cn": "📦 皮肤将在活动结束后统一发放。请留意官方公告。"
+    },
+    "支付成功皮肤将在活动结束后统一发放": {
+      "vi": "✓ Thanh toán thành công. Skin sẽ được phát sau khi sự kiện kết thúc.",
+      "cn": "✓ 支付成功。皮肤将在活动结束后统一发放。"
+    },
+    "皮肤发放时间": {
+      "vi": "📦 Thờii gian phát skin",
+      "cn": "📦 皮肤发放时间"
+    },
+    "皮肤将在活动结束后统一发放请留意官方公告_1": {
+      "vi": "Skin sẽ được phát sau khi sự kiện kết thúc. Vui lòng theo dõi thông báo chính thức.",
+      "cn": "皮肤将在活动结束后统一发放。请留意官方公告。"
+    },
+    "皮肤已发放": {
+      "vi": "🎉 Skin đã được phát!",
+      "cn": "🎉 皮肤已发放！"
+    },
+    "已公开皮肤": {
+      "vi": "Đã công bố skin",
+      "cn": "已公开皮肤"
+    },
+    "皮肤发放结束": {
+      "vi": "Kết thúc phát skin",
+      "cn": "皮肤发放结束"
+    },
+    "已发放皮肤检查": {
+      "vi": "Đã phát skin - Kiểm tra",
+      "cn": "已发放皮肤-检查"
+    }
+  },
+  "rules": {
+    "活动规则": {
+      "vi": "Thể Lệ",
+      "cn": "活动规则"
+    },
+    "活动规则_1": {
+      "vi": "Thể Lệ Sự Kiện",
+      "cn": "活动规则"
+    }
+  },
+  "footer": {},
+  "modals": {
+    "login": {
+      "登录": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "登录_1": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "请先登录以加入阵营": {
+        "vi": "Vui lòng đăng nhập để tham gia phe",
+        "cn": "请先登录以加入阵营"
+      },
+      "登录_2": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "1_登录游戏账号并选择阵营加入": {
+        "vi": "1. Đăng nhập tài khoản game và chọn phe tham gia",
+        "cn": "1. 登录游戏账号并选择阵营加入"
+      },
+      "请登录游戏并检查您的背包如未收到皮肤请联系客服获取帮助": {
+        "vi": "Vui lòng đăng nhập game và kiểm tra túi đồ của bạn. Nếu chưa nhận được skin, vui lòng liên hệ CSKH để được hỗ trợ.",
+        "cn": "请登录游戏并检查您的背包。如未收到皮肤，请联系客服获取帮助。"
+      },
+      "登录_3": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "登录_4": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "用户名": {
+        "vi": "Tên đăng nhập",
+        "cn": "用户名"
+      },
+      "登录_5": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "立即注册": {
+        "vi": "Đăng ký ngay",
+        "cn": "立即注册"
+      },
+      "登录游戏": {
+        "vi": "Đăng nhập game",
+        "cn": "登录游戏"
+      },
+      "打开游戏使用您的账号登录": {
+        "vi": "Mở game và đăng nhập bằng tài khoản của bạn",
+        "cn": "打开游戏，使用您的账号登录"
+      },
+      "未登录": {
+        "vi": "Chưa đăng nhập",
+        "cn": "未登录"
+      }
+    },
+    "download": {
+      "下载游戏": {
+        "vi": "Tải game",
+        "cn": "下载游戏"
+      },
+      "下载游戏_1": {
+        "vi": "Tải Game",
+        "cn": "下载游戏"
+      },
+      "下载游戏_2": {
+        "vi": "Tải Game",
+        "cn": "下载游戏"
+      },
+      "请选择以下任意下载源": {
+        "vi": "Chọn một trong các nguồn tải bên dưới",
+        "cn": "请选择以下任意下载源"
+      },
+      "下载_1": {
+        "vi": "Tải 1",
+        "cn": "下载 1"
+      },
+      "下载_2": {
+        "vi": "Tải 2",
+        "cn": "下载 2"
+      },
+      "下载_3": {
+        "vi": "Tải 3",
+        "cn": "下载 3"
+      },
+      "下载_4": {
+        "vi": "Tải 4",
+        "cn": "下载 4"
+      },
+      "下载游戏客户端": {
+        "vi": "Tải game client",
+        "cn": "下载游戏客户端"
+      },
+      "点击下载游戏按钮获取安装包": {
+        "vi": "Nhấn nút 'Tải game' để tải bộ cài đặt",
+        "cn": "点击'下载游戏'按钮获取安装包"
+      }
+    },
+    "howTo": {},
+    "confirm": {},
+    "purchase": {
+      "立即购买": {
+        "vi": "Mua ngay",
+        "cn": "立即购买"
+      },
+      "立即购买_1": {
+        "vi": "Mua ngay",
+        "cn": "立即购买"
+      },
+      "立即购买_2": {
+        "vi": "Mua ngay",
+        "cn": "立即购买"
+      },
+      "立即购买_3": {
+        "vi": "Mua ngay",
+        "cn": "立即购买"
+      },
+      "立即购买_4": {
+        "vi": "Mua ngay",
+        "cn": "立即购买"
+      },
+      "2_可购买史前霸主礼包": {
+        "vi": "2. Có thể mua Bá Chủ Thờii Tiền Sử Gói",
+        "cn": "2. 可购买史前霸主礼包"
+      },
+      "活动结束后开放福利购买两周": {
+        "vi": "• Sau khi sự kiện kết thúc: Mở bán phúc lợi trong 2 tuần",
+        "cn": "• 活动结束后：开放福利购买两周"
+      },
+      "确认购买": {
+        "vi": "Xác nhận mua hàng",
+        "cn": "确认购买"
+      },
+      "确认购买_1": {
+        "vi": "Xác nhận mua hàng",
+        "cn": "确认购买"
+      }
+    },
+    "paymentSuccess": {
+      "福利发放时间": {
+        "vi": "Thờii gian phát phúc lợi",
+        "cn": "福利发放时间"
+      },
+      "支付成功": {
+        "vi": "Thanh toán thành công!",
+        "cn": "支付成功！"
+      }
+    },
+    "skinDelivered": {
+      "客服支持": {
+        "vi": "Hỗ trợ & Liên hệ",
+        "cn": "客服支持"
+      },
+      "扫码联系客服": {
+        "vi": "Quét mã QR để liên hệ CSKH",
+        "cn": "扫码联系客服"
+      },
+      "扫码联系客服_1": {
+        "vi": "Quét mã QR liên hệ CSKH",
+        "cn": "扫码联系客服"
+      }
+    },
+    "qr": {}
+  },
+  "common": {
+    "活动首页": {
+      "vi": "Trang Chủ",
+      "cn": "活动首页"
+    },
+    "14_主播空降恐龙岛": {
+      "vi": "1-4 Streamer Đột Kích Đảo Khủng Long",
+      "cn": "1-4 主播空降恐龙岛"
+    },
+    "距离_14__报名截止": {
+      "vi": "Còn 01/04 — Hạn chót đăng ký",
+      "cn": "距离 1/4 — 报名截止"
+    },
+    "天": {
+      "vi": "ngày",
+      "cn": "天"
+    },
+    "时": {
+      "vi": "giờ",
+      "cn": "时"
+    },
+    "分": {
+      "vi": "phút",
+      "cn": "分"
+    },
+    "秒": {
+      "vi": "giây",
+      "cn": "秒"
+    },
+    "报名已截止": {
+      "vi": "ĐĂNG KÝ ĐÃ ĐÓNG",
+      "cn": "报名已截止"
+    },
+    "对抗开战时间": {
+      "vi": "THỜI GIAN CHIẾN ĐẤU",
+      "cn": "对抗开战时间"
+    },
+    "如何进入": {
+      "vi": "Hướng dẫn",
+      "cn": "如何进入"
+    },
+    "只能选择一个": {
+      "vi": "Chọn 1 phe",
+      "cn": "只能选择一个"
+    },
+    "人": {
+      "vi": "ngườii",
+      "cn": "人"
+    },
+    "人_1": {
+      "vi": "ngườii",
+      "cn": "人"
+    },
+    "只能选择一个_1": {
+      "vi": "Chọn 1 phe",
+      "cn": "只能选择一个"
+    },
+    "人_2": {
+      "vi": "ngườii",
+      "cn": "人"
+    },
+    "人_3": {
+      "vi": "ngườii",
+      "cn": "人"
+    },
+    "尊贵福利": {
+      "vi": "Phúc Lợi Quý Hiếm",
+      "cn": "尊贵福利"
+    },
+    "专属忠诚战士的荣耀": {
+      "vi": "Độc quyền dành cho chiến binh trung thành",
+      "cn": "专属忠诚战士的荣耀"
+    },
+    "4_款": {
+      "vi": "4 loại",
+      "cn": "4 款"
+    },
+    "限时福利特惠": {
+      "vi": "Ưu Đãi Có Hạn",
+      "cn": "限时福利特惠"
+    },
+    "即将揭晓": {
+      "vi": "Sắp tiết lộ",
+      "cn": "即将揭晓"
+    },
+    "原价": {
+      "vi": "Giá gốc",
+      "cn": "原价"
+    },
+    "即将揭晓_1": {
+      "vi": "Sắp tiết lộ",
+      "cn": "即将揭晓"
+    },
+    "原价_1": {
+      "vi": "Giá gốc",
+      "cn": "原价"
+    },
+    "即将揭晓_2": {
+      "vi": "Sắp tiết lộ",
+      "cn": "即将揭晓"
+    },
+    "原价_2": {
+      "vi": "Giá gốc",
+      "cn": "原价"
+    },
+    "即将揭晓_3": {
+      "vi": "Sắp tiết lộ",
+      "cn": "即将揭晓"
+    },
+    "原价_3": {
+      "vi": "Giá gốc",
+      "cn": "原价"
+    },
+    "即将登场": {
+      "vi": "Sắp trình làng",
+      "cn": "即将登场"
+    },
+    "超稀有": {
+      "vi": "Cực Hiếm",
+      "cn": "超稀有"
+    },
+    "限时福利特惠_1": {
+      "vi": "Ưu Đãi Có Hạn",
+      "cn": "限时福利特惠"
+    },
+    "史前霸主礼包": {
+      "vi": "Bá Chủ Thờii Tiền Sử Gói",
+      "cn": "史前霸主礼包"
+    },
+    "绝对权威__无双力量的象征只为登顶者": {
+      "vi": "Quyền uy tuyệt đối — Biểu tượng của sức mạnh vô song, chỉ dành cho kẻ đứng đầu",
+      "cn": "绝对权威 —— 无双力量的象征，只为登顶者"
+    },
+    "原价_4": {
+      "vi": "Giá gốc",
+      "cn": "原价"
+    },
+    "至高珍宝": {
+      "vi": "Báu vật thượng đẳng",
+      "cn": "至高珍宝"
+    },
+    "活动期间唯一获取机会": {
+      "vi": "Cơ hội sở hữu duy nhất trong sự kiện",
+      "cn": "活动期间唯一获取机会"
+    },
+    "福利详情将分阶段公布请关注官方主页": {
+      "vi": "* Chi tiết phúc lợi sẽ được cập nhật theo từng giai đoạn. Vui lòng theo dõi trang chính thức.",
+      "cn": "* 福利详情将分阶段公布，请关注官方主页"
+    },
+    "活动时间": {
+      "vi": "Thờii gian sự kiện",
+      "cn": "活动时间"
+    },
+    "2026年4月1日具体时间请关注后续公告": {
+      "vi": "01/04/2026 (thờii gian cụ thể sẽ thông báo sau)",
+      "cn": "2026年4月1日（具体时间请关注后续公告）"
+    },
+    "参与方式": {
+      "vi": "Cách tham gia",
+      "cn": "参与方式"
+    },
+    "参与资格": {
+      "vi": "Điều kiện tham gia",
+      "cn": "参与资格"
+    },
+    "活动福利": {
+      "vi": "Phúc lợi sự kiện",
+      "cn": "活动福利"
+    },
+    "2026年4月1日报名截止晚间2000开放对抗": {
+      "vi": "• 01/04/2026: Hạn chót đăng ký, bắt đầu đối kháng 20:00",
+      "cn": "• 2026年4月1日：报名截止，晚间20:00开放对抗"
+    },
+    "活动结束时间请关注官方公告": {
+      "vi": "• Thờii gian kết thúc sự kiện: Vui lòng xem thông báo chính thức",
+      "cn": "• 活动结束时间：请关注官方公告"
+    },
+    "注意事项": {
+      "vi": "Lưu ý",
+      "cn": "注意事项"
+    },
+    "原价_5": {
+      "vi": "Giá gốc:",
+      "cn": "原价："
+    },
+    "售价": {
+      "vi": "Giá bán:",
+      "cn": "售价："
+    },
+    "折扣": {
+      "vi": "Giảm giá:",
+      "cn": "折扣："
+    },
+    "请选择您拥有角色的服务器": {
+      "vi": "💡 Chọn máy chủ có nhân vật của bạn:",
+      "cn": "💡 请选择您拥有角色的服务器："
+    },
+    "每个订单只能扫码支付一次": {
+      "vi": "Mỗi đơn hàng chỉ được quét mã thanh toán một lần.",
+      "cn": "每个订单只能扫码支付一次。"
+    },
+    "立即支付": {
+      "vi": "Thanh toán ngay",
+      "cn": "立即支付"
+    },
+    "正在处理支付": {
+      "vi": "Đang xử lý thanh toán",
+      "cn": "正在处理支付"
+    },
+    "请不要关闭此页面": {
+      "vi": "Vui lòng không đóng trang này...",
+      "cn": "请不要关闭此页面..."
+    },
+    "关闭": {
+      "vi": "Đóng",
+      "cn": "关闭"
+    },
+    "我知道了": {
+      "vi": "Tôi đã hiểu",
+      "cn": "我知道了"
+    },
+    "使用_Zalo_或扫码应用联系": {
+      "vi": "Sử dụng Zalo hoặc ứng dụng quét mã để liên hệ",
+      "cn": "使用 Zalo 或扫码应用联系"
+    },
+    "密码": {
+      "vi": "Mật khẩu",
+      "cn": "密码"
+    },
+    "还没有账号": {
+      "vi": "Chưa có tài khoản?",
+      "cn": "还没有账号？"
+    },
+    "均为Windows_PC版本": {
+      "vi": "Tất cả đều là phiên bản Windows PC",
+      "cn": "均为Windows PC版本"
+    },
+    "重要提示": {
+      "vi": "Lưu ý quan trọng",
+      "cn": "重要提示"
+    },
+    "取消": {
+      "vi": "Hủy",
+      "cn": "取消"
+    },
+    "确认": {
+      "vi": "Xác nhận",
+      "cn": "确认"
+    },
+    "如何进入游戏": {
+      "vi": "Hướng dẫn vào game",
+      "cn": "如何进入游戏"
+    },
+    "如何进入游戏_1": {
+      "vi": "Hướng dẫn vào game",
+      "cn": "如何进入游戏"
+    },
+    "安装游戏": {
+      "vi": "Cài đặt game",
+      "cn": "安装游戏"
+    },
+    "运行安装程序按提示完成安装": {
+      "vi": "Chạy file cài đặt và làm theo hướng dẫn",
+      "cn": "运行安装程序，按提示完成安装"
+    },
+    "创建角色": {
+      "vi": "Tạo nhân vật",
+      "cn": "创建角色"
+    },
+    "选择服务器并创建您的第一个角色": {
+      "vi": "Chọn server và tạo nhân vật đầu tiên",
+      "cn": "选择服务器并创建您的第一个角色"
+    },
+    "完成": {
+      "vi": "Hoàn tất",
+      "cn": "完成"
+    },
+    "明白了": {
+      "vi": "Đã hiểu",
+      "cn": "明白了"
+    },
+    "测试模式": {
+      "vi": "Chế độ Test",
+      "cn": "测试模式"
+    },
+    "未进游戏": {
+      "vi": "Chưa vào game",
+      "cn": "未进游戏"
+    },
+    "已进游戏": {
+      "vi": "Đã vào game",
+      "cn": "已进游戏"
+    },
+    "报名已截止_1": {
+      "vi": "Đăng ký đã đóng",
+      "cn": "报名已截止"
+    },
+    "即将上线": {
+      "vi": "Sắp ra mắt",
+      "cn": "即将上线"
+    },
+    "开放销售中": {
+      "vi": "Đang mở bán",
+      "cn": "开放销售中"
+    },
+    "切换Q服结果": {
+      "vi": "Đổi kết quả Q (heni↔ricon)",
+      "cn": "切换Q服结果"
+    },
+    "切换K服结果": {
+      "vi": "Đổi kết quả K (Sữa Chua↔MiuMiu)",
+      "cn": "切换K服结果"
+    },
+    "登录": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "登录_1": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "请先登录以加入阵营": {
+      "vi": "Vui lòng đăng nhập để tham gia phe",
+      "cn": "请先登录以加入阵营"
+    },
+    "登录_2": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "下载游戏": {
+      "vi": "Tải game",
+      "cn": "下载游戏"
+    },
+    "立即购买": {
+      "vi": "Mua ngay",
+      "cn": "立即购买"
+    },
+    "立即购买_1": {
+      "vi": "Mua ngay",
+      "cn": "立即购买"
+    },
+    "立即购买_2": {
+      "vi": "Mua ngay",
+      "cn": "立即购买"
+    },
+    "立即购买_3": {
+      "vi": "Mua ngay",
+      "cn": "立即购买"
+    },
+    "立即购买_4": {
+      "vi": "Mua ngay",
+      "cn": "立即购买"
+    },
+    "1_登录游戏账号并选择阵营加入": {
+      "vi": "1. Đăng nhập tài khoản game và chọn phe tham gia",
+      "cn": "1. 登录游戏账号并选择阵营加入"
+    },
+    "2_可购买史前霸主礼包": {
+      "vi": "2. Có thể mua Bá Chủ Thờii Tiền Sử Gói",
+      "cn": "2. 可购买史前霸主礼包"
+    },
+    "福利发放时间": {
+      "vi": "Thờii gian phát phúc lợi",
+      "cn": "福利发放时间"
+    },
+    "活动结束后开放福利购买两周": {
+      "vi": "• Sau khi sự kiện kết thúc: Mở bán phúc lợi trong 2 tuần",
+      "cn": "• 活动结束后：开放福利购买两周"
+    },
+    "客服支持": {
+      "vi": "Hỗ trợ & Liên hệ",
+      "cn": "客服支持"
+    },
+    "扫码联系客服": {
+      "vi": "Quét mã QR để liên hệ CSKH",
+      "cn": "扫码联系客服"
+    },
+    "确认购买": {
+      "vi": "Xác nhận mua hàng",
+      "cn": "确认购买"
+    },
+    "确认购买_1": {
+      "vi": "Xác nhận mua hàng",
+      "cn": "确认购买"
+    },
+    "支付成功": {
+      "vi": "Thanh toán thành công!",
+      "cn": "支付成功！"
+    },
+    "请登录游戏并检查您的背包如未收到皮肤请联系客服获取帮助": {
+      "vi": "Vui lòng đăng nhập game và kiểm tra túi đồ của bạn. Nếu chưa nhận được skin, vui lòng liên hệ CSKH để được hỗ trợ.",
+      "cn": "请登录游戏并检查您的背包。如未收到皮肤，请联系客服获取帮助。"
+    },
+    "扫码联系客服_1": {
+      "vi": "Quét mã QR liên hệ CSKH",
+      "cn": "扫码联系客服"
+    },
+    "登录_3": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "登录_4": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "用户名": {
+      "vi": "Tên đăng nhập",
+      "cn": "用户名"
+    },
+    "登录_5": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "立即注册": {
+      "vi": "Đăng ký ngay",
+      "cn": "立即注册"
+    },
+    "下载游戏_1": {
+      "vi": "Tải Game",
+      "cn": "下载游戏"
+    },
+    "下载游戏_2": {
+      "vi": "Tải Game",
+      "cn": "下载游戏"
+    },
+    "请选择以下任意下载源": {
+      "vi": "Chọn một trong các nguồn tải bên dưới",
+      "cn": "请选择以下任意下载源"
+    },
+    "下载_1": {
+      "vi": "Tải 1",
+      "cn": "下载 1"
+    },
+    "下载_2": {
+      "vi": "Tải 2",
+      "cn": "下载 2"
+    },
+    "下载_3": {
+      "vi": "Tải 3",
+      "cn": "下载 3"
+    },
+    "下载_4": {
+      "vi": "Tải 4",
+      "cn": "下载 4"
+    },
+    "下载游戏客户端": {
+      "vi": "Tải game client",
+      "cn": "下载游戏客户端"
+    },
+    "点击下载游戏按钮获取安装包": {
+      "vi": "Nhấn nút 'Tải game' để tải bộ cài đặt",
+      "cn": "点击'下载游戏'按钮获取安装包"
+    },
+    "登录游戏": {
+      "vi": "Đăng nhập game",
+      "cn": "登录游戏"
+    },
+    "打开游戏使用您的账号登录": {
+      "vi": "Mở game và đăng nhập bằng tài khoản của bạn",
+      "cn": "打开游戏，使用您的账号登录"
+    },
+    "未登录": {
+      "vi": "Chưa đăng nhập",
+      "cn": "未登录"
+    },
+    "page_title": {
+      "vi": "Streamer Đột Kích Đảo Khủng Long - MonsterLair",
+      "cn": "主播空降恐龙岛 - MonsterLair"
+    }
+  }
+};
+        
+        // Skin Pricing Config - 金币:越南盾 = 1:1800
+        const EXCHANGE_RATE = 1800;
+        const SKIN_PRICES = {
+            warrior: {
+                gold: 3888, // 金币
+                get original() { return this.gold * EXCHANGE_RATE; }, // 6,998,400 VND
+                // Final price depends on faction victory - revealed after event
+                discountPercent: null // Will be calculated based on victory
+            },
+            overlord: {
+                gold: 18888, // 金币
+                get original() { return this.gold * EXCHANGE_RATE; }, // 33,998,400 VND
+                get current() { return this.original * 0.66; }, // 22,438,944 VND (34% off)
+                discountPercent: 34
+            }
+        };
+
+        // Language and i18n functions
         function toggleLanguage() {
-            currentLang = currentLang === 'vi' ? 'cn' : 'vi';
+            const newLang = currentLang === 'vi' ? 'cn' : 'vi';
+            Analytics.track('language_switch', { from: currentLang, to: newLang });
+            
+            currentLang = newLang;
             document.getElementById('lang-btn-desktop').textContent = currentLang === 'vi' ? 'CN' : 'VN';
             document.getElementById('lang-btn-mobile').textContent = currentLang === 'vi' ? 'CN' : 'VN';
             
-            document.querySelectorAll('[data-vi][data-cn]').forEach(el => {
-                if (el.tagName === 'INPUT') {
-                    el.placeholder = el.getAttribute(`data-${currentLang}`);
-                } else if (el.tagName === 'OPTION') {
-                    el.textContent = el.getAttribute(`data-${currentLang}`);
-                } else {
-                    el.textContent = el.getAttribute(`data-${currentLang}`);
-                }
-            });
-            
-            // 刷新动态生成的皮肤价格显示
+            applyLanguage();
+            updateFactionView();
             updateSkinDisplayState();
             
             showToast(currentLang === 'vi' ? 'Đã chuyển sang tiếng Việt' : '已切换到中文');
         }
-
+        
+        function applyLanguage() {
+            // Apply translations using data-i18n attributes
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                const translation = getTranslation(key);
+                if (translation) {
+                    if (el.tagName === 'INPUT') {
+                        el.placeholder = translation;
+                    } else if (el.tagName === 'TITLE') {
+                        document.title = translation;
+                    } else {
+                        el.textContent = translation;
+                    }
+                }
+            });
+        }
+        
+        function getTranslation(key) {
+            // Support nested keys like "common.登录" or "skins.皮肤已发放"
+            const parts = key.split('.');
+            let value = EMBEDDED_I18N;
+            for (const part of parts) {
+                if (value && value[part]) {
+                    value = value[part];
+                } else {
+                    return null;
+                }
+            }
+            // Return the translation for current language
+            if (value && value[currentLang]) {
+                return value[currentLang];
+            }
+            return null;
+        }
+        
         // Toast notification
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -1267,91 +2214,7 @@
             }, 2000);
         }
 
-        // Login Modal
-        function showLoginModal() {
-            document.getElementById('login-modal').classList.remove('hidden');
-        }
-
-        function closeLoginModal() {
-            document.getElementById('login-modal').classList.add('hidden');
-        }
-
-        function doLogin() {
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-            
-            if (!username || !password) {
-                showToast(currentLang === 'vi' ? 'Vui lòng nhập đầy đủ thông tin' : '请输入完整信息');
-                return;
-            }
-            
-            isLoggedIn = true;
-            closeLoginModal();
-            
-            document.getElementById('header-login-btn').classList.add('hidden');
-            document.getElementById('mobile-login-btn').classList.add('hidden');
-            document.getElementById('header-user-info').classList.remove('hidden');
-            document.getElementById('header-username').textContent = username;
-            
-            updateFactionView();
-            showToast(currentLang === 'vi' ? 'Đăng nhập thành công' : '登录成功');
-        }
-
-        // Download Modal
-        function showDownloadModal() {
-            document.getElementById('download-modal').classList.remove('hidden');
-        }
-
-        function closeDownloadModal() {
-            document.getElementById('download-modal').classList.add('hidden');
-        }
-
-        // How to Play Modal
-        function showHowToPlay() {
-            document.getElementById('how-to-modal').classList.remove('hidden');
-        }
-
-        function closeHowToModal() {
-            document.getElementById('how-to-modal').classList.add('hidden');
-        }
-
-        // Toggle Rules
-        function toggleRules() {
-            const content = document.getElementById('rules-content');
-            const icon = document.getElementById('rules-icon');
-            
-            if (content.classList.contains('hidden')) {
-                content.classList.remove('hidden');
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                content.classList.add('hidden');
-                icon.style.transform = 'rotate(0deg)';
-            }
-        }
-
-        function showRules() {
-            const content = document.getElementById('rules-content');
-            const icon = document.getElementById('rules-icon');
-            content.classList.remove('hidden');
-            icon.style.transform = 'rotate(180deg)';
-            document.getElementById('rules-content').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Toggle Reward Detail
-        function toggleRewardDetail(id) {
-            const detail = document.getElementById(`${id}-detail`);
-            const icon = document.getElementById(`${id}-icon`);
-            
-            if (detail.classList.contains('expanded')) {
-                detail.classList.remove('expanded');
-                icon.style.transform = 'rotate(0deg)';
-            } else {
-                detail.classList.add('expanded');
-                icon.style.transform = 'rotate(180deg)';
-            }
-        }
-
-        // Update faction section view based on state
+        // Core UI Functions
         function updateFactionView() {
             const vsOnlyView = document.getElementById('vs-only-view');
             const joinFactionView = document.getElementById('join-faction-view');
@@ -1383,28 +2246,33 @@
             }
         }
 
-        // Handle Streamer Click
         function handleStreamerClick(server, streamer) {
             // Check if registration is closed
             if (!isRegistrationOpen) {
+                Analytics.track('faction_join_error', { reason: 'registration_closed', server, streamer });
                 showToast(currentLang === 'vi' ? 'Đăng ký đã đóng' : '报名已截止');
                 return;
             }
             
             if (!isLoggedIn) {
+                Analytics.track('faction_join_click', { server, streamer, status: 'not_logged_in' });
                 showLoginModal();
                 return;
             }
             
             if (!hasCharacter) {
+                Analytics.track('faction_join_click', { server, streamer, status: 'no_character' });
                 showToast(currentLang === 'vi' ? 'Vui lòng vào game trước' : '请先进入游戏');
                 return;
             }
             
             if (registrations[server]) {
+                Analytics.track('faction_join_click', { server, streamer, status: 'already_joined' });
                 showToast(currentLang === 'vi' ? 'Bạn đã tham gia phe này' : '您已加入该阵营');
                 return;
             }
+            
+            Analytics.track('faction_join_click', { server, streamer, status: 'valid' });
             
             // Store pending registration
             pendingRegistration = { server, streamer };
@@ -1413,7 +2281,6 @@
             showConfirmModal(server, streamer);
         }
 
-        // Confirm Modal
         function showConfirmModal(server, streamer) {
             const streamerName = getStreamerName(server, streamer);
             const serverName = server === 'q' ? 'Quân Đoàn Chiến' : 'Khủng Long Chi Chiến';
@@ -1438,12 +2305,107 @@
             
             registrations[server] = streamer;
             
+            // 获取加入时的人数
+            const countEl = document.getElementById(`${server}-${streamer}-count`);
+            const joinPosition = countEl ? countEl.textContent.trim().split(' ')[0] : '0';
+            
+            Analytics.track('faction_join_success', {
+                server,
+                streamer,
+                join_position: parseInt(joinPosition) || 0
+            });
+            
             updateStreamerCards(server);
             
             const streamerName = getStreamerName(server, streamer);
             showToast(currentLang === 'vi' ? `Đã tham gia phe ${streamerName}` : `已成功加入${streamerName}阵营`);
             
             closeConfirmModal();
+        }
+
+        // Modal Functions
+        function showLoginModal() {
+            Analytics.track('login_click', { position: 'header' });
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+
+        function doLogin() {
+            const startTime = Date.now();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!username || !password) {
+                Analytics.track('login_error', { reason: 'empty_fields' });
+                showToast(currentLang === 'vi' ? 'Vui lòng nhập đầy đủ thông tin' : '请输入完整信息');
+                return;
+            }
+            
+            isLoggedIn = true;
+            Analytics.setUserId(username);
+            Analytics.track('login_success', {
+                user_id: username,
+                duration_ms: Date.now() - startTime
+            });
+            
+            closeLoginModal();
+            
+            document.getElementById('header-login-btn').classList.add('hidden');
+            document.getElementById('mobile-login-btn').classList.add('hidden');
+            document.getElementById('header-user-info').classList.remove('hidden');
+            document.getElementById('header-username').textContent = username;
+            
+            updateFactionView();
+            showToast(currentLang === 'vi' ? 'Đăng nhập thành công' : '登录成功');
+        }
+
+        function showDownloadModal() {
+            Analytics.track('download_modal_open', { trigger: 'status_bar' });
+            document.getElementById('download-modal').classList.remove('hidden');
+        }
+
+        function closeDownloadModal() {
+            document.getElementById('download-modal').classList.add('hidden');
+        }
+
+        function showHowToPlay() {
+            document.getElementById('how-to-modal').classList.remove('hidden');
+        }
+
+        function closeHowToModal() {
+            document.getElementById('how-to-modal').classList.add('hidden');
+        }
+
+        function toggleRules() {
+            const content = document.getElementById('rules-content');
+            const icon = document.getElementById('rules-icon');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function showRules() {
+            const content = document.getElementById('rules-content');
+            const icon = document.getElementById('rules-icon');
+            content.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+            document.getElementById('rules-content').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showQRModal() {
+            document.getElementById('qr-modal').classList.remove('hidden');
+        }
+
+        function closeQRModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
         }
 
         function getStreamerName(server, streamer) {
@@ -1465,17 +2427,20 @@
                 if (registeredStreamer === streamer) {
                     // Selected
                     card.classList.add('selected');
-                    btn.textContent = currentLang === 'vi' ? 'Đã tham gia ✓' : '已加入 ✓';
+                    const joinedText = currentLang === 'vi' ? 'Đã tham gia ✓' : '已加入 ✓';
+                    btn.textContent = joinedText;
                     btn.className = 'w-full py-1.5 rounded-full text-xs font-medium transition-all bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 cursor-default';
                 } else if (registeredStreamer) {
                     // Disabled (other streamer in same server selected)
                     card.classList.add('disabled');
-                    btn.textContent = currentLang === 'vi' ? 'Không thể chọn' : '不可选择';
+                    const disabledText = currentLang === 'vi' ? 'Không thể chọn' : '不可选择';
+                    btn.textContent = disabledText;
                     btn.className = 'w-full py-1.5 rounded-full text-xs font-medium transition-all bg-gray-700/50 text-gray-500 cursor-not-allowed';
                 } else {
                     // Available
                     card.classList.remove('selected', 'disabled');
-                    btn.textContent = currentLang === 'vi' ? 'Tham gia' : '加入阵营';
+                    const joinText = getTranslation('streamers.加入阵营_3') || (currentLang === 'vi' ? 'Tham gia' : '加入阵营');
+                    btn.textContent = joinText;
                     btn.className = 'w-full py-1.5 rounded-full text-xs font-medium transition-all bg-gradient-to-r from-gold to-gold-dark text-jungle-900 hover:brightness-110 cursor-pointer';
                 }
             });
@@ -1500,213 +2465,38 @@
             }
         }
 
-        // Test Mode
         function toggleTestMenu() {
             const menu = document.getElementById('test-menu');
             menu.classList.toggle('hidden');
         }
 
-        function setTestMode(mode) {
-            // Reset state
-            isLoggedIn = false;
-            hasCharacter = false;
-            registrations = { q: null, k: null };
-            
-            // Reset UI
-            document.getElementById('header-login-btn').classList.remove('hidden');
-            document.getElementById('mobile-login-btn').classList.remove('hidden');
-            document.getElementById('header-user-info').classList.add('hidden');
-            document.getElementById('q-registered-hint').classList.add('hidden');
-            document.getElementById('k-registered-hint').classList.add('hidden');
-            
-            // Reset Discord buttons
-            document.getElementById('q-discord-hint').classList.add('hidden');
-            document.getElementById('k-discord-hint').classList.add('hidden');
-            ['q-heni', 'q-ricon', 'k-suachua', 'k-miumiu'].forEach(id => {
-                const discordBtn = document.getElementById(`${id}-discord`);
-                if (discordBtn) discordBtn.classList.add('hidden');
-            });
-            
-            // Reset all cards
-            ['q-heni', 'q-ricon', 'k-suachua', 'k-miumiu'].forEach(id => {
-                const card = document.getElementById(id);
-                const btn = document.getElementById(`${id}-btn`);
-                if (card && btn) {
-                    card.classList.remove('selected', 'disabled');
-                    btn.textContent = currentLang === 'vi' ? 'Tham gia' : '加入阵营';
-                    btn.className = 'w-full py-1.5 rounded-full text-xs font-medium transition-all bg-gradient-to-r from-gold to-gold-dark text-jungle-900 hover:brightness-110 cursor-pointer';
-                }
-            });
-            
-            // Apply test mode
-            switch(mode) {
-                case 'loggedOut':
-                    updateFactionView();
-                    break;
-                case 'noCharacter':
-                    isLoggedIn = true;
-                    updateFactionView();
-                    break;
-                case 'hasCharacter':
-                    isLoggedIn = true;
-                    hasCharacter = true;
-                    updateFactionView();
-                    break;
-                case 'registrationClosed':
-                    isLoggedIn = true;
-                    hasCharacter = true;
-                    isRegistrationOpen = false;
-                    registrations.q = 'heni';
-                    registrations.k = 'suachua';
-                    // Show event started UI
-                    document.getElementById('countdown-section').classList.add('hidden');
-                    document.getElementById('event-started-section').classList.remove('hidden');
-                    document.getElementById('event-started-section').classList.add('flex');
-                    // Hide status bar
-                    document.getElementById('status-bar').classList.add('hidden');
-                    // Show full faction view but disable buttons
-                    document.getElementById('vs-only-view').classList.add('hidden');
-                    document.getElementById('join-faction-view').classList.remove('hidden');
-                    // Update cards to show registered state
-                    updateStreamerCards('q');
-                    updateStreamerCards('k');
-                    // Disable all buttons
-                    disableAllFactionButtons();
-                    break;
-                case 'skinComingSoon':
-                    // 即将上线 - 使用默认占位图，显示"即将揭晓"
-                    isLoggedIn = true;
-                    hasCharacter = true;
-                    registrations.q = 'heni';
-                    registrations.k = 'suachua';
-                    skinDisplayState = 'comingSoon';
-                    updateFactionView();
-                    updateStreamerCards('q');
-                    updateStreamerCards('k');
-                    updateSkinDisplayState();
-                    showToast(currentLang === 'vi' ? 'Skin sắp ra mắt - Ẩn thông tin' : '即将上线 - 隐藏信息');
-                    break;
-                case 'skinRevealed':
-                    // 公开信息 - 显示真实皮肤图，显示原价，但不能购买
-                    isLoggedIn = true;
-                    hasCharacter = true;
-                    registrations.q = 'heni';
-                    registrations.k = 'suachua';
-                    skinDisplayState = 'revealed';
-                    updateFactionView();
-                    updateStreamerCards('q');
-                    updateStreamerCards('k');
-                    updateSkinDisplayState();
-                    showToast(currentLang === 'vi' ? 'Đã công bố skin - Chỉ hiển thị giá gốc' : '已公开皮肤 - 仅显示原价');
-                    break;
-                case 'skinOnSale':
-                    // 开放销售 - 显示真实皮肤图，显示折扣价，可以购买
-                    isLoggedIn = true;
-                    hasCharacter = true;
-                    registrations.q = 'heni';
-                    registrations.k = 'suachua';
-                    skinDisplayState = 'onSale';
-                    updateFactionView();
-                    updateStreamerCards('q');
-                    updateStreamerCards('k');
-                    updateSkinDisplayState();
-                    showToast(currentLang === 'vi' ? 'Đang mở bán - Hiển thị giá ưu đãi' : '开放销售中 - 显示折扣价');
-                    break;
-                case 'eventEnded':
-                    // 活动已结束 - 显示亲卫勇士最终折扣（基于阵营胜负）
-                    isLoggedIn = true;
-                    hasCharacter = true;
-                    registrations.q = 'heni';
-                    registrations.k = 'suachua';
-                    skinDisplayState = 'eventEnded';
-                    updateFactionView();
-                    updateStreamerCards('q');
-                    updateStreamerCards('k');
-                    updateSkinDisplayState();
-                    showToast(currentLang === 'vi' ? 'Sự kiện đã kết thúc - Hiển thị giá cuối' : '活动已结束 - 显示最终售价');
-                    break;
-                case 'skinDelivered':
-                    // 已发放皮肤 - 显示全屏弹窗
-                    isLoggedIn = true;
-                    hasCharacter = true;
-                    registrations.q = 'heni';
-                    registrations.k = 'suachua';
-                    skinDisplayState = 'skinDelivered';
-                    updateFactionView();
-                    updateStreamerCards('q');
-                    updateStreamerCards('k');
-                    updateSkinDisplayState();
-                    // 显示全屏弹窗
-                    setTimeout(() => {
-                        showSkinDeliveredModal();
-                    }, 500);
-                    showToast(currentLang === 'vi' ? 'Skin đã phát - Hiển thị thông báo' : '皮肤已发放 - 显示通知');
-                    break;
-            }
-            
-            document.getElementById('test-menu').classList.add('hidden');
-            showToast(currentLang === 'vi' ? 'Đã chuyển chế độ test' : '已切换测试模式');
-        }
-
-        // Toggle faction winner for testing
         function toggleFactionResult(server) {
             if (server === 'q') {
-                // 切换 Q 服胜负
-                if (factionResults.q.winner === 'heni') {
-                    factionResults.q = { winner: 'ricon', discount: { heni: 20, ricon: 30 } };
-                    showToast(currentLang === 'vi' ? 'ricon thắng (-30%), heni thua (-20%)' : 'ricon获胜(-30%)，heni落败(-20%)');
-                } else {
-                    factionResults.q = { winner: 'heni', discount: { heni: 30, ricon: 20 } };
-                    showToast(currentLang === 'vi' ? 'heni thắng (-30%), ricon thua (-20%)' : 'heni获胜(-30%)，ricon落败(-20%)');
-                }
-            } else if (server === 'k') {
-                // 切换 K 服胜负
-                if (factionResults.k.winner === 'suachua') {
-                    factionResults.k = { winner: 'miumiu', discount: { suachua: 20, miumiu: 30 } };
-                    showToast(currentLang === 'vi' ? 'MiuMiu thắng (-30%), Sữa Chua thua (-20%)' : 'MiuMiu获胜(-30%)，Sữa Chua落败(-20%)');
-                } else {
-                    factionResults.k = { winner: 'suachua', discount: { suachua: 30, miumiu: 20 } };
-                    showToast(currentLang === 'vi' ? 'Sữa Chua thắng (-30%), MiuMiu thua (-20%)' : 'Sữa Chua获胜(-30%)，MiuMiu落败(-20%)');
-                }
+                // Toggle Q server winner
+                const currentWinner = factionResults.q.winner;
+                factionResults.q.winner = currentWinner === 'heni' ? 'ricon' : 'heni';
+                factionResults.q.discount = factionResults.q.winner === 'heni' 
+                    ? { heni: 50, ricon: 10 }
+                    : { heni: 10, ricon: 50 };
+                showToast(currentLang === 'vi' 
+                    ? `Q服: ${factionResults.q.winner === 'heni' ? 'heni' : 'ricon'} thắng` 
+                    : `Q服: ${factionResults.q.winner === 'heni' ? 'heni' : 'ricon'} 获胜`);
+            } else {
+                // Toggle K server winner
+                const currentWinner = factionResults.k.winner;
+                factionResults.k.winner = currentWinner === 'suachua' ? 'miumiu' : 'suachua';
+                factionResults.k.discount = factionResults.k.winner === 'suachua'
+                    ? { suachua: 50, miumiu: 10 }
+                    : { suachua: 10, miumiu: 50 };
+                showToast(currentLang === 'vi' 
+                    ? `K服: ${factionResults.k.winner === 'suachua' ? 'Sữa Chua' : 'MiuMiu'} thắng` 
+                    : `K服: ${factionResults.k.winner === 'suachua' ? 'Sữa Chua' : 'MiuMiu'} 获胜`);
             }
-            // 刷新显示
-            updateSkinDisplayState();
+            // Update display if in onSale mode
+            if (skinDisplayState === 'onSale') {
+                updateSkinDisplayState();
+            }
         }
-
-        // State - Registration Deadline & Battle Time
-        const REGISTRATION_DEADLINE = new Date('2026-04-01T00:00:00+07:00');
-        const BATTLE_START_TIME = new Date('2026-04-01T20:00:00+07:00');
-        let isRegistrationOpen = true;
-        
-        // Skin Sales State
-        // skinDisplayState: 'comingSoon' | 'revealed' | 'onSale' | 'eventEnded'
-        let skinDisplayState = 'comingSoon';
-        let selectedServer = null;
-        let currentPurchaseItem = null;
-        
-        // 模拟阵营胜负状态（用于开放销售测试）
-        // 胜者 7 折，败者 8 折
-        let factionResults = {
-            q: { winner: 'heni', discount: { heni: 30, ricon: 20 } },  // heni 胜 7折，ricon 败 8折
-            k: { winner: 'suachua', discount: { suachua: 30, miumiu: 20 } }  // Sữa Chua 胜 7折，MiuMiu 败 8折
-        };
-        
-        // Skin Pricing Config - 金币:越南盾 = 1:1800
-        const EXCHANGE_RATE = 1800;
-        const SKIN_PRICES = {
-            warrior: {
-                gold: 3888, // 金币
-                get original() { return this.gold * EXCHANGE_RATE; }, // 6,998,400 VND
-                // Final price depends on faction victory - revealed after event
-                discountPercent: null // Will be calculated based on victory
-            },
-            overlord: {
-                gold: 18888, // 金币
-                get original() { return this.gold * EXCHANGE_RATE; }, // 33,998,400 VND
-                get current() { return this.original * 0.66; }, // 22,438,944 VND (34% off)
-                discountPercent: 34
-            }
-        };
 
         // Check if registration is still open
         function checkRegistrationStatus() {
@@ -1741,9 +2531,133 @@
             });
         }
 
+        // Test Mode Functions
+        function setTestMode(mode) {
+            // Reset state
+            isLoggedIn = false;
+            hasCharacter = false;
+            registrations = { q: null, k: null };
+            isRegistrationOpen = true;
+            skinDisplayState = 'comingSoon';
+            
+            // Reset UI
+            document.getElementById('header-login-btn').classList.remove('hidden');
+            document.getElementById('mobile-login-btn').classList.remove('hidden');
+            document.getElementById('header-user-info').classList.add('hidden');
+            document.getElementById('q-registered-hint').classList.add('hidden');
+            document.getElementById('k-registered-hint').classList.add('hidden');
+            
+            // Reset countdown and event started section
+            document.getElementById('countdown-section').classList.remove('hidden');
+            document.getElementById('event-started-section').classList.add('hidden');
+            document.getElementById('event-started-section').classList.remove('flex');
+            
+            // Reset Discord buttons
+            document.getElementById('q-discord-hint').classList.add('hidden');
+            document.getElementById('k-discord-hint').classList.add('hidden');
+            ['q-heni', 'q-ricon', 'k-suachua', 'k-miumiu'].forEach(id => {
+                const discordBtn = document.getElementById(`${id}-discord`);
+                if (discordBtn) discordBtn.classList.add('hidden');
+            });
+            
+            // Reset all cards
+            ['q-heni', 'q-ricon', 'k-suachua', 'k-miumiu'].forEach(id => {
+                const card = document.getElementById(id);
+                const btn = document.getElementById(`${id}-btn`);
+                if (card && btn) {
+                    card.classList.remove('selected', 'disabled');
+                    card.onclick = function() { handleStreamerClick(id.split('-')[0], id.split('-')[1]); };
+                    const joinText = getTranslation('streamers.加入阵营_3') || (currentLang === 'vi' ? 'Tham gia' : '加入阵营');
+                    btn.textContent = joinText;
+                    btn.className = 'w-full py-1.5 rounded-full text-xs font-medium transition-all bg-gradient-to-r from-gold to-gold-dark text-jungle-900 hover:brightness-110 cursor-pointer';
+                }
+            });
+            
+            // Apply test mode
+            switch(mode) {
+                case 'loggedOut':
+                    updateFactionView();
+                    showToast(currentLang === 'vi' ? 'Đã reset: Chưa đăng nhập' : '已重置: 未登录');
+                    break;
+                case 'noCharacter':
+                    isLoggedIn = true;
+                    updateFactionView();
+                    showToast(currentLang === 'vi' ? 'Đã đăng nhập, chưa vào game' : '已登录，未进游戏');
+                    break;
+                case 'hasCharacter':
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    updateFactionView();
+                    showToast(currentLang === 'vi' ? 'Đã vào game, chưa chọn phe' : '已进游戏，未选阵营');
+                    break;
+                case 'registrationClosed':
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    isRegistrationOpen = false;
+                    registrations.q = 'heni';
+                    registrations.k = 'suachua';
+                    document.getElementById('countdown-section').classList.add('hidden');
+                    document.getElementById('event-started-section').classList.remove('hidden');
+                    document.getElementById('event-started-section').classList.add('flex');
+                    document.getElementById('status-bar').classList.add('hidden');
+                    document.getElementById('vs-only-view').classList.add('hidden');
+                    document.getElementById('join-faction-view').classList.remove('hidden');
+                    updateStreamerCards('q');
+                    updateStreamerCards('k');
+                    disableAllFactionButtons();
+                    showToast(currentLang === 'vi' ? 'Đăng ký đã đóng' : '报名已截止');
+                    break;
+                case 'skinComingSoon':
+                    skinDisplayState = 'comingSoon';
+                    updateSkinDisplayState();
+                    showToast(currentLang === 'vi' ? 'Skin: Sắp ra mắt' : '皮肤: 即将上线');
+                    break;
+                case 'skinRevealed':
+                    skinDisplayState = 'revealed';
+                    updateSkinDisplayState();
+                    showToast(currentLang === 'vi' ? 'Skin: Đã công bố' : '皮肤: 已公开');
+                    break;
+                case 'skinOnSale':
+                    skinDisplayState = 'onSale';
+                    isLoggedIn = true;
+                    hasCharacter = true;
+                    registrations.q = 'heni';
+                    registrations.k = 'suachua';
+                    updateFactionView();
+                    updateStreamerCards('q');
+                    updateStreamerCards('k');
+                    updateSkinDisplayState();
+                    showToast(currentLang === 'vi' ? 'Skin đã mở bán' : '皮肤已开售');
+                    break;
+                case 'eventEnded':
+                    skinDisplayState = 'eventEnded';
+                    updateSkinDisplayState();
+                    showToast(currentLang === 'vi' ? 'Sự kiện đã kết thúc' : '活动已结束');
+                    break;
+                case 'skinDelivered':
+                    skinDisplayState = 'skinDelivered';
+                    updateSkinDisplayState();
+                    showSkinDeliveredModal();
+                    showToast(currentLang === 'vi' ? 'Đã phát skin' : '皮肤已发放');
+                    break;
+            }
+        }
+
         // Purchase Modal Functions
         function showPurchaseModal(type, streamer = null) {
             currentPurchaseItem = { type, streamer };
+            
+            const price = type === 'warrior' ? 
+                SKIN_PRICES.warrior.original : 
+                SKIN_PRICES.overlord.original;
+            
+            Analytics.track('purchase_initiate', {
+                item_type: type,
+                item_id: streamer || 'overlord',
+                price_vnd: price,
+                skin_state: skinDisplayState
+            });
+            
             const modal = document.getElementById('purchase-modal');
             const itemImage = document.getElementById('purchase-item-image');
             const itemName = document.getElementById('purchase-item-name');
@@ -1759,7 +2673,7 @@
             if (type === 'warrior') {
                 // 亲卫勇士皮肤
                 itemImage.src = `assets/streamer-skin-${streamer}.png`;
-                itemImage.onerror = function() { this.src = 'assets/warrior-skin-default.png'; };
+                itemImage.onerror = function() { this.src = 'assets/warrior-gold.png'; };
                 itemName.textContent = `Skin Dũng Sĩ Cận Vệ - ${streamer}`;
                 
                 // 设置价格显示
@@ -1808,6 +2722,7 @@
         
         function selectServer(server) {
             selectedServer = server;
+            Analytics.track('purchase_select_server', { server, item: currentPurchaseItem });
             updateServerButtons();
             document.getElementById('pay-btn').disabled = false;
         }
@@ -1856,6 +2771,16 @@
                 } else if (currentPurchaseItem.type === 'overlord') {
                     purchasedOverlord = true;
                 }
+                
+                // 上报购买完成
+                Analytics.track('purchase_complete', {
+                    order_id: 'ORD_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                    item_type: currentPurchaseItem.type,
+                    item_id: currentPurchaseItem.streamer || 'overlord',
+                    server: selectedServer,
+                    skin_state: skinDisplayState
+                });
+                
                 updateSkinDisplayState();
             }, 3000);
         }
@@ -1873,6 +2798,185 @@
             document.getElementById('skin-delivered-modal').classList.add('hidden');
         }
         
+        // ===== 数据采集模块 (Analytics) =====
+        const Analytics = {
+          // Mock API 配置
+          config: {
+            endpoint: 'https://analytics.mock.monster-lair.vn/collect',
+            batchSize: 10,
+            flushInterval: 30000, // 30秒自动上报
+            maxRetries: 3
+          },
+          
+          // 初始化状态
+          queue: [],
+          sessionId: null,
+          userId: null,
+          anonymousId: null,
+          trackingData: null,
+          flushTimer: null,
+          
+          init() {
+            // 生成或恢复匿名 ID
+            this.anonymousId = this.getOrCreateAnonymousId();
+            this.sessionId = this.generateId();
+            
+            // 解析 URL 参数
+            const params = new URLSearchParams(window.location.search);
+            this.trackingData = {
+              source: params.get('source') || params.get('utm_source') || 'direct',
+              campaign: params.get('utm_campaign') || 'organic',
+              medium: params.get('utm_medium') || '',
+              content: params.get('utm_content') || '',
+              landingPage: window.location.pathname
+            };
+            localStorage.setItem('campaign_tracking', JSON.stringify(this.trackingData));
+            
+            // 启动定时上报
+            this.startFlushTimer();
+            
+            // 上报页面访问
+            this.track('page_view', {
+              url: window.location.href,
+              referrer: document.referrer,
+              screenSize: `${window.innerWidth}x${window.innerHeight}`,
+              deviceType: this.getDeviceType(),
+              userAgent: navigator.userAgent.substring(0, 100)
+            });
+            
+            // 页面卸载前强制上报
+            window.addEventListener('beforeunload', () => {
+              this.flush();
+            });
+          },
+          
+          // 获取或创建匿名 ID
+          getOrCreateAnonymousId() {
+            let id = localStorage.getItem('analytics_anonymous_id');
+            if (!id) {
+              id = 'anon_' + this.generateId();
+              localStorage.setItem('analytics_anonymous_id', id);
+            }
+            return id;
+          },
+          
+          // 生成唯一 ID
+          generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+          },
+          
+          // 获取设备类型
+          getDeviceType() {
+            const ua = navigator.userAgent;
+            if (/Mobile|Android|iPhone/i.test(ua)) return 'mobile';
+            if (/iPad|Tablet/i.test(ua)) return 'tablet';
+            return 'desktop';
+          },
+          
+          // 获取当前用户 ID（登录用户优先）
+          getCurrentUserId() {
+            return this.userId || this.anonymousId;
+          },
+          
+          // 设置登录用户 ID
+          setUserId(userId) {
+            const oldId = this.getCurrentUserId();
+            this.userId = userId;
+            
+            // 用户识别事件（关联匿名 ID 和登录 ID）
+            this.track('user_identify', {
+              anonymous_id: this.anonymousId,
+              user_id: userId,
+              previous_id: oldId
+            });
+          },
+          
+          // 追踪事件
+          track(eventName, data = {}) {
+            const payload = {
+              event: eventName,
+              timestamp: new Date().toISOString(),
+              session_id: this.sessionId,
+              user_id: this.getCurrentUserId(),
+              anonymous_id: this.anonymousId,
+              tracking: this.trackingData,
+              page: 'streamer-dropin',
+              url: window.location.href,
+              data: data
+            };
+            
+            // 加入队列
+            this.queue.push(payload);
+            console.log('[Analytics Queued]', eventName, data);
+            
+            // 达到批量大小立即上报
+            if (this.queue.length >= this.config.batchSize) {
+              this.flush();
+            }
+          },
+          
+          // 启动定时上报
+          startFlushTimer() {
+            this.flushTimer = setInterval(() => {
+              if (this.queue.length > 0) {
+                this.flush();
+              }
+            }, this.config.flushInterval);
+          },
+          
+          // 批量上报
+          async flush() {
+            if (this.queue.length === 0) return;
+            
+            const batch = this.queue.splice(0, this.config.batchSize);
+            
+            try {
+              // Mock API 调用
+              await this.mockApiRequest(batch);
+              console.log('[Analytics Flushed]', batch.length, 'events');
+            } catch (error) {
+              console.error('[Analytics Failed]', error);
+              // 失败时重新入队（带重试标记）
+              batch.forEach(event => {
+                event._retries = (event._retries || 0) + 1;
+                if (event._retries < this.config.maxRetries) {
+                  this.queue.unshift(event);
+                }
+              });
+            }
+          },
+          
+          // Mock API 请求（模拟网络延迟和随机成功/失败）
+          mockApiRequest(batch) {
+            return new Promise((resolve, reject) => {
+              setTimeout(() => {
+                // 模拟 95% 成功率
+                if (Math.random() > 0.05) {
+                  resolve({
+                    success: true,
+                    received: batch.length,
+                    serverTime: new Date().toISOString()
+                  });
+                } else {
+                  reject(new Error('Mock API Error: Network timeout'));
+                }
+              }, 100 + Math.random() * 200); // 100-300ms 延迟
+            });
+          },
+          
+          // 获取队列状态（调试用）
+          getQueueStatus() {
+            return {
+              pending: this.queue.length,
+              userId: this.getCurrentUserId(),
+              sessionId: this.sessionId
+            };
+          }
+        };
+
+        // 初始化 Analytics
+        Analytics.init();
+
         // Track purchased skins
         let purchasedWarriorSkins = {
             heni: false,
@@ -1913,7 +3017,7 @@
                 // 更新图片
                 if (imgEl) {
                     if (skinDisplayState === 'comingSoon') {
-                        imgEl.src = 'assets/warrior-skin-default.png';
+                        imgEl.src = 'assets/warrior-gold.png';
                     } else {
                         imgEl.src = `assets/streamer-skin-${streamer}.png`;
                     }
@@ -2097,6 +3201,9 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            // Apply language first
+            applyLanguage();
+            
             // Check registration status first
             checkRegistrationStatus();
             

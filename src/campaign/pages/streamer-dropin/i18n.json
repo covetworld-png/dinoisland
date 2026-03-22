@@ -1,0 +1,842 @@
+{
+  "_meta": {
+    "description": "Streamer Dropin Campaign - i18n Configuration",
+    "languages": [
+      "vi",
+      "cn"
+    ],
+    "lastUpdated": "2026-03-21"
+  },
+  "header": {},
+  "hero": {},
+  "countdown": {},
+  "status": {},
+  "streamers": {
+    "倒计时结束后停止加入阵营": {
+      "vi": "* Đăng ký sẽ đóng khi đếm ngược kết thúc",
+      "cn": "* 倒计时结束后停止加入阵营"
+    },
+    "阵营已定战役即将开启": {
+      "vi": "Phe chiến đã định, cuộc chiến sắp bắt đầu",
+      "cn": "阵营已定，战役即将开启"
+    },
+    "需要进入游戏创建角色才能加入阵营": {
+      "vi": "Cần vào game tạo nhân vật để tham gia phe",
+      "cn": "需要进入游戏创建角色才能加入阵营"
+    },
+    "加入阵营": {
+      "vi": "Tham gia",
+      "cn": "加入阵营"
+    },
+    "加入阵营_1": {
+      "vi": "Tham gia",
+      "cn": "加入阵营"
+    },
+    "加入_heni_Discord": {
+      "vi": "Tham gia Discord heni",
+      "cn": "加入 heni Discord"
+    },
+    "加入_ricon_Discord": {
+      "vi": "Tham gia Discord ricon",
+      "cn": "加入 ricon Discord"
+    },
+    "加入阵营_2": {
+      "vi": "Tham gia",
+      "cn": "加入阵营"
+    },
+    "加入阵营_3": {
+      "vi": "Tham gia",
+      "cn": "加入阵营"
+    },
+    "加入_Sữa_Chua_Discord": {
+      "vi": "Tham gia Discord Sữa Chua",
+      "cn": "加入 Sữa Chua Discord"
+    },
+    "加入_MiuMiu_Discord": {
+      "vi": "Tham gia Discord MiuMiu",
+      "cn": "加入 MiuMiu Discord"
+    },
+    "加入阵营__解锁专属优惠": {
+      "vi": "Gia nhập phe → Mở khóa ưu đãi độc quyền",
+      "cn": "加入阵营 → 解锁专属优惠"
+    },
+    "最终售价取决于阵营结果": {
+      "vi": "Giá cuối cùng phụ thuộc kết quả phe",
+      "cn": "最终售价取决于阵营结果"
+    },
+    "最终售价取决于阵营结果_1": {
+      "vi": "Giá cuối cùng phụ thuộc kết quả phe",
+      "cn": "最终售价取决于阵营结果"
+    },
+    "最终售价取决于阵营结果_2": {
+      "vi": "Giá cuối cùng phụ thuộc kết quả phe",
+      "cn": "最终售价取决于阵营结果"
+    },
+    "最终售价取决于阵营结果_3": {
+      "vi": "Giá cuối cùng phụ thuộc kết quả phe",
+      "cn": "最终售价取决于阵营结果"
+    },
+    "阵营玩家专属超品": {
+      "vi": "Siêu phẩm chỉ dành cho ngườii chơi phe",
+      "cn": "阵营玩家专属超品"
+    },
+    "2_每个服务器有2个主播阵营对决选择您支持的主播阵营": {
+      "vi": "2. Mỗi server có 2 phe streamer đối đầu, chọn phe bạn ủng hộ",
+      "cn": "2. 每个服务器有2个主播阵营对决，选择您支持的主播阵营"
+    },
+    "3_加入阵营后进入主播_Discord_接收战术指挥": {
+      "vi": "3. Sau khi gia nhập phe, tham gia Discord của streamer để nhận chỉ đạo chiến thuật",
+      "cn": "3. 加入阵营后，进入主播 Discord 接收战术指挥"
+    },
+    "仅限已进入游戏并创建角色的玩家加入阵营": {
+      "vi": "Chỉ ngườii chơi đã vào game và tạo nhân vật mới có thể tham gia phe",
+      "cn": "仅限已进入游戏并创建角色的玩家加入阵营"
+    },
+    "关于_Discord_组织": {
+      "vi": "📌 Về Tổ Chức Qua Discord",
+      "cn": "📌 关于 Discord 组织"
+    },
+    "所有战士加入阵营后需进入主播_Discord": {
+      "vi": "• Tất cả chiến binh sau khi gia nhập phe cần vào Discord của streamer",
+      "cn": "• 所有战士加入阵营后需进入主播 Discord"
+    },
+    "Discord_是活动中的战术指挥和任务分配场所": {
+      "vi": "• Discord là nơi chỉ huy chiến thuật và phân công nhiệm vụ trong sự kiện",
+      "cn": "• Discord 是活动中的战术指挥和任务分配场所"
+    },
+    "主播将通过_Discord_通知集合时间地点和战术": {
+      "vi": "• Streamer sẽ thông báo thờii gian, địa điểm tập trung và chiến thuật qua Discord",
+      "cn": "• 主播将通过 Discord 通知集合时间、地点和战术"
+    },
+    "阵营对决": {
+      "vi": "Đối kháng phe",
+      "cn": "阵营对决"
+    },
+    "3_福利仅限加入阵营玩家购买": {
+      "vi": "3. Phúc lợi chỉ dành cho ngườii chơi đã tham gia phe",
+      "cn": "3. 福利仅限加入阵营玩家购买"
+    },
+    "1_加入阵营成功后不可更改阵营": {
+      "vi": "1. Sau khi tham gia phe thành công không thể đổi phe",
+      "cn": "1. 加入阵营成功后不可更改阵营"
+    },
+    "2_每个账号每服限加入一个阵营": {
+      "vi": "2. Mỗi tài khoản chỉ được tham gia 1 phe trong mỗi server",
+      "cn": "2. 每个账号每服限加入一个阵营"
+    },
+    "3_选择阵营后请立即加入_Discord以免错过战术信息": {
+      "vi": "3. Vui lòng tham gia Discord ngay sau khi chọn phe để không bỏ lỡ thông tin chiến thuật",
+      "cn": "3. 选择阵营后请立即加入 Discord，以免错过战术信息"
+    },
+    "确认加入": {
+      "vi": "Xác nhận tham gia",
+      "cn": "确认加入"
+    },
+    "确认加入_1": {
+      "vi": "Xác nhận tham gia",
+      "cn": "确认加入"
+    },
+    "您即将加入阵营": {
+      "vi": "Bạn sắp tham gia phe",
+      "cn": "您即将加入阵营"
+    },
+    "确认后不可更改阵营请仔细核对信息后再确认": {
+      "vi": "Sau khi xác nhận, bạn không thể thay đổi phe. Vui lòng kiểm tra kỹ thông tin trước khi xác nhận.",
+      "cn": "确认后不可更改阵营，请仔细核对信息后再确认。"
+    },
+    "返回本页面即可加入阵营": {
+      "vi": "Quay lại trang này để tham gia phe",
+      "cn": "返回本页面即可加入阵营"
+    }
+  },
+  "skins": {
+    "亲卫勇士皮肤__主播限定": {
+      "vi": "Skin Dũng Sĩ Cận Vệ - Độc quyền Streamer",
+      "cn": "亲卫勇士皮肤 - 主播限定"
+    },
+    "1_加入阵营成功后解锁亲卫勇士礼包购买资格": {
+      "vi": "1. Sau khi tham gia phe thành công, mở khóa quyền mua Dũng Sĩ Cận Vệ Gói",
+      "cn": "1. 加入阵营成功后解锁亲卫勇士礼包购买资格"
+    },
+    "皮肤将在活动结束后统一发放请留意官方公告": {
+      "vi": "📦 Skin sẽ được phát sau khi sự kiện kết thúc. Vui lòng theo dõi thông báo chính thức.",
+      "cn": "📦 皮肤将在活动结束后统一发放。请留意官方公告。"
+    },
+    "支付成功皮肤将在活动结束后统一发放": {
+      "vi": "✓ Thanh toán thành công. Skin sẽ được phát sau khi sự kiện kết thúc.",
+      "cn": "✓ 支付成功。皮肤将在活动结束后统一发放。"
+    },
+    "皮肤发放时间": {
+      "vi": "📦 Thờii gian phát skin",
+      "cn": "📦 皮肤发放时间"
+    },
+    "皮肤将在活动结束后统一发放请留意官方公告_1": {
+      "vi": "Skin sẽ được phát sau khi sự kiện kết thúc. Vui lòng theo dõi thông báo chính thức.",
+      "cn": "皮肤将在活动结束后统一发放。请留意官方公告。"
+    },
+    "皮肤已发放": {
+      "vi": "🎉 Skin đã được phát!",
+      "cn": "🎉 皮肤已发放！"
+    },
+    "已公开皮肤": {
+      "vi": "Đã công bố skin",
+      "cn": "已公开皮肤"
+    },
+    "皮肤发放结束": {
+      "vi": "Kết thúc phát skin",
+      "cn": "皮肤发放结束"
+    },
+    "已发放皮肤检查": {
+      "vi": "Đã phát skin - Kiểm tra",
+      "cn": "已发放皮肤-检查"
+    }
+  },
+  "rules": {
+    "活动规则": {
+      "vi": "Thể Lệ",
+      "cn": "活动规则"
+    },
+    "活动规则_1": {
+      "vi": "Thể Lệ Sự Kiện",
+      "cn": "活动规则"
+    }
+  },
+  "footer": {},
+  "modals": {
+    "login": {
+      "登录": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "登录_1": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "请先登录以加入阵营": {
+        "vi": "Vui lòng đăng nhập để tham gia phe",
+        "cn": "请先登录以加入阵营"
+      },
+      "登录_2": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "1_登录游戏账号并选择阵营加入": {
+        "vi": "1. Đăng nhập tài khoản game và chọn phe tham gia",
+        "cn": "1. 登录游戏账号并选择阵营加入"
+      },
+      "请登录游戏并检查您的背包如未收到皮肤请联系客服获取帮助": {
+        "vi": "Vui lòng đăng nhập game và kiểm tra túi đồ của bạn. Nếu chưa nhận được skin, vui lòng liên hệ CSKH để được hỗ trợ.",
+        "cn": "请登录游戏并检查您的背包。如未收到皮肤，请联系客服获取帮助。"
+      },
+      "登录_3": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "登录_4": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "用户名": {
+        "vi": "Tên đăng nhập",
+        "cn": "用户名"
+      },
+      "登录_5": {
+        "vi": "Đăng nhập",
+        "cn": "登录"
+      },
+      "立即注册": {
+        "vi": "Đăng ký ngay",
+        "cn": "立即注册"
+      },
+      "登录游戏": {
+        "vi": "Đăng nhập game",
+        "cn": "登录游戏"
+      },
+      "打开游戏使用您的账号登录": {
+        "vi": "Mở game và đăng nhập bằng tài khoản của bạn",
+        "cn": "打开游戏，使用您的账号登录"
+      },
+      "未登录": {
+        "vi": "Chưa đăng nhập",
+        "cn": "未登录"
+      }
+    },
+    "download": {
+      "下载游戏": {
+        "vi": "Tải game",
+        "cn": "下载游戏"
+      },
+      "下载游戏_1": {
+        "vi": "Tải Game",
+        "cn": "下载游戏"
+      },
+      "下载游戏_2": {
+        "vi": "Tải Game",
+        "cn": "下载游戏"
+      },
+      "请选择以下任意下载源": {
+        "vi": "Chọn một trong các nguồn tải bên dưới",
+        "cn": "请选择以下任意下载源"
+      },
+      "下载_1": {
+        "vi": "Tải 1",
+        "cn": "下载 1"
+      },
+      "下载_2": {
+        "vi": "Tải 2",
+        "cn": "下载 2"
+      },
+      "下载_3": {
+        "vi": "Tải 3",
+        "cn": "下载 3"
+      },
+      "下载_4": {
+        "vi": "Tải 4",
+        "cn": "下载 4"
+      },
+      "下载游戏客户端": {
+        "vi": "Tải game client",
+        "cn": "下载游戏客户端"
+      },
+      "点击下载游戏按钮获取安装包": {
+        "vi": "Nhấn nút 'Tải game' để tải bộ cài đặt",
+        "cn": "点击'下载游戏'按钮获取安装包"
+      }
+    },
+    "howTo": {},
+    "confirm": {},
+    "purchase": {
+      "立即购买": {
+        "vi": "Mua ngay",
+        "cn": "立即购买"
+      },
+      "立即购买_1": {
+        "vi": "Mua ngay",
+        "cn": "立即购买"
+      },
+      "立即购买_2": {
+        "vi": "Mua ngay",
+        "cn": "立即购买"
+      },
+      "立即购买_3": {
+        "vi": "Mua ngay",
+        "cn": "立即购买"
+      },
+      "立即购买_4": {
+        "vi": "Mua ngay",
+        "cn": "立即购买"
+      },
+      "2_可购买史前霸主礼包": {
+        "vi": "2. Có thể mua Bá Chủ Thờii Tiền Sử Gói",
+        "cn": "2. 可购买史前霸主礼包"
+      },
+      "活动结束后开放福利购买两周": {
+        "vi": "• Sau khi sự kiện kết thúc: Mở bán phúc lợi trong 2 tuần",
+        "cn": "• 活动结束后：开放福利购买两周"
+      },
+      "确认购买": {
+        "vi": "Xác nhận mua hàng",
+        "cn": "确认购买"
+      },
+      "确认购买_1": {
+        "vi": "Xác nhận mua hàng",
+        "cn": "确认购买"
+      }
+    },
+    "paymentSuccess": {
+      "福利发放时间": {
+        "vi": "Thờii gian phát phúc lợi",
+        "cn": "福利发放时间"
+      },
+      "支付成功": {
+        "vi": "Thanh toán thành công!",
+        "cn": "支付成功！"
+      }
+    },
+    "skinDelivered": {
+      "客服支持": {
+        "vi": "Hỗ trợ & Liên hệ",
+        "cn": "客服支持"
+      },
+      "扫码联系客服": {
+        "vi": "Quét mã QR để liên hệ CSKH",
+        "cn": "扫码联系客服"
+      },
+      "扫码联系客服_1": {
+        "vi": "Quét mã QR liên hệ CSKH",
+        "cn": "扫码联系客服"
+      }
+    },
+    "qr": {}
+  },
+  "common": {
+    "活动首页": {
+      "vi": "Trang Chủ",
+      "cn": "活动首页"
+    },
+    "14_主播空降恐龙岛": {
+      "vi": "1-4 Streamer Đột Kích Đảo Khủng Long",
+      "cn": "1-4 主播空降恐龙岛"
+    },
+    "距离_14__报名截止": {
+      "vi": "Còn 01/04 — Hạn chót đăng ký",
+      "cn": "距离 1/4 — 报名截止"
+    },
+    "天": {
+      "vi": "ngày",
+      "cn": "天"
+    },
+    "时": {
+      "vi": "giờ",
+      "cn": "时"
+    },
+    "分": {
+      "vi": "phút",
+      "cn": "分"
+    },
+    "秒": {
+      "vi": "giây",
+      "cn": "秒"
+    },
+    "报名已截止": {
+      "vi": "ĐĂNG KÝ ĐÃ ĐÓNG",
+      "cn": "报名已截止"
+    },
+    "对抗开战时间": {
+      "vi": "THỜI GIAN CHIẾN ĐẤU",
+      "cn": "对抗开战时间"
+    },
+    "如何进入": {
+      "vi": "Hướng dẫn",
+      "cn": "如何进入"
+    },
+    "只能选择一个": {
+      "vi": "Chọn 1 phe",
+      "cn": "只能选择一个"
+    },
+    "人": {
+      "vi": "ngườii",
+      "cn": "人"
+    },
+    "人_1": {
+      "vi": "ngườii",
+      "cn": "人"
+    },
+    "只能选择一个_1": {
+      "vi": "Chọn 1 phe",
+      "cn": "只能选择一个"
+    },
+    "人_2": {
+      "vi": "ngườii",
+      "cn": "人"
+    },
+    "人_3": {
+      "vi": "ngườii",
+      "cn": "人"
+    },
+    "尊贵福利": {
+      "vi": "Phúc Lợi Quý Hiếm",
+      "cn": "尊贵福利"
+    },
+    "专属忠诚战士的荣耀": {
+      "vi": "Độc quyền dành cho chiến binh trung thành",
+      "cn": "专属忠诚战士的荣耀"
+    },
+    "4_款": {
+      "vi": "4 loại",
+      "cn": "4 款"
+    },
+    "限时福利特惠": {
+      "vi": "Ưu Đãi Có Hạn",
+      "cn": "限时福利特惠"
+    },
+    "即将揭晓": {
+      "vi": "Sắp tiết lộ",
+      "cn": "即将揭晓"
+    },
+    "原价": {
+      "vi": "Giá gốc",
+      "cn": "原价"
+    },
+    "即将揭晓_1": {
+      "vi": "Sắp tiết lộ",
+      "cn": "即将揭晓"
+    },
+    "原价_1": {
+      "vi": "Giá gốc",
+      "cn": "原价"
+    },
+    "即将揭晓_2": {
+      "vi": "Sắp tiết lộ",
+      "cn": "即将揭晓"
+    },
+    "原价_2": {
+      "vi": "Giá gốc",
+      "cn": "原价"
+    },
+    "即将揭晓_3": {
+      "vi": "Sắp tiết lộ",
+      "cn": "即将揭晓"
+    },
+    "原价_3": {
+      "vi": "Giá gốc",
+      "cn": "原价"
+    },
+    "即将登场": {
+      "vi": "Sắp trình làng",
+      "cn": "即将登场"
+    },
+    "超稀有": {
+      "vi": "Cực Hiếm",
+      "cn": "超稀有"
+    },
+    "限时福利特惠_1": {
+      "vi": "Ưu Đãi Có Hạn",
+      "cn": "限时福利特惠"
+    },
+    "史前霸主礼包": {
+      "vi": "Bá Chủ Thờii Tiền Sử Gói",
+      "cn": "史前霸主礼包"
+    },
+    "绝对权威__无双力量的象征只为登顶者": {
+      "vi": "Quyền uy tuyệt đối — Biểu tượng của sức mạnh vô song, chỉ dành cho kẻ đứng đầu",
+      "cn": "绝对权威 —— 无双力量的象征，只为登顶者"
+    },
+    "原价_4": {
+      "vi": "Giá gốc",
+      "cn": "原价"
+    },
+    "至高珍宝": {
+      "vi": "Báu vật thượng đẳng",
+      "cn": "至高珍宝"
+    },
+    "活动期间唯一获取机会": {
+      "vi": "Cơ hội sở hữu duy nhất trong sự kiện",
+      "cn": "活动期间唯一获取机会"
+    },
+    "福利详情将分阶段公布请关注官方主页": {
+      "vi": "* Chi tiết phúc lợi sẽ được cập nhật theo từng giai đoạn. Vui lòng theo dõi trang chính thức.",
+      "cn": "* 福利详情将分阶段公布，请关注官方主页"
+    },
+    "活动时间": {
+      "vi": "Thờii gian sự kiện",
+      "cn": "活动时间"
+    },
+    "2026年4月1日具体时间请关注后续公告": {
+      "vi": "01/04/2026 (thờii gian cụ thể sẽ thông báo sau)",
+      "cn": "2026年4月1日（具体时间请关注后续公告）"
+    },
+    "参与方式": {
+      "vi": "Cách tham gia",
+      "cn": "参与方式"
+    },
+    "参与资格": {
+      "vi": "Điều kiện tham gia",
+      "cn": "参与资格"
+    },
+    "活动福利": {
+      "vi": "Phúc lợi sự kiện",
+      "cn": "活动福利"
+    },
+    "2026年4月1日报名截止晚间2000开放对抗": {
+      "vi": "• 01/04/2026: Hạn chót đăng ký, bắt đầu đối kháng 20:00",
+      "cn": "• 2026年4月1日：报名截止，晚间20:00开放对抗"
+    },
+    "活动结束时间请关注官方公告": {
+      "vi": "• Thờii gian kết thúc sự kiện: Vui lòng xem thông báo chính thức",
+      "cn": "• 活动结束时间：请关注官方公告"
+    },
+    "注意事项": {
+      "vi": "Lưu ý",
+      "cn": "注意事项"
+    },
+    "原价_5": {
+      "vi": "Giá gốc:",
+      "cn": "原价："
+    },
+    "售价": {
+      "vi": "Giá bán:",
+      "cn": "售价："
+    },
+    "折扣": {
+      "vi": "Giảm giá:",
+      "cn": "折扣："
+    },
+    "请选择您拥有角色的服务器": {
+      "vi": "💡 Chọn máy chủ có nhân vật của bạn:",
+      "cn": "💡 请选择您拥有角色的服务器："
+    },
+    "每个订单只能扫码支付一次": {
+      "vi": "Mỗi đơn hàng chỉ được quét mã thanh toán một lần.",
+      "cn": "每个订单只能扫码支付一次。"
+    },
+    "立即支付": {
+      "vi": "Thanh toán ngay",
+      "cn": "立即支付"
+    },
+    "正在处理支付": {
+      "vi": "Đang xử lý thanh toán",
+      "cn": "正在处理支付"
+    },
+    "请不要关闭此页面": {
+      "vi": "Vui lòng không đóng trang này...",
+      "cn": "请不要关闭此页面..."
+    },
+    "关闭": {
+      "vi": "Đóng",
+      "cn": "关闭"
+    },
+    "我知道了": {
+      "vi": "Tôi đã hiểu",
+      "cn": "我知道了"
+    },
+    "使用_Zalo_或扫码应用联系": {
+      "vi": "Sử dụng Zalo hoặc ứng dụng quét mã để liên hệ",
+      "cn": "使用 Zalo 或扫码应用联系"
+    },
+    "密码": {
+      "vi": "Mật khẩu",
+      "cn": "密码"
+    },
+    "还没有账号": {
+      "vi": "Chưa có tài khoản?",
+      "cn": "还没有账号？"
+    },
+    "均为Windows_PC版本": {
+      "vi": "Tất cả đều là phiên bản Windows PC",
+      "cn": "均为Windows PC版本"
+    },
+    "重要提示": {
+      "vi": "Lưu ý quan trọng",
+      "cn": "重要提示"
+    },
+    "取消": {
+      "vi": "Hủy",
+      "cn": "取消"
+    },
+    "确认": {
+      "vi": "Xác nhận",
+      "cn": "确认"
+    },
+    "如何进入游戏": {
+      "vi": "Hướng dẫn vào game",
+      "cn": "如何进入游戏"
+    },
+    "如何进入游戏_1": {
+      "vi": "Hướng dẫn vào game",
+      "cn": "如何进入游戏"
+    },
+    "安装游戏": {
+      "vi": "Cài đặt game",
+      "cn": "安装游戏"
+    },
+    "运行安装程序按提示完成安装": {
+      "vi": "Chạy file cài đặt và làm theo hướng dẫn",
+      "cn": "运行安装程序，按提示完成安装"
+    },
+    "创建角色": {
+      "vi": "Tạo nhân vật",
+      "cn": "创建角色"
+    },
+    "选择服务器并创建您的第一个角色": {
+      "vi": "Chọn server và tạo nhân vật đầu tiên",
+      "cn": "选择服务器并创建您的第一个角色"
+    },
+    "完成": {
+      "vi": "Hoàn tất",
+      "cn": "完成"
+    },
+    "明白了": {
+      "vi": "Đã hiểu",
+      "cn": "明白了"
+    },
+    "测试模式": {
+      "vi": "Chế độ Test",
+      "cn": "测试模式"
+    },
+    "未进游戏": {
+      "vi": "Chưa vào game",
+      "cn": "未进游戏"
+    },
+    "已进游戏": {
+      "vi": "Đã vào game",
+      "cn": "已进游戏"
+    },
+    "报名已截止_1": {
+      "vi": "Đăng ký đã đóng",
+      "cn": "报名已截止"
+    },
+    "即将上线": {
+      "vi": "Sắp ra mắt",
+      "cn": "即将上线"
+    },
+    "开放销售中": {
+      "vi": "Đang mở bán",
+      "cn": "开放销售中"
+    },
+    "切换Q服结果": {
+      "vi": "Đổi kết quả Q (heni↔ricon)",
+      "cn": "切换Q服结果"
+    },
+    "切换K服结果": {
+      "vi": "Đổi kết quả K (Sữa Chua↔MiuMiu)",
+      "cn": "切换K服结果"
+    },
+    "登录": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "登录_1": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "请先登录以加入阵营": {
+      "vi": "Vui lòng đăng nhập để tham gia phe",
+      "cn": "请先登录以加入阵营"
+    },
+    "登录_2": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "下载游戏": {
+      "vi": "Tải game",
+      "cn": "下载游戏"
+    },
+    "立即购买": {
+      "vi": "Mua ngay",
+      "cn": "立即购买"
+    },
+    "立即购买_1": {
+      "vi": "Mua ngay",
+      "cn": "立即购买"
+    },
+    "立即购买_2": {
+      "vi": "Mua ngay",
+      "cn": "立即购买"
+    },
+    "立即购买_3": {
+      "vi": "Mua ngay",
+      "cn": "立即购买"
+    },
+    "立即购买_4": {
+      "vi": "Mua ngay",
+      "cn": "立即购买"
+    },
+    "1_登录游戏账号并选择阵营加入": {
+      "vi": "1. Đăng nhập tài khoản game và chọn phe tham gia",
+      "cn": "1. 登录游戏账号并选择阵营加入"
+    },
+    "2_可购买史前霸主礼包": {
+      "vi": "2. Có thể mua Bá Chủ Thờii Tiền Sử Gói",
+      "cn": "2. 可购买史前霸主礼包"
+    },
+    "福利发放时间": {
+      "vi": "Thờii gian phát phúc lợi",
+      "cn": "福利发放时间"
+    },
+    "活动结束后开放福利购买两周": {
+      "vi": "• Sau khi sự kiện kết thúc: Mở bán phúc lợi trong 2 tuần",
+      "cn": "• 活动结束后：开放福利购买两周"
+    },
+    "客服支持": {
+      "vi": "Hỗ trợ & Liên hệ",
+      "cn": "客服支持"
+    },
+    "扫码联系客服": {
+      "vi": "Quét mã QR để liên hệ CSKH",
+      "cn": "扫码联系客服"
+    },
+    "确认购买": {
+      "vi": "Xác nhận mua hàng",
+      "cn": "确认购买"
+    },
+    "确认购买_1": {
+      "vi": "Xác nhận mua hàng",
+      "cn": "确认购买"
+    },
+    "支付成功": {
+      "vi": "Thanh toán thành công!",
+      "cn": "支付成功！"
+    },
+    "请登录游戏并检查您的背包如未收到皮肤请联系客服获取帮助": {
+      "vi": "Vui lòng đăng nhập game và kiểm tra túi đồ của bạn. Nếu chưa nhận được skin, vui lòng liên hệ CSKH để được hỗ trợ.",
+      "cn": "请登录游戏并检查您的背包。如未收到皮肤，请联系客服获取帮助。"
+    },
+    "扫码联系客服_1": {
+      "vi": "Quét mã QR liên hệ CSKH",
+      "cn": "扫码联系客服"
+    },
+    "登录_3": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "登录_4": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "用户名": {
+      "vi": "Tên đăng nhập",
+      "cn": "用户名"
+    },
+    "登录_5": {
+      "vi": "Đăng nhập",
+      "cn": "登录"
+    },
+    "立即注册": {
+      "vi": "Đăng ký ngay",
+      "cn": "立即注册"
+    },
+    "下载游戏_1": {
+      "vi": "Tải Game",
+      "cn": "下载游戏"
+    },
+    "下载游戏_2": {
+      "vi": "Tải Game",
+      "cn": "下载游戏"
+    },
+    "请选择以下任意下载源": {
+      "vi": "Chọn một trong các nguồn tải bên dưới",
+      "cn": "请选择以下任意下载源"
+    },
+    "下载_1": {
+      "vi": "Tải 1",
+      "cn": "下载 1"
+    },
+    "下载_2": {
+      "vi": "Tải 2",
+      "cn": "下载 2"
+    },
+    "下载_3": {
+      "vi": "Tải 3",
+      "cn": "下载 3"
+    },
+    "下载_4": {
+      "vi": "Tải 4",
+      "cn": "下载 4"
+    },
+    "下载游戏客户端": {
+      "vi": "Tải game client",
+      "cn": "下载游戏客户端"
+    },
+    "点击下载游戏按钮获取安装包": {
+      "vi": "Nhấn nút 'Tải game' để tải bộ cài đặt",
+      "cn": "点击'下载游戏'按钮获取安装包"
+    },
+    "登录游戏": {
+      "vi": "Đăng nhập game",
+      "cn": "登录游戏"
+    },
+    "打开游戏使用您的账号登录": {
+      "vi": "Mở game và đăng nhập bằng tài khoản của bạn",
+      "cn": "打开游戏，使用您的账号登录"
+    },
+    "未登录": {
+      "vi": "Chưa đăng nhập",
+      "cn": "未登录"
+    },
+    "page_title": {
+      "vi": "Streamer Đột Kích Đảo Khủng Long - MonsterLair",
+      "cn": "主播空降恐龙岛 - MonsterLair"
+    }
+  }
+}
