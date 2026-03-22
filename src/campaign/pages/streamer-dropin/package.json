@@ -1,0 +1,15 @@
+{
+  "name": "streamer-dropin-campaign",
+  "version": "1.0.0",
+  "description": "主播空降恐龙岛活动落地页",
+  "scripts": {
+    "build": "node build.js",
+    "build:prod": "NODE_ENV=production node build.js",
+    "serve": "npx serve . -p 8080",
+    "dev": "python3 -m http.server 8080"
+  },
+  "keywords": ["campaign", "landing-page", "monster-lair"],
+  "author": "MonsterLair Team",
+  "license": "UNLICENSED",
+  "private": true
+}

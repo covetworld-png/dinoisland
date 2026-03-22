@@ -1,0 +1,62 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "updatedAt": "2026-03-22T12:00:00+07:00",
+    "updatedBy": "admin"
+  },
+  "timings": {
+    "registrationDeadline": "2026-04-01T00:00:00+07:00",
+    "battleStartTime": "2026-04-01T20:00:00+07:00",
+    "skinRevealTime": "2026-04-02T00:00:00+07:00",
+    "saleStartTime": "2026-04-03T00:00:00+07:00",
+    "saleEndTime": "2026-04-17T00:00:00+07:00"
+  },
+  "skinState": {
+    "current": "comingSoon",
+    "allowedValues": ["comingSoon", "revealed", "onSale", "eventEnded", "skinDelivered"]
+  },
+  "factionResults": {
+    "q": {
+      "winner": "heni",
+      "discounts": {
+        "heni": 50,
+        "ricon": 10
+      }
+    },
+    "k": {
+      "winner": "suachua",
+      "discounts": {
+        "suachua": 50,
+        "miumiu": 10
+      }
+    }
+  },
+  "pricing": {
+    "exchangeRate": 1800,
+    "warrior": {
+      "gold": 3888
+    },
+    "overlord": {
+      "gold": 18888,
+      "discountPercent": 34
+    }
+  },
+  "links": {
+    "discord": {
+      "q": {
+        "heni": "https://discord.gg/9BGHDX56U",
+        "ricon": "https://discord.gg/hbn4y6nwR"
+      },
+      "k": {
+        "suachua": "https://discord.gg/5ujDrmCHa",
+        "miumiu": "https://discord.gg/zaU4tf2Rd"
+      }
+    },
+    "downloads": [
+      {"name": "MediaFire", "url": "https://www.mediafire.com/file/h35uc0bhc5gv15z/QuanDoanChien.zip/file"},
+      {"name": "Google Drive 1", "url": "https://drive.google.com/file/d/1n7JHQkX-bnmKX3vpXB7Cw41c929MeTWq/view?usp=drivesdk"},
+      {"name": "Google Drive 2", "url": "https://drive.google.com/file/d/11Yj793DCdpEPvFhKj-jpYFIdGf1wyoAi/view?usp=drive_link"},
+      {"name": "Google Drive 3", "url": "https://drive.google.com/file/d/1o4YeZ2JyVoeDaueaaWzABJhDAfTrDj9b/view?usp=drivesd"}
+    ]
+  }
+}
