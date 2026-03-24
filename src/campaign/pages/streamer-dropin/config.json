@@ -1,46 +1,68 @@
 {
   "_meta": {
-    "version": "1.0.0",
-    "updatedAt": "2026-03-22T12:00:00+07:00",
-    "updatedBy": "admin"
+    "version": "1.0.2",
+    "updatedAt": "2026-03-24T15:00:00+07:00",
+    "notes": [
+      "【配置说明】",
+      "1. 价格配置：勇士原价5888金币，胜者2722金币(54%折扣)，败者3110金币(47%折扣)；霸主原价18888金币，售价10888金币(42%折扣)",
+      "2. 汇率：1金币 = 1800越南盾",
+      "3. 皮肤状态：comingSoon(即将上线) | revealed(已公开) | onSale(销售中) | eventEnded(活动结束) | skinDelivered(已发放)",
+      "4. 占位资源：assets/overlord-preview.mp4 需替换为最终版"
+    ]
   },
+
   "timings": {
+    "_comment": "活动关键时间节点（ISO 8601格式，GMT+7）",
     "registrationDeadline": "2026-04-01T00:00:00+07:00",
     "battleStartTime": "2026-04-01T20:00:00+07:00",
     "skinRevealTime": "2026-04-02T00:00:00+07:00",
     "saleStartTime": "2026-04-03T00:00:00+07:00",
     "saleEndTime": "2026-04-17T00:00:00+07:00"
   },
+
   "skinState": {
+    "_comment": "【皮肤卡片显示状态】改这个值控制皮肤卡片长什么样。可选5种：comingSoon(未开始，显示问号遮罩) | revealed(刚公布，显示原图但还不能买) | onSale(开售中，显示价格+购买按钮) | eventEnded(已结束，显示关闭) | skinDelivered(已发放，弹窗提示已到账)",
     "current": "comingSoon",
     "allowedValues": ["comingSoon", "revealed", "onSale", "eventEnded", "skinDelivered"]
   },
+
   "factionResults": {
+    "_comment": "阵营对抗结果（决定皮肤折扣）：胜者折扣约54%(5888→2722)，败者折扣约47%(5888→3110)。Q服可选ID: heni | ricon；K服可选ID: suachua | miumiu",
     "q": {
+      "_comment": "Q服(Quân Đoàn Chiến)：winner填获胜主播ID，discounts中对应主播填54，另一主播填47",
       "winner": "heni",
       "discounts": {
-        "heni": 50,
-        "ricon": 10
+        "heni": 54,
+        "ricon": 47
       }
     },
     "k": {
+      "_comment": "K服(Khủng Long Chi Chiến)：winner填获胜主播ID，discounts中对应主播填54，另一主播填47",
       "winner": "suachua",
       "discounts": {
-        "suachua": 50,
-        "miumiu": 10
+        "suachua": 54,
+        "miumiu": 47
       }
     }
   },
+
   "pricing": {
+    "_comment": "礼包定价（汇率1金币=1800越南盾，越南盾仅在按钮显示）",
     "exchangeRate": 1800,
     "warrior": {
-      "gold": 3888
+      "displayOriginal": 5888,
+      "finalPriceWinner": 2722,
+      "finalPriceLoser": 3110,
+      "discountPercentWinner": 54,
+      "discountPercentLoser": 47
     },
     "overlord": {
-      "gold": 18888,
-      "discountPercent": 34
+      "displayOriginal": 18888,
+      "salePrice": 10888,
+      "discountPercent": 42
     }
   },
+
   "links": {
     "discord": {
       "q": {
