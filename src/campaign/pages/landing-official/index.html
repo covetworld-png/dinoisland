@@ -1243,15 +1243,17 @@
 
             // 显示二维码兜底方案
             showQRCodeFallback() {
+                // 生成 Zalo 添加好友二维码 URL
+                const zaloUrl = `https://zalo.me/${this.phone}`;
+                const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(zaloUrl)}`;
+                
                 const html = `
                     <div class="qrcode-fallback-overlay" id="qrcodeFallback" onclick="this.remove()">
                         <div class="qrcode-fallback-modal" onclick="event.stopPropagation()">
                             <div class="qrcode-icon">📱</div>
                             <h3>${currentLang === 'vi' ? 'Quét mã QR để thêm Zalo' : '扫描二维码添加 Zalo'}</h3>
                             <div class="qrcode-placeholder">
-                                <div style="width:200px;height:200px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#333;font-size:12px;text-align:center;padding:10px;">
-                                    QR Code<br>${this.phone}
-                                </div>
+                                <img src="${qrApiUrl}" alt="Zalo QR Code" style="width:200px;height:200px;border-radius:8px;background:#fff;padding:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
                             </div>
                             <p class="qrcode-phone">${this.phone}</p>
                             <button class="guide-btn" onclick="document.getElementById('qrcodeFallback').remove()">${currentLang === 'vi' ? 'Đóng' : '关闭'}</button>
