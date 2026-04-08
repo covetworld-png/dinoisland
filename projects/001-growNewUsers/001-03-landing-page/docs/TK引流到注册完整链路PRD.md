@@ -8,52 +8,31 @@
 
 ## 1. 流程概览
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          用户旅程完整链路                                      │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-TK Bio/评论区/直播间
-       │
-       ▼
-┌──────────────┐
-│ 短链跳转      │  dkl.vn/{主播}{渠道}
-│ (302跳转)     │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ 落地页        │  account.monster-lair.vn/landing-official/
-│ (Webview)     │  - 展示主播信息
-│               │  - 生成4位身份码（服务端）
-│               │  - 口令_身份码写入剪贴板（如 H2_1234）
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ Zalo调起      │  ✅ 调起成功 → 添加客服
-│               │  ❌ 调起失败 → 复制Zalo号 → 手动打开
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ 客服对话      │  - 索要口令_身份码（如 H2_1234）
-│               │  - 解析口令生成链接
-│               │  - 兜底：Unknown选项
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ 注册页        │  account.monster-lair.vn/#/register?code=H2_1234
-│               │  - 服务端解析 code 参数
-│               │  - 拆解口令(H2)和身份码(1234)
-│               │  - 口令映射到主播_渠道
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ 注册成功      │  归因完成
-└──────────────┘
+```mermaid
+flowchart TD
+    Start([TK Bio/评论区/直播间]) --> ShortLink[短链跳转<br/>dkl.vn/{主播}{渠道}]
+    ShortLink --> Landing[落地页 Webview]
+    
+    Landing --> Identity[生成身份码<br/>H2_1234]
+    Identity --> Clipboard[剪贴板写入<br/>H2_1234]
+    Clipboard --> Zalo{Zalo 调起}
+    
+    Zalo -->|✅ 成功| AddCS[添加客服]
+    Zalo -->|❌ 失败| CopyZalo[复制 Zalo 号<br/>手动打开]
+    CopyZalo --> AddCS
+    
+    AddCS --> CS[客服对话]
+    CS --> Ask[索要口令 H2_1234]
+    
+    Ask -->|用户提供| Parse[解析口令<br/>生成链接]
+    Ask -->|不提供| Unknown[手动选择 Unknown]
+    
+    Parse --> Register[注册页<br/>?code=H2_1234]
+    Unknown --> Register
+    
+    Register --> Server[服务端解析 code]
+    Server --> Attribution[归因到主播+渠道]
+    Attribution --> Success([注册成功])
 ```
 
 ---
@@ -62,23 +41,34 @@ TK Bio/评论区/直播间
 
 ### 2.1 编码规则
 
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#e3f2fd', 'primaryTextColor': '#333', 'primaryBorderColor': '#1976d2', 'lineColor': '#666', 'secondaryColor': '#f5f5f5', 'tertiaryColor': '#fff'}}}%%
+graph LR
+    subgraph 主播编码["主播编码 (7位)"]
+        H[H<br/>阿贤heni]
+        R[R<br/>志青Ricon]
+        C[C<br/>阿园Chua]
+        M[M<br/>MYMY]
+        P[P<br/>Pink]
+        E[E<br/>peo]
+        V[V<br/>Vanie]
+        U[U<br/>Unknown]
+    end
+    
+    subgraph 渠道编码["渠道编码 (4位)"]
+        N1[1<br/>个人主页]
+        N2[2<br/>评论置顶]
+        N3[3<br/>视频描述]
+        N4[4<br/>直播间]
+    end
+    
+    H --- N1
+    H --- N2
+    H --- N3
+    H --- N4
 ```
-格式: {主播字母}{渠道数字}
 
-主播编码 (7位):               渠道编码 (4位):
-┌────┬────────────┐          ┌────┬────────────────┐
-│ 码  │ 主播名      │          │ 码  │ 渠道位置        │
-├────┼────────────┤          ├────┼────────────────┤
-│ H  │ 阿贤heni   │          │ 1  │ 个人主页 Bio   │
-│ R  │ 志青Ricon  │          │ 2  │ 评论置顶        │
-│ C  │ 阿园Chua   │          │ 3  │ 视频描述        │
-│ M  │ MYMY       │          │ 4  │ 直播间          │
-│ P  │ Pink       │          └────┴────────────────┘
-│ E  │ peo        │
-│ V  │ Vanie      │
-│ U  │ Unknown    │  ← 兜底
-└────┴────────────┘
-```
+**编码格式**: `{主播字母}{渠道数字}`
 
 ### 2.2 示例短链
 
@@ -91,14 +81,18 @@ TK Bio/评论区/直播间
 
 ### 2.3 跳转目标
 
-```
-用户访问: https://dkl.vn/h1
-       ↓  [服务端 302 跳转]
-目标地址: https://account.monster-lair.vn/landing-official/index.html
-          ?source=tiktok
-          &anchor=heni
-          &channel=profile
-          &ref=tiktok_heni_profile
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant D as dkl.vn
+    participant S as 落地页
+    
+    U->>D: GET /h1
+    D->>D: 解析 h1<br/>主播=H, 渠道=1
+    D-->>U: 302 Redirect
+    
+    U->>S: GET /landing-official<br/>?source=tiktok<br/>&anchor=heni<br/>&channel=profile
+    S-->>U: 200 OK<br/>返回落地页HTML
 ```
 
 ---
@@ -161,59 +155,57 @@ H2_1234
 
 ### 4.1 正常流程（用户提供口令_身份码）
 
-```
-落地页生成
-┌─────────────────────────────────────────┐
-│ 服务端生成身份码: 1234                  │
-│ 口令: H2                                │
-│ 剪贴板内容: H2_1234                     │
-└─────────────────────────────────────────┘
-      │
-      ▼
-用户粘贴给客服: H2_1234
-      │
-      ▼
-客服工具解析
-┌─────────────────────────────────────────┐
-│ 口令: H2                                │
-│ 身份码: 1234（来自落地页服务端）         │
-│ 主播: 阿贤heni                          │
-│ 渠道: 评论置顶                          │
-└─────────────────────────────────────────┘
-      │
-      ▼
-生成注册链接（包含身份码）
-https://account.monster-lair.vn/#/register
-?code=H2_1234
-      │
-      ▼
-客服发送话术 _ 链接
-      │
-      ▼
-用户点击链接 → 注册 → 服务端验证身份码
+```mermaid
+sequenceDiagram
+    participant S as 服务端
+    participant L as 落地页
+    participant U as 用户
+    participant C as 客服
+    participant R as 注册页
+    
+    S->>S: 生成身份码 1234
+    S-->>L: 返回身份码
+    L->>L: 生成口令 H2
+    L->>L: 剪贴板写入 H2_1234
+    
+    U->>C: 粘贴口令 H2_1234
+    
+    C->>C: 解析口令 H2
+    C->>C: 提取身份码 1234
+    C->>C: 映射主播=heni<br/>渠道=comment
+    
+    C->>U: 发送注册链接<br/>?code=H2_1234
+    
+    U->>R: 访问链接
+    R->>S: 提交注册
+    S->>S: 解析 code=H2_1234
+    S->>S: 验证身份码
+    S-->>U: 注册成功
 ```
 
 ### 4.2 兜底流程（用户未发口令/身份码）
 
-```
-用户: 你好
-客服: Bạn tìm thấy link từ đâu ạ?
-      (你从哪里找到我的链接的？)
-      → 用户不回复或无法确认
-      → 客服选择 Unknown
-         
-┌─────────────────────────────────────────┐
-│ 方式二：手动选择                 [兜底]  │
-├─────────────────────────────────────────┤
-│ 主播 [Unknown (未知) ▼]                 │
-│ 渠道 [Unknown (未知) ▼]                 │
-├─────────────────────────────────────────┤
-│ [⚡ 生成链接]                            │
-└─────────────────────────────────────────┘
-
-生成链接: account.monster-lair.vn/#/register
-          ?code=U0_5678
-          (U0 = Unknown主播 _ Unknown渠道)
+```mermaid
+flowchart LR
+    A[用户: 你好] --> B[客服询问来源]
+    B --> C{用户回复?}
+    
+    C -->|确认来源| D[手动选择主播+渠道]
+    C -->|不回复| E[选择 Unknown]
+    C -->|无法确认| E
+    
+    D --> F[生成链接<br/>?code=H2]
+    E --> G[生成链接<br/>?code=U0_xxxx]
+    
+    F --> H[用户注册]
+    G --> H
+    
+    H --> I{有身份码?}
+    I -->|有| J[精确归因]
+    I -->|无| K[IP兜底归因]
+    
+    J --> L[注册完成]
+    K --> L
 ```
 
 ### 4.3 客服工具输入要求
@@ -299,25 +291,23 @@ def parse_code_param(code_str):
 
 ### 5.2 归因流程
 
-```
-用户访问注册页
-       │
-       ▼
-提取 URL 参数 code=H2_1234
-       │
-       ▼
-解析 code → anchor=heni, channel=comment, identity=1234
-       │
-       ▼
-┌─────────────────────────────────────────┐
-│ 是否有 code 参数?                        │
-├─────────────────────────────────────────┤
-│ ✅ 有 → 直接归因                          │
-│ ❌ 无 → IP 兜底归因（见下方）              │
-└─────────────────────────────────────────┘
-       │
-       ▼
-记录注册归因
+```mermaid
+flowchart TD
+    A[用户访问注册页] --> B{提取 URL 参数}
+    
+    B -->|有 code| C[解析 code]
+    B -->|无 code| D[IP 兜底归因]
+    
+    C --> C1[拆解口令 H2]
+    C --> C2[拆解身份码 1234]
+    C1 --> C3[映射主播=heni<br/>渠道=comment]
+    C2 --> C4[验证身份码有效性]
+    
+    C3 --> E[记录注册归因]
+    C4 --> E
+    D --> E
+    
+    E --> F([注册完成])
 ```
 
 ### 5.3 IP 兜底归因（code 参数为空时）
