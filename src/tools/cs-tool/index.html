@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>恐龙岛客服工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .input-group {
+            margin-bottom: 16px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #555;
+        }
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #555;
+        }
+        .btn-secondary:hover {
+            background: #e8e8e8;
+        }
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #45a049;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .result-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .result-value {
+            font-weight: 500;
+            color: #1a1a1a;
+            font-size: 14px;
+        }
+        .link-box {
+            background: #1e1e1e;
+            color: #4caf50;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            word-break: break-all;
+            margin-top: 12px;
+            position: relative;
+        }
+        .link-box .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .link-box .copy-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .template-box {
+            background: #fff9e6;
+            border: 1px solid #ffe082;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+            position: relative;
+        }
+        .template-box h4 {
+            font-size: 13px;
+            color: #f57c00;
+            margin-bottom: 8px;
+        }
+        .template-content {
+            font-size: 14px;
+            color: #333;
+            white-space: pre-line;
+            line-height: 1.8;
+        }
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .history-item {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-info {
+            flex: 1;
+        }
+        .history-code {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 14px;
+        }
+        .history-detail {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .history-copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .history-copy-btn:hover {
+            background: #5a6fd6;
+        }
+        .history-time {
+            font-size: 12px;
+            color: #aaa;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .quick-code {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .code-tag {
+            background: #e8eaf6;
+            color: #3f51b5;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .code-tag:hover {
+            background: #c5cae9;
+        }
+        .section-divider {
+            text-align: center;
+            margin: 32px 0;
+            position: relative;
+        }
+        .section-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        .section-divider span {
+            background: #f5f7fa;
+            padding: 0 16px;
+            color: #888;
+            font-size: 14px;
+            position: relative;
+        }
+        .hidden {
+            display: none;
+        }
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .lang-switch {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .lang-btn {
+            padding: 6px 16px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .lang-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .note {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #1976d2;
+        }
+        .note strong {
+            color: #0d47a1;
+        }
+        
+        /* 话术模板库 */
+        .template-library {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .template-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+        }
+        .template-item h5 {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .template-item pre {
+            font-size: 13px;
+            color: #333;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            margin: 0;
+            font-family: inherit;
+        }
+        .template-item .copy-btn-small {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .template-item .copy-btn-small:hover {
+            background: #5a6fd6;
+        }
+        
+        /* 双语模板样式 - 左右并列 */
+        .template-item-bilingual {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .template-item-bilingual:last-child {
+            margin-bottom: 0;
+        }
+        .template-col {
+            display: flex;
+            flex-direction: column;
+        }
+        .vi-col {
+            border-right: 1px solid #e0e0e0;
+            padding-right: 12px;
+        }
+        .zh-col {
+            padding-left: 0;
+        }
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .template-tag {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .template-tag.vi {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .template-tag.zh {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        .template-content {
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 0;
+            font-family: inherit;
+            padding: 10px;
+            border-radius: 4px;
+            flex: 1;
+        }
+        .vi-content {
+            color: #333;
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+        .zh-content {
+            color: #666;
+            background: #fafafa;
+            border: 1px dashed #e0e0e0;
+        }
+        @media (max-width: 768px) {
+            .template-item-bilingual {
+                grid-template-columns: 1fr;
+            }
+            .vi-col {
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+                padding-right: 0;
+                padding-bottom: 12px;
+            }
+        }
+        
+        /* 双列布局 */
+        .dual-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .dual-column .card {
+            margin-bottom: 0;
+        }
+        .dual-column .card-title {
+            font-size: 14px;
+        }
+        .dual-column .input-group label {
+            font-size: 13px;
+        }
+        .dual-column .input-group input,
+        .dual-column .input-group select {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+        .dual-column .btn {
+            padding: 10px 16px;
+            font-size: 13px;
+        }
+        .dual-column .quick-code {
+            gap: 6px;
+        }
+        .dual-column .code-tag {
+            padding: 3px 8px;
+            font-size: 11px;
+        }
+        @media (max-width: 768px) {
+            .dual-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎮 恐龙岛客服工具</h1>
+            <p>口令解析 · 链接生成 · 历史记录</p>
+        </div>
+
+        <!-- 更新提示 -->
+        <div class="note">
+            <strong>⚠️ 维护说明</strong>：检测到新增主播时，需在 <code>meetings/special/fu</code> 更新主播编码映射表
+        </div>
+
+        <!-- 双列布局：方式一 + 方式二 -->
+        <div class="dual-column">
+            <!-- 方式一：口令解析 -->
+            <div class="card">
+                <div class="card-title">
+                    方式一：口令解析
+                    <span class="badge">推荐</span>
+                </div>
+                <div class="input-group">
+                    <label>口令（如 H2, R1）</label>
+                    <input type="text" id="codeInput" placeholder="输入两位口令" maxlength="2">
+                </div>
+                <div class="quick-code" id="quickCodes">
+                    <!-- 动态生成，按使用频率排序 -->
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="parseCode()">🔍 解析</button>
+                    <button class="btn btn-success" onclick="generateLink()">⚡ 生成</button>
+                </div>
+                
+                <!-- 解析结果 -->
+                <div id="parseResult" class="result-box hidden" style="margin-top: 12px; padding: 12px;">
+                    <div class="result-item" style="padding: 4px 0;">
+                        <span class="result-label" style="font-size: 12px;">主播</span>
+                        <span class="result-value" style="font-size: 12px;" id="resultAnchor">-</span>
+                    </div>
+                    <div class="result-item" style="padding: 4px 0;">
+                        <span class="result-label" style="font-size: 12px;">渠道</span>
+                        <span class="result-value" style="font-size: 12px;" id="resultChannel">-</span>
+                    </div>
+                    <div class="result-item" style="padding: 4px 0;">
+                        <span class="result-label" style="font-size: 12px;">短链</span>
+                        <span class="result-value" style="font-size: 12px;" id="resultShortLink">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 方式二：手动选择兜底 -->
+            <div class="card">
+                <div class="card-title">
+                    方式二：手动选择
+                    <span class="badge" style="background: #fff3e0; color: #e65100;">兜底</span>
+                </div>
+                
+                <div class="manual-hint">
+                    <small style="color: #666; font-size: 11px;">
+                        💡 用户未给口令时，询问来源后手动选择<br>
+                        示例："Bạn tìm thấy link từ đâu ạ? Từ TikTok à?"
+                    </small>
+                </div>
+                
+                <div class="input-group">
+                    <label>主播</label>
+                    <select id="manualAnchor">
+                        <option value="">选择主播</option>
+                        <option value="heni">阿贤heni (H)</option>
+                        <option value="ricon">志青Ricon (R)</option>
+                        <option value="chua">阿园Chua (C)</option>
+                        <option value="mymy">MYMY (M)</option>
+                        <option value="pink">Pink (P)</option>
+                        <option value="peo">peo (E)</option>
+                        <option value="vanie">Vanie (V)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>渠道</label>
+                    <select id="manualChannel">
+                        <option value="profile" selected>个人主页 Bio (1)</option>
+                        <option value="comment">评论置顶 (2)</option>
+                        <option value="video_description">视频描述 (3)</option>
+                        <option value="live">直播间 (4)</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="generateManualLink()" style="margin-top: 8px; width: 100%;">⚡ 生成链接</button>
+            </div>
+        </div>
+
+        <!-- 生成的链接 -->
+        <div id="linkCard" class="card hidden">
+            <div class="card-title">生成的注册链接</div>
+            <div class="link-box" id="generatedLink">
+                <button class="copy-btn" onclick="copyLink()">复制</button>
+                <span id="linkText"></span>
+            </div>
+            
+            <!-- 语言切换 -->
+            <div class="lang-switch">
+                <button class="lang-btn active" onclick="switchLang('vi')" id="btnVi">🇻🇳 越南语</button>
+                <button class="lang-btn" onclick="switchLang('zh')" id="btnZh">🇨🇳 中文</button>
+            </div>
+            
+            <!-- 话术模板 -->
+            <div class="template-box">
+                <button class="copy-btn" style="top: 8px; right: 8px; background: #f57c00; color: white;" onclick="copyTemplate()">复制话术</button>
+                <h4 id="templateTitle">📝 发送给用户的话术</h4>
+                <div class="template-content" id="templateContent"></div>
+            </div>
+        </div>
+
+        <!-- 话术模板库 -->
+        <div class="card">
+            <div class="card-title">
+                📚 话术模板库
+                <span style="margin-left: auto; font-size: 12px; color: #888;">左侧越南语可复制，右侧中文仅供阅读</span>
+            </div>
+            <div class="template-library" id="templateLibrary">
+                <!-- 动态生成：双语并排显示 -->
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <div class="card">
+            <div class="card-title">
+                📋 生成历史
+                <div style="margin-left: auto; display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px;" onclick="downloadHistory()">📥 下载</button>
+                    <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px;" onclick="importHistory()">📤 导入</button>
+                    <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px;" onclick="clearHistory()">清空</button>
+                </div>
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="empty-state">暂无生成记录</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ==================== 硬编码映射表 ====================
+        // ⚠️ 注意：新增主播时需在 meetings/special/fu 更新此映射表
+        
+        // 主播映射
+        // 主播映射（同步自 meetings/special/fu/data/all_streamer_data.json）
+        // 更新日期: 2026-04-08
+        const ANCHOR_MAP = {
+            'H': { id: 'heni', name: '阿贤heni' },
+            'R': { id: 'ricon', name: '志青Ricon' },
+            'C': { id: 'chua', name: '阿园Chua' },
+            'M': { id: 'mymy', name: 'MYMY' },
+            'P': { id: 'pink', name: 'Pink' },
+            'E': { id: 'peo', name: 'peo' },
+            'V': { id: 'vanie', name: 'Vanie' }
+            // 新增主播在此添加，如: 'A': { id: 'alice', name: 'Alice' }
+        };
+
+        // 渠道映射（已简化，去掉5-ads）
+        const CHANNEL_MAP = {
+            '1': { id: 'profile', name: '个人主页 Bio' },
+            '2': { id: 'comment', name: '评论置顶' },
+            '3': { id: 'video_description', name: '视频描述' },
+            '4': { id: 'live', name: '直播间' }
+        };
+
+        // 短链映射
+        const SHORT_LINK_MAP = {
+            'H1': 'dkl.vn/h1',
+            'H2': 'dkl.vn/h2',
+            'H3': 'dkl.vn/h3',
+            'H4': 'dkl.vn/h4',
+            'R1': 'dkl.vn/r1',
+            'R2': 'dkl.vn/r2',
+            'R3': 'dkl.vn/r3',
+            'R4': 'dkl.vn/r4',
+            'S1': 'dkl.vn/s1',
+            'S2': 'dkl.vn/s2',
+            'S3': 'dkl.vn/s3',
+            'S4': 'dkl.vn/s4',
+            'M1': 'dkl.vn/m1',
+            'M2': 'dkl.vn/m2',
+            'M3': 'dkl.vn/m3',
+            'M4': 'dkl.vn/m4'
+        };
+
+        // 反向映射（用于手动选择）
+        const ANCHOR_CODE_MAP = {
+            'heni': 'H',
+            'ricon': 'R',
+            'suachua': 'S',
+            'miumiu': 'M'
+        };
+
+        const CHANNEL_CODE_MAP = {
+            'profile': '1',
+            'comment': '2',
+            'video_description': '3',
+            'live': '4'
+        };
+
+        // 快捷指令使用频率统计（用于排序）
+        const QUICK_CODES_ALL = ['H1', 'H2', 'H3', 'H4', 'R1', 'R2', 'R3', 'R4', 'C1', 'C2', 'C3', 'C4', 'M1', 'M2', 'M3', 'M4', 'P1', 'P2', 'P3', 'P4', 'E1', 'E2', 'E3', 'E4', 'V1', 'V2', 'V3', 'V4'];
+
+        // 话术模板
+        const TEMPLATES = {
+            vi: {
+                title: '📝 发送给用户的话术（越南语）',
+                content: (link) => `🎮 Chào mừng đến với Đảo Khủng Long!
+
+📥 Link đăng ký & tải game: ${link}
+
+⚠️ Lưu ý: Đây là game PC, cần tải về máy tính để chơi nhé!
+
+🎯 Ba bước để bắt đầu:
+1. Đăng ký tài khoản game
+2. Tải và cài đặt game client
+3. Vào game nhận khủng long miễn phí!`
+            },
+            zh: {
+                title: '📝 发送给用户的话术（中文）',
+                content: (link) => `🎮 欢迎来到恐龙岛！
+
+📥 注册并下载游戏：${link}
+
+⚠️ 注意：这是PC端游戏，需要在电脑上下载运行！
+
+🎯 三步开始游戏：
+1. 注册游戏账号
+2. 下载游戏客户端
+3. 进入游戏领取恐龙！`
+            }
+        };
+
+        // 话术模板库数据（越南语/中文完全独立）
+        const TEMPLATE_LIBRARY = {
+            vi: [
+                {
+                    id: 'ask_code',
+                    title: 'Yêu cầu mã code',
+                    content: `Chào bạn! 🎮
+
+Bạn vui lòng gửi lại mã code để nhận quà nhé!
+Mã code đã tự động copy khi bạn click link lúc nãy.
+Ví dụ: H2`
+                },
+                {
+                    id: 'ask_source',
+                    title: 'Hỏi nguồn (không có mã)',
+                    content: `Bạn tìm thấy link của mình từ đâu ạ?
+Từ TikTok à?`
+                },
+                {
+                    id: 'pc_remind',
+                    title: 'Nhắc game PC',
+                    content: `⚠️ Lưu ý quan trọng:
+Đây là game PC, cần tải về máy tính để chơi.
+Không hỗ trợ trên điện thoại di động nhé!`
+                },
+                {
+                    id: 'claim_gift',
+                    title: 'Hướng dẫn tân thủ',
+                    content: `🎮 Chào mừng đến với Đảo Khủng Long!
+
+📥 Link đăng ký & tải game: {link}
+
+🎯 Ba bước để bắt đầu:
+1. Đăng ký tài khoản game
+2. Tải và cài đặt game client
+3. Vào game nhận khủng long miễn phí!`
+                },
+                {
+                    id: 'thanks',
+                    title: 'Cảm ơn',
+                    content: `Cảm ơn bạn đã ủng hộ! 🙏
+Nếu có vấn đề gì cứ nhắn tin cho mình nhé!
+Chúc bạn chơi game vui vẻ! 🦕`
+                }
+            ],
+            zh: [
+                {
+                    id: 'ask_code',
+                    title: '索要口令',
+                    content: `你好！🎮
+
+请发送一下口令来领取礼包！
+口令在你刚才点击链接时已经自动复制了。
+例如：H2`
+                },
+                {
+                    id: 'ask_source',
+                    title: '询问来源（用户未给口令）',
+                    content: `你从哪里找到我的链接的？
+是从 TikTok 上吗？`
+                },
+                {
+                    id: 'pc_remind',
+                    title: '提醒PC端游戏',
+                    content: `⚠️ 重要提醒：
+这是PC端游戏，需要在电脑上下载运行。
+不支持手机游玩哦！`
+                },
+                {
+                    id: 'claim_gift',
+                    title: '新手指引',
+                    content: `🎮 欢迎来到恐龙岛！
+
+📥 注册并下载游戏：{link}
+
+🎯 三步开始游戏：
+1. 注册游戏账号
+2. 下载游戏客户端
+3. 进入游戏领取恐龙！`
+                },
+                {
+                    id: 'thanks',
+                    title: '感谢语',
+                    content: `感谢您的支持！🙏
+如有问题请随时联系！
+祝您游戏愉快！🦕`
+                }
+            ]
+        };
+
+        // ==================== 状态管理 ====================
+        
+        let currentParse = null;
+
+        let currentLang = 'vi';
+        let currentLink = '';
+
+        // ==================== 核心功能 ====================
+
+        // 填充口令
+        function fillCode(code) {
+            document.getElementById('codeInput').value = code;
+            parseCode();
+        }
+
+        // 解析口令
+        function parseCode() {
+            const input = document.getElementById('codeInput').value.trim().toUpperCase();
+            
+            if (input.length !== 2) {
+                showToast('请输入两位口令，如 H2');
+                return;
+            }
+
+            const anchorCode = input[0];
+            const channelCode = input[1];
+
+            const anchor = ANCHOR_MAP[anchorCode];
+            const channel = CHANNEL_MAP[channelCode];
+
+            if (!anchor) {
+                showToast('无效的主播代码: ' + anchorCode + '，请检查是否需更新映射表');
+                return;
+            }
+
+            if (!channel) {
+                showToast('无效的渠道代码: ' + channelCode + '（仅支持1-4）');
+                return;
+            }
+
+            const shortLink = SHORT_LINK_MAP[input] || `dkl.vn/${input.toLowerCase()}`;
+
+            currentParse = {
+                code: input,
+                anchor: anchor,
+                channel: channel,
+                shortLink: shortLink,
+                ref: `tiktok_${anchor.id}_${channel.id}`
+            };
+
+            // 显示解析结果
+            document.getElementById('resultAnchor').textContent = `${anchor.name} (${anchorCode})`;
+            document.getElementById('resultChannel').textContent = `${channel.name} (${channelCode})`;
+            document.getElementById('resultShortLink').textContent = shortLink;
+            document.getElementById('parseResult').classList.remove('hidden');
+
+            // 记录使用的channel
+            recordUsedChannel(input);
+
+            showToast('口令解析成功');
+        }
+
+        // 生成链接（口令方式）
+        function generateLink() {
+            if (!currentParse) {
+                parseCode();
+                if (!currentParse) return;
+            }
+
+            const link = buildRegisterLink(currentParse.ref, currentParse.anchor.id, currentParse.channel.id);
+            showGeneratedLink(link, currentParse);
+        }
+
+        // 生成链接（手动方式）
+        function generateManualLink() {
+            const anchorId = document.getElementById('manualAnchor').value;
+            const channelId = document.getElementById('manualChannel').value;
+
+            if (!anchorId || !channelId) {
+                showToast('请选择主播和渠道');
+                return;
+            }
+
+            const anchorCode = ANCHOR_CODE_MAP[anchorId];
+            const channelCode = CHANNEL_CODE_MAP[channelId];
+            const anchor = ANCHOR_MAP[anchorCode];
+            const channel = CHANNEL_MAP[channelCode];
+
+            const parseInfo = {
+                code: anchorCode + channelCode,
+                anchor: anchor,
+                channel: channel,
+                shortLink: SHORT_LINK_MAP[anchorCode + channelCode] || `dkl.vn/${(anchorCode + channelCode).toLowerCase()}`,
+                ref: `tiktok_${anchorId}_${channelId}`,
+                isManual: true
+            };
+
+            const link = buildRegisterLink(parseInfo.ref, parseInfo.anchor.id, parseInfo.channel.id);
+            showGeneratedLink(link, parseInfo);
+        }
+
+        // 构建注册链接
+        function buildRegisterLink(ref, anchorId, channelId) {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 10000);
+            const fullRef = `${ref}_${timestamp}_${random}`;
+            return `https://account.monster-lair.vn/#/register?ref=${fullRef}&source=tiktok&anchor=${anchorId}&channel=${channelId}`;
+        }
+
+        // 显示生成的链接
+        function showGeneratedLink(link, parseInfo) {
+            currentLink = link;
+            document.getElementById('linkText').textContent = link;
+            document.getElementById('linkCard').classList.remove('hidden');
+
+            // 更新话术
+            updateTemplate();
+
+            // 添加到历史记录
+            addToHistory({
+                code: parseInfo.code,
+                anchor: parseInfo.anchor.name,
+                channel: parseInfo.channel.name,
+                link: link,
+                time: new Date().toLocaleString('zh-CN')
+            });
+
+            showToast('链接生成成功');
+        }
+
+        // ==================== 语言切换 ====================
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.getElementById('btnVi').classList.toggle('active', lang === 'vi');
+            document.getElementById('btnZh').classList.toggle('active', lang === 'zh');
+            updateTemplate();
+        }
+
+        // 渲染话术模板库（双语左右并列，复制仅复制越南语）
+        function renderTemplateLibrary() {
+            const container = document.getElementById('templateLibrary');
+            const viTemplates = TEMPLATE_LIBRARY.vi;
+            const zhTemplates = TEMPLATE_LIBRARY.zh;
+            
+            container.innerHTML = viTemplates.map((viTpl, index) => {
+                const zhTpl = zhTemplates[index];
+                return `
+                <div class="template-item-bilingual">
+                    <div class="template-col vi-col">
+                        <div class="template-header">
+                            <span class="template-tag vi">🇻🇳 越南语</span>
+                            <button class="copy-btn-small" onclick="copyTemplateText('${viTpl.id}')">复制</button>
+                        </div>
+                        <pre class="template-content vi-content">${viTpl.content}</pre>
+                    </div>
+                    <div class="template-col zh-col">
+                        <div class="template-header">
+                            <span class="template-tag zh">🇨🇳 中文参考</span>
+                        </div>
+                        <pre class="template-content zh-content">${zhTpl.content}</pre>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // 复制话术模板文本（仅越南语）
+        function copyTemplateText(tplId) {
+            const content = TEMPLATE_LIBRARY.vi.find(t => t.id === tplId)?.content || '';
+            copyToClipboard(content);
+        }
+
+        function updateTemplate() {
+            const template = TEMPLATES[currentLang];
+            document.getElementById('templateTitle').textContent = template.title;
+            document.getElementById('templateContent').textContent = template.content(currentLink);
+        }
+
+        // ==================== 历史记录 ====================
+
+        function addToHistory(record) {
+            let history = JSON.parse(localStorage.getItem('csToolHistory') || '[]');
+            history.unshift(record);
+            history = history.slice(0, 50);
+            localStorage.setItem('csToolHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('csToolHistory') || '[]');
+            const container = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无生成记录</div>';
+                return;
+            }
+
+            container.innerHTML = history.map((item, index) => `
+                <div class="history-item">
+                    <div class="history-info">
+                        <div class="history-code">${item.code} · ${item.anchor} · ${item.channel}</div>
+                        <div class="history-detail">${item.time}</div>
+                    </div>
+                    <div class="history-actions">
+                        <button class="history-copy-btn" onclick="copyHistoryUrl(${index})">复制链接</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 复制历史记录中的URL
+        function copyHistoryUrl(index) {
+            const history = JSON.parse(localStorage.getItem('csToolHistory') || '[]');
+            const item = history[index];
+            if (item && item.link) {
+                copyToClipboard(item.link);
+            } else {
+                showToast('链接不存在');
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('确定要清空历史记录吗？')) {
+                localStorage.removeItem('csToolHistory');
+                renderHistory();
+                showToast('历史记录已清空');
+            }
+        }
+
+        // 下载历史记录
+        function downloadHistory() {
+            const history = JSON.parse(localStorage.getItem('csToolHistory') || '[]');
+            if (history.length === 0) {
+                showToast('暂无历史记录可下载');
+                return;
+            }
+            
+            const data = {
+                exportTime: new Date().toISOString(),
+                totalCount: history.length,
+                records: history
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `客服工具历史记录_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast(`已下载 ${history.length} 条记录`);
+        }
+
+        // 导入历史记录
+        function importHistory() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        const importedRecords = data.records || data;
+                        
+                        if (!Array.isArray(importedRecords)) {
+                            showToast('文件格式错误');
+                            return;
+                        }
+                        
+                        // 合并现有记录和导入记录
+                        const existing = JSON.parse(localStorage.getItem('csToolHistory') || '[]');
+                        const merged = [...importedRecords, ...existing];
+                        
+                        // 去重（基于 code + time）
+                        const seen = new Set();
+                        const unique = merged.filter(item => {
+                            const key = item.code + '_' + item.time;
+                            if (seen.has(key)) return false;
+                            seen.add(key);
+                            return true;
+                        });
+                        
+                        // 限制50条
+                        const final = unique.slice(0, 50);
+                        
+                        localStorage.setItem('csToolHistory', JSON.stringify(final));
+                        renderHistory();
+                        
+                        showToast(`导入成功，共 ${final.length} 条记录（新增 ${final.length - existing.length} 条）`);
+                    } catch (err) {
+                        showToast('文件解析失败：' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // ==================== 工具函数 ====================
+
+        function copyLink() {
+            const link = document.getElementById('linkText').textContent;
+            copyToClipboard(link);
+        }
+
+        function copyTemplate() {
+            const template = document.getElementById('templateContent').textContent;
+            copyToClipboard(template);
+        }
+
+        function copyToClipboard(text) {
+            if (!text) {
+                showToast('暂无内容可复制');
+                return;
+            }
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => showToast('已复制到剪贴板'));
+            } else {
+                const input = document.createElement('textarea');
+                input.value = text;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                showToast('已复制到剪贴板');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // ==================== 快捷指令渲染 ====================
+        
+        // 获取已使用的channel记录
+        function getUsedChannels() {
+            return JSON.parse(localStorage.getItem('csToolUsedChannels') || '[]');
+        }
+        
+        // 记录使用的channel
+        function recordUsedChannel(code) {
+            const used = getUsedChannels();
+            if (!used.includes(code)) {
+                used.push(code);
+                localStorage.setItem('csToolUsedChannels', JSON.stringify(used));
+                renderQuickCodes(); // 重新渲染
+            }
+        }
+        
+        function renderQuickCodes() {
+            const container = document.getElementById('quickCodes');
+            const used = getUsedChannels();
+            
+            // 基础列表：每个主播的1号channel
+            const baseCodes = Object.keys(ANCHOR_MAP).map(a => a + '1');
+            
+            // 添加其他已使用的channel（非1号）
+            const extraCodes = used.filter(code => !code.endsWith('1'));
+            
+            // 合并并去重
+            const displayCodes = [...new Set([...baseCodes, ...extraCodes])];
+            
+            container.innerHTML = displayCodes.map(code => 
+                `<span class="code-tag" onclick="fillCode('${code}')">${code}</span>`
+            ).join('');
+        }
+
+        // ==================== 初始化 ====================
+
+        renderQuickCodes();
+        renderHistory();
+        renderTemplateLibrary();
+
+        document.getElementById('codeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                parseCode();
+            }
+        });
+    </script>
+</body>
+</html>
