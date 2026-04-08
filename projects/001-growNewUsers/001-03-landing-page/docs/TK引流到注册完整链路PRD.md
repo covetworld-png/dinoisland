@@ -244,50 +244,36 @@ https://account.monster-lair.vn/#/register?code=U0
 
 ### 5.1 code 参数解析
 
-```python
-def parse_code_param(code_str):
-    """
-    解析 code 参数
-    输入: "H2_1234" 或 "U0_5678"
-    输出: {anchor, channel, identity_code}
-    """
-    if not code_str or '_' not in code_str:
-        return None
-    
-    parts = code_str.split('_')
-    if len(parts) != 2:
-        return None
-    
-    code, identity_code = parts[0], parts[1]
-    
-    # 验证身份码为4位数字
-    if not identity_code.isdigit() or len(identity_code) != 4:
-        return None
-    
-    # 解析口令
-    if len(code) != 2:
-        return None
-    
-    anchor_code = code[0]  # H, R, C, M, P, E, V, U
-    channel_code = code[1]  # 1, 2, 3, 4, 0
-    
-    # 映射表
-    anchor_map = {
-        'H': 'heni', 'R': 'ricon', 'C': 'chua', 'M': 'mymy',
-        'P': 'pink', 'E': 'peo', 'V': 'vanie', 'U': 'unknown'
-    }
-    channel_map = {
-        '1': 'profile', '2': 'comment', 
-        '3': 'video_description', '4': 'live', '0': 'unknown'
-    }
-    
-    return {
-        'anchor': anchor_map.get(anchor_code, 'unknown'),
-        'channel': channel_map.get(channel_code, 'unknown'),
-        'identity_code': identity_code,
-        'source': 'tiktok'
-    }
-```
+**输入**: `code` 参数，格式为 `口令_身份码`（如 `H2_1234`）或仅 `口令`（如 `H2`）
+
+**解析步骤**:
+
+1. **检查分隔符**: 查找 `_` 分隔符
+   - 有 `_`: 拆分为口令和身份码
+   - 无 `_`: 仅解析口令部分
+
+2. **验证身份码**（如有）:
+   - 必须是4位纯数字
+   - 如格式错误，忽略身份码
+
+3. **解析口令**（2位字符）:
+   - 第1位: 主播编码（H/R/C/M/P/E/V/U）
+   - 第2位: 渠道编码（1/2/3/4/0）
+
+4. **映射主播和渠道**:
+
+| 主播码 | 映射结果 | 渠道码 | 映射结果 |
+|--------|----------|--------|----------|
+| H | heni | 1 | profile |
+| R | ricon | 2 | comment |
+| C | chua | 3 | video_description |
+| M | mymy | 4 | live |
+| P | pink | 0 | unknown |
+| E | peo | | |
+| V | vanie | | |
+| U | unknown | | |
+
+**输出**: 主播标识、渠道位置、身份码（如有）、来源平台
 
 ### 5.2 归因流程
 
@@ -312,71 +298,48 @@ flowchart TD
 
 ### 5.3 IP 兜底归因（code 参数为空时）
 
-```python
-def attribution_by_ip(reg_ip, reg_time):
-    """
-    IP兜底归因算法
-    """
-    # 1. 查询该IP最近30分钟的落地页访问记录
-    visits = query("""
-        SELECT * FROM landing_visits 
-        WHERE ip = %s 
-        AND created_at BETWEEN %s - 30min AND %s
-        ORDER BY created_at DESC
-    """, reg_ip, reg_time)
-    
-    # 2. 按时间最近优先
-    if visits:
-        latest = visits[0]
-        return {
-            'anchor': latest.anchor,
-            'channel': latest.channel,
-            'confidence': 80 if len(visits) == 1 else 60,
-            'method': 'ip_fallback'
-        }
-    
-    # 3. 无匹配记录
-    return {
-        'anchor': 'unknown',
-        'channel': 'unknown', 
-        'confidence': 0,
-        'method': 'unknown'
-    }
-```
+当注册链接没有 `code` 参数或解析失败时，使用 IP 兜底归因。
 
-### 5.4 服务端数据表
+**查询条件**:
+- 用户注册 IP = 落地页访问 IP
+- 访问时间在注册前 30 分钟内
+- 按访问时间倒序（最近优先）
 
-```sql
--- 落地页访问日志
-CREATE TABLE landing_visits (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    ip VARCHAR(45) NOT NULL COMMENT '用户IP',
-    short_code VARCHAR(10) COMMENT '短链编码(H1/R2等)',
-    anchor VARCHAR(32) COMMENT '主播标识',
-    channel VARCHAR(32) COMMENT '渠道位置',
-    identity_code VARCHAR(4) COMMENT '4位身份码',
-    ref VARCHAR(128) COMMENT '完整ref',
-    user_agent TEXT COMMENT 'UA信息',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_ip_time (ip, created_at),
-    INDEX idx_identity (identity_code),
-    INDEX idx_anchor (anchor, created_at)
-) ENGINE=InnoDB COMMENT='落地页访问日志';
+**归因逻辑**:
 
--- 注册归因表
-CREATE TABLE registration_attribution (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL COMMENT '注册用户ID',
-    reg_ip VARCHAR(45) COMMENT '注册IP',
-    code VARCHAR(16) COMMENT '口令_身份码(H2_1234)',
-    anchor VARCHAR(32) COMMENT '主播标识',
-    channel VARCHAR(32) COMMENT '渠道位置',
-    identity_code VARCHAR(4) COMMENT '身份码',
-    method ENUM('code', 'ip_fallback', 'unknown') COMMENT '归因方式',
-    confidence INT COMMENT '置信度(%)',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB COMMENT='注册归因记录';
-```
+| 场景 | 归因结果 | 置信度 |
+|------|----------|--------|
+| 该IP只有1条访问记录 | 使用此记录的主播+渠道 | 80% |
+| 该IP有多条访问记录 | 使用最近的一条 | 60% |
+| 无匹配记录 | 标记为 unknown | 0% |
+
+### 5.4 服务端数据存储
+
+**落地页访问日志**
+
+| 字段 | 说明 | 用途 |
+|------|------|------|
+| 访问ID | 自增主键 | 唯一标识 |
+| 用户IP | 访问者IP地址 | IP兜底归因匹配 |
+| 短链编码 | 如 H1, R2 | 记录访问来源 |
+| 主播标识 | heni/ricon等 | 归因目标 |
+| 渠道位置 | profile/comment等 | 归因目标 |
+| 身份码 | 4位数字 | 精确用户识别 |
+| 完整ref | 原始ref参数 | 追踪链路 |
+| 访问时间 | 时间戳 | IP匹配时间窗口 |
+
+**注册归因记录**
+
+| 字段 | 说明 | 用途 |
+|------|------|------|
+| 记录ID | 自增主键 | 唯一标识 |
+| 用户ID | 注册用户ID | 关联用户 |
+| 注册IP | 注册时IP | 备选匹配 |
+| code参数 | 如 H2_1234 | 主要归因依据 |
+| 主播标识 | 最终归因主播 | 结算依据 |
+| 渠道位置 | 最终归因渠道 | 结算依据 |
+| 归因方式 | code/ip_fallback/unknown | 数据质量标记 |
+| 置信度 | 0-100% | 归因可信度 |
 
 ---
 
