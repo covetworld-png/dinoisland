@@ -906,7 +906,7 @@ Chúc bạn chơi game vui vẻ! 🦕`
                 if (!currentParse) return;
             }
 
-            const link = buildRegisterLink(currentParse.ref, currentParse.anchor.id, currentParse.channel.id);
+            const link = buildRegisterLink(currentParse.code);
             showGeneratedLink(link, currentParse);
         }
 
@@ -932,7 +932,7 @@ Chúc bạn chơi game vui vẻ! 🦕`
                     ref: 'unknown',
                     isManual: true
                 };
-                const link = buildRegisterLink('unknown', 'unknown', 'unknown');
+                const link = buildRegisterLink('U0');
                 showGeneratedLink(link, parseInfo);
                 return;
             }
@@ -949,22 +949,23 @@ Chúc bạn chơi game vui vẻ! 🦕`
                 isManual: true
             };
 
-            const link = buildRegisterLink(parseInfo.ref, parseInfo.anchor.id, parseInfo.channel.id);
+            const link = buildRegisterLink(parseInfo.code);
             showGeneratedLink(link, parseInfo);
         }
 
-        // 构建注册链接
-        function buildRegisterLink(ref, anchorId, channelId) {
-            const timestamp = Date.now();
-            const random = Math.floor(Math.random() * 10000);
-            const fullRef = `${ref}_${timestamp}_${random}`;
+        // 生成4位数字身份码
+        function generateIdentityCode() {
+            return Math.floor(1000 + Math.random() * 9000).toString();
+        }
+
+        // 构建注册链接（新格式：?code=口令+身份码）
+        function buildRegisterLink(code) {
+            // 生成4位数字身份码
+            const identityCode = generateIdentityCode();
             
-            // 如果 anchor 或 channel 为 unknown，生成无参链接（触发服务端兜底）
-            if (anchorId === 'unknown' || channelId === 'unknown') {
-                return `https://account.monster-lair.vn/#/register?ref=${fullRef}`;
-            }
-            
-            return `https://account.monster-lair.vn/#/register?ref=${fullRef}&source=tiktok&anchor=${anchorId}&channel=${channelId}`;
+            // 新格式：code=口令+身份码，由服务端解析
+            // 示例：code=H2+1234 或 code=U0+5678
+            return `https://account.monster-lair.vn/#/register?code=${code}+${identityCode}`;
         }
 
         // 显示生成的链接
