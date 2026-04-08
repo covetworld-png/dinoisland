@@ -579,6 +579,7 @@
                         <option value="pink">Pink (P)</option>
                         <option value="peo">peo (E)</option>
                         <option value="vanie">Vanie (V)</option>
+                        <option value="unknown">Unknown (未知)</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -588,6 +589,7 @@
                         <option value="comment">评论置顶 (2)</option>
                         <option value="video_description">视频描述 (3)</option>
                         <option value="live">直播间 (4)</option>
+                        <option value="unknown">Unknown (未知)</option>
                     </select>
                 </div>
                 <button class="btn btn-primary" onclick="generateManualLink()" style="margin-top: 8px; width: 100%;">⚡ 生成链接</button>
@@ -660,7 +662,8 @@
             'M': { id: 'mymy', name: 'MYMY' },
             'P': { id: 'pink', name: 'Pink' },
             'E': { id: 'peo', name: 'peo' },
-            'V': { id: 'vanie', name: 'Vanie' }
+            'V': { id: 'vanie', name: 'Vanie' },
+            'U': { id: 'unknown', name: 'Unknown' }
             // 新增主播在此添加，如: 'A': { id: 'alice', name: 'Alice' }
         };
 
@@ -696,15 +699,20 @@
         const ANCHOR_CODE_MAP = {
             'heni': 'H',
             'ricon': 'R',
-            'suachua': 'S',
-            'miumiu': 'M'
+            'chua': 'C',
+            'mymy': 'M',
+            'pink': 'P',
+            'peo': 'E',
+            'vanie': 'V',
+            'unknown': 'U'
         };
 
         const CHANNEL_CODE_MAP = {
             'profile': '1',
             'comment': '2',
             'video_description': '3',
-            'live': '4'
+            'live': '4',
+            'unknown': '0'
         };
 
         // 快捷指令使用频率统计（用于排序）
@@ -915,6 +923,24 @@ Chúc bạn chơi game vui vẻ! 🦕`
 
             const anchorCode = ANCHOR_CODE_MAP[anchorId];
             const channelCode = CHANNEL_CODE_MAP[channelId];
+            
+            // 处理 Unknown 情况
+            const isUnknown = anchorId === 'unknown' || channelId === 'unknown';
+            
+            if (isUnknown) {
+                const parseInfo = {
+                    code: 'U0',
+                    anchor: { id: 'unknown', name: 'Unknown' },
+                    channel: { id: 'unknown', name: '未知' },
+                    shortLink: 'unknown',
+                    ref: 'unknown',
+                    isManual: true
+                };
+                const link = buildRegisterLink('unknown', 'unknown', 'unknown');
+                showGeneratedLink(link, parseInfo);
+                return;
+            }
+            
             const anchor = ANCHOR_MAP[anchorCode];
             const channel = CHANNEL_MAP[channelCode];
 
@@ -936,6 +962,12 @@ Chúc bạn chơi game vui vẻ! 🦕`
             const timestamp = Date.now();
             const random = Math.floor(Math.random() * 10000);
             const fullRef = `${ref}_${timestamp}_${random}`;
+            
+            // 如果 anchor 或 channel 为 unknown，生成无参链接（触发服务端兜底）
+            if (anchorId === 'unknown' || channelId === 'unknown') {
+                return `https://account.monster-lair.vn/#/register?ref=${fullRef}`;
+            }
+            
             return `https://account.monster-lair.vn/#/register?ref=${fullRef}&source=tiktok&anchor=${anchorId}&channel=${channelId}`;
         }
 
