@@ -10,28 +10,28 @@
 
 ```mermaid
 flowchart TD
-    Start([TK Bio/评论区/直播间]) --> ShortLink[短链跳转<br/>dkl.vn/{主播}{渠道}]
+    Start([TK Bio/评论区/直播间]) --> ShortLink[短链跳转]
     ShortLink --> Landing[落地页 Webview]
     
-    Landing --> Identity[生成身份码<br/>H2_1234]
-    Identity --> Clipboard[剪贴板写入<br/>H2_1234]
+    Landing --> Identity[生成身份码]
+    Identity --> Clipboard[剪贴板写入]
     Clipboard --> Zalo{Zalo 调起}
     
-    Zalo -->|✅ 成功| AddCS[添加客服]
-    Zalo -->|❌ 失败| CopyZalo[复制 Zalo 号<br/>手动打开]
+    Zalo -->|成功| AddCS[添加客服]
+    Zalo -->|失败| CopyZalo[复制 Zalo 号]
     CopyZalo --> AddCS
     
     AddCS --> CS[客服对话]
-    CS --> Ask[索要口令 H2_1234]
+    CS --> Ask[索要口令]
     
-    Ask -->|用户提供| Parse[解析口令<br/>生成链接]
-    Ask -->|不提供| Unknown[手动选择 Unknown]
+    Ask -->|用户提供口令| Parse[解析口令并生成链接]
+    Ask -->|不提供口令| Unknown[手动选择 Unknown]
     
-    Parse --> Register[注册页<br/>?code=H2_1234]
+    Parse --> Register[注册页]
     Unknown --> Register
     
-    Register --> Server[服务端解析 code]
-    Server --> Attribution[归因到主播+渠道]
+    Register --> Server[服务端解析]
+    Server --> Attribution[归因到主播和渠道]
     Attribution --> Success([注册成功])
 ```
 
