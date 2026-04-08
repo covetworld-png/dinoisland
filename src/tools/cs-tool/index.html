@@ -292,7 +292,7 @@
             position: relative;
         }
         .hidden {
-            display: none;
+            display: none !important;
         }
         .toast {
             position: fixed;
@@ -500,40 +500,312 @@
             font-weight: 500;
         }
         
-        /* 双列布局 */
-        .dual-column {
+        /* 更大的复制按钮 */
+        .copy-btn-large {
+            padding: 10px 20px;
+            font-size: 14px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+        .copy-btn-large:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+        .link-box .copy-btn-large {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+        }
+        .template-box .copy-btn-large {
+            position: absolute;
+            top: 12px;
+        }
+        
+        /* 口令解析布局 - 左右并列 */
+        .parse-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        .parse-input-section {
+            min-width: 0;
+        }
+        .parse-result-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .parse-result-section .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .parse-result-section .result-item:last-child {
+            border-bottom: none;
+        }
+        .parse-result-section .result-label {
+            color: #666;
+            font-size: 13px;
+        }
+        .parse-result-section .result-value {
+            font-weight: 500;
+            color: #1a1a1a;
+            font-size: 13px;
+        }
+        @media (max-width: 768px) {
+            .parse-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 生成结果话术双语布局 */
+        .template-bilingual {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .template-col-output {
+            display: flex;
+            flex-direction: column;
+        }
+        .vi-col-output {
+            border-right: 1px solid #e0e0e0;
+        }
+        .template-header-output {
+            padding: 10px 12px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .template-content-output {
+            padding: 12px;
+            margin: 0;
+            font-family: inherit;
+            font-size: 13px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+            min-height: 140px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: none;
+            outline: none;
+            resize: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .template-content-output.editable {
+            cursor: text;
+        }
+        .template-content-output.editable:focus {
+            background: #fffef0;
+        }
+        .vi-content-output {
+            background: white;
+            color: #333;
+        }
+        .zh-content-output {
+            background: #fafafa;
+            color: #666;
+        }
+        
+        /* 历史记录中的身份码标签 */
+        .history-identity {
+            display: inline-block;
+            background: #e8eaf6;
+            color: #3f51b5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        /* 话术模板库操作按钮 */
+        .template-actions {
+            display: flex;
+            gap: 6px;
+            margin-left: auto;
+        }
+        .template-btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .template-btn-copy {
+            background: #4caf50;
+            color: white;
+        }
+        .template-btn-copy:hover {
+            background: #45a049;
+        }
+        .template-btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        .template-btn-delete:hover {
+            background: #d32f2f;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            position: relative;
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #888;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-close:hover {
+            color: #333;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #555;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
-            margin-bottom: 20px;
         }
-        .dual-column .card {
-            margin-bottom: 0;
+        
+        /* 占位符提示 */
+        .placeholder-hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .dual-column .card-title {
-            font-size: 14px;
-        }
-        .dual-column .input-group label {
+        .link-usage-note {
+            background: #e3f2fd;
+            border-left: 3px solid #2196f3;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 4px;
             font-size: 13px;
+            color: #333;
         }
-        .dual-column .input-group input,
-        .dual-column .input-group select {
-            padding: 10px 12px;
-            font-size: 13px;
+        .link-usage-note strong {
+            color: #1976d2;
         }
-        .dual-column .btn {
-            padding: 10px 16px;
-            font-size: 13px;
+        .link-usage-note code {
+            background: rgba(33, 150, 243, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #1976d2;
         }
-        .dual-column .quick-code {
-            gap: 6px;
+        .placeholder-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .dual-column .code-tag {
-            padding: 3px 8px;
-            font-size: 11px;
+        .placeholder-tag:hover {
+            background: #bbdefb;
         }
+        
         @media (max-width: 768px) {
-            .dual-column {
+            .template-bilingual {
+                grid-template-columns: 1fr;
+            }
+            .vi-col-output {
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            .form-row {
                 grid-template-columns: 1fr;
             }
         }
@@ -547,113 +819,93 @@
             <p>口令解析 · 链接生成 · 历史记录</p>
         </div>
 
-        <!-- 更新提示 -->
-        <div class="note">
-            <strong>⚠️ 维护说明</strong>：检测到新增主播时，需在 <code>meetings/special/fu</code> 更新主播编码映射表
-        </div>
-
-        <!-- 双列布局：方式一 + 方式二 -->
-        <div class="dual-column">
-            <!-- 方式一：口令解析 -->
-            <div class="card">
-                <div class="card-title">
-                    方式一：口令解析
-                    <span class="badge">推荐</span>
-                </div>
-                <div class="input-group">
-                    <label>口令 + 身份码</label>
-                    <div class="code-input-group">
-                        <input type="text" id="codeInput" class="code-input code-part" placeholder="口令" maxlength="2">
-                        <span class="code-separator">_</span>
-                        <input type="text" id="identityInput" class="code-input identity-part" placeholder="身份码" maxlength="4">
+        <!-- 口令解析 -->
+        <div class="card">
+            <div class="card-title">
+                口令解析
+                <span class="badge">推荐</span>
+            </div>
+            <div class="parse-layout">
+                <!-- 左侧：输入区 -->
+                <div class="parse-input-section">
+                    <div class="input-group">
+                        <label>口令 + 身份码</label>
+                        <div class="code-input-group">
+                            <input type="text" id="codeInput" class="code-input code-part" placeholder="口令" maxlength="2">
+                            <span class="code-separator">_</span>
+                            <input type="text" id="identityInput" class="code-input identity-part" placeholder="身份码" maxlength="4">
+                            <button class="btn btn-secondary" onclick="pasteFromClipboard()" style="padding: 10px 12px; font-size: 13px; margin-left: 8px; white-space: nowrap;" title="从剪贴板粘贴 H2_1234 格式">📋 粘贴</button>
+                        </div>
+                        <small style="color: #888; font-size: 11px;">粘贴 H2_1234 可自动填充</small>
                     </div>
-                    <small style="color: #888; font-size: 11px;">粘贴 H2_1234 可自动填充</small>
-                </div>
-                <div class="quick-code" id="quickCodes">
-                    <!-- 动态生成，按使用频率排序 -->
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="parseCode()">🔍 解析</button>
-                    <button class="btn btn-success" onclick="generateLink()">⚡ 生成</button>
+                    <div class="quick-code" id="quickCodes">
+                        <!-- 动态生成，按使用频率排序 -->
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="parseCode()">🔍 解析</button>
+                        <button class="btn btn-success" onclick="generateLink()">⚡ 生成</button>
+                    </div>
                 </div>
                 
-                <!-- 解析结果 -->
-                <div id="parseResult" class="result-box hidden" style="margin-top: 12px; padding: 12px;">
-                    <div class="result-item" style="padding: 4px 0;">
-                        <span class="result-label" style="font-size: 12px;">主播</span>
-                        <span class="result-value" style="font-size: 12px;" id="resultAnchor">-</span>
+                <!-- 右侧：解析结果 -->
+                <div id="parseResult" class="parse-result-section hidden">
+                    <div class="result-item">
+                        <span class="result-label">主播</span>
+                        <span class="result-value" id="resultAnchor">-</span>
                     </div>
-                    <div class="result-item" style="padding: 4px 0;">
-                        <span class="result-label" style="font-size: 12px;">渠道</span>
-                        <span class="result-value" style="font-size: 12px;" id="resultChannel">-</span>
+                    <div class="result-item">
+                        <span class="result-label">渠道</span>
+                        <span class="result-value" id="resultChannel">-</span>
                     </div>
-                    <div class="result-item" style="padding: 4px 0;">
-                        <span class="result-label" style="font-size: 12px;">短链</span>
-                        <span class="result-value" style="font-size: 12px;" id="resultShortLink">-</span>
+                    <div class="result-item">
+                        <span class="result-label">身份码</span>
+                        <span class="result-value" id="resultIdentity">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">短链</span>
+                        <span class="result-value" id="resultShortLink">-</span>
                     </div>
                 </div>
             </div>
-
-            <!-- 方式二：手动选择兜底 -->
-            <div class="card">
-                <div class="card-title">
-                    方式二：手动选择
-                    <span class="badge" style="background: #fff3e0; color: #e65100;">兜底</span>
-                </div>
-                
-                <div class="manual-hint">
-                    <small style="color: #666; font-size: 11px;">
-                        💡 用户未给口令时，询问来源后手动选择<br>
-                        示例："Bạn tìm thấy link từ đâu ạ? Từ TikTok à?"
-                    </small>
-                </div>
-                
-                <div class="input-group">
-                    <label>主播</label>
-                    <select id="manualAnchor">
-                        <option value="unknown" selected>Unknown (未知)</option>
-                        <option value="heni">阿贤heni (H)</option>
-                        <option value="ricon">志青Ricon (R)</option>
-                        <option value="chua">阿园Chua (C)</option>
-                        <option value="mymy">MYMY (M)</option>
-                        <option value="pink">Pink (P)</option>
-                        <option value="peo">peo (E)</option>
-                        <option value="vanie">Vanie (V)</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>渠道</label>
-                    <select id="manualChannel">
-                        <option value="unknown" selected>Unknown (未知)</option>
-                        <option value="profile">个人主页 Bio (1)</option>
-                        <option value="comment">评论置顶 (2)</option>
-                        <option value="video_description">视频描述 (3)</option>
-                        <option value="live">直播间 (4)</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary" onclick="generateManualLink()" style="margin-top: 8px; width: 100%;">⚡ 生成链接</button>
-            </div>
         </div>
 
-        <!-- 生成的链接 -->
+        <!-- 生成的链接与话术 -->
         <div id="linkCard" class="card hidden">
-            <div class="card-title">生成的注册链接</div>
-            <div class="link-box" id="generatedLink">
-                <button class="copy-btn" onclick="copyLink()">复制</button>
-                <span id="linkText"></span>
+            <div class="card-title">
+                生成结果
+                <span style="margin-left: auto; font-size: 12px; color: #888;">点击复制按钮可复制内容</span>
             </div>
-            
-            <!-- 语言切换 -->
-            <div class="lang-switch">
-                <button class="lang-btn active" onclick="switchLang('vi')" id="btnVi">🇻🇳 越南语</button>
-                <button class="lang-btn" onclick="switchLang('zh')" id="btnZh">🇨🇳 中文</button>
-            </div>
-            
-            <!-- 话术模板 -->
-            <div class="template-box">
-                <button class="copy-btn" style="top: 8px; right: 8px; background: #f57c00; color: white;" onclick="copyTemplate()">复制话术</button>
-                <h4 id="templateTitle">📝 发送给用户的话术</h4>
-                <div class="template-content" id="templateContent"></div>
+            <div class="result-layout">
+                <!-- 左侧：链接区域 -->
+                <div class="result-link-section">
+                    <div class="section-label">🔗 注册链接</div>
+                    <div class="link-box" id="generatedLink">
+                        <span id="linkText"></span>
+                    </div>
+                    <button class="copy-btn-large" onclick="copyLink()" style="margin-top: 12px; width: 100%;">📋 复制链接</button>
+                </div>
+                
+                <!-- 右侧：双语话术区域 -->
+                <div class="result-template-section">
+                    <div class="section-label">📝 发给用户的话术</div>
+                    <div class="template-bilingual" id="templateBilingual">
+                        <!-- 左侧：越南语 -->
+                        <div class="template-col-output vi-col-output">
+                            <div class="template-header-output">
+                                <span class="template-tag vi">🇻🇳 越南语（复制此版本）</span>
+                            </div>
+                            <textarea class="template-content-output vi-content-output editable" id="templateVi" onscroll="syncScroll('templateVi', 'templateZh')" placeholder="越南语话术编辑..." spellcheck="false"></textarea>
+                        </div>
+                        <!-- 右侧：中文参考 -->
+                        <div class="template-col-output zh-col-output">
+                            <div class="template-header-output">
+                                <span class="template-tag zh">🇨🇳 中文参考</span>
+                            </div>
+                            <textarea class="template-content-output zh-content-output editable" id="templateZh" onscroll="syncScroll('templateZh', 'templateVi')" placeholder="中文参考编辑..." spellcheck="false"></textarea>
+                        </div>
+                    </div>
+                    <button class="copy-btn-large" onclick="copyTemplate()" style="margin-top: 12px; width: 100%;">📋 复制话术（越南语）</button>
+                </div>
             </div>
         </div>
 
@@ -661,10 +913,45 @@
         <div class="card">
             <div class="card-title">
                 📚 话术模板库
-                <span style="margin-left: auto; font-size: 12px; color: #888;">左侧越南语可复制，右侧中文仅供阅读</span>
+                <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
+                    <span style="font-size: 12px; color: #888;">左侧越南语可复制，右侧中文仅供阅读</span>
+                    <button class="btn btn-primary" style="padding: 6px 14px; font-size: 13px;" onclick="openAddTemplateModal()">+ 新增模板</button>
+                    <button class="btn btn-secondary" style="padding: 6px 14px; font-size: 13px;" onclick="resetTemplates()">重置默认</button>
+                </div>
             </div>
             <div class="template-library" id="templateLibrary">
                 <!-- 动态生成：双语并排显示 -->
+            </div>
+        </div>
+
+        <!-- 添加模板弹窗 -->
+        <div id="templateModal" class="modal hidden">
+            <div class="modal-overlay" onclick="closeAddTemplateModal()"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>新增模板</h3>
+                    <button class="modal-close" onclick="closeAddTemplateModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>🇻🇳 越南语内容</label>
+                            <textarea id="addTemplateVi" placeholder="输入越南语话术..." rows="10"></textarea>
+                            <div class="placeholder-hint">
+                                <button class="placeholder-tag" onclick="insertPlaceholder('addTemplateVi', '{link}')">{link}</button>
+                                <span style="color: #888;">复制时会自动替换为注册链接</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>🇨🇳 中文内容（参考）</label>
+                            <textarea id="addTemplateZh" placeholder="输入中文参考..." rows="10"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeAddTemplateModal()">取消</button>
+                    <button class="btn btn-primary" onclick="addTemplate()">保存</button>
+                </div>
             </div>
         </div>
 
@@ -734,26 +1021,6 @@
             'M4': 'dkl.vn/m4'
         };
 
-        // 反向映射（用于手动选择）
-        const ANCHOR_CODE_MAP = {
-            'heni': 'H',
-            'ricon': 'R',
-            'chua': 'C',
-            'mymy': 'M',
-            'pink': 'P',
-            'peo': 'E',
-            'vanie': 'V',
-            'unknown': 'U'
-        };
-
-        const CHANNEL_CODE_MAP = {
-            'profile': '1',
-            'comment': '2',
-            'video_description': '3',
-            'live': '4',
-            'unknown': '0'
-        };
-
         // 快捷指令使用频率统计（用于排序）
         const QUICK_CODES_ALL = ['H1', 'H2', 'H3', 'H4', 'R1', 'R2', 'R3', 'R4', 'C1', 'C2', 'C3', 'C4', 'M1', 'M2', 'M3', 'M4', 'P1', 'P2', 'P3', 'P4', 'E1', 'E2', 'E3', 'E4', 'V1', 'V2', 'V3', 'V4'];
 
@@ -787,8 +1054,8 @@
             }
         };
 
-        // 话术模板库数据（越南语/中文完全独立）
-        const TEMPLATE_LIBRARY = {
+        // 默认话术模板库数据
+        const DEFAULT_TEMPLATE_LIBRARY = {
             vi: [
                 {
                     id: 'ask_code',
@@ -876,6 +1143,9 @@ Chúc bạn chơi game vui vẻ! 🦕`
                 }
             ]
         };
+        
+        // 动态话术模板库（从 localStorage 加载或使用默认值）
+        let TEMPLATE_LIBRARY = loadTemplates();
 
         // ==================== 状态管理 ====================
         
@@ -892,10 +1162,41 @@ Chúc bạn chơi game vui vẻ! 🦕`
             document.getElementById('identityInput').value = '';
             parseCode();
         }
+        
+        // 从剪贴板粘贴并解析
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (!text) {
+                    showToast('剪贴板为空');
+                    return;
+                }
+                
+                const cleanText = text.trim().toLowerCase();
+                
+                // 解析 H2_1234 格式
+                if (cleanText.includes('_')) {
+                    const parts = cleanText.split('_');
+                    document.getElementById('codeInput').value = parts[0].slice(0, 2);
+                    document.getElementById('identityInput').value = parts[1].slice(0, 4);
+                } else if (cleanText.length >= 2) {
+                    // 没有下划线，前2位是口令，剩余是身份码
+                    document.getElementById('codeInput').value = cleanText.slice(0, 2);
+                    if (cleanText.length > 2) {
+                        document.getElementById('identityInput').value = cleanText.slice(2, 6);
+                    }
+                }
+                
+                parseCode();
+                showToast('已粘贴: ' + cleanText);
+            } catch (err) {
+                showToast('无法读取剪贴板，请手动粘贴 (Ctrl+V)');
+            }
+        }
 
         // 从两个输入框获取值
         function getCodeAndIdentity() {
-            const code = document.getElementById('codeInput').value.trim().toUpperCase();
+            const code = document.getElementById('codeInput').value.trim().toLowerCase();
             const identity = document.getElementById('identityInput').value.trim();
             return { code, identity };
         }
@@ -905,12 +1206,15 @@ Chúc bạn chơi game vui vẻ! 🦕`
             const { code, identity } = getCodeAndIdentity();
             
             if (code.length !== 2) {
-                showToast('请输入两位口令，如 H2');
+                if (code.length > 0) {
+                    showToast('请输入两位口令，如 h2');
+                }
                 return;
             }
 
-            const anchorCode = code[0];
-            const channelCode = code[1];
+            // 转大写匹配映射表
+            const anchorCode = code[0].toUpperCase();
+            const channelCode = code[1].toUpperCase();
 
             const anchor = ANCHOR_MAP[anchorCode];
             const channel = CHANNEL_MAP[channelCode];
@@ -925,7 +1229,7 @@ Chúc bạn chơi game vui vẻ! 🦕`
                 return;
             }
 
-            const shortLink = SHORT_LINK_MAP[code] || `dkl.vn/${code.toLowerCase()}`;
+            const shortLink = SHORT_LINK_MAP[code.toUpperCase()] || `dkl.vn/${code}`;
 
             currentParse = {
                 code: code,
@@ -937,10 +1241,10 @@ Chúc bạn chơi game vui vẻ! 🦕`
                 ref: `tiktok_${anchor.id}_${channel.id}`
             };
 
-            // 显示解析结果
-            const identityDisplay = identity ? ` (身份码: ${identity})` : '';
-            document.getElementById('resultAnchor').textContent = `${anchor.name} (${anchorCode})${identityDisplay}`;
+            // 显示解析结果 - 身份码单独显示
+            document.getElementById('resultAnchor').textContent = `${anchor.name} (${anchorCode})`;
             document.getElementById('resultChannel').textContent = `${channel.name} (${channelCode})`;
+            document.getElementById('resultIdentity').textContent = identity ? identity : '无';
             document.getElementById('resultShortLink').textContent = shortLink;
             document.getElementById('parseResult').classList.remove('hidden');
 
@@ -953,7 +1257,7 @@ Chúc bạn chơi game vui vẻ! 🦕`
         // 处理粘贴事件（支持 H2_1234 格式自动拆分）
         function handlePaste(e) {
             e.preventDefault();
-            const pastedText = (e.clipboardData || window.clipboardData).getData('text').trim().toUpperCase();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text').trim().toLowerCase();
             
             // 检查是否包含下划线
             if (pastedText.includes('_')) {
@@ -987,7 +1291,7 @@ Chúc bạn chơi game vui vẻ! 🦕`
 
         // 口令输入框自动跳转到身份码
         function handleCodeInput(e) {
-            const value = e.target.value.toUpperCase();
+            const value = e.target.value.toLowerCase();
             e.target.value = value;
             
             // 输入满2位自动跳转到身份码输入框
@@ -1017,6 +1321,24 @@ Chúc bạn chơi game vui vẻ! 🦕`
 
         // 生成链接（口令方式）
         function generateLink() {
+            const { code, identity } = getCodeAndIdentity();
+            
+            // 如果口令和身份码都为空，生成默认链接（无参数）
+            if (!code && !identity) {
+                const parseInfo = {
+                    code: '-',
+                    identityCode: null,
+                    anchor: { id: 'natural', name: '自然流量' },
+                    channel: { id: 'none', name: '无' },
+                    shortLink: '-',
+                    ref: 'natural',
+                    isEmpty: true
+                };
+                const link = 'https://account.monster-lair.vn/#/register';
+                showGeneratedLink(link, parseInfo);
+                return;
+            }
+            
             if (!currentParse) {
                 parseCode();
                 if (!currentParse) return;
@@ -1026,65 +1348,30 @@ Chúc bạn chơi game vui vẻ! 🦕`
             showGeneratedLink(link, currentParse);
         }
 
-        // 生成链接（手动方式）
-        function generateManualLink() {
-            const anchorId = document.getElementById('manualAnchor').value;
-            const channelId = document.getElementById('manualChannel').value;
-
-            // 允许生成链接（支持unknown作为默认值）
-
-            const anchorCode = ANCHOR_CODE_MAP[anchorId];
-            const channelCode = CHANNEL_CODE_MAP[channelId];
-            
-            // 处理 Unknown 情况
-            const isUnknown = anchorId === 'unknown' || channelId === 'unknown';
-            
-            if (isUnknown) {
-                const parseInfo = {
-                    code: 'U0',
-                    anchor: { id: 'unknown', name: 'Unknown' },
-                    channel: { id: 'unknown', name: '未知' },
-                    shortLink: 'unknown',
-                    ref: 'unknown',
-                    isManual: true
-                };
-                // Unknown 情况，生成不带身份码的链接
-                const link = buildRegisterLink('U0', null);
-                showGeneratedLink(link, parseInfo);
-                return;
-            }
-            
-            const anchor = ANCHOR_MAP[anchorCode];
-            const channel = CHANNEL_MAP[channelCode];
-
-            const parseInfo = {
-                code: anchorCode + channelCode,
-                anchor: anchor,
-                channel: channel,
-                shortLink: SHORT_LINK_MAP[anchorCode + channelCode] || `dkl.vn/${(anchorCode + channelCode).toLowerCase()}`,
-                ref: `tiktok_${anchorId}_${channelId}`,
-                isManual: true
-            };
-
-            // 手动选择模式，不带身份码
-            const link = buildRegisterLink(parseInfo.code, null);
-            showGeneratedLink(link, parseInfo);
-        }
-
         // 生成4位数字身份码
         function generateIdentityCode() {
             return Math.floor(1000 + Math.random() * 9000).toString();
         }
 
-        // 构建注册链接（新格式：?code=口令_身份码）
-        // 如果用户提供了身份码，使用完整格式；否则只用口令
+        // 构建注册链接（路径参数格式）
+        // 有身份码: https://account.monster-lair.vn/#/register/H2_1234
+        // 仅口令: https://account.monster-lair.vn/#/register/H2
+        // 无参数: https://account.monster-lair.vn/#/register
         function buildRegisterLink(code, identityCode) {
-            // 新格式：code=口令_身份码，由服务端解析
-            // 示例：code=H2_1234（含身份码）或 code=H2（仅口令）
-            if (identityCode) {
-                return `https://account.monster-lair.vn/#/register?code=${code}_${identityCode}`;
+            const baseUrl = 'https://account.monster-lair.vn/#/register';
+            
+            // 如果没有code，返回无参数链接（自然流量）
+            if (!code || code === '-') {
+                return baseUrl;
             }
-            return `https://account.monster-lair.vn/#/register?code=${code}`;
+            
+            // 有身份码: /register/H2_1234
+            if (identityCode) {
+                return `${baseUrl}/${code}_${identityCode}`;
+            }
+            
+            // 仅口令: /register/H2
+            return `${baseUrl}/${code}`;
         }
 
         // 显示生成的链接
@@ -1096,9 +1383,10 @@ Chúc bạn chơi game vui vẻ! 🦕`
             // 更新话术
             updateTemplate();
 
-            // 添加到历史记录
+            // 添加到历史记录（带上身份码）
             addToHistory({
                 code: parseInfo.code,
+                identityCode: parseInfo.identityCode,
                 anchor: parseInfo.anchor.name,
                 channel: parseInfo.channel.name,
                 link: link,
@@ -1112,52 +1400,176 @@ Chúc bạn chơi game vui vẻ! 🦕`
 
         function switchLang(lang) {
             currentLang = lang;
-            document.getElementById('btnVi').classList.toggle('active', lang === 'vi');
-            document.getElementById('btnZh').classList.toggle('active', lang === 'zh');
-            updateTemplate();
+            // 双语同时显示，不需要切换
         }
 
-        // 渲染话术模板库（双语左右并列，复制仅复制越南语）
+        // 从 localStorage 加载模板
+        function loadTemplates() {
+            const saved = localStorage.getItem('csToolTemplates');
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    console.error('加载模板失败', e);
+                }
+            }
+            return JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_LIBRARY));
+        }
+        
+        // 保存模板到 localStorage
+        function saveTemplates() {
+            localStorage.setItem('csToolTemplates', JSON.stringify(TEMPLATE_LIBRARY));
+        }
+        
+        // 重置为默认模板
+        function resetTemplates() {
+            if (confirm('确定要重置为默认模板吗？自定义模板将丢失。')) {
+                TEMPLATE_LIBRARY = JSON.parse(JSON.stringify(DEFAULT_TEMPLATE_LIBRARY));
+                saveTemplates();
+                renderTemplateLibrary();
+                showToast('已重置为默认模板');
+            }
+        }
+        
+        // 打开添加模板弹窗
+        function openAddTemplateModal() {
+            document.getElementById('templateModal').classList.remove('hidden');
+        }
+        
+        // 关闭添加模板弹窗
+        function closeAddTemplateModal() {
+            document.getElementById('templateModal').classList.add('hidden');
+            // 清空输入
+            document.getElementById('addTemplateVi').value = '';
+            document.getElementById('addTemplateZh').value = '';
+        }
+        
+        // 插入占位符到指定输入框的当前光标位置
+        function insertPlaceholder(inputId, placeholder) {
+            const input = document.getElementById(inputId);
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const value = input.value;
+            
+            // 在光标位置插入占位符
+            input.value = value.substring(0, start) + placeholder + value.substring(end);
+            
+            // 移动光标到插入内容之后
+            const newCursorPos = start + placeholder.length;
+            input.setSelectionRange(newCursorPos, newCursorPos);
+            
+            // 聚焦输入框
+            input.focus();
+        }
+        
+        // 添加模板
+        function addTemplate() {
+            const viContent = document.getElementById('addTemplateVi').value.trim();
+            const zhContent = document.getElementById('addTemplateZh').value.trim();
+            
+            if (!viContent) {
+                showToast('请输入越南语内容');
+                return;
+            }
+            
+            // 自动生成标题：取越南语前20个字符
+            const title = viContent.substring(0, 20).replace(/\n/g, ' ') + (viContent.length > 20 ? '...' : '');
+            
+            const newId = 'tpl_' + Date.now();
+            TEMPLATE_LIBRARY.vi.push({
+                id: newId,
+                title: title,
+                content: viContent
+            });
+            TEMPLATE_LIBRARY.zh.push({
+                id: newId,
+                title: title,
+                content: zhContent
+            });
+            
+            saveTemplates();
+            renderTemplateLibrary();
+            closeAddTemplateModal();
+            showToast('模板已添加');
+        }
+        
+        // 删除模板
+        function deleteTemplate(id) {
+            if (!confirm('确定要删除这个模板吗？')) {
+                return;
+            }
+            
+            TEMPLATE_LIBRARY.vi = TEMPLATE_LIBRARY.vi.filter(t => t.id !== id);
+            TEMPLATE_LIBRARY.zh = TEMPLATE_LIBRARY.zh.filter(t => t.id !== id);
+            
+            saveTemplates();
+            renderTemplateLibrary();
+            showToast('模板已删除');
+        }
+
+        // 渲染话术模板库（双语左右并列，带操作按钮）
         function renderTemplateLibrary() {
             const container = document.getElementById('templateLibrary');
             const viTemplates = TEMPLATE_LIBRARY.vi;
             const zhTemplates = TEMPLATE_LIBRARY.zh;
             
+            if (viTemplates.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无话术模板，点击"新增模板"按钮创建</div>';
+                return;
+            }
+            
             container.innerHTML = viTemplates.map((viTpl, index) => {
-                const zhTpl = zhTemplates[index];
+                const zhTpl = zhTemplates[index] || { content: '' };
                 return `
                 <div class="template-item-bilingual">
                     <div class="template-col vi-col">
                         <div class="template-header">
                             <span class="template-tag vi">🇻🇳 越南语</span>
-                            <button class="copy-btn-small" onclick="copyTemplateText('${viTpl.id}')">复制</button>
+                            <div class="template-actions">
+                                <button class="template-btn template-btn-copy" onclick="copyTemplateText('${viTpl.id}')">复制</button>
+                                <button class="template-btn template-btn-delete" onclick="deleteTemplate('${viTpl.id}')">删除</button>
+                            </div>
                         </div>
-                        <pre class="template-content vi-content">${viTpl.content}</pre>
+                        <pre class="template-content vi-content">${escapeHtml(viTpl.content)}</pre>
                     </div>
                     <div class="template-col zh-col">
                         <div class="template-header">
                             <span class="template-tag zh">🇨🇳 中文参考</span>
                         </div>
-                        <pre class="template-content zh-content">${zhTpl.content}</pre>
+                        <pre class="template-content zh-content">${escapeHtml(zhTpl.content)}</pre>
                     </div>
                 </div>
                 `;
             }).join('');
+        }
+        
+        // HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // 复制话术模板文本（仅越南语，替换{link}为当前链接或占位符）
         function copyTemplateText(tplId) {
             let content = TEMPLATE_LIBRARY.vi.find(t => t.id === tplId)?.content || '';
             // 替换 {link} 为当前链接或提示占位符
-            const linkToUse = currentLink || 'https://account.monster-lair.vn/#/register?ref=...';
+            const linkToUse = currentLink || '(chưa có link, vui lòng tạo link trước)';
             content = content.replace(/{link}/g, linkToUse);
             copyToClipboard(content);
         }
 
         function updateTemplate() {
-            const template = TEMPLATES[currentLang];
-            document.getElementById('templateTitle').textContent = template.title;
-            document.getElementById('templateContent').textContent = template.content(currentLink);
+            // 同时更新越南语和中文
+            document.getElementById('templateVi').value = TEMPLATES.vi.content(currentLink);
+            document.getElementById('templateZh').value = TEMPLATES.zh.content(currentLink);
+        }
+        
+        // 同步两个 textarea 的滚动位置
+        function syncScroll(sourceId, targetId) {
+            const source = document.getElementById(sourceId);
+            const target = document.getElementById(targetId);
+            target.scrollTop = source.scrollTop;
         }
 
         // ==================== 历史记录 ====================
@@ -1179,17 +1591,19 @@ Chúc bạn chơi game vui vẻ! 🦕`
                 return;
             }
 
-            container.innerHTML = history.map((item, index) => `
+            container.innerHTML = history.map((item, index) => {
+                const identityTag = item.identityCode ? `<span class="history-identity">ID:${item.identityCode}</span>` : '';
+                return `
                 <div class="history-item">
                     <div class="history-info">
-                        <div class="history-code">${item.code} · ${item.anchor} · ${item.channel}</div>
+                        <div class="history-code">${item.code} · ${item.anchor} · ${item.channel}${identityTag}</div>
                         <div class="history-detail">${item.time}</div>
                     </div>
                     <div class="history-actions">
                         <button class="history-copy-btn" onclick="copyHistoryUrl(${index})">复制链接</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         // 复制历史记录中的URL
@@ -1295,7 +1709,8 @@ Chúc bạn chơi game vui vẻ! 🦕`
         }
 
         function copyTemplate() {
-            const template = document.getElementById('templateContent').textContent;
+            // 复制越南语版本（使用 value 因为是 textarea）
+            const template = document.getElementById('templateVi').value;
             copyToClipboard(template);
         }
 
@@ -1326,16 +1741,18 @@ Chúc bạn chơi game vui vẻ! 🦕`
 
         // ==================== 快捷指令渲染 ====================
         
-        // 获取已使用的channel记录
+        // 获取已使用的channel记录（返回小写）
         function getUsedChannels() {
-            return JSON.parse(localStorage.getItem('csToolUsedChannels') || '[]');
+            const channels = JSON.parse(localStorage.getItem('csToolUsedChannels') || '[]');
+            return channels.map(c => c.toLowerCase());
         }
         
-        // 记录使用的channel
+        // 记录使用的channel（存储小写）
         function recordUsedChannel(code) {
             const used = getUsedChannels();
-            if (!used.includes(code)) {
-                used.push(code);
+            const lowerCode = code.toLowerCase();
+            if (!used.includes(lowerCode)) {
+                used.push(lowerCode);
                 localStorage.setItem('csToolUsedChannels', JSON.stringify(used));
                 renderQuickCodes(); // 重新渲染
             }
@@ -1345,11 +1762,11 @@ Chúc bạn chơi game vui vẻ! 🦕`
             const container = document.getElementById('quickCodes');
             const used = getUsedChannels();
             
-            // 基础列表：每个主播的1号channel
-            const baseCodes = Object.keys(ANCHOR_MAP).map(a => a + '1');
+            // 基础列表：每个主播的1号channel（小写）
+            const baseCodes = Object.keys(ANCHOR_MAP).map(a => a.toLowerCase() + '1');
             
             // 添加其他已使用的channel（非1号）
-            const extraCodes = used.filter(code => !code.endsWith('1'));
+            const extraCodes = used.filter(code => !code.endsWith('1')).map(code => code.toLowerCase());
             
             // 合并并去重
             const displayCodes = [...new Set([...baseCodes, ...extraCodes])];

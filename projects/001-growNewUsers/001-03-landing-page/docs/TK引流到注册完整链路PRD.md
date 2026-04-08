@@ -24,11 +24,11 @@ flowchart TD
     AddCS --> CS[客服对话]
     CS --> Ask[索要口令]
     
-    Ask -->|用户提供口令| Parse[解析口令并生成链接]
-    Ask -->|不提供口令| Unknown[手动选择 Unknown]
+    Ask -->|用户提供口令| Parse[生成带参数链接]
+    Ask -->|不提供口令| Default[发送默认注册链接]
     
     Parse --> Register[注册页]
-    Unknown --> Register
+    Default --> Register
     
     Register --> Server[服务端解析]
     Server --> Attribution[归因到主播和渠道]
@@ -41,58 +41,51 @@ flowchart TD
 
 ### 2.1 编码规则
 
-```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#e3f2fd', 'primaryTextColor': '#333', 'primaryBorderColor': '#1976d2', 'lineColor': '#666', 'secondaryColor': '#f5f5f5', 'tertiaryColor': '#fff'}}}%%
-graph LR
-    subgraph 主播编码["主播编码 (7位)"]
-        H[H<br/>阿贤heni]
-        R[R<br/>志青Ricon]
-        C[C<br/>阿园Chua]
-        M[M<br/>MYMY]
-        P[P<br/>Pink]
-        E[E<br/>peo]
-        V[V<br/>Vanie]
-        U[U<br/>Unknown]
-    end
-    
-    subgraph 渠道编码["渠道编码 (4位)"]
-        N1[1<br/>个人主页]
-        N2[2<br/>评论置顶]
-        N3[3<br/>视频描述]
-        N4[4<br/>直播间]
-    end
-    
-    H --- N1
-    H --- N2
-    H --- N3
-    H --- N4
-```
-
 **编码格式**: `{主播字母}{渠道数字}`
+
+**主播编码**:
+
+| 编码 | 主播 |
+|------|------|
+| H | 阿贤heni |
+| R | 志青Ricon |
+| C | 阿园Chua |
+| M | MYMY |
+| P | Pink |
+| E | peo |
+| V | Vanie |
+| U | Unknown |
+
+**渠道编码**:
+
+| 编码 | 渠道 |
+|------|------|
+| 1 | 个人主页 Bio |
+| 2 | 评论置顶 |
+| 3 | 视频描述 |
+| 4 | 直播间 |
 
 ### 2.2 示例短链
 
-| 短链 | 解析 | 使用场景 |
-|------|------|----------|
-| dkl.vn/h1 | 阿贤heni _ 主页 | Bio链接 |
-| dkl.vn/h2 | 阿贤heni _ 评论 | 评论区置顶 |
-| dkl.vn/r1 | 志青Ricon _ 主页 | Bio链接 |
-| dkl.vn/m2 | MYMY _ 评论 | 评论区置顶 |
+| 短链 | 解析 | 场景 |
+|------|------|------|
+| `dkl.vn/h1` | 阿贤heni + 主页 | Bio链接 |
+| `dkl.vn/h2` | 阿贤heni + 评论 | 评论区置顶 |
+| `dkl.vn/r1` | 志青Ricon + 主页 | Bio链接 |
+| `dkl.vn/m2` | MYMY + 评论 | 评论区置顶 |
 
 ### 2.3 跳转目标
 
-```mermaid
-sequenceDiagram
-    participant U as 用户
-    participant D as dkl.vn
-    participant S as 落地页
-    
-    U->>D: GET /h1
-    D->>D: 解析 h1<br/>主播=H, 渠道=1
-    D-->>U: 302 Redirect
-    
-    U->>S: GET /landing-official<br/>?source=tiktok<br/>&anchor=heni<br/>&channel=profile
-    S-->>U: 200 OK<br/>返回落地页HTML
+用户访问短链后，服务端返回 302 跳转，目标地址携带来源参数：
+
+```
+用户访问: https://dkl.vn/h1
+       ↓  [服务端 302 跳转]
+目标地址: https://account.monster-lair.vn/landing-official/index.html
+          ?source=tiktok
+          &anchor=heni
+          &channel=profile
+          &ref=tiktok_heni_profile
 ```
 
 ---
@@ -101,14 +94,14 @@ sequenceDiagram
 
 ### 3.1 核心功能
 
-| 功能 | 实现 | 备注 |
-|------|------|------|
-| **身份码生成** | **服务端生成**4位随机数字，与口令绑定 | 用户访问时生成，需复制给客服 |
-| **口令生成** | 页面加载时自动生成 | 格式: {主播字母}{渠道数字} |
-| **剪贴板写入** | 自动复制"口令_身份码" | 如: H2_1234 |
-| **剪贴板兜底** | 失败时弹窗展示口令_身份码 | 可一键复制 |
-| **Zalo调起** | zalo://qr?... | 支持 iOS/Android |
-| **复制Zalo号** | 备用方案 | 调起失败时使用 |
+| 功能 | 说明 | 技术实现 |
+|------|------|----------|
+| 身份码生成 | 4位随机数字，与口令绑定 | 服务端生成，用户访问时生成 |
+| 口令生成 | 页面加载时自动生成 | 格式: `{主播字母}{渠道数字}` |
+| 剪贴板写入 | 自动复制"口令_身份码" | 如: `H2_1234` |
+| 剪贴板兜底 | 失败时弹窗展示口令_身份码 | 弹窗内可一键复制 |
+| Zalo调起 | 点击调起Zalo应用 | 使用 `zalo://qr?...` 协议 |
+| 复制Zalo号 | 备用方案 | 调起失败时展示Zalo号 |
 
 ### 3.2 剪贴板内容格式
 
@@ -138,16 +131,16 @@ H2_1234
 
 ### 3.4 事件埋点
 
-| 事件名 | 触发时机 | 携带参数 |
-|--------|----------|----------|
-| page_view | 页面加载 | ref, source, anchor, channel |
-| identity_code_generated | 身份码生成 | identity_code, ref |
-| clipboard_write_attempt | 尝试写入剪贴板 | code, identity_code |
-| clipboard_write_success | 剪贴板写入成功 | code, identity_code |
-| clipboard_write_fail | 剪贴板写入失败 | code, identity_code |
-| zalo_launch_attempt | 点击调起 | ref, webview_type |
-| zalo_launch_success | 调起成功 | ref, time_to_success |
-| copy_number | 点击复制Zalo号 | ref, method |
+| 事件 | 时机 | 参数 |
+|------|------|------|
+| `page_view` | 页面加载 | `ref`, `source`, `anchor`, `channel` |
+| `identity_code_generated` | 身份码生成 | `identity_code`, `ref` |
+| `clipboard_write_attempt` | 尝试写入剪贴板 | `code`, `identity_code` |
+| `clipboard_write_success` | 剪贴板写入成功 | `code`, `identity_code` |
+| `clipboard_write_fail` | 剪贴板写入失败 | `code`, `identity_code` |
+| `zalo_launch_attempt` | 点击调起 | `ref`, `webview_type` |
+| `zalo_launch_success` | 调起成功 | `ref`, `time_to_success` |
+| `copy_number` | 点击复制Zalo号 | `ref`, `method` |
 
 ---
 
@@ -157,29 +150,22 @@ H2_1234
 
 ```mermaid
 sequenceDiagram
-    participant S as 服务端
     participant L as 落地页
     participant U as 用户
     participant C as 客服
     participant R as 注册页
+    participant S as 服务端
     
-    S->>S: 生成身份码 1234
-    S-->>L: 返回身份码
-    L->>L: 生成口令 H2
+    L->>L: 生成口令 H2 和身份码 1234
     L->>L: 剪贴板写入 H2_1234
     
     U->>C: 粘贴口令 H2_1234
     
-    C->>C: 解析口令 H2
-    C->>C: 提取身份码 1234
-    C->>C: 映射主播=heni<br/>渠道=comment
+    C->>U: 发送注册链接 /h2_1234
     
-    C->>U: 发送注册链接<br/>?code=H2_1234
-    
-    U->>R: 访问链接
+    U->>R: 访问链接 /h2_1234
     R->>S: 提交注册
-    S->>S: 解析 code=H2_1234
-    S->>S: 验证身份码
+    S->>S: 解析参数并归因
     S-->>U: 注册成功
 ```
 
@@ -187,217 +173,90 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-    A[用户: 你好] --> B[客服询问来源]
+    A[用户: 你好] --> B[询问是否能提供口令]
     B --> C{用户回复?}
     
-    C -->|确认来源| D[手动选择主播+渠道]
-    C -->|不回复| E[选择 Unknown]
-    C -->|无法确认| E
+    C -->|提供口令| D[生成链接 /h2_1234]
+    C -->|不能提供| E[发送默认注册链接]
     
-    D --> F[生成链接<br/>?code=H2]
-    E --> G[生成链接<br/>?code=U0_xxxx]
+    D --> F[用户访问链接注册]
+    E --> F
     
-    F --> H[用户注册]
-    G --> H
+    F --> G{有身份码?}
+    G -->|有| H[精确归因]
+    G -->|无| I[IP兜底归因]
     
-    H --> I{有身份码?}
-    I -->|有| J[精确归因]
-    I -->|无| K[IP兜底归因]
-    
-    J --> L[注册完成]
-    K --> L
+    H --> J[注册完成]
+    I --> J
 ```
 
 ### 4.3 客服工具输入要求
 
-客服需获取用户提供的内容：
-- **理想情况**: 口令 + 身份码（如 `H2_1234`）
-- **兜底情况**: 仅口令（如 `H2`），由服务端 IP 匹配归因
-- **完全未知**: 选择 Unknown，链接不含具体参数
+客服获取用户提供的内容，直接透传给注册链接：
+
+| 场景 | 用户输入 | 生成链接 | 备注 |
+|------|----------|----------|------|
+| 理想情况 | `H2_1234` | `/h2_1234` | 精确归因 |
+| 仅口令 | `H2` | `/h2` | IP兜底归因 |
+| 完全未知 | (无) | 默认链接 | 视为自然流量 |
+
+**注意**: 客服工具只做参数透传，不解析口令含义。服务端负责解码和归因。
 
 ### 4.4 注册链接格式
 
-**用户提供身份码时**（推荐，归因精确）:
+**用户提供口令+身份码时**（推荐，归因精确）:
 ```
-https://account.monster-lair.vn/#/register?code=H2_1234
-```
-
-**用户未提供身份码时**（兜底，归因模糊）:
-```
-https://account.monster-lair.vn/#/register?code=H2
+https://account.monster-lair.vn/#/register/H2_1234
 ```
 
-**完全未知时**:
+**用户仅提供口令时**（兜底，归因模糊）:
 ```
-https://account.monster-lair.vn/#/register?code=U0
+https://account.monster-lair.vn/#/register/H2
 ```
 
-**参数说明**:
-- `code`: 口令[_身份码]，身份码可选
+**完全未知时**（自然流量）:
+```
+https://account.monster-lair.vn/#/register
+```
+
+**路径参数说明**:
+- 路径格式: `/register/{口令}_{身份码}` 或 `/register/{口令}`
 - 有身份码: 服务端精确归因到具体用户
 - 无身份码: 服务端尝试 IP 兜底归因
-- 服务端解析 `code`，拆解后映射到具体参数
+- 无参数: 视为自然流量
 
 ---
 
 ## 5. 服务端解析逻辑
 
-### 5.1 code 参数解析
-
-**输入**: `code` 参数，格式为 `口令_身份码`（如 `H2_1234`）或仅 `口令`（如 `H2`）
-
-**解析步骤**:
-
-1. **检查分隔符**: 查找 `_` 分隔符
-   - 有 `_`: 拆分为口令和身份码
-   - 无 `_`: 仅解析口令部分
-
-2. **验证身份码**（如有）:
-   - 必须是4位纯数字
-   - 如格式错误，忽略身份码
-
-3. **解析口令**（2位字符）:
-   - 第1位: 主播编码（H/R/C/M/P/E/V/U）
-   - 第2位: 渠道编码（1/2/3/4/0）
-
-4. **映射主播和渠道**:
-
-| 主播码 | 映射结果 | 渠道码 | 映射结果 |
-|--------|----------|--------|----------|
-| H | heni | 1 | profile |
-| R | ricon | 2 | comment |
-| C | chua | 3 | video_description |
-| M | mymy | 4 | live |
-| P | pink | 0 | unknown |
-| E | peo | | |
-| V | vanie | | |
-| U | unknown | | |
-
-**输出**: 主播标识、渠道位置、身份码（如有）、来源平台
-
-### 5.2 归因流程
+### 5.1 归因流程
 
 ```mermaid
 flowchart TD
-    A[用户访问注册页] --> B{提取 URL 参数}
+    A[用户访问注册页] --> B{提取 URL 路径参数}
     
-    B -->|有 code| C[解析 code]
-    B -->|无 code| D[IP 兜底归因]
+    B -->|有参数| C[解析参数]
+    B -->|无参数| D[IP 兜底归因]
     
     C --> C1[拆解口令 H2]
     C --> C2[拆解身份码 1234]
-    C1 --> C3[映射主播=heni<br/>渠道=comment]
+    C1 --> C3[映射主播=heni<br>渠道=comment]
     C2 --> C4[验证身份码有效性]
     
     C3 --> E[记录注册归因]
     C4 --> E
-    D --> E
     
-    E --> F([注册完成])
-```
-
-### 5.3 IP 兜底归因（code 参数为空时）
-
-当注册链接没有 `code` 参数或解析失败时，使用 IP 兜底归因。
-
-**查询条件**:
-- 用户注册 IP = 落地页访问 IP
-- 访问时间在注册前 30 分钟内
-- 按访问时间倒序（最近优先）
-
-**归因逻辑**:
-
-| 场景 | 归因结果 | 置信度 |
-|------|----------|--------|
-| 该IP只有1条访问记录 | 使用此记录的主播+渠道 | 80% |
-| 该IP有多条访问记录 | 使用最近的一条 | 60% |
-| 无匹配记录 | 标记为 unknown | 0% |
-
-### 5.4 服务端数据存储
-
-**落地页访问日志**
-
-| 字段 | 说明 | 用途 |
-|------|------|------|
-| 访问ID | 自增主键 | 唯一标识 |
-| 用户IP | 访问者IP地址 | IP兜底归因匹配 |
-| 短链编码 | 如 H1, R2 | 记录访问来源 |
-| 主播标识 | heni/ricon等 | 归因目标 |
-| 渠道位置 | profile/comment等 | 归因目标 |
-| 身份码 | 4位数字 | 精确用户识别 |
-| 完整ref | 原始ref参数 | 追踪链路 |
-| 访问时间 | 时间戳 | IP匹配时间窗口 |
-
-**注册归因记录**
-
-| 字段 | 说明 | 用途 |
-|------|------|------|
-| 记录ID | 自增主键 | 唯一标识 |
-| 用户ID | 注册用户ID | 关联用户 |
-| 注册IP | 注册时IP | 备选匹配 |
-| code参数 | 如 H2_1234 | 主要归因依据 |
-| 主播标识 | 最终归因主播 | 结算依据 |
-| 渠道位置 | 最终归因渠道 | 结算依据 |
-| 归因方式 | code/ip_fallback/unknown | 数据质量标记 |
-| 置信度 | 0-100% | 归因可信度 |
-
----
-
-## 6. 客服话术模板
-
-### 6.1 索要口令
-
-**越南语:**
-```
-Chào bạn! 🎮
-
-Bạn vui lòng gửi lại mã code để nhận quà nhé!
-Mã đã tự động copy khi bạn click link lúc nãy.
-Ví dụ: H2_1234
-```
-
-**中文:**
-```
-你好！🎮
-
-请发送一下口令来领取礼包！
-口令在你刚才点击链接时已经自动复制了。
-例如：H2_1234
-```
-
-### 6.2 发送注册链接
-
-**越南语:**
-```
-🎮 Chào mừng đến với Đảo Khủng Long!
-
-📥 Link đăng ký & tải game: {link}
-
-⚠️ Lưu ý: Đây là game PC, cần tải về máy tính để chơi nhé!
-
-🎯 Ba bước để bắt đầu:
-1. Đăng ký tài khoản game
-2. Tải và cài đặt game client
-3. Vào game nhận khủng long miễn phí!
-```
-
-**中文:**
-```
-🎮 欢迎来到恐龙岛！
-
-📥 注册并下载游戏：{link}
-
-⚠️ 注意：这是PC端游戏，需要在电脑上下载运行！
-
-🎯 三步开始游戏：
-1. 注册游戏账号
-2. 下载游戏客户端
-3. 进入游戏领取恐龙！
+    D --> D1{IP匹配成功?}
+    D1 -->|是| E
+    D1 -->|否| F[标记为自然流量]
+    
+    E --> G([注册完成])
+    F --> G
 ```
 
 ---
 
-## 7. 异常处理
+## 6. 异常处理
 
 | 场景 | 处理方案 |
 |------|----------|
@@ -405,48 +264,17 @@ Ví dụ: H2_1234
 | 剪贴板写入失败 | 弹窗展示口令_身份码，用户手动复制 |
 | Zalo调起失败 | 展示Zalo号，用户手动添加 |
 | 用户只发口令不发身份码 | 客服工具兼容解析（提示补充身份码） |
-| 用户不发口令/身份码 | 客服手动选择 Unknown 生成兜底链接 |
+| 用户不发口令/身份码 | 客服发送默认注册链接（无参数） |
 | code参数格式错误 | 服务端返回错误，尝试IP兜底 |
 | IP匹配失败 | 标记为自然流量，不计入渠道 |
 
 ---
 
-## 8. 核心变更点总结
+## 7. 变更记录
 
-### 8.1 vs 旧方案对比
-
-| 项目 | 旧方案 | 新方案 |
-|------|--------|--------|
-| **剪贴板内容** | H2 | H2_1234（口令_身份码） |
-| **注册链接格式** | `?ref=xxx&anchor=heni&channel=comment` | `?code=H2_1234` |
-| **参数解析** | 客户端直接读取URL参数 | 服务端解析code参数 |
-| **身份识别** | 无 | 4位身份码，精确到用户个体 |
-| **兜底方案** | IP匹配 | 优先code，失败再IP |
-
-### 8.2 优势
-
-1. **简化参数**：URL只有一个 `code` 参数，便于分享和复制
-2. **用户识别**：身份码可精确追踪单个用户
-3. **安全性**：参数不暴露直接的业务逻辑（anchor/channel）
-4. **灵活性**：服务端可随时调整映射规则，无需改前端
-
----
-
-## 9. 相关文档
-
-| 文档 | 说明 |
-|------|------|
-| `TK引流到注册完整链路PRD.md` | 本文档 |
-| `url-mapping-spec.md` | 短链映射规范 |
-| `tracking-params-spec.md` | URL参数规范（需更新） |
-| `客服工具与口令系统设计方案.md` | 客服工具详细设计 |
-| `src/tools/cs-tool/index.html` | 客服工具页面 |
-
----
-
-**变更记录:**
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.0 | 2026-04-08 | 初版：完整链路PRD |
 | v1.1 | 2026-04-08 | 新增身份码机制，修改链接格式为 code=口令_身份码 |
 | v1.2 | 2026-04-08 | 客服工具改为双输入框设计（验证码风格），支持粘贴自动拆分 |
+| v1.3 | 2026-04-08 | 按飞书表格规范优化表格格式 |

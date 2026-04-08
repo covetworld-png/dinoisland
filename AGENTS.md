@@ -108,6 +108,20 @@ git add src/report/streamer-data.html
 git commit -m "update: 更新主播数据报告至 YYYYMMDD"
 ```
 
+### 7.2 飞书文档生成规则
+
+**触发条件**: 生成面向飞书的 Markdown 文档时
+
+**强制动作**:
+1. 所有 Mermaid 图表必须遵循 [引用:docs/飞书Mermaid语法指南.md]
+2. 使用文本绘图小组件语法（`/文本绘图`），而非 Markdown 代码块
+3. 避免使用飞书不支持的语法：`%%{init}%%`、`linkStyle`、`click` 事件等
+4. 图表先在 Mermaid Live Editor 验证后再写入文档
+5. 所有表格必须遵循 [引用:docs/飞书表格Markdown语法指南.md]
+6. 表格控制在合理宽度（建议不超过 7 列）
+7. 避免表格嵌套、表格内代码块等复杂结构
+8. 粘贴到飞书后需检查表格格式，必要时手动调整
+
 ---
 
 ## 8. 专项规范索引
@@ -120,6 +134,8 @@ git commit -m "update: 更新主播数据报告至 YYYYMMDD"
 | **claude.md 生成** | [引用:docs/claude-md-spec.md] | 强制标识规则、格式标准、响应话术 |
 | **记忆系统** | [引用:docs/memory-system.md] | 跨会话上下文持久化方案 |
 | **文档规范** | [引用:docs/documentation-standards.md] | Mermaid 流程图、PRD 结构、禁止代码片段 |
+| **飞书 Mermaid** | [引用:docs/飞书Mermaid语法指南.md] | 飞书文档中 Mermaid 图表的标准语法与限制 |
+| **飞书表格** | [引用:docs/飞书表格Markdown语法指南.md] | 飞书文档中表格的 Markdown 语法标准 |
 
 ## 8. 文档索引
 
@@ -134,6 +150,8 @@ git commit -m "update: 更新主播数据报告至 YYYYMMDD"
 | `docs/frontend-guidelines.md` | 前端资源管理规范 |
 | `docs/claude-md-spec.md` | claude.md 生成规范 |
 | `docs/documentation-standards.md` | 项目文档规范：流程图、PRD 结构 |
+| `docs/飞书Mermaid语法指南.md` | 飞书 Mermaid 语法标准指南：图表类型、语法限制、最佳实践 |
+| `docs/飞书表格Markdown语法指南.md` | 飞书表格 Markdown 语法标准指南：表格规范、最佳实践、模板 |
 
 ## 9. 数据源
 
