@@ -571,7 +571,7 @@
                 <div class="input-group">
                     <label>主播</label>
                     <select id="manualAnchor">
-                        <option value="">选择主播</option>
+                        <option value="unknown" selected>Unknown (未知)</option>
                         <option value="heni">阿贤heni (H)</option>
                         <option value="ricon">志青Ricon (R)</option>
                         <option value="chua">阿园Chua (C)</option>
@@ -579,7 +579,6 @@
                         <option value="pink">Pink (P)</option>
                         <option value="peo">peo (E)</option>
                         <option value="vanie">Vanie (V)</option>
-                        <option value="unknown">Unknown (未知)</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -916,10 +915,7 @@ Chúc bạn chơi game vui vẻ! 🦕`
             const anchorId = document.getElementById('manualAnchor').value;
             const channelId = document.getElementById('manualChannel').value;
 
-            if (!anchorId || !channelId) {
-                showToast('请选择主播和渠道');
-                return;
-            }
+            // 允许生成链接（支持unknown作为默认值）
 
             const anchorCode = ANCHOR_CODE_MAP[anchorId];
             const channelCode = CHANNEL_CODE_MAP[channelId];
