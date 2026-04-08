@@ -563,9 +563,9 @@
                 <div class="input-group">
                     <label>口令 + 身份码</label>
                     <div class="code-input-group">
-                        <input type="text" id="codeInput" class="code-input code-part" placeholder="H2" maxlength="2">
+                        <input type="text" id="codeInput" class="code-input code-part" placeholder="口令" maxlength="2">
                         <span class="code-separator">_</span>
-                        <input type="text" id="identityInput" class="code-input identity-part" placeholder="1234" maxlength="4">
+                        <input type="text" id="identityInput" class="code-input identity-part" placeholder="身份码" maxlength="4">
                     </div>
                     <small style="color: #888; font-size: 11px;">粘贴 H2_1234 可自动填充</small>
                 </div>
@@ -996,6 +996,25 @@ Chúc bạn chơi game vui vẻ! 🦕`
             }
         }
 
+        // 身份码输入框处理 Backspace
+        function handleIdentityKeydown(e) {
+            const input = e.target;
+            
+            // 当身份码为空且按 Backspace 时，跳回口令输入框
+            if (e.key === 'Backspace' && input.value.length === 0) {
+                const codeInput = document.getElementById('codeInput');
+                codeInput.focus();
+                
+                // 删除口令的最后一个字符
+                const codeValue = codeInput.value;
+                if (codeValue.length > 0) {
+                    codeInput.value = codeValue.slice(0, -1);
+                }
+                
+                e.preventDefault();
+            }
+        }
+
         // 生成链接（口令方式）
         function generateLink() {
             if (!currentParse) {
@@ -1356,6 +1375,9 @@ Chúc bạn chơi game vui vẻ! 🦕`
         
         // 输入事件 - 自动跳转
         codeInput.addEventListener('input', handleCodeInput);
+        
+        // Backspace 事件 - 身份码为空时回退到口令
+        identityInput.addEventListener('keydown', handleIdentityKeydown);
         
         // 回车事件
         codeInput.addEventListener('keypress', function(e) {
