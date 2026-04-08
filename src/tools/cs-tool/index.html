@@ -465,6 +465,41 @@
             }
         }
         
+        /* 口令+身份码双输入框样式 */
+        .code-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .code-input {
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            letter-spacing: 4px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        .code-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .code-part {
+            width: 60px;
+            background: #f8f9fa;
+        }
+        .identity-part {
+            width: 90px;
+            background: #f8f9fa;
+        }
+        .code-separator {
+            font-size: 18px;
+            color: #888;
+            font-weight: 500;
+        }
+        
         /* 双列布局 */
         .dual-column {
             display: grid;
@@ -526,8 +561,13 @@
                     <span class="badge">推荐</span>
                 </div>
                 <div class="input-group">
-                    <label>口令（如 H2, R1）</label>
-                    <input type="text" id="codeInput" placeholder="输入两位口令" maxlength="2">
+                    <label>口令 + 身份码</label>
+                    <div class="code-input-group">
+                        <input type="text" id="codeInput" class="code-input code-part" placeholder="H2" maxlength="2">
+                        <span class="code-separator">_</span>
+                        <input type="text" id="identityInput" class="code-input identity-part" placeholder="1234" maxlength="4">
+                    </div>
+                    <small style="color: #888; font-size: 11px;">粘贴 H2_1234 可自动填充</small>
                 </div>
                 <div class="quick-code" id="quickCodes">
                     <!-- 动态生成，按使用频率排序 -->
@@ -849,26 +889,23 @@ Chúc bạn chơi game vui vẻ! 🦕`
         // 填充口令
         function fillCode(code) {
             document.getElementById('codeInput').value = code;
+            document.getElementById('identityInput').value = '';
             parseCode();
+        }
+
+        // 从两个输入框获取值
+        function getCodeAndIdentity() {
+            const code = document.getElementById('codeInput').value.trim().toUpperCase();
+            const identity = document.getElementById('identityInput').value.trim();
+            return { code, identity };
         }
 
         // 解析口令
         function parseCode() {
-            const rawInput = document.getElementById('codeInput').value.trim().toUpperCase();
-            
-            // 解析口令和身份码（支持 H2 或 H2_1234 格式）
-            let code, identityCode;
-            if (rawInput.includes('_')) {
-                const parts = rawInput.split('_');
-                code = parts[0];
-                identityCode = parts[1];
-            } else {
-                code = rawInput;
-                identityCode = null;
-            }
+            const { code, identity } = getCodeAndIdentity();
             
             if (code.length !== 2) {
-                showToast('请输入两位口令，如 H2 或 H2_1234');
+                showToast('请输入两位口令，如 H2');
                 return;
             }
 
@@ -892,8 +929,8 @@ Chúc bạn chơi game vui vẻ! 🦕`
 
             currentParse = {
                 code: code,
-                identityCode: identityCode,
-                fullCode: rawInput,
+                identityCode: identity || null,
+                fullCode: identity ? `${code}_${identity}` : code,
                 anchor: anchor,
                 channel: channel,
                 shortLink: shortLink,
@@ -901,7 +938,7 @@ Chúc bạn chơi game vui vẻ! 🦕`
             };
 
             // 显示解析结果
-            const identityDisplay = identityCode ? ` (身份码: ${identityCode})` : '';
+            const identityDisplay = identity ? ` (身份码: ${identity})` : '';
             document.getElementById('resultAnchor').textContent = `${anchor.name} (${anchorCode})${identityDisplay}`;
             document.getElementById('resultChannel').textContent = `${channel.name} (${channelCode})`;
             document.getElementById('resultShortLink').textContent = shortLink;
@@ -910,7 +947,53 @@ Chúc bạn chơi game vui vẻ! 🦕`
             // 记录使用的channel
             recordUsedChannel(code);
 
-            showToast('口令解析成功' + (identityCode ? '，含身份码' : ''));
+            showToast('口令解析成功' + (identity ? '，含身份码' : ''));
+        }
+
+        // 处理粘贴事件（支持 H2_1234 格式自动拆分）
+        function handlePaste(e) {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text').trim().toUpperCase();
+            
+            // 检查是否包含下划线
+            if (pastedText.includes('_')) {
+                const parts = pastedText.split('_');
+                if (parts.length >= 2) {
+                    const codePart = parts[0].slice(0, 2); // 取前2位
+                    const identityPart = parts[1].slice(0, 4); // 取前4位
+                    
+                    document.getElementById('codeInput').value = codePart;
+                    document.getElementById('identityInput').value = identityPart;
+                    
+                    // 自动触发解析
+                    parseCode();
+                    return;
+                }
+            }
+            
+            // 如果不包含下划线，根据长度判断
+            if (pastedText.length >= 2) {
+                const codePart = pastedText.slice(0, 2);
+                document.getElementById('codeInput').value = codePart;
+                
+                // 如果长度大于2，剩余部分作为身份码
+                if (pastedText.length > 2) {
+                    document.getElementById('identityInput').value = pastedText.slice(2, 6);
+                }
+                
+                parseCode();
+            }
+        }
+
+        // 口令输入框自动跳转到身份码
+        function handleCodeInput(e) {
+            const value = e.target.value.toUpperCase();
+            e.target.value = value;
+            
+            // 输入满2位自动跳转到身份码输入框
+            if (value.length === 2) {
+                document.getElementById('identityInput').focus();
+            }
         }
 
         // 生成链接（口令方式）
@@ -1263,7 +1346,24 @@ Chúc bạn chơi game vui vẻ! 🦕`
         renderHistory();
         renderTemplateLibrary();
 
-        document.getElementById('codeInput').addEventListener('keypress', function(e) {
+        // 绑定口令输入框事件
+        const codeInput = document.getElementById('codeInput');
+        const identityInput = document.getElementById('identityInput');
+        
+        // 粘贴事件
+        codeInput.addEventListener('paste', handlePaste);
+        identityInput.addEventListener('paste', handlePaste);
+        
+        // 输入事件 - 自动跳转
+        codeInput.addEventListener('input', handleCodeInput);
+        
+        // 回车事件
+        codeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                identityInput.focus();
+            }
+        });
+        identityInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 parseCode();
             }
