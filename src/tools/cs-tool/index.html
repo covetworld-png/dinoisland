@@ -958,14 +958,14 @@ Chúc bạn chơi game vui vẻ! 🦕`
             return Math.floor(1000 + Math.random() * 9000).toString();
         }
 
-        // 构建注册链接（新格式：?code=口令+身份码）
+        // 构建注册链接（新格式：?code=口令_身份码）
         function buildRegisterLink(code) {
             // 生成4位数字身份码
             const identityCode = generateIdentityCode();
             
-            // 新格式：code=口令+身份码，由服务端解析
-            // 示例：code=H2+1234 或 code=U0+5678
-            return `https://account.monster-lair.vn/#/register?code=${code}+${identityCode}`;
+            // 新格式：code=口令_身份码，由服务端解析
+            // 示例：code=H2_1234 或 code=U0_5678
+            return `https://account.monster-lair.vn/#/register?code=${code}_${identityCode}`;
         }
 
         // 显示生成的链接
