@@ -596,6 +596,123 @@
             margin-bottom: 16px;
         }
 
+        /* Clipboard Fallback Modal */
+        .clipboard-fallback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 26, 21, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .clipboard-fallback-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .clipboard-fallback-modal {
+            background: var(--jungle-800);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+            padding: 28px;
+            max-width: 340px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .clipboard-fallback-modal .warning-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .clipboard-fallback-modal h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            color: var(--gold);
+            margin: 0 0 16px;
+        }
+
+        .clipboard-fallback-modal .modal-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .clipboard-fallback-modal .code-box {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .clipboard-fallback-modal .code-text {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+
+        .clipboard-fallback-modal .code-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .clipboard-fallback-modal .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .clipboard-fallback-modal .btn-primary-small {
+            flex: 1;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: var(--jungle-900);
+            border: none;
+            padding: 14px 20px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clipboard-fallback-modal .btn-primary-small:hover {
+            filter: brightness(1.1);
+        }
+
+        .clipboard-fallback-modal .btn-secondary-small {
+            flex: 1;
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clipboard-fallback-modal .btn-secondary-small:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
         /* QR Code Fallback */
         .qrcode-fallback-overlay {
             position: fixed;
@@ -794,6 +911,23 @@
         </div>
     </div>
 
+    <!-- Clipboard Fallback Modal -->
+    <div class="clipboard-fallback-overlay" id="clipboardFallback">
+        <div class="clipboard-fallback-modal">
+            <div class="warning-icon">⚠️</div>
+            <h3 data-i18n="clipboard.title">Sao chép thất bại</h3>
+            <p class="modal-desc" data-i18n="clipboard.desc">Vui lòng sao chép thủ công mã code bên dưới:</p>
+            <div class="code-box">
+                <div class="code-text" id="fallbackCode">H2_1234</div>
+                <div class="code-label" data-i18n="clipboard.label">Mã code để nhận quà</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary-small" onclick="copyFallbackCode()" data-i18n="clipboard.copy">📋 Sao chép</button>
+                <button class="btn-secondary-small" onclick="closeClipboardFallback()" data-i18n="clipboard.close">Đóng</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // Internationalization
@@ -814,7 +948,12 @@
                 'benefit.rare': 'Khủng Long Hiếm Cấp S',
                 'benefit.boost': 'Khởi đầu thuận lợi',
                 'benefit.support': 'Hỗ trợ tận tình 24/7',
-                'toast.copied': 'Đã sao chép!'
+                'toast.copied': 'Đã sao chép!',
+                'clipboard.title': 'Sao chép thất bại',
+                'clipboard.desc': 'Vui lòng sao chép thủ công mã code bên dưới:',
+                'clipboard.label': 'Mã code để nhận quà',
+                'clipboard.copy': '📋 Sao chép',
+                'clipboard.close': 'Đóng'
             },
             cn: {
                 'page.title': '恐龙岛 - 新用户福利',
@@ -831,7 +970,12 @@
                 'benefit.rare': 'S级稀有恐龙',
                 'benefit.boost': '开局顺利',
                 'benefit.support': '24小时贴心服务',
-                'toast.copied': '已复制！'
+                'toast.copied': '已复制！',
+                'clipboard.title': '复制失败',
+                'clipboard.desc': '请手动复制下方的口令代码：',
+                'clipboard.label': '领取礼包的口令代码',
+                'clipboard.copy': '📋 复制',
+                'clipboard.close': '关闭'
             }
         };
 
@@ -1339,6 +1483,39 @@
         // 关闭 WebView 引导
         window.closeWebViewGuide = function() {
             document.getElementById('webviewGuide').classList.remove('show');
+        };
+
+        // ============================================
+        // Clipboard Fallback Modal
+        // ============================================
+        let currentFallbackCode = '';
+
+        function showClipboardFallback(code) {
+            currentFallbackCode = code;
+            document.getElementById('fallbackCode').textContent = code;
+            document.getElementById('clipboardFallback').classList.add('show');
+            Analytics.track('clipboard_fallback_shown', { code: code });
+        }
+
+        window.closeClipboardFallback = function() {
+            document.getElementById('clipboardFallback').classList.remove('show');
+        };
+
+        window.copyFallbackCode = function() {
+            const code = document.getElementById('fallbackCode').textContent;
+            const textArea = document.createElement('textarea');
+            textArea.value = code;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast(i18n[currentLang]['toast.copied']);
+                Analytics.track('clipboard_fallback_copied', { code: code });
+                setTimeout(closeClipboardFallback, 500);
+            } catch (err) {
+                console.error('Copy failed:', err);
+            }
+            document.body.removeChild(textArea);
         };
 
         // ============================================
