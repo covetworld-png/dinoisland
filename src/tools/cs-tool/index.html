@@ -997,9 +997,12 @@ Chúc bạn chơi game vui vẻ! 🦕`
             }).join('');
         }
 
-        // 复制话术模板文本（仅越南语）
+        // 复制话术模板文本（仅越南语，替换{link}为当前链接或占位符）
         function copyTemplateText(tplId) {
-            const content = TEMPLATE_LIBRARY.vi.find(t => t.id === tplId)?.content || '';
+            let content = TEMPLATE_LIBRARY.vi.find(t => t.id === tplId)?.content || '';
+            // 替换 {link} 为当前链接或提示占位符
+            const linkToUse = currentLink || 'https://account.monster-lair.vn/#/register?ref=...';
+            content = content.replace(/{link}/g, linkToUse);
             copyToClipboard(content);
         }
 
