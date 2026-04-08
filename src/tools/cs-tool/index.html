@@ -854,15 +854,26 @@ Chúc bạn chơi game vui vẻ! 🦕`
 
         // 解析口令
         function parseCode() {
-            const input = document.getElementById('codeInput').value.trim().toUpperCase();
+            const rawInput = document.getElementById('codeInput').value.trim().toUpperCase();
             
-            if (input.length !== 2) {
-                showToast('请输入两位口令，如 H2');
+            // 解析口令和身份码（支持 H2 或 H2_1234 格式）
+            let code, identityCode;
+            if (rawInput.includes('_')) {
+                const parts = rawInput.split('_');
+                code = parts[0];
+                identityCode = parts[1];
+            } else {
+                code = rawInput;
+                identityCode = null;
+            }
+            
+            if (code.length !== 2) {
+                showToast('请输入两位口令，如 H2 或 H2_1234');
                 return;
             }
 
-            const anchorCode = input[0];
-            const channelCode = input[1];
+            const anchorCode = code[0];
+            const channelCode = code[1];
 
             const anchor = ANCHOR_MAP[anchorCode];
             const channel = CHANNEL_MAP[channelCode];
@@ -877,10 +888,12 @@ Chúc bạn chơi game vui vẻ! 🦕`
                 return;
             }
 
-            const shortLink = SHORT_LINK_MAP[input] || `dkl.vn/${input.toLowerCase()}`;
+            const shortLink = SHORT_LINK_MAP[code] || `dkl.vn/${code.toLowerCase()}`;
 
             currentParse = {
-                code: input,
+                code: code,
+                identityCode: identityCode,
+                fullCode: rawInput,
                 anchor: anchor,
                 channel: channel,
                 shortLink: shortLink,
@@ -888,15 +901,16 @@ Chúc bạn chơi game vui vẻ! 🦕`
             };
 
             // 显示解析结果
-            document.getElementById('resultAnchor').textContent = `${anchor.name} (${anchorCode})`;
+            const identityDisplay = identityCode ? ` (身份码: ${identityCode})` : '';
+            document.getElementById('resultAnchor').textContent = `${anchor.name} (${anchorCode})${identityDisplay}`;
             document.getElementById('resultChannel').textContent = `${channel.name} (${channelCode})`;
             document.getElementById('resultShortLink').textContent = shortLink;
             document.getElementById('parseResult').classList.remove('hidden');
 
             // 记录使用的channel
-            recordUsedChannel(input);
+            recordUsedChannel(code);
 
-            showToast('口令解析成功');
+            showToast('口令解析成功' + (identityCode ? '，含身份码' : ''));
         }
 
         // 生成链接（口令方式）
@@ -906,7 +920,7 @@ Chúc bạn chơi game vui vẻ! 🦕`
                 if (!currentParse) return;
             }
 
-            const link = buildRegisterLink(currentParse.code);
+            const link = buildRegisterLink(currentParse.code, currentParse.identityCode);
             showGeneratedLink(link, currentParse);
         }
 
@@ -932,7 +946,8 @@ Chúc bạn chơi game vui vẻ! 🦕`
                     ref: 'unknown',
                     isManual: true
                 };
-                const link = buildRegisterLink('U0');
+                // Unknown 情况，生成不带身份码的链接
+                const link = buildRegisterLink('U0', null);
                 showGeneratedLink(link, parseInfo);
                 return;
             }
@@ -949,7 +964,8 @@ Chúc bạn chơi game vui vẻ! 🦕`
                 isManual: true
             };
 
-            const link = buildRegisterLink(parseInfo.code);
+            // 手动选择模式，不带身份码
+            const link = buildRegisterLink(parseInfo.code, null);
             showGeneratedLink(link, parseInfo);
         }
 
@@ -959,13 +975,14 @@ Chúc bạn chơi game vui vẻ! 🦕`
         }
 
         // 构建注册链接（新格式：?code=口令_身份码）
-        function buildRegisterLink(code) {
-            // 生成4位数字身份码
-            const identityCode = generateIdentityCode();
-            
+        // 如果用户提供了身份码，使用完整格式；否则只用口令
+        function buildRegisterLink(code, identityCode) {
             // 新格式：code=口令_身份码，由服务端解析
-            // 示例：code=H2_1234 或 code=U0_5678
-            return `https://account.monster-lair.vn/#/register?code=${code}_${identityCode}`;
+            // 示例：code=H2_1234（含身份码）或 code=H2（仅口令）
+            if (identityCode) {
+                return `https://account.monster-lair.vn/#/register?code=${code}_${identityCode}`;
+            }
+            return `https://account.monster-lair.vn/#/register?code=${code}`;
         }
 
         // 显示生成的链接

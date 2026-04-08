@@ -163,7 +163,7 @@ const config = await loadCampaignConfig();
 | 资源 | 说明 |
 |------|------|
 | `warrior-gold.png` | 皮肤未公开时的占位图，正常使用 |
-| `streamer-skin-*.png` | 4款主播皮肤最终图，已确认 |
+| `streamer-skin-*.jpg` | 4款主播皮肤最终图，已确认 |
 
 ---
 

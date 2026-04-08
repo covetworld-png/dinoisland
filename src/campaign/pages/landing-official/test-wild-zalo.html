@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>野生 Zalo 参数透传测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 18px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .param-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .param-label {
+            font-weight: 600;
+            color: #666;
+        }
+        .param-value {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            max-width: 60%;
+            word-break: break-all;
+        }
+        .status-ok {
+            color: #28a745;
+            font-weight: 600;
+        }
+        .status-warn {
+            color: #ffc107;
+            font-weight: 600;
+        }
+        .status-error {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .btn-test {
+            width: 100%;
+            padding: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-test:hover {
+            background: #0056b3;
+        }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .test-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 野生 Zalo 参数透传测试</h1>
+
+    <!-- 测试 1: URL 参数解析 -->
+    <div class="test-section">
+        <h2>1. URL 参数解析测试</h2>
+        <div id="urlParamsDisplay"></div>
+    </div>
+
+    <!-- 测试 2: 参数中继逻辑 -->
+    <div class="test-section">
+        <h2>2. 野生号调起链接生成</h2>
+        <div id="launchLinkDisplay"></div>
+        <div class="note">
+            <strong>野生号限制：</strong>个人号无法使用 <code>ref</code> 参数，只能通过 H5 页面埋点记录点击行为。
+        </div>
+    </div>
+
+    <!-- 测试 3: 模拟点击测试 -->
+    <div class="test-section">
+        <h2>3. 模拟调起测试</h2>
+        <p>点击下方按钮测试调起行为（不会实际跳转，仅显示会使用的链接）：</p>
+        <button class="btn-test" onclick="simulateLaunch()">🚀 模拟调起 Zalo</button>
+        <div id="simulationResult"></div>
+    </div>
+
+    <!-- 测试 4: 参数透传验证 -->
+    <div class="test-section">
+        <h2>4. 参数透传链路验证</h2>
+        <div id="transmissionChain"></div>
+    </div>
+
+    <script>
+        // ============================================
+        // 测试配置
+        // ============================================
+        const TEST_CONFIG = {
+            // 模拟的野生 Zalo 个人号
+            wildZaloPhone: '8618717777125',
+            // 测试用的 track_id 格式
+            testTrackId: 'S001_Amy_Bio_260325'
+        };
+
+        // ============================================
+        // 1. URL 参数解析测试
+        // ============================================
+        function testUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            
+            // 获取参数（支持从当前 URL 读取或使用默认值）
+            const urlParams = {
+                source: params.get('source') || 'tiktok',
+                anchor: params.get('anchor') || 'Amy',
+                channel: params.get('channel') || 'Bio',
+                track_id: params.get('track_id') || TEST_CONFIG.testTrackId
+            };
+
+            // 生成 ref
+            urlParams.ref = `${urlParams.source}_${urlParams.anchor}_${urlParams.channel}`;
+
+            // 显示结果
+            const display = document.getElementById('urlParamsDisplay');
+            display.innerHTML = `
+                <div class="param-row">
+                    <span class="param-label">URL 完整路径:</span>
+                    <span class="param-value">${window.location.href}</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">source:</span>
+                    <span class="param-value">${urlParams.source}</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">anchor:</span>
+                    <span class="param-value">${urlParams.anchor}</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">channel:</span>
+                    <span class="param-value">${urlParams.channel}</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">track_id:</span>
+                    <span class="param-value">${urlParams.track_id}</span>
+                </div>
+                <div class="param-row">
+                    <span class="param-label">生成的 ref:</span>
+                    <span class="param-value" style="background:#d4edda;color:#155724;">${urlParams.ref}</span>
+                </div>
+                <div class="note">
+                    <strong>状态:</strong> <span class="status-ok">✓ 参数解析正常</span><br>
+                    <strong>说明:</strong> 当前 URL ${params.has('track_id') ? '携带了测试参数' : '未携带参数，使用默认值'}
+                </div>
+            `;
+
+            return urlParams;
+        }
+
+        // ============================================
+        // 2. 野生号调起链接生成测试
+        // ============================================
+        function testWildZaloLaunch(urlParams) {
+            // 野生号调起方案
+            // 方案 A: 直接调起个人号（无法带 ref）
+            const directLaunchUrl = `https://zalo.me/${TEST_CONFIG.wildZaloPhone}`;
+            
+            // 方案 B: 尝试通过查询参数传递（野生号不支持，仅作测试）
+            const attemptWithRef = `https://zalo.me/${TEST_CONFIG.wildZaloPhone}?ref=${encodeURIComponent(urlParams.ref)}`;
+
+            const display = document.getElementById('launchLinkDisplay');
+            display.innerHTML = `
+                <div class="result-title">野生号调起方案对比:</div>
+                
+                <div style="margin:15px 0;padding:15px;background:#e7f3ff;border-radius:8px;">
+                    <strong>方案 A: 直接调起（推荐）</strong>
+                    <div class="code-block">${directLaunchUrl}</div>
+                    <div style="margin-top:10px;font-size:14px;color:#666;">
+                        特点: 简单可靠，所有设备兼容<br>
+                        限制: <span class="status-error">无法携带 ref 参数</span>
+                    </div>
+                </div>
+
+                <div style="margin:15px 0;padding:15px;background:#fff3cd;border-radius:8px;">
+                    <strong>方案 B: 尝试带参数（测试用）</strong>
+                    <div class="code-block">${attemptWithRef}</div>
+                    <div style="margin-top:10px;font-size:14px;color:#666;">
+                        特点: 尝试通过 URL 参数传递<br>
+                        预期: <span class="status-warn">野生号会忽略 ref 参数</span>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <strong>野生号限制说明:</strong><br>
+                    1. 个人号不支持 Zalo OA 的 <code>ref</code> 追踪参数<br>
+                    2. 只能通过 H5 页面埋点记录"点击行为"作为近似归因<br>
+                    3. 实际加好友行为需要在 Zalo 内手动统计
+                </div>
+            `;
+
+            return { directLaunchUrl, attemptWithRef };
+        }
+
+        // ============================================
+        // 3. 模拟调起测试
+        // ============================================
+        function simulateLaunch() {
+            const urlParams = testUrlParams();
+            const { directLaunchUrl } = testWildZaloLaunch(urlParams);
+
+            // 模拟调起前的埋点
+            const trackData = {
+                event: 'zalo_launch_attempt',
+                track_id: urlParams.track_id,
+                ref: urlParams.ref,
+                phone: TEST_CONFIG.wildZaloPhone,
+                timestamp: new Date().toISOString(),
+                user_agent: navigator.userAgent.substring(0, 100)
+            };
+
+            const resultDiv = document.getElementById('simulationResult');
+            resultDiv.innerHTML = `
+                <div class="test-result">
+                    <div class="result-title">📊 模拟调起结果:</div>
+                    
+                    <div style="margin:10px 0;">
+                        <strong>调起链接:</strong>
+                        <div class="code-block">${directLaunchUrl}</div>
+                    </div>
+
+                    <div style="margin:10px 0;">
+                        <strong>埋点数据 (会发送到统计系统):</strong>
+                        <div class="code-block">${JSON.stringify(trackData, null, 2)}</div>
+                    </div>
+
+                    <div class="note" style="background:#d4edda;border-color:#28a745;">
+                        <strong>✓ 野生号参数透传方案验证:</strong><br>
+                        虽然无法通过 Zalo 调起 URL 传递参数，但可以在 H5 页面点击时：<br>
+                        1. 记录 track_id 和点击时间戳<br>
+                        2. 发送到自建统计系统<br>
+                        3. 与主播每日填报的新增好友数交叉验证
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // 4. 参数透传链路验证
+        // ============================================
+        function testTransmissionChain() {
+            const urlParams = testUrlParams();
+            
+            const chainDiv = document.getElementById('transmissionChain');
+            chainDiv.innerHTML = `
+                <div class="result-title">🔗 完整参数透传链路:</div>
+                
+                <div style="margin:15px 0;padding:15px;background:#f8f9fa;border-radius:8px;border-left:4px solid #007bff;">
+                    <strong>Step 1: TikTok → H5</strong><br>
+                    TikTok Bio/评论链接携带参数<br>
+                    <code style="background:#e9ecef;padding:2px 6px;border-radius:3px;">
+                        https://.../landing?track_id=${urlParams.track_id}
+                    </code><br>
+                    <span class="status-ok">✓ 参数可正常传递</span>
+                </div>
+
+                <div style="margin:15px 0;padding:15px;background:#f8f9fa;border-radius:8px;border-left:4px solid #ffc107;">
+                    <strong>Step 2: H5 页面解析</strong><br>
+                    JS 读取 URL 参数并存储<br>
+                    <code style="background:#e9ecef;padding:2px 6px;border-radius:3px;">
+                        const trackId = urlParams.get('track_id');
+                    </code><br>
+                    <span class="status-ok">✓ 解析正常</span>
+                </div>
+
+                <div style="margin:15px 0;padding:15px;background:#f8f9fa;border-radius:8px;border-left:4px solid #dc3545;">
+                    <strong>Step 3: H5 → Zalo 调起</strong><br>
+                    野生个人号调起链接<br>
+                    <code style="background:#e9ecef;padding:2px 6px;border-radius:3px;">
+                        https://zalo.me/${TEST_CONFIG.wildZaloPhone}
+                    </code><br>
+                    <span class="status-error">✗ ref 参数无法传递</span> (野生号限制)<br>
+                    <span class="status-warn">⚠ 替代方案: H5 埋点记录点击行为</span>
+                </div>
+
+                <div style="margin:15px 0;padding:15px;background:#f8f9fa;border-radius:8px;border-left:4px solid #6c757d;">
+                    <strong>Step 4: Zalo 内转化</strong><br>
+                    用户添加好友 → 主播引导注册 → 用户填写邀请码<br>
+                    <span class="status-warn">⚠ 需人工介入: 主播每日填报新增好友数</span><br>
+                    <span class="status-ok">✓ 注册归因: 通过邀请码自动追踪</span>
+                </div>
+
+                <div style="margin-top:20px;padding:15px;background:#e7f3ff;border-radius:8px;">
+                    <strong>📋 测试结论:</strong><br>
+                    <table style="width:100%;margin-top:10px;border-collapse:collapse;font-size:14px;">
+                        <tr style="border-bottom:1px solid #ddd;">
+                            <td style="padding:8px;">TikTok → H5</td>
+                            <td style="padding:8px;text-align:right;" class="status-ok">✓ 可行</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #ddd;">
+                            <td style="padding:8px;">H5 埋点追踪</td>
+                            <td style="padding:8px;text-align:right;" class="status-ok">✓ 可行</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #ddd;">
+                            <td style="padding:8px;">H5 → Zalo 参数透传</td>
+                            <td style="padding:8px;text-align:right;" class="status-error">✗ 不可行</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;">L2-L4 游戏归因</td>
+                            <td style="padding:8px;text-align:right;" class="status-ok">✓ 可行 (邀请码)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="note">
+                    <strong>野生号方案建议:</strong><br>
+                    1. <strong>L1 层:</strong> 使用 H5 点击数作为近似值，主播每日填报实际新增好友数<br>
+                    2. <strong>L2-L4 层:</strong> 通过邀请码实现精准归因<br>
+                    3. <strong>交叉验证:</strong> 点击数 vs 好友数，异常比例时排查原因
+                </div>
+            `;
+        }
+
+        // ============================================
+        // 初始化测试
+        // ============================================
+        window.onload = function() {
+            const urlParams = testUrlParams();
+            testWildZaloLaunch(urlParams);
+            testTransmissionChain();
+        };
+    </script>
+</body>
+</html>

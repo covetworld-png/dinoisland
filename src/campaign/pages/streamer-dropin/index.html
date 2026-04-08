@@ -2684,7 +2684,7 @@
             
             if (type === 'warrior') {
                 // 亲卫勇士皮肤 V2: 仅显示原价和最终价
-                itemImage.src = `assets/streamer-skin-${streamer}.png`;
+                itemImage.src = `assets/streamer-skin-${streamer}.jpg`;
                 itemImage.onerror = function() { this.src = 'assets/warrior-gold.png'; };
                 itemName.textContent = `Skin Dũng Sĩ Cận Vệ - ${streamer}`;
                 
@@ -3059,7 +3059,7 @@
                 if (purchasedWarriorSkins[streamer]) {
                     const ownedText = currentLang === 'vi' ? 'Đã sở hữu' : '已拥有';
                     priceEl.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> ${ownedText}</span>`;
-                    if (imgEl) imgEl.src = `assets/streamer-skin-${streamer}.png`;
+                    if (imgEl) imgEl.src = `assets/streamer-skin-${streamer}.jpg`;
                     if (overlayEl) overlayEl.classList.add('hidden');
                     return;
                 }
@@ -3069,7 +3069,7 @@
                     if (skinDisplayState === 'comingSoon') {
                         imgEl.src = 'assets/warrior-gold.png';
                     } else {
-                        imgEl.src = `assets/streamer-skin-${streamer}.png`;
+                        imgEl.src = `assets/streamer-skin-${streamer}.jpg`;
                     }
                 }
                 

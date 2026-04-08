@@ -35,7 +35,7 @@
 | 资源 | 状态 | 说明 |
 |------|------|------|
 | `banner-BSZ_6Ncr.png` | ✅ 最终版 | 活动头图 |
-| `streamer-skin-*.png` (4张) | ✅ 最终版 | 主播皮肤展示图 |
+| `streamer-skin-*.jpg` (4张) | ✅ 最终版 | 主播皮肤展示图 |
 | `warrior-gold.png` | ✅ 占位图 | 皮肤未公开时显示，无需替换 |
 | `overlord-red.png` | ✅ 最终版 | 霸主礼包展示图 |
 | `overlord-preview.mp4` | ⚠️ 占位视频 | **需替换为最终版霸主礼包宣传视频** |
