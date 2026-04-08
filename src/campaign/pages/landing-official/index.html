@@ -1490,12 +1490,12 @@
         // ============================================
         let currentFallbackCode = '';
 
-        function showClipboardFallback(code) {
+        window.showClipboardFallback = function(code) {
             currentFallbackCode = code;
             document.getElementById('fallbackCode').textContent = code;
             document.getElementById('clipboardFallback').classList.add('show');
             Analytics.track('clipboard_fallback_shown', { code: code });
-        }
+        };
 
         window.closeClipboardFallback = function() {
             document.getElementById('clipboardFallback').classList.remove('show');
