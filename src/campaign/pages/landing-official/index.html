@@ -1175,10 +1175,13 @@
             });
         });
 
-        const savedLang = localStorage.getItem('landing-official-lang');
-        if (savedLang && i18n[savedLang]) {
-            setLanguage(savedLang);
-        }
+        // 延迟执行语言设置，等待 Analytics 等模块初始化
+        setTimeout(() => {
+            const savedLang = localStorage.getItem('landing-official-lang');
+            if (savedLang && i18n[savedLang]) {
+                setLanguage(savedLang);
+            }
+        }, 0);
 
         // ============================================
         // Source Tracking (Ref = source_anchor_channel)
