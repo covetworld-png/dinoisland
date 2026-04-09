@@ -1830,12 +1830,22 @@
             const params = new URLSearchParams(window.location.search);
             const code = params.get('code') || params.get('gift') || params.get('promo');
             
+            console.log('[URL Param] Checking params, code:', code);
+            console.log('[URL Param] Full URL:', window.location.href);
+            
             if (code) {
                 console.log('[URL Param] Auto-show fallback with code:', code);
+                
+                // 检查元素是否存在
+                const fallbackEl = document.getElementById('clipboardFallback');
+                const codeEl = document.getElementById('fallbackCode');
+                console.log('[URL Param] Elements - fallback:', !!fallbackEl, 'code:', !!codeEl);
+                
                 // 延迟显示，确保页面渲染完成
                 setTimeout(() => {
-                    showClipboardFallback(code);
-                }, 500);
+                    const result = showClipboardFallback(code);
+                    console.log('[URL Param] showClipboardFallback result:', result);
+                }, 300);
                 return true;
             }
             return false;
