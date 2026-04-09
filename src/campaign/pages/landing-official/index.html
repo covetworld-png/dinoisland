@@ -614,298 +614,6 @@
             margin-bottom: 16px;
         }
 
-        /* Clipboard Fallback Modal */
-        .clipboard-fallback-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(10, 26, 21, 0.95);
-            backdrop-filter: blur(8px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .clipboard-fallback-overlay.show {
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
-
-        .clipboard-fallback-modal {
-            background: linear-gradient(145deg, rgba(15, 45, 38, 0.95) 0%, rgba(10, 30, 25, 0.98) 100%);
-            border: 1px solid rgba(255, 215, 0, 0.25);
-            border-radius: 24px;
-            padding: 32px 24px 24px;
-            max-width: 360px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 
-                0 25px 80px rgba(0, 0, 0, 0.6),
-                0 0 0 1px rgba(255, 215, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .clipboard-fallback-modal::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            opacity: 0.6;
-        }
-
-        .clipboard-fallback-modal .gift-icon {
-            font-size: 56px;
-            margin-bottom: 16px;
-            filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.3));
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
-
-        .clipboard-fallback-modal h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 20px;
-            color: var(--gold);
-            margin: 0 0 8px;
-            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.2);
-        }
-
-        .clipboard-fallback-modal .modal-desc {
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-bottom: 24px;
-            line-height: 1.5;
-        }
-
-        .clipboard-fallback-modal .code-section {
-            background: rgba(255, 215, 0, 0.06);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            border-radius: 16px;
-            padding: 20px 16px;
-            margin-bottom: 20px;
-        }
-
-        .clipboard-fallback-modal .code-label-top {
-            font-size: 12px;
-            color: var(--mist-light);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .clipboard-fallback-modal .code-box {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 215, 0, 0.05) 100%);
-            border: 2px dashed rgba(255, 215, 0, 0.4);
-            border-radius: 12px;
-            padding: 16px;
-            position: relative;
-        }
-
-        .clipboard-fallback-modal .code-text {
-            font-family: 'Courier New', monospace;
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--gold);
-            letter-spacing: 2px;
-            word-break: break-all;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-        }
-
-        /* Primary: Copy Code Button */
-        .clipboard-fallback-modal .btn-copy-code-primary {
-            width: 100%;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
-            color: var(--jungle-900);
-            border: none;
-            padding: 18px 24px;
-            border-radius: 28px;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .clipboard-fallback-modal .btn-copy-code-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .clipboard-fallback-modal .btn-copy-code-primary:hover::before {
-            left: 100%;
-        }
-
-        .clipboard-fallback-modal .btn-copy-code-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(255, 215, 0, 0.4);
-        }
-
-        .clipboard-fallback-modal .btn-copy-code-primary:active {
-            transform: translateY(0);
-        }
-
-        /* Secondary: Open Zalo Button */
-        .clipboard-fallback-modal .btn-open-zalo-secondary {
-            width: 100%;
-            background: transparent;
-            border: 1.5px solid rgba(74, 154, 138, 0.5);
-            color: var(--mist-light);
-            padding: 14px 24px;
-            border-radius: 28px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-bottom: 16px;
-        }
-
-        .clipboard-fallback-modal .btn-open-zalo-secondary:hover {
-            background: rgba(74, 154, 138, 0.1);
-            border-color: var(--mist);
-            color: var(--text-primary);
-        }
-
-        .clipboard-fallback-modal .hint-box {
-            background: linear-gradient(135deg, rgba(74, 154, 138, 0.12) 0%, rgba(74, 154, 138, 0.05) 100%);
-            border: 1px solid rgba(74, 154, 138, 0.2);
-            border-radius: 12px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            text-align: left;
-        }
-
-        .clipboard-fallback-modal .hint-icon {
-            font-size: 18px;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .clipboard-fallback-modal .hint-text {
-            font-size: 13px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        .clipboard-fallback-modal .hint-text strong {
-            color: var(--mist-light);
-        }
-
-        .clipboard-fallback-modal .btn-close {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 32px;
-            height: 32px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            color: var(--text-secondary);
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-            padding: 0;
-        }
-
-        .clipboard-fallback-modal .btn-close:hover {
-            background: rgba(255, 255, 255, 0.15);
-            color: var(--text-primary);
-            transform: rotate(90deg);
-        }
-
-        /* Phone Section in Modal */
-        .clipboard-fallback-modal .phone-section {
-            margin-top: 16px;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px dashed rgba(74, 154, 138, 0.3);
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .clipboard-fallback-modal .phone-section:hover {
-            background: rgba(74, 154, 138, 0.1);
-            border-color: var(--mist);
-        }
-
-        .clipboard-fallback-modal .phone-section:active {
-            transform: scale(0.98);
-        }
-
-        .clipboard-fallback-modal .phone-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-        }
-
-        .clipboard-fallback-modal .phone-number {
-            font-family: 'Courier New', monospace;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--gold);
-            letter-spacing: 1px;
-        }
-
-        .clipboard-fallback-modal .phone-section.hidden {
-            display: none;
-        }
-
-        .clipboard-fallback-modal .phone-section.show {
-            display: block;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         /* QR Code Fallback */
         .qrcode-fallback-overlay {
             position: fixed;
@@ -957,6 +665,67 @@
             letter-spacing: 2px;
         }
 
+        /* Code Display Section */
+        .code-display-section {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.02) 100%);
+            border: 2px dashed rgba(255, 215, 0, 0.4);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .code-display-section .code-label {
+            font-size: 13px;
+            color: var(--mist-light);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .code-display-section .code-box-display {
+            background: rgba(255, 215, 0, 0.15);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .code-display-section .code-box-display:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: rgba(255, 215, 0, 0.5);
+            transform: scale(1.02);
+        }
+
+        .code-display-section .code-box-display:active {
+            transform: scale(0.98);
+        }
+
+        .code-display-section .code-text-display {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .code-display-section .copy-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .code-display-section .code-tip {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
         /* Responsive */
         @media (max-width: 360px) {
             .container {
@@ -1002,6 +771,16 @@
 
         <!-- CTA Section -->
         <div class="glass-card cta-section">
+            <!-- 口令显示区域 -->
+            <div class="code-display-section" id="codeSection">
+                <div class="code-label" data-i18n="code.label">🎁 Mã nhận quà của bạn</div>
+                <div class="code-box-display" id="codeBox" onclick="copyCodeManual()">
+                    <span class="code-text-display" id="displayCode">NHANLONG</span>
+                    <span class="copy-hint" data-i18n="code.copyHint">📋 Nhấn để sao chép</span>
+                </div>
+                <p class="code-tip" data-i18n="code.tip">Nhấn nút bên dưới để sao chép mã và mở Zalo</p>
+            </div>
+
             <a href="https://zalo.me/8618717777125" class="btn-primary animate-pulse-glow" id="zaloBtn">
                 <span class="icon">💬</span>
                 <span data-i18n="cta.primary">Nhận quà ngay qua Zalo</span>
@@ -1108,144 +887,61 @@
         </div>
     </div>
 
-    <!-- Clipboard Fallback Modal -->
-    <div class="clipboard-fallback-overlay" id="clipboardFallback" onclick="closeClipboardFallback()">
-        <div class="clipboard-fallback-modal" onclick="event.stopPropagation()">
-            <button class="btn-close" onclick="closeClipboardFallback()" aria-label="关闭">✕</button>
-            <div class="gift-icon">🎁</div>
-            <h3 data-i18n="clipboard.title">领取新手礼包</h3>
-            <p class="modal-desc" data-i18n="clipboard.desc">请手动复制口令</p>
-            <div class="code-section">
-                <div class="code-label-top" data-i18n="clipboard.codeLabel">礼包口令</div>
-                <div class="code-box">
-                    <div class="code-text" id="fallbackCode">H2_1234</div>
-                </div>
-            </div>
-            <button class="btn-copy-code-primary" onclick="copyFallbackCode()" data-i18n="clipboard.copyCode">
-                <span>📋</span>
-                <span>复制口令</span>
-            </button>
-            <button class="btn-open-zalo-secondary" onclick="openZaloFromFallback()" data-i18n="clipboard.openZalo">
-                <span>💬</span>
-                <span>打开 Zalo</span>
-            </button>
-            <div class="hint-box">
-                <span class="hint-icon">💡</span>
-                <p class="hint-text" data-i18n="clipboard.hint">
-                    添加客服后发送此口令领取礼包！
-                </p>
-            </div>
-            <div class="phone-section hidden" id="phoneFallback" onclick="copyFallbackPhone()">
-                <div class="phone-label" data-i18n="clipboard.phoneLabel">点击复制客服号</div>
-                <div class="phone-number">86-1871-7777-125</div>
-            </div>
-        </div>
-    </div>
-
     <script>
         // ============================================
-        // Global Fallback Functions (Must be first)
+        // Utility Functions
         // ============================================
-        window.showClipboardFallback = function(code) {
-            try {
-                window._currentFallbackCode = code;
-                const fallbackEl = document.getElementById('clipboardFallback');
-                const codeEl = document.getElementById('fallbackCode');
-                if (!fallbackEl) {
-                    console.error('[ClipboardFallback] clipboardFallback element not found');
-                    return false;
-                }
-                if (codeEl) codeEl.textContent = code;
-                fallbackEl.classList.add('show');
-                console.log('[ClipboardFallback] Shown:', code);
-                return true;
-            } catch (e) {
-                console.error('[ClipboardFallback] Error:', e);
-                return false;
-            }
-        };
+        let currentCode = 'NHANLONG'; // 默认口令
 
-        window.closeClipboardFallback = function() {
-            const el = document.getElementById('clipboardFallback');
-            if (el) el.classList.remove('show');
-        };
-
-        window.copyFallbackCode = function() {
-            const codeEl = document.getElementById('fallbackCode');
-            if (!codeEl) return;
-            const code = codeEl.textContent;
+        // 复制文本到剪贴板
+        function copyToClipboard(text) {
             const textArea = document.createElement('textarea');
-            textArea.value = code;
+            textArea.value = text;
             document.body.appendChild(textArea);
             textArea.select();
             try {
                 document.execCommand('copy');
-                const toast = document.getElementById('toast');
-                const currentLang = document.documentElement.lang || 'vi';
-                if (toast) {
-                    toast.textContent = currentLang === 'cn' ? '已复制口令！' : 'Đã sao chép mã!';
-                    toast.classList.add('show');
-                    setTimeout(() => toast.classList.remove('show'), 2000);
-                }
+                return true;
             } catch (err) {
                 console.error('Copy failed:', err);
+                return false;
+            } finally {
+                document.body.removeChild(textArea);
             }
-            document.body.removeChild(textArea);
-        };
+        }
 
-        window.copyFallbackPhone = function() {
-            const phone = '8618717777125';
-            const textArea = document.createElement('textarea');
-            textArea.value = phone;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                const toast = document.getElementById('toast');
-                const currentLang = document.documentElement.lang || 'vi';
-                if (toast) {
-                    toast.textContent = currentLang === 'cn' ? '已复制客服号！' : 'Đã sao chép SĐT!';
-                    toast.classList.add('show');
-                    setTimeout(() => toast.classList.remove('show'), 2000);
-                }
-            } catch (err) {
-                console.error('Copy phone failed:', err);
+        // 显示 Toast
+        function showToastMessage(message) {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
             }
-            document.body.removeChild(textArea);
-        };
+        }
 
-        window.openZaloFromFallback = function(forceFail = false) {
-            const phone = '8618717777125';
-            const zaloUrl = 'https://zalo.me/' + phone;
-            
-            // 尝试打开 Zalo
-            const newWindow = window.open(zaloUrl, '_blank');
-            
-            // 检查是否被拦截（或强制测试失败情况）
-            if (forceFail || !newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                // 弹窗被拦截，显示客服号复制区域
-                const phoneSection = document.getElementById('phoneFallback');
-                if (phoneSection) {
-                    phoneSection.classList.remove('hidden');
-                    phoneSection.classList.add('show');
-                }
-                
-                // 提示用户
-                const toast = document.getElementById('toast');
-                if (toast) {
-                    const currentLang = document.documentElement.lang || 'vi';
-                    toast.textContent = currentLang === 'cn' 
-                        ? '请复制下方客服号添加好友' 
-                        : 'Vui lòng sao chép SĐT CSKH bên dưới';
-                    toast.classList.add('show');
-                    setTimeout(() => toast.classList.remove('show'), 3000);
-                }
+        // 在页面上设置口令
+        function setDisplayCode(code) {
+            currentCode = code;
+            const displayCode = document.getElementById('displayCode');
+            if (displayCode) {
+                displayCode.textContent = code;
             }
-        };
+            // 同时更新 codeSection 显示
+            const codeSection = document.getElementById('codeSection');
+            if (codeSection) {
+                codeSection.style.display = 'block';
+            }
+        }
 
-        // 调试函数：强制测试 Zalo 调起失败提示
-        window.testZaloFail = function() {
-            openZaloFromFallback(true);
+        // 手动复制口令（点击口令框）
+        window.copyCodeManual = function() {
+            const success = copyToClipboard(currentCode);
+            const currentLang = document.documentElement.lang || 'vi';
+            const message = success 
+                ? (currentLang === 'cn' ? '已复制口令！' : 'Đã sao chép mã!')
+                : (currentLang === 'cn' ? '复制失败，请手动复制' : 'Sao chép thất bại');
+            showToastMessage(message);
         };
 
         // ============================================
@@ -1260,6 +956,9 @@
                 'divider': 'hoặc',
                 'zalo.label': 'Số Zalo',
                 'cta.copy': 'Sao chép số Zalo',
+                'code.label': '🎁 Mã nhận quà của bạn',
+                'code.copyHint': '📋 Nhấn để sao chép',
+                'code.tip': 'Nhấn nút bên dưới để sao chép mã và mở Zalo',
                 'steps.title': '📋 3 BƯỚC NHẬN QUÀ',
                 'steps.step1': 'Kết bạn Zalo',
                 'steps.step2': 'Nhắn tin "NHẬN LONG"',
@@ -1285,6 +984,9 @@
                 'divider': '或',
                 'zalo.label': 'Zalo 号码',
                 'cta.copy': '复制号码',
+                'code.label': '🎁 你的礼包口令',
+                'code.copyHint': '📋 点击复制',
+                'code.tip': '点击下方按钮复制口令并打开 Zalo',
                 'steps.title': '📋 3步领取',
                 'steps.step1': '添加 Zalo 好友',
                 'steps.step2': '发送消息"领龙"',
@@ -1816,7 +1518,7 @@
         };
 
         // ============================================
-        // Zalo Button Handler
+        // Zalo Button Handler (Copy code + Launch Zalo)
         // ============================================
         const zaloBtn = document.getElementById('zaloBtn');
         const zaloLauncher = new VietnamZaloLauncher();
@@ -1824,15 +1526,28 @@
         zaloBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // 记录 CTA 点击
-            Analytics.track('cta_click', { 
-                type: 'zalo_primary', 
-                position: 'hero',
-                webview_type: zaloLauncher.detectEnvironment().type
-            });
+            // 1. 先复制口令到剪贴板
+            const codeCopySuccess = copyToClipboard(currentCode);
+            const currentLang = document.documentElement.lang || 'vi';
             
-            // 使用增强版调起
-            zaloLauncher.launch();
+            if (codeCopySuccess) {
+                showToastMessage(currentLang === 'cn' ? '口令已复制！' : 'Đã sao chép mã!');
+            }
+            
+            // 记录 CTA 点击
+            if (typeof Analytics !== 'undefined') {
+                Analytics.track('cta_click', { 
+                    type: 'zalo_primary', 
+                    position: 'hero',
+                    webview_type: zaloLauncher.detectEnvironment().type,
+                    code_copied: codeCopySuccess
+                });
+            }
+            
+            // 2. 调起 Zalo
+            setTimeout(() => {
+                zaloLauncher.launch();
+            }, codeCopySuccess ? 300 : 0); // 如果复制成功，延迟一下让用户看到提示
         });
 
         // ============================================
@@ -1991,28 +1706,17 @@
         };
 
         // ============================================
-        // URL Parameter Handler (Auto-show fallback)
+        // URL Parameter Handler (Set code on page)
         // ============================================
         function checkUrlParams() {
             const params = new URLSearchParams(window.location.search);
             const code = params.get('code') || params.get('gift') || params.get('promo');
             
             console.log('[URL Param] Checking params, code:', code);
-            console.log('[URL Param] Full URL:', window.location.href);
             
             if (code) {
-                console.log('[URL Param] Auto-show fallback with code:', code);
-                
-                // 检查元素是否存在
-                const fallbackEl = document.getElementById('clipboardFallback');
-                const codeEl = document.getElementById('fallbackCode');
-                console.log('[URL Param] Elements - fallback:', !!fallbackEl, 'code:', !!codeEl);
-                
-                // 延迟显示，确保页面渲染完成
-                setTimeout(() => {
-                    const result = showClipboardFallback(code);
-                    console.log('[URL Param] showClipboardFallback result:', result);
-                }, 300);
+                console.log('[URL Param] Setting code on page:', code);
+                setDisplayCode(code);
                 return true;
             }
             return false;
