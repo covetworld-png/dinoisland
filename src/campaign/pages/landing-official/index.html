@@ -886,6 +886,26 @@
             letter-spacing: 1px;
         }
 
+        .clipboard-fallback-modal .phone-section.hidden {
+            display: none;
+        }
+
+        .clipboard-fallback-modal .phone-section.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* QR Code Fallback */
         .qrcode-fallback-overlay {
             position: fixed;
@@ -1115,8 +1135,8 @@
                     添加客服后发送此口令领取礼包！
                 </p>
             </div>
-            <div class="phone-section" onclick="copyFallbackPhone()">
-                <div class="phone-label" data-i18n="clipboard.phoneLabel">或点击复制客服号</div>
+            <div class="phone-section hidden" id="phoneFallback" onclick="copyFallbackPhone()">
+                <div class="phone-label" data-i18n="clipboard.phoneLabel">点击复制客服号</div>
                 <div class="phone-number">86-1871-7777-125</div>
             </div>
         </div>
@@ -1203,15 +1223,22 @@
             
             // 检查是否被拦截（或强制测试失败情况）
             if (forceFail || !newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                // 弹窗被拦截，提示用户
+                // 弹窗被拦截，显示客服号复制区域
+                const phoneSection = document.getElementById('phoneFallback');
+                if (phoneSection) {
+                    phoneSection.classList.remove('hidden');
+                    phoneSection.classList.add('show');
+                }
+                
+                // 提示用户
                 const toast = document.getElementById('toast');
                 if (toast) {
                     const currentLang = document.documentElement.lang || 'vi';
                     toast.textContent = currentLang === 'cn' 
-                        ? '请允许弹窗，或手动复制 Zalo 号: ' + phone 
-                        : 'Vui lòng cho phép popup hoặc sao chép SĐT: ' + phone;
+                        ? '请复制下方客服号添加好友' 
+                        : 'Vui lòng sao chép SĐT CSKH bên dưới';
                     toast.classList.add('show');
-                    setTimeout(() => toast.classList.remove('show'), 4000);
+                    setTimeout(() => toast.classList.remove('show'), 3000);
                 }
             }
         };
@@ -1273,7 +1300,7 @@
                 'clipboard.openZalo': '打开 Zalo',
                 'clipboard.copyCode': '复制口令',
                 'clipboard.hint': '添加客服后发送此口令领取礼包！',
-                'clipboard.phoneLabel': '或点击复制客服号'
+                'clipboard.phoneLabel': '点击复制客服号'
             }
         };
 
