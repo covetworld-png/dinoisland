@@ -1163,8 +1163,10 @@
 
             localStorage.setItem('landing-official-lang', lang);
             
-            // Analytics
-            Analytics.track('language_switch', { from: currentLang === 'vi' ? 'cn' : 'vi', to: lang });
+            // Analytics (检查是否存在，避免初始化前调用报错)
+            if (typeof Analytics !== 'undefined' && Analytics.track) {
+                Analytics.track('language_switch', { from: currentLang === 'vi' ? 'cn' : 'vi', to: lang });
+            }
         }
 
         document.querySelectorAll('.lang-btn').forEach(btn => {
