@@ -726,6 +726,140 @@
             margin-bottom: 0;
         }
 
+        /* PC Info Section */
+        .pc-info-section {
+            background: linear-gradient(180deg, rgba(15, 45, 38, 0.6) 0%, rgba(10, 30, 25, 0.8) 100%);
+            border: 1px solid rgba(74, 154, 138, 0.2);
+        }
+
+        .pc-info-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(74, 154, 138, 0.15);
+        }
+
+        .pc-icon-large {
+            font-size: 48px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 12px rgba(74, 154, 138, 0.3));
+        }
+
+        .pc-info-header h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            color: var(--gold);
+            margin: 0 0 8px;
+        }
+
+        .pc-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .pc-features {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .pc-feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(74, 154, 138, 0.08);
+            border-radius: 12px;
+            border: 1px solid rgba(74, 154, 138, 0.1);
+        }
+
+        .pc-feature-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .pc-feature-content {
+            flex: 1;
+        }
+
+        .pc-feature-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .pc-feature-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .pc-requirements {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .pc-req-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--mist-light);
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .pc-req-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .pc-req-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .pc-req-label {
+            color: var(--text-secondary);
+        }
+
+        .pc-req-value {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .pc-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.02) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .pc-note-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .pc-note p {
+            font-size: 13px;
+            color: var(--gold);
+            margin: 0;
+            line-height: 1.4;
+        }
+
         /* Responsive */
         @media (max-width: 360px) {
             .container {
@@ -866,6 +1000,74 @@
                 </div>
             </div>
         </div>
+
+        <!-- PC Game Info Section -->
+        <div class="glass-card pc-info-section">
+            <div class="pc-info-header">
+                <div class="pc-icon-large">🖥️</div>
+                <h3 data-i18n="pc.title">Trò chơi PC</h3>
+                <p class="pc-subtitle" data-i18n="pc.subtitle">Trải nghiệm chơi game đỉnh cao trên máy tính</p>
+            </div>
+            
+            <div class="pc-features">
+                <div class="pc-feature-item">
+                    <span class="pc-feature-icon">🎮</span>
+                    <div class="pc-feature-content">
+                        <div class="pc-feature-title" data-i18n="pc.feature1">Đồ họa 3D chất lượng cao</div>
+                        <div class="pc-feature-desc" data-i18n="pc.feature1.desc">Trải nghiệm thế giới khủng long sống động với đồ họa tuyệt đẹp</div>
+                    </div>
+                </div>
+                <div class="pc-feature-item">
+                    <span class="pc-feature-icon">⚔️</span>
+                    <div class="pc-feature-content">
+                        <div class="pc-feature-title" data-i18n="pc.feature2">Chiến đấu đa ngườ chơi</div>
+                        <div class="pc-feature-desc" data-i18n="pc.feature2.desc">Tham gia các trận chiến PvP và PvE quy mô lớn</div>
+                    </div>
+                </div>
+                <div class="pc-feature-item">
+                    <span class="pc-feature-icon">🏰</span>
+                    <div class="pc-feature-content">
+                        <div class="pc-feature-title" data-i18n="pc.feature3">Xây dựng căn cứ</div>
+                        <div class="pc-feature-desc" data-i18n="pc.feature3.desc">Xây dựng và phát triển căn cứ khủng long của riêng bạn</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pc-requirements">
+                <div class="pc-req-title" data-i18n="pc.req.title">📋 Yêu cầu cấu hình tối thiểu</div>
+                <div class="pc-req-grid">
+                    <div class="pc-req-item">
+                        <span class="pc-req-label" data-i18n="pc.req.os">Hệ điều hành:</span>
+                        <span class="pc-req-value">Windows 10/11 64-bit</span>
+                    </div>
+                    <div class="pc-req-item">
+                        <span class="pc-req-label" data-i18n="pc.req.cpu">Bộ xử lý:</span>
+                        <span class="pc-req-value">Intel i3 / AMD Ryzen 3</span>
+                    </div>
+                    <div class="pc-req-item">
+                        <span class="pc-req-label" data-i18n="pc.req.ram">RAM:</span>
+                        <span class="pc-req-value">8 GB</span>
+                    </div>
+                    <div class="pc-req-item">
+                        <span class="pc-req-label" data-i18n="pc.req.gpu">Card đồ họa:</span>
+                        <span class="pc-req-value">GTX 750 / RX 560</span>
+                    </div>
+                    <div class="pc-req-item">
+                        <span class="pc-req-label" data-i18n="pc.req.storage">Dung lượng:</span>
+                        <span class="pc-req-value">20 GB</span>
+                    </div>
+                    <div class="pc-req-item">
+                        <span class="pc-req-label" data-i18n="pc.req.network">Mạng:</span>
+                        <span class="pc-req-value">Kết nối Internet</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pc-note">
+                <span class="pc-note-icon">💡</span>
+                <p data-i18n="pc.note">Nhận quà tân thủ ngay hôm nay để có khởi đầu thuận lợi trong thế giới khủng long!</p>
+            </div>
+        </div>
     </div>
 
     <!-- Toast Notification -->
@@ -974,7 +1176,23 @@
                 'clipboard.openZalo': 'Mở Zalo',
                 'clipboard.copyCode': 'Sao chép mã',
                 'clipboard.hint': 'Thêm CSKH và gửi mã này để nhận quà!',
-                'clipboard.phoneLabel': 'Hoặc sao chép SĐT CSKH'
+                'clipboard.phoneLabel': 'Hoặc sao chép SĐT CSKH',
+                'pc.title': 'Trò chơi PC',
+                'pc.subtitle': 'Trải nghiệm chơi game đỉnh cao trên máy tính',
+                'pc.feature1': 'Đồ họa 3D chất lượng cao',
+                'pc.feature1.desc': 'Trải nghiệm thế giới khủng long sống động với đồ họa tuyệt đẹp',
+                'pc.feature2': 'Chiến đấu đa ngườ chơi',
+                'pc.feature2.desc': 'Tham gia các trận chiến PvP và PvE quy mô lớn',
+                'pc.feature3': 'Xây dựng căn cứ',
+                'pc.feature3.desc': 'Xây dựng và phát triển căn cứ khủng long của riêng bạn',
+                'pc.req.title': '📋 Yêu cầu cấu hình tối thiểu',
+                'pc.req.os': 'Hệ điều hành:',
+                'pc.req.cpu': 'Bộ xử lý:',
+                'pc.req.ram': 'RAM:',
+                'pc.req.gpu': 'Card đồ họa:',
+                'pc.req.storage': 'Dung lượng:',
+                'pc.req.network': 'Mạng:',
+                'pc.note': 'Nhận quà tân thủ ngay hôm nay để có khởi đầu thuận lợi trong thế giới khủng long!'
             },
             cn: {
                 'page.title': '恐龙岛 - PC端游戏福利',
@@ -1002,7 +1220,23 @@
                 'clipboard.openZalo': '打开 Zalo',
                 'clipboard.copyCode': '复制口令',
                 'clipboard.hint': '添加客服后发送此口令领取礼包！',
-                'clipboard.phoneLabel': '点击复制客服号'
+                'clipboard.phoneLabel': '点击复制客服号',
+                'pc.title': 'PC端游戏',
+                'pc.subtitle': '在电脑上体验顶级游戏乐趣',
+                'pc.feature1': '高品质3D画面',
+                'pc.feature1.desc': '体验精美画面呈现的生动恐龙世界',
+                'pc.feature2': '多人战斗',
+                'pc.feature2.desc': '参与大规模的PvP和PvE战斗',
+                'pc.feature3': '基地建设',
+                'pc.feature3.desc': '建造并发展属于你自己的恐龙基地',
+                'pc.req.title': '📋 最低配置要求',
+                'pc.req.os': '操作系统:',
+                'pc.req.cpu': '处理器:',
+                'pc.req.ram': '内存:',
+                'pc.req.gpu': '显卡:',
+                'pc.req.storage': '存储空间:',
+                'pc.req.network': '网络:',
+                'pc.note': '立即领取新手礼包，在恐龙世界中获得顺利开局！'
             }
         };
 
