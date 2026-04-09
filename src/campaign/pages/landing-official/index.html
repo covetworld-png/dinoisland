@@ -464,6 +464,24 @@
             border-bottom: none;
         }
 
+        .benefit-item.pc-badge {
+            background: linear-gradient(135deg, rgba(74, 154, 138, 0.15) 0%, rgba(74, 154, 138, 0.05) 100%);
+            border: 1px solid rgba(74, 154, 138, 0.25);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+
+        .benefit-item.pc-badge .benefit-icon {
+            background: linear-gradient(135deg, var(--mist) 0%, var(--jungle-600) 100%);
+            color: white;
+        }
+
+        .benefit-item.pc-badge .benefit-text {
+            color: var(--mist-light);
+            font-weight: 600;
+        }
+
         .benefit-icon {
             width: 24px;
             height: 24px;
@@ -833,6 +851,41 @@
             transform: rotate(90deg);
         }
 
+        /* Phone Section in Modal */
+        .clipboard-fallback-modal .phone-section {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(74, 154, 138, 0.3);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clipboard-fallback-modal .phone-section:hover {
+            background: rgba(74, 154, 138, 0.1);
+            border-color: var(--mist);
+        }
+
+        .clipboard-fallback-modal .phone-section:active {
+            transform: scale(0.98);
+        }
+
+        .clipboard-fallback-modal .phone-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .clipboard-fallback-modal .phone-number {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 1px;
+        }
+
         /* QR Code Fallback */
         .qrcode-fallback-overlay {
             position: fixed;
@@ -996,6 +1049,10 @@
         <!-- Benefits Section -->
         <div class="glass-card">
             <div class="benefits-list">
+                <div class="benefit-item pc-badge">
+                    <div class="benefit-icon">🖥️</div>
+                    <div class="benefit-text" data-i18n="benefit.pc">PC端游戏</div>
+                </div>
                 <div class="benefit-item">
                     <div class="benefit-icon">✓</div>
                     <div class="benefit-text" data-i18n="benefit.rare">Khủng Long Hiếm Cấp S</div>
@@ -1058,6 +1115,10 @@
                     添加客服后发送此口令领取礼包！
                 </p>
             </div>
+            <div class="phone-section" onclick="copyFallbackPhone()">
+                <div class="phone-label" data-i18n="clipboard.phoneLabel">或点击复制客服号</div>
+                <div class="phone-number">86-1871-7777-125</div>
+            </div>
         </div>
     </div>
 
@@ -1112,6 +1173,27 @@
             document.body.removeChild(textArea);
         };
 
+        window.copyFallbackPhone = function() {
+            const phone = '8618717777125';
+            const textArea = document.createElement('textarea');
+            textArea.value = phone;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const toast = document.getElementById('toast');
+                const currentLang = document.documentElement.lang || 'vi';
+                if (toast) {
+                    toast.textContent = currentLang === 'cn' ? '已复制客服号！' : 'Đã sao chép SĐT!';
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 2000);
+                }
+            } catch (err) {
+                console.error('Copy phone failed:', err);
+            }
+            document.body.removeChild(textArea);
+        };
+
         window.openZaloFromFallback = function(forceFail = false) {
             const phone = '8618717777125';
             const zaloUrl = 'https://zalo.me/' + phone;
@@ -1158,17 +1240,19 @@
                 'benefit.rare': 'Khủng Long Hiếm Cấp S',
                 'benefit.boost': 'Khởi đầu thuận lợi',
                 'benefit.support': 'Hỗ trợ tận tình 24/7',
+                'benefit.pc': 'Trò chơi PC',
                 'toast.copied': 'Đã sao chép!',
                 'clipboard.title': 'Nhận quà tân thủ',
                 'clipboard.desc': 'Vui lòng sao chép mã code',
                 'clipboard.codeLabel': 'MÃ NHẬN QUÀ',
                 'clipboard.openZalo': 'Mở Zalo',
                 'clipboard.copyCode': 'Sao chép mã',
-                'clipboard.hint': 'Thêm CSKH và gửi mã này để nhận quà!'
+                'clipboard.hint': 'Thêm CSKH và gửi mã này để nhận quà!',
+                'clipboard.phoneLabel': 'Hoặc sao chép SĐT CSKH'
             },
             cn: {
-                'page.title': '恐龙岛 - 新用户福利',
-                'hero.title': '🎁 开局送恐龙',
+                'page.title': '恐龙岛 - PC端游戏福利',
+                'hero.title': '🎁 PC端游戏 开局送恐龙',
                 'hero.subtitle': '新玩家欢迎礼',
                 'cta.primary': '通过 Zalo 立即领取',
                 'divider': '或',
@@ -1181,13 +1265,15 @@
                 'benefit.rare': 'S级稀有恐龙',
                 'benefit.boost': '开局顺利',
                 'benefit.support': '24小时贴心服务',
+                'benefit.pc': 'PC端游戏',
                 'toast.copied': '已复制！',
                 'clipboard.title': '领取新手礼包',
                 'clipboard.desc': '请手动复制口令',
                 'clipboard.codeLabel': '礼包口令',
                 'clipboard.openZalo': '打开 Zalo',
                 'clipboard.copyCode': '复制口令',
-                'clipboard.hint': '添加客服后发送此口令领取礼包！'
+                'clipboard.hint': '添加客服后发送此口令领取礼包！',
+                'clipboard.phoneLabel': '或点击复制客服号'
             }
         };
 
