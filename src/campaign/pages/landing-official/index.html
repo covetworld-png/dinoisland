@@ -1112,15 +1112,15 @@
             document.body.removeChild(textArea);
         };
 
-        window.openZaloFromFallback = function() {
+        window.openZaloFromFallback = function(forceFail = false) {
             const phone = '8618717777125';
             const zaloUrl = 'https://zalo.me/' + phone;
             
             // 尝试打开 Zalo
             const newWindow = window.open(zaloUrl, '_blank');
             
-            // 检查是否被拦截
-            if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+            // 检查是否被拦截（或强制测试失败情况）
+            if (forceFail || !newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
                 // 弹窗被拦截，提示用户
                 const toast = document.getElementById('toast');
                 if (toast) {
@@ -1129,9 +1129,14 @@
                         ? '请允许弹窗，或手动复制 Zalo 号: ' + phone 
                         : 'Vui lòng cho phép popup hoặc sao chép SĐT: ' + phone;
                     toast.classList.add('show');
-                    setTimeout(() => toast.classList.remove('show'), 3000);
+                    setTimeout(() => toast.classList.remove('show'), 4000);
                 }
             }
+        };
+
+        // 调试函数：强制测试 Zalo 调起失败提示
+        window.testZaloFail = function() {
+            openZaloFromFallback(true);
         };
 
         // ============================================
