@@ -807,6 +807,32 @@
             color: var(--mist-light);
         }
 
+        .clipboard-fallback-modal .btn-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .clipboard-fallback-modal .btn-close:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+            transform: rotate(90deg);
+        }
+
         /* QR Code Fallback */
         .qrcode-fallback-overlay {
             position: fixed;
@@ -1006,8 +1032,9 @@
     </div>
 
     <!-- Clipboard Fallback Modal -->
-    <div class="clipboard-fallback-overlay" id="clipboardFallback">
-        <div class="clipboard-fallback-modal">
+    <div class="clipboard-fallback-overlay" id="clipboardFallback" onclick="closeClipboardFallback()">
+        <div class="clipboard-fallback-modal" onclick="event.stopPropagation()">
+            <button class="btn-close" onclick="closeClipboardFallback()" aria-label="关闭">✕</button>
             <div class="gift-icon">🎁</div>
             <h3 data-i18n="clipboard.title">领取新手礼包</h3>
             <p class="modal-desc" data-i18n="clipboard.desc">请手动复制口令</p>
@@ -1087,7 +1114,24 @@
 
         window.openZaloFromFallback = function() {
             const phone = '8618717777125';
-            window.open('https://zalo.me/' + phone, '_blank');
+            const zaloUrl = 'https://zalo.me/' + phone;
+            
+            // 尝试打开 Zalo
+            const newWindow = window.open(zaloUrl, '_blank');
+            
+            // 检查是否被拦截
+            if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                // 弹窗被拦截，提示用户
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    const currentLang = document.documentElement.lang || 'vi';
+                    toast.textContent = currentLang === 'cn' 
+                        ? '请允许弹窗，或手动复制 Zalo 号: ' + phone 
+                        : 'Vui lòng cho phép popup hoặc sao chép SĐT: ' + phone;
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 3000);
+                }
+            }
         };
 
         // ============================================
