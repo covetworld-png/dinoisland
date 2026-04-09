@@ -1854,11 +1854,30 @@
         // ============================================
         // Initialize
         // ============================================
+        console.log('[Init] Script loaded, waiting for DOM...');
+        
         document.addEventListener('DOMContentLoaded', () => {
-            Analytics.init();
-            carousel.init();
-            checkUrlParams(); // 检查 URL 参数自动显示弹窗
+            console.log('[Init] DOMContentLoaded fired');
+            
+            try {
+                // 先检查 URL 参数（最重要）
+                checkUrlParams();
+                
+                // 其他初始化
+                if (typeof Analytics !== 'undefined') Analytics.init();
+                if (typeof carousel !== 'undefined') carousel.init();
+                
+                console.log('[Init] All initialized');
+            } catch (e) {
+                console.error('[Init] Error during initialization:', e);
+            }
         });
+        
+        // 备用：如果 DOM 已加载立即执行
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            console.log('[Init] DOM already ready, running checkUrlParams now');
+            checkUrlParams();
+        }
     </script>
 </body>
 </html>
