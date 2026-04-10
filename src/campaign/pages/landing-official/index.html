@@ -860,9 +860,28 @@
             margin: 0 4px;
         }
 
-        @media (max-width: 400px) {
+        @media (max-width: 480px) {
             .pc-req-columns {
                 grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .pc-req-column {
+                padding: 10px;
+            }
+            
+            .pc-req-item {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .pc-req-value {
+                font-size: 11px;
+            }
+            
+            .pc-req-footer {
+                font-size: 11px;
+                gap: 6px;
             }
         }
 
@@ -874,10 +893,12 @@
             background: rgba(255, 255, 255, 0.03);
             border-radius: 8px;
             font-size: 13px;
+            gap: 8px;
         }
 
         .pc-req-label {
             color: var(--text-secondary);
+            flex-shrink: 0;
         }
 
         .pc-req-value {
@@ -885,6 +906,8 @@
             font-weight: 500;
             font-family: 'Courier New', monospace;
             font-size: 12px;
+            text-align: right;
+            word-break: break-all;
         }
 
         .pc-note {
@@ -1053,31 +1076,31 @@
         <!-- PC Game Info Section -->
         <div class="glass-card pc-info-section">
             <div class="pc-info-header">
-                <div class="pc-icon-large">🖥️</div>
-                <h3 data-i18n="pc.title">Trò chơi PC</h3>
-                <p class="pc-subtitle" data-i18n="pc.subtitle">Trải nghiệm chơi game đỉnh cao trên máy tính</p>
+                <div class="pc-icon-large">🦖</div>
+                <h3 data-i18n="pc.title">Đảo Khủng Long 3D</h3>
+                <p class="pc-subtitle" data-i18n="pc.subtitle">Thế giới mở 3D - Hàng trăm loài khủng long, chiến đấu sinh tồn!</p>
             </div>
             
             <div class="pc-features">
                 <div class="pc-feature-item">
                     <span class="pc-feature-icon">🎮</span>
                     <div class="pc-feature-content">
-                        <div class="pc-feature-title" data-i18n="pc.feature1">Thế giới khủng long</div>
-                        <div class="pc-feature-desc" data-i18n="pc.feature1.desc">Sinh tồn, tiến hóa, trở thành bá chủ!</div>
+                        <div class="pc-feature-title" data-i18n="pc.feature1">Khủng long đại chiến</div>
+                        <div class="pc-feature-desc" data-i18n="pc.feature1.desc">Cưỡi long chiến đấu, tranh bá đảo!</div>
                     </div>
                 </div>
                 <div class="pc-feature-item">
                     <span class="pc-feature-icon">⚔️</span>
                     <div class="pc-feature-content">
-                        <div class="pc-feature-title" data-i18n="pc.feature2">Đại chiến Long tộc</div>
-                        <div class="pc-feature-desc" data-i18n="pc.feature2.desc">Trăm long hỗn chiến, kẻ mạnh sinh tồn!</div>
+                        <div class="pc-feature-title" data-i18n="pc.feature2">Sinh tồn tiến hóa</div>
+                        <div class="pc-feature-desc" data-i18n="pc.feature2.desc">Tiến hóa thành long vương!</div>
                     </div>
                 </div>
                 <div class="pc-feature-item">
                     <span class="pc-feature-icon">🏰</span>
                     <div class="pc-feature-content">
-                        <div class="pc-feature-title" data-i18n="pc.feature3">Tranh bá công hội</div>
-                        <div class="pc-feature-desc" data-i18n="pc.feature3.desc">Chiếm núi quản lý, xưng bá Đảo Khủng Long!</div>
+                        <div class="pc-feature-title" data-i18n="pc.feature3">Công hội tranh hùng</div>
+                        <div class="pc-feature-desc" data-i18n="pc.feature3.desc">Chiếm núi xưng bá!</div>
                     </div>
                 </div>
             </div>
@@ -1259,14 +1282,14 @@
                 'clipboard.copyCode': 'Sao chép mã',
                 'clipboard.hint': 'Thêm CSKH và gửi mã này để nhận quà!',
                 'clipboard.phoneLabel': 'Hoặc sao chép SĐT CSKH',
-                'pc.title': 'Trò chơi PC',
-                'pc.subtitle': 'Trải nghiệm chơi game đỉnh cao trên máy tính',
-                'pc.feature1': 'Thế giới khủng long',
-                'pc.feature1.desc': 'Sinh tồn, tiến hóa, trở thành bá chủ!',
-                'pc.feature2': 'Đại chiến Long tộc',
-                'pc.feature2.desc': 'Trăm long hỗn chiến, kẻ mạnh sinh tồn!',
-                'pc.feature3': 'Tranh bá công hội',
-                'pc.feature3.desc': 'Chiếm núi quản lý, xưng bá Đảo Khủng Long!',
+                'pc.title': 'Đảo Khủng Long 3D',
+                'pc.subtitle': 'Thế giới mở 3D - Hàng trăm loài khủng long, chiến đấu sinh tồn!',
+                'pc.feature1': 'Khủng long đại chiến',
+                'pc.feature1.desc': 'Cưỡi long chiến đấu, tranh bá đảo!',
+                'pc.feature2': 'Sinh tồn tiến hóa',
+                'pc.feature2.desc': 'Tiến hóa thành long vương!',
+                'pc.feature3': 'Công hội tranh hùng',
+                'pc.feature3.desc': 'Chiếm núi xưng bá!',
                 'pc.req.title': '📋 Yêu cầu hệ thống',
                 'pc.req.min': 'Cấu hình tối thiểu',
                 'pc.req.rec': 'Cấu hình đề xuất',
@@ -1300,14 +1323,14 @@
                 'clipboard.copyCode': '复制口令',
                 'clipboard.hint': '添加客服后发送此口令领取礼包！',
                 'clipboard.phoneLabel': '点击复制客服号',
-                'pc.title': 'PC端游戏',
-                'pc.subtitle': '在电脑上体验顶级游戏乐趣',
-                'pc.feature1': '恐龙世界',
-                'pc.feature1.desc': '生存、进化、成为霸主！',
-                'pc.feature2': '千龙大战',
-                'pc.feature2.desc': '百龙混战，适者生存！',
-                'pc.feature3': '军团争霸',
-                'pc.feature3.desc': '占领管理山，称霸恐龙岛！',
+                'pc.title': '恐龙岛3D',
+                'pc.subtitle': '3D开放世界 - 数百种恐龙，战斗求生！',
+                'pc.feature1': '恐龙大战',
+                'pc.feature1.desc': '骑龙战斗，称霸岛屿！',
+                'pc.feature2': '生存进化',
+                'pc.feature2.desc': '进化成为龙王！',
+                'pc.feature3': '公会争霸',
+                'pc.feature3.desc': '占领管理山，称霸全岛！',
                 'pc.req.title': '📋 系统配置要求',
                 'pc.req.min': '最低配置',
                 'pc.req.rec': '推荐配置',
