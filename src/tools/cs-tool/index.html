@@ -1353,9 +1353,9 @@ Chúc bạn chơi game vui vẻ! 🦕`
             return Math.floor(1000 + Math.random() * 9000).toString();
         }
 
-        // 构建注册链接（路径参数格式）
-        // 有身份码: https://account.monster-lair.vn/#/register/H2_1234
-        // 仅口令: https://account.monster-lair.vn/#/register/H2
+        // 构建注册链接（查询参数格式）
+        // 有身份码: https://account.monster-lair.vn/#/register?code=H2_1234
+        // 仅口令: https://account.monster-lair.vn/#/register?code=H2
         // 无参数: https://account.monster-lair.vn/#/register
         function buildRegisterLink(code, identityCode) {
             const baseUrl = 'https://account.monster-lair.vn/#/register';
@@ -1365,13 +1365,13 @@ Chúc bạn chơi game vui vẻ! 🦕`
                 return baseUrl;
             }
             
-            // 有身份码: /register/H2_1234
+            // 有身份码: ?code=H2_1234
             if (identityCode) {
-                return `${baseUrl}/${code}_${identityCode}`;
+                return `${baseUrl}?code=${code}_${identityCode}`;
             }
             
-            // 仅口令: /register/H2
-            return `${baseUrl}/${code}`;
+            // 仅口令: ?code=H2
+            return `${baseUrl}?code=${code}`;
         }
 
         // 显示生成的链接
