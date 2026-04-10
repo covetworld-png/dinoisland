@@ -1875,9 +1875,11 @@
             }
             
             // 2. 调起 Zalo
+            console.log('[ZaloBtn] Launching Zalo...');
             setTimeout(() => {
+                console.log('[ZaloBtn] Executing launch()');
                 zaloLauncher.launch();
-            }, codeCopySuccess ? 300 : 0); // 如果复制成功，延迟一下让用户看到提示
+            }, codeCopySuccess ? 300 : 0);
         });
 
         // ============================================
