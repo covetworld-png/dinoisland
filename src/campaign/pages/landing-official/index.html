@@ -817,6 +817,55 @@
             gap: 10px;
         }
 
+        .pc-req-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .pc-req-column {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .pc-req-subtitle {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-align: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pc-req-subtitle.recommended {
+            color: var(--gold);
+        }
+
+        .pc-req-footer {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pc-req-separator {
+            color: rgba(255, 255, 255, 0.2);
+            margin: 0 4px;
+        }
+
+        @media (max-width: 400px) {
+            .pc-req-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .pc-req-item {
             display: flex;
             justify-content: space-between;
@@ -1013,53 +1062,86 @@
                 <div class="pc-feature-item">
                     <span class="pc-feature-icon">🎮</span>
                     <div class="pc-feature-content">
-                        <div class="pc-feature-title" data-i18n="pc.feature1">Đồ họa 3D chất lượng cao</div>
-                        <div class="pc-feature-desc" data-i18n="pc.feature1.desc">Trải nghiệm thế giới khủng long sống động với đồ họa tuyệt đẹp</div>
+                        <div class="pc-feature-title" data-i18n="pc.feature1">Thế giới khủng long</div>
+                        <div class="pc-feature-desc" data-i18n="pc.feature1.desc">Sinh tồn, tiến hóa, trở thành bá chủ!</div>
                     </div>
                 </div>
                 <div class="pc-feature-item">
                     <span class="pc-feature-icon">⚔️</span>
                     <div class="pc-feature-content">
-                        <div class="pc-feature-title" data-i18n="pc.feature2">Chiến đấu đa ngườ chơi</div>
-                        <div class="pc-feature-desc" data-i18n="pc.feature2.desc">Tham gia các trận chiến PvP và PvE quy mô lớn</div>
+                        <div class="pc-feature-title" data-i18n="pc.feature2">Đại chiến Long tộc</div>
+                        <div class="pc-feature-desc" data-i18n="pc.feature2.desc">Trăm long hỗn chiến, kẻ mạnh sinh tồn!</div>
                     </div>
                 </div>
                 <div class="pc-feature-item">
                     <span class="pc-feature-icon">🏰</span>
                     <div class="pc-feature-content">
-                        <div class="pc-feature-title" data-i18n="pc.feature3">Xây dựng căn cứ</div>
-                        <div class="pc-feature-desc" data-i18n="pc.feature3.desc">Xây dựng và phát triển căn cứ khủng long của riêng bạn</div>
+                        <div class="pc-feature-title" data-i18n="pc.feature3">Tranh bá công hội</div>
+                        <div class="pc-feature-desc" data-i18n="pc.feature3.desc">Chiếm núi quản lý, xưng bá Đảo Khủng Long!</div>
                     </div>
                 </div>
             </div>
 
             <div class="pc-requirements">
-                <div class="pc-req-title" data-i18n="pc.req.title">📋 Yêu cầu cấu hình tối thiểu</div>
-                <div class="pc-req-grid">
-                    <div class="pc-req-item">
-                        <span class="pc-req-label" data-i18n="pc.req.os">Hệ điều hành:</span>
-                        <span class="pc-req-value">Windows 10/11 64-bit</span>
+                <div class="pc-req-title" data-i18n="pc.req.title">📋 Yêu cầu hệ thống</div>
+                <div class="pc-req-columns">
+                    <div class="pc-req-column">
+                        <div class="pc-req-subtitle" data-i18n="pc.req.min">Cấu hình tối thiểu</div>
+                        <div class="pc-req-grid">
+                            <div class="pc-req-item">
+                                <span class="pc-req-label">OS:</span>
+                                <span class="pc-req-value">Win 10/11 64-bit</span>
+                            </div>
+                            <div class="pc-req-item">
+                                <span class="pc-req-label">CPU:</span>
+                                <span class="pc-req-value">i3 / Ryzen 3</span>
+                            </div>
+                            <div class="pc-req-item">
+                                <span class="pc-req-label">RAM:</span>
+                                <span class="pc-req-value">8 GB</span>
+                            </div>
+                            <div class="pc-req-item">
+                                <span class="pc-req-label">GPU:</span>
+                                <span class="pc-req-value">GTX 750 / RX 560</span>
+                            </div>
+                            <div class="pc-req-item">
+                                <span class="pc-req-label">Storage:</span>
+                                <span class="pc-req-value">20 GB</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="pc-req-item">
-                        <span class="pc-req-label" data-i18n="pc.req.cpu">Bộ xử lý:</span>
-                        <span class="pc-req-value">Intel i3 / AMD Ryzen 3</span>
+                    <div class="pc-req-column">
+                        <div class="pc-req-subtitle recommended" data-i18n="pc.req.rec">Cấu hình đề xuất</div>
+                        <div class="pc-req-grid">
+                            <div class="pc-req-item">
+                                <span class="pc-req-label">OS:</span>
+                                <span class="pc-req-value">Win 10/11 64-bit</span>
+                            </div>
+                            <div class="pc-req-item">
+                                <span class="pc-req-label">CPU:</span>
+                                <span class="pc-req-value">i7-8700K / R7 3700X</span>
+                            </div>
+                            <div class="pc-req-item">
+                                <span class="pc-req-label">RAM:</span>
+                                <span class="pc-req-value">16 GB</span>
+                            </div>
+                            <div class="pc-req-item">
+                                <span class="pc-req-label">GPU:</span>
+                                <span class="pc-req-value">RTX 3070 / RX 6800</span>
+                            </div>
+                            <div class="pc-req-item">
+                                <span class="pc-req-label">Storage:</span>
+                                <span class="pc-req-value">60 GB SSD</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="pc-req-item">
-                        <span class="pc-req-label" data-i18n="pc.req.ram">RAM:</span>
-                        <span class="pc-req-value">8 GB</span>
-                    </div>
-                    <div class="pc-req-item">
-                        <span class="pc-req-label" data-i18n="pc.req.gpu">Card đồ họa:</span>
-                        <span class="pc-req-value">GTX 750 / RX 560</span>
-                    </div>
-                    <div class="pc-req-item">
-                        <span class="pc-req-label" data-i18n="pc.req.storage">Dung lượng:</span>
-                        <span class="pc-req-value">20 GB</span>
-                    </div>
-                    <div class="pc-req-item">
-                        <span class="pc-req-label" data-i18n="pc.req.network">Mạng:</span>
-                        <span class="pc-req-value">Kết nối Internet</span>
-                    </div>
+                </div>
+                <div class="pc-req-footer">
+                    <span class="pc-req-label">Network:</span>
+                    <span class="pc-req-value" data-i18n="pc.req.networkVal">Băng thông cao tốc</span>
+                    <span class="pc-req-separator">|</span>
+                    <span class="pc-req-label">DirectX:</span>
+                    <span class="pc-req-value">12 Ultimate</span>
                 </div>
             </div>
 
@@ -1179,24 +1261,21 @@
                 'clipboard.phoneLabel': 'Hoặc sao chép SĐT CSKH',
                 'pc.title': 'Trò chơi PC',
                 'pc.subtitle': 'Trải nghiệm chơi game đỉnh cao trên máy tính',
-                'pc.feature1': 'Đồ họa 3D chất lượng cao',
-                'pc.feature1.desc': 'Trải nghiệm thế giới khủng long sống động với đồ họa tuyệt đẹp',
-                'pc.feature2': 'Chiến đấu đa ngườ chơi',
-                'pc.feature2.desc': 'Tham gia các trận chiến PvP và PvE quy mô lớn',
-                'pc.feature3': 'Xây dựng căn cứ',
-                'pc.feature3.desc': 'Xây dựng và phát triển căn cứ khủng long của riêng bạn',
-                'pc.req.title': '📋 Yêu cầu cấu hình tối thiểu',
-                'pc.req.os': 'Hệ điều hành:',
-                'pc.req.cpu': 'Bộ xử lý:',
-                'pc.req.ram': 'RAM:',
-                'pc.req.gpu': 'Card đồ họa:',
-                'pc.req.storage': 'Dung lượng:',
-                'pc.req.network': 'Mạng:',
+                'pc.feature1': 'Thế giới khủng long',
+                'pc.feature1.desc': 'Sinh tồn, tiến hóa, trở thành bá chủ!',
+                'pc.feature2': 'Đại chiến Long tộc',
+                'pc.feature2.desc': 'Trăm long hỗn chiến, kẻ mạnh sinh tồn!',
+                'pc.feature3': 'Tranh bá công hội',
+                'pc.feature3.desc': 'Chiếm núi quản lý, xưng bá Đảo Khủng Long!',
+                'pc.req.title': '📋 Yêu cầu hệ thống',
+                'pc.req.min': 'Cấu hình tối thiểu',
+                'pc.req.rec': 'Cấu hình đề xuất',
+                'pc.req.networkVal': 'Băng thông cao tốc',
                 'pc.note': 'Nhận quà tân thủ ngay hôm nay để có khởi đầu thuận lợi trong thế giới khủng long!'
             },
             cn: {
                 'page.title': '恐龙岛 - PC端游戏福利',
-                'hero.title': '🎁 PC端游戏 开局送恐龙',
+                'hero.title': '🎁 开局送恐龙',
                 'hero.subtitle': '新玩家欢迎礼',
                 'cta.primary': '通过 Zalo 立即领取',
                 'divider': '或',
@@ -1223,19 +1302,16 @@
                 'clipboard.phoneLabel': '点击复制客服号',
                 'pc.title': 'PC端游戏',
                 'pc.subtitle': '在电脑上体验顶级游戏乐趣',
-                'pc.feature1': '高品质3D画面',
-                'pc.feature1.desc': '体验精美画面呈现的生动恐龙世界',
-                'pc.feature2': '多人战斗',
-                'pc.feature2.desc': '参与大规模的PvP和PvE战斗',
-                'pc.feature3': '基地建设',
-                'pc.feature3.desc': '建造并发展属于你自己的恐龙基地',
-                'pc.req.title': '📋 最低配置要求',
-                'pc.req.os': '操作系统:',
-                'pc.req.cpu': '处理器:',
-                'pc.req.ram': '内存:',
-                'pc.req.gpu': '显卡:',
-                'pc.req.storage': '存储空间:',
-                'pc.req.network': '网络:',
+                'pc.feature1': '恐龙世界',
+                'pc.feature1.desc': '生存、进化、成为霸主！',
+                'pc.feature2': '千龙大战',
+                'pc.feature2.desc': '百龙混战，适者生存！',
+                'pc.feature3': '军团争霸',
+                'pc.feature3.desc': '占领管理山，称霸恐龙岛！',
+                'pc.req.title': '📋 系统配置要求',
+                'pc.req.min': '最低配置',
+                'pc.req.rec': '推荐配置',
+                'pc.req.networkVal': '高速宽带连接',
                 'pc.note': '立即领取新手礼包，在恐龙世界中获得顺利开局！'
             }
         };
