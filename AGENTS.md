@@ -122,6 +122,37 @@ git commit -m "update: 更新主播数据报告至 YYYYMMDD"
 7. 避免表格嵌套、表格内代码块等复杂结构
 8. 粘贴到飞书后需检查表格格式，必要时手动调整
 
+### 7.3 静态页面打包发布规则
+
+**触发条件**: 用户说"打包"时
+
+**强制动作**:
+1. **版本号递增**: 检查 `dist/` 下已有版本，新文件夹命名为 `landing-official-v{x.y}`
+2. **复制源文件**: 从 `src/` 复制到 `dist/landing-official-v{x.y}/`，不修改源文件
+3. **调整路径**: 将 HTML 中的资源路径 `../../assets/official/` 改为 `./assets/official/`
+4. **生成 zip**: 在 `dist/` 下生成 `landing-official-v{x.y}.zip`
+
+**禁止行为**:
+- ❌ 不修改 `src/` 下任何源文件
+- ❌ 不移动/重命名源文件
+- ❌ 不删除 `src/` 下的静态资源
+
+**操作示例**:
+```bash
+# 1. 创建新版本目录（版本号递增）
+mkdir -p dist/landing-official-v1.2
+
+# 2. 复制源文件（保持目录结构）
+cp src/campaign/pages/landing-official/index.html dist/landing-official-v1.2/
+cp -r src/campaign/assets/official/* dist/landing-official-v1.2/assets/official/
+
+# 3. 调整资源路径为相对路径
+sed -i '' 's|../../assets/official/|./assets/official/|g' dist/landing-official-v1.2/index.html
+
+# 4. 打包
+zip -r dist/landing-official-v1.2.zip dist/landing-official-v1.2
+```
+
 ---
 
 ## 8. 专项规范索引
