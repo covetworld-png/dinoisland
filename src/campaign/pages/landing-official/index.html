@@ -1615,21 +1615,31 @@
             }
 
             launch() {
-                const env = this.detectEnvironment();
-                window._zaloLaunchStartTime = Date.now();
-                
-                // 记录调起尝试
-                Analytics.trackZaloLaunchAttempt(env.type, this.getLaunchMethod(env));
-                
-                if (env.isWebView) {
-                    // WebView 环境：显示引导层
-                    Analytics.trackZaloLaunchResult('webview_blocked', env.type);
-                    this.showWebViewGuide(env.type);
-                    return;
+                try {
+                    const env = this.detectEnvironment();
+                    window._zaloLaunchStartTime = Date.now();
+                    console.log('[ZaloLauncher] Environment:', env.type, 'isWebView:', env.isWebView);
+                    
+                    // 记录调起尝试
+                    if (typeof Analytics !== 'undefined') {
+                        Analytics.trackZaloLaunchAttempt(env.type, this.getLaunchMethod(env));
+                    }
+                    
+                    if (env.isWebView) {
+                        // WebView 环境：显示引导层
+                        if (typeof Analytics !== 'undefined') {
+                            Analytics.trackZaloLaunchResult('webview_blocked', env.type);
+                        }
+                        this.showWebViewGuide(env.type);
+                        return;
+                    }
+                    
+                    // 系统浏览器环境：执行调起
+                    console.log('[ZaloLauncher] Launching in system browser...');
+                    this.launchInSystemBrowser(env);
+                } catch (e) {
+                    console.error('[ZaloLauncher] Launch error:', e);
                 }
-                
-                // 系统浏览器环境：执行调起
-                this.launchInSystemBrowser(env);
             }
 
             getLaunchMethod(env) {
@@ -1757,7 +1767,7 @@
                     <div class="qrcode-fallback-overlay" id="qrcodeFallback" onclick="this.remove()">
                         <div class="qrcode-fallback-modal" onclick="event.stopPropagation()">
                             <div class="qrcode-icon">📱</div>
-                            <h3>${currentLang === 'vi' ? 'Quét mã QR để thêm Zalo' : '扫描二维码添加 Zalo'}</h3>
+                            <h3>${currentLang === 'vi' ? 'Quét mã QR để thêm Zalo CSKH' : '扫描二维码添加 Zalo 客服'}</h3>
                             <div class="qrcode-placeholder">
                                 <img src="${qrApiUrl}" alt="Zalo QR Code" style="width:200px;height:200px;border-radius:8px;background:#fff;padding:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
                             </div>
@@ -1777,7 +1787,7 @@
                         steps: currentLang === 'vi' ? [
                             'Nhấn vào biểu tượng chia sẻ (→)',
                             'Chọn "Mở trong Chrome" hoặc "Mở trong Safari"',
-                            'Quay lại trang này và nhấn nút thêm Zalo'
+                            'Quay lại trang này và nhấn nút thêm Zalo CSKH'
                         ] : [
                             '点击分享按钮 (→)',
                             '选择"在 Chrome 中打开"或"在 Safari 中打开"',
@@ -1791,7 +1801,7 @@
                         steps: currentLang === 'vi' ? [
                             'Nhấn vào biểu tượng ⋮ (ba chấm) ở góc trên bên phải',
                             'Chọn "Mở trong Chrome" hoặc "Mở trong trình duyệt"',
-                            'Quay lại trang này và nhấn nút thêm Zalo'
+                            'Quay lại trang này và nhấn nút thêm Zalo CSKH'
                         ] : [
                             '点击右上角菜单按钮 (⋮)',
                             '选择"在 Chrome 中打开"或"在浏览器中打开"',
@@ -1805,7 +1815,7 @@
                         steps: currentLang === 'vi' ? [
                             'Nhấn vào biểu tượng ⋮ (ba chấm) ở góc trên bên phải',
                             'Chọn "Mở trong trình duyệt"',
-                            'Quay lại trang này và nhấn nút thêm Zalo'
+                            'Quay lại trang này và nhấn nút thêm Zalo CSKH'
                         ] : [
                             '点击右上角菜单按钮 (⋮)',
                             '选择"在浏览器中打开"',
@@ -1819,7 +1829,7 @@
                         steps: currentLang === 'vi' ? [
                             'Nhấn vào biểu tượng ⋮ ở góc trên bên phải',
                             'Chọn "Mở trong trình duyệt"',
-                            'Quay lại trang này và nhấn nút thêm Zalo'
+                            'Quay lại trang này và nhấn nút thêm Zalo CSKH'
                         ] : [
                             '点击右上角菜单按钮 (⋮)',
                             '选择"在浏览器中打开"',
