@@ -1427,6 +1427,17 @@
                 const saved = sessionStorage.getItem('landing_source_ref');
                 if (saved) return JSON.parse(saved);
                 return this.saveSourceParams();
+            },
+            
+            // 获取简化的来源摘要
+            getSourceSummary() {
+                const params = this.getSavedParams();
+                return {
+                    source: params.source,
+                    ref: params.ref,
+                    anchor: params.anchor,
+                    channel: params.channel
+                };
             }
         };
 
