@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zalo 兼容性测试面板</title>
+    <style>
+        :root { --zalo-color: #0084FF; --bg-gray: #f2f4f7; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg-gray); margin: 0; padding: 15px; }
+        .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .btn-main { background: var(--zalo-color); color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        
+        /* 调试日志区 */
+        .debug-header { font-size: 12px; color: #666; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .debug-panel { background: #1c1c1e; color: #32d74b; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 11px; height: 160px; overflow-y: auto; }
+        .log-item { margin-bottom: 6px; border-bottom: 1px solid #333; padding-bottom: 4px; word-break: break-all; }
+        .log-url { color: #ffd60a; display: block; margin-top: 2px; }
+
+        /* 失败保底 */
+        #fallback-card { display: none; background: #fffbe6; border: 2px solid #ffe58f; text-align: center; }
+        .phone-highlight { font-size: 22px; color: #d48806; font-weight: bold; margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h3 style="margin-top:0">自定义 Zalo 手机号</h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="customPhone" value="8618717777125"
+                   style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;margin-bottom:10px;"
+                   placeholder="输入手机号，如 8618717777125">
+            <button onclick="updatePhone()" style="width:100%;padding:10px;background:#28a745;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">
+                更新手机号
+            </button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0">Zalo 导流诊断</h3>
+        <p style="font-size:13px; color:#666">目标：引导用户安装 PC 客户端</p>
+        <button onclick="launchZalo(currentPhone)" class="btn-main">唤起 Zalo - Intent 方案 (<span id="btnPhone1">8618717777125</span>)</button>
+        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+            <button onclick="testReferrerClean(currentPhone)" class="btn-main" style="background: #52c41a;">方案一：清理 Referer (rel=noreferrer)</button>
+            <button onclick="testZaloAppApi(currentPhone)" class="btn-main" style="background: #722ed1;">方案二：zaloapp.com API 路径</button>
+            <button onclick="testTikTokWebView(currentPhone)" class="btn-main" style="background: #eb2f96;">方案三：TikTok WebView 兼容</button>
+        </div>
+    </div>
+
+    <div class="debug-header">
+        <span>实时调用日志</span>
+        <span id="verTag">VER: 0313.05</span>
+    </div>
+    <div class="debug-panel" id="logPanel">
+        <div class="log-item">> 等待指令...</div>
+    </div>
+
+    <div id="fallback-card" class="card">
+        <p style="color:#ff4d4f; font-weight:bold; margin-top:0;">⚠️ 自动跳转受限</p>
+        <p style="font-size:13px;">请手动复制手机号并搜索添加：</p>
+        <div class="phone-highlight" id="fallbackPhone">8618717777125</div>
+        <button onclick="copyPhone(currentPhone)" style="color:var(--zalo-color); background:none; border:1px solid var(--zalo-color); padding:8px 20px; border-radius:5px;">点击复制手机号</button>
+    </div>
+
+    <script>
+        // 全局手机号变量
+        let currentPhone = '8618717777125';
+
+        function updatePhone() {
+            const input = document.getElementById('customPhone');
+            const phone = input.value.trim();
+            if (!phone) {
+                alert('请输入手机号');
+                return;
+            }
+            currentPhone = phone.replace(/\s/g, '');
+            alert('已更新手机号为: ' + currentPhone);
+            log('手机号已更新为: ' + currentPhone);
+            // 更新按钮显示的手机号
+            document.getElementById('btnPhone1').textContent = currentPhone;
+            // 更新 fallback 区域的手机号
+            document.getElementById('fallbackPhone').textContent = currentPhone;
+        }
+
+        function log(msg, url = "") {
+            const panel = document.getElementById('logPanel');
+            const time = new Date().toLocaleTimeString().split(' ')[0];
+            let html = `<div class="log-item">[${time}] ${msg}`;
+            if (url) html += `<span class="log-url">${url}</span>`;
+            html += `</div>`;
+            panel.innerHTML += html;
+            panel.scrollTop = panel.scrollHeight;
+        }
+
+        function launchZalo(phone) {
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            
+            log("设备识别: " + (isAndroid ? "Android" : isiOS ? "iOS" : "Unknown"));
+
+            let finalUrl = "";
+
+            if (isAndroid) {
+                // Android 使用 Intent 强力方案，解决死循环
+                finalUrl = `intent://zalo.me/${phone}#Intent;scheme=https;package=com.zing.zalo;S.browser_fallback_url=https%3A%2F%2Fzalo.me%2F${phone};end`;
+                log("Android 专用 Intent 调用:");
+            } else if (isiOS) {
+                // iOS 使用标准的 HTTPS (Universal Link)
+                // 此时 iOS 系统会自动检查是否安装 Zalo 并询问是否打开
+                finalUrl = `https://zalo.me/${phone}`;
+                log("iOS 标准 HTTPS 调用:");
+            } else {
+                finalUrl = `https://zalo.me/${phone}`;
+                log("其他设备调用:");
+            }
+
+            log("", finalUrl);
+            window.location.href = finalUrl;
+
+            // 失败检测：3秒内未跳走则显示保底卡片
+            setTimeout(() => {
+                if (!document.hidden) {
+                    log("!!! 检测到页面未跳转，显示保底提示");
+                    document.getElementById('fallback-card').style.display = 'block';
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }
+            }, 3000);
+        }
+
+        function copyPhone(p) {
+            const el = document.createElement('textarea');
+            el.value = p;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            log("手机号已复制");
+            alert("已复制手机号，请去 Zalo 搜索");
+        }
+
+        // ========== 方案一：清理 Referer ==========
+        function testReferrerClean(phone) {
+            log("方案一：清理 Referer (rel=noreferrer)");
+            
+            const link = document.createElement('a');
+            link.href = `https://zalo.me/${phone}`;
+            link.rel = 'noreferrer'; // 隐藏来源，绕过 Zalo 的域名校验
+            link.target = '_blank';
+            
+            log("创建隐藏 referer 链接:", link.href);
+            
+            // 触发点击
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            log("已触发无 referer 跳转");
+            
+            // 失败检测
+            setTimeout(() => {
+                if (!document.hidden) {
+                    log("方案一 !!! 检测到页面未跳转，显示保底提示");
+                    document.getElementById('fallback-card').style.display = 'block';
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }
+            }, 3000);
+        }
+
+        // ========== 方案二：zaloapp.com API 路径 ==========
+        function testZaloAppApi(phone) {
+            log("方案二：zaloapp.com API 路径");
+            
+            // zaloapp.com 是 App 的直接解析接口，通常比短链更稳定
+            const apiUrl = `https://zaloapp.com/qr/p/${phone}`;
+            
+            log("跳转 URL:", apiUrl);
+            
+            window.location.href = apiUrl;
+            
+            // 失败检测
+            setTimeout(() => {
+                if (!document.hidden) {
+                    log("方案二 !!! 检测到页面未跳转，显示保底提示");
+                    document.getElementById('fallback-card').style.display = 'block';
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }
+            }, 3000);
+        }
+
+        // ========== 方案三：TikTok WebView 兼容 ==========
+        function testTikTokWebView(phone) {
+            log("方案三：TikTok WebView 兼容代码");
+            
+            const isTikTok = /Bytedance|TTWebView|TikTok/i.test(navigator.userAgent);
+            log("检测到 TikTok WebView:", isTikTok ? "是" : "否");
+            
+            // TikTok 内置浏览器非常严格，建议使用"点击即触发"逻辑，不要有任何延时
+            // 直接用纯净的 window.open 方式，避免被拦截
+            
+            const zaloUrl = `https://zalo.me/${phone}`;
+            
+            // 尝试多种方式
+            try {
+                // 方式 1：直接修改 location
+                window.location.href = zaloUrl;
+                log("已执行 location.href 跳转:", zaloUrl);
+                
+                // 方式 2：同时尝试 open（TikTok 可能拦截）
+                setTimeout(() => {
+                    const newWin = window.open(zaloUrl, '_blank');
+                    if (newWin) {
+                        log("已尝试 window.open 新标签页");
+                    }
+                }, 50);
+                
+            } catch (e) {
+                log("跳转异常:", e.message);
+            }
+            
+            // 失败检测（延长到5秒，TikTok 响应较慢）
+            setTimeout(() => {
+                if (!document.hidden) {
+                    log("方案三 !!! 检测到页面未跳转，显示保底提示");
+                    document.getElementById('fallback-card').style.display = 'block';
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
