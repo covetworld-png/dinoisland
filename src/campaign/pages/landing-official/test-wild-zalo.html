@@ -102,7 +102,21 @@
     </style>
 </head>
 <body>
-    <h1>🧪 野生 Zalo 参数透传测试</h1>
+    <!-- 测试 0: 自定义手机号 -->
+    <div class="test-section">
+        <h2>0. 自定义 Zalo 手机号</h2>
+        <div style="margin-bottom: 15px;">
+            <label for="customPhone" style="font-weight:600;display:block;margin-bottom:8px;">手机号:</label>
+            <input type="text" id="customPhone" value="8618717777125"
+                   style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;"
+                   placeholder="输入手机号，如 8618717777125">
+            <button onclick="updatePhone()"
+                    style="margin-top:10px;padding:8px 16px;background:#28a745;color:white;border:none;border-radius:6px;cursor:pointer;">
+                更新手机号
+            </button>
+        </div>
+        <div id="phoneStatus" class="note" style="background:#d4edda;border-color:#28a745;display:none;"></div>
+    </div>
 
     <!-- 测试 1: URL 参数解析 -->
     <div class="test-section">
@@ -137,12 +151,46 @@
         // ============================================
         // 测试配置
         // ============================================
-        const TEST_CONFIG = {
+        let TEST_CONFIG = {
             // 模拟的野生 Zalo 个人号
             wildZaloPhone: '8618717777125',
             // 测试用的 track_id 格式
             testTrackId: 'S001_Amy_Bio_260325'
         };
+
+        // ============================================
+        // 0. 自定义手机号功能
+        // ============================================
+        function updatePhone() {
+            const input = document.getElementById('customPhone');
+            const phone = input.value.trim();
+
+            if (!phone) {
+                alert('请输入手机号');
+                return;
+            }
+
+            // 验证手机号格式（简单验证：纯数字，以 86 开头或纯数字）
+            const validPhone = phone.replace(/\s/g, '');
+
+            TEST_CONFIG.wildZaloPhone = validPhone;
+
+            const statusDiv = document.getElementById('phoneStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `<strong>✓ 已更新手机号为:</strong> ${validPhone}`;
+
+            // 重新运行所有测试
+            runAllTests();
+        }
+
+        // ============================================
+        // 运行所有测试
+        // ============================================
+        function runAllTests() {
+            const urlParams = testUrlParams();
+            testWildZaloLaunch(urlParams);
+            testTransmissionChain();
+        }
 
         // ============================================
         // 1. URL 参数解析测试

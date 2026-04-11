@@ -153,6 +153,39 @@ sed -i '' 's|../../assets/official/|./assets/official/|g' dist/landing-official-
 zip -r dist/landing-official-v1.2.zip dist/landing-official-v1.2
 ```
 
+### 7.4 客服工具页面发布规则
+
+**触发条件**: 更新 `cs-tool.html` 客服工具页面时
+
+**路径映射**:
+
+| 类型 | 路径 | 说明 |
+|------|------|------|
+| **源文件** | `projects/001-growNewUsers/001-03-landing-page/docs/cs-tool.html` | 开发/编辑工作区 |
+| **发布文件** | `src/tools/cs-tool/index.html` | **唯一提交到 git 的文件** |
+| **访问地址** | `https://covetworld-png.github.io/dinoisland/src/tools/cs-tool/index.html` | GitHub Pages |
+
+**强制动作**:
+1. 仅在源文件位置进行编辑开发
+2. 完成后复制到发布位置：`cp projects/001-growNewUsers/001-03-landing-page/docs/cs-tool.html src/tools/cs-tool/index.html`
+3. 提交发布位置的文件到 git
+4. 源文件目录受 `.gitignore` 保护，**禁止**使用 `git add -f` 强制提交
+
+**操作示例**:
+```bash
+# 1. 编辑源文件（在忽略目录内，不提交）
+# vim projects/001-growNewUsers/001-03-landing-page/docs/cs-tool.html
+
+# 2. 复制到发布位置
+cp projects/001-growNewUsers/001-03-landing-page/docs/cs-tool.html \
+   src/tools/cs-tool/index.html
+
+# 3. 提交发布文件
+git add src/tools/cs-tool/index.html
+git commit -m "fix(cs-tool): xxx"
+git push origin main
+```
+
 ---
 
 ## 8. 专项规范索引
