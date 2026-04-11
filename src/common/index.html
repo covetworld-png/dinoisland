@@ -24,13 +24,25 @@
 <body>
 
     <div class="card">
+        <h3 style="margin-top:0">自定义 Zalo 手机号</h3>
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="customPhone" value="8618717777125"
+                   style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;margin-bottom:10px;"
+                   placeholder="输入手机号，如 8618717777125">
+            <button onclick="updatePhone()" style="width:100%;padding:10px;background:#28a745;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">
+                更新手机号
+            </button>
+        </div>
+    </div>
+
+    <div class="card">
         <h3 style="margin-top:0">Zalo 导流诊断</h3>
         <p style="font-size:13px; color:#666">目标：引导用户安装 PC 客户端</p>
-        <button onclick="launchZalo('8618717777125')" class="btn-main">唤起 Zalo - Intent 方案 (8618717777125)</button>
+        <button onclick="launchZalo(currentPhone)" class="btn-main">唤起 Zalo - Intent 方案 (<span id="btnPhone1">8618717777125</span>)</button>
         <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px;">
-            <button onclick="testReferrerClean('8618717777125')" class="btn-main" style="background: #52c41a;">方案一：清理 Referer (rel=noreferrer)</button>
-            <button onclick="testZaloAppApi('8618717777125')" class="btn-main" style="background: #722ed1;">方案二：zaloapp.com API 路径</button>
-            <button onclick="testTikTokWebView('8618717777125')" class="btn-main" style="background: #eb2f96;">方案三：TikTok WebView 兼容</button>
+            <button onclick="testReferrerClean(currentPhone)" class="btn-main" style="background: #52c41a;">方案一：清理 Referer (rel=noreferrer)</button>
+            <button onclick="testZaloAppApi(currentPhone)" class="btn-main" style="background: #722ed1;">方案二：zaloapp.com API 路径</button>
+            <button onclick="testTikTokWebView(currentPhone)" class="btn-main" style="background: #eb2f96;">方案三：TikTok WebView 兼容</button>
         </div>
     </div>
 
@@ -45,11 +57,30 @@
     <div id="fallback-card" class="card">
         <p style="color:#ff4d4f; font-weight:bold; margin-top:0;">⚠️ 自动跳转受限</p>
         <p style="font-size:13px;">请手动复制手机号并搜索添加：</p>
-        <div class="phone-highlight">8618717777125</div>
-        <button onclick="copyPhone('8618717777125')" style="color:var(--zalo-color); background:none; border:1px solid var(--zalo-color); padding:8px 20px; border-radius:5px;">点击复制手机号</button>
+        <div class="phone-highlight" id="fallbackPhone">8618717777125</div>
+        <button onclick="copyPhone(currentPhone)" style="color:var(--zalo-color); background:none; border:1px solid var(--zalo-color); padding:8px 20px; border-radius:5px;">点击复制手机号</button>
     </div>
 
     <script>
+        // 全局手机号变量
+        let currentPhone = '8618717777125';
+
+        function updatePhone() {
+            const input = document.getElementById('customPhone');
+            const phone = input.value.trim();
+            if (!phone) {
+                alert('请输入手机号');
+                return;
+            }
+            currentPhone = phone.replace(/\s/g, '');
+            alert('已更新手机号为: ' + currentPhone);
+            log('手机号已更新为: ' + currentPhone);
+            // 更新按钮显示的手机号
+            document.getElementById('btnPhone1').textContent = currentPhone;
+            // 更新 fallback 区域的手机号
+            document.getElementById('fallbackPhone').textContent = currentPhone;
+        }
+
         function log(msg, url = "") {
             const panel = document.getElementById('logPanel');
             const time = new Date().toLocaleTimeString().split(' ')[0];
