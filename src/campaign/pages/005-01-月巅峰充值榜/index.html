@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chí Tôn Long Vương | 至尊龙王</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css?v=2">
+</head>
+<body>
+    <div class="page">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="logo">
+                    <img src="static/images/logo.png" alt="Logo" class="logo-img">
+                    <div class="logo-text">
+                        <span class="lang-vi">Chí Tôn Long Vương</span>
+                        <span class="lang-cn">至尊龙王</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-test-countdown" onclick="toggleCountdownMode()">
+                        <span class="lang-vi">Chuyển đếm ngược</span>
+                        <span class="lang-cn">切换倒计时</span>
+                    </button>
+                    <button class="btn-toggle" onclick="toggleResult()" id="toggle-result-btn">
+                        <span class="lang-vi">Công bố người thắng</span>
+                        <span class="lang-cn">宣布获胜</span>
+                    </button>
+                    <button class="lang-toggle" onclick="toggleLanguage()">
+                        <span id="current-lang">VI / 中</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- Hero -->
+                <section class="hero">
+                    <div class="hero-king">
+                        <img id="hero-king-img" src="static/images/dragon-king-crown.png" alt="Chí Tôn Long Vương">
+                    </div>
+                    <h1>
+                        <span class="lang-vi">Chí Tôn Long Vương</span>
+                        <span class="lang-cn">至尊龙王</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        <span class="lang-vi">Ngày duy nhất - Một ngưới đỉnh cao</span>
+                        <span class="lang-cn">一日限定 - 一人独尊</span>
+                    </p>
+                    <p class="hero-desc">
+                        <span class="lang-vi">
+                            Ngày <strong>17/04/2026</strong>, ngưới nạp tiền cao nhất toàn server sẽ đăng quang <strong>Chí Tôn Long Vương</strong>, 
+                            nhận đặc quyền trong 2 ngày (18-19/04) và ghi danh vĩnh viễn.
+                        </span>
+                        <span class="lang-cn">
+                            <strong>2026年4月17日</strong>单日，全服充值最高者将登顶<strong>至尊龙王</strong>，
+                            享受2天特权（4月18-19日）并永久留名。
+                        </span>
+                    </p>
+                </section>
+
+                    <section class="section" id="rank" style="display: none;">
+                        <h2 class="section-title">
+                            <span class="lang-vi">Bảng Vàng Chí Tôn</span>
+                            <span class="lang-cn">至尊金榜</span>
+                        </h2>
+                        
+                        <div class="leaderboard">
+                            <!-- Rank 1 -->
+                            <div class="rank-item rank-1">
+                                <div class="rank-medal">🥇</div>
+                                <div class="rank-info">
+                                    <div class="rank-title">
+                                        <span class="lang-vi">Chí Tôn Long Vương</span>
+                                        <span class="lang-cn">至尊龙王</span>
+                                    </div>
+                                    <div class="rank-amount" id="top-amount">188,888,000 VND</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Rank 2 -->
+                            <div class="rank-item rank-others">
+                                <div class="rank-number">2</div>
+                                <div class="rank-info">
+                                    <div class="rank-amount" id="rank2-amount">156,000,000 VND</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Rank 3 -->
+                            <div class="rank-item rank-others">
+                                <div class="rank-number">3</div>
+                                <div class="rank-info">
+                                    <div class="rank-amount" id="rank3-amount">128,000,000 VND</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Rank 4+ -->
+                            <div class="rank-item rank-others">
+                                <div class="rank-number">4+</div>
+                                <div class="rank-info">
+                                    <div class="rank-name-hidden">...</div>
+                                </div>
+                            </div>
+                            
+                            <!-- My Rank -->
+                            <div class="rank-item rank-my" id="my-rank-box">
+                                <div class="rank-number" id="my-rank-num">5</div>
+                                <div class="rank-info">
+                                    <div class="rank-name my-name">
+                                        <span class="lang-vi">Bạn</span>
+                                        <span class="lang-cn">您</span>
+                                    </div>
+                                    <div class="rank-amount" id="my-amount">45,000,000 VND</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Login Prompt -->
+                        <div class="login-box" id="login-box">
+                            <p>
+                                <span class="lang-vi">Đăng nhập để cập nhật số tiền nạp realtime</span>
+                                <span class="lang-cn">登录以实时更新您的充值金额</span>
+                            </p>
+                            <button class="btn btn-large" id="login-btn">
+                                <span class="lang-vi">Đăng nhập</span>
+                                <span class="lang-cn">登录</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Gap Info (show after login) -->
+                        <div class="gap-info" id="gap-info" style="display: none;">
+                            <div class="gap-row">
+                                <span>
+                                    <span class="lang-vi">Thứ hạng của bạn</span>
+                                    <span class="lang-cn">您的排名</span>
+                                </span>
+                                <strong id="user-rank-display">#5</strong>
+                            </div>
+                            <div class="gap-row">
+                                <span>
+                                    <span class="lang-vi">Số tiền đã nạp</span>
+                                    <span class="lang-cn">已充值金额</span>
+                                </span>
+                                <strong id="user-amount-display">45,000,000 VND</strong>
+                            </div>
+                            <div class="gap-row gap-highlight" id="gap-row">
+                                <span>
+                                    <span class="lang-vi">Cần thêm để vượt lên #1</span>
+                                    <span class="lang-cn">还需多少超越第1名</span>
+                                </span>
+                                <strong id="gap-amount-display">143,888,000 VND</strong>
+                            </div>
+                        </div>
+                    </section>
+
+                <!-- Result View -->
+                <div id="result-view" style="display: none;">
+                    <section class="section">
+                        <h2 class="section-title">
+                            <span class="lang-vi">Kết Quả Chung Cuộc</span>
+                            <span class="lang-cn">最终结果</span>
+                        </h2>
+                        <div class="winner-card">
+                            <div class="winner-badge">
+                                <span class="lang-vi">Chí Tôn Long Vương Mùa 1</span>
+                                <span class="lang-cn">第一届至尊龙王</span>
+                            </div>
+
+                            <div class="winner-avatar">
+                                <img src="static/images/dragon-king-crown.png" alt="Winner">
+                            </div>
+                            <div class="winner-name" id="winner-name">Rock</div>
+                            <div class="winner-amount" id="winner-amount">188,888,000 VND</div>
+                            <div class="winner-date">17/04/2026</div>
+                        </div>
+                    </section>
+</div>
+
+                <!-- Rewards -->
+                <section class="section rewards-section" id="rewards">
+                    <h2 class="section-title">
+                        <span class="lang-vi">Đặc Quyền Chí Tôn</span>
+                        <span class="lang-cn">至尊特权</span>
+                    </h2>
+                    <div class="rewards-grid">
+                        <div class="reward-card">
+                            <img class="reward-img" src="static/images/icon_dinosaur_size.png" alt="Thể hình khổng lồ">
+                            <div class="reward-title">
+                                <span class="lang-vi">Thể hình khổng lồ</span>
+                                <span class="lang-cn">体型暴涨</span>
+                            </div>
+                            <div class="reward-value">+50%</div>
+                            <div class="reward-desc-small">
+                                <span class="lang-vi">Tất cả khủng long</span>
+                                <span class="lang-cn">所有恐龙</span>
+                            </div>
+                        </div>
+                        <div class="reward-card">
+                            <img class="reward-img" src="static/images/icon_bite_force.png" alt="Sức cắn tăng cường">
+                            <div class="reward-title">
+                                <span class="lang-vi">Sức cắn tăng cường</span>
+                                <span class="lang-cn">咬合力强化</span>
+                            </div>
+                            <div class="reward-value">+100</div>
+                            <div class="reward-desc-small">
+                                <span class="lang-vi">Lực cắn tất cả khủng long</span>
+                                <span class="lang-cn">所有恐龙咬合力</span>
+                            </div>
+                        </div>
+                        <div class="reward-card">
+                            <img class="reward-img" src="static/images/icon_gm_announcement.png" alt="Vinh quang toàn server">
+                            <div class="reward-title">
+                                <span class="lang-vi">Vinh quang toàn server</span>
+                                <span class="lang-cn">全服荣耀播报</span>
+                            </div>
+                            <div class="reward-desc">
+                                <span class="lang-vi">Mỗi ngày khi đăng nhập, GM sẽ gửi thông báo "Long Vương đã đến" toàn bộ server biết bạn là ai</span>
+                                <span class="lang-cn">每日登录时，GM将发送全服公告"龙王降临"，让全服玩家知道你的身份</span>
+                            </div>
+                        </div>
+                        <div class="reward-card highlight">
+                            <img class="reward-img" src="static/images/icon_hall_of_fame.png" alt="Ghi danh vĩnh viễn">
+                            <div class="reward-title">
+                                <span class="lang-vi">Ghi danh vĩnh viễn</span>
+                                <span class="lang-cn">永载史册</span>
+                            </div>
+                            <div class="reward-desc">
+                                <span class="lang-vi">Tên bạn sẽ được khắc vào Đại Sảnh Danh Nhân Khủng Long Đảo, lưu truyền muôn đờ</span>
+                                <span class="lang-cn">你的名字将永久性镌刻在恐龙岛名人殿堂，流芳百世</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rewards-note">
+                        <div class="note-main">
+                            <span class="lang-vi">Thờ gian hiệu lực: 18-19/04/2026 • Duy nhất 1 ngưới</span>
+                            <span class="lang-cn">特权有效期：2026/04/18-19 • 全服唯一</span>
+                        </div>
+                        <div class="note-sub">
+                            <span class="lang-vi">Sau khi đăng quang, liên hệ CSKH để nhận hướng dẫn sử dụng đặc quyền</span>
+                            <span class="lang-cn">登顶后请联系客服获取权益使用规则</span>
+                        </div>
+                    </div>
+                </section>
+
+                    <!-- Honor Hall -->
+                    <section class="section" id="honor-hall" style="display: none;">
+                        <h2 class="section-title">
+                            <span class="lang-vi">Đại Sảnh Danh Nhân</span>
+                            <span class="lang-cn">名人殿堂</span>
+                        </h2>
+                        <div class="hall-grid">
+                            <div class="hall-card winner">
+                                <div class="hall-season"><span class="lang-vi">Mùa 1</span><span class="lang-cn">第一届</span></div>
+                                <div class="hall-crown">👑</div>
+                                <div class="hall-name" id="hall-name">Rock</div>
+                                <div class="hall-date">17/04/2026</div>
+                            </div>
+                            <div class="hall-card empty">
+                                <div class="hall-season"><span class="lang-vi">Mùa 2</span><span class="lang-cn">第二届</span></div>
+                                <div class="hall-placeholder">?</div>
+                                <div class="hall-text"><span class="lang-vi">Sắp diễn ra</span><span class="lang-cn">敬请期待</span></div>
+                            </div>
+                        </div>
+                    </section>
+
+
+
+
+                <!-- Activity View -->
+                <div id="activity-view">
+                    <!-- Countdown Section -->
+                    <section class="section countdown-section">
+                        <!-- Before event starts -->
+                        <div class="countdown-box" id="countdown-start">
+                            <div class="countdown-label">
+                                <span class="lang-vi">Sự kiện bắt đầu sau</span>
+                                <span class="lang-cn">距离活动开始</span>
+                            </div>
+                            <div class="countdown-time">
+                                <span id="start-days">03</span>:
+                                <span id="start-hours">23</span>:
+                                <span id="start-minutes">45</span>:
+                                <span id="start-seconds">12</span>
+                            </div>
+                            <div class="countdown-units">
+                                <span><span class="lang-vi">ngày</span><span class="lang-cn">天</span></span>
+                                <span><span class="lang-vi">giờ</span><span class="lang-cn">时</span></span>
+                                <span><span class="lang-vi">phút</span><span class="lang-cn">分</span></span>
+                                <span><span class="lang-vi">giây</span><span class="lang-cn">秒</span></span>
+                            </div>
+                            <div class="countdown-detail">
+                                <div class="countdown-row">
+                                    <span class="lang-vi">Thờ gian: 17/04/2026 00:00 - 23:59:59 (GMT+7)</span>
+                                    <span class="lang-cn">活动时间：2026/04/17 00:00 - 23:59:59（东7区时间）</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- During event -->
+                        <div class="countdown-box active" id="countdown-end" style="display: none;">
+                            <div class="countdown-label">
+                                <span class="lang-vi">Thờ gian còn lại sự kiện nạp tiền</span>
+                                <span class="lang-cn">充值活动剩余时间</span>
+                            </div>
+                            <div class="countdown-time large">
+                                <span id="end-hours">12</span>:
+                                <span id="end-minutes">34</span>:
+                                <span id="end-seconds">56</span>
+                            </div>
+                            <div class="countdown-date">
+                                <span class="lang-vi">Kết thúc: 17/04/2026 23:59:59 (GMT+7)</span>
+                                <span class="lang-cn">结束：2026/04/17 23:59:59（东7区时间）</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Rank Section - Leaderboard Style -->
+
+                    <!-- Rules -->
+                    <section class="section" id="rules">
+                        <h2 class="section-title">
+                            <span class="lang-vi">Thể Lệ</span>
+                            <span class="lang-cn">活动规则</span>
+                        </h2>
+                        <div class="rules-list">
+                            <div class="rule-item">
+                                <div class="rule-num">01</div>
+                                <div class="rule-content">
+                                    <strong>
+                                        <span class="lang-vi">Thờ gian nạp tiền</span>
+                                        <span class="lang-cn">充值时间</span>
+                                    </strong>
+                                    <p>17/04/2026 00:00 - 23:59:59 (GMT+7)</p>
+                                </div>
+                            </div>
+                            <div class="rule-item">
+                                <div class="rule-num">02</div>
+                                <div class="rule-content">
+                                    <strong>
+                                        <span class="lang-vi">Phạm vi</span>
+                                        <span class="lang-cn">活动范围</span>
+                                    </strong>
+                                    <p>
+                                        <span class="lang-vi">Máy chủ Q + K, tích lũy theo tài khoản</span>
+                                        <span class="lang-cn">Q服+K服，同一账号两服充值累计</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="rule-item">
+                                <div class="rule-num">03</div>
+                                <div class="rule-content">
+                                    <strong>
+                                        <span class="lang-vi">Kênh nạp</span>
+                                        <span class="lang-cn">充值渠道</span>
+                                    </strong>
+                                    <p>
+                                        <span class="lang-vi">Chỉ tính nạp qua website chính thức</span>
+                                        <span class="lang-cn">仅统计官网直充（代充不计入内）</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="rule-item">
+                                <div class="rule-num">04</div>
+                                <div class="rule-content">
+                                    <strong>
+                                        <span class="lang-vi">Quy tắc xếp hạng</span>
+                                        <span class="lang-cn">排名规则</span>
+                                    </strong>
+                                    <p>
+                                        <span class="lang-vi">Số tiền cao nhất thắng. Nếu bằng nhau, ưu tiên ngưới đạt trước (theo thờ gian thanh toán đơn hàng thành công).</span>
+                                        <span class="lang-cn">累计金额最高者获胜。金额相同时，优先完成该累计金额者获胜（以订单支付成功时间为准）。</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="rule-item">
+                                <div class="rule-num">05</div>
+                                <div class="rule-content">
+                                    <strong>
+                                        <span class="lang-vi">Quyền lợi và cách nhận</span>
+                                        <span class="lang-cn">权益说明与领取方式</span>
+                                    </strong>
+                                    <p>
+                                        <span class="lang-vi">Đặc quyền có hiệu lực ngày 18-19/04/2026. Sau khi đăng quang, chủ động liên hệ CSKH để được hướng dẫn. Chi tiết liên hệ CSKH để biết thêm.</span>
+                                        <span class="lang-cn">特权有效期为2026年4月18-19日。登顶后请主动联系客服获取权益。具体规则请联系客服确认。</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>
+                    <span class="lang-vi">Chí Tôn Long Vương | Máy chủ Q+K</span>
+                    <span class="lang-cn">至尊龙王 | Q服+K服</span>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/countdown.js?v=2"></script>
+    <script src="js/main.js?v=2"></script>
+</body>
+</html>
