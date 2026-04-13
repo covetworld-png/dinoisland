@@ -116,6 +116,25 @@
             <div class="card">
                 <div class="card-title">总收入趋势 (含7日移动均线)</div>
                 <div class="chart-container"><canvas id="totalIncomeChart"></canvas></div>
+                <p style="margin-top:15px;color:#666">
+                    <strong>关键发现：</strong>4/6-4/12 vs 3/30-4/5，
+                    总观看次数下降<strong>-27.6%</strong>，
+                    总收入增长<strong>+106.0%</strong>。
+                </p>
+            </div>
+            <div class="card">
+                <div class="card-title">主播占比（4/6-4/12）</div>
+                <div class="chart-row">
+                    <div class="chart-container"><canvas id="pieViewsChart"></canvas></div>
+                    <div class="chart-container"><canvas id="pieIncomeChart"></canvas></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">主播贡献堆积图（近10天）</div>
+                <div class="chart-row">
+                    <div class="chart-container"><canvas id="stackViewsChart"></canvas></div>
+                    <div class="chart-container"><canvas id="stackIncomeChart"></canvas></div>
+                </div>
             </div>
             <div class="card">
                 <div class="card-title">核心主播 vs 新主播 收入占比</div>
@@ -144,6 +163,15 @@
         
             <tr><td><strong>阿园</strong></td><td>¥340.82</td><td>¥391.08</td>
             <td class="positive">+50.3</td><td class="positive">+14.7%</td><td>↑ 增长</td></tr>
+        
+            <tr><td><strong>Pink</strong></td><td>¥80.36</td><td>¥214.23</td>
+            <td class="positive">+133.9</td><td class="positive">+166.6%</td><td>↑ 增长</td></tr>
+        
+            <tr><td><strong>peo</strong></td><td>¥52.95</td><td>¥116.82</td>
+            <td class="positive">+63.9</td><td class="positive">+120.6%</td><td>↑ 增长</td></tr>
+        
+            <tr><td><strong>Vanie</strong></td><td>¥58.71</td><td>¥183.52</td>
+            <td class="positive">+124.8</td><td class="positive">+212.6%</td><td>↑ 增长</td></tr>
         
                 </table>
             </div>
@@ -195,7 +223,7 @@
 
         <div id="double" class="tab-content">
             <div class="card">
-                <div class="card-title">MYMY 双场对比 (13点 vs 18点)</div>
+                <div class="card-title">MYMY 双场收入对比 (13点 vs 18点)</div>
                 <div class="chart-container"><canvas id="mymyDoubleChart"></canvas></div>
                 <div class="comparison-box">
                     <div class="comparison-item">
@@ -204,12 +232,16 @@
                     </div>
                     <div class="comparison-item">
                         <div class="comparison-label">晚间场平均收入</div>
-                        <div class="comparison-value">¥236</div>
+                        <div class="comparisonValue">¥236</div>
                     </div>
                 </div>
             </div>
             <div class="card">
-                <div class="card-title">阿贤heni 双场对比 (13点 vs 18点)</div>
+                <div class="card-title">MYMY 双场尖峰在线对比 (13点 vs 18点)</div>
+                <div class="chart-container"><canvas id="mymyPeakChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">阿贤heni 双场收入对比 (13点 vs 18点)</div>
                 <div class="chart-container"><canvas id="heniDoubleChart"></canvas></div>
                 <div class="comparison-box">
                     <div class="comparison-item">
@@ -221,6 +253,10 @@
                         <div class="comparison-value">¥185</div>
                     </div>
                 </div>
+            </div>
+            <div class="card">
+                <div class="card-title">阿贤heni 双场尖峰在线对比 (13点 vs 18点)</div>
+                <div class="chart-container"><canvas id="heniPeakChart"></canvas></div>
             </div>
         </div>
     </div>
@@ -250,6 +286,29 @@
         const heniEveningIncome = [0, 0, 0, 34.3, 116.09, 33.77, 59.28, 69.5, 110.66, 81.28, 95.09, 351.37, 853.58, 392.11, 386.85, 0.0, 249.9, 162.46, 0, 113.6, 129.16, 56.95, 71.51, 143.84, 83.19, 97.66, 114.91, 150.36, 107.35, 266.76, 664.1, 306.18, 468.97, 324.83, 299.15, 416.19, 153.78, 135.83, 156.16, 339.95, 252.62, 106.85, 260.65, 236.4, 324.6, 878.47, 389.98, 317.27, 196.59, 342.61, 121.24, 395.44, 466.09, 175.7, 149.02, 176.48, 146.38, 134.88, 133.7, 189.22, 142.74, 141.18, 336.98, 0, 269.39, 126.64, 105.64, 38.75, 118.55, 0, 0, 0, 0, 0, 0, 0, 0];
         const heniAfternoonPeak = [2235, 2627, 2894, 3913, 4725, 5019, 7442, 6219, 9615, 9309, 12100, 12700, 13500, 12700, 13600, 14100, 12000, 11600, 12600, 12500, 14600, 13000, 13800, 14300, 13100, 13800, 14200, 13200, 13300, 13400, 15200, 15900, 0, 0, 10000, 0, 9894, 11600, 10100, 10400, 10900, 11500, 10300, 9518, 10100, 9106, 12000, 8853, 8820, 9345, 8453, 9150, 9569, 9839, 9433, 11100, 10900, 9675, 11300, 9242, 11300, 10800, 10700, 10200, 14300, 10700, 8445, 7432, 6051, 5687, 7011, 5732, 5300, 6063, 2282, 5400, 6219];
         const heniEveningPeak = [0, 0, 0, 5055, 5130, 5126, 7323, 11300, 11700, 10900, 15100, 17200, 16000, 15200, 15600, 0, 16500, 16100, 0, 18400, 14700, 15200, 16700, 18900, 17500, 16000, 14600, 14800, 9636, 15100, 15100, 15900, 10500, 7378, 10300, 10900, 12900, 12100, 13800, 11900, 12400, 9330, 12300, 10100, 12600, 12800, 11500, 11300, 11100, 11900, 11000, 11000, 11400, 12900, 12600, 14500, 10800, 12900, 11200, 14600, 13900, 13600, 12500, 0, 15200, 12300, 8577, 8993, 6632, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        const pieLabels = ["阿贤", "MYMY", "志青", "阿园", "Pink", "peo", "Vanie"];
+        const pieViewsData = [463419, 264274, 121563, 98544, 56292, 36172, 68314];
+        const pieIncomeData = [3411.15, 3443.74, 213.36, 391.08, 214.23, 116.82, 183.52];
+        const stackLabels = ["2026-04-03", "2026-04-04", "2026-04-05", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-11", "2026-04-12"];
+        const stackViewsData = {
+            '阿贤heni': [83064, 78193, 80715, 74653, 72746, 69598, 33009, 72328, 52201, 88884],
+            'MYMY': [0, 50489, 52405, 48029, 31823, 31155, 71488, 0, 37413, 44366],
+            '志青Ricon': [0, 27534, 31316, 0, 37047, 28363, 32013, 24140, 0, 0],
+            '阿园Chua': [11789, 16573, 17905, 14455, 16337, 14415, 0, 13349, 21366, 18622],
+            'Pink': [0, 8533, 8090, 0, 7693, 7457, 7258, 11480, 10213, 12191],
+            'peo': [8093, 5553, 4625, 4976, 0, 4995, 5706, 5860, 7928, 6707],
+            'Vanie': [8641, 8172, 7339, 8128, 9242, 0, 12188, 10311, 15393, 13052]
+        };
+        const stackIncomeData = {
+            '阿贤heni': [282.55, 231.17, 344.45, 514.03, 406.47, 167.08, 1113.81, 371.5, 214.51, 623.75],
+            'MYMY': [0, 284.65, 177.61, 314.83, 246.06, 433.49, 2080.18, 0, 211.12, 158.06],
+            '志青Ricon': [0, 41.1, 73.44, 0, 47.63, 62.97, 25.87, 76.89, 0, 0],
+            '阿园Chua': [116.09, 85.85, 46.2, 44.83, 92.9, 45.81, 0, 88.62, 58.02, 60.9],
+            'Pink': [0, 27.3, 21.39, 0, 13.05, 4.87, 43.04, 30.46, 50.88, 71.93],
+            'peo': [9.16, 8.99, 17.3, 11.93, 0, 14.62, 12.01, 25.76, 42.17, 10.33],
+            'Vanie': [29.23, 7.56, 21.92, 9.16, 31.95, 0, 43.62, 24.98, 27.36, 46.45]
+        };
 
         
         const 阿贤heni_income = [599.64, 674.05, 0, 339.84, 659.91, 357.72, 450.66, 373.47, 413.7, 0, 695.66, 364.95, 424.06, 538.05, 114.02, 2127.3, 225.82, 289.43, 186.06, 0, 282.55, 231.17, 344.45, 514.03, 406.47, 167.08, 1113.81, 371.5, 214.51, 623.75];
@@ -341,6 +400,68 @@
             options: { responsive: true, maintainAspectRatio: false }
         });
 
+        // 观看次数占比饼图
+        new Chart(document.getElementById('pieViewsChart'), {
+            type: 'doughnut',
+            data: {
+                labels: pieLabels,
+                datasets: [{
+                    data: pieViewsData,
+                    backgroundColor: ['#e74c3c', '#2ecc71', '#95a5a6', '#f39c12', '#9b59b6', '#1abc9c', '#3498db']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 收入占比饼图
+        new Chart(document.getElementById('pieIncomeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: pieLabels,
+                datasets: [{
+                    data: pieIncomeData,
+                    backgroundColor: ['#e74c3c', '#2ecc71', '#95a5a6', '#f39c12', '#9b59b6', '#1abc9c', '#3498db']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 观看次数堆积图（近10天）
+        new Chart(document.getElementById('stackViewsChart'), {
+            type: 'bar',
+            data: {
+                labels: stackLabels,
+                datasets: [
+                    { label: '阿贤', data: stackViewsData['阿贤heni'], backgroundColor: '#e74c3c' },
+                    { label: 'MYMY', data: stackViewsData['MYMY'], backgroundColor: '#2ecc71' },
+                    { label: '志青', data: stackViewsData['志青Ricon'], backgroundColor: '#95a5a6' },
+                    { label: '阿园', data: stackViewsData['阿园Chua'], backgroundColor: '#f39c12' },
+                    { label: 'Pink', data: stackViewsData['Pink'], backgroundColor: '#9b59b6' },
+                    { label: 'peo', data: stackViewsData['peo'], backgroundColor: '#1abc9c' },
+                    { label: 'Vanie', data: stackViewsData['Vanie'], backgroundColor: '#3498db' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+        });
+
+        // 收入堆积图（近10天）
+        new Chart(document.getElementById('stackIncomeChart'), {
+            type: 'bar',
+            data: {
+                labels: stackLabels,
+                datasets: [
+                    { label: '阿贤', data: stackIncomeData['阿贤heni'], backgroundColor: '#e74c3c' },
+                    { label: 'MYMY', data: stackIncomeData['MYMY'], backgroundColor: '#2ecc71' },
+                    { label: '志青', data: stackIncomeData['志青Ricon'], backgroundColor: '#95a5a6' },
+                    { label: '阿园', data: stackIncomeData['阿园Chua'], backgroundColor: '#f39c12' },
+                    { label: 'Pink', data: stackIncomeData['Pink'], backgroundColor: '#9b59b6' },
+                    { label: 'peo', data: stackIncomeData['peo'], backgroundColor: '#1abc9c' },
+                    { label: 'Vanie', data: stackIncomeData['Vanie'], backgroundColor: '#3498db' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+        });
+
         // 收入趋势
         createLineChart(document.getElementById('incomeChart').getContext('2d'), labels30, [
             { label: '阿贤', data: 阿贤heni_income, borderColor: '#e74c3c', tension: 0.3 },
@@ -415,6 +536,17 @@
             },
             options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
         });
+        new Chart(document.getElementById('mymyPeakChart'), {
+            type: 'bar',
+            data: {
+                labels: mymyDates,
+                datasets: [
+                    { label: '下午场尖峰', data: mymyAfternoonPeak, backgroundColor: '#f39c12' },
+                    { label: '晚间场尖峰', data: mymyEveningPeak, backgroundColor: '#9b59b6' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
         new Chart(document.getElementById('heniDoubleChart'), {
             type: 'bar',
             data: {
@@ -422,6 +554,17 @@
                 datasets: [
                     { label: '下午场收入', data: heniAfternoonIncome, backgroundColor: '#f39c12' },
                     { label: '晚间场收入', data: heniEveningIncome, backgroundColor: '#9b59b6' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+        new Chart(document.getElementById('heniPeakChart'), {
+            type: 'bar',
+            data: {
+                labels: heniDates,
+                datasets: [
+                    { label: '下午场尖峰', data: heniAfternoonPeak, backgroundColor: '#f39c12' },
+                    { label: '晚间场尖峰', data: heniEveningPeak, backgroundColor: '#9b59b6' }
                 ]
             },
             options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
