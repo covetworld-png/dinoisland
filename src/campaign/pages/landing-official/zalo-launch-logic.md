@@ -26,75 +26,74 @@ sequenceDiagram
     participant User as 用户点击
     participant ZaloBtn as Zalo 按钮
     participant Launcher as VietnamZaloLauncher
-    participant Env as detectEnvironment()
-    participant Analytics as Analytics
     participant Browser as 系统浏览器
-    participant WebView as WebView环境
 
     User->>ZaloBtn: 点击按钮
-    ZaloBtn->>ZaloBtn: e.preventDefault() 阻止默认
-    ZaloBtn->>Analytics: track('cta_click')
     ZaloBtn->>Launcher: launch()
 
-    Note over Launcher: 开始调起流程
-    Launcher->>Env: detectEnvironment()
-    Env-->>Launcher: 返回环境类型 (TikTok/FB/ Safari/Android/iOS等)
-
-    Launcher->>Analytics: trackZaloLaunchAttempt(env.type, method)
+    Note over Launcher: 检测当前环境<br/>判断是 WebView 还是系统浏览器
 
     alt 是 WebView 环境 (TikTok/FB/IG/微信)
-        Launcher->>Analytics: trackZaloLaunchResult('webview_blocked')
         Launcher->>Launcher: showWebViewGuide(env.type)
         Launcher-->>User: 显示引导 Modal
+        Note over User: 用户点击分享 → 选择外部浏览器 → 重新打开页面
+        User->>ZaloBtn: 再次点击按钮
+        Note over Launcher: 切到系统浏览器后<br/>走下方正常调起流程
+    else 系统浏览器环境
+        Launcher->>Launcher: showWebViewGuide(env.type)
+        Launcher-->>User: 显示引导 Modal
+        Note over User: 用户点击分享 → 选择外部浏览器 → 重新打开页面
+        User->>ZaloBtn: 再次点击按钮
+        Note over Launcher: 切到系统浏览器后<br/>走下方正常调起流程
     else 系统浏览器环境
         Launcher->>Browser: launchInSystemBrowser(env)
 
         alt 小米浏览器 (miuibrowser)
-            Browser->>Launcher: 使用 Scheme: zalo://me/{phone}
-            Launcher->>Launcher: executeLaunchWithFallback(url, fallbackFn)
-            Note over Launcher: 超时1200ms后检测
-            alt 调起成功 (blur事件)
-                Launcher->>Analytics: trackZaloLaunchSuccess()
+            Launcher->>Browser: zalo://me/{phone}
+            Browser->>Launcher: 执行调起
+            Note over Launcher: 超时1200ms<br/>检测 blur 事件
+            alt 调起成功
+                Launcher-->>User: 跳转 Zalo App
             else 调起失败
-                Launcher->>Analytics: trackZaloLaunchResult('failed')
-                Launcher->>Launcher: fallbackFn() 显示二维码
+                Launcher->>Launcher: showQRCodeFallback()
+                Launcher-->>User: 显示二维码
             end
         else Safari
-            Browser->>Launcher: window.open(url) 或 location.href
-            Launcher->>Launcher: executeLaunchForSafari(url)
-            Note over Launcher: 超时1000ms<br/>双重检测: blur + visibilitychange
+            Launcher->>Browser: window.open 或 location.href
+            Browser->>Launcher: 跳转 https://zalo.me/{phone}
+            Note over Launcher: 超时1000ms<br/>双重检测 blur + visibilitychange
             alt 调起成功
-                Launcher->>Analytics: trackZaloLaunchSuccess()
+                Launcher-->>User: 跳转 Zalo App
             else 超时
-                Launcher->>Analytics: trackZaloLaunchResult('unknown')
+                Launcher-->>User: 停留在当前页
             end
-        else Android
-            Browser->>Launcher: Intent URL
-            Launcher->>Launcher: executeLaunch(url)
+        else Android (Chrome/Cốc Cốc/Samsung)
+            Note over Launcher: 生成 Intent URL<br/>intent://zalo.me/{phone}#Intent;scheme=https;package=com.zing.zalo;S.browser_fallback_url=https://zalo.me/{phone}
+            Launcher->>Browser: window.location.href = Intent URL
+            Note over Browser: 尝试调起 Zalo App<br/>失败则跳转 fallback_url
             Note over Launcher: 超时800ms<br/>检测 blur 事件
             alt 调起成功
-                Launcher->>Analytics: trackZaloLaunchSuccess()
+                Launcher-->>User: 跳转 Zalo App
             else 超时
-                Launcher->>Analytics: trackZaloLaunchResult('unknown')
+                Launcher-->>User: 停留在当前页
             end
-        else iOS 其他
-            Browser->>Launcher: Universal Link: https://zalo.me/{phone}
-            Launcher->>Launcher: executeLaunch(url)
-            Note over Launcher: 超时800ms
+        else 其他系统浏览器 (iOS/通用)
+            Launcher->>Browser: https://zalo.me/{phone}
+            Note over Launcher: 超时800ms<br/>检测 blur 事件
             alt 调起成功
-                Launcher->>Analytics: trackZaloLaunchSuccess()
+                Launcher-->>User: 跳转 Zalo App
             else 超时
-                Launcher->>Analytics: trackZaloLaunchResult('unknown')
+                Launcher-->>User: 停留在当前页
             end
         end
     end
-
-    Note over User: 流程结束<br/>(成功跳转/显示引导/显示二维码/停留原页)
 ```
 
 ---
 
-## 3. 环境检测 (`detectEnvironment`)
+## 3. 环境检测
+
+Launcher 内部通过 UA 字符串判断当前环境类型：
 
 | 检测目标 | 判断逻辑 |
 |---------|---------|
@@ -267,19 +266,9 @@ executeLaunchWithFallback(url, env, fallbackFn) {
 
 ---
 
-## 8. Analytics 事件
+## 8. 注意事项
 
-| 事件名 | 触发时机 | 参数 |
-|--------|---------|------|
-| `zalo_launch_attempt` | 调起尝试 | `webview_type`, `launch_method`, `phone`, `source` |
-| `zalo_launch_result` | 调起结果 | `result`, `reason`, `time_since_attempt`, `source` |
-| `zalo_launch_success` | 调起成功 | `time_to_success`, `source` |
-
----
-
-## 9. 注意事项
-
-1. **无主动跳转**: 除小米浏览器外，其他超时场景仅上报 Analytics，用户停留在当前页面
+1. **无主动跳转**: 除小米浏览器外，其他超时场景用户停留在当前页面
 2. **WebView 阻断**: TikTok/Facebook/Instagram/微信内置浏览器会直接阻断调起，引导用户到外部浏览器
 3. **超时时间差异**: 不同环境的超时检测时间不同 (800ms-1200ms)
 4. **失焦检测**: 使用 `blur` 事件和 `visibilitychange` 事件双重检测调起是否成功
