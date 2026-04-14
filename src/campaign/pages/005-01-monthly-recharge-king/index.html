@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chí Tôn Long Vương | 至尊龙王</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=3">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css?v=7">
 </head>
 <body class="state-before">
     <div class="page">
@@ -174,7 +174,7 @@
                             <div class="winner-avatar">
                                 <img src="static/images/dragon-king-crown.png" alt="Winner">
                             </div>
-                            <div class="winner-name" id="winner-name">Rock</div>
+                            <div class="winner-name" id="winner-name">Thiên Long</div>
                             <div class="winner-account" id="winner-account">13225799</div>
                             <div class="winner-amount" id="winner-amount">188,888,000 VND</div>
                             <div class="winner-date" id="winner-date">17/04/2026</div>
@@ -255,15 +255,30 @@
                         <span class="lang-cn">名人殿堂</span>
                     </h2>
                     <div class="hall-grid">
-                        <div class="hall-card winner">
-                            <div class="hall-season"><span class="lang-vi">Mùa 1</span><span class="lang-cn">第一届</span></div>
-                            <div class="hall-crown">👑</div>
+                        <div class="hall-card winner" id="hall-winner-card">
+                            <div class="hall-crown">
+                                <span class="crown-empty">👑</span>
+                                <div class="crown-winner">
+                                    <div class="winner-badge-corner">
+                                        <span class="lang-vi">Mùa 1</span>
+                                        <span class="lang-cn">第一届</span>
+                                    </div>
+                                    <img src="static/images/dragon-king-crown.png" alt="Chí Tôn Long Vương">
+                                </div>
+                            </div>
                             <div class="hall-name" id="hall-name">?</div>
+                            <div class="hall-account" id="hall-account">?</div>
                             <div class="hall-text" id="hall-placeholder-text">
                                 <span class="lang-vi">Ngai vàng đang chờ chủ nhân</span>
                                 <span class="lang-cn">王座虚位以待</span>
                             </div>
-                            <div class="hall-date" id="hall-date" style="display: none;">17/04/2026</div>
+                            <div class="hall-date" id="hall-date" style="display: none;">
+                                <span class="date-label">
+                                    <span class="lang-vi">Ngày đăng quang</span>
+                                    <span class="lang-cn">加冕日期</span>
+                                </span>
+                                <span class="date-value">17/04/2026</span>
+                            </div>
                         </div>
                         <div class="hall-card empty">
                             <div class="hall-season"><span class="lang-vi">Mùa 2</span><span class="lang-cn">第二届</span></div>
@@ -404,7 +419,7 @@
         </footer>
     </div>
 
-    <script src="js/countdown.js?v=3"></script>
-    <script src="js/main.js?v=3"></script>
+    <script src="js/countdown.js?v=7"></script>
+    <script src="js/main.js?v=7"></script>
 </body>
 </html>

@@ -45,6 +45,11 @@ function toggleResult() {
     } else {
         body.classList.remove('state-before', 'state-active', 'state-result');
         body.classList.add(demoPreviousState);
+        // Reset honor hall to placeholder when leaving result view
+        const hallCard = document.getElementById('hall-winner-card');
+        const hallAccount = document.getElementById('hall-account');
+        if (hallCard) hallCard.classList.remove('has-winner');
+        if (hallAccount) hallAccount.style.display = 'none';
         if (toggleBtn) {
             toggleBtn.innerHTML = '<span class="lang-vi">Công bố ngưới thắng</span><span class="lang-cn">宣布获胜</span>';
         }
@@ -151,10 +156,13 @@ function syncHonorHall() {
     if (!document.body.classList.contains('state-result')) return;
     
     const winnerName = document.getElementById('winner-name');
+    const winnerAccount = document.getElementById('winner-account');
     const winnerDate = document.getElementById('winner-date');
     const hallName = document.getElementById('hall-name');
+    const hallAccount = document.getElementById('hall-account');
     const hallDate = document.getElementById('hall-date');
     const hallPlaceholder = document.getElementById('hall-placeholder-text');
+    const hallCard = document.getElementById('hall-winner-card');
     
     if (!winnerName || !hallName) return;
     
@@ -162,14 +170,20 @@ function syncHonorHall() {
     // If result area has real winner data (not placeholder), sync to honor hall
     if (name && name !== '?' && name !== '') {
         hallName.textContent = name;
+        if (hallAccount && winnerAccount) {
+            const account = winnerAccount.textContent.trim();
+            hallAccount.textContent = account !== '?' ? account : '';
+        }
         if (hallPlaceholder) hallPlaceholder.style.display = 'none';
         if (hallDate && winnerDate) {
             const date = winnerDate.textContent.trim();
             if (date && date !== '?') {
-                hallDate.textContent = date;
-                hallDate.style.display = 'block';
+                const dateValue = hallDate.querySelector('.date-value');
+                if (dateValue) dateValue.textContent = date;
+                hallDate.style.display = 'flex';
             }
         }
+        if (hallCard) hallCard.classList.add('has-winner');
     }
 }
 

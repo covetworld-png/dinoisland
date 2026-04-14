@@ -251,8 +251,10 @@ body.state-result #rules { order: 5; }
     position: relative;
     z-index: 1;
     font-size: 3.5rem;
-    font-weight: 900;
+    font-weight: 700;
     color: var(--gold);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 3px;
     margin-bottom: 16px;
     text-shadow: 
         0 2px 10px rgba(0, 0, 0, 0.8),
@@ -757,9 +759,11 @@ body.state-result #rules { order: 5; }
 
 .winner-name {
     font-size: 2rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--gold);
     margin-bottom: 4px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1.5px;
 }
 
 .winner-account {
@@ -807,15 +811,42 @@ body.state-result #rules { order: 5; }
 }
 
 .hall-crown {
+    margin: 0 auto 16px;
+}
+
+.hall-crown .crown-empty {
     font-size: 3rem;
-    margin-bottom: 12px;
+    line-height: 1;
+    display: block;
+}
+
+.hall-crown .crown-winner {
+    max-width: 220px;
+    margin: 0 auto;
+    position: relative;
+    display: none;
+}
+
+.hall-crown .crown-winner img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    filter: drop-shadow(0 8px 32px rgba(212, 175, 55, 0.35));
 }
 
 .hall-name {
     font-size: 1.4rem;
     font-weight: 700;
     color: var(--gold);
+    margin-bottom: 4px;
+}
+
+.hall-account {
+    font-size: 1rem;
+    color: var(--text-muted);
     margin-bottom: 8px;
+    display: none;
 }
 
 .hall-date {
@@ -832,6 +863,100 @@ body.state-result #rules { order: 5; }
 .hall-text {
     color: var(--text-muted);
     font-size: 1rem;
+}
+
+/* Winner announced - glorified hall card */
+.hall-card.winner.has-winner {
+    position: relative;
+    border: 2px solid var(--gold);
+    background: 
+        radial-gradient(ellipse at top center, rgba(212, 175, 55, 0.15) 0%, transparent 60%),
+        var(--bg-card);
+    padding: 32px 24px 36px;
+}
+
+.hall-card.winner.has-winner::after {
+    content: '✦';
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--gold);
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+.hall-card.winner.has-winner .hall-crown .crown-empty {
+    display: none;
+}
+
+.hall-card.winner.has-winner .hall-crown .crown-winner {
+    display: block;
+}
+
+.winner-badge-corner {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    background: linear-gradient(135deg, var(--gold) 0%, #b8860b 100%);
+    color: var(--bg);
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 4px 14px 4px 14px;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 2;
+    letter-spacing: 0.5px;
+}
+
+.hall-card.winner.has-winner .hall-name {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 20px 0 2px;
+    letter-spacing: 2px;
+    font-family: 'Cinzel', serif;
+}
+
+.hall-card.winner.has-winner .hall-name::before {
+    content: '▸ ';
+    color: var(--gold-light);
+    font-weight: 400;
+    font-family: 'Inter', sans-serif;
+}
+
+.hall-card.winner.has-winner .hall-account {
+    display: block;
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+.hall-card.winner.has-winner .hall-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.hall-card.winner.has-winner .date-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.hall-card.winner.has-winner .date-value {
+    font-size: 1.1rem;
+    color: var(--gold-light);
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
 }
 
 /* Footer */
