@@ -277,10 +277,10 @@
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <h3 style="margin:0">当前已标注事件</h3>
         <div class="actions">
-          <label class="btn btn-secondary" id="btn-import" style="position:relative;overflow:hidden;cursor:pointer;">
-            导入 JSON
+          <div id="btn-import-wrap" style="position:relative;display:inline-block;">
+            <button class="btn btn-secondary" style="pointer-events:none;">导入 JSON</button>
             <input type="file" id="file-import" accept="application/json" style="position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;cursor:pointer;" />
-          </label>
+          </div>
           <button class="btn btn-secondary" id="btn-export">导出 revenue_events.json</button>
           <button class="btn btn-danger" id="btn-clear">清空本地缓存</button>
         </div>
@@ -819,22 +819,24 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (evt) => {
-        try {
-          const imported = JSON.parse(evt.target.result);
-          if (!imported.events || !Array.isArray(imported.events)) {
-            alert('导入失败：JSON 中缺少 events 数组');
-            return;
+        setTimeout(() => {
+          try {
+            const imported = JSON.parse(evt.target.result);
+            if (!imported.events || !Array.isArray(imported.events)) {
+              alert('导入失败：JSON 中缺少 events 数组');
+              return;
+            }
+            if (confirm(`确定导入吗？当前 ${eventsData.events.length} 条事件将被替换为 ${imported.events.length} 条。`)) {
+              eventsData = { events: imported.events };
+              saveLocal();
+              renderChart();
+              renderEventsTable();
+              alert('导入成功');
+            }
+          } catch (err) {
+            alert('导入失败：文件不是有效的 JSON');
           }
-          if (confirm(`确定导入吗？当前 ${eventsData.events.length} 条事件将被替换为 ${imported.events.length} 条。`)) {
-            eventsData = { events: imported.events };
-            saveLocal();
-            renderChart();
-            renderEventsTable();
-            alert('导入成功');
-          }
-        } catch (err) {
-          alert('导入失败：文件不是有效的 JSON');
-        }
+        }, 0);
       };
       reader.readAsText(file);
       e.target.value = '';
