@@ -198,6 +198,17 @@
       background: #f2f3f5;
       color: #646a73;
     }
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     input[type="date"] {
       position: relative;
       cursor: pointer;
@@ -277,10 +288,8 @@
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <h3 style="margin:0">当前已标注事件</h3>
         <div class="actions">
-          <div id="btn-import-wrap" style="position:relative;display:inline-block;">
-            <button class="btn btn-secondary" style="pointer-events:none;">导入 JSON</button>
-            <input type="file" id="file-import" accept="application/json" style="position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;cursor:pointer;" />
-          </div>
+          <button class="btn btn-secondary" id="btn-import">导入 JSON</button>
+          <input type="file" id="file-import" accept="application/json" class="visually-hidden" />
           <button class="btn btn-secondary" id="btn-export">导出 revenue_events.json</button>
           <button class="btn btn-danger" id="btn-clear">清空本地缓存</button>
         </div>
@@ -812,6 +821,10 @@
       renderChart();
       renderEventsTable();
       resetForm();
+    });
+
+    document.getElementById('btn-import').addEventListener('click', () => {
+      document.getElementById('file-import').click();
     });
 
     document.getElementById('file-import').addEventListener('change', (e) => {
