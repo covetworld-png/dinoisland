@@ -38,6 +38,7 @@ function toggleResult() {
         }
         body.classList.remove('state-before', 'state-active', 'state-result');
         body.classList.add('state-result');
+        syncHonorHall();
         if (toggleBtn) {
             toggleBtn.innerHTML = '<span class="lang-vi">Xem hoạt động</span><span class="lang-cn">查看活动</span>';
         }
@@ -146,6 +147,9 @@ if (document.readyState === 'loading') {
 }
 
 function syncHonorHall() {
+    // Only sync when in result state
+    if (!document.body.classList.contains('state-result')) return;
+    
     const winnerName = document.getElementById('winner-name');
     const winnerDate = document.getElementById('winner-date');
     const hallName = document.getElementById('hall-name');
@@ -155,7 +159,7 @@ function syncHonorHall() {
     if (!winnerName || !hallName) return;
     
     const name = winnerName.textContent.trim();
-    // If result area has real winner data (not default placeholder), sync to honor hall
+    // If result area has real winner data (not placeholder), sync to honor hall
     if (name && name !== '?' && name !== '') {
         hallName.textContent = name;
         if (hallPlaceholder) hallPlaceholder.style.display = 'none';
