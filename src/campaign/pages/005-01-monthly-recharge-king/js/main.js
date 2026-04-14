@@ -29,20 +29,17 @@ function toggleResult() {
     
     const rankSection = document.getElementById('rank');
     const heroKingImg = document.getElementById('hero-king-img');
-    const honorHall = document.getElementById('honor-hall');
     if (showingResult) {
         if (activityView) activityView.style.display = 'none';
         if (resultView) resultView.style.display = 'block';
         if (rankSection) rankSection.style.display = 'none';
         if (heroKingImg) heroKingImg.style.display = 'none';
-        if (honorHall) honorHall.style.display = 'block';
         if (toggleBtn) {
             toggleBtn.innerHTML = '<span class="lang-vi">Xem hoạt động</span><span class="lang-cn">查看活动</span>';
         }
     } else {
         if (activityView) activityView.style.display = 'block';
         if (heroKingImg) heroKingImg.style.display = 'block';
-        if (honorHall) honorHall.style.display = 'none';
         if (resultView) resultView.style.display = 'none';
         if (toggleBtn) {
             toggleBtn.innerHTML = '<span class="lang-vi">Công bố người thắng</span><span class="lang-cn">宣布获胜</span>';

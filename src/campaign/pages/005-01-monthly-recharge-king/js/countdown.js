@@ -68,14 +68,12 @@
         const toggleBtn = document.getElementById('toggle-result-btn');
         const rankSection = document.getElementById('rank');
         const heroKingImg = document.getElementById('hero-king-img');
-        const honorHall = document.getElementById('honor-hall');
         
         if (activityView) activityView.style.display = 'none';
         if (resultView) resultView.style.display = 'block';
         if (toggleBtn) toggleBtn.style.display = 'none';
         if (rankSection) rankSection.style.display = 'none';
         if (heroKingImg) heroKingImg.style.display = 'none';
-        if (honorHall) honorHall.style.display = 'block';
     }
     
     // Update immediately and every second
