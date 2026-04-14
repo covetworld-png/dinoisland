@@ -277,8 +277,10 @@
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <h3 style="margin:0">当前已标注事件</h3>
         <div class="actions">
-          <button class="btn btn-secondary" id="btn-import">导入 JSON</button>
-          <input type="file" id="file-import" accept="application/json" style="display:none;" />
+          <label class="btn btn-secondary" id="btn-import" style="position:relative;overflow:hidden;cursor:pointer;">
+            导入 JSON
+            <input type="file" id="file-import" accept="application/json" style="position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;cursor:pointer;" />
+          </label>
           <button class="btn btn-secondary" id="btn-export">导出 revenue_events.json</button>
           <button class="btn btn-danger" id="btn-clear">清空本地缓存</button>
         </div>
@@ -810,10 +812,6 @@
       renderChart();
       renderEventsTable();
       resetForm();
-    });
-
-    document.getElementById('btn-import').addEventListener('click', () => {
-      document.getElementById('file-import').click();
     });
 
     document.getElementById('file-import').addEventListener('change', (e) => {
