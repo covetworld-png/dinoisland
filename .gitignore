@@ -5,11 +5,6 @@
 !src/
 !src/**
 
-# Except projects/004-video-downloader
-!projects/
-!projects/004-video-downloader/
-!projects/004-video-downloader/**
-
 # Except root index.html
 !index.html
 
@@ -21,7 +16,8 @@
 **/*.zip
 **/README.md
 
-# Ignore other projects
-projects/001-growNewUsers/
-projects/002-meetings/
-projects/003-activation/
+# Ignore other projects (all tracked pages should go through build/pipeline.py to src/)
+projects/001-增长/
+projects/002-内容/
+projects/003-运营/
+projects/004-工具/

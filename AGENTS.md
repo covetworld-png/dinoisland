@@ -102,8 +102,7 @@
 
 **操作示例**:
 ```bash
-# 生成报告后执行
-cp meetings/special/fu/reports/YYYYMMDD_数据更新分析报告.html src/report/streamer-data.html
+python build/pipeline.py streamer-data-report
 git add src/report/streamer-data.html
 git commit -m "update: 更新主播数据报告至 YYYYMMDD"
 ```
@@ -139,18 +138,7 @@ git commit -m "update: 更新主播数据报告至 YYYYMMDD"
 
 **操作示例**:
 ```bash
-# 1. 创建新版本目录（版本号递增）
-mkdir -p dist/landing-official-v1.2
-
-# 2. 复制源文件（保持目录结构）
-cp src/campaign/pages/landing-official/index.html dist/landing-official-v1.2/
-cp -r src/campaign/assets/official/* dist/landing-official-v1.2/assets/official/
-
-# 3. 调整资源路径为相对路径
-sed -i '' 's|../../assets/official/|./assets/official/|g' dist/landing-official-v1.2/index.html
-
-# 4. 打包
-zip -r dist/landing-official-v1.2.zip dist/landing-official-v1.2
+python build/packager.py landing-official
 ```
 
 ### 7.4 客服工具页面发布规则
@@ -161,29 +149,40 @@ zip -r dist/landing-official-v1.2.zip dist/landing-official-v1.2
 
 | 类型 | 路径 | 说明 |
 |------|------|------|
-| **源文件** | `projects/001-growNewUsers/001-03-landing-page/docs/cs-tool.html` | 开发/编辑工作区 |
+| **源文件** | `projects/001-增长/001-03-landing-page/docs/cs-tool.html` | 开发/编辑工作区 |
 | **发布文件** | `src/tools/cs-tool/index.html` | **唯一提交到 git 的文件** |
 | **访问地址** | `https://covetworld-png.github.io/dinoisland/src/tools/cs-tool/index.html` | GitHub Pages |
 
 **强制动作**:
 1. 仅在源文件位置进行编辑开发
-2. 完成后复制到发布位置：`cp projects/001-growNewUsers/001-03-landing-page/docs/cs-tool.html src/tools/cs-tool/index.html`
+2. 完成后复制到发布位置：`python build/pipeline.py cs-tool`
 3. 提交发布位置的文件到 git
 4. 源文件目录受 `.gitignore` 保护，**禁止**使用 `git add -f` 强制提交
 
 **操作示例**:
 ```bash
 # 1. 编辑源文件（在忽略目录内，不提交）
-# vim projects/001-growNewUsers/001-03-landing-page/docs/cs-tool.html
+# vim projects/001-增长/001-03-landing-page/docs/cs-tool.html
 
 # 2. 复制到发布位置
-cp projects/001-growNewUsers/001-03-landing-page/docs/cs-tool.html \
-   src/tools/cs-tool/index.html
+python build/pipeline.py cs-tool
 
 # 3. 提交发布文件
 git add src/tools/cs-tool/index.html
 git commit -m "fix(cs-tool): xxx"
 git push origin main
+```
+
+### 7.5 发布管道使用规则
+
+所有涉及 `projects/` → `src/` 同步或 `src/` → `dist/` 打包的操作，优先通过 `build/` 脚本执行，具体映射关系参见 `build/manifest.json`。
+
+```bash
+# projects/ -> src/ 同步
+python build/pipeline.py <page-key>
+
+# src/ -> dist/ 打包
+python build/packager.py <package-key>
 ```
 
 ---
