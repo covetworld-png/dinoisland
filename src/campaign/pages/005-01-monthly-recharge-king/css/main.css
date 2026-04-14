@@ -82,6 +82,43 @@ body[data-lang="vi"] .lang-cn {
     z-index: 1;
 }
 
+.layout-container {
+    display: flex;
+    flex-direction: column;
+}
+
+/* State-based visibility & ordering */
+body.state-before #rank,
+body.state-before #result-view,
+body.state-active #result-view,
+body.state-result #rank,
+body.state-result .countdown-section {
+    display: none;
+}
+
+body.state-result #hero-king-img {
+    display: none;
+}
+
+body.state-before .hero { order: 1; }
+body.state-before #rewards { order: 2; }
+body.state-before .countdown-section { order: 3; }
+body.state-before #honor-hall { order: 4; }
+body.state-before #rules { order: 5; }
+
+body.state-active .hero { order: 1; }
+body.state-active #rank { order: 2; }
+body.state-active .countdown-section { order: 3; }
+body.state-active #rewards { order: 4; }
+body.state-active #rules { order: 5; }
+body.state-active #honor-hall { order: 6; }
+
+body.state-result .hero { order: 1; }
+body.state-result #result-view { order: 2; }
+body.state-result #rewards { order: 3; }
+body.state-result #honor-hall { order: 4; }
+body.state-result #rules { order: 5; }
+
 /* Header */
 .header {
     background: rgba(20, 25, 32, 0.95);
@@ -722,6 +759,12 @@ body[data-lang="vi"] .lang-cn {
     font-size: 2rem;
     font-weight: 800;
     color: var(--gold);
+    margin-bottom: 4px;
+}
+
+.winner-account {
+    font-size: 1rem;
+    color: var(--text-muted);
     margin-bottom: 12px;
 }
 

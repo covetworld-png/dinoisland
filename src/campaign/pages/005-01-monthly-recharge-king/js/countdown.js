@@ -19,23 +19,24 @@
         
         if (!startBox || !endBox) return;
         
-        const rankSection = document.getElementById('rank');
-        
         // Only auto-switch display if manual override is not active
         if (!window.countdownManualOverride) {
+            const body = document.body;
             if (now < EVENT_START) {
                 startBox.style.display = 'block';
                 endBox.style.display = 'none';
-                if (rankSection) rankSection.style.display = 'none';
+                body.classList.remove('state-before', 'state-active', 'state-result');
+                body.classList.add('state-before');
             } else if (now < EVENT_END) {
                 startBox.style.display = 'none';
                 endBox.style.display = 'block';
-                if (rankSection) rankSection.style.display = 'block';
+                body.classList.remove('state-before', 'state-active', 'state-result');
+                body.classList.add('state-active');
             } else {
                 startBox.style.display = 'none';
                 endBox.style.display = 'block';
-                if (rankSection) rankSection.style.display = 'block';
-                showResultView();
+                body.classList.remove('state-before', 'state-active', 'state-result');
+                body.classList.add('state-result');
             }
         }
         
@@ -60,20 +61,6 @@
         if (endHoursEl) endHoursEl.textContent = String(endH).padStart(2, '0');
         if (endMinutesEl) endMinutesEl.textContent = String(endM).padStart(2, '0');
         if (endSecondsEl) endSecondsEl.textContent = String(endS).padStart(2, '0');
-    }
-    
-    function showResultView() {
-        const activityView = document.getElementById('activity-view');
-        const resultView = document.getElementById('result-view');
-        const toggleBtn = document.getElementById('toggle-result-btn');
-        const rankSection = document.getElementById('rank');
-        const heroKingImg = document.getElementById('hero-king-img');
-        
-        if (activityView) activityView.style.display = 'none';
-        if (resultView) resultView.style.display = 'block';
-        if (toggleBtn) toggleBtn.style.display = 'none';
-        if (rankSection) rankSection.style.display = 'none';
-        if (heroKingImg) heroKingImg.style.display = 'none';
     }
     
     // Update immediately and every second

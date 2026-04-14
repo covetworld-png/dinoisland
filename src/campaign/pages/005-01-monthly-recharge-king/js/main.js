@@ -18,31 +18,34 @@ function toggleLanguage() {
     localStorage.setItem('lang', newLang);
 }
 
-// Toggle between activity view and result view
+// Toggle between activity view and result view (demo button)
 let showingResult = false;
+let demoPreviousState = 'state-before';
+
 function toggleResult() {
     showingResult = !showingResult;
+    window.countdownManualOverride = true;
     
-    const activityView = document.getElementById('activity-view');
-    const resultView = document.getElementById('result-view');
+    const body = document.body;
     const toggleBtn = document.getElementById('toggle-result-btn');
     
-    const rankSection = document.getElementById('rank');
-    const heroKingImg = document.getElementById('hero-king-img');
     if (showingResult) {
-        if (activityView) activityView.style.display = 'none';
-        if (resultView) resultView.style.display = 'block';
-        if (rankSection) rankSection.style.display = 'none';
-        if (heroKingImg) heroKingImg.style.display = 'none';
+        // Save current state before switching to result
+        if (body.classList.contains('state-before')) {
+            demoPreviousState = 'state-before';
+        } else if (body.classList.contains('state-active')) {
+            demoPreviousState = 'state-active';
+        }
+        body.classList.remove('state-before', 'state-active', 'state-result');
+        body.classList.add('state-result');
         if (toggleBtn) {
             toggleBtn.innerHTML = '<span class="lang-vi">Xem hoạt động</span><span class="lang-cn">查看活动</span>';
         }
     } else {
-        if (activityView) activityView.style.display = 'block';
-        if (heroKingImg) heroKingImg.style.display = 'block';
-        if (resultView) resultView.style.display = 'none';
+        body.classList.remove('state-before', 'state-active', 'state-result');
+        body.classList.add(demoPreviousState);
         if (toggleBtn) {
-            toggleBtn.innerHTML = '<span class="lang-vi">Công bố người thắng</span><span class="lang-cn">宣布获胜</span>';
+            toggleBtn.innerHTML = '<span class="lang-vi">Công bố ngưới thắng</span><span class="lang-cn">宣布获胜</span>';
         }
     }
     
@@ -57,21 +60,23 @@ function toggleCountdownMode() {
     testModeDuringEvent = !testModeDuringEvent;
     window.countdownManualOverride = true;
     
+    const body = document.body;
     const startBox = document.getElementById('countdown-start');
     const endBox = document.getElementById('countdown-end');
-    const rankSection = document.getElementById('rank');
     
     if (testModeDuringEvent) {
+        body.classList.remove('state-before', 'state-active', 'state-result');
+        body.classList.add('state-active');
         if (startBox) startBox.style.display = 'none';
         if (endBox) {
             endBox.style.display = 'block';
             endBox.classList.add('active');
         }
-        if (rankSection) rankSection.style.display = 'block';
     } else {
+        body.classList.remove('state-before', 'state-active', 'state-result');
+        body.classList.add('state-before');
         if (startBox) startBox.style.display = 'block';
         if (endBox) endBox.style.display = 'none';
-        if (rankSection) rankSection.style.display = 'none';
     }
 }
 
