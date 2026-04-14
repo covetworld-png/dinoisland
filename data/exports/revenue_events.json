@@ -1,0 +1,32 @@
+{
+  "_comment": "运营事件标注文件，关联收入趋势分析。修改后刷新 report 页面即可生效。",
+  "events": [
+    {
+      "date": "2026-04-01",
+      "type": "markLine",
+      "name": "示例-愚人节活动上线",
+      "color": "#5470c6"
+    },
+    {
+      "date": "2026-03-05",
+      "type": "markPoint",
+      "name": "示例-主播空降活动",
+      "color": "#91cc75",
+      "value": 3495
+    },
+    {
+      "date": "2026-02-16",
+      "type": "markLine",
+      "name": "示例-春节大规模投放",
+      "color": "#ee6666"
+    }
+  ],
+  "format": {
+    "date": "YYYY-MM-DD，必须与 daily_metrics.csv 的日期一致",
+    "type": "markLine(垂直标线) | markPoint(标注点)",
+    "name": "事件名称，显示在图表上",
+    "color": "十六进制颜色码，可选，默认 #5470c6",
+    "value": "markPoint 专用，对应纵轴收入值；若省略则自动取当日收入"
+  },
+  "color_palette": ["#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#3ba272", "#fc8452", "#9a60b4"]
+}

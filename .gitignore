@@ -5,6 +5,26 @@
 !src/
 !src/**
 
+# Except data (calculated data, charts, exports)
+!data/
+!data/**
+
+# Except build (pipeline manifests)
+!build/
+!build/**
+
+# Except public (static assets)
+!public/
+!public/**
+
+# Except versions (backups)
+!versions/
+!versions/**
+
+# Except docs (documentation)
+!docs/
+!docs/**
+
 # Except root index.html
 !index.html
 
