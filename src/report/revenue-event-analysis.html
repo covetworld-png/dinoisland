@@ -174,19 +174,16 @@
       border: 1px solid #dee0e3;
     }
     .btn:hover { opacity: .9; }
-    input[type="file"].btn-file {
-      -webkit-appearance: none;
-      appearance: none;
-      padding: 8px 16px;
+    .import-area {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px 12px;
+      border: 1px solid #dee0e3;
       border-radius: 6px;
       font-size: 14px;
-      cursor: pointer;
-      border: 1px solid #dee0e3;
-      background: #f2f3f5;
-      color: #1f2329;
-      transition: opacity .2s;
+      font-family: Menlo, Monaco, Consolas, monospace;
+      resize: vertical;
     }
-    input[type="file"].btn-file:hover { opacity: .9; }
     .actions {
       display: flex;
       gap: 10px;
@@ -301,9 +298,16 @@
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <h3 style="margin:0">当前已标注事件</h3>
         <div class="actions">
-          <input type="file" id="file-import" accept="application/json" class="btn-file" />
           <button class="btn btn-secondary" id="btn-export">导出 revenue_events.json</button>
           <button class="btn btn-danger" id="btn-clear">清空本地缓存</button>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div style="font-size:13px;color:#646a73;margin-bottom:6px;">快速导入（将 JSON 内容粘贴到下方）</div>
+        <textarea id="import-text" class="import-area" placeholder="粘贴 revenue_events.json 的内容..."></textarea>
+        <div class="actions" style="margin-top:8px;">
+          <button class="btn btn-primary" id="btn-import">导入 JSON</button>
+          <button class="btn btn-secondary" id="btn-import-file" style="display:none;">从文件导入</button>
         </div>
       </div>
       <div id="events-table" style="margin-top:12px;">加载中...</div>
@@ -835,29 +839,62 @@
       resetForm();
     });
 
-    document.getElementById('file-import').addEventListener('change', (e) => {
+    document.getElementById('btn-import').addEventListener('click', () => {
+      const raw = document.getElementById('import-text').value.trim();
+      if (!raw) {
+        alert('请先将 JSON 内容粘贴到文本框中');
+        return;
+      }
+      try {
+        const imported = JSON.parse(raw);
+        if (!imported.events || !Array.isArray(imported.events)) {
+          alert('导入失败：JSON 中缺少 events 数组');
+          return;
+        }
+        if (confirm(`确定导入吗？当前 ${eventsData.events.length} 条事件将被替换为 ${imported.events.length} 条。`)) {
+          eventsData = { events: imported.events };
+          saveLocal();
+          renderChart();
+          renderEventsTable();
+          document.getElementById('import-text').value = '';
+          alert('导入成功');
+        }
+      } catch (err) {
+        alert('导入失败：内容不是有效的 JSON');
+      }
+    });
+
+    // Fallback: hidden file input for browsers that support it
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'application/json';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+
+    const fileBtn = document.getElementById('btn-import-file');
+    fileBtn.style.display = 'inline-block';
+    fileBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (evt) => {
-        setTimeout(() => {
-          try {
-            const imported = JSON.parse(evt.target.result);
-            if (!imported.events || !Array.isArray(imported.events)) {
-              alert('导入失败：JSON 中缺少 events 数组');
-              return;
-            }
-            if (confirm(`确定导入吗？当前 ${eventsData.events.length} 条事件将被替换为 ${imported.events.length} 条。`)) {
-              eventsData = { events: imported.events };
-              saveLocal();
-              renderChart();
-              renderEventsTable();
-              alert('导入成功');
-            }
-          } catch (err) {
-            alert('导入失败：文件不是有效的 JSON');
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (!imported.events || !Array.isArray(imported.events)) {
+            alert('导入失败：JSON 中缺少 events 数组');
+            return;
           }
-        }, 0);
+          if (confirm(`确定导入吗？当前 ${eventsData.events.length} 条事件将被替换为 ${imported.events.length} 条。`)) {
+            eventsData = { events: imported.events };
+            saveLocal();
+            renderChart();
+            renderEventsTable();
+            alert('导入成功');
+          }
+        } catch (err) {
+          alert('导入失败：文件不是有效的 JSON');
+        }
       };
       reader.readAsText(file);
       e.target.value = '';
