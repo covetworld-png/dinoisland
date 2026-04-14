@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>收入波动与事件关联分析</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f6f7;
+      color: #1f2329;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+      font-size: 22px;
+      margin: 0 0 8px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #646a73;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    #chart {
+      width: 100%;
+      height: 520px;
+    }
+    .error {
+      color: #d93026;
+      background: #fce8e6;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .info {
+      color: #1f2329;
+      background: #e8f2ff;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid #dee0e3;
+    }
+    th {
+      background: #f5f6f7;
+      font-weight: 600;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+      background: #f2f3f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .color-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .color-preset {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      margin-right: 6px;
+      transition: transform .1s;
+    }
+    .color-preset:hover {
+      transform: scale(1.1);
+    }
+    .color-preset.active {
+      border-color: #1f2329;
+    }
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #646a73;
+      margin-top: 8px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group label {
+      font-size: 13px;
+      color: #646a73;
+      margin-bottom: 6px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #dee0e3;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: #3370ff;
+    }
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .color-hex {
+      font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-size: 13px;
+      color: #646a73;
+      min-width: 70px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: opacity .2s;
+    }
+    .btn-primary {
+      background: #3370ff;
+      color: #fff;
+    }
+    .btn-danger {
+      background: #d93026;
+      color: #fff;
+    }
+    .btn-secondary {
+      background: #f2f3f5;
+      color: #1f2329;
+      border: 1px solid #dee0e3;
+    }
+    .btn:hover { opacity: .9; }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .hint {
+      font-size: 13px;
+      color: #646a73;
+      margin-top: 8px;
+    }
+    .empty {
+      color: #646a73;
+      font-size: 14px;
+      padding: 8px 0;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: #f2f3f5;
+      color: #646a73;
+    }
+    input[type="date"] {
+      position: relative;
+      cursor: pointer;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>收入波动与事件关联分析</h1>
+    <div class="subtitle">数据来源：daily_metrics.csv &nbsp;|&nbsp; 事件标注：revenue_events.json</div>
+
+    <div id="message"></div>
+
+    <div class="card">
+      <div id="chart"></div>
+      <div class="legend">
+        <div class="legend-item"><span class="color-dot" style="background:#5470c6"></span>markLine：垂直标线</div>
+        <div class="legend-item"><span class="color-dot" style="background:#91cc75"></span>markPoint：标注点</div>
+        <div class="legend-item"><span class="color-dot" style="background:#fac858"></span>markArea：区间高亮</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">添加事件</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="ev-date">开始日期 <span style="color:#d93026">*</span></label>
+          <input type="date" id="ev-date" />
+        </div>
+        <div class="form-group" id="enddate-group" style="display:none;">
+          <label for="ev-enddate">结束日期 <span style="color:#d93026">*</span></label>
+          <input type="date" id="ev-enddate" />
+        </div>
+        <div class="form-group">
+          <label for="ev-type">类型 <span style="color:#d93026">*</span></label>
+          <select id="ev-type">
+            <option value="markLine">markLine（垂直标线）</option>
+            <option value="markPoint">markPoint（标注点）</option>
+            <option value="markArea">markArea（区间高亮）</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ev-name">事件名称 <span style="color:#d93026">*</span></label>
+          <input type="text" id="ev-name" placeholder="如：主播空降活动" />
+        </div>
+        <div class="form-group">
+          <label>颜色</label>
+          <div class="color-row">
+            <input type="color" id="ev-color" value="#5470c6" style="width:42px;height:28px;padding:0;border:none;background:none;cursor:pointer;" />
+            <span class="color-hex" id="ev-color-hex">#5470c6</span>
+            <span id="ev-color-presets"></span>
+          </div>
+        </div>
+        <div class="form-group" id="value-group" style="display:none;">
+          <label for="ev-value">收入值（可选）</label>
+          <input type="number" id="ev-value" placeholder="自动取当日收入" />
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary" id="btn-add" style="height:36px;">添加</button>
+        </div>
+      </div>
+      <div class="hint">
+        <b>提示：</b>markPoint 默认自动取当日收入作为纵轴位置；markArea 会在开始日期与结束日期之间生成一个带背景色的区间块。
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <h3 style="margin:0">当前已标注事件</h3>
+        <div class="actions">
+          <button class="btn btn-secondary" id="btn-import">导入 JSON</button>
+          <input type="file" id="file-import" accept="application/json" style="display:none;" />
+          <button class="btn btn-secondary" id="btn-export">导出 revenue_events.json</button>
+          <button class="btn btn-danger" id="btn-clear">清空本地缓存</button>
+        </div>
+      </div>
+      <div id="events-table" style="margin-top:12px;">加载中...</div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">快速使用说明</h3>
+      <ol style="font-size:14px;color:#1f2329;line-height:1.8;padding-left:18px;margin:0;">
+        <li>在上方表单添加事件，图表会<strong>实时更新</strong>。</li>
+        <li>事件数据会暂存在浏览器 <code>localStorage</code> 中，刷新页面不会丢失。</li>
+        <li>编辑完成后，点击「导出 revenue_events.json」，将文件覆盖到 <code>data/exports/revenue_events.json</code> 并提交 git。</li>
+        <li>如需从远程 JSON 重新加载，点击「清空本地缓存」后刷新页面。</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    const CSV_URL = '../../data/exports/daily_metrics.csv';
+    const EVENTS_URL = '../../data/exports/revenue_events.json';
+    const LS_KEY = 'revenue_events_v1';
+    const ZOOM_KEY = 'revenue_zoom_v1';
+
+    let csvRows = [];
+    let eventsData = { events: [] };
+    let chartInstance = null;
+
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines[0].split(',');
+      const dateIdx = headers.indexOf('date');
+      const revenueIdx = headers.findIndex(h => h.includes('收入'));
+      if (dateIdx === -1 || revenueIdx === -1) {
+        throw new Error('CSV 中未找到 date 或收入列');
+      }
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',');
+        if (cols.length <= Math.max(dateIdx, revenueIdx)) continue;
+        const date = cols[dateIdx].trim();
+        const revenue = parseFloat(cols[revenueIdx].trim()) || 0;
+        if (date) rows.push({ date, revenue });
+      }
+      rows.sort((a, b) => new Date(a.date) - new Date(b.date));
+      return rows;
+    }
+
+    const COLOR_PALETTE = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'];
+
+    function getDefaultColor(type) {
+      return type === 'markLine' ? '#5470c6' : (type === 'markPoint' ? '#91cc75' : '#fac858');
+    }
+
+    function getNextColor() {
+      const events = eventsData.events || [];
+      if (!events.length) return COLOR_PALETTE[0];
+      const counts = {};
+      COLOR_PALETTE.forEach(c => counts[c] = 0);
+      events.forEach(ev => {
+        const c = ev.color || '';
+        if (counts[c] !== undefined) counts[c]++;
+      });
+      let minColor = COLOR_PALETTE[0];
+      let minCount = Infinity;
+      COLOR_PALETTE.forEach(c => {
+        if (counts[c] < minCount) {
+          minCount = counts[c];
+          minColor = c;
+        }
+      });
+      return minColor;
+    }
+
+    function setColorInput(hex) {
+      document.getElementById('ev-color').value = hex;
+      document.getElementById('ev-color-hex').textContent = hex;
+      updatePresetActive(hex);
+    }
+
+    function renderColorPresets(containerId, activeHex, onClick) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      let html = '';
+      COLOR_PALETTE.forEach(c => {
+        const isActive = c.toLowerCase() === (activeHex || '').toLowerCase();
+        html += `<span class="color-preset ${isActive ? 'active' : ''}" data-color="${c}" style="background:${c};" title="${c}"></span>`;
+      });
+      container.innerHTML = html;
+      container.querySelectorAll('.color-preset').forEach(dot => {
+        dot.addEventListener('click', () => {
+          const c = dot.getAttribute('data-color');
+          onClick(c);
+        });
+      });
+    }
+
+    function updatePresetActive(hex) {
+      const presets = document.querySelectorAll('#ev-color-presets .color-preset');
+      presets.forEach(p => {
+        p.classList.toggle('active', p.getAttribute('data-color').toLowerCase() === (hex || '').toLowerCase());
+      });
+    }
+
+    function initColorPresets() {
+      renderColorPresets('ev-color-presets', document.getElementById('ev-color').value, (c) => setColorInput(c));
+      document.getElementById('ev-color').addEventListener('input', (e) => {
+        document.getElementById('ev-color-hex').textContent = e.target.value;
+        updatePresetActive(e.target.value);
+      });
+    }
+
+    function renderChart() {
+      const dates = csvRows.map(r => r.date);
+      const revenues = csvRows.map(r => r.revenue);
+      const revenueMap = new Map(csvRows.map(r => [r.date, r.revenue]));
+
+      const markLines = [];
+      const markPoints = [];
+      const markAreas = [];
+
+      (eventsData.events || []).forEach(ev => {
+        if (ev.type === 'markLine') {
+          markLines.push({
+            xAxis: ev.date,
+            name: ev.name,
+            lineStyle: { color: ev.color || getDefaultColor('markLine'), type: 'dashed' },
+            label: { formatter: '{b}', position: 'end' }
+          });
+        } else if (ev.type === 'markPoint') {
+          const val = ev.value !== undefined && ev.value !== '' ? Number(ev.value) : (revenueMap.get(ev.date) || 0);
+          markPoints.push({
+            coord: [ev.date, val],
+            name: ev.name,
+            value: val,
+            itemStyle: { color: ev.color || getDefaultColor('markPoint') },
+            label: { show: true, formatter: '{b}', position: 'top' }
+          });
+        } else if (ev.type === 'markArea') {
+          markAreas.push([
+            {
+              name: ev.name,
+              xAxis: ev.date,
+              itemStyle: { color: (ev.color || getDefaultColor('markArea')) + '33' }, // 20% opacity
+              label: { show: true, position: 'top', formatter: '{b}', color: ev.color || getDefaultColor('markArea') }
+            },
+            {
+              xAxis: ev.endDate || ev.date
+            }
+          ]);
+        }
+      });
+
+      let zoomState = loadZoom();
+      if (chartInstance) {
+        const opt = chartInstance.getOption();
+        if (opt.dataZoom && opt.dataZoom.length) {
+          zoomState = opt.dataZoom.map(dz => ({ start: dz.start, end: dz.end }));
+        }
+      } else {
+        chartInstance = echarts.init(document.getElementById('chart'));
+        window.addEventListener('resize', () => chartInstance.resize());
+        chartInstance.on('datazoom', function () {
+          const opt = chartInstance.getOption();
+          if (opt.dataZoom && opt.dataZoom.length) {
+            saveZoom(opt.dataZoom.map(dz => ({ start: dz.start, end: dz.end })));
+          }
+        });
+      }
+
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' },
+          formatter: function (params) {
+            let html = `<div style="font-weight:600;margin-bottom:4px;">${params[0].axisValue}</div>`;
+            html += `收入：<b>${params[0].value}</b> w<br/>`;
+            return html;
+          }
+        },
+        grid: { left: '3%', right: '4%', bottom: '15%', containLabel: true },
+        xAxis: {
+          type: 'category',
+          data: dates,
+          boundaryGap: false,
+          axisLabel: { rotate: 60, interval: 'auto', hideOverlap: true }
+        },
+        yAxis: {
+          type: 'value',
+          name: '收入 (w)',
+          splitLine: { lineStyle: { type: 'dashed' } }
+        },
+        dataZoom: [
+          { type: 'inside', start: zoomState ? zoomState[0].start : 0, end: zoomState ? zoomState[0].end : 100, zoomOnMouseWheel: false },
+          { type: 'slider', start: zoomState ? zoomState[1].start : 0, end: zoomState ? zoomState[1].end : 100, bottom: 10, height: 24 }
+        ],
+        series: [{
+          name: '收入',
+          type: 'line',
+          data: revenues,
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 6,
+          lineStyle: { width: 2, color: '#5470c6' },
+          itemStyle: { color: '#5470c6' },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(84,112,198,0.25)' },
+              { offset: 1, color: 'rgba(84,112,198,0.02)' }
+            ])
+          },
+          labelLayout: { hideOverlap: true },
+          markLine: markLines.length ? {
+            symbol: ['none', 'none'],
+            data: markLines,
+            animation: false,
+            label: {
+              backgroundColor: 'rgba(255,255,255,0.85)',
+              padding: [2, 6],
+              borderRadius: 4,
+              color: 'inherit'
+            }
+          } : undefined,
+          markPoint: markPoints.length ? {
+            data: markPoints,
+            symbolSize: 48,
+            animation: false,
+            label: {
+              show: true,
+              backgroundColor: 'rgba(255,255,255,0.85)',
+              padding: [2, 6],
+              borderRadius: 4
+            }
+          } : undefined,
+          markArea: markAreas.length ? {
+            data: markAreas,
+            animation: false,
+            label: {
+              show: true,
+              backgroundColor: 'rgba(255,255,255,0.85)',
+              padding: [2, 6],
+              borderRadius: 4
+            }
+          } : undefined
+        }]
+      };
+      chartInstance.setOption(option, true);
+    }
+
+    let editingIdx = null;
+
+    function commitEdit(idx) {
+      if (editingIdx !== idx) return;
+      const date = document.getElementById(`edit-date-${idx}`).value;
+      const type = document.getElementById(`edit-type-${idx}`).value;
+      const name = document.getElementById(`edit-name-${idx}`).value.trim();
+      const color = document.getElementById(`edit-color-${idx}`).value;
+      if (!date || !name) {
+        alert('日期和事件名称不能为空');
+        return;
+      }
+      const ev = { date, type, name, color };
+      if (type === 'markPoint') {
+        const valEl = document.getElementById(`edit-value-${idx}`);
+        if (valEl) {
+          const valRaw = valEl.value.trim();
+          if (valRaw !== '') ev.value = Number(valRaw);
+        }
+      }
+      if (type === 'markArea') {
+        const endDate = document.getElementById(`edit-enddate-${idx}`).value;
+        if (!endDate) {
+          alert('结束日期不能为空');
+          return;
+        }
+        ev.endDate = endDate;
+      }
+      eventsData.events[idx] = ev;
+      eventsData.events.sort((a, b) => new Date(a.date) - new Date(b.date));
+      editingIdx = null;
+      saveLocal();
+      renderChart();
+      renderEventsTable();
+    }
+
+    function formatDateRange(ev) {
+      if (ev.type === 'markArea') return `${ev.date} ~ ${ev.endDate || ev.date}`;
+      return ev.date;
+    }
+
+    function renderEventsTable() {
+      const events = eventsData.events || [];
+      if (!events.length) {
+        document.getElementById('events-table').innerHTML = '<p class="empty">暂无标注事件，请从上方表单添加。</p>';
+        return;
+      }
+      let html = '<table><thead><tr><th>日期</th><th>类型</th><th>事件名称</th><th>颜色</th><th>收入值</th><th style="width:130px;">操作</th></tr></thead><tbody>';
+      events.forEach((ev, idx) => {
+        const color = ev.color || getDefaultColor(ev.type);
+        const dateDisplay = formatDateRange(ev);
+        const valueDisplay = ev.type === 'markPoint' ? (ev.value !== undefined && ev.value !== '' ? ev.value : '<span class="tag">自动</span>') : '-';
+        if (editingIdx === idx) {
+          html += `<tr>
+            <td><input type="date" class="edit-input" data-edit-idx="${idx}" id="edit-date-${idx}" value="${ev.date}" style="width:100%;min-width:110px;padding:4px 6px;border:1px solid #dee0e3;border-radius:4px;" /></td>
+            <td>
+              <select class="edit-input" data-edit-idx="${idx}" id="edit-type-${idx}" style="width:110px;padding:4px 6px;border:1px solid #dee0e3;border-radius:4px;">
+                <option value="markLine" ${ev.type === 'markLine' ? 'selected' : ''}>markLine</option>
+                <option value="markPoint" ${ev.type === 'markPoint' ? 'selected' : ''}>markPoint</option>
+                <option value="markArea" ${ev.type === 'markArea' ? 'selected' : ''}>markArea</option>
+              </select>
+            </td>
+            <td><input type="text" class="edit-input" data-edit-idx="${idx}" id="edit-name-${idx}" value="${ev.name}" style="width:140px;padding:4px 6px;border:1px solid #dee0e3;border-radius:4px;" /></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input type="color" class="edit-input" data-edit-idx="${idx}" id="edit-color-${idx}" value="${color}" style="width:36px;height:24px;padding:0;border:none;background:none;cursor:pointer;" />
+                <code id="edit-color-hex-${idx}">${color}</code>
+                <span id="edit-color-presets-${idx}"></span>
+              </div>
+            </td>
+            <td id="edit-value-cell-${idx}">${ev.type === 'markPoint' ? `<input type="number" class="edit-input" data-edit-idx="${idx}" id="edit-value-${idx}" value="${ev.value !== undefined ? ev.value : ''}" placeholder="自动" style="width:70px;padding:4px 6px;border:1px solid #dee0e3;border-radius:4px;" />` : '-'}</td>
+            <td>
+              <button class="btn btn-primary" data-idx="${idx}" style="padding:4px 10px;font-size:12px;">保存</button>
+              <button class="btn btn-secondary" data-idx="${idx}" style="padding:4px 10px;font-size:12px;">取消</button>
+            </td>
+          </tr>`;
+          if (ev.type === 'markArea') {
+            html += `<tr>
+              <td colspan="6" style="padding-top:0;border-bottom:none;">
+                <div style="display:flex;align-items:center;gap:8px;padding:4px 0 8px;">
+                  <span style="font-size:13px;color:#646a73;">结束日期：</span>
+                  <input type="date" class="edit-input" data-edit-idx="${idx}" id="edit-enddate-${idx}" value="${ev.endDate || ev.date}" style="padding:4px 6px;border:1px solid #dee0e3;border-radius:4px;" />
+                </div>
+              </td>
+            </tr>`;
+          }
+        } else {
+          html += `<tr>
+            <td>${dateDisplay}</td>
+            <td>${ev.type}</td>
+            <td>${ev.name}</td>
+            <td><span class="color-dot" style="background:${color}"></span><code>${color}</code></td>
+            <td>${valueDisplay}</td>
+            <td>
+              <button class="btn btn-primary" data-idx="${idx}" style="padding:4px 10px;font-size:12px;">编辑</button>
+              <button class="btn btn-danger" data-idx="${idx}" style="padding:4px 10px;font-size:12px;">删除</button>
+            </td>
+          </tr>`;
+        }
+      });
+      html += '</tbody></table>';
+      document.getElementById('events-table').innerHTML = html;
+
+      // Bind edit-mode color presets and hex update
+      events.forEach((ev, idx) => {
+        if (editingIdx === idx) {
+          renderColorPresets(`edit-color-presets-${idx}`, document.getElementById(`edit-color-${idx}`).value, (c) => {
+            document.getElementById(`edit-color-${idx}`).value = c;
+            document.getElementById(`edit-color-hex-${idx}`).textContent = c;
+          });
+          document.getElementById(`edit-color-${idx}`).addEventListener('input', (e) => {
+            document.getElementById(`edit-color-hex-${idx}`).textContent = e.target.value;
+          });
+
+          // Type change in edit mode
+          document.getElementById(`edit-type-${idx}`).addEventListener('change', () => {
+            const type = document.getElementById(`edit-type-${idx}`).value;
+            const valueCell = document.getElementById(`edit-value-cell-${idx}`);
+            if (type === 'markPoint') {
+              valueCell.innerHTML = `<input type="number" id="edit-value-${idx}" value="${ev.value !== undefined ? ev.value : ''}" placeholder="自动" style="width:70px;padding:4px 6px;border:1px solid #dee0e3;border-radius:4px;" />`;
+            } else {
+              valueCell.innerHTML = '-';
+            }
+          });
+        }
+      });
+
+      document.querySelectorAll('#events-table .btn-danger').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!confirm('确定删除该事件吗？')) return;
+          const idx = Number(btn.getAttribute('data-idx'));
+          eventsData.events.splice(idx, 1);
+          if (editingIdx === idx) editingIdx = null;
+          saveLocal();
+          renderChart();
+          renderEventsTable();
+        });
+      });
+
+      // Auto-save on blur/enter for edit inputs
+      document.querySelectorAll('.edit-input').forEach(el => {
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const idx = Number(el.getAttribute('data-edit-idx'));
+            commitEdit(idx);
+          }
+        });
+        el.addEventListener('focusout', (e) => {
+          const idx = Number(el.getAttribute('data-edit-idx'));
+          const related = e.relatedTarget;
+          if (related && related.classList.contains('edit-input') && Number(related.getAttribute('data-edit-idx')) === idx) {
+            return; // focus moved within same row
+          }
+          commitEdit(idx);
+        });
+      });
+
+      document.querySelectorAll('#events-table .btn-primary').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-idx'));
+          if (editingIdx === idx) {
+            commitEdit(idx);
+          } else {
+            editingIdx = idx;
+            renderEventsTable();
+          }
+        });
+      });
+
+      document.querySelectorAll('#events-table .btn-secondary').forEach(btn => {
+        btn.addEventListener('click', () => {
+          editingIdx = null;
+          renderEventsTable();
+        });
+      });
+    }
+
+    function saveLocal() {
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(eventsData));
+      } catch (e) {}
+    }
+
+    function loadLocal() {
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function clearLocal() {
+      try {
+        localStorage.removeItem(LS_KEY);
+        localStorage.removeItem(ZOOM_KEY);
+      } catch (e) {}
+    }
+
+    function saveZoom(state) {
+      try {
+        localStorage.setItem(ZOOM_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function loadZoom() {
+      try {
+        const raw = localStorage.getItem(ZOOM_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function exportJSON() {
+      const payload = {
+        _comment: "运营事件标注文件，关联收入趋势分析。修改后刷新 report 页面即可生效。",
+        events: eventsData.events,
+        format: {
+          date: "YYYY-MM-DD，必须与 daily_metrics.csv 的日期一致",
+          endDate: "markArea 专用，结束日期",
+          type: "markLine(垂直标线) | markPoint(标注点) | markArea(区间高亮)",
+          name: "事件名称，显示在图表上",
+          color: "十六进制颜色码，可选",
+          value: "markPoint 专用，对应纵轴收入值；若省略则自动取当日收入"
+        },
+        color_palette: COLOR_PALETTE
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'revenue_events.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetForm() {
+      document.getElementById('ev-date').value = '';
+      document.getElementById('ev-enddate').value = '';
+      document.getElementById('ev-type').value = 'markLine';
+      document.getElementById('ev-name').value = '';
+      setColorInput(getNextColor());
+      document.getElementById('ev-value').value = '';
+      toggleGroups();
+    }
+
+    function toggleGroups() {
+      const type = document.getElementById('ev-type').value;
+      document.getElementById('value-group').style.display = type === 'markPoint' ? 'block' : 'none';
+      document.getElementById('enddate-group').style.display = type === 'markArea' ? 'block' : 'none';
+    }
+
+    document.getElementById('ev-type').addEventListener('change', toggleGroups);
+
+    document.getElementById('btn-add').addEventListener('click', () => {
+      const date = document.getElementById('ev-date').value;
+      const endDate = document.getElementById('ev-enddate').value;
+      const type = document.getElementById('ev-type').value;
+      const name = document.getElementById('ev-name').value.trim();
+      const color = document.getElementById('ev-color').value;
+      const valueRaw = document.getElementById('ev-value').value.trim();
+
+      if (!date || !name) {
+        alert('请填写日期和事件名称');
+        return;
+      }
+      if (type === 'markArea' && !endDate) {
+        alert('请填写结束日期');
+        return;
+      }
+
+      const ev = { date, type, name, color };
+      if (type === 'markPoint' && valueRaw !== '') {
+        ev.value = Number(valueRaw);
+      }
+      if (type === 'markArea') {
+        ev.endDate = endDate;
+      }
+
+      eventsData.events.push(ev);
+      eventsData.events.sort((a, b) => new Date(a.date) - new Date(b.date));
+      saveLocal();
+      renderChart();
+      renderEventsTable();
+      resetForm();
+    });
+
+    document.getElementById('btn-import').addEventListener('click', () => {
+      document.getElementById('file-import').click();
+    });
+
+    document.getElementById('file-import').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (!imported.events || !Array.isArray(imported.events)) {
+            alert('导入失败：JSON 中缺少 events 数组');
+            return;
+          }
+          if (confirm(`确定导入吗？当前 ${eventsData.events.length} 条事件将被替换为 ${imported.events.length} 条。`)) {
+            eventsData = { events: imported.events };
+            saveLocal();
+            renderChart();
+            renderEventsTable();
+            alert('导入成功');
+          }
+        } catch (err) {
+          alert('导入失败：文件不是有效的 JSON');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    document.getElementById('btn-export').addEventListener('click', exportJSON);
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      if (confirm('确定清空本地缓存并从远程 JSON 重新加载吗？未导出的修改将丢失。')) {
+        clearLocal();
+        location.reload();
+      }
+    });
+
+    async function init() {
+      try {
+        const [csvRes, eventsRes] = await Promise.all([
+          fetch(CSV_URL),
+          fetch(EVENTS_URL)
+        ]);
+        if (!csvRes.ok) throw new Error(`CSV 加载失败: ${csvRes.status}`);
+
+        const csvText = await csvRes.text();
+        csvRows = parseCSV(csvText);
+
+        const localData = loadLocal();
+        if (localData && localData.events) {
+          eventsData = localData;
+          document.getElementById('message').innerHTML =
+            '<div class="info">已加载本地缓存数据。如需同步远程最新配置，请点击「清空本地缓存」后刷新页面。</div>';
+        } else if (eventsRes.ok) {
+          eventsData = await eventsRes.json();
+          saveLocal();
+        } else {
+          eventsData = { events: [] };
+          document.getElementById('message').innerHTML =
+            `<div class="error">远程事件配置加载失败（${eventsRes.status}），已启用空事件列表。您可以直接在页面内添加事件并导出。</div>`;
+        }
+
+        initColorPresets();
+        resetForm();
+        renderChart();
+        renderEventsTable();
+      } catch (err) {
+        document.getElementById('message').innerHTML =
+          `<div class="error">加载失败：${err.message}<br/><span style="font-size:13px;color:#8c1d18">
+          提示：本地直接打开 HTML（file:// 协议）可能导致跨域限制。请通过本地服务器（如 VS Code Live Server）或 GitHub Pages 访问。</span></div>`;
+        console.error(err);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
