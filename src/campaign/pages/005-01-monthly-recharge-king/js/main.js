@@ -145,6 +145,30 @@ if (document.readyState === 'loading') {
     init();
 }
 
+function syncHonorHall() {
+    const winnerName = document.getElementById('winner-name');
+    const winnerDate = document.getElementById('winner-date');
+    const hallName = document.getElementById('hall-name');
+    const hallDate = document.getElementById('hall-date');
+    const hallPlaceholder = document.getElementById('hall-placeholder-text');
+    
+    if (!winnerName || !hallName) return;
+    
+    const name = winnerName.textContent.trim();
+    // If result area has real winner data (not default placeholder), sync to honor hall
+    if (name && name !== '?' && name !== '') {
+        hallName.textContent = name;
+        if (hallPlaceholder) hallPlaceholder.style.display = 'none';
+        if (hallDate && winnerDate) {
+            const date = winnerDate.textContent.trim();
+            if (date && date !== '?') {
+                hallDate.textContent = date;
+                hallDate.style.display = 'block';
+            }
+        }
+    }
+}
+
 function init() {
     console.log('Initializing...');
     
@@ -158,6 +182,9 @@ function init() {
     }
     
     document.title = savedLang === 'vi' ? 'Chí Tôn Long Vương' : '至尊龙王';
+    
+    // Sync honor hall with result view data
+    syncHonorHall();
     
     // Initialize gap display
     updateUserDisplay();
