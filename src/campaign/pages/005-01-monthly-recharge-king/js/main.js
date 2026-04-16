@@ -16,6 +16,9 @@ function toggleLanguage() {
     document.title = newLang === 'vi' ? 'Chí Tôn Long Vương' : '至尊龙王';
     
     localStorage.setItem('lang', newLang);
+    
+    // Re-render amounts with correct currency suffix
+    renderAmounts();
 }
 
 // Toggle between activity view and result view (demo button)
@@ -91,13 +94,19 @@ function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
+// Format number with currency suffix based on current language
+function formatCurrency(num) {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    return formatNumber(num) + (lang === 'vi' ? ' vàng' : ' 金币');
+}
+
 // Mock data - initial values shown on page
 const mockData = {
-    topAmount: 188888000,
-    rank2Amount: 156000000,
-    rank3Amount: 128000000,
+    topAmount: 88888,
+    rank2Amount: 66666,
+    rank3Amount: 52000,
     userRank: 5,
-    userAmount: 45000000
+    userAmount: 12800
 };
 
 // Check if already logged in (for demo)
@@ -139,18 +148,12 @@ function updateUserDisplay() {
     } else {
         if (gapAmountDisplay) {
             const gap = mockData.topAmount - mockData.userAmount;
-            gapAmountDisplay.textContent = formatNumber(gap) + ' VND';
+            gapAmountDisplay.textContent = formatCurrency(gap);
         }
     }
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
-}
-
+// Sync honor hall with result view data
 function syncHonorHall() {
     // Only sync when in result state
     if (!document.body.classList.contains('state-result')) return;
@@ -187,6 +190,32 @@ function syncHonorHall() {
     }
 }
 
+// Render all static and dynamic amounts with correct currency suffix
+function renderAmounts() {
+    const topAmountEl = document.getElementById('top-amount');
+    const rank2AmountEl = document.getElementById('rank2-amount');
+    const rank3AmountEl = document.getElementById('rank3-amount');
+    const myAmountEl = document.getElementById('my-amount');
+    const userAmountDisplay = document.getElementById('user-amount-display');
+    const winnerAmountEl = document.getElementById('winner-amount');
+    
+    if (topAmountEl) topAmountEl.textContent = formatCurrency(mockData.topAmount);
+    if (rank2AmountEl) rank2AmountEl.textContent = formatCurrency(mockData.rank2Amount);
+    if (rank3AmountEl) rank3AmountEl.textContent = formatCurrency(mockData.rank3Amount);
+    if (myAmountEl) myAmountEl.textContent = formatCurrency(mockData.userAmount);
+    if (userAmountDisplay) userAmountDisplay.textContent = formatCurrency(mockData.userAmount);
+    if (winnerAmountEl) winnerAmountEl.textContent = formatCurrency(mockData.topAmount);
+    
+    updateUserDisplay();
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+
 function init() {
     console.log('Initializing...');
     
@@ -204,8 +233,8 @@ function init() {
     // Sync honor hall with result view data
     syncHonorHall();
     
-    // Initialize gap display
-    updateUserDisplay();
+    // Render all amounts with correct currency
+    renderAmounts();
     
     // Attach login button handler
     const loginBtn = document.getElementById('login-btn');
@@ -225,19 +254,19 @@ function init() {
 // Simulate top amount increasing (only if logged in)
 setInterval(function() {
     if (isLoggedIn && Math.random() > 0.7) {
-        mockData.topAmount += Math.floor(Math.random() * 500000);
+        mockData.topAmount += Math.floor(Math.random() * 888);
         
         // Update top amount display
         const topAmountEl = document.getElementById('top-amount');
         if (topAmountEl) {
-            topAmountEl.textContent = formatNumber(mockData.topAmount) + ' VND';
+            topAmountEl.textContent = formatCurrency(mockData.topAmount);
         }
         
         // Update gap
         const gapAmountDisplay = document.getElementById('gap-amount-display');
         if (gapAmountDisplay && mockData.userRank !== 1) {
             const gap = mockData.topAmount - mockData.userAmount;
-            gapAmountDisplay.textContent = formatNumber(gap) + ' VND';
+            gapAmountDisplay.textContent = formatCurrency(gap);
         }
     }
 }, 5000);
