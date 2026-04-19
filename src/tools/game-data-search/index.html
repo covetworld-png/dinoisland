@@ -1807,6 +1807,9 @@ function doSearch(query) {
       clearHighlight(tr);
     });
     document.querySelectorAll('.section').forEach(sec => sec.classList.remove('collapsed'));
+    // 恢复所有表格和标题显示
+    document.querySelectorAll('table').forEach(t => t.style.display = '');
+    document.querySelectorAll('h2, h3, h4').forEach(h => h.style.display = '');
     matchEl.textContent = allRowEls.length;
     return;
   }
@@ -1852,6 +1855,40 @@ function doSearch(query) {
     const visible = sec.querySelectorAll('tr[data-search]:not(.hidden)');
     if (visible.length > 0) {
       sec.classList.remove('collapsed');
+    }
+  });
+
+  // 隐藏没有可见数据行的表格及其前面的标题
+  document.querySelectorAll('table').forEach(table => {
+    const visibleRows = table.querySelectorAll('tr[data-search]:not(.hidden)');
+    if (visibleRows.length === 0) {
+      table.style.display = 'none';
+      // 隐藏紧邻的前一个标题（h2/h3/h4），如果该标题后面没有其他可见表格
+      let prev = table.previousElementSibling;
+      while (prev && !prev.matches('h2, h3, h4')) {
+        prev = prev.previousElementSibling;
+      }
+      if (prev) {
+        // 检查该标题和下一个同层级标题之间是否还有可见表格
+        let hasVisibleTable = false;
+        let next = prev.nextElementSibling;
+        while (next && next !== table) {
+          next = next.nextElementSibling;
+        }
+        // 简化处理：只隐藏紧邻表格的 h4/h3，h2 作为大章节始终保留
+        if (prev.matches('h3, h4')) {
+          prev.style.display = 'none';
+        }
+      }
+    } else {
+      table.style.display = '';
+      let prev = table.previousElementSibling;
+      while (prev && !prev.matches('h2, h3, h4')) {
+        prev = prev.previousElementSibling;
+      }
+      if (prev && prev.matches('h3, h4')) {
+        prev.style.display = '';
+      }
     }
   });
 }

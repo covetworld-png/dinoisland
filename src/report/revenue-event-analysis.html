@@ -307,7 +307,9 @@
         <textarea id="import-text" class="import-area" placeholder="粘贴 revenue_events.json 的内容..."></textarea>
         <div class="actions" style="margin-top:8px;">
           <button class="btn btn-primary" id="btn-import">导入 JSON</button>
-          <button class="btn btn-secondary" id="btn-import-file" style="display:none;">从文件导入</button>
+          <label class="btn btn-secondary" id="btn-import-file-label" style="display:none;cursor:pointer;">从文件导入
+            <input type="file" id="file-input" accept="application/json" style="display:none;">
+          </label>
         </div>
       </div>
       <div id="events-table" style="margin-top:12px;">加载中...</div>
@@ -864,16 +866,9 @@
       }
     });
 
-    // Fallback: hidden file input for browsers that support it
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'application/json';
-    fileInput.style.display = 'none';
-    document.body.appendChild(fileInput);
-
-    const fileBtn = document.getElementById('btn-import-file');
+    const fileBtn = document.getElementById('btn-import-file-label');
     fileBtn.style.display = 'inline-block';
-    fileBtn.addEventListener('click', () => fileInput.click());
+    const fileInput = document.getElementById('file-input');
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -895,9 +890,9 @@
         } catch (err) {
           alert('导入失败：文件不是有效的 JSON');
         }
+        fileInput.value = '';
       };
       reader.readAsText(file);
-      e.target.value = '';
     });
 
     document.getElementById('btn-export').addEventListener('click', exportJSON);

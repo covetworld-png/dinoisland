@@ -13,17 +13,12 @@
 !build/
 !build/**
 
-# Except public (static assets)
-!public/
-!public/**
+# Ignore public (static assets)
+public/
 
 # Except versions (backups)
 !versions/
 !versions/**
-
-# Except docs (documentation)
-!docs/
-!docs/**
 
 # Except root index.html
 !index.html

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+  <title>怪兽岛</title>
+  <meta name="description" content="怪兽岛">
+  <link rel="icon" href="../../../../public/favicon.ico">
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Common Styles -->
+  <link rel="stylesheet" href="../../../common/assets/reset.css">
+  
+  <!-- Official Site Common Styles -->
+  <link rel="stylesheet" href="../../assets/common_official.css">
+  
+  <!-- Home Page Specific Styles -->
+  <link rel="stylesheet" href="./assets/home.css">
+  
+  <!-- Loading Handler -->
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        document.body.classList.add('loaded');
+      }, 500);
+    });
+  </script>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loader-wrapper">
+    <div id="loader"></div>
+    <div class="loader-section section-left"></div>
+    <div class="loader-section section-right"></div>
+    <div class="load_title">正在加载...</div>
+  </div>
+
+  <!-- App -->
+  <div id="app">
+    <!-- Header Navigation -->
+    <header class="site-header">
+      <div class="header-left">
+        <nav class="main-nav">
+          <a href="/" class="nav-link active">回到首页</a>
+          <a href="/orders" class="nav-link">订单列表</a>
+          <a href="/war" class="nav-link">宣战</a>
+          <a href="/report" class="nav-link">日报</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="lang-switcher" id="langSwitcher">
+          <svg class="icon-language" viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+          </svg>
+        </div>
+        <div class="user-info">
+          <svg class="icon-user" viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+          <span class="user-label">登录账号：</span>
+          <span class="user-name">covetworld</span>
+          <span class="divider">|</span>
+          <span class="user-label">游戏账号：</span>
+          <span class="game-id">13225799</span>
+        </div>
+        <div class="user-center-dropdown">
+          <span>个人中心</span>
+          <svg class="icon-arrow" viewBox="0 0 24 24" width="16" height="16">
+            <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- Invite Friends Button -->
+    <a href="/invite" class="invite-btn">
+      <span class="invite-icon">🎁</span>
+      <span class="invite-text">邀请好友</span>
+    </a>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Banner Section -->
+      <div class="banner-section">
+        <img src="https://account.monster-lair.vn/assets/banner-BSZ_6Ncr.png" alt="怪兽岛 Banner" class="banner-img">
+      </div>
+
+      <!-- Product Section -->
+      <div class="product-section">
+        <!-- Notice & Server -->
+        <div class="product-header">
+          <div class="notice-bar">
+            <span class="notice-text">每个订单只能扫码支付一次</span>
+          </div>
+          <div class="server-select-wrapper">
+            <div class="el-select">
+              <div class="el-select__wrapper">
+                <span class="el-select__placeholder">请选择服务器列表</span>
+                <svg class="el-select__icon" viewBox="0 0 24 24" width="12" height="12">
+                  <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Cards -->
+        <div class="product-list">
+          <div class="pro-item" data-price="130000" data-coins="50">
+            <img src="https://account.monster-lair.vn/assets/1-D9Xuy4dF.png" alt="荒岛初生龙裔包" class="pro-card-img">
+            <div class="pro-name">荒岛初生龙裔包</div>
+          </div>
+          <div class="pro-item" data-price="250000" data-coins="100">
+            <img src="https://account.monster-lair.vn/assets/2-BqDSsF21.png" alt="蛮荒进化战龙包" class="pro-card-img">
+            <div class="pro-name">蛮荒进化战龙包</div>
+          </div>
+          <div class="pro-item" data-price="2200000" data-coins="1000">
+            <img src="https://account.monster-lair.vn/assets/3-B4zcwT84.png" alt="荒岛霸主蓄能包" class="pro-card-img">
+            <div class="pro-name">荒岛霸主蓄能包</div>
+          </div>
+          <div class="pro-item" data-price="9000000" data-coins="5000">
+            <img src="https://account.monster-lair.vn/assets/4-CnCSa9Ds.png" alt="史前万龙至尊包" class="pro-card-img">
+            <div class="pro-name">史前万龙至尊包</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Download Links -->
+      <div class="download-ver-box">
+        <a href="https://www.mediafire.com/file/h35uc0bhc5gv15z/QuanDoanChien.zip/file" target="_blank" class="download-link">
+          <span>Link tải game 1</span>
+          <img src="https://account.monster-lair.vn/assets/icon_arrow-CnCvvJft.png" alt="arrow">
+        </a>
+        <a href="https://drive.google.com/file/d/1n7JHQkX-bnmKX3vpXB7Cw41c929MeTWq/view?usp=drivesdk" target="_blank" class="download-link">
+          <span>Link tải game 2</span>
+          <img src="https://account.monster-lair.vn/assets/icon_arrow-CnCvvJft.png" alt="arrow">
+        </a>
+        <a href="https://drive.google.com/file/d/11Yj793DCdpEPvFhKj-jpYFIdGf1wyoAi/view?usp=drive_link" target="_blank" class="download-link">
+          <span>Link tải game 3</span>
+          <img src="https://account.monster-lair.vn/assets/icon_arrow-CnCvvJft.png" alt="arrow">
+        </a>
+        <a href="https://drive.google.com/file/d/1o4YeZ2JyVoeDaueaaWzABJhDAfTrDj9b/view?usp=drivesd" target="_blank" class="download-link">
+          <span>Link tải game 4</span>
+          <img src="https://account.monster-lair.vn/assets/icon_arrow-CnCvvJft.png" alt="arrow">
+        </a>
+      </div>
+
+      <!-- Footer QR -->
+      <div class="footer-content">
+        <img src="https://account.monster-lair.vn/assets/icon_server-B7mKHxRr.png" alt="客服二维码" class="server-qr">
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="./assets/home.js"></script>
+</body>
+</html>
