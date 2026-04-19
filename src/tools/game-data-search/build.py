@@ -93,14 +93,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
 <style>
 :root {
-  --bg: #f8fafc;
+  --bg: #f0f2f5;
   --bg-elevated: #ffffff;
-  --border: #e2e8f0;
-  --text: #1e293b;
-  --text-muted: #64748b;
+  --border: #d1d5db;
+  --text: #374151;
+  --text-muted: #6b7280;
   --accent: #2563eb;
   --accent-dim: #1d4ed8;
-  --highlight: rgba(37, 99, 235, 0.10);
+  --highlight: rgba(37, 99, 235, 0.08);
   --danger: #dc2626;
   --success: #16a34a;
   --warning: #d97706;
