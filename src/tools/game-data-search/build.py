@@ -27,10 +27,25 @@ def parse_markdown(md_text: str) -> tuple[str, list]:
     section_id = 0
     row_id = 0
 
-    # 为每个 h2/h3/h4 添加锚点 id
+    # Section 颜色映射
+    SECTION_COLORS = {
+        "一、恐龙属性数据": "#059669",
+        "二、商城数据": "#3b82f6",
+        "三、公会商城": "#d97706",
+        "四、皮肤数据": "#8b5cf6",
+        "五、权益系统": "#f97316",
+        "六、战斗机制": "#ef4444",
+    }
+
+    # 为每个 h2/h3/h4 添加锚点 id 和 section 颜色
     for tag in soup.find_all(["h2", "h3", "h4"]):
         section_id += 1
         tag["id"] = f"sec-{section_id}"
+        text = tag.get_text().strip()
+        for prefix, color in SECTION_COLORS.items():
+            if text.startswith(prefix):
+                tag["data-section-color"] = color
+                break
 
     # 为每个表格行添加 data-search 和 data-section
     for table in soup.find_all("table"):
@@ -40,6 +55,9 @@ def parse_markdown(md_text: str) -> tuple[str, list]:
         if prev:
             section_name = prev.get_text().strip()
             sec_id = prev.get("id", "")
+            sec_color = prev.get("data-section-color", "")
+            if sec_color:
+                table["data-section-color"] = sec_color
         else:
             sec_id = ""
 
@@ -133,7 +151,10 @@ html, body {
   outline: none;
   transition: border-color .2s;
 }
-#searchInput:focus { border-color: var(--accent); }
+#searchInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15), 0 0 12px rgba(88, 166, 255, 0.08);
+}
 .search-wrap::before {
   content: "🔍";
   position: absolute;
@@ -179,9 +200,17 @@ html, body {
 .section.collapsed .section-body { display: none; }
 
 /* Headings */
-h2 { font-size: 20px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-top: 32px; }
-h3 { font-size: 16px; color: var(--text); margin-top: 24px; }
-h4 { font-size: 14px; color: var(--text-muted); margin-top: 16px; }
+h2 {
+  font-size: 20px;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0 8px 14px;
+  margin-top: 32px;
+  border-left: 4px solid transparent;
+  transition: border-left-color .2s;
+}
+h3 { font-size: 16px; color: var(--text); margin-top: 24px; padding-left: 8px; border-left: 3px solid transparent; }
+h4 { font-size: 14px; color: var(--text-muted); margin-top: 16px; padding-left: 8px; border-left: 3px solid transparent; }
 
 /* Tables */
 table {
@@ -189,22 +218,28 @@ table {
   border-collapse: collapse;
   margin: 12px 0;
   font-size: 13px;
+  border-left: 3px solid transparent;
+  transition: border-left-color .2s;
 }
 th, td {
   padding: 8px 12px;
   text-align: left;
   border: 1px solid var(--border);
 }
+td {
+  font-variant-numeric: tabular-nums;
+}
 th {
-  background: var(--bg-elevated);
+  background: rgba(22, 27, 34, 0.95);
   color: var(--accent);
   font-weight: 600;
   position: sticky;
   top: 68px;
   z-index: 10;
+  letter-spacing: 0.3px;
 }
 tr:nth-child(even) { background: rgba(255,255,255,.02); }
-tr:hover { background: rgba(255,255,255,.04); }
+tr:hover { background: rgba(88, 166, 255, 0.06) !important; }
 tr.hidden { display: none !important; }
 tr.matched { background: var(--highlight) !important; }
 
@@ -458,6 +493,11 @@ searchInput.addEventListener('keydown', e => {
     doSearch('');
     searchInput.blur();
   }
+});
+
+// 初始化 section 色条
+document.querySelectorAll('[data-section-color]').forEach(el => {
+  el.style.borderLeftColor = el.dataset.sectionColor;
 });
 
 // 自动聚焦搜索框（桌面端）
