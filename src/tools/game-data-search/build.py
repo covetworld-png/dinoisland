@@ -93,17 +93,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
 <style>
 :root {
-  --bg: #0d1117;
-  --bg-elevated: #161b22;
-  --border: #30363d;
-  --text: #c9d1d9;
-  --text-muted: #8b949e;
-  --accent: #58a6ff;
-  --accent-dim: #1f6feb;
-  --highlight: rgba(56, 139, 253, 0.15);
-  --danger: #f85149;
-  --success: #3fb950;
-  --warning: #d29922;
+  --bg: #f8fafc;
+  --bg-elevated: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --accent: #2563eb;
+  --accent-dim: #1d4ed8;
+  --highlight: rgba(37, 99, 235, 0.10);
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #d97706;
 }
 * { box-sizing: border-box; }
 html, body {
@@ -153,7 +153,7 @@ html, body {
 }
 #searchInput:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15), 0 0 12px rgba(88, 166, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), 0 0 12px rgba(37, 99, 235, 0.06);
 }
 .search-wrap::before {
   content: "🔍";
@@ -230,7 +230,7 @@ td {
   font-variant-numeric: tabular-nums;
 }
 th {
-  background: rgba(22, 27, 34, 0.95);
+  background: #f1f5f9;
   color: var(--accent);
   font-weight: 600;
   position: sticky;
@@ -238,15 +238,15 @@ th {
   z-index: 10;
   letter-spacing: 0.3px;
 }
-tr:nth-child(even) { background: rgba(255,255,255,.02); }
-tr:hover { background: rgba(88, 166, 255, 0.06) !important; }
+tr:nth-child(even) { background: rgba(0,0,0,.02); }
+tr:hover { background: rgba(37, 99, 235, 0.06) !important; }
 tr.hidden { display: none !important; }
 tr.matched { background: var(--highlight) !important; }
 
 /* Highlight */
 mark {
-  background: rgba(56, 139, 253, 0.35);
-  color: inherit;
+  background: rgba(37, 99, 235, 0.20);
+  color: var(--text);
   padding: 0 2px;
   border-radius: 3px;
 }
