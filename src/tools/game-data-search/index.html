@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>恐龙岛游戏数据查询</title>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+<style>
+:root {
+  --bg: #0d1117;
+  --bg-elevated: #161b22;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --accent-dim: #1f6feb;
+  --highlight: rgba(56, 139, 253, 0.15);
+  --danger: #f85149;
+  --success: #3fb950;
+  --warning: #d29922;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.search-wrap {
+  flex: 1;
+  min-width: 240px;
+  position: relative;
+}
+#searchInput {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color .2s;
+}
+#searchInput:focus { border-color: var(--accent); }
+.search-wrap::before {
+  content: "🔍";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: .6;
+  font-size: 13px;
+}
+#searchInput::placeholder { color: var(--text-muted); }
+.stats {
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.stats b { color: var(--accent); }
+
+/* Layout */
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+/* Section */
+.section { margin-bottom: 24px; }
+.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 0;
+  user-select: none;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.section-toggle:hover { color: var(--accent); }
+.section-toggle .arrow {
+  display: inline-block;
+  width: 0; height: 0;
+  border-left: 5px solid var(--text-muted);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform .2s;
+}
+.section.collapsed .arrow { transform: rotate(-90deg); }
+.section.collapsed .section-body { display: none; }
+
+/* Headings */
+h2 { font-size: 20px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-top: 32px; }
+h3 { font-size: 16px; color: var(--text); margin-top: 24px; }
+h4 { font-size: 14px; color: var(--text-muted); margin-top: 16px; }
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 13px;
+}
+th, td {
+  padding: 8px 12px;
+  text-align: left;
+  border: 1px solid var(--border);
+}
+th {
+  background: var(--bg-elevated);
+  color: var(--accent);
+  font-weight: 600;
+  position: sticky;
+  top: 68px;
+  z-index: 10;
+}
+tr:nth-child(even) { background: rgba(255,255,255,.02); }
+tr:hover { background: rgba(255,255,255,.04); }
+tr.hidden { display: none !important; }
+tr.matched { background: var(--highlight) !important; }
+
+/* Highlight */
+mark {
+  background: rgba(56, 139, 253, 0.35);
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+/* Empty state */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.no-results b { color: var(--danger); }
+
+/* Scroll to top */
+.to-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+  font-size: 18px;
+}
+.to-top.visible { opacity: 1; pointer-events: auto; }
+.to-top:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header { padding: 12px 16px; }
+  .container { padding: 12px; }
+  th, td { padding: 6px 8px; font-size: 12px; }
+  h2 { font-size: 17px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🦖 恐龙岛数据查询</h1>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="输入关键词搜索，如：牛龙、咬合力、128888、积分..." autocomplete="off">
+  </div>
+  <div class="stats">共 <b id="totalRows">0</b> 条数据 · 匹配 <b id="matchRows">0</b> 条</div>
+</div>
+
+<div class="container" id="content">
+  <h1>恐龙岛游戏数据汇总</h1>
+<blockquote>
+<p>数据来源：游戏内截图提取 | 提取时间：2026-04-19</p>
+</blockquote>
+<hr/>
+<h2 id="sec-1">一、恐龙属性数据（成年体）</h2>
+<table>
+<thead>
+<tr>
+<th>恐龙名称</th>
+<th>饮食</th>
+<th>性别</th>
+<th>血量</th>
+<th>咬合力</th>
+<th>防御力</th>
+<th>体重</th>
+<th>成长值</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="机械暴龙_成年 食肉 ♂ 130,000 3,600 1,000 18,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-1">
+<td>机械暴龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>130,000</td>
+<td>3,600</td>
+<td>1,000</td>
+<td>18,000</td>
+<td>100%</td>
+</tr>
+<tr data-search="剑龙_成年 食草 ♂ 6,000 1,600 1,000 1,300 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-2">
+<td>剑龙_成年</td>
+<td>食草</td>
+<td>♂</td>
+<td>6,000</td>
+<td>1,600</td>
+<td>1,000</td>
+<td>1,300</td>
+<td>100%</td>
+</tr>
+<tr data-search="异特龙_成年 食肉 ♂ 2,800 500 1,000 2,400 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-3">
+<td>异特龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>2,800</td>
+<td>500</td>
+<td>1,000</td>
+<td>2,400</td>
+<td>100%</td>
+</tr>
+<tr data-search="远古南巨_成年 食肉 ♂ 28,000 1,900 1,000 18,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-4">
+<td>远古南巨_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>28,000</td>
+<td>1,900</td>
+<td>1,000</td>
+<td>18,000</td>
+<td>100%</td>
+</tr>
+<tr data-search="艾雷拉龙_成年 食肉 ♀ 2,500 250 1,000 2,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-5">
+<td>艾雷拉龙_成年</td>
+<td>食肉</td>
+<td>♀</td>
+<td>2,500</td>
+<td>250</td>
+<td>1,000</td>
+<td>2,000</td>
+<td>100%</td>
+</tr>
+<tr data-search="南手龙 食草 ♀ 10,000 0 1,000 2,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-6">
+<td>南手龙</td>
+<td>食草</td>
+<td>♀</td>
+<td>10,000</td>
+<td>0</td>
+<td>1,000</td>
+<td>2,000</td>
+<td>100%</td>
+</tr>
+<tr data-search="霸王龙_成年 食肉 ♀ 6,500 1,200 1,000 5,800 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-7">
+<td>霸王龙_成年</td>
+<td>食肉</td>
+<td>♀</td>
+<td>6,500</td>
+<td>1,200</td>
+<td>1,000</td>
+<td>5,800</td>
+<td>100%</td>
+</tr>
+<tr data-search="甲龙_成年 食草 ♀ 6,000 800 1,000 1,300 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-8">
+<td>甲龙_成年</td>
+<td>食草</td>
+<td>♀</td>
+<td>6,000</td>
+<td>800</td>
+<td>1,000</td>
+<td>1,300</td>
+<td>100%</td>
+</tr>
+<tr data-search="重爪龙_成年 食肉 ♀ 3,500 300 1,000 2,800 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-9">
+<td>重爪龙_成年</td>
+<td>食肉</td>
+<td>♀</td>
+<td>3,500</td>
+<td>300</td>
+<td>1,000</td>
+<td>2,800</td>
+<td>100%</td>
+</tr>
+<tr data-search="牛龙_成年 食肉 ♂ 5,200 460 1,000 3,200 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-10">
+<td>牛龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>5,200</td>
+<td>460</td>
+<td>1,000</td>
+<td>3,200</td>
+<td>100%</td>
+</tr>
+<tr data-search="翼龙_成年 食肉 ♂ 20,000 0 100 1,800 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-11">
+<td>翼龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>20,000</td>
+<td>0</td>
+<td>100</td>
+<td>1,800</td>
+<td>100%</td>
+</tr>
+<tr data-search="角鼻龙_成年 食肉 ♂ 5,000 500 1,000 3,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-12">
+<td>角鼻龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>5,000</td>
+<td>500</td>
+<td>1,000</td>
+<td>3,000</td>
+<td>100%</td>
+</tr>
+<tr data-search="超级暴龙_成年 食肉 ♂ 168,000 3,000 1,000 16,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-13">
+<td>超级暴龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>168,000</td>
+<td>3,000</td>
+<td>1,000</td>
+<td>16,000</td>
+<td>100%</td>
+</tr>
+<tr data-search="双脊龙_成年 食肉 ♂ 3,000 400 1,000 2,400 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-14">
+<td>双脊龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>3,000</td>
+<td>400</td>
+<td>1,000</td>
+<td>2,400</td>
+<td>100%</td>
+</tr>
+<tr data-search="巨型脊背龙_成年 食肉 ♂ 29,000 1,700 1,000 18,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-15">
+<td>巨型脊背龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>29,000</td>
+<td>1,700</td>
+<td>1,000</td>
+<td>18,000</td>
+<td>100%</td>
+</tr>
+<tr data-search="踢脚鸡_成年 食草 ♂ 1,800 300 1,000 2,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-16">
+<td>踢脚鸡_成年</td>
+<td>食草</td>
+<td>♂</td>
+<td>1,800</td>
+<td>300</td>
+<td>1,000</td>
+<td>2,000</td>
+<td>100%</td>
+</tr>
+<tr data-search="高脊龙_成年 食肉 ♂ 4,000 400 1,000 3,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-17">
+<td>高脊龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>4,000</td>
+<td>400</td>
+<td>1,000</td>
+<td>3,000</td>
+<td>100%</td>
+</tr>
+<tr data-search="犹他龙_成年 食肉 ♂ 3,000 200 1,000 2,500 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-18">
+<td>犹他龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>3,000</td>
+<td>200</td>
+<td>1,000</td>
+<td>2,500</td>
+<td>100%</td>
+</tr>
+<tr data-search="雷龙_成年 食草 ♂ 60,000 15,000 2,000 30,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-19">
+<td>雷龙_成年</td>
+<td>食草</td>
+<td>♂</td>
+<td>60,000</td>
+<td>15,000</td>
+<td>2,000</td>
+<td>30,000</td>
+<td>100%</td>
+</tr>
+<tr data-search="三角龙_成年 食草 ♂ 6,000 800 1,000 1,300 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-20">
+<td>三角龙_成年</td>
+<td>食草</td>
+<td>♂</td>
+<td>6,000</td>
+<td>800</td>
+<td>1,000</td>
+<td>1,300</td>
+<td>100%</td>
+</tr>
+<tr data-search="恶魔双角龙_成年 食草 ♂ 4,500 400 1,000 900 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-21">
+<td>恶魔双角龙_成年</td>
+<td>食草</td>
+<td>♂</td>
+<td>4,500</td>
+<td>400</td>
+<td>1,000</td>
+<td>900</td>
+<td>100%</td>
+</tr>
+<tr data-search="远古霸王龙_成年 食肉 ♂ 28,000 1,800 1,000 15,000 100%" data-sec-id="sec-1" data-section="一、恐龙属性数据（成年体）" id="row-22">
+<td>远古霸王龙_成年</td>
+<td>食肉</td>
+<td>♂</td>
+<td>28,000</td>
+<td>1,800</td>
+<td>1,000</td>
+<td>15,000</td>
+<td>100%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec-2">属性统计</h3>
+<ul>
+<li>食肉恐龙：15 种</li>
+<li>食草恐龙：7 种</li>
+<li>最高血量：168,000（超级暴龙_成年）</li>
+<li>最高咬合力：15,000（雷龙_成年）</li>
+<li>最高防御力：2,000（雷龙_成年）</li>
+<li>最高体重：30,000（雷龙_成年）</li>
+</ul>
+<h2 id="sec-3">二、商城数据</h2>
+<h3 id="sec-4">2.1 商城 - 怪兽</h3>
+<table>
+<thead>
+<tr>
+<th>怪兽名称</th>
+<th>兽币价格</th>
+<th>积分价格</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="三角龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-23">
+<td>三角龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="三角龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-24">
+<td>三角龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="剑龙_成年 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-25">
+<td>剑龙_成年</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="剑龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-26">
+<td>剑龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="双脊龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-27">
+<td>双脊龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="双脊龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-28">
+<td>双脊龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="巨型脊背龙_成年 2 560" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-29">
+<td>巨型脊背龙_成年</td>
+<td>2</td>
+<td>560</td>
+</tr>
+<tr data-search="巨型脊背龙_幼年 1 288" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-30">
+<td>巨型脊背龙_幼年</td>
+<td>1</td>
+<td>288</td>
+</tr>
+<tr data-search="异特龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-31">
+<td>异特龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="异特龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-32">
+<td>异特龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="恶魔双角龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-33">
+<td>恶魔双角龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="恶魔双角龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-34">
+<td>恶魔双角龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="机械暴龙_成年 105 无" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-35">
+<td>机械暴龙_成年</td>
+<td>105</td>
+<td>无</td>
+</tr>
+<tr data-search="机械暴龙_幼年 65 无" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-36">
+<td>机械暴龙_幼年</td>
+<td>65</td>
+<td>无</td>
+</tr>
+<tr data-search="牛龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-37">
+<td>牛龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="牛龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-38">
+<td>牛龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="犹他龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-39">
+<td>犹他龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="犹他龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-40">
+<td>犹他龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="甲龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-41">
+<td>甲龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="甲龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-42">
+<td>甲龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="翼龙_成年 300 无" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-43">
+<td>翼龙_成年</td>
+<td>300</td>
+<td>无</td>
+</tr>
+<tr data-search="艾雷拉龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-44">
+<td>艾雷拉龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="艾雷拉龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-45">
+<td>艾雷拉龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="角鼻龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-46">
+<td>角鼻龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="角鼻龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-47">
+<td>角鼻龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="超级暴龙_成年 75 128,888" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-48">
+<td>超级暴龙_成年</td>
+<td>75</td>
+<td>128,888</td>
+</tr>
+<tr data-search="超级暴龙_幼年 40 108,888" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-49">
+<td>超级暴龙_幼年</td>
+<td>40</td>
+<td>108,888</td>
+</tr>
+<tr data-search="踢脚鸡-成年_公 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-50">
+<td>踢脚鸡-成年_公</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="踢脚鸡-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-51">
+<td>踢脚鸡-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="远古南巨_成年 2 520" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-52">
+<td>远古南巨_成年</td>
+<td>2</td>
+<td>520</td>
+</tr>
+<tr data-search="远古南巨_幼年 1 288" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-53">
+<td>远古南巨_幼年</td>
+<td>1</td>
+<td>288</td>
+</tr>
+<tr data-search="远古牛龙_成年 2 1,200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-54">
+<td>远古牛龙_成年</td>
+<td>2</td>
+<td>1,200</td>
+</tr>
+<tr data-search="远古牛龙_幼年 1 688" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-55">
+<td>远古牛龙_幼年</td>
+<td>1</td>
+<td>688</td>
+</tr>
+<tr data-search="远古霸王龙_成年 2 520" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-56">
+<td>远古霸王龙_成年</td>
+<td>2</td>
+<td>520</td>
+</tr>
+<tr data-search="远古霸王龙_幼年 1 288" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-57">
+<td>远古霸王龙_幼年</td>
+<td>1</td>
+<td>288</td>
+</tr>
+<tr data-search="重爪龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-58">
+<td>重爪龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="重爪龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-59">
+<td>重爪龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="雷龙_成年 75 128,888" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-60">
+<td>雷龙_成年</td>
+<td>75</td>
+<td>128,888</td>
+</tr>
+<tr data-search="雷龙_幼年 40 108,888" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-61">
+<td>雷龙_幼年</td>
+<td>40</td>
+<td>108,888</td>
+</tr>
+<tr data-search="霸王龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-62">
+<td>霸王龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr data-search="霸王龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-63">
+<td>霸王龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="高脊龙-成年_公 1 100" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-64">
+<td>高脊龙-成年_公</td>
+<td>1</td>
+<td>100</td>
+</tr>
+<tr data-search="高脊龙-成年_母 1 200" data-sec-id="sec-4" data-section="2.1 商城 - 怪兽" id="row-65">
+<td>高脊龙-成年_母</td>
+<td>1</td>
+<td>200</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sec-5">道具</h4>
+<table>
+<thead>
+<tr>
+<th>道具名称</th>
+<th>兽币价格</th>
+<th>积分价格</th>
+<th>类型</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="基因强化卡 3 无 功能卡" data-sec-id="sec-5" data-section="道具" id="row-66">
+<td>基因强化卡</td>
+<td>3</td>
+<td>无</td>
+<td>功能卡</td>
+</tr>
+<tr data-search="传送卡*100 10 无 功能卡" data-sec-id="sec-5" data-section="道具" id="row-67">
+<td>传送卡*100</td>
+<td>10</td>
+<td>无</td>
+<td>功能卡</td>
+</tr>
+<tr data-search="等离子-文本 30 无 文本/昵称" data-sec-id="sec-5" data-section="道具" id="row-68">
+<td>等离子-文本</td>
+<td>30</td>
+<td>无</td>
+<td>文本/昵称</td>
+</tr>
+<tr data-search="少女感-文本 30 无 文本/昵称" data-sec-id="sec-5" data-section="道具" id="row-69">
+<td>少女感-文本</td>
+<td>30</td>
+<td>无</td>
+<td>文本/昵称</td>
+</tr>
+<tr data-search="红黄蓝绿-文本 30 无 文本/昵称" data-sec-id="sec-5" data-section="道具" id="row-70">
+<td>红黄蓝绿-文本</td>
+<td>30</td>
+<td>无</td>
+<td>文本/昵称</td>
+</tr>
+<tr data-search="等离子-昵称 30 无 文本/昵称" data-sec-id="sec-5" data-section="道具" id="row-71">
+<td>等离子-昵称</td>
+<td>30</td>
+<td>无</td>
+<td>文本/昵称</td>
+</tr>
+<tr data-search="少女感-昵称 30 无 文本/昵称" data-sec-id="sec-5" data-section="道具" id="row-72">
+<td>少女感-昵称</td>
+<td>30</td>
+<td>无</td>
+<td>文本/昵称</td>
+</tr>
+<tr data-search="红黄蓝绿-昵称 30 无 文本/昵称" data-sec-id="sec-5" data-section="道具" id="row-73">
+<td>红黄蓝绿-昵称</td>
+<td>30</td>
+<td>无</td>
+<td>文本/昵称</td>
+</tr>
+<tr data-search="进化卡 35 无 功能卡" data-sec-id="sec-5" data-section="道具" id="row-74">
+<td>进化卡</td>
+<td>35</td>
+<td>无</td>
+<td>功能卡</td>
+</tr>
+<tr data-search="新年限定2(带烟花特效)（×50） 50 100,000 特效" data-sec-id="sec-5" data-section="道具" id="row-75">
+<td>新年限定2(带烟花特效)（×50）</td>
+<td>50</td>
+<td>100,000</td>
+<td>特效</td>
+</tr>
+<tr data-search="新年限定1(带烟花特效)（×50） 50 100,000 特效" data-sec-id="sec-5" data-section="道具" id="row-76">
+<td>新年限定1(带烟花特效)（×50）</td>
+<td>50</td>
+<td>100,000</td>
+<td>特效</td>
+</tr>
+<tr data-search="定点卡 50 无 功能卡" data-sec-id="sec-5" data-section="道具" id="row-77">
+<td>定点卡</td>
+<td>50</td>
+<td>无</td>
+<td>功能卡</td>
+</tr>
+<tr data-search="生死看淡，不服就干（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-78">
+<td>生死看淡，不服就干（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="岂有此理（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-79">
+<td>岂有此理（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="啊？！（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-80">
+<td>啊？！（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="来者何人（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-81">
+<td>来者何人（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="熔岩恐龙（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-82">
+<td>熔岩恐龙（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="再跑啊！（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-83">
+<td>再跑啊！（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="看！大傻子（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-84">
+<td>看！大傻子（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="浑身放电（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-85">
+<td>浑身放电（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="大哥放我一马（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-86">
+<td>大哥放我一马（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="箭头（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-87">
+<td>箭头（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="大王饶命（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-88">
+<td>大王饶命（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="真棒（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-89">
+<td>真棒（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="嗷呜-镭射（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-90">
+<td>嗷呜-镭射（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="嗷呜（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-91">
+<td>嗷呜（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="星星眼-镭射（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-92">
+<td>星星眼-镭射（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="星星眼（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-93">
+<td>星星眼（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="你过来呀（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-94">
+<td>你过来呀（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="弱鸡（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-95">
+<td>弱鸡（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="菜（×100） 50 100,000 表情/喷漆" data-sec-id="sec-5" data-section="道具" id="row-96">
+<td>菜（×100）</td>
+<td>50</td>
+<td>100,000</td>
+<td>表情/喷漆</td>
+</tr>
+<tr data-search="改名卡 68 无 功能卡" data-sec-id="sec-5" data-section="道具" id="row-97">
+<td>改名卡</td>
+<td>68</td>
+<td>无</td>
+<td>功能卡</td>
+</tr>
+<tr data-search="公会冷却卡 88 无 功能卡" data-sec-id="sec-5" data-section="道具" id="row-98">
+<td>公会冷却卡</td>
+<td>88</td>
+<td>无</td>
+<td>功能卡</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sec-6">礼包</h4>
+<table>
+<thead>
+<tr>
+<th>礼包名称</th>
+<th>兽币价格</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="成年远古霸王龙礼包（200 头） 100" data-sec-id="sec-6" data-section="礼包" id="row-99">
+<td>成年远古霸王龙礼包（200 头）</td>
+<td>100</td>
+</tr>
+<tr data-search="大号成年远古霸王龙礼包（500 头） 240" data-sec-id="sec-6" data-section="礼包" id="row-100">
+<td>大号成年远古霸王龙礼包（500 头）</td>
+<td>240</td>
+</tr>
+<tr data-search="成年超级暴龙礼包（10头） 700" data-sec-id="sec-6" data-section="礼包" id="row-101">
+<td>成年超级暴龙礼包（10头）</td>
+<td>700</td>
+</tr>
+<tr data-search="幼年超级暴龙礼包（10 头幼暴+强化卡 60） 500" data-sec-id="sec-6" data-section="礼包" id="row-102">
+<td>幼年超级暴龙礼包（10 头幼暴+强化卡 60）</td>
+<td>500</td>
+</tr>
+<tr data-search="雷龙礼包（10 头） 700" data-sec-id="sec-6" data-section="礼包" id="row-103">
+<td>雷龙礼包（10 头）</td>
+<td>700</td>
+</tr>
+<tr data-search="南手龙礼包（1 头+100 个绿帽子喷漆+100弱鸡喷漆） 1314" data-sec-id="sec-6" data-section="礼包" id="row-104">
+<td>南手龙礼包（1 头+100 个绿帽子喷漆+100弱鸡喷漆）</td>
+<td>1314</td>
+</tr>
+<tr data-search="翼龙礼包（10头+传送卡 300） 320" data-sec-id="sec-6" data-section="礼包" id="row-105">
+<td>翼龙礼包（10头+传送卡 300）</td>
+<td>320</td>
+</tr>
+<tr data-search="成年远古牛龙礼包（200 头） 200" data-sec-id="sec-6" data-section="礼包" id="row-106">
+<td>成年远古牛龙礼包（200 头）</td>
+<td>200</td>
+</tr>
+<tr data-search="成年远古南巨礼包（200 头） 100" data-sec-id="sec-6" data-section="礼包" id="row-107">
+<td>成年远古南巨礼包（200 头）</td>
+<td>100</td>
+</tr>
+<tr data-search="成年脊背礼包（200 头） 100" data-sec-id="sec-6" data-section="礼包" id="row-108">
+<td>成年脊背礼包（200 头）</td>
+<td>100</td>
+</tr>
+<tr data-search="幼年机械龙礼包（10 头+强化卡 80） 750" data-sec-id="sec-6" data-section="礼包" id="row-109">
+<td>幼年机械龙礼包（10 头+强化卡 80）</td>
+<td>750</td>
+</tr>
+<tr data-search="成年机械龙礼包（10 头） 1000" data-sec-id="sec-6" data-section="礼包" id="row-110">
+<td>成年机械龙礼包（10 头）</td>
+<td>1000</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec-7">三、公会商城</h2>
+<h3 id="sec-8">3.1 公会商店</h3>
+<table>
+<thead>
+<tr>
+<th>商品名称</th>
+<th>龙币价格</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="公会传送碑 600" data-sec-id="sec-8" data-section="3.1 公会商店" id="row-111">
+<td>公会传送碑</td>
+<td>600</td>
+</tr>
+<tr data-search="超级暴龙_成年 90" data-sec-id="sec-8" data-section="3.1 公会商店" id="row-112">
+<td>超级暴龙_成年</td>
+<td>90</td>
+</tr>
+<tr data-search="雷龙_成年 90" data-sec-id="sec-8" data-section="3.1 公会商店" id="row-113">
+<td>雷龙_成年</td>
+<td>90</td>
+</tr>
+<tr data-search="远古牛龙_成年 1" data-sec-id="sec-8" data-section="3.1 公会商店" id="row-114">
+<td>远古牛龙_成年</td>
+<td>1</td>
+</tr>
+<tr data-search="远古霸王龙_成年 1" data-sec-id="sec-8" data-section="3.1 公会商店" id="row-115">
+<td>远古霸王龙_成年</td>
+<td>1</td>
+</tr>
+<tr data-search="巨型脊背龙_成年 1" data-sec-id="sec-8" data-section="3.1 公会商店" id="row-116">
+<td>巨型脊背龙_成年</td>
+<td>1</td>
+</tr>
+<tr data-search="远古南巨_成年 1" data-sec-id="sec-8" data-section="3.1 公会商店" id="row-117">
+<td>远古南巨_成年</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec-9">3.2 贡献点兑换 - 怪兽</h3>
+<table>
+<thead>
+<tr>
+<th>怪兽名称</th>
+<th>贡献点价格</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="超级暴龙_成年 2100" data-sec-id="sec-9" data-section="3.2 贡献点兑换 - 怪兽" id="row-118">
+<td>超级暴龙_成年</td>
+<td>2100</td>
+</tr>
+<tr data-search="雷龙_成年 2100" data-sec-id="sec-9" data-section="3.2 贡献点兑换 - 怪兽" id="row-119">
+<td>雷龙_成年</td>
+<td>2100</td>
+</tr>
+<tr data-search="超级暴龙_幼年 1200" data-sec-id="sec-9" data-section="3.2 贡献点兑换 - 怪兽" id="row-120">
+<td>超级暴龙_幼年</td>
+<td>1200</td>
+</tr>
+<tr data-search="雷龙_幼年 1200" data-sec-id="sec-9" data-section="3.2 贡献点兑换 - 怪兽" id="row-121">
+<td>雷龙_幼年</td>
+<td>1200</td>
+</tr>
+<tr data-search="远古牛龙_成年 20" data-sec-id="sec-9" data-section="3.2 贡献点兑换 - 怪兽" id="row-122">
+<td>远古牛龙_成年</td>
+<td>20</td>
+</tr>
+<tr data-search="远古霸王龙_成年 10" data-sec-id="sec-9" data-section="3.2 贡献点兑换 - 怪兽" id="row-123">
+<td>远古霸王龙_成年</td>
+<td>10</td>
+</tr>
+<tr data-search="巨型脊背龙_成年 10" data-sec-id="sec-9" data-section="3.2 贡献点兑换 - 怪兽" id="row-124">
+<td>巨型脊背龙_成年</td>
+<td>10</td>
+</tr>
+<tr data-search="远古南巨_成年 10" data-sec-id="sec-9" data-section="3.2 贡献点兑换 - 怪兽" id="row-125">
+<td>远古南巨_成年</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec-10">3.3 贡献点兑换 - 道具</h3>
+<table>
+<thead>
+<tr>
+<th>道具名称</th>
+<th>贡献点价格</th>
+<th>类型</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="基因强化卡 200 功能卡" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-126">
+<td>基因强化卡</td>
+<td>200</td>
+<td>功能卡</td>
+</tr>
+<tr data-search="传送卡*100 300 功能卡" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-127">
+<td>传送卡*100</td>
+<td>300</td>
+<td>功能卡</td>
+</tr>
+<tr data-search="公会专属_少女粉-昵称 1000 公会专属" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-128">
+<td>公会专属_少女粉-昵称</td>
+<td>1000</td>
+<td>公会专属</td>
+</tr>
+<tr data-search="公会专属_海天一色-昵称 1000 公会专属" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-129">
+<td>公会专属_海天一色-昵称</td>
+<td>1000</td>
+<td>公会专属</td>
+</tr>
+<tr data-search="公会专属_我很神秘-昵称 1000 公会专属" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-130">
+<td>公会专属_我很神秘-昵称</td>
+<td>1000</td>
+<td>公会专属</td>
+</tr>
+<tr data-search="公会专属_开门红-文本 1000 公会专属" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-131">
+<td>公会专属_开门红-文本</td>
+<td>1000</td>
+<td>公会专属</td>
+</tr>
+<tr data-search="公会专属_金光闪闪-文本 1000 公会专属" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-132">
+<td>公会专属_金光闪闪-文本</td>
+<td>1000</td>
+<td>公会专属</td>
+</tr>
+<tr data-search="公会专属_少女粉-文本 1000 公会专属" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-133">
+<td>公会专属_少女粉-文本</td>
+<td>1000</td>
+<td>公会专属</td>
+</tr>
+<tr data-search="公会专属_海天一色-文本 1000 公会专属" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-134">
+<td>公会专属_海天一色-文本</td>
+<td>1000</td>
+<td>公会专属</td>
+</tr>
+<tr data-search="公会专属_我很神秘-文本 1000 公会专属" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-135">
+<td>公会专属_我很神秘-文本</td>
+<td>1000</td>
+<td>公会专属</td>
+</tr>
+<tr data-search="公会专属_开门红-昵称 1000 公会专属" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-136">
+<td>公会专属_开门红-昵称</td>
+<td>1000</td>
+<td>公会专属</td>
+</tr>
+<tr data-search="公会专属_金光闪闪-昵称 1000 公会专属" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-137">
+<td>公会专属_金光闪闪-昵称</td>
+<td>1000</td>
+<td>公会专属</td>
+</tr>
+<tr data-search="进化卡 1200 功能卡" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-138">
+<td>进化卡</td>
+<td>1200</td>
+<td>功能卡</td>
+</tr>
+<tr data-search="定点卡 2000 功能卡" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-139">
+<td>定点卡</td>
+<td>2000</td>
+<td>功能卡</td>
+</tr>
+<tr data-search="改名卡 2500 功能卡" data-sec-id="sec-10" data-section="3.3 贡献点兑换 - 道具" id="row-140">
+<td>改名卡</td>
+<td>2500</td>
+<td>功能卡</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec-11">3.4 公会机制</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="领地价格 1000 团队令" data-sec-id="sec-11" data-section="3.4 公会机制" id="row-141">
+<td>领地价格</td>
+<td>1000 团队令</td>
+</tr>
+<tr data-search="团队令兑换比例 1 兽币 = 1 团队令，赠送 10 贡献点" data-sec-id="sec-11" data-section="3.4 公会机制" id="row-142">
+<td>团队令兑换比例</td>
+<td>1 兽币 = 1 团队令，赠送 10 贡献点</td>
+</tr>
+<tr data-search="团队令使用权限 仅限会长及有权限的部分成员" data-sec-id="sec-11" data-section="3.4 公会机制" id="row-143">
+<td>团队令使用权限</td>
+<td>仅限会长及有权限的部分成员</td>
+</tr>
+<tr data-search="贡献点归属 绑定个人" data-sec-id="sec-11" data-section="3.4 公会机制" id="row-144">
+<td>贡献点归属</td>
+<td>绑定个人</td>
+</tr>
+<tr data-search="公会经验 每兑换 1 枚团队令可获得 1 点公会经验值" data-sec-id="sec-11" data-section="3.4 公会机制" id="row-145">
+<td>公会经验</td>
+<td>每兑换 1 枚团队令可获得 1 点公会经验值</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec-12">四、皮肤数据</h2>
+<h3 id="sec-13">通用皮肤（金币）</h3>
+<table>
+<thead>
+<tr>
+<th>皮肤名称</th>
+<th>金币价格</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="彩色花瓣2048 200" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-146">
+<td>彩色花瓣2048</td>
+<td>200</td>
+</tr>
+<tr data-search="战术迷彩2091 300" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-147">
+<td>战术迷彩2091</td>
+<td>300</td>
+</tr>
+<tr data-search="样条线2044 300" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-148">
+<td>样条线2044</td>
+<td>300</td>
+</tr>
+<tr data-search="褪色银河2045 300" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-149">
+<td>褪色银河2045</td>
+<td>300</td>
+</tr>
+<tr data-search="帆布月亮2046 400" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-150">
+<td>帆布月亮2046</td>
+<td>400</td>
+</tr>
+<tr data-search="混沌2047 400" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-151">
+<td>混沌2047</td>
+<td>400</td>
+</tr>
+<tr data-search="碎岩2081 500" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-152">
+<td>碎岩2081</td>
+<td>500</td>
+</tr>
+<tr data-search="硬朗迷彩2106 500" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-153">
+<td>硬朗迷彩2106</td>
+<td>500</td>
+</tr>
+<tr data-search="绿箭头2108 500" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-154">
+<td>绿箭头2108</td>
+<td>500</td>
+</tr>
+<tr data-search="黄金2007 500" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-155">
+<td>黄金2007</td>
+<td>500</td>
+</tr>
+<tr data-search="暗金2008 500" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-156">
+<td>暗金2008</td>
+<td>500</td>
+</tr>
+<tr data-search="草地2009 500" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-157">
+<td>草地2009</td>
+<td>500</td>
+</tr>
+<tr data-search="岩石2010 500" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-158">
+<td>岩石2010</td>
+<td>500</td>
+</tr>
+<tr data-search="斑马2043 500" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-159">
+<td>斑马2043</td>
+<td>500</td>
+</tr>
+<tr data-search="少女心2082 520" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-160">
+<td>少女心2082</td>
+<td>520</td>
+</tr>
+<tr data-search="卡通兔子2130 520" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-161">
+<td>卡通兔子2130</td>
+<td>520</td>
+</tr>
+<tr data-search="卡通兔子2131 520" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-162">
+<td>卡通兔子2131</td>
+<td>520</td>
+</tr>
+<tr data-search="大白鹅2132 520" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-163">
+<td>大白鹅2132</td>
+<td>520</td>
+</tr>
+<tr data-search="卡通小猫2133 520" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-164">
+<td>卡通小猫2133</td>
+<td>520</td>
+</tr>
+<tr data-search="动物乐园2134 520" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-165">
+<td>动物乐园2134</td>
+<td>520</td>
+</tr>
+<tr data-search="软萌暴暴2135 520" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-166">
+<td>软萌暴暴2135</td>
+<td>520</td>
+</tr>
+<tr data-search="卡通兔子2129 520" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-167">
+<td>卡通兔子2129</td>
+<td>520</td>
+</tr>
+<tr data-search="赤红心心2090 600" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-168">
+<td>赤红心心2090</td>
+<td>600</td>
+</tr>
+<tr data-search="豹纹2089 600" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-169">
+<td>豹纹2089</td>
+<td>600</td>
+</tr>
+<tr data-search="舞厅之王2109 666" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-170">
+<td>舞厅之王2109</td>
+<td>666</td>
+</tr>
+<tr data-search="荧屏灯珠2110 666" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-171">
+<td>荧屏灯珠2110</td>
+<td>666</td>
+</tr>
+<tr data-search="波动橙2115 688" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-172">
+<td>波动橙2115</td>
+<td>688</td>
+</tr>
+<tr data-search="波动蓝2116 688" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-173">
+<td>波动蓝2116</td>
+<td>688</td>
+</tr>
+<tr data-search="波动紫2117 688" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-174">
+<td>波动紫2117</td>
+<td>688</td>
+</tr>
+<tr data-search="沙子雕塑2118 688" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-175">
+<td>沙子雕塑2118</td>
+<td>688</td>
+</tr>
+<tr data-search="砂岩雕塑2119 688" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-176">
+<td>砂岩雕塑2119</td>
+<td>688</td>
+</tr>
+<tr data-search="枯木雕塑2120 688" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-177">
+<td>枯木雕塑2120</td>
+<td>688</td>
+</tr>
+<tr data-search="火山岩雕塑2121 788" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-178">
+<td>火山岩雕塑2121</td>
+<td>788</td>
+</tr>
+<tr data-search="黑钢岩雕塑2122 788" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-179">
+<td>黑钢岩雕塑2122</td>
+<td>788</td>
+</tr>
+<tr data-search="塑料青2013 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-180">
+<td>塑料青2013</td>
+<td>800</td>
+</tr>
+<tr data-search="塑料灰2014 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-181">
+<td>塑料灰2014</td>
+<td>800</td>
+</tr>
+<tr data-search="塑料绿2015 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-182">
+<td>塑料绿2015</td>
+<td>800</td>
+</tr>
+<tr data-search="塑料粉2016 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-183">
+<td>塑料粉2016</td>
+<td>800</td>
+</tr>
+<tr data-search="塑料黄2017 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-184">
+<td>塑料黄2017</td>
+<td>800</td>
+</tr>
+<tr data-search="塑料棕2018 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-185">
+<td>塑料棕2018</td>
+<td>800</td>
+</tr>
+<tr data-search="风格化绿2019 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-186">
+<td>风格化绿2019</td>
+<td>800</td>
+</tr>
+<tr data-search="风格化紫2020 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-187">
+<td>风格化紫2020</td>
+<td>800</td>
+</tr>
+<tr data-search="经典黄2021 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-188">
+<td>经典黄2021</td>
+<td>800</td>
+</tr>
+<tr data-search="经典绿2022 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-189">
+<td>经典绿2022</td>
+<td>800</td>
+</tr>
+<tr data-search="经典黑2023 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-190">
+<td>经典黑2023</td>
+<td>800</td>
+</tr>
+<tr data-search="经典粉2024 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-191">
+<td>经典粉2024</td>
+<td>800</td>
+</tr>
+<tr data-search="经典红2025 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-192">
+<td>经典红2025</td>
+<td>800</td>
+</tr>
+<tr data-search="经典灰2026 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-193">
+<td>经典灰2026</td>
+<td>800</td>
+</tr>
+<tr data-search="经典蓝2027 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-194">
+<td>经典蓝2027</td>
+<td>800</td>
+</tr>
+<tr data-search="光膜2028 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-195">
+<td>光膜2028</td>
+<td>800</td>
+</tr>
+<tr data-search="镭射2029 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-196">
+<td>镭射2029</td>
+<td>800</td>
+</tr>
+<tr data-search="白炽灯2030 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-197">
+<td>白炽灯2030</td>
+<td>800</td>
+</tr>
+<tr data-search="纯黑2031 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-198">
+<td>纯黑2031</td>
+<td>800</td>
+</tr>
+<tr data-search="藤条2050 800" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-199">
+<td>藤条2050</td>
+<td>800</td>
+</tr>
+<tr data-search="动态螺旋2078 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-200">
+<td>动态螺旋2078</td>
+<td>888</td>
+</tr>
+<tr data-search="赤红痕迹2083 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-201">
+<td>赤红痕迹2083</td>
+<td>888</td>
+</tr>
+<tr data-search="橘子皮动态2072 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-202">
+<td>橘子皮动态2072</td>
+<td>888</td>
+</tr>
+<tr data-search="蓝色噪波2073 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-203">
+<td>蓝色噪波2073</td>
+<td>888</td>
+</tr>
+<tr data-search="香芋啵啵2075 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-204">
+<td>香芋啵啵2075</td>
+<td>888</td>
+</tr>
+<tr data-search="香芋癫狂2076 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-205">
+<td>香芋癫狂2076</td>
+<td>888</td>
+</tr>
+<tr data-search="动态蓝地砖2077 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-206">
+<td>动态蓝地砖2077</td>
+<td>888</td>
+</tr>
+<tr data-search="地砖2105 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-207">
+<td>地砖2105</td>
+<td>888</td>
+</tr>
+<tr data-search="激光线条2107 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-208">
+<td>激光线条2107</td>
+<td>888</td>
+</tr>
+<tr data-search="石灰岩2114 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-209">
+<td>石灰岩2114</td>
+<td>888</td>
+</tr>
+<tr data-search="线团2085 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-210">
+<td>线团2085</td>
+<td>888</td>
+</tr>
+<tr data-search="三叶草2128 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-211">
+<td>三叶草2128</td>
+<td>888</td>
+</tr>
+<tr data-search="闪电花纹2061 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-212">
+<td>闪电花纹2061</td>
+<td>888</td>
+</tr>
+<tr data-search="哈基米2060 888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-213">
+<td>哈基米2060</td>
+<td>888</td>
+</tr>
+<tr data-search="动态碎玻璃2079 999" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-214">
+<td>动态碎玻璃2079</td>
+<td>999</td>
+</tr>
+<tr data-search="动态闪电2080 999" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-215">
+<td>动态闪电2080</td>
+<td>999</td>
+</tr>
+<tr data-search="光子轨迹2084 999" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-216">
+<td>光子轨迹2084</td>
+<td>999</td>
+</tr>
+<tr data-search="黄金甲2087 999" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-217">
+<td>黄金甲2087</td>
+<td>999</td>
+</tr>
+<tr data-search="白银甲2088 999" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-218">
+<td>白银甲2088</td>
+<td>999</td>
+</tr>
+<tr data-search="能量波动2095 1288" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-219">
+<td>能量波动2095</td>
+<td>1288</td>
+</tr>
+<tr data-search="腐殖质层2127 1288" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-220">
+<td>腐殖质层2127</td>
+<td>1288</td>
+</tr>
+<tr data-search="大马士革蓝2098 1288" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-221">
+<td>大马士革蓝2098</td>
+<td>1288</td>
+</tr>
+<tr data-search="光暗交汇2099 1288" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-222">
+<td>光暗交汇2099</td>
+<td>1288</td>
+</tr>
+<tr data-search="寒气逼人2100 1288" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-223">
+<td>寒气逼人2100</td>
+<td>1288</td>
+</tr>
+<tr data-search="熔岩2005 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-224">
+<td>熔岩2005</td>
+<td>1888</td>
+</tr>
+<tr data-search="粉钻2032 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-225">
+<td>粉钻2032</td>
+<td>1888</td>
+</tr>
+<tr data-search="蓝钻2033 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-226">
+<td>蓝钻2033</td>
+<td>1888</td>
+</tr>
+<tr data-search="黄钻2034 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-227">
+<td>黄钻2034</td>
+<td>1888</td>
+</tr>
+<tr data-search="白钻2035 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-228">
+<td>白钻2035</td>
+<td>1888</td>
+</tr>
+<tr data-search="高速星星2058 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-229">
+<td>高速星星2058</td>
+<td>1888</td>
+</tr>
+<tr data-search="能量汇集2093 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-230">
+<td>能量汇集2093</td>
+<td>1888</td>
+</tr>
+<tr data-search="大马士革紫2094 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-231">
+<td>大马士革紫2094</td>
+<td>1888</td>
+</tr>
+<tr data-search="石油色斑2102 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-232">
+<td>石油色斑2102</td>
+<td>1888</td>
+</tr>
+<tr data-search="花屏2103 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-233">
+<td>花屏2103</td>
+<td>1888</td>
+</tr>
+<tr data-search="星图2086 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-234">
+<td>星图2086</td>
+<td>1888</td>
+</tr>
+<tr data-search="金星闪烁2101 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-235">
+<td>金星闪烁2101</td>
+<td>1888</td>
+</tr>
+<tr data-search="地狱火2068 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-236">
+<td>地狱火2068</td>
+<td>1888</td>
+</tr>
+<tr data-search="魔兽绿2069 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-237">
+<td>魔兽绿2069</td>
+<td>1888</td>
+</tr>
+<tr data-search="黑钻2070 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-238">
+<td>黑钻2070</td>
+<td>1888</td>
+</tr>
+<tr data-search="绿钻2071 1888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-239">
+<td>绿钻2071</td>
+<td>1888</td>
+</tr>
+<tr data-search="动感波纹2104 1999" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-240">
+<td>动感波纹2104</td>
+<td>1999</td>
+</tr>
+<tr data-search="雪花飘飘2096 1999" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-241">
+<td>雪花飘飘2096</td>
+<td>1999</td>
+</tr>
+<tr data-search="梦境骑士2097 1999" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-242">
+<td>梦境骑士2097</td>
+<td>1999</td>
+</tr>
+<tr data-search="星系2039 2888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-243">
+<td>星系2039</td>
+<td>2888</td>
+</tr>
+<tr data-search="繁星2040 2888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-244">
+<td>繁星2040</td>
+<td>2888</td>
+</tr>
+<tr data-search="繁星三2074 2888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-245">
+<td>繁星三2074</td>
+<td>2888</td>
+</tr>
+<tr data-search="蓝水晶2001 3888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-246">
+<td>蓝水晶2001</td>
+<td>3888</td>
+</tr>
+<tr data-search="紫水晶2002 3888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-247">
+<td>紫水晶2002</td>
+<td>3888</td>
+</tr>
+<tr data-search="黄水晶2003 3888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-248">
+<td>黄水晶2003</td>
+<td>3888</td>
+</tr>
+<tr data-search="冰块2004 6888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-249">
+<td>冰块2004</td>
+<td>6888</td>
+</tr>
+<tr data-search="大哥大2092 8888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-250">
+<td>大哥大2092</td>
+<td>8888</td>
+</tr>
+<tr data-search="树叶伪装2125 8888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-251">
+<td>树叶伪装2125</td>
+<td>8888</td>
+</tr>
+<tr data-search="寒冰雕塑2126 12888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-252">
+<td>寒冰雕塑2126</td>
+<td>12888</td>
+</tr>
+<tr data-search="水玻璃蓝2112 15888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-253">
+<td>水玻璃蓝2112</td>
+<td>15888</td>
+</tr>
+<tr data-search="水玻璃紫2113 15888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-254">
+<td>水玻璃紫2113</td>
+<td>15888</td>
+</tr>
+<tr data-search="花海伪装2124 18888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-255">
+<td>花海伪装2124</td>
+<td>18888</td>
+</tr>
+<tr data-search="黑螺旋2066 19999" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-256">
+<td>黑螺旋2066</td>
+<td>19999</td>
+</tr>
+<tr data-search="黑丝2059 25888" data-sec-id="sec-13" data-section="通用皮肤（金币）" id="row-257">
+<td>黑丝2059</td>
+<td>25888</td>
+</tr>
+</tbody>
+</table>
+<p><strong>价格区间</strong>：最低 200 金币，最高 25,888 金币
+<strong>皮肤总数</strong>：112 款</p>
+<h2 id="sec-14">五、权益系统</h2>
+<h3 id="sec-15">5.1 权益卡</h3>
+<table>
+<thead>
+<tr>
+<th>权益卡类型</th>
+<th>兽币价格</th>
+<th>月发放点数</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="季度权益卡 2,688 20点/月" data-sec-id="sec-15" data-section="5.1 权益卡" id="row-258">
+<td>季度权益卡</td>
+<td>2,688</td>
+<td>20点/月</td>
+</tr>
+<tr data-search="半年权益卡 5,088 20点/月" data-sec-id="sec-15" data-section="5.1 权益卡" id="row-259">
+<td>半年权益卡</td>
+<td>5,088</td>
+<td>20点/月</td>
+</tr>
+<tr data-search="半年权益卡 9,888 40点/月" data-sec-id="sec-15" data-section="5.1 权益卡" id="row-260">
+<td>半年权益卡</td>
+<td>9,888</td>
+<td>40点/月</td>
+</tr>
+<tr data-search="年度权益卡 18,888 50 点/月" data-sec-id="sec-15" data-section="5.1 权益卡" id="row-261">
+<td>年度权益卡</td>
+<td>18,888</td>
+<td>50 点/月</td>
+</tr>
+<tr data-search="年度权益卡 30,888 100点/月" data-sec-id="sec-15" data-section="5.1 权益卡" id="row-262">
+<td>年度权益卡</td>
+<td>30,888</td>
+<td>100点/月</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec-16">5.2 权益积分兑换</h3>
+<table>
+<thead>
+<tr>
+<th>商品名称</th>
+<th>权益积分价格</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="成年远古霸王龙100条 1" data-sec-id="sec-16" data-section="5.2 权益积分兑换" id="row-263">
+<td>成年远古霸王龙100条</td>
+<td>1</td>
+</tr>
+<tr data-search="成年脊背100条 1" data-sec-id="sec-16" data-section="5.2 权益积分兑换" id="row-264">
+<td>成年脊背100条</td>
+<td>1</td>
+</tr>
+<tr data-search="成年远古牛龙100条 1" data-sec-id="sec-16" data-section="5.2 权益积分兑换" id="row-265">
+<td>成年远古牛龙100条</td>
+<td>1</td>
+</tr>
+<tr data-search="成年远古南巨100条 1" data-sec-id="sec-16" data-section="5.2 权益积分兑换" id="row-266">
+<td>成年远古南巨100条</td>
+<td>1</td>
+</tr>
+<tr data-search="成年超级暴龙1条 1" data-sec-id="sec-16" data-section="5.2 权益积分兑换" id="row-267">
+<td>成年超级暴龙1条</td>
+<td>1</td>
+</tr>
+<tr data-search="成年雷龙1条 1" data-sec-id="sec-16" data-section="5.2 权益积分兑换" id="row-268">
+<td>成年雷龙1条</td>
+<td>1</td>
+</tr>
+<tr data-search="机械暴龙2条 3" data-sec-id="sec-16" data-section="5.2 权益积分兑换" id="row-269">
+<td>机械暴龙2条</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec-17">5.3 会员等级权益</h3>
+<ul>
+<li>当前会员等级：0级</li>
+<li>升级条件：需充值298兽币可升级为会员1</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>会员等级</th>
+<th>权益列表</th>
+</tr>
+</thead>
+<tbody>
+<tr data-search="会员1级 无损坠落；喝水吃肉额外回血200每秒" data-sec-id="sec-17" data-section="5.3 会员等级权益" id="row-270">
+<td>会员1级</td>
+<td>无损坠落；喝水吃肉额外回血200每秒</td>
+</tr>
+<tr data-search="会员2级 无损坠落；趴下体力恢复1.5倍；喝水吃肉额外回血200每秒；最大定点数上调至25个" data-sec-id="sec-17" data-section="5.3 会员等级权益" id="row-271">
+<td>会员2级</td>
+<td>无损坠落；趴下体力恢复1.5倍；喝水吃肉额外回血200每秒；最大定点数上调至25个</td>
+</tr>
+<tr data-search="会员3级 无损坠落；喝水吃肉经验值额外0.5点每秒；趴下体力恢复1.5倍；喝水吃肉额外回血200每秒；最大定点数上调至30个" data-sec-id="sec-17" data-section="5.3 会员等级权益" id="row-272">
+<td>会员3级</td>
+<td>无损坠落；喝水吃肉经验值额外0.5点每秒；趴下体力恢复1.5倍；喝水吃肉额外回血200每秒；最大定点数上调至30个</td>
+</tr>
+<tr data-search="会员4级 无损坠落；喝水吃肉经验值额外0.5点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血300每秒；最大定点数上调至40个" data-sec-id="sec-17" data-section="5.3 会员等级权益" id="row-273">
+<td>会员4级</td>
+<td>无损坠落；喝水吃肉经验值额外0.5点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血300每秒；最大定点数上调至40个</td>
+</tr>
+<tr data-search="会员5级 无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血300每秒；最大定点数上调至60个" data-sec-id="sec-17" data-section="5.3 会员等级权益" id="row-274">
+<td>会员5级</td>
+<td>无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血300每秒；最大定点数上调至60个</td>
+</tr>
+<tr data-search="会员6级 无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血350每秒；最大定点数上调至100个" data-sec-id="sec-17" data-section="5.3 会员等级权益" id="row-275">
+<td>会员6级</td>
+<td>无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血350每秒；最大定点数上调至100个</td>
+</tr>
+<tr data-search="会员7级 无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血350每秒；最大定点数上调至150个" data-sec-id="sec-17" data-section="5.3 会员等级权益" id="row-276">
+<td>会员7级</td>
+<td>无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血350每秒；最大定点数上调至150个</td>
+</tr>
+<tr data-search="会员8级 无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值2.0倍；喝水吃肉额外回血400每秒；最大定点数上调至200个" data-sec-id="sec-17" data-section="5.3 会员等级权益" id="row-277">
+<td>会员8级</td>
+<td>无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值2.0倍；喝水吃肉额外回血400每秒；最大定点数上调至200个</td>
+</tr>
+<tr data-search="会员9级 无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值2.0倍；喝水吃肉额外回血450每秒；最大定点数上调至300个" data-sec-id="sec-17" data-section="5.3 会员等级权益" id="row-278">
+<td>会员9级</td>
+<td>无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值2.0倍；喝水吃肉额外回血450每秒；最大定点数上调至300个</td>
+</tr>
+<tr data-search="会员10级 无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值3.0倍；喝水吃肉额外回血500每秒；最大定点数上调至400个" data-sec-id="sec-17" data-section="5.3 会员等级权益" id="row-279">
+<td>会员10级</td>
+<td>无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值3.0倍；喝水吃肉额外回血500每秒；最大定点数上调至400个</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<p><em>注：数据来源于游戏内截图提取，部分价格为截图时可见数据，可能存在滚动截断未完全收录的情况。</em></p>
+</div>
+
+<div class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+
+<script>
+// 数据索引
+const ROWS = JSON.parse(`[{"id": "row-1", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "机械暴龙_成年 食肉 ♂ 130,000 3,600 1,000 18,000 100%", "cells": ["机械暴龙_成年", "食肉", "♂", "130,000", "3,600", "1,000", "18,000", "100%"]}, {"id": "row-2", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "剑龙_成年 食草 ♂ 6,000 1,600 1,000 1,300 100%", "cells": ["剑龙_成年", "食草", "♂", "6,000", "1,600", "1,000", "1,300", "100%"]}, {"id": "row-3", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "异特龙_成年 食肉 ♂ 2,800 500 1,000 2,400 100%", "cells": ["异特龙_成年", "食肉", "♂", "2,800", "500", "1,000", "2,400", "100%"]}, {"id": "row-4", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "远古南巨_成年 食肉 ♂ 28,000 1,900 1,000 18,000 100%", "cells": ["远古南巨_成年", "食肉", "♂", "28,000", "1,900", "1,000", "18,000", "100%"]}, {"id": "row-5", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "艾雷拉龙_成年 食肉 ♀ 2,500 250 1,000 2,000 100%", "cells": ["艾雷拉龙_成年", "食肉", "♀", "2,500", "250", "1,000", "2,000", "100%"]}, {"id": "row-6", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "南手龙 食草 ♀ 10,000 0 1,000 2,000 100%", "cells": ["南手龙", "食草", "♀", "10,000", "0", "1,000", "2,000", "100%"]}, {"id": "row-7", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "霸王龙_成年 食肉 ♀ 6,500 1,200 1,000 5,800 100%", "cells": ["霸王龙_成年", "食肉", "♀", "6,500", "1,200", "1,000", "5,800", "100%"]}, {"id": "row-8", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "甲龙_成年 食草 ♀ 6,000 800 1,000 1,300 100%", "cells": ["甲龙_成年", "食草", "♀", "6,000", "800", "1,000", "1,300", "100%"]}, {"id": "row-9", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "重爪龙_成年 食肉 ♀ 3,500 300 1,000 2,800 100%", "cells": ["重爪龙_成年", "食肉", "♀", "3,500", "300", "1,000", "2,800", "100%"]}, {"id": "row-10", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "牛龙_成年 食肉 ♂ 5,200 460 1,000 3,200 100%", "cells": ["牛龙_成年", "食肉", "♂", "5,200", "460", "1,000", "3,200", "100%"]}, {"id": "row-11", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "翼龙_成年 食肉 ♂ 20,000 0 100 1,800 100%", "cells": ["翼龙_成年", "食肉", "♂", "20,000", "0", "100", "1,800", "100%"]}, {"id": "row-12", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "角鼻龙_成年 食肉 ♂ 5,000 500 1,000 3,000 100%", "cells": ["角鼻龙_成年", "食肉", "♂", "5,000", "500", "1,000", "3,000", "100%"]}, {"id": "row-13", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "超级暴龙_成年 食肉 ♂ 168,000 3,000 1,000 16,000 100%", "cells": ["超级暴龙_成年", "食肉", "♂", "168,000", "3,000", "1,000", "16,000", "100%"]}, {"id": "row-14", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "双脊龙_成年 食肉 ♂ 3,000 400 1,000 2,400 100%", "cells": ["双脊龙_成年", "食肉", "♂", "3,000", "400", "1,000", "2,400", "100%"]}, {"id": "row-15", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "巨型脊背龙_成年 食肉 ♂ 29,000 1,700 1,000 18,000 100%", "cells": ["巨型脊背龙_成年", "食肉", "♂", "29,000", "1,700", "1,000", "18,000", "100%"]}, {"id": "row-16", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "踢脚鸡_成年 食草 ♂ 1,800 300 1,000 2,000 100%", "cells": ["踢脚鸡_成年", "食草", "♂", "1,800", "300", "1,000", "2,000", "100%"]}, {"id": "row-17", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "高脊龙_成年 食肉 ♂ 4,000 400 1,000 3,000 100%", "cells": ["高脊龙_成年", "食肉", "♂", "4,000", "400", "1,000", "3,000", "100%"]}, {"id": "row-18", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "犹他龙_成年 食肉 ♂ 3,000 200 1,000 2,500 100%", "cells": ["犹他龙_成年", "食肉", "♂", "3,000", "200", "1,000", "2,500", "100%"]}, {"id": "row-19", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "雷龙_成年 食草 ♂ 60,000 15,000 2,000 30,000 100%", "cells": ["雷龙_成年", "食草", "♂", "60,000", "15,000", "2,000", "30,000", "100%"]}, {"id": "row-20", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "三角龙_成年 食草 ♂ 6,000 800 1,000 1,300 100%", "cells": ["三角龙_成年", "食草", "♂", "6,000", "800", "1,000", "1,300", "100%"]}, {"id": "row-21", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "恶魔双角龙_成年 食草 ♂ 4,500 400 1,000 900 100%", "cells": ["恶魔双角龙_成年", "食草", "♂", "4,500", "400", "1,000", "900", "100%"]}, {"id": "row-22", "section": "一、恐龙属性数据（成年体）", "secId": "sec-1", "text": "远古霸王龙_成年 食肉 ♂ 28,000 1,800 1,000 15,000 100%", "cells": ["远古霸王龙_成年", "食肉", "♂", "28,000", "1,800", "1,000", "15,000", "100%"]}, {"id": "row-23", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "三角龙-成年_母 1 200", "cells": ["三角龙-成年_母", "1", "200"]}, {"id": "row-24", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "三角龙-成年_公 1 100", "cells": ["三角龙-成年_公", "1", "100"]}, {"id": "row-25", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "剑龙_成年 1 200", "cells": ["剑龙_成年", "1", "200"]}, {"id": "row-26", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "剑龙-成年_母 1 200", "cells": ["剑龙-成年_母", "1", "200"]}, {"id": "row-27", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "双脊龙-成年_母 1 200", "cells": ["双脊龙-成年_母", "1", "200"]}, {"id": "row-28", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "双脊龙-成年_公 1 100", "cells": ["双脊龙-成年_公", "1", "100"]}, {"id": "row-29", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "巨型脊背龙_成年 2 560", "cells": ["巨型脊背龙_成年", "2", "560"]}, {"id": "row-30", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "巨型脊背龙_幼年 1 288", "cells": ["巨型脊背龙_幼年", "1", "288"]}, {"id": "row-31", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "异特龙-成年_母 1 200", "cells": ["异特龙-成年_母", "1", "200"]}, {"id": "row-32", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "异特龙-成年_公 1 100", "cells": ["异特龙-成年_公", "1", "100"]}, {"id": "row-33", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "恶魔双角龙-成年_母 1 200", "cells": ["恶魔双角龙-成年_母", "1", "200"]}, {"id": "row-34", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "恶魔双角龙-成年_公 1 100", "cells": ["恶魔双角龙-成年_公", "1", "100"]}, {"id": "row-35", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "机械暴龙_成年 105 无", "cells": ["机械暴龙_成年", "105", "无"]}, {"id": "row-36", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "机械暴龙_幼年 65 无", "cells": ["机械暴龙_幼年", "65", "无"]}, {"id": "row-37", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "牛龙-成年_母 1 200", "cells": ["牛龙-成年_母", "1", "200"]}, {"id": "row-38", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "牛龙-成年_公 1 100", "cells": ["牛龙-成年_公", "1", "100"]}, {"id": "row-39", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "犹他龙-成年_母 1 200", "cells": ["犹他龙-成年_母", "1", "200"]}, {"id": "row-40", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "犹他龙-成年_公 1 100", "cells": ["犹他龙-成年_公", "1", "100"]}, {"id": "row-41", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "甲龙-成年_母 1 200", "cells": ["甲龙-成年_母", "1", "200"]}, {"id": "row-42", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "甲龙-成年_公 1 100", "cells": ["甲龙-成年_公", "1", "100"]}, {"id": "row-43", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "翼龙_成年 300 无", "cells": ["翼龙_成年", "300", "无"]}, {"id": "row-44", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "艾雷拉龙-成年_母 1 200", "cells": ["艾雷拉龙-成年_母", "1", "200"]}, {"id": "row-45", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "艾雷拉龙-成年_公 1 100", "cells": ["艾雷拉龙-成年_公", "1", "100"]}, {"id": "row-46", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "角鼻龙-成年_母 1 200", "cells": ["角鼻龙-成年_母", "1", "200"]}, {"id": "row-47", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "角鼻龙-成年_公 1 100", "cells": ["角鼻龙-成年_公", "1", "100"]}, {"id": "row-48", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "超级暴龙_成年 75 128,888", "cells": ["超级暴龙_成年", "75", "128,888"]}, {"id": "row-49", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "超级暴龙_幼年 40 108,888", "cells": ["超级暴龙_幼年", "40", "108,888"]}, {"id": "row-50", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "踢脚鸡-成年_公 1 200", "cells": ["踢脚鸡-成年_公", "1", "200"]}, {"id": "row-51", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "踢脚鸡-成年_母 1 200", "cells": ["踢脚鸡-成年_母", "1", "200"]}, {"id": "row-52", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "远古南巨_成年 2 520", "cells": ["远古南巨_成年", "2", "520"]}, {"id": "row-53", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "远古南巨_幼年 1 288", "cells": ["远古南巨_幼年", "1", "288"]}, {"id": "row-54", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "远古牛龙_成年 2 1,200", "cells": ["远古牛龙_成年", "2", "1,200"]}, {"id": "row-55", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "远古牛龙_幼年 1 688", "cells": ["远古牛龙_幼年", "1", "688"]}, {"id": "row-56", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "远古霸王龙_成年 2 520", "cells": ["远古霸王龙_成年", "2", "520"]}, {"id": "row-57", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "远古霸王龙_幼年 1 288", "cells": ["远古霸王龙_幼年", "1", "288"]}, {"id": "row-58", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "重爪龙-成年_母 1 200", "cells": ["重爪龙-成年_母", "1", "200"]}, {"id": "row-59", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "重爪龙-成年_公 1 100", "cells": ["重爪龙-成年_公", "1", "100"]}, {"id": "row-60", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "雷龙_成年 75 128,888", "cells": ["雷龙_成年", "75", "128,888"]}, {"id": "row-61", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "雷龙_幼年 40 108,888", "cells": ["雷龙_幼年", "40", "108,888"]}, {"id": "row-62", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "霸王龙-成年_母 1 200", "cells": ["霸王龙-成年_母", "1", "200"]}, {"id": "row-63", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "霸王龙-成年_公 1 100", "cells": ["霸王龙-成年_公", "1", "100"]}, {"id": "row-64", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "高脊龙-成年_公 1 100", "cells": ["高脊龙-成年_公", "1", "100"]}, {"id": "row-65", "section": "2.1 商城 - 怪兽", "secId": "sec-4", "text": "高脊龙-成年_母 1 200", "cells": ["高脊龙-成年_母", "1", "200"]}, {"id": "row-66", "section": "道具", "secId": "sec-5", "text": "基因强化卡 3 无 功能卡", "cells": ["基因强化卡", "3", "无", "功能卡"]}, {"id": "row-67", "section": "道具", "secId": "sec-5", "text": "传送卡*100 10 无 功能卡", "cells": ["传送卡*100", "10", "无", "功能卡"]}, {"id": "row-68", "section": "道具", "secId": "sec-5", "text": "等离子-文本 30 无 文本/昵称", "cells": ["等离子-文本", "30", "无", "文本/昵称"]}, {"id": "row-69", "section": "道具", "secId": "sec-5", "text": "少女感-文本 30 无 文本/昵称", "cells": ["少女感-文本", "30", "无", "文本/昵称"]}, {"id": "row-70", "section": "道具", "secId": "sec-5", "text": "红黄蓝绿-文本 30 无 文本/昵称", "cells": ["红黄蓝绿-文本", "30", "无", "文本/昵称"]}, {"id": "row-71", "section": "道具", "secId": "sec-5", "text": "等离子-昵称 30 无 文本/昵称", "cells": ["等离子-昵称", "30", "无", "文本/昵称"]}, {"id": "row-72", "section": "道具", "secId": "sec-5", "text": "少女感-昵称 30 无 文本/昵称", "cells": ["少女感-昵称", "30", "无", "文本/昵称"]}, {"id": "row-73", "section": "道具", "secId": "sec-5", "text": "红黄蓝绿-昵称 30 无 文本/昵称", "cells": ["红黄蓝绿-昵称", "30", "无", "文本/昵称"]}, {"id": "row-74", "section": "道具", "secId": "sec-5", "text": "进化卡 35 无 功能卡", "cells": ["进化卡", "35", "无", "功能卡"]}, {"id": "row-75", "section": "道具", "secId": "sec-5", "text": "新年限定2(带烟花特效)（×50） 50 100,000 特效", "cells": ["新年限定2(带烟花特效)（×50）", "50", "100,000", "特效"]}, {"id": "row-76", "section": "道具", "secId": "sec-5", "text": "新年限定1(带烟花特效)（×50） 50 100,000 特效", "cells": ["新年限定1(带烟花特效)（×50）", "50", "100,000", "特效"]}, {"id": "row-77", "section": "道具", "secId": "sec-5", "text": "定点卡 50 无 功能卡", "cells": ["定点卡", "50", "无", "功能卡"]}, {"id": "row-78", "section": "道具", "secId": "sec-5", "text": "生死看淡，不服就干（×100） 50 100,000 表情/喷漆", "cells": ["生死看淡，不服就干（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-79", "section": "道具", "secId": "sec-5", "text": "岂有此理（×100） 50 100,000 表情/喷漆", "cells": ["岂有此理（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-80", "section": "道具", "secId": "sec-5", "text": "啊？！（×100） 50 100,000 表情/喷漆", "cells": ["啊？！（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-81", "section": "道具", "secId": "sec-5", "text": "来者何人（×100） 50 100,000 表情/喷漆", "cells": ["来者何人（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-82", "section": "道具", "secId": "sec-5", "text": "熔岩恐龙（×100） 50 100,000 表情/喷漆", "cells": ["熔岩恐龙（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-83", "section": "道具", "secId": "sec-5", "text": "再跑啊！（×100） 50 100,000 表情/喷漆", "cells": ["再跑啊！（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-84", "section": "道具", "secId": "sec-5", "text": "看！大傻子（×100） 50 100,000 表情/喷漆", "cells": ["看！大傻子（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-85", "section": "道具", "secId": "sec-5", "text": "浑身放电（×100） 50 100,000 表情/喷漆", "cells": ["浑身放电（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-86", "section": "道具", "secId": "sec-5", "text": "大哥放我一马（×100） 50 100,000 表情/喷漆", "cells": ["大哥放我一马（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-87", "section": "道具", "secId": "sec-5", "text": "箭头（×100） 50 100,000 表情/喷漆", "cells": ["箭头（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-88", "section": "道具", "secId": "sec-5", "text": "大王饶命（×100） 50 100,000 表情/喷漆", "cells": ["大王饶命（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-89", "section": "道具", "secId": "sec-5", "text": "真棒（×100） 50 100,000 表情/喷漆", "cells": ["真棒（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-90", "section": "道具", "secId": "sec-5", "text": "嗷呜-镭射（×100） 50 100,000 表情/喷漆", "cells": ["嗷呜-镭射（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-91", "section": "道具", "secId": "sec-5", "text": "嗷呜（×100） 50 100,000 表情/喷漆", "cells": ["嗷呜（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-92", "section": "道具", "secId": "sec-5", "text": "星星眼-镭射（×100） 50 100,000 表情/喷漆", "cells": ["星星眼-镭射（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-93", "section": "道具", "secId": "sec-5", "text": "星星眼（×100） 50 100,000 表情/喷漆", "cells": ["星星眼（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-94", "section": "道具", "secId": "sec-5", "text": "你过来呀（×100） 50 100,000 表情/喷漆", "cells": ["你过来呀（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-95", "section": "道具", "secId": "sec-5", "text": "弱鸡（×100） 50 100,000 表情/喷漆", "cells": ["弱鸡（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-96", "section": "道具", "secId": "sec-5", "text": "菜（×100） 50 100,000 表情/喷漆", "cells": ["菜（×100）", "50", "100,000", "表情/喷漆"]}, {"id": "row-97", "section": "道具", "secId": "sec-5", "text": "改名卡 68 无 功能卡", "cells": ["改名卡", "68", "无", "功能卡"]}, {"id": "row-98", "section": "道具", "secId": "sec-5", "text": "公会冷却卡 88 无 功能卡", "cells": ["公会冷却卡", "88", "无", "功能卡"]}, {"id": "row-99", "section": "礼包", "secId": "sec-6", "text": "成年远古霸王龙礼包（200 头） 100", "cells": ["成年远古霸王龙礼包（200 头）", "100"]}, {"id": "row-100", "section": "礼包", "secId": "sec-6", "text": "大号成年远古霸王龙礼包（500 头） 240", "cells": ["大号成年远古霸王龙礼包（500 头）", "240"]}, {"id": "row-101", "section": "礼包", "secId": "sec-6", "text": "成年超级暴龙礼包（10头） 700", "cells": ["成年超级暴龙礼包（10头）", "700"]}, {"id": "row-102", "section": "礼包", "secId": "sec-6", "text": "幼年超级暴龙礼包（10 头幼暴+强化卡 60） 500", "cells": ["幼年超级暴龙礼包（10 头幼暴+强化卡 60）", "500"]}, {"id": "row-103", "section": "礼包", "secId": "sec-6", "text": "雷龙礼包（10 头） 700", "cells": ["雷龙礼包（10 头）", "700"]}, {"id": "row-104", "section": "礼包", "secId": "sec-6", "text": "南手龙礼包（1 头+100 个绿帽子喷漆+100弱鸡喷漆） 1314", "cells": ["南手龙礼包（1 头+100 个绿帽子喷漆+100弱鸡喷漆）", "1314"]}, {"id": "row-105", "section": "礼包", "secId": "sec-6", "text": "翼龙礼包（10头+传送卡 300） 320", "cells": ["翼龙礼包（10头+传送卡 300）", "320"]}, {"id": "row-106", "section": "礼包", "secId": "sec-6", "text": "成年远古牛龙礼包（200 头） 200", "cells": ["成年远古牛龙礼包（200 头）", "200"]}, {"id": "row-107", "section": "礼包", "secId": "sec-6", "text": "成年远古南巨礼包（200 头） 100", "cells": ["成年远古南巨礼包（200 头）", "100"]}, {"id": "row-108", "section": "礼包", "secId": "sec-6", "text": "成年脊背礼包（200 头） 100", "cells": ["成年脊背礼包（200 头）", "100"]}, {"id": "row-109", "section": "礼包", "secId": "sec-6", "text": "幼年机械龙礼包（10 头+强化卡 80） 750", "cells": ["幼年机械龙礼包（10 头+强化卡 80）", "750"]}, {"id": "row-110", "section": "礼包", "secId": "sec-6", "text": "成年机械龙礼包（10 头） 1000", "cells": ["成年机械龙礼包（10 头）", "1000"]}, {"id": "row-111", "section": "3.1 公会商店", "secId": "sec-8", "text": "公会传送碑 600", "cells": ["公会传送碑", "600"]}, {"id": "row-112", "section": "3.1 公会商店", "secId": "sec-8", "text": "超级暴龙_成年 90", "cells": ["超级暴龙_成年", "90"]}, {"id": "row-113", "section": "3.1 公会商店", "secId": "sec-8", "text": "雷龙_成年 90", "cells": ["雷龙_成年", "90"]}, {"id": "row-114", "section": "3.1 公会商店", "secId": "sec-8", "text": "远古牛龙_成年 1", "cells": ["远古牛龙_成年", "1"]}, {"id": "row-115", "section": "3.1 公会商店", "secId": "sec-8", "text": "远古霸王龙_成年 1", "cells": ["远古霸王龙_成年", "1"]}, {"id": "row-116", "section": "3.1 公会商店", "secId": "sec-8", "text": "巨型脊背龙_成年 1", "cells": ["巨型脊背龙_成年", "1"]}, {"id": "row-117", "section": "3.1 公会商店", "secId": "sec-8", "text": "远古南巨_成年 1", "cells": ["远古南巨_成年", "1"]}, {"id": "row-118", "section": "3.2 贡献点兑换 - 怪兽", "secId": "sec-9", "text": "超级暴龙_成年 2100", "cells": ["超级暴龙_成年", "2100"]}, {"id": "row-119", "section": "3.2 贡献点兑换 - 怪兽", "secId": "sec-9", "text": "雷龙_成年 2100", "cells": ["雷龙_成年", "2100"]}, {"id": "row-120", "section": "3.2 贡献点兑换 - 怪兽", "secId": "sec-9", "text": "超级暴龙_幼年 1200", "cells": ["超级暴龙_幼年", "1200"]}, {"id": "row-121", "section": "3.2 贡献点兑换 - 怪兽", "secId": "sec-9", "text": "雷龙_幼年 1200", "cells": ["雷龙_幼年", "1200"]}, {"id": "row-122", "section": "3.2 贡献点兑换 - 怪兽", "secId": "sec-9", "text": "远古牛龙_成年 20", "cells": ["远古牛龙_成年", "20"]}, {"id": "row-123", "section": "3.2 贡献点兑换 - 怪兽", "secId": "sec-9", "text": "远古霸王龙_成年 10", "cells": ["远古霸王龙_成年", "10"]}, {"id": "row-124", "section": "3.2 贡献点兑换 - 怪兽", "secId": "sec-9", "text": "巨型脊背龙_成年 10", "cells": ["巨型脊背龙_成年", "10"]}, {"id": "row-125", "section": "3.2 贡献点兑换 - 怪兽", "secId": "sec-9", "text": "远古南巨_成年 10", "cells": ["远古南巨_成年", "10"]}, {"id": "row-126", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "基因强化卡 200 功能卡", "cells": ["基因强化卡", "200", "功能卡"]}, {"id": "row-127", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "传送卡*100 300 功能卡", "cells": ["传送卡*100", "300", "功能卡"]}, {"id": "row-128", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "公会专属_少女粉-昵称 1000 公会专属", "cells": ["公会专属_少女粉-昵称", "1000", "公会专属"]}, {"id": "row-129", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "公会专属_海天一色-昵称 1000 公会专属", "cells": ["公会专属_海天一色-昵称", "1000", "公会专属"]}, {"id": "row-130", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "公会专属_我很神秘-昵称 1000 公会专属", "cells": ["公会专属_我很神秘-昵称", "1000", "公会专属"]}, {"id": "row-131", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "公会专属_开门红-文本 1000 公会专属", "cells": ["公会专属_开门红-文本", "1000", "公会专属"]}, {"id": "row-132", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "公会专属_金光闪闪-文本 1000 公会专属", "cells": ["公会专属_金光闪闪-文本", "1000", "公会专属"]}, {"id": "row-133", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "公会专属_少女粉-文本 1000 公会专属", "cells": ["公会专属_少女粉-文本", "1000", "公会专属"]}, {"id": "row-134", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "公会专属_海天一色-文本 1000 公会专属", "cells": ["公会专属_海天一色-文本", "1000", "公会专属"]}, {"id": "row-135", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "公会专属_我很神秘-文本 1000 公会专属", "cells": ["公会专属_我很神秘-文本", "1000", "公会专属"]}, {"id": "row-136", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "公会专属_开门红-昵称 1000 公会专属", "cells": ["公会专属_开门红-昵称", "1000", "公会专属"]}, {"id": "row-137", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "公会专属_金光闪闪-昵称 1000 公会专属", "cells": ["公会专属_金光闪闪-昵称", "1000", "公会专属"]}, {"id": "row-138", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "进化卡 1200 功能卡", "cells": ["进化卡", "1200", "功能卡"]}, {"id": "row-139", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "定点卡 2000 功能卡", "cells": ["定点卡", "2000", "功能卡"]}, {"id": "row-140", "section": "3.3 贡献点兑换 - 道具", "secId": "sec-10", "text": "改名卡 2500 功能卡", "cells": ["改名卡", "2500", "功能卡"]}, {"id": "row-141", "section": "3.4 公会机制", "secId": "sec-11", "text": "领地价格 1000 团队令", "cells": ["领地价格", "1000 团队令"]}, {"id": "row-142", "section": "3.4 公会机制", "secId": "sec-11", "text": "团队令兑换比例 1 兽币 = 1 团队令，赠送 10 贡献点", "cells": ["团队令兑换比例", "1 兽币 = 1 团队令，赠送 10 贡献点"]}, {"id": "row-143", "section": "3.4 公会机制", "secId": "sec-11", "text": "团队令使用权限 仅限会长及有权限的部分成员", "cells": ["团队令使用权限", "仅限会长及有权限的部分成员"]}, {"id": "row-144", "section": "3.4 公会机制", "secId": "sec-11", "text": "贡献点归属 绑定个人", "cells": ["贡献点归属", "绑定个人"]}, {"id": "row-145", "section": "3.4 公会机制", "secId": "sec-11", "text": "公会经验 每兑换 1 枚团队令可获得 1 点公会经验值", "cells": ["公会经验", "每兑换 1 枚团队令可获得 1 点公会经验值"]}, {"id": "row-146", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "彩色花瓣2048 200", "cells": ["彩色花瓣2048", "200"]}, {"id": "row-147", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "战术迷彩2091 300", "cells": ["战术迷彩2091", "300"]}, {"id": "row-148", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "样条线2044 300", "cells": ["样条线2044", "300"]}, {"id": "row-149", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "褪色银河2045 300", "cells": ["褪色银河2045", "300"]}, {"id": "row-150", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "帆布月亮2046 400", "cells": ["帆布月亮2046", "400"]}, {"id": "row-151", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "混沌2047 400", "cells": ["混沌2047", "400"]}, {"id": "row-152", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "碎岩2081 500", "cells": ["碎岩2081", "500"]}, {"id": "row-153", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "硬朗迷彩2106 500", "cells": ["硬朗迷彩2106", "500"]}, {"id": "row-154", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "绿箭头2108 500", "cells": ["绿箭头2108", "500"]}, {"id": "row-155", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "黄金2007 500", "cells": ["黄金2007", "500"]}, {"id": "row-156", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "暗金2008 500", "cells": ["暗金2008", "500"]}, {"id": "row-157", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "草地2009 500", "cells": ["草地2009", "500"]}, {"id": "row-158", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "岩石2010 500", "cells": ["岩石2010", "500"]}, {"id": "row-159", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "斑马2043 500", "cells": ["斑马2043", "500"]}, {"id": "row-160", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "少女心2082 520", "cells": ["少女心2082", "520"]}, {"id": "row-161", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "卡通兔子2130 520", "cells": ["卡通兔子2130", "520"]}, {"id": "row-162", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "卡通兔子2131 520", "cells": ["卡通兔子2131", "520"]}, {"id": "row-163", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "大白鹅2132 520", "cells": ["大白鹅2132", "520"]}, {"id": "row-164", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "卡通小猫2133 520", "cells": ["卡通小猫2133", "520"]}, {"id": "row-165", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "动物乐园2134 520", "cells": ["动物乐园2134", "520"]}, {"id": "row-166", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "软萌暴暴2135 520", "cells": ["软萌暴暴2135", "520"]}, {"id": "row-167", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "卡通兔子2129 520", "cells": ["卡通兔子2129", "520"]}, {"id": "row-168", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "赤红心心2090 600", "cells": ["赤红心心2090", "600"]}, {"id": "row-169", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "豹纹2089 600", "cells": ["豹纹2089", "600"]}, {"id": "row-170", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "舞厅之王2109 666", "cells": ["舞厅之王2109", "666"]}, {"id": "row-171", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "荧屏灯珠2110 666", "cells": ["荧屏灯珠2110", "666"]}, {"id": "row-172", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "波动橙2115 688", "cells": ["波动橙2115", "688"]}, {"id": "row-173", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "波动蓝2116 688", "cells": ["波动蓝2116", "688"]}, {"id": "row-174", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "波动紫2117 688", "cells": ["波动紫2117", "688"]}, {"id": "row-175", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "沙子雕塑2118 688", "cells": ["沙子雕塑2118", "688"]}, {"id": "row-176", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "砂岩雕塑2119 688", "cells": ["砂岩雕塑2119", "688"]}, {"id": "row-177", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "枯木雕塑2120 688", "cells": ["枯木雕塑2120", "688"]}, {"id": "row-178", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "火山岩雕塑2121 788", "cells": ["火山岩雕塑2121", "788"]}, {"id": "row-179", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "黑钢岩雕塑2122 788", "cells": ["黑钢岩雕塑2122", "788"]}, {"id": "row-180", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "塑料青2013 800", "cells": ["塑料青2013", "800"]}, {"id": "row-181", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "塑料灰2014 800", "cells": ["塑料灰2014", "800"]}, {"id": "row-182", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "塑料绿2015 800", "cells": ["塑料绿2015", "800"]}, {"id": "row-183", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "塑料粉2016 800", "cells": ["塑料粉2016", "800"]}, {"id": "row-184", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "塑料黄2017 800", "cells": ["塑料黄2017", "800"]}, {"id": "row-185", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "塑料棕2018 800", "cells": ["塑料棕2018", "800"]}, {"id": "row-186", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "风格化绿2019 800", "cells": ["风格化绿2019", "800"]}, {"id": "row-187", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "风格化紫2020 800", "cells": ["风格化紫2020", "800"]}, {"id": "row-188", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "经典黄2021 800", "cells": ["经典黄2021", "800"]}, {"id": "row-189", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "经典绿2022 800", "cells": ["经典绿2022", "800"]}, {"id": "row-190", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "经典黑2023 800", "cells": ["经典黑2023", "800"]}, {"id": "row-191", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "经典粉2024 800", "cells": ["经典粉2024", "800"]}, {"id": "row-192", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "经典红2025 800", "cells": ["经典红2025", "800"]}, {"id": "row-193", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "经典灰2026 800", "cells": ["经典灰2026", "800"]}, {"id": "row-194", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "经典蓝2027 800", "cells": ["经典蓝2027", "800"]}, {"id": "row-195", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "光膜2028 800", "cells": ["光膜2028", "800"]}, {"id": "row-196", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "镭射2029 800", "cells": ["镭射2029", "800"]}, {"id": "row-197", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "白炽灯2030 800", "cells": ["白炽灯2030", "800"]}, {"id": "row-198", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "纯黑2031 800", "cells": ["纯黑2031", "800"]}, {"id": "row-199", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "藤条2050 800", "cells": ["藤条2050", "800"]}, {"id": "row-200", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "动态螺旋2078 888", "cells": ["动态螺旋2078", "888"]}, {"id": "row-201", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "赤红痕迹2083 888", "cells": ["赤红痕迹2083", "888"]}, {"id": "row-202", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "橘子皮动态2072 888", "cells": ["橘子皮动态2072", "888"]}, {"id": "row-203", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "蓝色噪波2073 888", "cells": ["蓝色噪波2073", "888"]}, {"id": "row-204", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "香芋啵啵2075 888", "cells": ["香芋啵啵2075", "888"]}, {"id": "row-205", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "香芋癫狂2076 888", "cells": ["香芋癫狂2076", "888"]}, {"id": "row-206", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "动态蓝地砖2077 888", "cells": ["动态蓝地砖2077", "888"]}, {"id": "row-207", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "地砖2105 888", "cells": ["地砖2105", "888"]}, {"id": "row-208", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "激光线条2107 888", "cells": ["激光线条2107", "888"]}, {"id": "row-209", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "石灰岩2114 888", "cells": ["石灰岩2114", "888"]}, {"id": "row-210", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "线团2085 888", "cells": ["线团2085", "888"]}, {"id": "row-211", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "三叶草2128 888", "cells": ["三叶草2128", "888"]}, {"id": "row-212", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "闪电花纹2061 888", "cells": ["闪电花纹2061", "888"]}, {"id": "row-213", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "哈基米2060 888", "cells": ["哈基米2060", "888"]}, {"id": "row-214", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "动态碎玻璃2079 999", "cells": ["动态碎玻璃2079", "999"]}, {"id": "row-215", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "动态闪电2080 999", "cells": ["动态闪电2080", "999"]}, {"id": "row-216", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "光子轨迹2084 999", "cells": ["光子轨迹2084", "999"]}, {"id": "row-217", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "黄金甲2087 999", "cells": ["黄金甲2087", "999"]}, {"id": "row-218", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "白银甲2088 999", "cells": ["白银甲2088", "999"]}, {"id": "row-219", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "能量波动2095 1288", "cells": ["能量波动2095", "1288"]}, {"id": "row-220", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "腐殖质层2127 1288", "cells": ["腐殖质层2127", "1288"]}, {"id": "row-221", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "大马士革蓝2098 1288", "cells": ["大马士革蓝2098", "1288"]}, {"id": "row-222", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "光暗交汇2099 1288", "cells": ["光暗交汇2099", "1288"]}, {"id": "row-223", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "寒气逼人2100 1288", "cells": ["寒气逼人2100", "1288"]}, {"id": "row-224", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "熔岩2005 1888", "cells": ["熔岩2005", "1888"]}, {"id": "row-225", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "粉钻2032 1888", "cells": ["粉钻2032", "1888"]}, {"id": "row-226", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "蓝钻2033 1888", "cells": ["蓝钻2033", "1888"]}, {"id": "row-227", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "黄钻2034 1888", "cells": ["黄钻2034", "1888"]}, {"id": "row-228", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "白钻2035 1888", "cells": ["白钻2035", "1888"]}, {"id": "row-229", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "高速星星2058 1888", "cells": ["高速星星2058", "1888"]}, {"id": "row-230", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "能量汇集2093 1888", "cells": ["能量汇集2093", "1888"]}, {"id": "row-231", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "大马士革紫2094 1888", "cells": ["大马士革紫2094", "1888"]}, {"id": "row-232", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "石油色斑2102 1888", "cells": ["石油色斑2102", "1888"]}, {"id": "row-233", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "花屏2103 1888", "cells": ["花屏2103", "1888"]}, {"id": "row-234", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "星图2086 1888", "cells": ["星图2086", "1888"]}, {"id": "row-235", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "金星闪烁2101 1888", "cells": ["金星闪烁2101", "1888"]}, {"id": "row-236", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "地狱火2068 1888", "cells": ["地狱火2068", "1888"]}, {"id": "row-237", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "魔兽绿2069 1888", "cells": ["魔兽绿2069", "1888"]}, {"id": "row-238", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "黑钻2070 1888", "cells": ["黑钻2070", "1888"]}, {"id": "row-239", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "绿钻2071 1888", "cells": ["绿钻2071", "1888"]}, {"id": "row-240", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "动感波纹2104 1999", "cells": ["动感波纹2104", "1999"]}, {"id": "row-241", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "雪花飘飘2096 1999", "cells": ["雪花飘飘2096", "1999"]}, {"id": "row-242", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "梦境骑士2097 1999", "cells": ["梦境骑士2097", "1999"]}, {"id": "row-243", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "星系2039 2888", "cells": ["星系2039", "2888"]}, {"id": "row-244", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "繁星2040 2888", "cells": ["繁星2040", "2888"]}, {"id": "row-245", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "繁星三2074 2888", "cells": ["繁星三2074", "2888"]}, {"id": "row-246", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "蓝水晶2001 3888", "cells": ["蓝水晶2001", "3888"]}, {"id": "row-247", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "紫水晶2002 3888", "cells": ["紫水晶2002", "3888"]}, {"id": "row-248", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "黄水晶2003 3888", "cells": ["黄水晶2003", "3888"]}, {"id": "row-249", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "冰块2004 6888", "cells": ["冰块2004", "6888"]}, {"id": "row-250", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "大哥大2092 8888", "cells": ["大哥大2092", "8888"]}, {"id": "row-251", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "树叶伪装2125 8888", "cells": ["树叶伪装2125", "8888"]}, {"id": "row-252", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "寒冰雕塑2126 12888", "cells": ["寒冰雕塑2126", "12888"]}, {"id": "row-253", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "水玻璃蓝2112 15888", "cells": ["水玻璃蓝2112", "15888"]}, {"id": "row-254", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "水玻璃紫2113 15888", "cells": ["水玻璃紫2113", "15888"]}, {"id": "row-255", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "花海伪装2124 18888", "cells": ["花海伪装2124", "18888"]}, {"id": "row-256", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "黑螺旋2066 19999", "cells": ["黑螺旋2066", "19999"]}, {"id": "row-257", "section": "通用皮肤（金币）", "secId": "sec-13", "text": "黑丝2059 25888", "cells": ["黑丝2059", "25888"]}, {"id": "row-258", "section": "5.1 权益卡", "secId": "sec-15", "text": "季度权益卡 2,688 20点/月", "cells": ["季度权益卡", "2,688", "20点/月"]}, {"id": "row-259", "section": "5.1 权益卡", "secId": "sec-15", "text": "半年权益卡 5,088 20点/月", "cells": ["半年权益卡", "5,088", "20点/月"]}, {"id": "row-260", "section": "5.1 权益卡", "secId": "sec-15", "text": "半年权益卡 9,888 40点/月", "cells": ["半年权益卡", "9,888", "40点/月"]}, {"id": "row-261", "section": "5.1 权益卡", "secId": "sec-15", "text": "年度权益卡 18,888 50 点/月", "cells": ["年度权益卡", "18,888", "50 点/月"]}, {"id": "row-262", "section": "5.1 权益卡", "secId": "sec-15", "text": "年度权益卡 30,888 100点/月", "cells": ["年度权益卡", "30,888", "100点/月"]}, {"id": "row-263", "section": "5.2 权益积分兑换", "secId": "sec-16", "text": "成年远古霸王龙100条 1", "cells": ["成年远古霸王龙100条", "1"]}, {"id": "row-264", "section": "5.2 权益积分兑换", "secId": "sec-16", "text": "成年脊背100条 1", "cells": ["成年脊背100条", "1"]}, {"id": "row-265", "section": "5.2 权益积分兑换", "secId": "sec-16", "text": "成年远古牛龙100条 1", "cells": ["成年远古牛龙100条", "1"]}, {"id": "row-266", "section": "5.2 权益积分兑换", "secId": "sec-16", "text": "成年远古南巨100条 1", "cells": ["成年远古南巨100条", "1"]}, {"id": "row-267", "section": "5.2 权益积分兑换", "secId": "sec-16", "text": "成年超级暴龙1条 1", "cells": ["成年超级暴龙1条", "1"]}, {"id": "row-268", "section": "5.2 权益积分兑换", "secId": "sec-16", "text": "成年雷龙1条 1", "cells": ["成年雷龙1条", "1"]}, {"id": "row-269", "section": "5.2 权益积分兑换", "secId": "sec-16", "text": "机械暴龙2条 3", "cells": ["机械暴龙2条", "3"]}, {"id": "row-270", "section": "5.3 会员等级权益", "secId": "sec-17", "text": "会员1级 无损坠落；喝水吃肉额外回血200每秒", "cells": ["会员1级", "无损坠落；喝水吃肉额外回血200每秒"]}, {"id": "row-271", "section": "5.3 会员等级权益", "secId": "sec-17", "text": "会员2级 无损坠落；趴下体力恢复1.5倍；喝水吃肉额外回血200每秒；最大定点数上调至25个", "cells": ["会员2级", "无损坠落；趴下体力恢复1.5倍；喝水吃肉额外回血200每秒；最大定点数上调至25个"]}, {"id": "row-272", "section": "5.3 会员等级权益", "secId": "sec-17", "text": "会员3级 无损坠落；喝水吃肉经验值额外0.5点每秒；趴下体力恢复1.5倍；喝水吃肉额外回血200每秒；最大定点数上调至30个", "cells": ["会员3级", "无损坠落；喝水吃肉经验值额外0.5点每秒；趴下体力恢复1.5倍；喝水吃肉额外回血200每秒；最大定点数上调至30个"]}, {"id": "row-273", "section": "5.3 会员等级权益", "secId": "sec-17", "text": "会员4级 无损坠落；喝水吃肉经验值额外0.5点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血300每秒；最大定点数上调至40个", "cells": ["会员4级", "无损坠落；喝水吃肉经验值额外0.5点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血300每秒；最大定点数上调至40个"]}, {"id": "row-274", "section": "5.3 会员等级权益", "secId": "sec-17", "text": "会员5级 无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血300每秒；最大定点数上调至60个", "cells": ["会员5级", "无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血300每秒；最大定点数上调至60个"]}, {"id": "row-275", "section": "5.3 会员等级权益", "secId": "sec-17", "text": "会员6级 无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血350每秒；最大定点数上调至100个", "cells": ["会员6级", "无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血350每秒；最大定点数上调至100个"]}, {"id": "row-276", "section": "5.3 会员等级权益", "secId": "sec-17", "text": "会员7级 无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血350每秒；最大定点数上调至150个", "cells": ["会员7级", "无损坠落；喝水吃肉经验值额外1.0点每秒；趴下体力恢复2.0倍；趴下血量恢复值1.5倍；喝水吃肉额外回血350每秒；最大定点数上调至150个"]}, {"id": "row-277", "section": "5.3 会员等级权益", "secId": "sec-17", "text": "会员8级 无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值2.0倍；喝水吃肉额外回血400每秒；最大定点数上调至200个", "cells": ["会员8级", "无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值2.0倍；喝水吃肉额外回血400每秒；最大定点数上调至200个"]}, {"id": "row-278", "section": "5.3 会员等级权益", "secId": "sec-17", "text": "会员9级 无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值2.0倍；喝水吃肉额外回血450每秒；最大定点数上调至300个", "cells": ["会员9级", "无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值2.0倍；喝水吃肉额外回血450每秒；最大定点数上调至300个"]}, {"id": "row-279", "section": "5.3 会员等级权益", "secId": "sec-17", "text": "会员10级 无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值3.0倍；喝水吃肉额外回血500每秒；最大定点数上调至400个", "cells": ["会员10级", "无损坠落；喝水吃肉经验值额外2.0点每秒；趴下体力恢复3.0倍；趴下血量恢复值3.0倍；喝水吃肉额外回血500每秒；最大定点数上调至400个"]}]`);
+
+// 初始化 Fuse
+const fuse = new Fuse(ROWS, {
+  keys: ['text', 'section'],
+  threshold: 0.25,
+  includeMatches: true,
+  minMatchCharLength: 1,
+});
+
+const searchInput = document.getElementById('searchInput');
+const totalEl = document.getElementById('totalRows');
+const matchEl = document.getElementById('matchRows');
+const toTopBtn = document.getElementById('toTop');
+
+// 统计
+const allRowEls = document.querySelectorAll('tr[data-search]');
+totalEl.textContent = allRowEls.length;
+matchEl.textContent = allRowEls.length;
+
+// 高亮匹配文本
+function highlightText(node, indices) {
+  if (!indices || indices.length === 0) return;
+  const text = node.textContent;
+  let html = '';
+  let last = 0;
+  for (const [s, e] of indices) {
+    html += escapeHtml(text.slice(last, s));
+    html += '<mark>' + escapeHtml(text.slice(s, e + 1)) + '</mark>';
+    last = e + 1;
+  }
+  html += escapeHtml(text.slice(last));
+  node.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function clearHighlight(tr) {
+  tr.querySelectorAll('td').forEach(td => {
+    td.textContent = td.textContent; // 清除 innerHTML，恢复纯文本
+  });
+}
+
+// 搜索逻辑
+function doSearch(query) {
+  const q = query.trim();
+
+  if (!q) {
+    // 清空搜索，显示全部
+    allRowEls.forEach(tr => {
+      tr.classList.remove('hidden', 'matched');
+      clearHighlight(tr);
+    });
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('collapsed'));
+    matchEl.textContent = allRowEls.length;
+    return;
+  }
+
+  const results = fuse.search(q);
+  const matchedIds = new Set(results.map(r => r.item.id));
+
+  allRowEls.forEach(tr => {
+    const rid = tr.id;
+    const result = results.find(r => r.item.id === rid);
+
+    if (matchedIds.has(rid)) {
+      tr.classList.remove('hidden');
+      tr.classList.add('matched');
+
+      // 高亮匹配单元格
+      const matches = result.matches || [];
+      const textMatch = matches.find(m => m.key === 'text');
+      if (textMatch) {
+        const tds = tr.querySelectorAll('td');
+        // 简化处理：在整行文本中高亮，重新分配到单元格不太精确
+        // 这里采用简单策略：如果匹配在 section 中，不高亮单元格；如果在 text 中，尝试在对应单元格高亮
+        // 由于 Fuse 返回的是合并文本的 indices，我们在每个 td 中搜索 query 并高亮
+        tds.forEach(td => {
+          const tdText = td.textContent;
+          const regex = new RegExp('(' + escapeRegex(q) + ')', 'gi');
+          if (regex.test(tdText)) {
+            td.innerHTML = escapeHtml(tdText).replace(regex, '<mark>$1</mark>');
+          }
+        });
+      }
+    } else {
+      tr.classList.add('hidden');
+      tr.classList.remove('matched');
+      clearHighlight(tr);
+    }
+  });
+
+  matchEl.textContent = matchedIds.size;
+
+  // 自动展开有匹配结果的 section
+  document.querySelectorAll('.section').forEach(sec => {
+    const visible = sec.querySelectorAll('tr[data-search]:not(.hidden)');
+    if (visible.length > 0) {
+      sec.classList.remove('collapsed');
+    }
+  });
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// 事件监听
+let debounceTimer;
+searchInput.addEventListener('input', e => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => doSearch(e.target.value), 150);
+});
+
+// Section 折叠
+document.querySelectorAll('.section-toggle').forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    toggle.closest('.section').classList.toggle('collapsed');
+  });
+});
+
+// 自动为每个 section 添加 toggle（如果没有的话）
+document.querySelectorAll('.section').forEach(sec => {
+  const h2 = sec.querySelector('h2');
+  if (h2 && !sec.querySelector('.section-toggle')) {
+    const toggle = document.createElement('div');
+    toggle.className = 'section-toggle';
+    toggle.innerHTML = '<span class="arrow"></span><b>' + escapeHtml(h2.textContent) + '</b>';
+    sec.insertBefore(toggle, h2.nextSibling);
+    toggle.addEventListener('click', () => sec.classList.toggle('collapsed'));
+  }
+});
+
+// 回到顶部
+window.addEventListener('scroll', () => {
+  toTopBtn.classList.toggle('visible', window.scrollY > 300);
+});
+
+// 快捷键
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    searchInput.value = '';
+    doSearch('');
+    searchInput.blur();
+  }
+});
+
+// 自动聚焦搜索框（桌面端）
+if (window.innerWidth > 768) {
+  searchInput.focus();
+}
+</script>
+
+</body>
+</html>

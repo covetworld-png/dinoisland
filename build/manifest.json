@@ -98,6 +98,15 @@
       "private": true,
       "description": "内部视频下载器"
     },
+    "game-data-search": {
+      "source": "projects/004-工具/004-03-game-data-search",
+      "src": "src/tools/game-data-search",
+      "type": "tool-page",
+      "status": "ready",
+      "confirmed": true,
+      "private": true,
+      "description": "游戏数据搜索查询工具"
+    },
     "revenue-event-analysis": {
       "source": "projects/004-工具/004-02-revenue-event-analysis/frontend/revenue-event-analysis.html",
       "src": "src/report/revenue-event-analysis.html",
