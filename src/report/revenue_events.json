@@ -1,0 +1,68 @@
+{
+  "_comment": "运营事件标注文件，关联收入趋势分析。修改后刷新 report 页面即可生效。",
+  "events": [
+    {
+      "date": "2026-03-31",
+      "type": "markArea",
+      "name": "主播空降活动",
+      "color": "#fac858",
+      "endDate": "2026-04-02"
+    },
+    {
+      "date": "2026-03-31",
+      "type": "markLine",
+      "name": "heni 换剧本",
+      "color": "#fc8452"
+    },
+    {
+      "date": "2026-04-01",
+      "type": "markPoint",
+      "name": "更新大版本",
+      "color": "#3ba272",
+      "value": 2000
+    },
+    {
+      "date": "2026-04-04",
+      "type": "markPoint",
+      "name": "商单 1500",
+      "color": "#fc8452"
+    },
+    {
+      "date": "2026-04-09",
+      "type": "markPoint",
+      "name": "阿贤阿梅直播 PK",
+      "color": "#cc8775"
+    },
+    {
+      "date": "2026-04-11",
+      "type": "markPoint",
+      "name": "第一次宣战成功",
+      "color": "#73c0de"
+    },
+    {
+      "date": "2026-04-11",
+      "type": "markLine",
+      "name": "tk小手柄上架",
+      "color": "#ee6666"
+    }
+  ],
+  "format": {
+    "date": "YYYY-MM-DD，必须与 daily_metrics.csv 的日期一致",
+    "endDate": "markArea 专用，结束日期",
+    "type": "markLine(垂直标线) | markPoint(标注点) | markArea(区间高亮)",
+    "name": "事件名称，显示在图表上",
+    "color": "十六进制颜色码，可选",
+    "value": "markPoint 专用，对应纵轴收入值；若省略则自动取当日收入"
+  },
+  "color_palette": [
+    "#5470c6",
+    "#91cc75",
+    "#fac858",
+    "#ee6666",
+    "#73c0de",
+    "#3ba272",
+    "#fc8452",
+    "#9a60b4",
+    "#ea7ccc"
+  ]
+}

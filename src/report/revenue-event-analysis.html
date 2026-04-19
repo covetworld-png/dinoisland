@@ -320,15 +320,15 @@
       <ol style="font-size:14px;color:#1f2329;line-height:1.8;padding-left:18px;margin:0;">
         <li>在上方表单添加事件，图表会<strong>实时更新</strong>。</li>
         <li>事件数据会暂存在浏览器 <code>localStorage</code> 中，刷新页面不会丢失。</li>
-        <li>编辑完成后，点击「导出 revenue_events.json」，将文件覆盖到 <code>data/exports/revenue_events.json</code> 并提交 git。</li>
-        <li>如需从远程 JSON 重新加载，点击「清空本地缓存」后刷新页面。</li>
+        <li>编辑完成后，点击「导出 revenue_events.json」，将文件覆盖到同级目录 <code>src/report/revenue_events.json</code> 并提交 git。</li>
+        <li>运行 <code>python3 build/pipeline.py revenue-event-analysis</code> 可将事件同步到 <code>data/exports/revenue_events.json</code> 供其他项目引用。</li>
       </ol>
     </div>
   </div>
 
   <script>
-    const CSV_URL = '../../data/exports/daily_metrics.csv';
-    const EVENTS_URL = '../../data/exports/revenue_events.json';
+    const CSV_URL = './daily_metrics.csv';
+    const EVENTS_URL = './revenue_events.json';
     const LS_KEY = 'revenue_events_v1';
     const ZOOM_KEY = 'revenue_zoom_v1';
 
