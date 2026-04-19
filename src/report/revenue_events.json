@@ -44,6 +44,32 @@
       "type": "markLine",
       "name": "tk小手柄上架",
       "color": "#ee6666"
+    },
+    {
+      "date": "2026-04-17",
+      "type": "markPoint",
+      "name": "版本更新（新领地，团队令，团皮）",
+      "color": "#3ba272"
+    },
+    {
+      "date": "2026-04-17",
+      "type": "markPoint",
+      "name": "第二次宣战活动",
+      "color": "#fc8452",
+      "value": 3000
+    },
+    {
+      "date": "2026-04-17",
+      "type": "markPoint",
+      "name": "充值排行榜活动（恐龙变大）",
+      "color": "#91cc75",
+      "value": 2000
+    },
+    {
+      "date": "2026-04-19",
+      "type": "markPoint",
+      "name": "第三次宣战活动",
+      "color": "#fc8452"
     }
   ],
   "format": {
