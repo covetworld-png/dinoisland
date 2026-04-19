@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dino Island — 页面导航</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #1a1d23;
+      --border: #2a2e36;
+      --text: #e0e2e8;
+      --muted: #8b92a8;
+      --accent: #4f8cff;
+      --accent-hover: #6fa0ff;
+      --private: #ff9f43;
+      --private-bg: rgba(255, 159, 67, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    h1 .logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    /* Toggle */
+    .mode-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      padding: 10px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .mode-bar .label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .mode-switch {
+      display: inline-flex;
+      background: #14161c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .mode-switch button {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .mode-switch button.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .mode-hint {
+      margin-left: auto;
+      color: #555b6e;
+      font-size: 12px;
+      font-family: "SF Mono", Monaco, monospace;
+    }
+
+    .section { margin-bottom: 32px; }
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      padding-left: 4px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s, transform 0.1s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .card-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-public { background: rgba(79, 140, 255, 0.12); color: var(--accent); }
+    .badge-private { background: var(--private-bg); color: var(--private); }
+    .card-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .card-path {
+      font-size: 11px;
+      color: #555b6e;
+      font-family: "SF Mono", Monaco, monospace;
+      margin-top: 4px;
+      word-break: break-all;
+    }
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    @media (max-width: 640px) {
+      .mode-bar { flex-wrap: wrap; }
+      .mode-hint { margin-left: 0; width: 100%; }
+    }
+    @media (max-width: 480px) {
+      body { padding: 24px 16px; }
+      h1 { font-size: 22px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><span class="logo">🦖</span> Dino Island 页面导航</h1>
+    <p class="subtitle">所有项目页面的汇总入口，支持本地 / GitHub Pages 两种路径模式</p>
+
+    <div class="mode-bar">
+      <span class="label">路径模式</span>
+      <div class="mode-switch">
+        <button id="btn-local" class="active">本地 (Local)</button>
+        <button id="btn-gh">GitHub Pages</button>
+      </div>
+      <span class="mode-hint" id="mode-hint">相对路径，适合本地直接打开</span>
+    </div>
+
+    <!-- 活动页面 -->
+    <div class="section">
+      <div class="section-title">活动页面 / Campaign</div>
+      <div class="grid">
+        <a class="card"
+           data-local="campaign/pages/landing-official/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/landing-official/index.html">
+          <div class="card-header">
+            <span class="card-title">官方落地页</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">官方品牌落地页</div>
+          <div class="card-path">campaign/pages/landing-official/</div>
+        </a>
+
+        <a class="card"
+           data-local="campaign/pages/landing/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/landing/index.html">
+          <div class="card-header">
+            <span class="card-title">主播落地页</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">主播推广专用落地页</div>
+          <div class="card-path">campaign/pages/landing/</div>
+        </a>
+
+        <a class="card"
+           data-local="campaign/pages/streamer-dropin/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/streamer-dropin/index.html">
+          <div class="card-header">
+            <span class="card-title">主播空降活动页</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">主播空降活动专题页面</div>
+          <div class="card-path">campaign/pages/streamer-dropin/</div>
+        </a>
+
+        <a class="card"
+           data-local="campaign/pages/invite-activity/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/invite-activity/index.html">
+          <div class="card-header">
+            <span class="card-title">邀请活动页</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">玩家邀请活动专题页面</div>
+          <div class="card-path">campaign/pages/invite-activity/</div>
+        </a>
+
+        <a class="card"
+           data-local="campaign/pages/005-01-monthly-recharge-king/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/005-01-monthly-recharge-king/index.html">
+          <div class="card-header">
+            <span class="card-title">月巅峰充值榜</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">至尊龙王月巅峰充值榜（内部）</div>
+          <div class="card-path">campaign/pages/005-01-monthly-recharge-king/</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 官网 -->
+    <div class="section">
+      <div class="section-title">官网 / Official</div>
+      <div class="grid">
+        <a class="card"
+           data-local="official/pages/home/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/official/pages/home/index.html">
+          <div class="card-header">
+            <span class="card-title">官网首页</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">Dino Island 官方网站首页</div>
+          <div class="card-path">official/pages/home/</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 工具 -->
+    <div class="section">
+      <div class="section-title">工具 / Tools</div>
+      <div class="grid">
+        <a class="card"
+           data-local="tools/cs-tool/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/cs-tool/index.html">
+          <div class="card-header">
+            <span class="card-title">客服工具</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">客服专用辅助工具（内部）</div>
+          <div class="card-path">tools/cs-tool/</div>
+        </a>
+
+        <a class="card"
+           data-local="tools/game-data-search/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/game-data-search/index.html">
+          <div class="card-header">
+            <span class="card-title">游戏数据搜索</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">游戏数据查询与检索工具（内部）</div>
+          <div class="card-path">tools/game-data-search/</div>
+        </a>
+
+        <a class="card"
+           data-local="tools/video-downloader/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/video-downloader/index.html">
+          <div class="card-header">
+            <span class="card-title">视频下载器</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">内部视频下载工具</div>
+          <div class="card-path">tools/video-downloader/</div>
+        </a>
+
+        <a class="card"
+           data-local="tools/zalo-compat-test/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/zalo-compat-test/index.html">
+          <div class="card-header">
+            <span class="card-title">Zalo 兼容测试</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">Zalo 浏览器兼容测试页面</div>
+          <div class="card-path">tools/zalo-compat-test/</div>
+        </a>
+
+        <a class="card"
+           data-local="tools/zalo-wild-test/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/zalo-wild-test/index.html">
+          <div class="card-header">
+            <span class="card-title">Zalo Wild 测试</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">Zalo Wild 功能测试页面</div>
+          <div class="card-path">tools/zalo-wild-test/</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 数据报告 -->
+    <div class="section">
+      <div class="section-title">数据报告 / Reports</div>
+      <div class="grid">
+        <a class="card"
+           data-local="report/streamer-data.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/report/streamer-data.html">
+          <div class="card-header">
+            <span class="card-title">主播数据报告</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">主播数据分析报告（内部）</div>
+          <div class="card-path">report/streamer-data.html</div>
+        </a>
+
+        <a class="card"
+           data-local="report/revenue-event-analysis.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/report/revenue-event-analysis.html">
+          <div class="card-header">
+            <span class="card-title">收入波动与事件关联分析</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">收入波动与游戏事件关联分析工具</div>
+          <div class="card-path">report/revenue-event-analysis.html</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 其他 -->
+    <div class="section">
+      <div class="section-title">其他 / Other</div>
+      <div class="grid">
+        <a class="card"
+           data-local="common/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/common/index.html">
+          <div class="card-header">
+            <span class="card-title">Common</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">公共组件与样式预览</div>
+          <div class="card-path">common/index.html</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      仓库: <code>covetworld-png/dinoisland</code> &nbsp;|&nbsp;
+      基础地址: <code>https://covetworld-png.github.io/dinoisland/src/</code>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const btnLocal = document.getElementById('btn-local');
+      const btnGh = document.getElementById('btn-gh');
+      const hint = document.getElementById('mode-hint');
+      const cards = document.querySelectorAll('.card');
+
+      function setMode(mode) {
+        const isLocal = mode === 'local';
+        btnLocal.classList.toggle('active', isLocal);
+        btnGh.classList.toggle('active', !isLocal);
+        hint.textContent = isLocal
+          ? '相对路径，适合本地直接打开 src/index.html'
+          : '完整 HTTPS 链接，适合线上访问或分享给他人';
+
+        cards.forEach(card => {
+          const pathEl = card.querySelector('.card-path');
+          if (isLocal) {
+            card.href = card.dataset.local;
+            if (pathEl) pathEl.textContent = card.dataset.local;
+          } else {
+            card.href = card.dataset.gh;
+            if (pathEl) pathEl.textContent = card.dataset.gh;
+          }
+        });
+      }
+
+      btnLocal.addEventListener('click', () => setMode('local'));
+      btnGh.addEventListener('click', () => setMode('gh'));
+
+      // 默认根据当前协议自动判断
+      setMode(location.protocol === 'file:' ? 'local' : 'gh');
+    })();
+  </script>
+</body>
+</html>
