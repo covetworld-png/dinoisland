@@ -5,10 +5,6 @@
 !src/
 !src/**
 
-# Except data (calculated data, charts, exports)
-!data/
-!data/**
-
 # Except build (pipeline manifests)
 !build/
 !build/**
