@@ -156,6 +156,25 @@
       margin-top: 4px;
       word-break: break-all;
     }
+    .qr-code {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      display: none;
+    }
+    .qr-code img {
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      background: #fff;
+      padding: 4px;
+    }
+    .qr-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
     .footer {
       text-align: center;
       color: var(--muted);
@@ -202,6 +221,7 @@
           </div>
           <div class="card-desc">官方品牌落地页</div>
           <div class="card-path">campaign/pages/landing-official/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
 
         <a class="card"
@@ -213,6 +233,7 @@
           </div>
           <div class="card-desc">主播推广专用落地页</div>
           <div class="card-path">campaign/pages/landing/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
 
         <a class="card"
@@ -224,6 +245,7 @@
           </div>
           <div class="card-desc">主播空降活动专题页面</div>
           <div class="card-path">campaign/pages/streamer-dropin/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
 
         <a class="card"
@@ -235,6 +257,7 @@
           </div>
           <div class="card-desc">玩家邀请活动专题页面</div>
           <div class="card-path">campaign/pages/invite-activity/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
 
         <a class="card"
@@ -246,6 +269,7 @@
           </div>
           <div class="card-desc">至尊龙王月巅峰充值榜（内部）</div>
           <div class="card-path">campaign/pages/005-01-monthly-recharge-king/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
       </div>
     </div>
@@ -263,6 +287,7 @@
           </div>
           <div class="card-desc">Dino Island 官方网站首页</div>
           <div class="card-path">official/pages/home/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
       </div>
     </div>
@@ -280,6 +305,7 @@
           </div>
           <div class="card-desc">客服专用辅助工具（内部）</div>
           <div class="card-path">tools/cs-tool/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
 
         <a class="card"
@@ -291,6 +317,7 @@
           </div>
           <div class="card-desc">游戏数据查询与检索工具（内部）</div>
           <div class="card-path">tools/game-data-search/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
 
         <a class="card"
@@ -302,6 +329,7 @@
           </div>
           <div class="card-desc">内部视频下载工具</div>
           <div class="card-path">tools/video-downloader/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
 
         <a class="card"
@@ -313,6 +341,7 @@
           </div>
           <div class="card-desc">Zalo 浏览器兼容测试页面</div>
           <div class="card-path">tools/zalo-compat-test/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
 
         <a class="card"
@@ -324,6 +353,7 @@
           </div>
           <div class="card-desc">Zalo Wild 功能测试页面</div>
           <div class="card-path">tools/zalo-wild-test/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
       </div>
     </div>
@@ -341,6 +371,7 @@
           </div>
           <div class="card-desc">主播数据分析报告（内部）</div>
           <div class="card-path">report/streamer-data.html</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
 
         <a class="card"
@@ -352,6 +383,7 @@
           </div>
           <div class="card-desc">收入波动与游戏事件关联分析工具</div>
           <div class="card-path">report/revenue-event-analysis.html</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
       </div>
     </div>
@@ -369,6 +401,7 @@
           </div>
           <div class="card-desc">公共组件与样式预览</div>
           <div class="card-path">common/index.html</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
         </a>
       </div>
     </div>
@@ -396,12 +429,19 @@
 
         cards.forEach(card => {
           const pathEl = card.querySelector('.card-path');
+          const qrEl = card.querySelector('.qr-code');
+          const qrImg = qrEl ? qrEl.querySelector('img') : null;
           if (isLocal) {
             card.href = card.dataset.local;
             if (pathEl) pathEl.textContent = card.dataset.local;
+            if (qrEl) qrEl.style.display = 'none';
           } else {
             card.href = card.dataset.gh;
             if (pathEl) pathEl.textContent = card.dataset.gh;
+            if (qrEl) {
+              qrEl.style.display = 'block';
+              if (qrImg && !qrImg.src) qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(card.dataset.gh);
+            }
           }
           card.target = '_blank';
         });
