@@ -59,9 +59,11 @@ def pack(key: str, manifest: dict):
         print(f"❌ src 页面不存在: {src_page}")
         sys.exit(1)
 
-    version = (
-        get_next_version(key) if pkg.get("versioning", "auto") == "auto" else "1.0"
-    )
+    versioning = pkg.get("versioning", "auto")
+    if versioning == "auto":
+        version = get_next_version(key)
+    else:
+        version = versioning
     dist_name = f"{key}-v{version}"
     dist_dir = ROOT / "dist" / dist_name
 
