@@ -21,13 +21,16 @@
       "description": "客服工具页面"
     },
     "streamer-data-report": {
-      "source": "meetings/special/fu/reports",
       "src": "src/report/streamer-data.html",
       "type": "report",
       "status": "ready",
       "confirmed": true,
-      "private": true,
-      "note": "取 meetings/special/fu/reports/ 下最新的 html 文件"
+      "private": false,
+      "description": "主播数据多维度分析图表",
+      "note": "直接在 src/ 开发，数据外置为 streamer-data.json",
+      "copyAssets": [
+        {"from": "meetings/special/fu/data/streamer-report-data.json", "to": "src/report/streamer-data.json"}
+      ]
     },
     "landing-official": {
       "src": "src/campaign/pages/landing-official",
@@ -114,7 +117,11 @@
       "status": "ready",
       "confirmed": true,
       "private": false,
-      "description": "收入波动与事件关联分析工具"
+      "description": "收入波动与事件关联分析工具",
+      "copyAssets": [
+        {"from": "src/report/revenue_events.json", "to": "data/exports/revenue_events.json"},
+        {"from": "data/exports/daily_metrics.csv", "to": "src/report/daily_metrics.csv"}
+      ]
     }
   },
   "sharedAssets": {

@@ -115,6 +115,17 @@ def sync_page(key: str, manifest: dict):
                 shutil.copy2(from_path, to_path)
                 print(f"   📥 注入资源: {from_path.relative_to(ROOT)} -> {to_path.relative_to(ROOT)}")
 
+    # 处理 page 级别的额外资源同步
+    for item in page.get("copyAssets", []):
+        from_path = ROOT / item["from"]
+        to_path = ROOT / item["to"]
+        if from_path.exists():
+            to_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(from_path, to_path)
+            print(f"   📥 同步资源: {from_path.relative_to(ROOT)} -> {to_path.relative_to(ROOT)}")
+        else:
+            print(f"   ⚠️ 源文件不存在，跳过: {from_path.relative_to(ROOT)}")
+
     print(f"✅ {key} 处理完成")
 
 

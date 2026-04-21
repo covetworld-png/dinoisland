@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chí Tôn Long Vương Mùa 2 | 至尊龙王 第二届</title>
+    <title>Chí Tôn Long Vương | 至尊龙王</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css?v=10">
 </head>
@@ -15,8 +15,8 @@
                 <div class="logo">
                     <img src="static/images/logo.png" alt="Logo" class="logo-img">
                     <div class="logo-text">
-                        <span class="lang-vi">Chí Tôn Long Vương Mùa 2</span>
-                        <span class="lang-cn">至尊龙王 第二届</span>
+                        <span class="lang-vi">Chí Tôn Long Vương</span>
+                        <span class="lang-cn">至尊龙王</span>
                     </div>
                 </div>
                 <div class="header-actions">
@@ -27,10 +27,6 @@
                     <button class="btn-toggle" onclick="toggleResult()" id="toggle-result-btn">
                         <span class="lang-vi">Công bố ngưới thắng</span>
                         <span class="lang-cn">宣布获胜</span>
-                    </button>
-                    <button class="btn-test-winner" onclick="toggleWinnerMode()" id="toggle-winner-btn" title="演示：切换获胜者视角">
-                        <span class="lang-vi">👑 Ngưới thắng</span>
-                        <span class="lang-cn">👑 获胜者视角</span>
                     </button>
                     <button class="lang-toggle" onclick="toggleLanguage()">
                         <span id="current-lang">VI / 中</span>
@@ -45,7 +41,7 @@
                 <!-- Hero -->
                 <section class="hero">
                     <div class="hero-king">
-                        <img id="hero-king-img" src="static/images/dragon-king-crow2.png" alt="Chí Tôn Long Vương">
+                        <img id="hero-king-img" src="static/images/dragon-king-crown.png" alt="Chí Tôn Long Vương">
                     </div>
                     <h1>
                         <span class="lang-vi">Chí Tôn Long Vương</span>
@@ -57,12 +53,12 @@
                     </p>
                     <p class="hero-desc">
                         <span class="lang-vi">
-                            Ngày <strong>4月25-26日</strong>, ngưới nạp vàng cao nhất toàn server sẽ đăng quang <strong>Chí Tôn Long Vương Mùa 2</strong>, 
-                            nhận đặc quyền trong 2 ngày và ghi danh vĩnh viễn.
+                            Ngày <strong>17/04/2026</strong>, ngưới nạp vàng cao nhất toàn server sẽ đăng quang <strong>Chí Tôn Long Vương</strong>, 
+                            nhận đặc quyền trong 2 ngày (18-19/04) và ghi danh vĩnh viễn.
                         </span>
                         <span class="lang-cn">
-                            <strong>4月24日</strong>单日，全服充值最高者将登顶<strong>至尊龙王 第二届</strong>，
-                            享受2天特权并永久留名。
+                            <strong>2026年4月17日</strong>单日，全服充值最高者将登顶<strong>至尊龙王</strong>，
+                            享受2天特权（4月18-19日）并永久留名。
                         </span>
                     </p>
                 </section>
@@ -171,90 +167,17 @@
                         </h2>
                         <div class="winner-card">
                             <div class="winner-badge">
-                                <span class="lang-vi">Chí Tôn Long Vương Mùa 2</span>
-                                <span class="lang-cn">第二届至尊龙王</span>
+                                <span class="lang-vi">Chí Tôn Long Vương Mùa 1</span>
+                                <span class="lang-cn">第一届至尊龙王</span>
                             </div>
 
                             <div class="winner-avatar">
-                                <img src="static/images/dragon-king-crow2.png" alt="Winner">
+                                <img src="static/images/dragon-king-crown.png" alt="Winner">
                             </div>
                             <div class="winner-name" id="winner-name">Thiên Long</div>
                             <div class="winner-account" id="winner-account">13225799</div>
                             <div class="winner-amount" id="winner-amount">88,888 vàng</div>
-                            <div class="winner-date" id="winner-date">24/04</div>
-                        </div>
-
-                        <!-- Result Login Prompt (shown when not logged in) -->
-                        <div class="result-login-box" id="result-login-box" style="display: none;">
-                            <p>
-                                <span class="lang-vi">🔒 Đăng nhập để xem và kích hoạt đặc quyền dành riêng cho ngưới thắng</span>
-                                <span class="lang-cn">🔒 请登录以查看并激活获胜者专属权益</span>
-                            </p>
-                            <button class="btn btn-large" onclick="window.handleLogin()">
-                                <span class="lang-vi">Đăng nhập</span>
-                                <span class="lang-cn">登录</span>
-                            </button>
-                        </div>
-
-                        <!-- Auto Script Panel (Season 2) -->
-                        <div class="auto-script-panel" id="auto-script-panel" style="display: none;">
-                            <div class="auto-script-header">
-                                <span class="auto-script-icon">🤖</span>
-                                <h3>
-                                    <span class="lang-vi">Tự Động Hóa Long Vương</span>
-                                    <span class="lang-cn">龙王自动化脚本</span>
-                                </h3>
-                            </div>
-                            <p class="auto-script-desc">
-                                <span class="lang-vi">Đặc quyền dành riêng cho ngưới thắng. Nhấn nút bên dưới để tăng kích thước khủng long +150%.</span>
-                                <span class="lang-cn">获胜者专属权益。点击下方按钮，执行恐龙体型 +150% 自动化脚本。</span>
-                            </p>
-                            <div class="auto-script-status" id="auto-script-status">
-                                <span class="status-dot idle"></span>
-                                <span class="status-text" id="status-text">
-                                    <span class="lang-vi">Chưa kích hoạt</span>
-                                    <span class="lang-cn">未触发</span>
-                                </span>
-                            </div>
-                            <button class="btn btn-auto-script" id="btn-auto-script" onclick="triggerAutoScript()">
-                                <span class="btn-icon">🦕</span>
-                                <span class="btn-text">
-                                    <span class="lang-vi">Phóng to!</span>
-                                    <span class="lang-cn">变大！</span>
-                                </span>
-                            </button>
-                            <div class="auto-script-history" id="auto-script-history" style="display: none;">
-                                <h4>
-                                    <span class="lang-vi">Lịch sử thao tác</span>
-                                    <span class="lang-cn">操作历史</span>
-                                </h4>
-                                <ul class="history-list" id="history-list"></ul>
-                            </div>
-
-                            <div class="auto-script-instruction">
-                                <strong>
-                                    <span class="lang-vi">📋 Hướng dẫn sử dụng</span>
-                                    <span class="lang-cn">📋 使用说明</span>
-                                </strong>
-                                <ul>
-                                    <li>
-                                        <span class="lang-vi">Nhấn nút <strong>"Phóng to!"</strong> để kích hoạt script tự động tăng kích thước khủng long +150%.</span>
-                                        <span class="lang-cn">点击 <strong>"变大！"</strong> 按钮激活自动化脚本，执行恐龙体型 +150%。</span>
-                                    </li>
-                                    <li>
-                                        <span class="lang-vi">Nếu trong game khủng long chưa thay đổi, vui lòng <strong>nhấn lại nút</strong> để kích hoạt lại.</span>
-                                        <span class="lang-cn">如果游戏中恐龙体型没有变化，请<strong>重新点击按钮</strong>再次触发。</span>
-                                    </li>
-                                    <li>
-                                        <span class="lang-vi">Nếu thử nhiều lần vẫn thất bại, vui lòng <strong>liên hệ GM</strong> để được hỗ trợ thủ công.</span>
-                                        <span class="lang-cn">如果多次尝试仍失败，请<strong>直接联系 GM</strong> 进行人工处理。</span>
-                                    </li>
-                                    <li>
-                                        <span class="lang-vi">Mỗi lần đăng nhập lại hoặc quay lại màn hình chọn khủng long cần <strong>kích hoạt lại</strong>.</span>
-                                        <span class="lang-cn">每次重新登录游戏或回到取龙界面后，需要<strong>重新点击按钮</strong>触发。</span>
-                                    </li>
-                                </ul>
-                            </div>
+                            <div class="winner-date" id="winner-date">17/04/2026</div>
                         </div>
                     </section>
                 </div>
@@ -272,22 +195,22 @@
                                 <span class="lang-vi">Thể hình khổng lồ</span>
                                 <span class="lang-cn">体型暴涨</span>
                             </div>
-                            <div class="reward-value">+150%</div>
+                            <div class="reward-value">+50%</div>
                             <div class="reward-desc-small">
-                                <span class="lang-vi">Tất cả khủng long • Tự động hóa</span>
-                                <span class="lang-cn">所有恐龙 • 自动化脚本</span>
+                                <span class="lang-vi">Tất cả khủng long</span>
+                                <span class="lang-cn">所有恐龙</span>
                             </div>
                         </div>
                         <div class="reward-card">
-                            <img class="reward-img" src="static/images/icon_bite_force.png" alt="Thẻ cường hóa">
+                            <img class="reward-img" src="static/images/icon_bite_force.png" alt="Sức cắn tăng cường">
                             <div class="reward-title">
-                                <span class="lang-vi">Thẻ cường hóa ×20</span>
-                                <span class="lang-cn">强化卡 ×20</span>
+                                <span class="lang-vi">Sức cắn tăng cường</span>
+                                <span class="lang-cn">咬合力强化</span>
                             </div>
-                            <div class="reward-value">×20</div>
+                            <div class="reward-value">+100</div>
                             <div class="reward-desc-small">
-                                <span class="lang-vi">gửi qua thư trong game</span>
-                                <span class="lang-cn">游戏内邮件直接发放</span>
+                                <span class="lang-vi">Lực cắn tất cả khủng long</span>
+                                <span class="lang-cn">所有恐龙咬合力</span>
                             </div>
                         </div>
                         <div class="reward-card">
@@ -315,12 +238,12 @@
                     </div>
                     <div class="rewards-note">
                         <div class="note-main">
-                            <span class="lang-vi">Thờ gian hiệu lực: 4月25-26日 • Duy nhất 1 ngưới</span>
-                            <span class="lang-cn">特权有效期：4月24日 • 全服唯一</span>
+                            <span class="lang-vi">Thờ gian hiệu lực: 18-19/04/2026 • Duy nhất 1 ngưới</span>
+                            <span class="lang-cn">特权有效期：2026/04/18-19 • 全服唯一</span>
                         </div>
                         <div class="note-sub">
-                            <span class="lang-vi">Sau khi đăng quang, đăng nhập trang để kích hoạt tự động hóa + liên hệ CSKH nhận thẻ cường hóa</span>
-                            <span class="lang-cn">登顶后请登录页面激活自动化脚本，并无需操作，游戏内邮件自动发放</span>
+                            <span class="lang-vi">Sau khi đăng quang, liên hệ CSKH để nhận hướng dẫn sử dụng đặc quyền</span>
+                            <span class="lang-cn">登顶后请联系客服获取权益使用规则</span>
                         </div>
                     </div>
                 </section>
@@ -332,7 +255,7 @@
                         <span class="lang-cn">名人殿堂</span>
                     </h2>
                     <div class="hall-grid">
-                        <div class="hall-card winner has-winner" id="hall-winner-card">
+                        <div class="hall-card winner" id="hall-winner-card">
                             <div class="hall-crown">
                                 <span class="crown-empty">👑</span>
                                 <div class="crown-winner">
@@ -343,44 +266,24 @@
                                     <img src="static/images/dragon-king-crown.png" alt="Chí Tôn Long Vương">
                                 </div>
                             </div>
-                            <div class="hall-name" id="hall-name">HacThienLong1</div>
-                            <div class="hall-account" id="hall-account">13220491</div>
-                            <div class="hall-text" id="hall-placeholder-text" style="display: none;">
+                            <div class="hall-name" id="hall-name">?</div>
+                            <div class="hall-account" id="hall-account">?</div>
+                            <div class="hall-text" id="hall-placeholder-text">
                                 <span class="lang-vi">Ngai vàng đang chờ chủ nhân</span>
                                 <span class="lang-cn">王座虚位以待</span>
                             </div>
-                            <div class="hall-date" id="hall-date" style="display: flex;">
+                            <div class="hall-date" id="hall-date" style="display: none;">
                                 <span class="date-label">
                                     <span class="lang-vi">Ngày đăng quang</span>
                                     <span class="lang-cn">加冕日期</span>
                                 </span>
-                                <span class="date-value">17/04</span>
+                                <span class="date-value">17/04/2026</span>
                             </div>
                         </div>
-                        <div class="hall-card winner" id="hall-season2-card">
-                            <div class="hall-crown">
-                                <span class="crown-empty">👑</span>
-                                <div class="crown-winner">
-                                    <div class="winner-badge-corner">
-                                        <span class="lang-vi">Mùa 2</span>
-                                        <span class="lang-cn">第二届</span>
-                                    </div>
-                                    <img src="static/images/dragon-king-crow2.png" alt="Winner">
-                                </div>
-                            </div>
-                            <div class="hall-name" id="hall-s2-name" style="display: none;">?</div>
-                            <div class="hall-account" id="hall-s2-account" style="display: none;">?</div>
-                            <div class="hall-text" id="hall-s2-text">
-                                <span class="lang-vi">Sắp diễn ra</span>
-                                <span class="lang-cn">敬请期待</span>
-                            </div>
-                            <div class="hall-date" id="hall-s2-date" style="display: none;">
-                                <span class="date-label">
-                                    <span class="lang-vi">Ngày đăng quang</span>
-                                    <span class="lang-cn">加冕日期</span>
-                                </span>
-                                <span class="date-value" id="hall-s2-date-value">25-26/04</span>
-                            </div>
+                        <div class="hall-card empty">
+                            <div class="hall-season"><span class="lang-vi">Mùa 2</span><span class="lang-cn">第二届</span></div>
+                            <div class="hall-placeholder">?</div>
+                            <div class="hall-text"><span class="lang-vi">Sắp diễn ra</span><span class="lang-cn">敬请期待</span></div>
                         </div>
                     </div>
                 </section>
@@ -407,8 +310,8 @@
                         </div>
                         <div class="countdown-detail">
                             <div class="countdown-row">
-                                <span class="lang-vi">Thờ gian: 4月25-26日 00:00 - 23:59:59 (GMT+7)</span>
-                                <span class="lang-cn">活动时间：4月24日 00:00 - 23:59:59（东7区时间）</span>
+                                <span class="lang-vi">Thờ gian: 17/04/2026 00:00 - 23:59:59 (GMT+7)</span>
+                                <span class="lang-cn">活动时间：2026/04/17 00:00 - 23:59:59（东7区时间）</span>
                             </div>
                         </div>
                     </div>
@@ -425,8 +328,8 @@
                             <span id="end-seconds">56</span>
                         </div>
                         <div class="countdown-date">
-                            <span class="lang-vi">Kết thúc: 4月25-26日 23:59:59 (GMT+7)</span>
-                            <span class="lang-cn">结束：4月24日 23:59:59（东7区时间）</span>
+                            <span class="lang-vi">Kết thúc: 17/04/2026 23:59:59 (GMT+7)</span>
+                            <span class="lang-cn">结束：2026/04/17 23:59:59（东7区时间）</span>
                         </div>
                     </div>
                 </section>
@@ -445,7 +348,7 @@
                                     <span class="lang-vi">Thờ gian nạp tiền</span>
                                     <span class="lang-cn">充值时间</span>
                                 </strong>
-                                <p>4月24日 00:00 - 23:59:59 (GMT+7)</p>
+                                <p>17/04/2026 00:00 - 23:59:59 (GMT+7)</p>
                             </div>
                         </div>
                         <div class="rule-item">
@@ -495,8 +398,8 @@
                                     <span class="lang-cn">权益说明与领取方式</span>
                                 </strong>
                                 <p>
-                                    <span class="lang-vi">Đặc quyền có hiệu lực ngày 25-26/04. Sau khi đăng quang, chủ động liên hệ CSKH để được hướng dẫn. Chi tiết liên hệ CSKH để biết thêm.</span>
-                                    <span class="lang-cn">特权有效期为4月25-26日。登顶后请主动联系客服获取权益。具体规则请联系客服确认。</span>
+                                    <span class="lang-vi">Đặc quyền có hiệu lực ngày 18-19/04/2026. Sau khi đăng quang, chủ động liên hệ CSKH để được hướng dẫn. Chi tiết liên hệ CSKH để biết thêm.</span>
+                                    <span class="lang-cn">特权有效期为2026年4月18-19日。登顶后请主动联系客服获取权益。具体规则请联系客服确认。</span>
                                 </p>
                             </div>
                         </div>

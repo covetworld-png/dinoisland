@@ -1,4 +1,4 @@
-// Main JavaScript for Chí Tôn Long Vương
+// Main JavaScript for Chí Tôn Long Vương - Season 2
 
 // Language Toggle
 function toggleLanguage() {
@@ -13,7 +13,7 @@ function toggleLanguage() {
         langLabel.textContent = newLang === 'vi' ? 'VI / 中' : '中 / VI';
     }
     
-    document.title = newLang === 'vi' ? 'Chí Tôn Long Vương' : '至尊龙王';
+    document.title = newLang === 'vi' ? 'Chí Tôn Long Vương Mùa 2' : '至尊龙王 第二届';
     
     localStorage.setItem('lang', newLang);
     
@@ -48,15 +48,15 @@ function toggleResult() {
     } else {
         body.classList.remove('state-before', 'state-active', 'state-result');
         body.classList.add(demoPreviousState);
-        // Reset honor hall to placeholder when leaving result view
-        const hallCard = document.getElementById('hall-winner-card');
-        const hallAccount = document.getElementById('hall-account');
-        if (hallCard) hallCard.classList.remove('has-winner');
-        if (hallAccount) hallAccount.style.display = 'none';
+        // Reset season 2 honor hall only (season 1 is permanent)
+        resetSeason2Hall();
         if (toggleBtn) {
             toggleBtn.innerHTML = '<span class="lang-vi">Công bố ngưới thắng</span><span class="lang-cn">宣布获胜</span>';
         }
     }
+    
+    // Update auto script panel visibility
+    updateAutoScriptVisibility();
     
     // Re-apply language
     const savedLang = localStorage.getItem('lang') || 'vi';
@@ -87,6 +87,173 @@ function toggleCountdownMode() {
         if (startBox) startBox.style.display = 'block';
         if (endBox) endBox.style.display = 'none';
     }
+}
+
+// ===========================
+// Auto Script Panel (Season 2)
+// ===========================
+
+// Demo: toggle winner mode for testing
+let demoIsWinner = false;
+function toggleWinnerMode() {
+    demoIsWinner = !demoIsWinner;
+    const btn = document.getElementById('toggle-winner-btn');
+    if (btn) {
+        if (demoIsWinner) {
+            btn.innerHTML = '<span class="lang-vi">👑 Đang là ngưới thắng</span><span class="lang-cn">👑 当前为获胜者</span>';
+            btn.classList.add('active');
+        } else {
+            btn.innerHTML = '<span class="lang-vi">👑 Ngưới thắng</span><span class="lang-cn">👑 获胜者视角</span>';
+            btn.classList.remove('active');
+        }
+    }
+    updateAutoScriptVisibility();
+}
+
+// Auto script state machine
+const AUTO_SCRIPT_STATE = {
+    IDLE: 'idle',
+    PROCESSING: 'processing',
+    COMPLETED: 'completed',
+    ERROR: 'error'
+};
+
+let autoScriptState = AUTO_SCRIPT_STATE.IDLE;
+let autoScriptHistory = [];
+
+function updateAutoScriptVisibility() {
+    const panel = document.getElementById('auto-script-panel');
+    const loginBox = document.getElementById('result-login-box');
+    if (!panel) return;
+    
+    const body = document.body;
+    const isResultState = body.classList.contains('state-result');
+    
+    if (!isResultState) {
+        panel.style.display = 'none';
+        if (loginBox) loginBox.style.display = 'none';
+        return;
+    }
+    
+    if (!isLoggedIn) {
+        // Not logged in: show login prompt
+        panel.style.display = 'none';
+        if (loginBox) loginBox.style.display = 'block';
+    } else if (!demoIsWinner) {
+        // Logged in but not winner: hide everything
+        panel.style.display = 'none';
+        if (loginBox) loginBox.style.display = 'none';
+    } else {
+        // Logged in and is winner: show auto script panel
+        if (loginBox) loginBox.style.display = 'none';
+        panel.style.display = 'block';
+        renderAutoScriptPanel();
+    }
+}
+
+function renderAutoScriptPanel() {
+    const btn = document.getElementById('btn-auto-script');
+    const statusDot = document.querySelector('.status-dot');
+    const statusText = document.getElementById('status-text');
+    
+    if (!btn || !statusDot || !statusText) return;
+    
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    
+    switch (autoScriptState) {
+        case AUTO_SCRIPT_STATE.IDLE:
+            btn.disabled = false;
+            btn.className = 'btn btn-auto-script';
+            btn.innerHTML = '<span class="btn-icon">🦕</span><span class="btn-text"><span class="lang-vi">Phóng to!</span><span class="lang-cn">变大！</span></span>';
+            statusDot.className = 'status-dot idle';
+            statusText.innerHTML = '<span class="lang-vi">Sẵn sàng kích hoạt</span><span class="lang-cn">准备就绪</span>';
+            break;
+            
+        case AUTO_SCRIPT_STATE.PROCESSING:
+            btn.disabled = true;
+            btn.className = 'btn btn-auto-script processing';
+            btn.innerHTML = '<span class="btn-spinner"></span><span class="btn-text"><span class="lang-vi">Đang thực hiện...</span><span class="lang-cn">执行中...</span></span>';
+            statusDot.className = 'status-dot processing';
+            statusText.innerHTML = '<span class="lang-vi">Đang thực hiện...</span><span class="lang-cn">执行中...</span>';
+            break;
+            
+        case AUTO_SCRIPT_STATE.ERROR:
+            btn.disabled = false;
+            btn.className = 'btn btn-auto-script error';
+            btn.innerHTML = '<span class="btn-icon">❌</span><span class="btn-text"><span class="lang-vi">Thất bại, thử lại</span><span class="lang-cn">失败，点击重试</span></span>';
+            statusDot.className = 'status-dot error';
+            statusText.innerHTML = '<span class="lang-vi">Thất bại</span><span class="lang-cn">失败</span>';
+            break;
+    }
+    
+    // Render history
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const historyBox = document.getElementById('auto-script-history');
+    const historyList = document.getElementById('history-list');
+    if (!historyBox || !historyList) return;
+    
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    
+    if (autoScriptHistory.length > 0) {
+        historyBox.style.display = 'block';
+        historyList.innerHTML = autoScriptHistory.map(item => {
+            const startStr = item.startTime.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+            const label = lang === 'vi' 
+                ? `Kích thước khủng long +150% • Tự động hóa`
+                : `恐龙体型 +150% • 自动化脚本`;
+            
+            let statusHtml = '';
+            if (item.status === 'processing') {
+                statusHtml = `<span class="history-status processing">⏳ ${lang === 'vi' ? 'Đang thực hiện' : '执行中'}</span>`;
+            } else if (item.status === 'completed') {
+                statusHtml = `<span class="history-status success">✅ ${lang === 'vi' ? 'Thành công' : '成功'}</span>`;
+            } else if (item.status === 'failed') {
+                statusHtml = `<span class="history-status error">❌ ${lang === 'vi' ? 'Thất bại' : '失败'}</span>`;
+            }
+            
+            return `<li><span class="history-time">${startStr}</span><span class="history-action">${label}</span>${statusHtml}</li>`;
+        }).join('');
+    } else {
+        historyBox.style.display = 'none';
+    }
+}
+
+function triggerAutoScript() {
+    if (autoScriptState === AUTO_SCRIPT_STATE.PROCESSING) {
+        return;
+    }
+    
+    autoScriptState = AUTO_SCRIPT_STATE.PROCESSING;
+    
+    // Add history item with 'processing' status
+    const historyItem = {
+        id: Date.now(),
+        startTime: new Date(),
+        endTime: null,
+        action: 'auto_script_150',
+        status: 'processing'
+    };
+    autoScriptHistory.unshift(historyItem);
+    
+    renderAutoScriptPanel();
+    
+    // Simulate API call delay (2 seconds)
+    setTimeout(() => {
+        // Demo: 10% chance of error for testing
+        if (Math.random() < 0.1) {
+            autoScriptState = AUTO_SCRIPT_STATE.ERROR;
+            historyItem.status = 'failed';
+            historyItem.endTime = new Date();
+        } else {
+            autoScriptState = AUTO_SCRIPT_STATE.IDLE; // Back to idle, ready for next trigger
+            historyItem.status = 'completed';
+            historyItem.endTime = new Date();
+        }
+        renderAutoScriptPanel();
+    }, 2000);
 }
 
 // Format number with commas
@@ -133,6 +300,9 @@ window.handleLogin = function() {
     
     // Update display
     updateUserDisplay();
+    
+    // Update auto script panel visibility
+    updateAutoScriptVisibility();
 };
 
 // Update user display
@@ -159,34 +329,82 @@ function syncHonorHall() {
     if (!document.body.classList.contains('state-result')) return;
     
     const winnerName = document.getElementById('winner-name');
-    const winnerAccount = document.getElementById('winner-account');
     const winnerDate = document.getElementById('winner-date');
-    const hallName = document.getElementById('hall-name');
-    const hallAccount = document.getElementById('hall-account');
     const hallDate = document.getElementById('hall-date');
     const hallPlaceholder = document.getElementById('hall-placeholder-text');
     const hallCard = document.getElementById('hall-winner-card');
     
-    if (!winnerName || !hallName) return;
+    // Season 1 data is fixed (HacThienLong1 / 13220491 / 17/04/2026)
+    // Do NOT overwrite hall-name or hall-account text
+    // Only update styles
+    if (hallPlaceholder) hallPlaceholder.style.display = 'none';
+    if (hallDate) hallDate.style.display = 'flex';
+    if (hallCard) hallCard.classList.add('has-winner');
     
+    // Also sync season 2 hall card if it exists
+    syncSeason2Hall();
+}
+
+function resetSeason2Hall() {
+    const s2Card = document.getElementById('hall-season2-card');
+    const s2Name = document.getElementById('hall-s2-name');
+    const s2Account = document.getElementById('hall-s2-account');
+    const s2Text = document.getElementById('hall-s2-text');
+    const s2Date = document.getElementById('hall-s2-date');
+
+    if (s2Card) s2Card.classList.remove('has-winner');
+    if (s2Name) {
+        s2Name.textContent = '?';
+        s2Name.style.display = 'none';
+    }
+    if (s2Account) {
+        s2Account.textContent = '';
+        s2Account.style.display = 'none';
+    }
+    if (s2Text) {
+        s2Text.innerHTML = '<span class="lang-vi">Sắp diễn ra</span><span class="lang-cn">敬请期待</span>';
+        s2Text.style.display = 'block';
+    }
+    if (s2Date) s2Date.style.display = 'none';
+}
+
+function syncSeason2Hall() {
+    const winnerName = document.getElementById('winner-name');
+    const winnerAccount = document.getElementById('winner-account');
+    const winnerDate = document.getElementById('winner-date');
+    const s2Card = document.getElementById('hall-season2-card');
+    const s2Name = document.getElementById('hall-s2-name');
+    const s2Account = document.getElementById('hall-s2-account');
+    const s2Text = document.getElementById('hall-s2-text');
+    const s2Date = document.getElementById('hall-s2-date');
+
+    if (!winnerName || !s2Name) return;
+
     const name = winnerName.textContent.trim();
-    // If result area has real winner data (not placeholder), sync to honor hall
+    const account = winnerAccount ? winnerAccount.textContent.trim() : '';
+
     if (name && name !== '?' && name !== '') {
-        hallName.textContent = name;
-        if (hallAccount && winnerAccount) {
-            const account = winnerAccount.textContent.trim();
-            hallAccount.textContent = account !== '?' ? account : '';
+        if (s2Card) s2Card.classList.add('has-winner');
+        if (s2Name) {
+            s2Name.textContent = name;
+            s2Name.style.display = 'block';
         }
-        if (hallPlaceholder) hallPlaceholder.style.display = 'none';
-        if (hallDate && winnerDate) {
+        if (s2Account) {
+            s2Account.textContent = account;
+            s2Account.style.display = 'block';
+        }
+
+        if (s2Text) s2Text.style.display = 'none';
+
+        if (s2Date && winnerDate) {
             const date = winnerDate.textContent.trim();
             if (date && date !== '?') {
-                const dateValue = hallDate.querySelector('.date-value');
-                if (dateValue) dateValue.textContent = date;
-                hallDate.style.display = 'flex';
+                const dateValue = s2Date.querySelector('.date-value');
+                const shortDate = date.replace(/\/2026$/, '').replace(/2026年/, '');
+                if (dateValue) dateValue.textContent = shortDate;
+                s2Date.style.display = 'flex';
             }
         }
-        if (hallCard) hallCard.classList.add('has-winner');
     }
 }
 
@@ -207,6 +425,7 @@ function renderAmounts() {
     if (winnerAmountEl) winnerAmountEl.textContent = formatCurrency(mockData.topAmount);
     
     updateUserDisplay();
+    renderAutoScriptPanel();
 }
 
 // Initialize when DOM is ready
@@ -217,7 +436,7 @@ if (document.readyState === 'loading') {
 }
 
 function init() {
-    console.log('Initializing...');
+    console.log('Initializing Season 2...');
     
     // Language
     const savedLang = localStorage.getItem('lang') || 'vi';
@@ -228,7 +447,7 @@ function init() {
         langLabel.textContent = savedLang === 'vi' ? 'VI / 中' : '中 / VI';
     }
     
-    document.title = savedLang === 'vi' ? 'Chí Tôn Long Vương' : '至尊龙王';
+    document.title = savedLang === 'vi' ? 'Chí Tôn Long Vương Mùa 2' : '至尊龙王 第二届';
     
     // Sync honor hall with result view data
     syncHonorHall();
