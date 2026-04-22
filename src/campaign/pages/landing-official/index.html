@@ -2025,6 +2025,7 @@
         }
 
         function validateUsername(v) { return /^[a-zA-Z0-9]{6,20}$/.test(v); }
+        function validatePassword(v) { return /^[a-zA-Z0-9_+@#$%^&*-]{6,20}$/.test(v); }
         function validatePhone(v) { return /^\d{9,10}$/.test(v); }
 
         async function sendPhoneCode() {
@@ -2064,7 +2065,7 @@
             const code = regCode.value.trim();
 
             if (!validateUsername(username)) { showToast('用户名仅支持6-20位字母和数字'); regUsername.focus(); return; }
-            if (password.length < 6 || password.length > 20) { showToast('密码仅支持6-20位字母、数字和特殊符号(-_+@#$%^&)'); regPassword.focus(); return; }
+            if (!validatePassword(password)) { showToast('密码仅支持6-20位字母、数字和特殊符号(-_+@#$%^&*)'); regPassword.focus(); return; }
             if (password !== confirm) { showToast('两次输入的密码不一致'); regConfirm.focus(); return; }
             if (!validatePhone(phone)) { showToast('手机号长度必须介于 9 和 10 之间'); regPhone.focus(); return; }
             if (code.length !== 6) { showToast('验证码长度为6位'); regCode.focus(); return; }
