@@ -948,20 +948,20 @@
             background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
             border-radius: 10px; height: 46px;
             transition: border-color 0.2s, box-shadow 0.2s;
-            padding: 0;
+            padding: 0 14px;
         }
         .input-with-tag:focus-within {
             border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.15);
         }
         .input-tag {
             font-size: 13px; color: var(--text-secondary); white-space: nowrap;
-            flex-shrink: 0; padding: 0 10px 0 18px;
+            flex-shrink: 0; padding: 0 10px 0 0;
             border-right: 1px solid rgba(255,255,255,0.08);
             min-width: 48px; text-align: right;
         }
         .input-with-tag .form-input {
             flex: 1; background: transparent; border: none;
-            padding: 0 18px; height: 100%; box-shadow: none; border-radius: 0;
+            padding: 0 0 0 10px; height: 100%; box-shadow: none; border-radius: 0;
             min-width: 0;
         }
         .input-with-tag .form-input:focus { box-shadow: none; }
