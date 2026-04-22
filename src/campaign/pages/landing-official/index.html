@@ -955,13 +955,14 @@
         }
         .input-tag {
             font-size: 13px; color: var(--text-secondary); white-space: nowrap;
-            flex-shrink: 0; padding: 0 8px 0 14px;
+            flex-shrink: 0; padding: 0 10px 0 14px;
             border-right: 1px solid rgba(255,255,255,0.08);
-            width: 56px; text-align: right;
+            min-width: 48px; text-align: right;
         }
         .input-with-tag .form-input {
             flex: 1; background: transparent; border: none;
             padding: 0 14px; height: 100%; box-shadow: none; border-radius: 0;
+            min-width: 0;
         }
         .input-with-tag .form-input:focus { box-shadow: none; }
         .form-row { display: flex; gap: 8px; align-items: stretch; }
