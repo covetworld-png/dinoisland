@@ -124,10 +124,16 @@
       transition: border-color 0.15s, transform 0.1s;
       text-decoration: none;
       color: inherit;
+      position: relative;
+      z-index: 1;
     }
     .card:hover {
       border-color: var(--accent);
       transform: translateY(-1px);
+      z-index: 20;
+    }
+    .card:hover .qr-code {
+      display: block;
     }
     .card-header {
       display: flex;
@@ -157,11 +163,18 @@
       word-break: break-all;
     }
     .qr-code {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
       text-align: center;
       display: none;
+      position: absolute;
+      top: calc(100% - 1px);
+      left: -1px;
+      right: -1px;
+      z-index: 10;
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      padding: 10px;
     }
     .qr-code img {
       width: 120px;
@@ -439,7 +452,7 @@
             card.href = card.dataset.gh;
             if (pathEl) pathEl.textContent = card.dataset.gh;
             if (qrEl) {
-              qrEl.style.display = 'block';
+              qrEl.style.display = '';
               if (qrImg && !qrImg.src) qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(card.dataset.gh);
             }
           }
