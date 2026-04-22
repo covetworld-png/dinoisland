@@ -954,8 +954,9 @@
         }
         .input-tag {
             font-size: 13px; color: var(--text-secondary); white-space: nowrap;
-            flex-shrink: 0; padding: 0 10px 0 14px;
+            flex-shrink: 0; padding: 0 10px 0 12px;
             border-right: 1px solid rgba(255,255,255,0.08);
+            width: 56px; text-align: right;
         }
         .input-with-tag .form-input {
             flex: 1; background: transparent; border: none;
@@ -964,11 +965,11 @@
         .input-with-tag .form-input:focus { box-shadow: none; }
         .form-row { display: flex; gap: 8px; align-items: stretch; }
         .form-row .input-with-tag { flex: 1; }
-        .otp-inputs { display: flex; gap: 8px; justify-content: space-between; }
+        .otp-inputs { display: flex; gap: 6px; justify-content: space-between; }
         .otp-box {
-            width: 48px; height: 52px; text-align: center; font-size: 22px; font-weight: 700;
+            width: 42px; height: 46px; text-align: center; font-size: 20px; font-weight: 700;
             color: var(--gold); background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.15);
-            border-radius: 10px; outline: none; transition: all 0.2s; caret-color: var(--gold);
+            border-radius: 8px; outline: none; transition: all 0.2s; caret-color: var(--gold);
         }
         .otp-box:focus {
             border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.15);
@@ -978,9 +979,9 @@
         .form-row { display: flex; gap: 10px; }
         .form-row .form-input { flex: 1; }
         .btn-code {
-            height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--gold);
-            background: transparent; color: var(--gold); font-size: 14px; font-weight: 600;
-            font-family: inherit; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-width: 120px;
+            height: 46px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--gold);
+            background: transparent; color: var(--gold); font-size: 13px; font-weight: 600;
+            font-family: inherit; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-width: 100px;
         }
         .btn-code:disabled { border-color: rgba(255,255,255,0.1); color: var(--text-secondary); cursor: not-allowed; }
         .btn-code:not(:disabled):hover { background: var(--gold); color: #000; }
@@ -992,7 +993,18 @@
         }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,215,0,0.3); }
         .btn-submit:active { transform: translateY(0); }
-        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-submit:disabled {
+            opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none;
+            background: linear-gradient(135deg, rgba(255,215,0,0.25) 0%, rgba(180,140,0,0.25) 100%);
+            color: rgba(255,255,255,0.4);
+        }
+        .error-msg {
+            font-size: 12px; color: #ff6b6b; margin-top: 4px; padding-left: 12px;
+            display: none; line-height: 1.4;
+        }
+        .error-msg.show { display: block; }
+        .input-with-tag.error { border-color: rgba(255,107,107,0.6) !important; box-shadow: 0 0 0 2px rgba(255,107,107,0.15) !important; }
+        .otp-box.error { border-color: rgba(255,107,107,0.6) !important; box-shadow: 0 0 0 2px rgba(255,107,107,0.15) !important; }
         .success-icon { font-size: 56px; line-height: 1; margin-bottom: 4px; }
         .success-title { font-size: 22px; font-weight: 700; color: var(--gold); }
         .success-desc { font-size: 14px; color: var(--text-secondary); }
@@ -1053,26 +1065,29 @@
             <!-- Registration Form v2.0 -->
             <div class="register-section" id="registerSection">
                 <div class="form-group">
-                    <div class="input-with-tag">
+                    <div class="input-with-tag" id="usernameWrap">
                         <span class="input-tag" data-i18n="reg.usernameLabel">用户名</span>
                         <input type="text" class="form-input" id="regUsername" placeholder="6-20位字母和数字" maxlength="20" autocomplete="username">
                     </div>
+                    <div class="error-msg" id="usernameError"></div>
                 </div>
                 <div class="form-group">
-                    <div class="input-with-tag">
+                    <div class="input-with-tag" id="passwordWrap">
                         <span class="input-tag" data-i18n="reg.passwordLabel">密码</span>
                         <input type="password" class="form-input" id="regPassword" placeholder="6-20位，字母数字特殊符号" minlength="6" maxlength="20" autocomplete="new-password">
                     </div>
+                    <div class="error-msg" id="passwordError"></div>
                 </div>
                 <div class="form-group">
-                    <div class="input-with-tag">
+                    <div class="input-with-tag" id="confirmWrap">
                         <span class="input-tag" data-i18n="reg.confirmLabel">确认密码</span>
                         <input type="password" class="form-input" id="regConfirm" placeholder="再次输入密码" minlength="6" maxlength="20" autocomplete="new-password">
                     </div>
+                    <div class="error-msg" id="confirmError"></div>
                 </div>
                 <div class="form-group">
                     <div class="form-row">
-                        <div class="input-with-tag">
+                        <div class="input-with-tag" id="phoneWrap">
                             <span class="input-tag" data-i18n="reg.phoneLabel">手机号</span>
                             <input type="tel" class="form-input" id="regPhone" placeholder="9-10位数字" inputmode="numeric" autocomplete="tel">
                         </div>
@@ -1080,6 +1095,7 @@
                             <span data-i18n="reg.getCode">获取验证码</span>
                         </button>
                     </div>
+                    <div class="error-msg" id="phoneError"></div>
                 </div>
                 <div class="form-group">
                     <div class="otp-inputs" id="otpContainer">
@@ -1090,6 +1106,7 @@
                         <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="4">
                         <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="5">
                     </div>
+                    <div class="error-msg" id="codeError"></div>
                 </div>
                 <button class="btn-submit" id="registerBtn" onclick="submitRegister()">
                     <span data-i18n="reg.submit">🚀 立即注册</span>
@@ -2114,9 +2131,80 @@
         function validatePassword(v) { return /^[a-zA-Z0-9_+@#$%^&*-]{6,20}$/.test(v); }
         function validatePhone(v) { return /^\d{9,10}$/.test(v); }
 
+        // ===== Field Error Helpers =====
+        function showFieldError(fieldId, msg) {
+            const el = document.getElementById(fieldId + 'Error');
+            const wrap = document.getElementById(fieldId + 'Wrap') || document.getElementById('otpContainer');
+            if (el) { el.textContent = msg; el.classList.add('show'); }
+            if (wrap) wrap.classList.add('error');
+        }
+        function clearFieldError(fieldId) {
+            const el = document.getElementById(fieldId + 'Error');
+            const wrap = document.getElementById(fieldId + 'Wrap') || document.getElementById('otpContainer');
+            if (el) { el.textContent = ''; el.classList.remove('show'); }
+            if (wrap) wrap.classList.remove('error');
+        }
+        function validateField(name, showError = true) {
+            let ok = true;
+            if (name === 'username' || name === 'all') {
+                const v = regUsername.value.trim();
+                if (!v) { if (showError) showFieldError('username', '请输入用户名'); ok = false; }
+                else if (!validateUsername(v)) { if (showError) showFieldError('username', '用户名仅支持6-20位字母和数字'); ok = false; }
+                else clearFieldError('username');
+            }
+            if (name === 'password' || name === 'all') {
+                const v = regPassword.value.trim();
+                if (!v) { if (showError) showFieldError('password', '请输入密码'); ok = false; }
+                else if (!validatePassword(v)) { if (showError) showFieldError('password', '密码仅支持6-20位字母、数字和特殊符号(-_+@#$%^&*)'); ok = false; }
+                else clearFieldError('password');
+            }
+            if (name === 'confirm' || name === 'all') {
+                const v = regConfirm.value.trim(), p = regPassword.value.trim();
+                if (!v) { if (showError) showFieldError('confirm', '请再次输入密码'); ok = false; }
+                else if (v !== p) { if (showError) showFieldError('confirm', '两次输入的密码不一致'); ok = false; }
+                else clearFieldError('confirm');
+            }
+            if (name === 'phone' || name === 'all') {
+                const v = regPhone.value.trim().replace(/\D/g, '');
+                if (!v) { if (showError) showFieldError('phone', '请输入手机号'); ok = false; }
+                else if (!validatePhone(v)) { if (showError) showFieldError('phone', '手机号长度必须介于9和10之间'); ok = false; }
+                else clearFieldError('phone');
+            }
+            if (name === 'code' || name === 'all') {
+                const v = getOtpValue();
+                if (v.length !== 6) { if (showError) showFieldError('code', '验证码长度为6位'); ok = false; }
+                else clearFieldError('code');
+            }
+            return ok;
+        }
+        function updateSubmitButton() {
+            const allValid = validateField('all', false);
+            registerBtn.disabled = !allValid;
+        }
+
+        // Blur validation
+        regUsername.addEventListener('blur', () => { if (regUsername.value.trim()) validateField('username'); });
+        regPassword.addEventListener('blur', () => { if (regPassword.value.trim()) validateField('password'); });
+        regConfirm.addEventListener('blur', () => { if (regConfirm.value.trim()) validateField('confirm'); });
+        regPhone.addEventListener('blur', () => { if (regPhone.value.trim()) validateField('phone'); });
+        otpBoxes.forEach((box, i) => {
+            box.addEventListener('blur', () => {
+                const allFilled = getOtpValue().length === 6;
+                if (allFilled || (i === otpBoxes.length - 1 && getOtpValue().length > 0)) validateField('code');
+            });
+        });
+        // Input clears error & updates button
+        [regUsername, regPassword, regConfirm, regPhone].forEach(el => {
+            el.addEventListener('input', () => { clearFieldError(el.id.replace('reg','').toLowerCase()); updateSubmitButton(); });
+        });
+        otpBoxes.forEach(box => {
+            box.addEventListener('input', () => { clearFieldError('code'); updateSubmitButton(); });
+        });
+        updateSubmitButton();
+
         async function sendPhoneCode() {
             const phone = regPhone.value.trim().replace(/\D/g, '');
-            if (!validatePhone(phone)) { showToast('手机号长度必须介于 9 和 10 之间'); regPhone.focus(); return; }
+            if (!validatePhone(phone)) { validateField('phone', true); regPhone.focus(); return; }
 
             sendCodeBtn.disabled = true;
             const orig = sendCodeBtn.innerHTML;
@@ -2151,11 +2239,8 @@
             const phone = regPhone.value.trim().replace(/\D/g, '');
             const code = getOtpValue();
 
-            if (!validateUsername(username)) { showToast('用户名仅支持6-20位字母和数字'); regUsername.focus(); return; }
-            if (!validatePassword(password)) { showToast('密码仅支持6-20位字母、数字和特殊符号(-_+@#$%^&*)'); regPassword.focus(); return; }
-            if (password !== confirm) { showToast('两次输入的密码不一致'); regConfirm.focus(); return; }
-            if (!validatePhone(phone)) { showToast('手机号长度必须介于 9 和 10 之间'); regPhone.focus(); return; }
-            if (code.length !== 6) { showToast('验证码长度为6位'); focusOtpBox(0); return; }
+            const allValid = validateField('all', true);
+            if (!allValid) return;
 
             registerBtn.disabled = true;
             const orig = registerBtn.innerHTML;
