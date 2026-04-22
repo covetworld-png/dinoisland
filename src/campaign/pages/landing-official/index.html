@@ -944,6 +944,17 @@
         }
         .form-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.15); }
         .form-input::placeholder { color: rgba(148,163,184,0.5); }
+        .otp-inputs { display: flex; gap: 8px; justify-content: space-between; }
+        .otp-box {
+            width: 48px; height: 52px; text-align: center; font-size: 22px; font-weight: 700;
+            color: var(--gold); background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.15);
+            border-radius: 10px; outline: none; transition: all 0.2s; caret-color: var(--gold);
+        }
+        .otp-box:focus {
+            border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.15);
+            background: rgba(255,255,255,0.08);
+        }
+        .otp-box.filled { border-color: rgba(255,215,0,0.5); background: rgba(255,215,0,0.05); }
         .form-row { display: flex; gap: 10px; }
         .form-row .form-input { flex: 1; }
         .btn-code {
@@ -1044,7 +1055,14 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" data-i18n="reg.codeLabel">验证码</label>
-                    <input type="text" class="form-input" id="regCode" placeholder="请输入6位验证码，验证码长度为6位" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+                    <div class="otp-inputs" id="otpContainer">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" autocomplete="one-time-code" data-index="0">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="1">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="2">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="3">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="4">
+                        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" data-index="5">
+                    </div>
                 </div>
                 <button class="btn-submit" id="registerBtn" onclick="submitRegister()">
                     <span data-i18n="reg.submit">🚀 立即注册</span>
@@ -2004,7 +2022,48 @@
         const regPassword = document.getElementById('regPassword');
         const regConfirm = document.getElementById('regConfirm');
         const regPhone = document.getElementById('regPhone');
-        const regCode = document.getElementById('regCode');
+        const otpBoxes = document.querySelectorAll('#otpContainer .otp-box');
+        function getOtpValue() { return Array.from(otpBoxes).map(b => b.value).join(''); }
+        function focusOtpBox(idx) {
+            if (idx >= 0 && idx < otpBoxes.length) otpBoxes[idx].focus();
+        }
+        function initOtpInputs() {
+            otpBoxes.forEach((box, i) => {
+                box.addEventListener('keydown', (e) => {
+                    if (e.key >= '0' && e.key <= '9') {
+                        e.preventDefault();
+                        box.value = e.key;
+                        box.classList.add('filled');
+                        if (i < otpBoxes.length - 1) focusOtpBox(i + 1);
+                    } else if (e.key === 'Backspace') {
+                        if (box.value) { box.value = ''; box.classList.remove('filled'); }
+                        else if (i > 0) { focusOtpBox(i - 1); otpBoxes[i-1].value = ''; otpBoxes[i-1].classList.remove('filled'); }
+                    } else if (e.key === 'ArrowLeft' && i > 0) {
+                        e.preventDefault(); focusOtpBox(i - 1);
+                    } else if (e.key === 'ArrowRight' && i < otpBoxes.length - 1) {
+                        e.preventDefault(); focusOtpBox(i + 1);
+                    }
+                });
+                box.addEventListener('input', (e) => {
+                    const v = e.data;
+                    if (v && /^\d$/.test(v)) {
+                        box.value = v; box.classList.add('filled');
+                        if (i < otpBoxes.length - 1) focusOtpBox(i + 1);
+                    } else { box.value = ''; box.classList.remove('filled'); }
+                });
+                box.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const text = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+                    text.split('').forEach((ch, j) => {
+                        if (j < otpBoxes.length) { otpBoxes[j].value = ch; otpBoxes[j].classList.add('filled'); }
+                    });
+                    if (text.length < 6) focusOtpBox(text.length);
+                    else otpBoxes[otpBoxes.length - 1].focus();
+                });
+                box.addEventListener('focus', () => { box.select(); });
+            });
+        }
+        initOtpInputs();
         const sendCodeBtn = document.getElementById('sendCodeBtn');
         const registerBtn = document.getElementById('registerBtn');
         const registerSection = document.getElementById('registerSection');
@@ -2044,6 +2103,7 @@
                 const data = await res.json();
                 if (data.code === 0) {
                     showToast('验证码已发送，请查收短信');
+                    focusOtpBox(0);
                     codeCountdown = 60;
                     const t = setInterval(() => {
                         codeCountdown--;
@@ -2062,13 +2122,13 @@
             const password = regPassword.value.trim();
             const confirm = regConfirm.value.trim();
             const phone = regPhone.value.trim().replace(/\D/g, '');
-            const code = regCode.value.trim();
+            const code = getOtpValue();
 
             if (!validateUsername(username)) { showToast('用户名仅支持6-20位字母和数字'); regUsername.focus(); return; }
             if (!validatePassword(password)) { showToast('密码仅支持6-20位字母、数字和特殊符号(-_+@#$%^&*)'); regPassword.focus(); return; }
             if (password !== confirm) { showToast('两次输入的密码不一致'); regConfirm.focus(); return; }
             if (!validatePhone(phone)) { showToast('手机号长度必须介于 9 和 10 之间'); regPhone.focus(); return; }
-            if (code.length !== 6) { showToast('验证码长度为6位'); regCode.focus(); return; }
+            if (code.length !== 6) { showToast('验证码长度为6位'); focusOtpBox(0); return; }
 
             registerBtn.disabled = true;
             const orig = registerBtn.innerHTML;
@@ -2096,7 +2156,7 @@
                     showToast('注册成功！');
                 } else if (data.message.includes('用户名')) { showToast('用户名已存在'); regUsername.focus(); }
                 else if (data.message.includes('手机')) { showToast('手机号已存在'); regPhone.focus(); }
-                else if (data.message.includes('验证码')) { showToast('验证码错误'); regCode.focus(); }
+                else if (data.message.includes('验证码')) { showToast('验证码错误'); focusOtpBox(5); }
                 else { showToast(data.message || '注册失败'); }
             } catch (err) {
                 showToast('网络错误，请重试');
