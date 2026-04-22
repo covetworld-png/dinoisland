@@ -954,225 +954,6 @@
                 height: 240px;
             }
         }
-
-        /* ===== Registration Form v2.0 ===== */
-        .register-section {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-        .register-section.hidden {
-            display: none;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .form-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        .form-input {
-            height: 52px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.3);
-            padding: 0 16px;
-            color: var(--text-primary);
-            font-size: 16px;
-            font-family: inherit;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .form-input:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(255,215,0,0.15);
-        }
-        .form-input::placeholder {
-            color: rgba(148,163,184,0.5);
-        }
-        .form-input:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .form-row {
-            display: flex;
-            gap: 10px;
-        }
-        .form-row .form-input {
-            flex: 1;
-        }
-        .btn-code {
-            height: 52px;
-            padding: 0 18px;
-            border-radius: 12px;
-            border: 1px solid var(--gold);
-            background: transparent;
-            color: var(--gold);
-            font-size: 14px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-            min-width: 120px;
-        }
-        .btn-code:disabled {
-            border-color: rgba(255,255,255,0.1);
-            color: var(--text-secondary);
-            cursor: not-allowed;
-        }
-        .btn-code:not(:disabled):hover {
-            background: var(--gold);
-            color: #000;
-        }
-        .btn-submit {
-            height: 56px;
-            border-radius: 16px;
-            border: none;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
-            color: #000;
-            font-size: 17px;
-            font-weight: 700;
-            font-family: inherit;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 6px;
-        }
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(255,215,0,0.3);
-        }
-        .btn-submit:active {
-            transform: translateY(0);
-        }
-        .btn-submit:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        .step-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-        .step-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            transition: background 0.3s;
-        }
-        .step-dot.active {
-            background: var(--gold);
-            box-shadow: 0 0 8px var(--gold);
-        }
-
-        /* ===== Success Page v2.0 ===== */
-        .success-section {
-            display: none;
-            flex-direction: column;
-            gap: 16px;
-            text-align: center;
-        }
-        .success-section.active {
-            display: flex;
-        }
-        .success-icon {
-            font-size: 56px;
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-        .success-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--gold);
-        }
-        .success-desc {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-        .account-card {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,215,0,0.3);
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-        .account-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-        .account-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-        .account-value {
-            font-family: 'SF Mono', monospace;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--gold-light);
-            background: rgba(0,0,0,0.3);
-            padding: 8px 14px;
-            border-radius: 8px;
-            flex: 1;
-            text-align: right;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .btn-copy-account {
-            padding: 6px 14px;
-            border-radius: 8px;
-            border: 1px solid var(--gold);
-            background: transparent;
-            color: var(--gold);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .download-section {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 8px;
-        }
-        .btn-download {
-            height: 52px;
-            border-radius: 14px;
-            border: none;
-            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
-            color: #fff;
-            font-size: 16px;
-            font-weight: 700;
-            font-family: inherit;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: transform 0.2s;
-            text-decoration: none;
-        }
-        .btn-download:hover {
-            transform: translateY(-2px);
-        }
-        .btn-download.drive {
-            background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
-        }
-        .download-hint {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
     </style>
 </head>
 <body>
@@ -1196,94 +977,55 @@
 
         <!-- CTA Section -->
         <div class="glass-card cta-section">
-            <!-- Registration Form v2.0 -->
-            <div class="register-section" id="registerSection">
-                <div class="step-indicator">
-                    <div class="step-dot active" id="stepDot1"></div>
-                    <div class="step-dot" id="stepDot2"></div>
-                    <div class="step-dot" id="stepDot3"></div>
+            <!-- 口令显示区域 -->
+            <div class="code-display-section" id="codeSection">
+                <div class="code-label" data-i18n="code.label">🎁 Mã nhận quà của bạn</div>
+                <div class="code-box-display" id="codeBox" onclick="copyCodeManual()">
+                    <span class="code-text-display" id="displayCode">NHANLONG</span>
+                    <span class="copy-hint" data-i18n="code.copyHint">📋 Nhấn để sao chép</span>
                 </div>
-                <div class="step-label" data-i18n="register.stepLabel" id="stepLabel">Bước 1: Nhập số điện thoại</div>
-
-                <div class="form-group">
-                    <label class="form-label" data-i18n="register.phoneLabel">Số điện thoại</label>
-                    <input type="tel" class="form-input" id="phoneInput" placeholder="Nhập số điện thoại" inputmode="numeric" autocomplete="tel">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" data-i18n="register.codeLabel">Mã xác nhận</label>
-                    <div class="form-row">
-                        <input type="text" class="form-input" id="codeInput" placeholder="Nhập mã" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
-                        <button class="btn-code" id="sendCodeBtn" onclick="sendPhoneCode()">
-                            <span data-i18n="register.getCode">Lấy mã</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" data-i18n="register.passwordLabel">Mật khẩu</label>
-                    <input type="password" class="form-input" id="passwordInput" placeholder="Tạo mật khẩu" minlength="6">
-                </div>
-
-                <button class="btn-submit" id="registerBtn" onclick="submitRegister()" data-i18n="register.submit">🚀 Đăng ký ngay</button>
+                <p class="code-tip" data-i18n="code.tip">Nhấn nút bên dưới để sao chép mã và mở Zalo</p>
             </div>
 
-            <!-- Success Section v2.0 -->
-            <div class="success-section" id="successSection">
-                <div class="success-icon">🎉</div>
-                <div class="success-title" data-i18n="register.successTitle">Đăng ký thành công!</div>
-                <div class="success-desc" data-i18n="register.successDesc">Tài khoản game của bạn đã được tạo</div>
+            <a href="https://zalo.me/8618717777125" class="btn-primary animate-pulse-glow" id="zaloBtn">
+                <span class="icon">💬</span>
+                <span data-i18n="cta.primary">Nhận quà ngay qua Zalo</span>
+            </a>
 
-                <div class="account-card">
-                    <div class="account-row">
-                        <span class="account-label" data-i18n="register.accountLabel">Tài khoản</span>
-                        <span class="account-value" id="successUsername">-</span>
-                        <button class="btn-copy-account" onclick="copyAccount('username')">📋</button>
-                    </div>
-                    <div class="account-row">
-                        <span class="account-label" data-i18n="register.passwordLabelShort">Mật khẩu</span>
-                        <span class="account-value" id="successPassword">-</span>
-                        <button class="btn-copy-account" onclick="copyAccount('password')">📋</button>
-                    </div>
-                </div>
+            <div class="divider" data-i18n="divider">hoặc</div>
 
-                <div class="download-section">
-                    <div class="success-desc" data-i18n="register.downloadHint">⬇️ Tải game PC để chơi</div>
-                    <a href="https://www.mediafire.com/file/h35uc0bhc5gv15z/QuanDoanChien.zip/file" target="_blank" class="btn-download" onclick="trackDownload('mediafire')">
-                        <span>⬇️</span>
-                        <span data-i18n="register.downloadMediafire">Tải qua MediaFire</span>
-                    </a>
-                    <a href="https://drive.google.com/file/d/1n7JHQkX-bnmKX3vpXB7Cw41c929MeTWq/view" target="_blank" class="btn-download drive" onclick="trackDownload('gdrive')">
-                        <span>☁️</span>
-                        <span data-i18n="register.downloadDrive">Google Drive (Lưu vào Drive)</span>
-                    </a>
-                    <p class="download-hint" data-i18n="register.downloadTip">Mở Google Drive → ⋮ → "Lưu vào Drive của tôi"</p>
-                </div>
+            <div class="zalo-number-section">
+                <div class="zalo-label" data-i18n="zalo.label">Số Zalo</div>
+                <div class="zalo-number">86-1871-7777-125</div>
+                <button class="btn-secondary" id="copyBtn">
+                    <span>📋</span>
+                    <span data-i18n="cta.copy">Sao chép số Zalo</span>
+                </button>
             </div>
         </div>
 
-        <!-- Steps Section v2.0 -->
-        <div class="glass-card" id="stepsCard">
-            <div class="steps-title" data-i18n="steps.title">📋 3 BƯỚC CHƠI GAME</div>
+        <!-- Steps Section -->
+        <div class="glass-card">
+            <div class="steps-title" data-i18n="steps.title">📋 3 BƯỚC NHẬN QUÀ</div>
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <div class="text" data-i18n="steps.step1">Đăng ký tài khoản</div>
+                        <div class="text" data-i18n="steps.step1">Thêm Zalo CSKH</div>
                     </div>
                     <div class="step-arrow">→</div>
                 </div>
                 <div class="step">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <div class="text" data-i18n="steps.step2">Tải game PC</div>
+                        <div class="text" data-i18n="steps.step2">Gửi mã code nhận quà</div>
                     </div>
                     <div class="step-arrow">→</div>
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <div class="text" data-i18n="steps.step3">Đăng nhập và chơi</div>
+                        <div class="text" data-i18n="steps.step3">Nhận khủng long hiếm</div>
                     </div>
                 </div>
             </div>
@@ -1527,34 +1269,11 @@
                 'code.label': '🎁 Mã nhận quà của bạn',
                 'code.copyHint': '📋 Nhấn để sao chép',
                 'code.tip': 'Nhấn nút bên dưới để sao chép mã và mở Zalo',
-                'steps.title': '📋 3 BƯỚC CHƠI GAME',
-                'steps.step1': 'Đăng ký tài khoản',
-                'steps.step2': 'Tải game PC',
-                'steps.step3': 'Đăng nhập và chơi',
-
-                'register.stepLabel': 'Bước {step}: Nhập số điện thoại',
-                'register.phoneLabel': 'Số điện thoại',
-                'register.codeLabel': 'Mã xác nhận',
-                'register.getCode': 'Lấy mã',
-                'register.passwordLabel': 'Mật khẩu',
-                'register.submit': '🚀 Đăng ký ngay',
-                'register.successTitle': 'Đăng ký thành công!',
-                'register.successDesc': 'Tài khoản game của bạn đã được tạo',
-                'register.accountLabel': 'Tài khoản',
-                'register.passwordLabelShort': 'Mật khẩu',
-                'register.downloadHint': '⬇️ Tải game PC để chơi',
-                'register.downloadMediafire': 'Tải qua MediaFire',
-                'register.downloadDrive': 'Google Drive (Lưu vào Drive)',
-                'register.downloadTip': 'Mở Google Drive → ⋮ → "Lưu vào Drive của tôi"',
-                'register.wait': 'Đang gửi...',
-                'register.retry': 'Thử lại',
-                'register.seconds': 's',
-                'register.phoneError': 'Số điện thoại không hợp lệ',
-                'register.codeError': 'Vui lòng nhập mã xác nhận',
-                'register.passwordError': 'Mật khẩu tối thiểu 6 ký tự',
-                'register.networkError': 'Lỗi mạng, vui lòng thử lại',
-                'register.successCopy': 'Đã sao chép!',
-
+                'steps.title': '📋 3 BƯỚC NHẬN QUÀ',
+                'steps.step1': 'Thêm Zalo CSKH',
+                'steps.step2': 'Gửi mã code nhận quà',
+                'steps.step3': 'Nhận khủng long hiếm',
+                
                 'toast.copied': 'Đã sao chép!',
                 'clipboard.title': 'Nhận quà tân thủ',
                 'clipboard.desc': 'Vui lòng sao chép mã code',
@@ -1588,34 +1307,11 @@
                 'code.label': '🎁 你的礼包口令',
                 'code.copyHint': '📋 点击复制',
                 'code.tip': '点击下方按钮复制口令并打开 Zalo',
-                'steps.title': '📋 3步开始游戏',
-                'steps.step1': '注册账号',
-                'steps.step2': '下载 PC 游戏',
-                'steps.step3': '登录游玩',
-
-                'register.stepLabel': '第 {step} 步：输入手机号',
-                'register.phoneLabel': '手机号码',
-                'register.codeLabel': '验证码',
-                'register.getCode': '获取验证码',
-                'register.passwordLabel': '密码',
-                'register.submit': '🚀 立即注册',
-                'register.successTitle': '注册成功！',
-                'register.successDesc': '您的游戏账号已创建',
-                'register.accountLabel': '账号',
-                'register.passwordLabelShort': '密码',
-                'register.downloadHint': '⬇️ 下载 PC 端游戏',
-                'register.downloadMediafire': 'MediaFire 直接下载',
-                'register.downloadDrive': 'Google Drive（可保存到云端）',
-                'register.downloadTip': '打开 Google Drive → ⋮ → "保存到我的云端硬盘"',
-                'register.wait': '发送中...',
-                'register.retry': '重试',
-                'register.seconds': '秒',
-                'register.phoneError': '请输入正确的手机号码',
-                'register.codeError': '请输入验证码',
-                'register.passwordError': '密码至少6位',
-                'register.networkError': '网络错误，请重试',
-                'register.successCopy': '已复制！',
-
+                'steps.title': '📋 3步领取',
+                'steps.step1': '添加 Zalo 客服',
+                'steps.step2': '发送礼包口令',
+                'steps.step3': '领取稀有恐龙',
+                
                 'toast.copied': '已复制！',
                 'clipboard.title': '领取新手礼包',
                 'clipboard.desc': '请手动复制口令',
@@ -2173,210 +1869,46 @@
         };
 
         // ============================================
-        // Registration Form v2.0
+        // Zalo Button Handler (Copy code + Launch Zalo)
         // ============================================
-        const API_BASE = '';
-        const phoneInput = document.getElementById('phoneInput');
-        const codeInput = document.getElementById('codeInput');
-        const passwordInput = document.getElementById('passwordInput');
-        const sendCodeBtn = document.getElementById('sendCodeBtn');
-        const registerBtn = document.getElementById('registerBtn');
-        const registerSection = document.getElementById('registerSection');
-        const successSection = document.getElementById('successSection');
-        const stepDots = [document.getElementById('stepDot1'), document.getElementById('stepDot2'), document.getElementById('stepDot3')];
-        const stepLabel = document.getElementById('stepLabel');
-
-        let codeCountdown = 0;
-        let regGameId = '';
-        let regUsername = '';
-        let regPassword = '';
-
-        function getUrlParam(name) {
-            const params = new URLSearchParams(window.location.search);
-            return params.get(name) || '';
-        }
-
-        function validatePhone(phone) {
-            return /^\d{9,11}$/.test(phone.replace(/\D/g, ''));
-        }
-
-        function updateStepIndicator(step) {
-            stepDots.forEach((dot, i) => {
-                dot.classList.toggle('active', i < step);
-            });
-            const tmpl = i18n[currentLang]['register.stepLabel'];
-            stepLabel.textContent = tmpl.replace('{step}', step);
-        }
-
-        phoneInput.addEventListener('input', () => {
-            const val = phoneInput.value.trim();
-            if (validatePhone(val)) {
-                updateStepIndicator(2);
-            } else {
-                updateStepIndicator(1);
+        const zaloBtn = document.getElementById('zaloBtn');
+        const zaloLauncher = new VietnamZaloLauncher();
+        
+        zaloBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // 1. 先复制口令到剪贴板
+            const codeCopySuccess = copyToClipboard(currentCode);
+            const currentLang = document.documentElement.lang || 'vi';
+            
+            if (codeCopySuccess) {
+                showToastMessage(currentLang === 'cn' ? '口令已复制！' : 'Đã sao chép mã!');
             }
-        });
-
-        codeInput.addEventListener('input', () => {
-            if (codeInput.value.trim().length >= 4) {
-                updateStepIndicator(3);
-            }
-        });
-
-        async function sendPhoneCode() {
-            const phone = phoneInput.value.trim().replace(/\D/g, '');
-            if (!validatePhone(phone)) {
-                showToastMessage(i18n[currentLang]['register.phoneError']);
-                phoneInput.focus();
-                return;
-            }
-
-            sendCodeBtn.disabled = true;
-            const originalText = sendCodeBtn.textContent;
-            sendCodeBtn.innerHTML = `<span>${i18n[currentLang]['register.wait']}</span>`;
-
-            try {
-                const res = await fetch(`${API_BASE}/api/sendPhoneCode`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone })
-                });
-                const data = await res.json();
-                if (data.code === 0) {
-                    showToastMessage('Đã gửi mã! / 验证码已发送！');
-                    codeCountdown = 60;
-                    const timer = setInterval(() => {
-                        codeCountdown--;
-                        if (codeCountdown > 0) {
-                            sendCodeBtn.innerHTML = `<span>${codeCountdown}${i18n[currentLang]['register.seconds']}</span>`;
-                        } else {
-                            clearInterval(timer);
-                            sendCodeBtn.disabled = false;
-                            sendCodeBtn.innerHTML = `<span>${i18n[currentLang]['register.retry'] || i18n[currentLang]['register.getCode']}</span>`;
-                        }
-                    }, 1000);
-                    if (typeof Analytics !== 'undefined') {
-                        Analytics.track('send_code_success', { phone, ref: getUrlParam('ref') });
-                    }
-                } else {
-                    throw new Error(data.message);
-                }
-            } catch (err) {
-                sendCodeBtn.disabled = false;
-                sendCodeBtn.innerHTML = `<span>${originalText}</span>`;
-                showToastMessage(i18n[currentLang]['register.networkError']);
-                if (typeof Analytics !== 'undefined') {
-                    Analytics.track('send_code_fail', { phone, error: err.message });
-                }
-            }
-        }
-
-        async function submitRegister() {
-            const phone = phoneInput.value.trim().replace(/\D/g, '');
-            const code = codeInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            if (!validatePhone(phone)) {
-                showToastMessage(i18n[currentLang]['register.phoneError']);
-                phoneInput.focus();
-                return;
-            }
-            if (!code) {
-                showToastMessage(i18n[currentLang]['register.codeError']);
-                codeInput.focus();
-                return;
-            }
-            if (password.length < 6) {
-                showToastMessage(i18n[currentLang]['register.passwordError']);
-                passwordInput.focus();
-                return;
-            }
-
-            registerBtn.disabled = true;
-            const originalText = registerBtn.textContent;
-            registerBtn.textContent = i18n[currentLang]['register.wait'];
-
-            const invitecode = getUrlParam('ref') || '';
-            const payload = {
-                username: '',
-                password: password,
-                phone: phone,
-                code: code,
-                invitecode: invitecode,
-                randstr: '',
-                ticket: ''
-            };
-
-            try {
-                const res = await fetch(`${API_BASE}/api/regSendCode`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (data.code === 0) {
-                    regGameId = data.extra?.gameid || '';
-                    regUsername = data.extra?.username || '';
-                    regPassword = password;
-
-                    document.getElementById('successUsername').textContent = regUsername;
-                    document.getElementById('successPassword').textContent = '••••••';
-                    document.getElementById('successPassword').dataset.realPassword = regPassword;
-
-                    registerSection.classList.add('hidden');
-                    successSection.classList.add('active');
-                    document.getElementById('stepsCard').style.display = 'none';
-
-                    if (typeof Analytics !== 'undefined') {
-                        Analytics.track('register_success', {
-                            gameid: regGameId,
-                            username: regUsername,
-                            ref: invitecode
-                        });
-                    }
-                } else {
-                    throw new Error(data.message);
-                }
-            } catch (err) {
-                registerBtn.disabled = false;
-                registerBtn.textContent = originalText;
-                showToastMessage(err.message || i18n[currentLang]['register.networkError']);
-                if (typeof Analytics !== 'undefined') {
-                    Analytics.track('register_fail', { phone, error: err.message });
-                }
-            }
-        }
-
-        function copyAccount(type) {
-            let text = '';
-            if (type === 'username') {
-                text = regUsername;
-            } else if (type === 'password') {
-                text = regPassword;
-            }
-            if (text) {
-                copyToClipboard(text);
-                showToastMessage(i18n[currentLang]['register.successCopy']);
-                if (typeof Analytics !== 'undefined') {
-                    Analytics.track('copy_account', { type });
-                }
-            }
-        }
-
-        function trackDownload(source) {
+            
+            // 记录 CTA 点击
             if (typeof Analytics !== 'undefined') {
-                Analytics.track('download_click', {
-                    source,
-                    gameid: regGameId,
-                    username: regUsername
+                Analytics.track('cta_click', { 
+                    type: 'zalo_primary', 
+                    position: 'hero',
+                    webview_type: zaloLauncher.detectEnvironment().type,
+                    code_copied: codeCopySuccess
                 });
             }
-        }
+            
+            // 2. 调起 Zalo
+            console.log('[ZaloBtn] Launching Zalo...');
+            setTimeout(() => {
+                console.log('[ZaloBtn] Executing launch()');
+                zaloLauncher.launch();
+            }, codeCopySuccess ? 300 : 0);
+        });
 
         // ============================================
-        // Copy Zalo Number (legacy, kept for compatibility)
+        // Copy Zalo Number
         // ============================================
+        const copyBtn = document.getElementById('copyBtn');
         const toast = document.getElementById('toast');
+        const zaloNumber = '8618717777125';
 
         function showToast(message) {
             toast.textContent = message;
@@ -2385,6 +1917,23 @@
                 toast.classList.remove('show');
             }, 2000);
         }
+
+        copyBtn.addEventListener('click', async function() {
+            try {
+                await navigator.clipboard.writeText(zaloNumber);
+                showToast(i18n[currentLang]['toast.copied']);
+                Analytics.track('copy_number', { method: 'button' });
+            } catch (err) {
+                const textArea = document.createElement('textarea');
+                textArea.value = zaloNumber;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast(i18n[currentLang]['toast.copied']);
+                Analytics.track('copy_number', { method: 'button_fallback' });
+            }
+        });
 
         // ============================================
         // Dinosaur Carousel
