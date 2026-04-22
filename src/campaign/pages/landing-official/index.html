@@ -319,7 +319,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 14px 16px;
+            padding: 14px;
             background: rgba(74, 154, 138, 0.1);
             border-radius: 12px;
             border: 1px solid rgba(74, 154, 138, 0.15);
@@ -948,19 +948,20 @@
             background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
             border-radius: 10px; height: 46px;
             transition: border-color 0.2s, box-shadow 0.2s;
+            padding: 0;
         }
         .input-with-tag:focus-within {
             border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.15);
         }
         .input-tag {
             font-size: 13px; color: var(--text-secondary); white-space: nowrap;
-            flex-shrink: 0; padding: 0 10px 0 12px;
+            flex-shrink: 0; padding: 0 8px 0 14px;
             border-right: 1px solid rgba(255,255,255,0.08);
             width: 56px; text-align: right;
         }
         .input-with-tag .form-input {
             flex: 1; background: transparent; border: none;
-            padding: 0 12px; height: 100%; box-shadow: none; border-radius: 0;
+            padding: 0 14px; height: 100%; box-shadow: none; border-radius: 0;
         }
         .input-with-tag .form-input:focus { box-shadow: none; }
         .form-row { display: flex; gap: 8px; align-items: stretch; }
