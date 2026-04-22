@@ -33,13 +33,14 @@
       ]
     },
     "landing-official": {
+      "source": "projects/001-增长/001-03-landing-page/landing-official.html",
       "src": "src/campaign/pages/landing-official",
       "type": "campaign-page",
       "status": "ready",
       "confirmed": true,
       "private": false,
       "description": "官方落地页",
-      "note": "直接在 src/ 开发，无对应 project"
+      "note": "源文件在 project 下开发，确认后同步到 src/"
     },
     "streamer-dropin": {
       "src": "src/campaign/pages/streamer-dropin",
