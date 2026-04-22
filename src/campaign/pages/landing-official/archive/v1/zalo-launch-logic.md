@@ -1,0 +1,274 @@
+# Zalo 调起按钮逻辑说明
+
+> 适用页面: `src/campaign/pages/landing-official/index.html`
+
+## 1. 按钮点击入口
+
+```javascript
+// line 1345-1360
+zaloBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    Analytics.track('cta_click', { 
+        type: 'zalo_primary', 
+        position: 'hero',
+        webview_type: zaloLauncher.detectEnvironment().type
+    });
+    zaloLauncher.launch();  // 调起主逻辑
+});
+```
+
+---
+
+## 2. 调起流程时序图
+
+```mermaid
+sequenceDiagram
+    participant User as 用户点击
+    participant ZaloBtn as Zalo 按钮
+    participant Launcher as VietnamZaloLauncher
+    participant Browser as 系统浏览器
+
+    User->>ZaloBtn: 点击按钮
+    ZaloBtn->>Launcher: launch()
+
+    Note over Launcher: 检测当前环境<br/>判断是 WebView 还是系统浏览器
+
+    alt 是 WebView 环境 (TikTok/FB/IG/微信)
+        Launcher->>Launcher: showWebViewGuide(env.type)
+        Launcher-->>User: 显示引导 Modal
+        Note over User: 用户点击分享 → 选择外部浏览器 → 重新打开页面
+        User->>ZaloBtn: 再次点击按钮
+        Note over Launcher: 切到系统浏览器后<br/>走下方正常调起流程
+    else 系统浏览器环境
+        Launcher->>Launcher: showWebViewGuide(env.type)
+        Launcher-->>User: 显示引导 Modal
+        Note over User: 用户点击分享 → 选择外部浏览器 → 重新打开页面
+        User->>ZaloBtn: 再次点击按钮
+        Note over Launcher: 切到系统浏览器后<br/>走下方正常调起流程
+    else 系统浏览器环境
+        Launcher->>Browser: launchInSystemBrowser(env)
+
+        alt 小米浏览器 (miuibrowser)
+            Launcher->>Browser: zalo://me/{phone}
+            Browser->>Launcher: 执行调起
+            Note over Launcher: 超时1200ms<br/>检测 blur 事件
+            alt 调起成功
+                Launcher-->>User: 跳转 Zalo App
+            else 调起失败
+                Launcher->>Launcher: showQRCodeFallback()
+                Launcher-->>User: 显示二维码
+            end
+        else Safari
+            Launcher->>Browser: window.open 或 location.href
+            Browser->>Launcher: 跳转 https://zalo.me/{phone}
+            Note over Launcher: 超时1000ms<br/>双重检测 blur + visibilitychange
+            alt 调起成功
+                Launcher-->>User: 跳转 Zalo App
+            else 超时
+                Launcher-->>User: 停留在当前页
+            end
+        else Android (Chrome/Cốc Cốc/Samsung)
+            Note over Launcher: 生成 Intent URL<br/>intent://zalo.me/{phone}#Intent;scheme=https;package=com.zing.zalo;S.browser_fallback_url=https://zalo.me/{phone}
+            Launcher->>Browser: window.location.href = Intent URL
+            Note over Browser: 尝试调起 Zalo App<br/>失败则跳转 fallback_url
+            Note over Launcher: 超时800ms<br/>检测 blur 事件
+            alt 调起成功
+                Launcher-->>User: 跳转 Zalo App
+            else 超时
+                Launcher-->>User: 停留在当前页
+            end
+        else 其他系统浏览器 (iOS/通用)
+            Launcher->>Browser: https://zalo.me/{phone}
+            Note over Launcher: 超时800ms<br/>检测 blur 事件
+            alt 调起成功
+                Launcher-->>User: 跳转 Zalo App
+            else 超时
+                Launcher-->>User: 停留在当前页
+            end
+        end
+    end
+```
+
+---
+
+## 3. 环境检测
+
+Launcher 内部通过 UA 字符串判断当前环境类型：
+
+| 检测目标 | 判断逻辑 |
+|---------|---------|
+| TikTok WebView | UA 包含 `tiktok/musical_ly/bytedance/ttwebview/snssdk` 且不包含 `chrome/safari` |
+| Facebook WebView | UA 包含 `fb_iab/fbav` 或存在 `window.FB_IAB` |
+| Instagram | UA 包含 `instagram` |
+| 微信 | UA 包含 `micromessenger` |
+| 小米浏览器 | UA 包含 `miuibrowser/xiaomi` |
+| Safari | UA 包含 `safari` 但不包含 `chrome/crios` |
+| Chrome | UA 包含 `chrome` 但不包含 `edg/samsung` |
+| Samsung | UA 包含 `samsungbrowser` |
+| Cốc Cốc | UA 包含 `coccoc` |
+
+---
+
+## 4. 调起主逻辑 (`launch`)
+
+```javascript
+// line 1111-1127
+launch() {
+    const env = this.detectEnvironment();
+    window._zaloLaunchStartTime = Date.now();
+    
+    Analytics.trackZaloLaunchAttempt(env.type, this.getLaunchMethod(env));
+    
+    if (env.isWebView) {
+        // WebView 环境：显示引导层，阻断调起
+        Analytics.trackZaloLaunchResult('webview_blocked', env.type);
+        this.showWebViewGuide(env.type);
+        return;
+    }
+    
+    // 系统浏览器环境：执行调起
+    this.launchInSystemBrowser(env);
+}
+```
+
+---
+
+## 5. 各环境调起方式
+
+### 5.1 调起策略矩阵
+
+| 环境 | 调起方式 | URL 格式 | 超时时间 |
+|------|---------|---------|---------|
+| **小米浏览器** | Scheme URL + 兜底 | `zalo://me/8618717777125` | 1200ms |
+| **Safari** | Universal Link + `window.open` | `https://zalo.me/8618717777125` | 1000ms |
+| **Android** | Intent URL | `intent://zalo.me/...#Intent;package=com.zing.zalo;...` | 800ms |
+| **iOS 其他** | Universal Link | `https://zalo.me/8618717777125` | 800ms |
+
+### 5.2 Intent URL 格式 (Android)
+
+```
+intent://zalo.me/8618717777125#Intent;
+    scheme=https;
+    package=com.zing.zalo;
+    S.browser_fallback_url=https%3A%2F%2Fzalo.me%2F8618717777125;
+end
+```
+
+---
+
+## 6. 超时/未调起检测逻辑
+
+### 6.1 标准检测流程
+
+```javascript
+// line 1172-1188
+executeLaunch(url, env) {
+    let hasBlurred = false;
+    const onBlur = () => { hasBlurred = true };
+    window.addEventListener('blur', onBlur);  // 监听窗口失焦事件
+    
+    window.location.href = url;  // 执行调起
+    
+    setTimeout(() => {
+        window.removeEventListener('blur', onBlur);
+        
+        if (hasBlurred) {
+            Analytics.trackZaloLaunchSuccess();  // ✅ 调起成功
+        } else {
+            Analytics.trackZaloLaunchResult('unknown', 'no_blur_event');  // ❌ 超时未调起
+        }
+    }, 800);  // 超时时间：800ms
+}
+```
+
+### 6.2 Safari 专用检测
+
+```javascript
+// line 1191-1221
+executeLaunchForSafari(url, env) {
+    let hasBlurred = false;
+    let hasVisibilityChanged = false;
+    
+    // 双重检测机制
+    window.addEventListener('blur', onBlur);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    
+    // 优先尝试 popup 获取更好兼容性
+    const popup = window.open(url, '_blank');
+    if (!popup || popup.closed) {
+        window.location.href = url;  // 被拦截则回退
+    }
+    
+    setTimeout(() => {
+        window.removeEventListener('blur', onBlur);
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+        
+        if (hasBlurred || hasVisibilityChanged) {
+            Analytics.trackZaloLaunchSuccess();
+        } else {
+            Analytics.trackZaloLaunchResult('unknown', 'safari_no_response');
+        }
+    }, 1000);  // Safari 超时：1000ms
+}
+```
+
+### 6.3 小米浏览器兜底方案
+
+```javascript
+// line 1224-1242
+executeLaunchWithFallback(url, env, fallbackFn) {
+    let hasBlurred = false;
+    window.addEventListener('blur', onBlur);
+    
+    window.location.href = url;
+    
+    setTimeout(() => {
+        window.removeEventListener('blur', onBlur);
+        
+        if (hasBlurred) {
+            Analytics.trackZaloLaunchSuccess();
+        } else {
+            Analytics.trackZaloLaunchResult('failed', 'mi_browser_blocked');
+            // 执行兜底：显示二维码弹窗
+            if (fallbackFn) fallbackFn();
+        }
+    }, 1200);  // 超时：1200ms
+}
+```
+
+---
+
+## 7. 失败/阻断后的页面表现
+
+| 场景 | 处理方式 | 显示内容 |
+|------|---------|---------|
+| **WebView 环境** | 阻断调起，显示引导 Modal | 平台对应的"在外部浏览器打开"指引 |
+| **小米浏览器失败** | 显示二维码兜底 | 二维码占位区 + Zalo 号码 |
+| **其他超时** | 仅记录 Analytics | 无页面跳转，用户停留在原页面 |
+
+### 7.1 WebView 引导层内容
+
+| 平台 | 引导步骤 |
+|------|---------|
+| **TikTok** | 1. 点击分享按钮 (→)<br>2. 选择"在 Chrome 中打开"或"在 Safari 中打开"<br>3. 返回本页面点击添加 Zalo 按钮 |
+| **Facebook** | 1. 点击右上角菜单按钮 (⋮)<br>2. 选择"在 Chrome 中打开"或"在浏览器中打开"<br>3. 返回本页面点击添加 Zalo 按钮 |
+| **Instagram** | 1. 点击右上角菜单按钮 (⋮)<br>2. 选择"在浏览器中打开"<br>3. 返回本页面点击添加 Zalo 按钮 |
+| **微信** | 同上 + 显示"已复制链接"提示 |
+
+### 7.2 二维码兜底弹窗
+
+当小米浏览器调起失败时显示：
+- 图标: 📱
+- 标题: "扫描二维码添加 Zalo"
+- 内容: 200x200 二维码占位区
+- Zalo 号码: `86-1871-7777-125`
+- 关闭按钮
+
+---
+
+## 8. 注意事项
+
+1. **无主动跳转**: 除小米浏览器外，其他超时场景用户停留在当前页面
+2. **WebView 阻断**: TikTok/Facebook/Instagram/微信内置浏览器会直接阻断调起，引导用户到外部浏览器
+3. **超时时间差异**: 不同环境的超时检测时间不同 (800ms-1200ms)
+4. **失焦检测**: 使用 `blur` 事件和 `visibilitychange` 事件双重检测调起是否成功

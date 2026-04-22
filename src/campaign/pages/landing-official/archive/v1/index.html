@@ -257,6 +257,28 @@
             background: linear-gradient(90deg, transparent, rgba(74, 154, 138, 0.5), transparent);
         }
 
+        /* Zalo Number Section */
+        .zalo-number-section {
+            text-align: center;
+        }
+
+        .zalo-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .zalo-number {
+            font-family: 'Cinzel', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--gold);
+            -webkit-text-fill-color: var(--gold);
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+            margin-bottom: 12px;
+        }
+
         /* Secondary Button (Copy) */
         .btn-secondary {
             width: 100%;
@@ -924,78 +946,14 @@
                 font-size: 22px;
             }
 
+            .zalo-number {
+                font-size: 22px;
+            }
+
             .carousel-container {
                 height: 240px;
             }
         }
-
-        /* ===== v2.0 Registration Form ===== */
-        .register-section { display: flex; flex-direction: column; gap: 14px; }
-        .register-section.hidden { display: none; }
-        .success-section { display: none; flex-direction: column; gap: 16px; text-align: center; }
-        .success-section.active { display: flex; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
-        .form-input {
-            height: 52px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.3); padding: 0 16px; color: var(--text-primary);
-            font-size: 16px; font-family: inherit; outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .form-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.15); }
-        .form-input::placeholder { color: rgba(148,163,184,0.5); }
-        .form-row { display: flex; gap: 10px; }
-        .form-row .form-input { flex: 1; }
-        .btn-code {
-            height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--gold);
-            background: transparent; color: var(--gold); font-size: 14px; font-weight: 600;
-            font-family: inherit; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-width: 120px;
-        }
-        .btn-code:disabled { border-color: rgba(255,255,255,0.1); color: var(--text-secondary); cursor: not-allowed; }
-        .btn-code:not(:disabled):hover { background: var(--gold); color: #000; }
-        .btn-submit {
-            height: 56px; border-radius: 16px; border: none;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
-            color: #000; font-size: 17px; font-weight: 700; font-family: inherit;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 6px;
-        }
-        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,215,0,0.3); }
-        .btn-submit:active { transform: translateY(0); }
-        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-        .success-icon { font-size: 56px; line-height: 1; margin-bottom: 4px; }
-        .success-title { font-size: 22px; font-weight: 700; color: var(--gold); }
-        .success-desc { font-size: 14px; color: var(--text-secondary); }
-        .account-card {
-            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,215,0,0.3);
-            border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;
-            text-align: left;
-        }
-        .account-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-        .account-label { font-size: 13px; color: var(--text-secondary); min-width: 60px; }
-        .account-value {
-            font-family: 'SF Mono', monospace; font-size: 16px; font-weight: 600;
-            color: var(--gold-light); flex: 1; text-align: right; overflow: hidden; text-overflow: ellipsis;
-        }
-        .btn-copy-all {
-            height: 48px; border-radius: 14px; border: 1px solid var(--gold);
-            background: transparent; color: var(--gold); font-size: 15px; font-weight: 600;
-            font-family: inherit; cursor: pointer; display: flex; align-items: center;
-            justify-content: center; gap: 8px; transition: all 0.2s;
-        }
-        .btn-copy-all:hover { background: var(--gold); color: #000; }
-        .download-section { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
-        .btn-download {
-            height: 52px; border-radius: 14px; border: none;
-            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); color: #fff;
-            font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: transform 0.2s; text-decoration: none;
-        }
-        .btn-download:hover { transform: translateY(-2px); }
-        .btn-download.drive { background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%); }
-        .download-hint { font-size: 12px; color: var(--text-secondary); }
-        .dkl-link { color: var(--gold); font-weight: 600; text-decoration: none; }
-        .dkl-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -1019,111 +977,55 @@
 
         <!-- CTA Section -->
         <div class="glass-card cta-section">
-            <!-- Registration Form v2.0 -->
-            <div class="register-section" id="registerSection">
-                <div class="form-group">
-                    <label class="form-label" data-i18n="reg.usernameLabel">用户名</label>
-                    <input type="text" class="form-input" id="regUsername" placeholder="用户名仅支持6-20位字母和数字" maxlength="20" autocomplete="username">
+            <!-- 口令显示区域 -->
+            <div class="code-display-section" id="codeSection">
+                <div class="code-label" data-i18n="code.label">🎁 Mã nhận quà của bạn</div>
+                <div class="code-box-display" id="codeBox" onclick="copyCodeManual()">
+                    <span class="code-text-display" id="displayCode">NHANLONG</span>
+                    <span class="copy-hint" data-i18n="code.copyHint">📋 Nhấn để sao chép</span>
                 </div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="reg.passwordLabel">密码</label>
-                    <input type="password" class="form-input" id="regPassword" placeholder="密码仅支持6-20位字母、数字和特殊符号" minlength="6" maxlength="20" autocomplete="new-password">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="reg.confirmLabel">确认密码</label>
-                    <input type="password" class="form-input" id="regConfirm" placeholder="请再次输入密码" minlength="6" maxlength="20" autocomplete="new-password">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="reg.phoneLabel">手机号</label>
-                    <div class="form-row">
-                        <input type="tel" class="form-input" id="regPhone" placeholder="请输入您的手机号" inputmode="numeric" autocomplete="tel">
-                        <button class="btn-code" id="sendCodeBtn" onclick="sendPhoneCode()">
-                            <span data-i18n="reg.getCode">获取验证码</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="reg.codeLabel">验证码</label>
-                    <input type="text" class="form-input" id="regCode" placeholder="请输入6位验证码，验证码长度为6位" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
-                </div>
-                <button class="btn-submit" id="registerBtn" onclick="submitRegister()">
-                    <span data-i18n="reg.submit">🚀 立即注册</span>
-                </button>
+                <p class="code-tip" data-i18n="code.tip">Nhấn nút bên dưới để sao chép mã và mở Zalo</p>
             </div>
 
-            <!-- Success Section v2.0 -->
-            <div class="success-section" id="successSection">
-                <div class="success-icon">🎉</div>
-                <div class="success-title" data-i18n="reg.successTitle">注册成功！</div>
-                <div class="success-desc" data-i18n="reg.successDesc">您的游戏账号已创建</div>
+            <a href="https://zalo.me/8618717777125" class="btn-primary animate-pulse-glow" id="zaloBtn">
+                <span class="icon">💬</span>
+                <span data-i18n="cta.primary">Nhận quà ngay qua Zalo</span>
+            </a>
 
-                <div class="account-card">
-                    <div class="account-row">
-                        <span class="account-label" data-i18n="reg.accountLabel">用户名</span>
-                        <span class="account-value" id="sUsername">-</span>
-                    </div>
-                    <div class="account-row">
-                        <span class="account-label" data-i18n="reg.pwdLabel">密码</span>
-                        <span class="account-value" id="sPassword">-</span>
-                    </div>
-                    <div class="account-row">
-                        <span class="account-label" data-i18n="reg.phoneLabel2">手机号</span>
-                        <span class="account-value" id="sPhone">-</span>
-                    </div>
-                    <div class="account-row">
-                        <span class="account-label">官网</span>
-                        <span class="account-value">dkl.vn</span>
-                    </div>
-                </div>
+            <div class="divider" data-i18n="divider">hoặc</div>
 
-                <button class="btn-copy-all" id="copyAllBtn" onclick="copyAllInfo()">
+            <div class="zalo-number-section">
+                <div class="zalo-label" data-i18n="zalo.label">Số Zalo</div>
+                <div class="zalo-number">86-1871-7777-125</div>
+                <button class="btn-secondary" id="copyBtn">
                     <span>📋</span>
-                    <span data-i18n="reg.copyAll">一键复制全部信息</span>
+                    <span data-i18n="cta.copy">Sao chép số Zalo</span>
                 </button>
-                <div class="success-desc" data-i18n="reg.copyHint">复制后可通过 Zalo 发送给自己备份</div>
-
-                <div class="download-section">
-                    <div class="success-desc" data-i18n="reg.downloadTitle">⬇️ 下载游戏客户端</div>
-                    <a href="https://www.mediafire.com/file/h35uc0bhc5gv15z/QuanDoanChien.zip/file" target="_blank" class="btn-download" onclick="trackEvent('download_mediafire')">
-                        <span>⬇️</span>
-                        <span data-i18n="reg.downloadMF">MediaFire 直接下载</span>
-                    </a>
-                    <a href="https://drive.google.com/file/d/1n7JHQkX-bnmKX3vpXB7Cw41c929MeTWq/view" target="_blank" class="btn-download drive" onclick="trackEvent('download_gdrive')">
-                        <span>☁️</span>
-                        <span data-i18n="reg.downloadGD">Google Drive（可保存到云端）</span>
-                    </a>
-                    <p class="download-hint" data-i18n="reg.downloadTip">打开 Google Drive → ⋮ → "保存到我的云端硬盘"</p>
-                    <div class="success-desc" style="margin-top:8px;">
-                        🏠 <span data-i18n="reg.dklHint">或直接在电脑浏览器访问</span>
-                        <a href="https://dkl.vn" target="_blank" class="dkl-link">dkl.vn</a>
-                        <span data-i18n="reg.dklHint2">下载安装</span>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Steps Section v2.0 -->
-        <div class="glass-card" id="stepsCard">
-            <div class="steps-title" data-i18n="steps.title">📋 3 步开始游戏</div>
+        <!-- Steps Section -->
+        <div class="glass-card">
+            <div class="steps-title" data-i18n="steps.title">📋 3 BƯỚC NHẬN QUÀ</div>
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <div class="text" data-i18n="steps.step1">注册账号</div>
+                        <div class="text" data-i18n="steps.step1">Thêm Zalo CSKH</div>
                     </div>
                     <div class="step-arrow">→</div>
                 </div>
                 <div class="step">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <div class="text" data-i18n="steps.step2">下载 PC 游戏</div>
+                        <div class="text" data-i18n="steps.step2">Gửi mã code nhận quà</div>
                     </div>
                     <div class="step-arrow">→</div>
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <div class="text" data-i18n="steps.step3">登录游玩</div>
+                        <div class="text" data-i18n="steps.step3">Nhận khủng long hiếm</div>
                     </div>
                 </div>
             </div>
@@ -1360,38 +1262,23 @@
                 'page.title': 'Đảo Khủng Long - Quà Tân Thủ',
                 'hero.title': '🎁 Tặng Khủng Long Khởi Đầu',
                 'hero.subtitle': 'Quà chào mừng dành cho tân thủ',
-                'steps.title': '📋 3 步开始游戏',
-                'steps.step1': '注册账号',
-                'steps.step2': '下载 PC 游戏',
-                'steps.step3': '登录游玩',
-                'reg.usernameLabel': '用户名',
-                'reg.passwordLabel': '密码',
-                'reg.confirmLabel': '确认密码',
-                'reg.phoneLabel': '手机号',
-                'reg.getCode': '获取验证码',
-                'reg.codeLabel': '验证码',
-                'reg.submit': '🚀 立即注册',
-                'reg.successTitle': '注册成功！',
-                'reg.successDesc': '您的游戏账号已创建',
-                'reg.accountLabel': '用户名',
-                'reg.pwdLabel': '密码',
-                'reg.phoneLabel2': '手机号',
-                'reg.copyAll': '一键复制全部信息',
-                'reg.copyHint': '复制后可通过 Zalo 发送给自己备份',
-                'reg.downloadTitle': '⬇️ 下载游戏客户端',
-                'reg.downloadMF': 'MediaFire 直接下载',
-                'reg.downloadGD': 'Google Drive（可保存到云端）',
-                'reg.downloadTip': '打开 Google Drive → ⋮ → "保存到我的云端硬盘"',
-                'reg.dklHint': '或直接在电脑浏览器访问',
-                'reg.dklHint2': '下载安装',
-                'reg.wait': '发送中...',
-                'reg.retry': '重试',
-                'reg.seconds': '秒',
+                'cta.primary': 'Nhận quà ngay qua Zalo',
+                'divider': 'hoặc',
+                'zalo.label': 'Số Zalo',
+                'cta.copy': 'Sao chép số Zalo',
+                'code.label': '🎁 Mã nhận quà của bạn',
+                'code.copyHint': '📋 Nhấn để sao chép',
+                'code.tip': 'Nhấn nút bên dưới để sao chép mã và mở Zalo',
+                'steps.title': '📋 3 BƯỚC NHẬN QUÀ',
+                'steps.step1': 'Thêm Zalo CSKH',
+                'steps.step2': 'Gửi mã code nhận quà',
+                'steps.step3': 'Nhận khủng long hiếm',
                 
                 'toast.copied': 'Đã sao chép!',
                 'clipboard.title': 'Nhận quà tân thủ',
                 'clipboard.desc': 'Vui lòng sao chép mã code',
                 'clipboard.codeLabel': 'MÃ NHẬN QUÀ',
+                'clipboard.openZalo': 'Mở Zalo',
                 'clipboard.copyCode': 'Sao chép mã',
                 'clipboard.hint': 'Thêm CSKH và gửi mã này để nhận quà!',
                 'clipboard.phoneLabel': 'Hoặc sao chép SĐT CSKH',
@@ -1413,38 +1300,23 @@
                 'page.title': '恐龙岛 - PC端游戏福利',
                 'hero.title': '🎁 开局送恐龙',
                 'hero.subtitle': '新玩家欢迎礼',
-                'steps.title': '📋 3 步开始游戏',
-                'steps.step1': '注册账号',
-                'steps.step2': '下载 PC 游戏',
-                'steps.step3': '登录游玩',
-                'reg.usernameLabel': '用户名',
-                'reg.passwordLabel': '密码',
-                'reg.confirmLabel': '确认密码',
-                'reg.phoneLabel': '手机号',
-                'reg.getCode': '获取验证码',
-                'reg.codeLabel': '验证码',
-                'reg.submit': '🚀 立即注册',
-                'reg.successTitle': '注册成功！',
-                'reg.successDesc': '您的游戏账号已创建',
-                'reg.accountLabel': '用户名',
-                'reg.pwdLabel': '密码',
-                'reg.phoneLabel2': '手机号',
-                'reg.copyAll': '一键复制全部信息',
-                'reg.copyHint': '复制后可通过 Zalo 发送给自己备份',
-                'reg.downloadTitle': '⬇️ 下载游戏客户端',
-                'reg.downloadMF': 'MediaFire 直接下载',
-                'reg.downloadGD': 'Google Drive（可保存到云端）',
-                'reg.downloadTip': '打开 Google Drive → ⋮ → "保存到我的云端硬盘"',
-                'reg.dklHint': '或直接在电脑浏览器访问',
-                'reg.dklHint2': '下载安装',
-                'reg.wait': '发送中...',
-                'reg.retry': '重试',
-                'reg.seconds': '秒',
+                'cta.primary': '通过 Zalo 立即领取',
+                'divider': '或',
+                'zalo.label': 'Zalo 号码',
+                'cta.copy': '复制号码',
+                'code.label': '🎁 你的礼包口令',
+                'code.copyHint': '📋 点击复制',
+                'code.tip': '点击下方按钮复制口令并打开 Zalo',
+                'steps.title': '📋 3步领取',
+                'steps.step1': '添加 Zalo 客服',
+                'steps.step2': '发送礼包口令',
+                'steps.step3': '领取稀有恐龙',
                 
                 'toast.copied': '已复制！',
                 'clipboard.title': '领取新手礼包',
                 'clipboard.desc': '请手动复制口令',
                 'clipboard.codeLabel': '礼包口令',
+                'clipboard.openZalo': '打开 Zalo',
                 'clipboard.copyCode': '复制口令',
                 'clipboard.hint': '添加客服后发送此口令领取礼包！',
                 'clipboard.phoneLabel': '点击复制客服号',
@@ -1997,126 +1869,63 @@
         };
 
         // ============================================
-        // v2.0 Registration Logic
+        // Zalo Button Handler (Copy code + Launch Zalo)
         // ============================================
-        const API_BASE = '';
-        const regUsername = document.getElementById('regUsername');
-        const regPassword = document.getElementById('regPassword');
-        const regConfirm = document.getElementById('regConfirm');
-        const regPhone = document.getElementById('regPhone');
-        const regCode = document.getElementById('regCode');
-        const sendCodeBtn = document.getElementById('sendCodeBtn');
-        const registerBtn = document.getElementById('registerBtn');
-        const registerSection = document.getElementById('registerSection');
-        const successSection = document.getElementById('successSection');
-        const toast = document.getElementById('toast');
+        const zaloBtn = document.getElementById('zaloBtn');
+        const zaloLauncher = new VietnamZaloLauncher();
+        
+        zaloBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // 1. 先复制口令到剪贴板
+            const codeCopySuccess = copyToClipboard(currentCode);
+            const currentLang = document.documentElement.lang || 'vi';
+            
+            if (codeCopySuccess) {
+                showToastMessage(currentLang === 'cn' ? '口令已复制！' : 'Đã sao chép mã!');
+            }
+            
+            // 记录 CTA 点击
+            if (typeof Analytics !== 'undefined') {
+                Analytics.track('cta_click', { 
+                    type: 'zalo_primary', 
+                    position: 'hero',
+                    webview_type: zaloLauncher.detectEnvironment().type,
+                    code_copied: codeCopySuccess
+                });
+            }
+            
+            // 2. 调起 Zalo
+            console.log('[ZaloBtn] Launching Zalo...');
+            setTimeout(() => {
+                console.log('[ZaloBtn] Executing launch()');
+                zaloLauncher.launch();
+            }, codeCopySuccess ? 300 : 0);
+        });
 
-        let codeCountdown = 0;
-        let savedUsername = '', savedPassword = '', savedPhone = '';
+        // ============================================
+        // Copy Zalo Number
+        // ============================================
+        const copyBtn = document.getElementById('copyBtn');
+        const toast = document.getElementById('toast');
+        const zaloNumber = '8618717777125';
 
         function showToast(message) {
             toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 2500);
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
         }
 
-        function getUrlParam(name) {
-            return new URLSearchParams(window.location.search).get(name) || '';
-        }
-
-        function validateUsername(v) { return /^[a-zA-Z0-9]{6,20}$/.test(v); }
-        function validatePhone(v) { return /^\d{9,10}$/.test(v); }
-
-        async function sendPhoneCode() {
-            const phone = regPhone.value.trim().replace(/\D/g, '');
-            if (!validatePhone(phone)) { showToast('手机号长度必须介于 9 和 10 之间'); regPhone.focus(); return; }
-
-            sendCodeBtn.disabled = true;
-            const orig = sendCodeBtn.innerHTML;
-            sendCodeBtn.innerHTML = '<span>发送中...</span>';
-
+        copyBtn.addEventListener('click', async function() {
             try {
-                const res = await fetch(`${API_BASE}/api/sendPhoneCode`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone })
-                });
-                const data = await res.json();
-                if (data.code === 0) {
-                    showToast('验证码已发送，请查收短信');
-                    codeCountdown = 60;
-                    const t = setInterval(() => {
-                        codeCountdown--;
-                        if (codeCountdown > 0) sendCodeBtn.innerHTML = `<span>${codeCountdown}秒</span>`;
-                        else { clearInterval(t); sendCodeBtn.disabled = false; sendCodeBtn.innerHTML = `<span>重试</span>`; }
-                    }, 1000);
-                } else { throw new Error(data.message); }
+                await navigator.clipboard.writeText(zaloNumber);
+                showToast(i18n[currentLang]['toast.copied']);
+                Analytics.track('copy_number', { method: 'button' });
             } catch (err) {
-                sendCodeBtn.disabled = false; sendCodeBtn.innerHTML = orig;
-                showToast(err.message || '网络错误，请重试');
-            }
-        }
-
-        async function submitRegister() {
-            const username = regUsername.value.trim();
-            const password = regPassword.value.trim();
-            const confirm = regConfirm.value.trim();
-            const phone = regPhone.value.trim().replace(/\D/g, '');
-            const code = regCode.value.trim();
-
-            if (!validateUsername(username)) { showToast('用户名仅支持6-20位字母和数字'); regUsername.focus(); return; }
-            if (password.length < 6 || password.length > 20) { showToast('密码仅支持6-20位字母、数字和特殊符号(-_+@#$%^&)'); regPassword.focus(); return; }
-            if (password !== confirm) { showToast('两次输入的密码不一致'); regConfirm.focus(); return; }
-            if (!validatePhone(phone)) { showToast('手机号长度必须介于 9 和 10 之间'); regPhone.focus(); return; }
-            if (code.length !== 6) { showToast('验证码长度为6位'); regCode.focus(); return; }
-
-            registerBtn.disabled = true;
-            const orig = registerBtn.innerHTML;
-            registerBtn.innerHTML = '<span>处理中...</span>';
-
-            try {
-                const res = await fetch(`${API_BASE}/api/regSendCode`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username, password, phone, code,
-                        invitecode: getUrlParam('ref') || '', randstr: '', ticket: ''
-                    })
-                });
-                const data = await res.json();
-                if (data.code === 0) {
-                    savedUsername = data.extra?.username || username;
-                    savedPassword = password;
-                    savedPhone = phone;
-                    document.getElementById('sUsername').textContent = savedUsername;
-                    document.getElementById('sPassword').textContent = savedPassword;
-                    document.getElementById('sPhone').textContent = savedPhone;
-                    registerSection.classList.add('hidden');
-                    successSection.classList.add('active');
-                    document.getElementById('stepsCard').style.display = 'none';
-                    showToast('注册成功！');
-                } else if (data.message.includes('用户名')) { showToast('用户名已存在'); regUsername.focus(); }
-                else if (data.message.includes('手机')) { showToast('手机号已存在'); regPhone.focus(); }
-                else if (data.message.includes('验证码')) { showToast('验证码错误'); regCode.focus(); }
-                else { showToast(data.message || '注册失败'); }
-            } catch (err) {
-                showToast('网络错误，请重试');
-            } finally {
-                registerBtn.disabled = false; registerBtn.innerHTML = orig;
-            }
-        }
-
-        function copyAllInfo() {
-            const text = `账号：${savedUsername}\n密码：${savedPassword}\n手机号：${savedPhone}\n官网：dkl.vn`;
-            copyToClipboard(text);
-            showToast('已复制！建议通过 Zalo 发送给自己备份');
-        }
-
-        function trackEvent(name) {
-            if (typeof Analytics !== 'undefined') Analytics.track(name, { username: savedUsername });
-        }
-
-        // ============================================
-        // Copy Zalo Number (legacy compat)
-        // ============================================
+                const textArea = document.createElement('textarea');
+                textArea.value = zaloNumber;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand('copy');
