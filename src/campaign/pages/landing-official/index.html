@@ -2115,18 +2115,6 @@
         }
 
         // ============================================
-        // Copy Zalo Number (legacy compat)
-        // ============================================
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                showToast(i18n[currentLang]['toast.copied']);
-                Analytics.track('copy_number', { method: 'button_fallback' });
-            }
-        });
-
-        // ============================================
         // Dinosaur Carousel
         // ============================================
         const carousel = {
