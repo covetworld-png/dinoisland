@@ -64,7 +64,7 @@ def sync_page(key: str, manifest: dict):
         print("   请先在 manifest.json 中将 confirmed 设为 true")
         sys.exit(1)
 
-    if page.get("private") and page.get("source"):
+    if page.get("source"):
         source_path = ROOT / page["source"]
         if not source_path.exists():
             print(f"❌ 源路径不存在: {source_path}")
@@ -75,6 +75,15 @@ def sync_page(key: str, manifest: dict):
         if source_path.is_file():
             shutil.copy2(source_path, src_path)
             print(f"✅ 复制文件: {source_path.relative_to(ROOT)} -> {src_path.relative_to(ROOT)}")
+
+            # 应用路径重写
+            path_rewrite = page.get("pathRewrite", {})
+            if path_rewrite:
+                content = src_path.read_text(encoding="utf-8")
+                for old, new in path_rewrite.items():
+                    content = content.replace(old, new)
+                src_path.write_text(content, encoding="utf-8")
+                print(f"   🔄 路径重写: {path_rewrite}")
         else:
             # 目录：先清空再复制
             if src_path.exists():
@@ -86,11 +95,27 @@ def sync_page(key: str, manifest: dict):
             )
             print(f"✅ 复制目录: {source_path.relative_to(ROOT)} -> {src_path.relative_to(ROOT)}")
 
+            # 应用路径重写（文件内容替换）
+            path_rewrite = page.get("pathRewrite", {})
+            if path_rewrite:
+                for f in src_path.rglob("*"):
+                    if f.is_file() and f.suffix in {".html", ".css", ".js", ".md"}:
+                        content = f.read_text(encoding="utf-8")
+                        modified = False
+                        for old, new in path_rewrite.items():
+                            if old in content:
+                                content = content.replace(old, new)
+                                modified = True
+                        if modified:
+                            f.write_text(content, encoding="utf-8")
+                print(f"   🔄 路径重写: {path_rewrite}")
+
             # 清理 src 中不应公开的文档（仅保留 README.md）
-            for f in list(src_path.rglob("*.md")):
-                if f.name != "README.md":
-                    print(f"   🗑 移除私有文档: {f.relative_to(ROOT)}")
-                    f.unlink()
+            if page.get("private"):
+                for f in list(src_path.rglob("*.md")):
+                    if f.name != "README.md":
+                        print(f"   🗑 移除私有文档: {f.relative_to(ROOT)}")
+                        f.unlink()
     else:
         if not src_path.exists():
             print(f"⚠️ 项目 '{key}' 直接在 src 开发，但路径不存在: {src_path}")
