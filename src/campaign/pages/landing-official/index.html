@@ -1219,7 +1219,7 @@
     <!-- Background media: auto-switch image/video by network -->
     <div class="bg-media">
         <img class="bg-image" src="../../assets/official/bg.jpg?v=3" alt="" style="display:none;">
-        <video class="bg-video" src="../../assets/official/bg-video.mp4?v=3" autoplay muted loop playsinline preload="auto" x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" webkit-playsinline style="display:none;"></video>
+        <video class="bg-video" src="../../assets/official/bg-video.mp4?v=3" loop playsinline preload="auto" x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" webkit-playsinline style="display:none;"></video>
     </div>
     <div class="bg-play-wrap">
         <button class="bg-play-btn active" id="bgPlayBtn" onclick="toggleBackgroundMedia()">▶</button>
@@ -2659,9 +2659,10 @@
             }
 
             if (useVideo) {
-                // 桌面端：直接尝试视频
+                // 桌面端：静音自动播放
                 bgImage.style.display = 'none';
                 bgVideo.style.display = 'block';
+                bgVideo.muted = true;
                 bgVideo.play().catch(() => {
                     bgVideo.style.display = 'none';
                     bgImage.style.display = 'block';
