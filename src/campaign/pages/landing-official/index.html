@@ -1172,7 +1172,7 @@
     <!-- Background media: auto-switch image/video by network -->
     <div class="bg-media">
         <img class="bg-image" src="../../assets/official/bg.jpg" alt="" style="display:none;">
-        <video class="bg-video" src="../../assets/official/bg-video.mp4" autoplay muted loop playsinline preload="auto" style="display:none;"></video>
+        <video class="bg-video" src="../../assets/official/bg-video.mp4" autoplay muted loop playsinline preload="auto" x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" webkit-playsinline style="display:none;"></video>
     </div>
 
     <!-- Language Switcher -->
@@ -2554,10 +2554,11 @@
         // Background: auto-switch image/video by network
         // ============================================
         function initBackground() {
+            const isWechat = /MicroMessenger/i.test(navigator.userAgent);
             const conn = navigator.connection;
-            let useVideo = true;
+            let useVideo = !isWechat;
 
-            if (conn) {
+            if (useVideo && conn) {
                 if (conn.saveData) useVideo = false;
                 else if (conn.type === 'cellular') useVideo = false;
                 else if (['2g', 'slow-2g', '3g'].includes(conn.effectiveType)) useVideo = false;
@@ -2567,31 +2568,32 @@
             const bgVideo = document.querySelector('.bg-video');
             if (!bgImage || !bgVideo) return;
 
+            // 默认先显示图片，视频播放成功后再切换（防止黑屏）
+            bgImage.style.display = 'block';
+            bgVideo.style.display = 'none';
+
             if (useVideo) {
-                bgImage.style.display = 'none';
                 bgVideo.style.display = 'block';
-                bgVideo.play().catch((err) => {
-                    console.warn('[BG] autoplay blocked:', err.name, err.message);
-                    // 尝试 canplay 后再播放
-                    const onCanPlay = () => {
-                        bgVideo.play().catch(() => {});
-                        bgVideo.removeEventListener('canplay', onCanPlay);
-                    };
-                    bgVideo.addEventListener('canplay', onCanPlay);
-                    // 用户首次交互后再尝试播放
+                bgVideo.play().then(() => {
+                    bgImage.style.display = 'none';
+                    console.log('[BG] video playing');
+                }).catch((err) => {
+                    console.warn('[BG] autoplay blocked:', err.name);
+                    bgVideo.style.display = 'none';
+                    bgImage.style.display = 'block';
+                    // 用户首次交互后再尝试一次
                     const tryOnInteraction = () => {
+                        bgVideo.style.display = 'block';
                         bgVideo.play().then(() => {
-                            document.removeEventListener('touchstart', tryOnInteraction);
-                            document.removeEventListener('click', tryOnInteraction);
-                        }).catch(() => {});
+                            bgImage.style.display = 'none';
+                        }).catch(() => {
+                            bgVideo.style.display = 'none';
+                            bgImage.style.display = 'block';
+                        });
                     };
                     document.addEventListener('touchstart', tryOnInteraction, { once: true });
                     document.addEventListener('click', tryOnInteraction, { once: true });
                 });
-            } else {
-                bgVideo.style.display = 'none';
-                bgVideo.pause();
-                bgImage.style.display = 'block';
             }
         }
 
