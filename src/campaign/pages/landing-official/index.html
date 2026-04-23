@@ -1226,7 +1226,7 @@
                         <span class="account-value" id="sPhone">-</span>
                     </div>
                     <div class="account-row">
-                        <span class="account-label">官网</span>
+                        <span class="account-label" data-i18n="reg.officialLabel">PC端官网</span>
                         <span class="account-value">dkl.vn</span>
                     </div>
                 </div>
@@ -2292,7 +2292,7 @@
         }
 
         function copyAllInfo() {
-            const text = `账号：${savedUsername}\n密码：${savedPassword}\n手机号：${savedPhone}\n官网：dkl.vn`;
+            const text = `${t('reg.accountLabel')}：${savedUsername}\n${t('reg.pwdLabel')}：${savedPassword}\n${t('reg.phoneLabel2')}：${savedPhone}\n${t('reg.officialLabel')}：dkl.vn`;
             copyToClipboard(text);
             showToast(t('reg.copySuccess'));
         }
