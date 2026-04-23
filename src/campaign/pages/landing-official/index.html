@@ -2343,32 +2343,42 @@
 
             playIntro() {
                 clearInterval(this.interval);
-                // 快速滑动，短 transition 营造滚动感
-                this.slides.forEach(slide => {
-                    slide.style.transition = 'transform 0.18s linear';
-                });
-                let pos = this.slides.length - 1;
-                const fast = setInterval(() => {
-                    this.goToSlide(pos);
-                    pos--;
-                    if (pos === 0) {
-                        clearInterval(fast);
-                        this.decelerateToFirst();
-                    }
-                }, 200);
-            },
+                const total = this.slides.length;
+                const duration = 2200;
+                const startTime = performance.now();
+                const startPos = total - 1;
+                const endPos = 0;
+                const easeOutQuart = t => 1 - Math.pow(1 - t, 4);
 
-            decelerateToFirst() {
-                this.slides.forEach(slide => {
-                    slide.style.transition = 'transform 1.2s cubic-bezier(0.25, 1, 0.5, 1)';
-                });
-                this.goToSlide(0);
-                setTimeout(() => {
-                    this.slides.forEach(slide => {
-                        slide.style.transition = 'transform 0.5s ease';
+                const animate = (now) => {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = easeOutQuart(progress);
+                    const currentPos = startPos - (startPos - endPos) * eased;
+
+                    this.slides.forEach((slide, i) => {
+                        slide.style.transition = 'none';
+                        slide.style.transform = `translateX(${(i - currentPos) * 100}%)`;
                     });
-                    this.startAutoPlay();
-                }, 1300);
+
+                    const activeIndex = Math.min(Math.round(currentPos), total - 1);
+                    this.dots.forEach((dot, i) => {
+                        dot.classList.toggle('active', i === activeIndex);
+                    });
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        this.currentIndex = 0;
+                        this.slides.forEach(slide => {
+                            slide.style.transition = 'transform 0.5s ease';
+                        });
+                        this.updateSlidePosition();
+                        this.startAutoPlay();
+                    }
+                };
+
+                requestAnimationFrame(animate);
             },
 
             bindEvents() {
