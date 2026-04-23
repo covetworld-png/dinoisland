@@ -72,33 +72,41 @@
             -webkit-transform: translateZ(0);
         }
 
-        .bg-play-btn {
+        .bg-play-wrap {
             position: fixed;
             top: 56px;
             left: 16px;
             z-index: 102;
+            display: flex;
+            gap: 8px;
             background: var(--jungle-800);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(74, 154, 138, 0.2);
             border-radius: 20px;
-            padding: 6px 14px;
-            color: var(--gold);
+            padding: 4px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .bg-play-btn {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
             font-size: 13px;
             font-weight: 600;
-            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            display: none;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
             transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            display: none;
             line-height: 1;
         }
 
-        .bg-play-btn:hover {
-            border-color: var(--gold);
-            background: rgba(255, 215, 0, 0.1);
+        .bg-play-btn.active {
+            display: block;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: var(--jungle-900);
         }
 
         .bg-play-btn.active {
@@ -1213,7 +1221,9 @@
         <img class="bg-image" src="../../assets/official/bg.jpg?v=3" alt="" style="display:none;">
         <video class="bg-video" src="../../assets/official/bg-video.mp4?v=3" autoplay muted loop playsinline preload="auto" x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" webkit-playsinline style="display:none;"></video>
     </div>
-    <button class="bg-play-btn" id="bgPlayBtn" onclick="playBackgroundVideo()" data-i18n="btn.play">Play</button>
+    <div class="bg-play-wrap">
+        <button class="bg-play-btn active" id="bgPlayBtn" onclick="playBackgroundVideo()">Play</button>
+    </div>
 
     <!-- Language Switcher -->
     <div class="lang-switcher">
@@ -2601,7 +2611,7 @@
             bgImage.style.display = 'none';
             bgVideo.style.display = 'block';
             bgVideo.play().then(() => {
-                if (playBtn) playBtn.classList.add('hidden');
+                if (playBtn) playBtn.classList.remove('active');
             }).catch(() => {
                 bgVideo.style.display = 'none';
                 bgImage.style.display = 'block';
@@ -2632,7 +2642,6 @@
                     bgVideo.style.display = 'none';
                     if (playBtn) {
                         playBtn.classList.add('active');
-                        playBtn.classList.remove('hidden');
                     }
                 } else {
                     // 桌面端：直接尝试视频，成功则隐藏按钮
@@ -2640,7 +2649,6 @@
                     bgVideo.style.display = 'block';
                     bgVideo.play().then(() => {
                         if (playBtn) {
-                            playBtn.classList.add('hidden');
                             playBtn.classList.remove('active');
                         }
                     }).catch(() => {
@@ -2648,7 +2656,6 @@
                         bgImage.style.display = 'block';
                         if (playBtn) {
                             playBtn.classList.add('active');
-                            playBtn.classList.remove('hidden');
                         }
                     });
                 }
@@ -2656,7 +2663,6 @@
                 bgImage.style.display = 'block';
                 bgVideo.style.display = 'none';
                 if (playBtn) {
-                    playBtn.classList.add('hidden');
                     playBtn.classList.remove('active');
                 }
             }
