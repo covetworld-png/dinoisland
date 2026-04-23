@@ -146,8 +146,14 @@ def sync_page(key: str, manifest: dict):
         to_path = ROOT / item["to"]
         if from_path.exists():
             to_path.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(from_path, to_path)
-            print(f"   📥 同步资源: {from_path.relative_to(ROOT)} -> {to_path.relative_to(ROOT)}")
+            if from_path.is_dir():
+                if to_path.exists():
+                    shutil.rmtree(to_path)
+                shutil.copytree(from_path, to_path, ignore=lambda d, names: [n for n in names if skip_file(n)])
+                print(f"   📥 同步资源目录: {from_path.relative_to(ROOT)} -> {to_path.relative_to(ROOT)}")
+            else:
+                shutil.copy2(from_path, to_path)
+                print(f"   📥 同步资源: {from_path.relative_to(ROOT)} -> {to_path.relative_to(ROOT)}")
         else:
             print(f"   ⚠️ 源文件不存在，跳过: {from_path.relative_to(ROOT)}")
 
