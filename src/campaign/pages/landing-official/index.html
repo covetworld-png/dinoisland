@@ -2574,27 +2574,28 @@
             bgVideo.style.display = 'none';
 
             if (useVideo) {
-                bgVideo.style.display = 'block';
-                bgVideo.play().then(() => {
-                    bgImage.style.display = 'none';
-                    console.log('[BG] video playing');
-                }).catch((err) => {
-                    console.warn('[BG] autoplay blocked:', err.name);
-                    bgVideo.style.display = 'none';
-                    bgImage.style.display = 'block';
-                    // 用户首次交互后再尝试一次
-                    const tryOnInteraction = () => {
-                        bgVideo.style.display = 'block';
-                        bgVideo.play().then(() => {
-                            bgImage.style.display = 'none';
-                        }).catch(() => {
-                            bgVideo.style.display = 'none';
+                const tryPlay = () => {
+                    bgVideo.style.display = 'block';
+                    bgVideo.play().then(() => {
+                        bgImage.style.display = 'none';
+                        console.log('[BG] video playing');
+                    }).catch((err) => {
+                        console.warn('[BG] play failed:', err.name);
+                        bgVideo.style.display = 'none';
+                        bgImage.style.display = 'block';
+                    });
+                };
+
+                if (bgVideo.readyState >= 3) {
+                    tryPlay();
+                } else {
+                    bgVideo.addEventListener('canplay', tryPlay, { once: true });
+                    setTimeout(() => {
+                        if (bgVideo.style.display === 'none') {
                             bgImage.style.display = 'block';
-                        });
-                    };
-                    document.addEventListener('touchstart', tryOnInteraction, { once: true });
-                    document.addEventListener('click', tryOnInteraction, { once: true });
-                });
+                        }
+                    }, 3000);
+                }
             }
         }
 
