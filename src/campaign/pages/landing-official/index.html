@@ -76,35 +76,29 @@
             position: fixed;
             top: 80px;
             left: 16px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            z-index: 102;
             background: var(--jungle-800);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--gold);
+            border: 1px solid rgba(74, 154, 138, 0.2);
+            border-radius: 20px;
+            padding: 6px 14px;
             color: var(--gold);
-            font-size: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
             display: none;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 102;
-            transition: all 0.3s ease;
-            padding: 0;
-            line-height: 1;
+            gap: 6px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            animation: pulseBtn 2s ease-in-out infinite;
-        }
-
-        @keyframes pulseBtn {
-            0%, 100% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
-            50% { box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3); }
+            transition: all 0.2s ease;
+            line-height: 1;
         }
 
         .bg-play-btn:hover {
-            background: rgba(255, 215, 0, 0.15);
-            transform: scale(1.1);
+            border-color: var(--gold);
+            background: rgba(255, 215, 0, 0.1);
         }
 
         .bg-play-btn.active {
@@ -1219,7 +1213,7 @@
         <img class="bg-image" src="../../assets/official/bg.jpg?v=3" alt="" style="display:none;">
         <video class="bg-video" src="../../assets/official/bg-video.mp4?v=3" autoplay muted loop playsinline preload="auto" x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" webkit-playsinline style="display:none;"></video>
     </div>
-    <button class="bg-play-btn" id="bgPlayBtn" onclick="playBackgroundVideo()" aria-label="Play video">▶</button>
+    <button class="bg-play-btn" id="bgPlayBtn" onclick="playBackgroundVideo()" data-i18n="btn.play">Play</button>
 
     <!-- Language Switcher -->
     <div class="lang-switcher">

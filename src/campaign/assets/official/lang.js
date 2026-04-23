@@ -102,7 +102,8 @@ const i18n = {
         'dino.sucho': 'Galli',
         'dino.acro': 'Acro',
         'dino.herrera': 'Herrerasaurus',
-        'dino.ptero': 'Khủng Long Cánh'
+        'dino.ptero': 'Khủng Long Cánh',
+        'btn.play': 'Phát'
     },
     cn: {
         'page.title': '恐龙岛 - PC端游戏福利',
@@ -207,7 +208,8 @@ const i18n = {
         'dino.sucho': '踢脚鸡',
         'dino.acro': '高脊龙',
         'dino.herrera': '埃雷拉龙',
-        'dino.ptero': '翼龙'
+        'dino.ptero': '翼龙',
+        'btn.play': '播放'
     }
 };
 
