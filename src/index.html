@@ -463,8 +463,11 @@
       btnLocal.addEventListener('click', () => setMode('local'));
       btnGh.addEventListener('click', () => setMode('gh'));
 
-      // 默认根据当前协议自动判断
-      setMode(location.protocol === 'file:' ? 'local' : 'gh');
+      // 默认根据当前环境自动判断：本地文件 / localhost / 127.0.0.1 均视为本地
+      const isLocalEnv = location.protocol === 'file:' ||
+                         location.hostname === 'localhost' ||
+                         location.hostname === '127.0.0.1';
+      setMode(isLocalEnv ? 'local' : 'gh');
     })();
   </script>
 </body>
