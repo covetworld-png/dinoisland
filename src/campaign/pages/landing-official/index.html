@@ -1172,7 +1172,7 @@
     <!-- Background media: auto-switch image/video by network -->
     <div class="bg-media">
         <img class="bg-image" src="../../assets/official/bg.jpg" alt="" style="display:none;">
-        <video class="bg-video" src="../../assets/official/bg-video.mp4" muted loop playsinline style="display:none;"></video>
+        <video class="bg-video" src="../../assets/official/bg-video.mp4" autoplay muted loop playsinline preload="auto" style="display:none;"></video>
     </div>
 
     <!-- Language Switcher -->
@@ -2570,9 +2570,23 @@
             if (useVideo) {
                 bgImage.style.display = 'none';
                 bgVideo.style.display = 'block';
-                bgVideo.play().catch(() => {
-                    bgVideo.style.display = 'none';
-                    bgImage.style.display = 'block';
+                bgVideo.play().catch((err) => {
+                    console.warn('[BG] autoplay blocked:', err.name, err.message);
+                    // 尝试 canplay 后再播放
+                    const onCanPlay = () => {
+                        bgVideo.play().catch(() => {});
+                        bgVideo.removeEventListener('canplay', onCanPlay);
+                    };
+                    bgVideo.addEventListener('canplay', onCanPlay);
+                    // 用户首次交互后再尝试播放
+                    const tryOnInteraction = () => {
+                        bgVideo.play().then(() => {
+                            document.removeEventListener('touchstart', tryOnInteraction);
+                            document.removeEventListener('click', tryOnInteraction);
+                        }).catch(() => {});
+                    };
+                    document.addEventListener('touchstart', tryOnInteraction, { once: true });
+                    document.addEventListener('click', tryOnInteraction, { once: true });
                 });
             } else {
                 bgVideo.style.display = 'none';
