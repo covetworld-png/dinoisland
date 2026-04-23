@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主播数据多维度分析图表</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 32px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header p { margin: 10px 0 0 0; opacity: 0.9; }
+        .card {
+            background: white; border-radius: 12px; padding: 20px;
+            margin-bottom: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .card-title {
+            font-size: 18px; font-weight: bold; color: #333; margin-bottom: 15px;
+            display: flex; align-items: center;
+        }
+        .card-title::before {
+            content: ''; display: inline-block; width: 4px; height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-right: 10px; border-radius: 2px;
+        }
+        .chart-row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .chart-container { flex: 1; min-width: 400px; height: 350px; position: relative; }
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; margin-bottom: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; padding: 20px; border-radius: 10px; text-align: center;
+        }
+        .stat-value { font-size: 28px; font-weight: bold; }
+        .stat-label { font-size: 13px; opacity: 0.9; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; }
+        .negative { color: #e74c3c; font-weight: bold; }
+        .positive { color: #27ae60; font-weight: bold; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab {
+            padding: 10px 20px; background: white; border-radius: 8px;
+            cursor: pointer; font-weight: 500;
+        }
+        .tab.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .comparison-box { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .comparison-item {
+            flex: 1; min-width: 150px; padding: 15px; background: #f8f9fa;
+            border-radius: 8px; text-align: center;
+        }
+        .comparison-label { font-size: 12px; color: #666; margin-bottom: 5px; }
+        .comparison-value { font-size: 20px; font-weight: bold; color: #333; }
+        .warning {
+            background: #fff3cd; border-left: 4px solid #ffc107;
+            padding: 10px 15px; margin: 10px 0; border-radius: 4px;
+        }
+        .info {
+            background: #d1ecf1; border-left: 4px solid #17a2b8;
+            padding: 10px 15px; margin: 10px 0; border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 主播数据多维度分析图表</h1>
+            <p>数据更新时间: 2026-04-19 | 分析周期: 2025-11-21 至 2026-04-19</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">¥7,358</div>
+                <div class="stat-label">近一周总收入</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">119.0万</div>
+                <div class="stat-label">近一周总观看</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">+7.4%</div>
+                <div class="stat-label">观看周环比</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">-7.7%</div>
+                <div class="stat-label">收入周环比</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('overview')">📊 总盘子</div>
+            <div class="tab" onclick="showTab('income')">💰 收入分析</div>
+            <div class="tab" onclick="showTab('traffic')">👥 流量分析</div>
+            <div class="tab" onclick="showTab('engagement')">💬 互动分析</div>
+            <div class="tab" onclick="showTab('duration')">⏱️ 时长分析</div>
+            <div class="tab" onclick="showTab('new')">⭐ 新主播</div>
+            <div class="tab" onclick="showTab('double')">🎭 双场对比</div>
+        </div>
+
+        <div id="overview" class="tab-content active">
+            <div class="card">
+                <div class="card-title">总观看次数趋势 (含7日移动均线)</div>
+                <div class="chart-container"><canvas id="totalViewsChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">总收入趋势 (含7日移动均线)</div>
+                <div class="chart-container"><canvas id="totalIncomeChart"></canvas></div>
+                <p style="margin-top:15px;color:#666">
+                    <strong>关键发现：</strong>4/13-4/19 vs 4/6-4/12，
+                    总观看次数增长<strong>+7.4%</strong>，
+                    总收入下降<strong>-7.7%</strong>。
+                </p>
+            </div>
+            <div class="card">
+                <div class="card-title">主播占比（4/13-4/19）</div>
+                <div class="chart-row">
+                    <div class="chart-container"><canvas id="pieViewsChart"></canvas></div>
+                    <div class="chart-container"><canvas id="pieIncomeChart"></canvas></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">主播贡献堆积图（近10天）</div>
+                <div class="chart-row">
+                    <div class="chart-container"><canvas id="stackViewsChart"></canvas></div>
+                    <div class="chart-container"><canvas id="stackIncomeChart"></canvas></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">核心主播 vs 新主播 收入占比</div>
+                <div class="chart-container"><canvas id="incomeShareChart"></canvas></div>
+            </div>
+        </div>
+
+        <div id="income" class="tab-content">
+            <div class="card">
+                <div class="card-title">收入趋势对比 (30天)</div>
+                <div class="chart-container"><canvas id="incomeChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">周对周收入对比 (04/06-04/12 vs 04/13-04/19)</div>
+                <table>
+                    <tr><th>主播</th><th>上周</th><th>本周</th><th>变化额</th><th>变化率</th><th>趋势</th></tr>
+                    
+            <tr><td><strong>阿贤</strong></td><td>¥3411.15</td><td>¥3968.5</td>
+            <td class="positive">+557.3</td><td class="positive">+16.3%</td><td>↑ 增长</td></tr>
+        
+            <tr><td><strong>MYMY</strong></td><td>¥3443.74</td><td>¥2292.37</td>
+            <td class="negative">-1151.4</td><td class="negative">-33.4%</td><td>↓ 下滑</td></tr>
+        
+            <tr><td><strong>志青</strong></td><td>¥213.36</td><td>¥375.41</td>
+            <td class="positive">+162.1</td><td class="positive">+76.0%</td><td>↑ 增长</td></tr>
+        
+            <tr><td><strong>阿园</strong></td><td>¥391.08</td><td>¥357.14</td>
+            <td class="negative">-33.9</td><td class="negative">-8.7%</td><td>→ 稳定</td></tr>
+        
+            <tr><td><strong>Pink</strong></td><td>¥214.23</td><td>¥193.47</td>
+            <td class="negative">-20.8</td><td class="negative">-9.7%</td><td>→ 稳定</td></tr>
+        
+            <tr><td><strong>peo</strong></td><td>¥116.82</td><td>¥71.91</td>
+            <td class="negative">-44.9</td><td class="negative">-38.4%</td><td>↓ 下滑</td></tr>
+        
+            <tr><td><strong>Vanie</strong></td><td>¥183.52</td><td>¥99.7</td>
+            <td class="negative">-83.8</td><td class="negative">-45.7%</td><td>↓ 下滑</td></tr>
+        
+                </table>
+            </div>
+        </div>
+
+        <div id="traffic" class="tab-content">
+            <div class="card">
+                <div class="card-title">尖峰在线趋势 (30天)</div>
+                <div class="chart-container"><canvas id="peakChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">涨粉趋势 (30天)</div>
+                <div class="chart-container"><canvas id="followersChart"></canvas></div>
+            </div>
+        </div>
+
+        <div id="engagement" class="tab-content">
+            <div class="card">
+                <div class="card-title">互动量趋势 (点赞+评论, 30天)</div>
+                <div class="chart-container"><canvas id="interactionChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">点赞趋势 (30天)</div>
+                <div class="chart-container"><canvas id="likesChart"></canvas></div>
+            </div>
+        </div>
+
+        <div id="duration" class="tab-content">
+            <div class="card">
+                <div class="card-title">粉丝平均观看时长 (30天)</div>
+                <div class="chart-container"><canvas id="fanDurationChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">平均观看时长 (30天)</div>
+                <div class="chart-container"><canvas id="avgDurationChart"></canvas></div>
+            </div>
+        </div>
+
+        <div id="new" class="tab-content">
+            <div class="card">
+                <div class="card-title">peo 收入趋势</div>
+                <div class="chart-container"><canvas id="peoChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Vanie 收入趋势</div>
+                <div class="chart-container"><canvas id="vanieChart"></canvas></div>
+            </div>
+        </div>
+
+        <div id="double" class="tab-content">
+            <div class="card">
+                <div class="card-title">MYMY 双场收入对比 (13点 vs 18点)</div>
+                <div class="chart-container"><canvas id="mymyDoubleChart"></canvas></div>
+                <div class="comparison-box">
+                    <div class="comparison-item">
+                        <div class="comparison-label">下午场平均收入</div>
+                        <div class="comparison-value">¥165</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="comparison-label">晚间场平均收入</div>
+                        <div class="comparisonValue">¥238</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">MYMY 双场尖峰在线对比 (13点 vs 18点)</div>
+                <div class="chart-container"><canvas id="mymyPeakChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">阿贤heni 双场收入对比 (13点 vs 18点)</div>
+                <div class="chart-container"><canvas id="heniDoubleChart"></canvas></div>
+                <div class="comparison-box">
+                    <div class="comparison-item">
+                        <div class="comparison-label">下午场平均收入</div>
+                        <div class="comparison-value">¥273</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="comparison-label">晚间场平均收入</div>
+                        <div class="comparison-value">¥170</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">阿贤heni 双场尖峰在线对比 (13点 vs 18点)</div>
+                <div class="chart-container"><canvas id="heniPeakChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const labels30 = ["2026-03-21", "2026-03-22", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-28", "2026-03-29", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-04", "2026-04-05", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-11", "2026-04-12", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-18", "2026-04-19"];
+        const labels10 = ["2026-04-10", "2026-04-11", "2026-04-12", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-18", "2026-04-19"];
+
+        const totalViewsData = [216843, 219846, 57050, 230732, 249697, 175149, 201797, 148535, 255202, 177192, 205801, 553004, 85580, 111587, 195047, 202395, 150241, 174888, 155983, 161662, 137468, 144514, 183822, 155823, 154370, 180013, 129204, 167715, 194566, 208561];
+        const totalViewsMA = [200818.57, 190592.86, 185721.0, 187597.71, 190324.71, 182437.86, 193016.29, 183258.0, 188308.86, 205472.0, 201910.43, 245240.0, 232444.43, 219557.29, 226201.86, 218658.0, 214807.86, 210391.71, 153674.43, 164543.29, 168240.57, 161021.57, 158368.29, 159165.71, 156234.57, 159667.43, 155030.57, 159351.57, 166501.86, 170036.0];
+        const totalIncomeData = [766.53, 716.93, 268.44, 1101.21, 821.07, 729.62, 620.01, 709.95, 2385.29, 506.15, 545.48, 558.38, 434.5, 437.03, 686.62, 702.31, 894.78, 838.06, 728.84, 3318.53, 618.21, 604.06, 971.42, 488.85, 784.14, 1031.13, 1586.96, 1409.23, 1156.25, 901.94];
+        const totalIncomeMA = [903.31, 815.78, 719.09, 763.96, 724.21, 711.75, 717.69, 709.6, 947.94, 981.9, 902.51, 864.98, 822.82, 796.68, 793.35, 552.92, 608.44, 650.24, 674.59, 1086.6, 1112.48, 1100.68, 1139.13, 1081.14, 1073.44, 1116.62, 869.25, 982.26, 1061.14, 1051.21];
+
+        const peoLabels = ["4/2", "4/3", "4/4", "4/5", "4/6", "4/8", "4/9", "4/10", "4/11", "4/12", "4/13", "4/15", "4/16", "4/17", "4/18", "4/19"];
+        const peoIncomeData = [17.5, 9.16, 8.99, 17.3, 11.93, 14.62, 12.01, 25.76, 42.17, 10.33, 16.94, 6.47, 19.6, 16.24, 4.12, 8.54];
+        const vanieLabels = ["4/3", "4/4", "4/5", "4/6", "4/7", "4/9", "4/10", "4/11", "4/12", "4/13", "4/14", "4/15", "4/16", "4/17", "4/18", "4/19"];
+        const vanieIncomeData = [29.23, 7.56, 21.92, 9.16, 31.95, 43.62, 24.98, 27.36, 46.45, 27.86, 19.57, 7.64, 17.89, 8.79, 10.11, 7.84];
+
+        const mymyDates = ["01/09", "02/26", "02/28", "03/01", "03/02", "03/03", "03/04", "03/07", "03/08", "03/09", "03/10", "03/11", "03/12", "03/14", "03/15", "03/16", "03/17", "03/23", "03/24", "03/25", "03/26", "03/28", "03/29", "03/30", "03/31", "04/01", "04/02", "04/04", "04/05", "04/06", "04/07", "04/08", "04/09", "04/11", "04/12", "04/13", "04/14", "04/15", "04/16", "04/18", "04/19"];
+        const mymyAfternoonIncome = [78.71, 151.65, 87.25, 109.68, 89.91, 191.24, 133.67, 272.86, 211.71, 158.31, 385.56, 148.12, 176.62, 296.58, 307.41, 370.41, 205.13, 107.46, 87.05, 95.79, 213.14, 387.55, 99.37, 140.25, 74.59, 147.39, 287.64, 83.02, 94.25, 149.38, 172.73, 87.33, 184.1, 96.99, 76.52, 134.37, 70.34, 165.48, 168.5, 60.79, 208.49];
+        const mymyEveningIncome = [0, 61.52, 384.13, 202.08, 0, 103.43, 484.6, 189.25, 241.47, 463.96, 407.93, 270.73, 61.96, 505.68, 163.32, 439.71, 140.0, 103.46, 188.27, 181.8, 80.16, 158.82, 78.54, 91.56, 130.59, 85.6, 91.42, 201.63, 83.36, 165.45, 73.33, 346.16, 1896.08, 114.13, 81.54, 50.4, 178.67, 143.7, 728.87, 316.32, 66.44];
+        const mymyAfternoonPeak = [2794, 3872, 3788, 2990, 3152, 2978, 3297, 3445, 3789, 2692, 2940, 2994, 3676, 3348, 3750, 3034, 3030, 2351, 2542, 2983, 2876, 2450, 3334, 3067, 2951, 2562, 1917, 3061, 2916, 2833, 2997, 2750, 3201, 2703, 3326, 3015, 2633, 3365, 3506, 3681, 3478];
+        const mymyEveningPeak = [0, 4636, 4589, 3439, 0, 3508, 3305, 4675, 4118, 4678, 4255, 4400, 5464, 3978, 5520, 5643, 4151, 3079, 2892, 3544, 3217, 3404, 3717, 2572, 3108, 3498, 3338, 3953, 4524, 3740, 2841, 2959, 4988, 3308, 3102, 3780, 4392, 4703, 4363, 3579, 4371];
+
+        const heniDates = ["12/25", "12/26", "12/30", "12/31", "01/02", "01/03", "01/04", "01/06", "01/07", "01/08", "01/20", "01/21", "01/22", "01/23", "01/24", "01/25", "01/27", "01/28", "01/29", "01/30", "01/31", "02/01", "02/03", "02/04", "02/05", "02/06", "02/07", "02/08", "02/10", "02/11", "02/12", "02/13", "02/15", "02/19", "02/22", "02/23", "02/24", "02/25", "02/26", "02/27", "02/28", "03/01", "03/03", "03/04", "03/05", "03/06", "03/08", "03/10", "03/11", "03/12", "03/13", "03/14", "03/15", "03/17", "03/18", "03/19", "03/20", "03/21", "03/22", "03/24", "03/25", "03/26", "03/27", "03/28", "03/29", "03/30", "03/31", "04/01", "04/03", "04/04", "04/05", "04/06", "04/07", "04/08", "04/09", "04/10", "04/12", "04/13", "04/14", "04/15", "04/16", "04/17", "04/18", "04/19"];
+        const heniAfternoonIncome = [161.76, 48.52, 254.52, 128.58, 35.76, 192.7, 73.89, 56.14, 64.65, 173.52, 467.68, 137.59, 139.97, 208.35, 224.76, 103.94, 110.74, 147.17, 181.55, 301.42, 154.34, 121.66, 218.99, 244.08, 69.69, 351.62, 129.67, 307.02, 733.52, 414.09, 232.37, 238.34, 0, 0, 593.12, 0, 452.51, 179.09, 144.9, 166.38, 433.1, 496.89, 467.6, 711.2, 775.01, 224.53, 398.02, 252.42, 155.57, 191.32, 167.3, 204.2, 207.96, 164.14, 510.89, 181.24, 304.28, 238.59, 280.0, 506.44, 222.21, 282.88, 201.07, 114.02, 1857.91, 99.18, 183.79, 147.31, 164.0, 115.75, 247.07, 377.89, 200.0, 91.17, 1113.81, 255.22, 387.77, 144.62, 191.74, 317.63, 509.8, 262.75, 440.13, 196.48];
+        const heniEveningIncome = [0, 0, 0, 34.3, 116.09, 33.77, 59.28, 69.5, 110.66, 81.28, 95.09, 351.37, 853.58, 392.11, 386.85, 0.0, 249.9, 162.46, 0, 113.6, 129.16, 56.95, 71.51, 143.84, 83.19, 97.66, 114.91, 150.36, 107.35, 266.76, 664.1, 306.18, 468.97, 324.83, 299.15, 416.19, 153.78, 135.83, 156.16, 339.95, 252.62, 106.85, 260.65, 236.4, 324.6, 878.47, 389.98, 317.27, 196.59, 342.61, 121.24, 395.44, 466.09, 175.7, 149.02, 176.48, 146.38, 134.88, 133.7, 189.22, 142.74, 141.18, 336.98, 0, 269.39, 126.64, 105.64, 38.75, 118.55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        const heniAfternoonPeak = [2235, 2627, 2894, 3913, 4725, 5019, 7442, 6219, 9615, 9309, 12100, 12700, 13500, 12700, 13600, 14100, 12000, 11600, 12600, 12500, 14600, 13000, 13800, 14300, 13100, 13800, 14200, 13200, 13300, 13400, 15200, 15900, 0, 0, 10000, 0, 9894, 11600, 10100, 10400, 10900, 11500, 10300, 9518, 10100, 9106, 12000, 8853, 8820, 9345, 8453, 9150, 9569, 9839, 9433, 11100, 10900, 9675, 11300, 9242, 11300, 10800, 10700, 10200, 14300, 10700, 8445, 7432, 6051, 5687, 7011, 5732, 5300, 6063, 2282, 5400, 6219, 5832, 5897, 6293, 1979, 7298, 7479, 8851];
+        const heniEveningPeak = [0, 0, 0, 5055, 5130, 5126, 7323, 11300, 11700, 10900, 15100, 17200, 16000, 15200, 15600, 0, 16500, 16100, 0, 18400, 14700, 15200, 16700, 18900, 17500, 16000, 14600, 14800, 9636, 15100, 15100, 15900, 10500, 7378, 10300, 10900, 12900, 12100, 13800, 11900, 12400, 9330, 12300, 10100, 12600, 12800, 11500, 11300, 11100, 11900, 11000, 11000, 11400, 12900, 12600, 14500, 10800, 12900, 11200, 14600, 13900, 13600, 12500, 0, 15200, 12300, 8577, 8993, 6632, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        const pieLabels = ["阿贤", "MYMY", "志青", "阿园", "Pink", "peo", "Vanie"];
+        const pieViewsData = [548282, 261535, 127864, 79402, 82447, 30005, 60717];
+        const pieIncomeData = [3968.5, 2292.37, 375.41, 357.14, 193.47, 71.91, 99.7];
+        const stackLabels = ["2026-04-10", "2026-04-11", "2026-04-12", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-18", "2026-04-19"];
+        const stackViewsData = {
+            '阿贤heni': [72328, 52201, 88884, 79678, 75366, 73650, 29103, 94892, 94429, 101164],
+            'MYMY': [0, 37413, 44366, 39532, 43903, 45052, 50934, 0, 40884, 41230],
+            '志青Ricon': [24140, 0, 0, 0, 0, 27082, 22017, 22657, 24851, 31257],
+            '阿园Chua': [13349, 21366, 18622, 16027, 14881, 13088, 0, 11285, 11496, 12625],
+            'Pink': [11480, 10213, 12191, 0, 10010, 12020, 13939, 23034, 11267, 12177],
+            'peo': [5860, 7928, 6707, 8624, 0, 4710, 5613, 4705, 3542, 2811],
+            'Vanie': [10311, 15393, 13052, 11962, 10210, 4411, 7598, 11142, 8097, 7297]
+        };
+        const stackIncomeData = {
+            '阿贤heni': [371.5, 214.51, 623.75, 219.13, 436.29, 580.47, 509.8, 1251.65, 667.1, 304.06],
+            'MYMY': [0, 211.12, 158.06, 184.77, 249.01, 309.18, 897.37, 0, 377.11, 274.93],
+            '志青Ricon': [76.89, 0, 0, 0, 0, 54.35, 106.18, 34.08, 54.66, 126.14],
+            '阿园Chua': [88.62, 58.02, 60.9, 40.15, 43.26, 47.88, 0, 48.19, 35.45, 142.21],
+            'Pink': [30.46, 50.88, 71.93, 0, 36.01, 25.14, 36.12, 50.28, 7.7, 38.22],
+            'peo': [25.76, 42.17, 10.33, 16.94, 0, 6.47, 19.6, 16.24, 4.12, 8.54],
+            'Vanie': [24.98, 27.36, 46.45, 27.86, 19.57, 7.64, 17.89, 8.79, 10.11, 7.84]
+        };
+
+        
+        const 阿贤heni_income = [373.47, 413.7, 0, 695.66, 364.95, 424.06, 538.05, 114.02, 2127.3, 225.82, 289.43, 186.06, 0, 282.55, 231.17, 344.45, 514.03, 406.47, 167.08, 1113.81, 371.5, 214.51, 623.75, 219.13, 436.29, 580.47, 509.8, 1251.65, 667.1, 304.06];
+        const 阿贤heni_peak = [12900, 11300, 0, 14600, 13900, 13600, 12500, 10200, 15200, 12300, 8577, 8993, 0, 6632, 6431, 7011, 6859, 6000, 6269, 2282, 5951, 6277, 6219, 6313, 5897, 7638, 1979, 7304, 8284, 9187];
+        const 阿贤heni_followers = [171, 201, 0, 174, 213, 204, 193, 86, 232, 165, 109, 147, 0, 87, 66, 80, 94, 67, 65, 54, 79, 118, 168, 143, 114, 82, 49, 92, 81, 98];
+        const 阿贤heni_likes = [3700000, 3500000, 0, 4600000, 3700000, 3100000, 3800000, 1200000, 7600000, 3800000, 2300000, 2300000, 0, 2100000, 1867400, 2700000, 2200000, 2397200, 2400000, 1200000, 2300000, 1700000, 2800000, 2800000, 2300000, 2700000, 845900, 3000000, 2800000, 4700000];
+        const 阿贤heni_interaction = [3736800, 3536800, 0, 4640900, 3749700, 3150000, 3867100, 1213800, 7716300, 3845100, 2322423, 2327204, 0, 2118265, 1882728, 2740900, 2219038, 2414307, 2416042, 1204319, 2317282, 1709448, 2817263, 2817792, 2316154, 2727800, 850272, 3022900, 2826400, 4732600];
+        const 阿贤heni_fanDuration = [38, 38, 0, 38, 41, 40, 40, 35, 46, 36, 30, 28, 0, 26, 27, 27, 26, 25, 28, 5, 26, 25, 26, 30, 28, 31, 4, 34, 34, 38];
+        const 阿贤heni_avgDuration = [31, 32, 0, 31, 34, 34, 32, 27, 39, 30, 25, 22, 0, 23, 23, 23, 22, 20, 22, 4, 24, 17, 16, 20, 18, 24, 3, 25, 26, 28];
+        const 阿贤heni_views = [113193, 119458, 0, 117342, 127045, 130029, 132215, 55436, 152131, 128002, 106940, 242389, 0, 83064, 78193, 80715, 74653, 72746, 69598, 33009, 72328, 52201, 88884, 79678, 75366, 73650, 29103, 94892, 94429, 101164];
+        const 阿贤heni_income_10 = [371.5, 214.51, 623.75, 219.13, 436.29, 580.47, 509.8, 1251.65, 667.1, 304.06];
+        const 阿贤heni_views_10 = [72328, 52201, 88884, 79678, 75366, 73650, 29103, 94892, 94429, 101164];
+        
+        const MYMY_income = [255.64, 211.65, 210.92, 275.32, 277.59, 293.3, 0, 546.37, 177.91, 231.81, 205.18, 232.99, 379.06, 0, 284.65, 177.61, 314.83, 246.06, 433.49, 2080.18, 0, 211.12, 158.06, 184.77, 249.01, 309.18, 897.37, 0, 377.11, 274.93];
+        const MYMY_peak = [3166, 3418, 3079, 2892, 3544, 3217, 0, 3404, 3717, 3067, 3108, 3498, 3338, 0, 3953, 4524, 3740, 2997, 2959, 4988, 0, 3308, 3326, 3780, 4392, 4703, 4363, 0, 3681, 4371];
+        const MYMY_followers = [66, 67, 69, 67, 81, 62, 0, 75, 87, 52, 59, 118, 65, 0, 173, 153, 138, 62, 60, 275, 0, 95, 127, 77, 84, 110, 115, 0, 54, 65];
+        const MYMY_likes = [974400, 1096700, 951200, 1053600, 1334300, 874800, 0, 1008500, 1451000, 947500, 1120800, 1576100, 872600, 0, 1617700, 2800000, 2200000, 3118000, 1114000, 3025200, 0, 1349700, 1110900, 2200000, 1104958, 2130300, 2296700, 0, 1578900, 1305100];
+        const MYMY_interaction = [981568, 1104923, 957449, 1060362, 1343248, 883326, 0, 1018287, 1461251, 955592, 1128343, 1586426, 879984, 0, 1628346, 2816760, 2211451, 3162361, 1122316, 3046651, 0, 1359773, 1119507, 2209085, 1118460, 2144125, 2312651, 0, 1590348, 1315018];
+        const MYMY_fanDuration = [32, 30, 30, 30, 30, 29, 0, 28, 29, 30, 32, 23, 28, 0, 32, 36, 34, 34, 34, 29, 0, 31, 30, 36, 36, 42, 27, 0, 36, 34];
+        const MYMY_avgDuration = [25, 24, 24, 21, 22, 22, 0, 23, 22, 22, 22, 19, 16, 0, 13, 18, 18, 23, 23, 17, 0, 19, 16, 20, 20, 22, 18, 0, 24, 23];
+        const MYMY_views = [33446, 37361, 30209, 32138, 35019, 31651, 0, 34940, 38763, 35250, 32271, 91585, 35015, 0, 50489, 52405, 48029, 31823, 31155, 71488, 0, 37413, 44366, 39532, 43903, 45052, 50934, 0, 40884, 41230];
+        const MYMY_income_10 = [0, 211.12, 158.06, 184.77, 249.01, 309.18, 897.37, 0, 377.11, 274.93];
+        const MYMY_views_10 = [0, 37413, 44366, 39532, 43903, 45052, 50934, 0, 40884, 41230];
+        
+        const 志青Ricon_income = [59.22, 41.27, 0, 96.49, 95.09, 0, 40.38, 26.71, 33.18, 0, 12.01, 105.08, 35.22, 0, 41.1, 73.44, 0, 47.63, 62.97, 25.87, 76.89, 0, 0, 0, 0, 54.35, 106.18, 34.08, 54.66, 126.14];
+        const 志青Ricon_peak = [5250, 6888, 0, 9355, 11200, 0, 5970, 5955, 5518, 0, 5298, 5816, 4632, 0, 3688, 4488, 0, 4506, 3782, 4441, 3769, 0, 0, 0, 0, 3464, 3652, 3909, 3638, 4482];
+        const 志青Ricon_followers = [71, 81, 0, 120, 140, 0, 110, 91, 64, 0, 87, 161, 51, 0, 62, 85, 0, 59, 48, 63, 61, 0, 0, 0, 0, 58, 33, 72, 83, 65];
+        const 志青Ricon_likes = [566300, 542000, 0, 804300, 1700000, 0, 476100, 468800, 405900, 0, 778500, 251900, 464100, 0, 526700, 613600, 0, 466500, 526900, 425600, 472700, 0, 0, 0, 0, 433200, 494000, 536900, 1100000, 779300];
+        const 志青Ricon_interaction = [572773, 549078, 0, 820100, 1717900, 0, 484388, 477099, 412337, 0, 784309, 259326, 471008, 0, 532228, 620224, 0, 472500, 531366, 429684, 476913, 0, 0, 0, 0, 437531, 498783, 542804, 1105334, 785219];
+        const 志青Ricon_fanDuration = [25, 30, 0, 36, 36, 0, 26, 27, 22, 0, 24, 13, 22, 0, 21, 25, 0, 23, 22, 19, 22, 0, 0, 0, 0, 20, 19, 23, 24, 14];
+        const 志青Ricon_avgDuration = [19, 23, 0, 21, 23, 0, 20, 20, 17, 0, 14, 9, 16, 0, 15, 18, 0, 12, 15, 10, 16, 0, 0, 0, 0, 14, 15, 18, 18, 11];
+        const 志青Ricon_views = [38123, 36995, 0, 48768, 52433, 0, 42184, 43593, 35816, 0, 42192, 159434, 34194, 0, 27534, 31316, 0, 37047, 28363, 32013, 24140, 0, 0, 0, 0, 27082, 22017, 22657, 24851, 31257];
+        const 志青Ricon_income_10 = [76.89, 0, 0, 0, 0, 54.35, 106.18, 34.08, 54.66, 126.14];
+        const 志青Ricon_views_10 = [24140, 0, 0, 0, 0, 27082, 22017, 22657, 24851, 31257];
+        
+        const 阿园Chua_income = [52.36, 42.53, 39.82, 25.51, 43.71, 0, 32.2, 22.85, 39.03, 48.52, 22.96, 21.2, 0, 116.09, 85.85, 46.2, 44.83, 92.9, 45.81, 0, 88.62, 58.02, 60.9, 40.15, 43.26, 47.88, 0, 48.19, 35.45, 142.21];
+        const 阿园Chua_peak = [2559, 1867, 2131, 2518, 2218, 0, 1954, 2044, 1673, 1928, 1760, 1671, 0, 1437, 2023, 2784, 2233, 2306, 2090, 0, 1955, 2333, 2681, 1954, 1987, 1864, 0, 1590, 1938, 2141];
+        const 阿园Chua_followers = [56, 85, 53, 75, 84, 0, 65, 38, 50, 25, 39, 61, 0, 22, 43, 86, 46, 57, 38, 0, 45, 121, 71, 54, 51, 20, 0, 15, 19, 18];
+        const 阿园Chua_likes = [681800, 1100000, 684500, 798200, 1000000, 0, 687600, 1000000, 1000000, 1000000, 750200, 111100, 0, 436600, 1100000, 1200000, 358000, 653900, 1000000, 0, 525100, 1200000, 1300000, 1100000, 713500, 395800, 0, 509700, 1100000, 516800];
+        const 阿园Chua_interaction = [687312, 1102789, 688212, 802961, 1005850, 0, 690714, 1002719, 1002285, 1003435, 752571, 112520, 0, 439192, 1103117, 1204169, 360387, 657124, 1002068, 0, 527286, 1202849, 1303098, 1102030, 715779, 397543, 0, 512098, 1101614, 519307];
+        const 阿园Chua_fanDuration = [28, 24, 26, 28, 27, 0, 22, 21, 19, 23, 22, 3, 0, 22, 19, 25, 19, 21, 20, 0, 21, 25, 27, 21, 22, 19, 0, 18, 19, 24];
+        const 阿园Chua_avgDuration = [24, 18, 21, 22, 21, 0, 17, 17, 15, 19, 17, 2, 0, 18, 15, 19, 15, 16, 16, 0, 17, 15, 17, 13, 14, 15, 0, 15, 16, 20];
+        const 阿园Chua_views = [17170, 14730, 14343, 17801, 20818, 0, 14599, 14566, 14342, 13940, 12530, 49666, 0, 11789, 16573, 17905, 14455, 16337, 14415, 0, 13349, 21366, 18622, 16027, 14881, 13088, 0, 11285, 11496, 12625];
+        const 阿园Chua_income_10 = [88.62, 58.02, 60.9, 40.15, 43.26, 47.88, 0, 48.19, 35.45, 142.21];
+        const 阿园Chua_views_10 = [13349, 21366, 18622, 16027, 14881, 13088, 0, 11285, 11496, 12625];
+        
+        const Pink_income = [25.84, 7.78, 17.7, 8.23, 39.73, 12.26, 9.38, 0, 7.87, 0, 15.9, 13.05, 2.72, 0, 27.3, 21.39, 0, 13.05, 4.87, 43.04, 30.46, 50.88, 71.93, 0, 36.01, 25.14, 36.12, 50.28, 7.7, 38.22];
+        const Pink_peak = [1694, 1811, 1935, 2230, 2286, 1934, 2157, 0, 2033, 0, 1545, 1457, 1086, 0, 1041, 1201, 0, 969, 1021, 960, 1453, 1502, 1930, 0, 1611, 1827, 2171, 1724, 1353, 1821];
+        const Pink_followers = [558, 303, 291, 284, 206, 119, 88, 0, 104, 0, 87, 54, 32, 0, 39, 28, 0, 25, 31, 30, 67, 43, 63, 0, 43, 30, 40, 109, 13, 34];
+        const Pink_likes = [348600, 293400, 767100, 380400, 325300, 247900, 246300, 0, 338400, 0, 206900, 203400, 163000, 0, 193900, 225000, 0, 553800, 211500, 217600, 1100000, 263400, 266800, 0, 233800, 349900, 388500, 610800, 244700, 439200];
+        const Pink_interaction = [352243, 297056, 770129, 384408, 328637, 250905, 249904, 0, 341794, 0, 209281, 204979, 165686, 0, 195447, 226583, 0, 556062, 213309, 219312, 1103365, 267762, 272185, 0, 237206, 354674, 394125, 618029, 246864, 442488];
+        const Pink_fanDuration = [33, 35, 32, 30, 31, 26, 29, 0, 28, 0, 24, 20, 22, 0, 21, 23, 0, 22, 21, 21, 24, 30, 32, 0, 29, 33, 36, 24, 22, 30];
+        const Pink_avgDuration = [20, 24, 19, 19, 22, 17, 20, 0, 20, 0, 15, 12, 16, 0, 15, 18, 0, 17, 16, 16, 16, 22, 22, 0, 22, 22, 24, 16, 16, 21];
+        const Pink_views = [14911, 11302, 12498, 14683, 14382, 13469, 12799, 0, 14150, 0, 11868, 9930, 8964, 0, 8533, 8090, 0, 7693, 7457, 7258, 11480, 10213, 12191, 0, 10010, 12020, 13939, 23034, 11267, 12177];
+        const Pink_income_10 = [30.46, 50.88, 71.93, 0, 36.01, 25.14, 36.12, 50.28, 7.7, 38.22];
+        const Pink_views_10 = [11480, 10213, 12191, 0, 10010, 12020, 13939, 23034, 11267, 12177];
+        
+        const peo_income = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17.5, 9.16, 8.99, 17.3, 11.93, 0, 14.62, 12.01, 25.76, 42.17, 10.33, 16.94, 0, 6.47, 19.6, 16.24, 4.12, 8.54];
+        const peo_peak = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 855, 666, 507, 476, 498, 0, 424, 384, 592, 560, 505, 490, 0, 363, 515, 577, 360, 311];
+        const peo_followers = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 296, 149, 46, 38, 46, 0, 32, 45, 67, 131, 101, 118, 0, 23, 29, 36, 11, 5];
+        const peo_likes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 226800, 83000, 80400, 86200, 76900, 0, 263100, 146700, 124900, 127200, 158500, 542000, 0, 120300, 150800, 106100, 74400, 33700];
+        const peo_interaction = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 230197, 84664, 81206, 86893, 77722, 0, 264111, 147769, 125732, 128177, 159285, 543046, 0, 121011, 151979, 106637, 74789, 34030];
+        const peo_fanDuration = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 39, 16, 9, 7, 7, 0, 9, 13, 11, 9, 9, 10, 0, 7, 17, 8, 5, 6];
+        const peo_avgDuration = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 9, 6, 4, 5, 0, 6, 9, 6, 4, 4, 4, 0, 5, 13, 6, 4, 4];
+        const peo_views = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7407, 8093, 5553, 4625, 4976, 0, 4995, 5706, 5860, 7928, 6707, 8624, 0, 4710, 5613, 4705, 3542, 2811];
+        const peo_income_10 = [25.76, 42.17, 10.33, 16.94, 0, 6.47, 19.6, 16.24, 4.12, 8.54];
+        const peo_views_10 = [5860, 7928, 6707, 8624, 0, 4710, 5613, 4705, 3542, 2811];
+        
+        const Vanie_income = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29.23, 7.56, 21.92, 9.16, 31.95, 0, 43.62, 24.98, 27.36, 46.45, 27.86, 19.57, 7.64, 17.89, 8.79, 10.11, 7.84];
+        const Vanie_peak = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 651, 841, 715, 757, 778, 0, 1988, 1266, 1190, 1099, 1173, 1036, 706, 1030, 999, 805, 702];
+        const Vanie_followers = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 269, 171, 139, 69, 137, 0, 268, 82, 368, 193, 151, 85, 8, 27, 51, 17, 23];
+        const Vanie_likes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 180400, 132700, 106900, 125600, 122900, 0, 2100000, 223700, 177900, 160400, 162300, 117700, 27800, 151700, 125200, 69700, 57600];
+        const Vanie_interaction = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 181967, 133570, 107468, 127086, 124149, 0, 2105294, 226089, 179548, 161553, 163541, 118506, 28732, 153173, 126215, 70243, 57982];
+        const Vanie_fanDuration = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 8, 4, 10, 9, 0, 27, 22, 12, 10, 10, 9, 1, 15, 13, 7, 5];
+        const Vanie_avgDuration = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 6, 3, 7, 7, 0, 21, 18, 6, 6, 5, 5, 1, 11, 9, 5, 3];
+        const Vanie_views = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8641, 8172, 7339, 8128, 9242, 0, 12188, 10311, 15393, 13052, 11962, 10210, 4411, 7598, 11142, 8097, 7297];
+        const Vanie_income_10 = [24.98, 27.36, 46.45, 27.86, 19.57, 7.64, 17.89, 8.79, 10.11, 7.84];
+        const Vanie_views_10 = [10311, 15393, 13052, 11962, 10210, 4411, 7598, 11142, 8097, 7297];
+        
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Chart.js 配置辅助函数
+        function createLineChart(ctx, labels, datasets, title) {
+            return new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'top' }, title: { display: !!title, text: title } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // 总盘子
+        createLineChart(document.getElementById('totalViewsChart').getContext('2d'), labels30, [
+            { label: '总观看', data: totalViewsData, borderColor: '#667eea', backgroundColor: 'rgba(102,126,234,0.1)', tension: 0.4, fill: true },
+            { label: '7日移动平均', data: totalViewsMA, borderColor: '#e74c3c', borderDash: [5,5], tension: 0.4, pointRadius: 0 }
+        ]);
+        createLineChart(document.getElementById('totalIncomeChart').getContext('2d'), labels30, [
+            { label: '总收入', data: totalIncomeData, borderColor: '#27ae60', backgroundColor: 'rgba(39,174,96,0.1)', tension: 0.4, fill: true },
+            { label: '7日移动平均', data: totalIncomeMA, borderColor: '#e74c3c', borderDash: [5,5], tension: 0.4, pointRadius: 0 }
+        ]);
+
+        // 收入占比饼图 (近一周)
+        new Chart(document.getElementById('incomeShareChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['阿贤', 'MYMY', '志青', '阿园', 'Pink', 'peo', 'Vanie'],
+                datasets: [{
+                    data: [3968.5, 2292.37, 375.41, 357.14, 193.47, 71.91, 99.7],
+                    backgroundColor: ['#e74c3c', '#2ecc71', '#95a5a6', '#f39c12', '#9b59b6', '#1abc9c', '#3498db']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 观看次数占比饼图
+        new Chart(document.getElementById('pieViewsChart'), {
+            type: 'doughnut',
+            data: {
+                labels: pieLabels,
+                datasets: [{
+                    data: pieViewsData,
+                    backgroundColor: ['#e74c3c', '#2ecc71', '#95a5a6', '#f39c12', '#9b59b6', '#1abc9c', '#3498db']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 收入占比饼图
+        new Chart(document.getElementById('pieIncomeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: pieLabels,
+                datasets: [{
+                    data: pieIncomeData,
+                    backgroundColor: ['#e74c3c', '#2ecc71', '#95a5a6', '#f39c12', '#9b59b6', '#1abc9c', '#3498db']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 观看次数堆积图（近10天）
+        new Chart(document.getElementById('stackViewsChart'), {
+            type: 'bar',
+            data: {
+                labels: stackLabels,
+                datasets: [
+                    { label: '阿贤', data: stackViewsData['阿贤heni'], backgroundColor: '#e74c3c' },
+                    { label: 'MYMY', data: stackViewsData['MYMY'], backgroundColor: '#2ecc71' },
+                    { label: '志青', data: stackViewsData['志青Ricon'], backgroundColor: '#95a5a6' },
+                    { label: '阿园', data: stackViewsData['阿园Chua'], backgroundColor: '#f39c12' },
+                    { label: 'Pink', data: stackViewsData['Pink'], backgroundColor: '#9b59b6' },
+                    { label: 'peo', data: stackViewsData['peo'], backgroundColor: '#1abc9c' },
+                    { label: 'Vanie', data: stackViewsData['Vanie'], backgroundColor: '#3498db' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+        });
+
+        // 收入堆积图（近10天）
+        new Chart(document.getElementById('stackIncomeChart'), {
+            type: 'bar',
+            data: {
+                labels: stackLabels,
+                datasets: [
+                    { label: '阿贤', data: stackIncomeData['阿贤heni'], backgroundColor: '#e74c3c' },
+                    { label: 'MYMY', data: stackIncomeData['MYMY'], backgroundColor: '#2ecc71' },
+                    { label: '志青', data: stackIncomeData['志青Ricon'], backgroundColor: '#95a5a6' },
+                    { label: '阿园', data: stackIncomeData['阿园Chua'], backgroundColor: '#f39c12' },
+                    { label: 'Pink', data: stackIncomeData['Pink'], backgroundColor: '#9b59b6' },
+                    { label: 'peo', data: stackIncomeData['peo'], backgroundColor: '#1abc9c' },
+                    { label: 'Vanie', data: stackIncomeData['Vanie'], backgroundColor: '#3498db' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+        });
+
+        // 收入趋势
+        createLineChart(document.getElementById('incomeChart').getContext('2d'), labels30, [
+            { label: '阿贤', data: 阿贤heni_income, borderColor: '#e74c3c', tension: 0.3 },
+            { label: 'MYMY', data: MYMY_income, borderColor: '#2ecc71', tension: 0.3 },
+            { label: '志青', data: 志青Ricon_income, borderColor: '#95a5a6', tension: 0.3 },
+            { label: '阿园', data: 阿园Chua_income, borderColor: '#f39c12', tension: 0.3 },
+            { label: 'Pink', data: Pink_income, borderColor: '#9b59b6', tension: 0.3 },
+            { label: 'peo', data: peo_income, borderColor: '#1abc9c', tension: 0.3 },
+            { label: 'Vanie', data: Vanie_income, borderColor: '#3498db', tension: 0.3 }
+        ]);
+
+        // 流量
+        createLineChart(document.getElementById('peakChart').getContext('2d'), labels30, [
+            { label: '阿贤', data: 阿贤heni_peak, borderColor: '#e74c3c', tension: 0.3 },
+            { label: 'MYMY', data: MYMY_peak, borderColor: '#2ecc71', tension: 0.3 },
+            { label: '志青', data: 志青Ricon_peak, borderColor: '#95a5a6', tension: 0.3 },
+            { label: '阿园', data: 阿园Chua_peak, borderColor: '#f39c12', tension: 0.3 },
+            { label: 'Pink', data: Pink_peak, borderColor: '#9b59b6', tension: 0.3 },
+            { label: 'peo', data: peo_peak, borderColor: '#1abc9c', tension: 0.3 },
+            { label: 'Vanie', data: Vanie_peak, borderColor: '#3498db', tension: 0.3 }
+        ]);
+        createLineChart(document.getElementById('followersChart').getContext('2d'), labels30, [
+            { label: '阿贤', data: 阿贤heni_followers, borderColor: '#e74c3c', tension: 0.3 },
+            { label: 'MYMY', data: MYMY_followers, borderColor: '#2ecc71', tension: 0.3 },
+            { label: '志青', data: 志青Ricon_followers, borderColor: '#95a5a6', tension: 0.3 },
+            { label: '阿园', data: 阿园Chua_followers, borderColor: '#f39c12', tension: 0.3 },
+            { label: 'Pink', data: Pink_followers, borderColor: '#9b59b6', tension: 0.3 },
+            { label: 'peo', data: peo_followers, borderColor: '#1abc9c', tension: 0.3 },
+            { label: 'Vanie', data: Vanie_followers, borderColor: '#3498db', tension: 0.3 }
+        ]);
+
+        // 互动
+        createLineChart(document.getElementById('interactionChart').getContext('2d'), labels30, [
+            { label: '阿贤', data: 阿贤heni_interaction, borderColor: '#e74c3c', tension: 0.3 },
+            { label: 'MYMY', data: MYMY_interaction, borderColor: '#2ecc71', tension: 0.3 },
+            { label: '志青', data: 志青Ricon_interaction, borderColor: '#95a5a6', tension: 0.3 },
+            { label: '阿园', data: 阿园Chua_interaction, borderColor: '#f39c12', tension: 0.3 },
+            { label: 'Pink', data: Pink_interaction, borderColor: '#9b59b6', tension: 0.3 },
+            { label: 'peo', data: peo_interaction, borderColor: '#1abc9c', tension: 0.3 },
+            { label: 'Vanie', data: Vanie_interaction, borderColor: '#3498db', tension: 0.3 }
+        ]);
+        createLineChart(document.getElementById('likesChart').getContext('2d'), labels30, [
+            { label: '阿贤', data: 阿贤heni_likes, borderColor: '#e74c3c', tension: 0.3 },
+            { label: 'MYMY', data: MYMY_likes, borderColor: '#2ecc71', tension: 0.3 },
+            { label: '志青', data: 志青Ricon_likes, borderColor: '#95a5a6', tension: 0.3 },
+            { label: '阿园', data: 阿园Chua_likes, borderColor: '#f39c12', tension: 0.3 },
+            { label: 'Pink', data: Pink_likes, borderColor: '#9b59b6', tension: 0.3 },
+            { label: 'peo', data: peo_likes, borderColor: '#1abc9c', tension: 0.3 },
+            { label: 'Vanie', data: Vanie_likes, borderColor: '#3498db', tension: 0.3 }
+        ]);
+
+        // 时长
+        createLineChart(document.getElementById('fanDurationChart').getContext('2d'), labels30, [
+            { label: '阿贤', data: 阿贤heni_fanDuration, borderColor: '#e74c3c', tension: 0.3 },
+            { label: 'MYMY', data: MYMY_fanDuration, borderColor: '#2ecc71', tension: 0.3 },
+            { label: '志青', data: 志青Ricon_fanDuration, borderColor: '#95a5a6', tension: 0.3 },
+            { label: '阿园', data: 阿园Chua_fanDuration, borderColor: '#f39c12', tension: 0.3 },
+            { label: 'Pink', data: Pink_fanDuration, borderColor: '#9b59b6', tension: 0.3 },
+            { label: 'peo', data: peo_fanDuration, borderColor: '#1abc9c', tension: 0.3 },
+            { label: 'Vanie', data: Vanie_fanDuration, borderColor: '#3498db', tension: 0.3 }
+        ]);
+        createLineChart(document.getElementById('avgDurationChart').getContext('2d'), labels30, [
+            { label: '阿贤', data: 阿贤heni_avgDuration, borderColor: '#e74c3c', tension: 0.3 },
+            { label: 'MYMY', data: MYMY_avgDuration, borderColor: '#2ecc71', tension: 0.3 },
+            { label: '志青', data: 志青Ricon_avgDuration, borderColor: '#95a5a6', tension: 0.3 },
+            { label: '阿园', data: 阿园Chua_avgDuration, borderColor: '#f39c12', tension: 0.3 },
+            { label: 'Pink', data: Pink_avgDuration, borderColor: '#9b59b6', tension: 0.3 },
+            { label: 'peo', data: peo_avgDuration, borderColor: '#1abc9c', tension: 0.3 },
+            { label: 'Vanie', data: Vanie_avgDuration, borderColor: '#3498db', tension: 0.3 }
+        ]);
+
+        // 新主播
+        new Chart(document.getElementById('peoChart'), {
+            type: 'bar',
+            data: { labels: peoLabels, datasets: [{ label: '收入', data: peoIncomeData, backgroundColor: '#1abc9c' }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+        new Chart(document.getElementById('vanieChart'), {
+            type: 'bar',
+            data: { labels: vanieLabels, datasets: [{ label: '收入', data: vanieIncomeData, backgroundColor: '#3498db' }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+
+        // 双场对比
+        new Chart(document.getElementById('mymyDoubleChart'), {
+            type: 'bar',
+            data: {
+                labels: mymyDates,
+                datasets: [
+                    { label: '下午场收入', data: mymyAfternoonIncome, backgroundColor: '#f39c12' },
+                    { label: '晚间场收入', data: mymyEveningIncome, backgroundColor: '#9b59b6' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+        new Chart(document.getElementById('mymyPeakChart'), {
+            type: 'bar',
+            data: {
+                labels: mymyDates,
+                datasets: [
+                    { label: '下午场尖峰', data: mymyAfternoonPeak, backgroundColor: '#f39c12' },
+                    { label: '晚间场尖峰', data: mymyEveningPeak, backgroundColor: '#9b59b6' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+        new Chart(document.getElementById('heniDoubleChart'), {
+            type: 'bar',
+            data: {
+                labels: heniDates,
+                datasets: [
+                    { label: '下午场收入', data: heniAfternoonIncome, backgroundColor: '#f39c12' },
+                    { label: '晚间场收入', data: heniEveningIncome, backgroundColor: '#9b59b6' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+        new Chart(document.getElementById('heniPeakChart'), {
+            type: 'bar',
+            data: {
+                labels: heniDates,
+                datasets: [
+                    { label: '下午场尖峰', data: heniAfternoonPeak, backgroundColor: '#f39c12' },
+                    { label: '晚间场尖峰', data: heniEveningPeak, backgroundColor: '#9b59b6' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+    </script>
+</body>
+</html>

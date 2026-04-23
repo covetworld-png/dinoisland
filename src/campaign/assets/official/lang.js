@@ -14,8 +14,8 @@ const i18n = {
         // Registration labels
         'reg.usernameLabel': 'Tài khoản',
         'reg.passwordLabel': 'Mật khẩu',
-        'reg.confirmLabel': 'Xác nhận MK',
-        'reg.phoneLabel': 'Số điện thoại',
+        'reg.confirmLabel': 'Xác nhận',
+        'reg.phoneLabel': 'SĐT',
         'reg.getCode': 'Lấy mã',
         'reg.codeLabel': 'Mã xác nhận',
         'reg.submit': '🚀 Đăng ký ngay',
