@@ -100,11 +100,12 @@
             transition: all 0.2s ease;
             font-family: 'Inter', sans-serif;
             display: none;
-            line-height: 1;
+            align-items: center;
+            justify-content: center;
         }
 
         .bg-play-btn.active {
-            display: block;
+            display: flex;
             background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
             color: var(--jungle-900);
         }
@@ -185,6 +186,9 @@
             border-radius: 16px;
             transition: all 0.2s ease;
             font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .lang-btn:hover {
