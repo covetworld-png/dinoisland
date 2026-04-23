@@ -2279,6 +2279,8 @@
                 registerSection.classList.add('hidden');
                 successSection.classList.add('active');
                 document.getElementById('stepsCard').style.display = 'none';
+                setLanguage(currentLang);
+                setLanguage(currentLang);
                 showToast(t('reg.successTitle'));
             } catch (err) {
                 if (err.name === 'TypeError') {
