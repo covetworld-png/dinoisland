@@ -72,27 +72,16 @@
             -webkit-transform: translateZ(0);
         }
 
-        .bg-play-wrap {
+        .bg-play-btn {
             position: fixed;
             top: 56px;
-            left: 16px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 102;
-            display: flex;
-            gap: 8px;
-            background: var(--jungle-800);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(74, 154, 138, 0.2);
-            border-radius: 20px;
-            padding: 4px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .bg-play-btn {
-            padding: 6px 12px;
+            padding: 6px 14px;
             border: none;
-            background: transparent;
-            color: var(--text-secondary);
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: var(--jungle-900);
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
@@ -102,12 +91,11 @@
             display: none;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
         .bg-play-btn.active {
             display: flex;
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
-            color: var(--jungle-900);
         }
 
         .bg-play-btn.active {
@@ -1225,9 +1213,7 @@
         <img class="bg-image" src="../../assets/official/bg.jpg?v=3" alt="" style="display:none;">
         <video class="bg-video" src="../../assets/official/bg-video.mp4?v=3" autoplay muted loop playsinline preload="auto" x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" webkit-playsinline style="display:none;"></video>
     </div>
-    <div class="bg-play-wrap">
-        <button class="bg-play-btn active" id="bgPlayBtn" onclick="playBackgroundVideo()">▶</button>
-    </div>
+    <button class="bg-play-btn active" id="bgPlayBtn" onclick="playBackgroundVideo()">▶</button>
 
     <!-- Language Switcher -->
     <div class="lang-switcher">
