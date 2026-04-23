@@ -2344,10 +2344,11 @@
             playIntro() {
                 clearInterval(this.interval);
                 const total = this.slides.length;
-                const duration = 2200;
-                const startTime = performance.now();
-                const startPos = total - 1;
+                const cycles = 2;
+                const startPos = total * cycles - 1;
                 const endPos = 0;
+                const duration = 3500;
+                const startTime = performance.now();
                 const easeOutQuart = t => 1 - Math.pow(1 - t, 4);
 
                 const animate = (now) => {
@@ -2355,13 +2356,14 @@
                     const progress = Math.min(elapsed / duration, 1);
                     const eased = easeOutQuart(progress);
                     const currentPos = startPos - (startPos - endPos) * eased;
+                    const currentPosMod = ((currentPos % total) + total) % total;
 
                     this.slides.forEach((slide, i) => {
                         slide.style.transition = 'none';
-                        slide.style.transform = `translateX(${(i - currentPos) * 100}%)`;
+                        slide.style.transform = `translateX(${(i - currentPosMod) * 100}%)`;
                     });
 
-                    const activeIndex = Math.min(Math.round(currentPos), total - 1);
+                    const activeIndex = Math.min(Math.round(currentPosMod), total - 1);
                     this.dots.forEach((dot, i) => {
                         dot.classList.toggle('active', i === activeIndex);
                     });
