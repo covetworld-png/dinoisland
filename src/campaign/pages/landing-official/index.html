@@ -1222,7 +1222,7 @@
         <video class="bg-video" src="../../assets/official/bg-video.mp4?v=3" autoplay muted loop playsinline preload="auto" x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" webkit-playsinline style="display:none;"></video>
     </div>
     <div class="bg-play-wrap">
-        <button class="bg-play-btn active" id="bgPlayBtn" onclick="playBackgroundVideo()">▶</button>
+        <button class="bg-play-btn active" id="bgPlayBtn" onclick="toggleBackgroundMedia()">▶</button>
     </div>
 
     <!-- Language Switcher -->
@@ -2603,19 +2603,32 @@
         // ============================================
         // Background: auto-switch image/video by network
         // ============================================
-        function playBackgroundVideo() {
+        function toggleBackgroundMedia() {
             const bgImage = document.querySelector('.bg-image');
             const bgVideo = document.querySelector('.bg-video');
             const playBtn = document.getElementById('bgPlayBtn');
-            if (!bgVideo || !bgImage) return;
-            bgImage.style.display = 'none';
-            bgVideo.style.display = 'block';
-            bgVideo.play().then(() => {
-                if (playBtn) playBtn.classList.remove('active');
-            }).catch(() => {
-                bgVideo.style.display = 'none';
-                bgImage.style.display = 'block';
-            });
+            if (!bgVideo || !bgImage || !playBtn) return;
+
+            if (bgVideo.paused || bgVideo.style.display === 'none') {
+                // 首次播放：显示视频，取消静音，播放
+                bgImage.style.display = 'none';
+                bgVideo.style.display = 'block';
+                bgVideo.muted = false;
+                bgVideo.play().then(() => {
+                    playBtn.textContent = '🔇';
+                }).catch(() => {
+                    bgVideo.style.display = 'none';
+                    bgImage.style.display = 'block';
+                });
+            } else if (bgVideo.muted) {
+                // 取消静音
+                bgVideo.muted = false;
+                playBtn.textContent = '🔇';
+            } else {
+                // 静音
+                bgVideo.muted = true;
+                playBtn.textContent = '🔊';
+            }
         }
 
         function initBackground() {
@@ -2639,6 +2652,7 @@
             if (playBtn) {
                 if (isTouch && !isWechat) {
                     playBtn.classList.add('active');
+                    playBtn.textContent = '▶';
                 } else {
                     playBtn.classList.remove('active');
                 }
