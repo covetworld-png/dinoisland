@@ -1,0 +1,195 @@
+const i18n = {
+    vi: {
+        'page.title': 'Đảo Khủng Long - Quà Tân Thủ',
+        'hero.title': '🎁 Tặng Khủng Long Khởi Đầu',
+        'hero.subtitle': 'Quà chào mừng dành cho tân thủ',
+        'steps.title': '📋 3 bước bắt đầu chơi',
+        'steps.step1': 'Đăng ký tài khoản',
+        'steps.step2': 'Tải game PC',
+        'steps.step3': 'Đăng nhập chơi',
+        'nav.reg': 'Đăng ký',
+        'nav.intro': 'Giới thiệu',
+        'nav.config': 'Cấu hình',
+
+        // Registration labels
+        'reg.usernameLabel': 'Tài khoản',
+        'reg.passwordLabel': 'Mật khẩu',
+        'reg.confirmLabel': 'Xác nhận MK',
+        'reg.phoneLabel': 'Số điện thoại',
+        'reg.getCode': 'Lấy mã',
+        'reg.codeLabel': 'Mã xác nhận',
+        'reg.submit': '🚀 Đăng ký ngay',
+        'reg.successTitle': 'Đăng ký thành công!',
+        'reg.successDesc': 'Tài khoản game của bạn đã được tạo',
+        'reg.accountLabel': 'Tài khoản',
+        'reg.pwdLabel': 'Mật khẩu',
+        'reg.phoneLabel2': 'Số điện thoại',
+        'reg.copyAll': 'Sao chép toàn bộ thông tin',
+        'reg.copyHint': 'Sao chép và gửi qua Zalo để lưu trữ',
+        'reg.downloadTitle': '⬇️ Tải game',
+        'reg.downloadMF': 'Tải trực tiếp từ MediaFire',
+        'reg.downloadGD': 'Google Drive (Lưu trên đám mây)',
+        'reg.downloadTip': 'Mở Google Drive → ⋮ → "Lưu vào Drive của tôi"',
+        'reg.dklHint': 'Hoặc truy cập trực tiếp trên trình duyệt PC',
+        'reg.dklHint2': 'tải và cài đặt',
+
+        // Registration placeholders
+        'reg.usernamePlaceholder': '6-20 ký tự chữ và số',
+        'reg.passwordPlaceholder': '6-20 ký tự (chữ, số, đặc biệt)',
+        'reg.confirmPlaceholder': 'Nhập lại mật khẩu',
+        'reg.phonePlaceholder': '9-10 chữ số',
+
+        // Registration button states
+        'reg.wait': 'Đang gửi...',
+        'reg.retry': 'Thử lại',
+        'reg.seconds': 'giây',
+        'reg.processing': 'Đang xử lý...',
+
+        // Registration toasts
+        'reg.codeSent': 'Mã xác nhận đã gửi, vui lòng kiểm tra tin nhắn',
+        'reg.officialOnly': 'Vui lòng truy cập qua trang web chính thức dkl.vn',
+        'reg.networkError': 'Lỗi mạng, vui lòng thử lại',
+        'reg.usernameExists': 'Tên đăng nhập đã tồn tại',
+        'reg.phoneExists': 'Số điện thoại đã tồn tại',
+        'reg.codeError': 'Mã xác nhận không đúng',
+        'reg.registerFailed': 'Đăng ký thất bại',
+        'reg.copySuccess': 'Đã sao chép! Gửi qua Zalo để lưu trữ',
+
+        // Validation errors
+        'reg.usernameRequired': 'Vui lòng nhập tên đăng nhập',
+        'reg.usernameInvalid': 'Tên đăng nhập chỉ hỗ trợ 6-20 ký tự chữ và số',
+        'reg.passwordRequired': 'Vui lòng nhập mật khẩu',
+        'reg.passwordInvalid': 'Mật khẩu: 6-20 ký tự (chữ, số, đặc biệt)',
+        'reg.confirmRequired': 'Vui lòng nhập lại mật khẩu',
+        'reg.confirmMismatch': 'Hai mật khẩu không khớp',
+        'reg.phoneRequired': 'Vui lòng nhập số điện thoại',
+        'reg.phoneInvalid': 'Số điện thoại phải có 9-10 chữ số',
+        'reg.codeLength': 'Mã xác nhận phải có 6 chữ số',
+
+        // Clipboard / Toast
+        'toast.copied': 'Đã sao chép!',
+        'toast.copyCodeSuccess': 'Đã sao chép mã!',
+        'toast.copyCodeFail': 'Sao chép thất bại',
+
+        'clipboard.title': 'Nhận quà tân thủ',
+        'clipboard.desc': 'Vui lòng sao chép mã code',
+        'clipboard.codeLabel': 'MÃ NHẬN QUÀ',
+        'clipboard.copyCode': 'Sao chép mã',
+        'clipboard.hint': 'Thêm CSKH và gửi mã này để nhận quà!',
+        'clipboard.phoneLabel': 'Hoặc sao chép SĐT CSKH',
+
+        'pc.title': 'Game PC - Đảo Khủng Long',
+        'pc.subtitle': 'Thế giới khủng long 3D sống động, hoành tráng!',
+        'pc.feature1': 'Đồ họa 3D đỉnh cao',
+        'pc.feature1.desc': 'Hình ảnh sắc nét, sống động như thật!',
+        'pc.feature2': 'Hóa thân Khủng long',
+        'pc.feature2.desc': 'Hóa thân khủng long, săn mồi tiến hóa!',
+        'pc.feature3': 'Chiến trường Khủng long',
+        'pc.feature3.desc': 'Trăm khủng long tranh hùng, kẻ mạnh vương!',
+        'pc.req.title': '📋 Yêu cầu hệ thống',
+        'pc.req.min': 'Cấu hình tối thiểu',
+        'pc.req.rec': 'Cấu hình đề xuất',
+        'pc.req.networkVal': 'Băng thông cao tốc',
+        'pc.note': 'Nhận quà tân thủ ngay hôm nay để có khởi đầu thuận lợi trong thế giới khủng long!'
+    },
+    cn: {
+        'page.title': '恐龙岛 - PC端游戏福利',
+        'hero.title': '🎁 开局送恐龙',
+        'hero.subtitle': '新玩家欢迎礼',
+        'steps.title': '📋 3 步开始游戏',
+        'steps.step1': '注册账号',
+        'steps.step2': '下载 PC 游戏',
+        'steps.step3': '登录游玩',
+        'nav.reg': '注册福利',
+        'nav.intro': '游戏介绍',
+        'nav.config': '硬件要求',
+
+        // Registration labels
+        'reg.usernameLabel': '用户名',
+        'reg.passwordLabel': '密码',
+        'reg.confirmLabel': '确认密码',
+        'reg.phoneLabel': '手机号',
+        'reg.getCode': '获取验证码',
+        'reg.codeLabel': '验证码',
+        'reg.submit': '🚀 立即注册',
+        'reg.successTitle': '注册成功！',
+        'reg.successDesc': '您的游戏账号已创建',
+        'reg.accountLabel': '用户名',
+        'reg.pwdLabel': '密码',
+        'reg.phoneLabel2': '手机号',
+        'reg.copyAll': '一键复制全部信息',
+        'reg.copyHint': '复制后可通过 Zalo 发送给自己备份',
+        'reg.downloadTitle': '⬇️ 下载游戏客户端',
+        'reg.downloadMF': 'MediaFire 直接下载',
+        'reg.downloadGD': 'Google Drive（可保存到云端）',
+        'reg.downloadTip': '打开 Google Drive → ⋮ → "保存到我的云端硬盘"',
+        'reg.dklHint': '或直接在电脑浏览器访问',
+        'reg.dklHint2': '下载安装',
+
+        // Registration placeholders
+        'reg.usernamePlaceholder': '6-20位字母和数字',
+        'reg.passwordPlaceholder': '6-20位，字母数字特殊符号',
+        'reg.confirmPlaceholder': '再次输入密码',
+        'reg.phonePlaceholder': '9-10位数字',
+
+        // Registration button states
+        'reg.wait': '发送中...',
+        'reg.retry': '重试',
+        'reg.seconds': '秒',
+        'reg.processing': '处理中...',
+
+        // Registration toasts
+        'reg.codeSent': '验证码已发送，请查收短信',
+        'reg.officialOnly': '请通过游戏官网 dkl.vn 访问本页面',
+        'reg.networkError': '网络错误，请重试',
+        'reg.usernameExists': '用户名已存在',
+        'reg.phoneExists': '手机号已存在',
+        'reg.codeError': '验证码错误',
+        'reg.registerFailed': '注册失败',
+        'reg.copySuccess': '已复制！建议通过 Zalo 发送给自己备份',
+
+        // Validation errors
+        'reg.usernameRequired': '请输入用户名',
+        'reg.usernameInvalid': '用户名仅支持6-20位字母和数字',
+        'reg.passwordRequired': '请输入密码',
+        'reg.passwordInvalid': '密码仅支持6-20位字母、数字和特殊符号',
+        'reg.confirmRequired': '请再次输入密码',
+        'reg.confirmMismatch': '两次输入的密码不一致',
+        'reg.phoneRequired': '请输入手机号',
+        'reg.phoneInvalid': '手机号长度必须介于9和10之间',
+        'reg.codeLength': '验证码长度为6位',
+
+        // Clipboard / Toast
+        'toast.copied': '已复制！',
+        'toast.copyCodeSuccess': '已复制口令！',
+        'toast.copyCodeFail': '复制失败，请手动复制',
+
+        'clipboard.title': '领取新手礼包',
+        'clipboard.desc': '请手动复制口令',
+        'clipboard.codeLabel': '礼包口令',
+        'clipboard.copyCode': '复制口令',
+        'clipboard.hint': '添加客服后发送此口令领取礼包！',
+        'clipboard.phoneLabel': '点击复制客服号',
+
+        'pc.title': 'PC游戏 - 恐龙岛',
+        'pc.subtitle': '3D恐龙世界，栩栩如生，气势磅礴！',
+        'pc.feature1': '3D画质超高清',
+        'pc.feature1.desc': '画面精致细腻，身临其境！',
+        'pc.feature2': '化身恐龙生存',
+        'pc.feature2.desc': '扮演恐龙，狩猎进化，适者生存！',
+        'pc.feature3': '百龙争霸战场',
+        'pc.feature3.desc': '群雄逐鹿，胜者为王！',
+        'pc.req.title': '📋 系统配置要求',
+        'pc.req.min': '最低配置',
+        'pc.req.rec': '推荐配置',
+        'pc.req.networkVal': '高速宽带连接',
+        'pc.note': '立即领取新手礼包，在恐龙世界中获得顺利开局！'
+    }
+};
+
+let currentLang = 'vi';
+
+function t(key, fallback) {
+    const val = i18n[currentLang]?.[key];
+    return val !== undefined ? val : (fallback !== undefined ? fallback : key);
+}

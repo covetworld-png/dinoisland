@@ -43,7 +43,10 @@
       "note": "源文件在 project 下开发，确认后同步到 src/",
       "pathRewrite": {
         "../assets/official/": "../../assets/official/"
-      }
+      },
+      "copyAssets": [
+        {"from": "projects/001-增长/001-03-landing-page/assets/official/lang.js", "to": "src/campaign/assets/official/lang.js"}
+      ]
     },
     "streamer-dropin": {
       "src": "src/campaign/pages/streamer-dropin",

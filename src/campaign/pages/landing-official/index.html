@@ -93,9 +93,9 @@
         /* Language Switcher */
         .lang-switcher {
             position: fixed;
-            top: 16px;
+            top: 56px;
             right: 16px;
-            z-index: 100;
+            z-index: 101;
             display: flex;
             gap: 8px;
             background: var(--jungle-800);
@@ -933,10 +933,19 @@
         }
 
         /* ===== v2.0 Registration Form ===== */
-        .register-section { display: flex; flex-direction: column; gap: 14px; }
+        .register-section { display: flex; flex-direction: column; gap: 14px; padding: 0 20px; }
         .register-section.hidden { display: none; }
-        .success-section { display: none; flex-direction: column; gap: 16px; text-align: center; }
+        .success-section { display: none; flex-direction: column; gap: 20px; text-align: center; padding: 0 20px; }
         .success-section.active { display: flex; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .success-section.active .success-title { animation: fadeInUp 0.5s ease 0.1s both, textGlow 3s ease-in-out 0.7s infinite; }
+        .success-section.active .success-divider { animation: fadeInUp 0.5s ease 0.18s both; }
+        .success-section.active .account-card { animation: fadeInUp 0.5s ease 0.26s both; }
+        .success-section.active .btn-copy-all { animation: fadeInUp 0.5s ease 0.34s both; }
+        .success-section.active .download-section { animation: fadeInUp 0.5s ease 0.42s both; }
         .form-group { display: flex; flex-direction: column; }
         .form-input {
             height: 46px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
@@ -960,7 +969,7 @@
             font-size: 13px; color: var(--text-secondary); white-space: nowrap;
             flex-shrink: 0; padding: 0 10px 0 0;
             border-right: 1px solid rgba(255,255,255,0.08);
-            min-width: 48px; text-align: right;
+            width: 88px; text-align: right;
         }
         .input-with-tag .form-input {
             flex: 1; background: transparent; border: none;
@@ -970,9 +979,9 @@
         .input-with-tag .form-input:focus { box-shadow: none; }
         .form-row { display: flex; gap: 8px; align-items: stretch; }
         .form-row .input-with-tag { flex: 1; }
-        .otp-inputs { display: flex; gap: 6px; justify-content: center; }
+        .otp-inputs { display: flex; gap: 4px; justify-content: center; }
         .otp-box {
-            width: 42px; height: 46px; text-align: center; font-size: 20px; font-weight: 700;
+            width: 38px; height: 46px; text-align: center; font-size: 20px; font-weight: 700;
             color: var(--gold); background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.15);
             border-radius: 8px; outline: none; transition: all 0.2s; caret-color: var(--gold);
         }
@@ -992,7 +1001,7 @@
         @media (max-width: 400px) {
             .form-row { flex-wrap: wrap; }
             .form-row .input-with-tag { width: 100%; flex: none; }
-            .btn-code { width: 100%; min-width: auto; margin-top: 8px; }
+            .btn-code { width: 100%; min-width: auto; margin-top: 8px; font-size: 12px; padding: 0 10px; }
         }
         .btn-submit {
             width: 100%; height: 56px; border-radius: 16px; border: none;
@@ -1015,13 +1024,39 @@
         .error-msg.show { display: block; }
         .input-with-tag.error { border-color: rgba(255,107,107,0.6) !important; box-shadow: 0 0 0 2px rgba(255,107,107,0.15) !important; }
         .otp-box.error { border-color: rgba(255,107,107,0.6) !important; box-shadow: 0 0 0 2px rgba(255,107,107,0.15) !important; }
-        .success-icon { font-size: 56px; line-height: 1; margin-bottom: 4px; }
-        .success-title { font-size: 22px; font-weight: 700; color: var(--gold); }
+
+        .success-title {
+            font-size: 20px; font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--gold) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .success-divider {
+            width: 36px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 4px auto; border-radius: 2px;
+        }
+        @keyframes textGlow {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 4px rgba(255,215,0,0.2)); }
+            50% { filter: brightness(1.25) drop-shadow(0 0 12px rgba(255,215,0,0.5)); }
+        }
+        @keyframes shimmer {
+            0% { left: -60%; }
+            100% { left: 160%; }
+        }
         .success-desc { font-size: 14px; color: var(--text-secondary); }
         .account-card {
-            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,215,0,0.3);
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,215,0,0.4);
+            box-shadow: 0 0 20px rgba(255,215,0,0.08), inset 0 1px 0 rgba(255,255,255,0.05);
             border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;
-            text-align: left;
+            text-align: left; position: relative; overflow: hidden;
+        }
+        .account-card::before {
+            content: ''; position: absolute; top: 0; left: -60%;
+            width: 40%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.06), transparent);
+            animation: shimmer 3s ease-in-out 1s infinite;
         }
         .account-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
         .account-label { font-size: 13px; color: var(--text-secondary); min-width: 60px; }
@@ -1030,25 +1065,65 @@
             color: var(--gold-light); flex: 1; text-align: right; overflow: hidden; text-overflow: ellipsis;
         }
         .btn-copy-all {
-            height: 48px; border-radius: 14px; border: 1px solid var(--gold);
-            background: transparent; color: var(--gold); font-size: 15px; font-weight: 600;
+            height: 54px; border-radius: 16px; border: none;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: #000; font-size: 17px; font-weight: 700;
             font-family: inherit; cursor: pointer; display: flex; align-items: center;
             justify-content: center; gap: 8px; transition: all 0.2s;
+            box-shadow: 0 6px 20px rgba(255,215,0,0.35);
         }
-        .btn-copy-all:hover { background: var(--gold); color: #000; }
+        .btn-copy-all:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,215,0,0.5); }
         .download-section { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
         .btn-download {
-            height: 52px; border-radius: 14px; border: none;
-            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); color: #fff;
-            font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: transform 0.2s; text-decoration: none;
+            height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06); color: var(--text-secondary);
+            font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: all 0.2s; text-decoration: none;
         }
-        .btn-download:hover { transform: translateY(-2px); }
-        .btn-download.drive { background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%); }
+        .btn-download:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); }
+        .btn-download.drive { background: rgba(66,133,244,0.12); border-color: rgba(66,133,244,0.3); color: #8ab4f8; }
+        .btn-download.drive:hover { background: rgba(66,133,244,0.2); }
+        .btn-download:not(.drive) { display: none; }
         .download-hint { font-size: 12px; color: var(--text-secondary); }
         .dkl-link { color: var(--gold); font-weight: 600; text-decoration: none; }
         .dkl-link:hover { text-decoration: underline; }
+        /* Anchor Nav */
+        .anchor-nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(15,23,42,0.92);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(74,154,138,0.15);
+        }
+        .anchor-nav-inner {
+            display: flex; justify-content: center; gap: 0;
+            max-width: 420px; margin: 0 auto;
+            padding: 0 70px 0 16px;
+            box-sizing: border-box;
+        }
+        .anchor-item {
+            flex: 1; text-align: center;
+            padding: 12px 8px; font-size: 14px; font-weight: 600;
+            color: var(--text-secondary); text-decoration: none;
+            position: relative; transition: color 0.2s;
+            white-space: nowrap; cursor: pointer;
+        }
+        .anchor-item.active, .anchor-item:hover { color: var(--gold); }
+        .anchor-item.active::after {
+            content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+            height: 2px; background: var(--gold); border-radius: 1px;
+        }
+        /* Dev Preview Controls */
+        .dev-controls {
+            position: fixed; bottom: 16px; right: 16px; z-index: 9999;
+            display: flex; gap: 8px;
+        }
+        .dev-controls button {
+            padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.6); color: var(--text-primary); font-size: 13px;
+            cursor: pointer; backdrop-filter: blur(8px); white-space: nowrap;
+        }
+        .dev-controls button:hover { background: rgba(255,215,0,0.15); border-color: var(--gold); }
     </style>
 </head>
 <body>
@@ -1056,6 +1131,15 @@
     <div class="lang-switcher">
         <button class="lang-btn active" data-lang="vi">TIẾNG VIỆT</button>
         <button class="lang-btn" data-lang="cn">中文</button>
+    </div>
+
+    <!-- Anchor Nav -->
+    <div class="anchor-nav" id="anchorNav">
+        <div class="anchor-nav-inner">
+            <a href="#" class="anchor-item active" data-anchor="top" data-i18n="nav.reg" onclick="event.preventDefault(); scrollToTop()">注册福利</a>
+            <a href="#gameIntro" class="anchor-item" data-anchor="gameIntro" data-i18n="nav.intro" onclick="event.preventDefault(); scrollToAnchor('gameIntro')">游戏介绍</a>
+            <a href="#sysConfig" class="anchor-item" data-anchor="sysConfig" data-i18n="nav.config" onclick="event.preventDefault(); scrollToAnchor('sysConfig')">系统配置</a>
+        </div>
     </div>
 
     <div class="container">
@@ -1077,21 +1161,21 @@
                 <div class="form-group">
                     <div class="input-with-tag" id="usernameWrap">
                         <span class="input-tag" data-i18n="reg.usernameLabel">用户名</span>
-                        <input type="text" class="form-input" id="regUsername" placeholder="6-20位字母和数字" maxlength="20" autocomplete="username">
+                        <input type="text" class="form-input" id="regUsername" data-i18n-placeholder="reg.usernamePlaceholder" maxlength="20" autocomplete="username">
                     </div>
                     <div class="error-msg" id="usernameError"></div>
                 </div>
                 <div class="form-group">
                     <div class="input-with-tag" id="passwordWrap">
                         <span class="input-tag" data-i18n="reg.passwordLabel">密码</span>
-                        <input type="password" class="form-input" id="regPassword" placeholder="6-20位，字母数字特殊符号" minlength="6" maxlength="20" autocomplete="new-password">
+                        <input type="password" class="form-input" id="regPassword" data-i18n-placeholder="reg.passwordPlaceholder" minlength="6" maxlength="20" autocomplete="new-password">
                     </div>
                     <div class="error-msg" id="passwordError"></div>
                 </div>
                 <div class="form-group">
                     <div class="input-with-tag" id="confirmWrap">
                         <span class="input-tag" data-i18n="reg.confirmLabel">确认密码</span>
-                        <input type="password" class="form-input" id="regConfirm" placeholder="再次输入密码" minlength="6" maxlength="20" autocomplete="new-password">
+                        <input type="password" class="form-input" id="regConfirm" data-i18n-placeholder="reg.confirmPlaceholder" minlength="6" maxlength="20" autocomplete="new-password">
                     </div>
                     <div class="error-msg" id="confirmError"></div>
                 </div>
@@ -1099,7 +1183,7 @@
                     <div class="form-row">
                         <div class="input-with-tag" id="phoneWrap">
                             <span class="input-tag" data-i18n="reg.phoneLabel">手机号</span>
-                            <input type="tel" class="form-input" id="regPhone" placeholder="9-10位数字" inputmode="numeric" autocomplete="tel">
+                            <input type="tel" class="form-input" id="regPhone" data-i18n-placeholder="reg.phonePlaceholder" inputmode="numeric" autocomplete="tel">
                         </div>
                         <button class="btn-code" id="sendCodeBtn" onclick="sendPhoneCode()">
                             <span data-i18n="reg.getCode">获取验证码</span>
@@ -1125,9 +1209,8 @@
 
             <!-- Success Section v2.0 -->
             <div class="success-section" id="successSection">
-                <div class="success-icon">🎉</div>
                 <div class="success-title" data-i18n="reg.successTitle">注册成功！</div>
-                <div class="success-desc" data-i18n="reg.successDesc">您的游戏账号已创建</div>
+                <div class="success-divider"></div>
 
                 <div class="account-card">
                     <div class="account-row">
@@ -1202,7 +1285,7 @@
         </div>
 
         <!-- Dinosaur Carousel -->
-        <div class="glass-card carousel-section">
+        <div class="glass-card carousel-section" id="gameIntro">
             <div class="carousel-container" id="carousel">
                 <div class="carousel-slide active">
                     <img src="../../assets/official/dinos/spino.png" alt="Spinosaurus">
@@ -1278,7 +1361,7 @@
                 </div>
             </div>
 
-            <div class="pc-requirements">
+            <div class="pc-requirements" id="sysConfig">
                 <div class="pc-req-title" data-i18n="pc.req.title">📋 Yêu cầu hệ thống</div>
                 <div class="pc-req-columns">
                     <div class="pc-req-column">
@@ -1367,6 +1450,7 @@
         </div>
     </div>
 
+    <script src="../../assets/official/lang.js"></script>
     <script>
         // ============================================
         // Utility Functions
@@ -1419,133 +1503,30 @@
             const success = copyToClipboard(currentCode);
             const currentLang = document.documentElement.lang || 'vi';
             const message = success 
-                ? (currentLang === 'cn' ? '已复制口令！' : 'Đã sao chép mã!')
-                : (currentLang === 'cn' ? '复制失败，请手动复制' : 'Sao chép thất bại');
+                ? t('toast.copyCodeSuccess')
+                : t('toast.copyCodeFail');
             showToastMessage(message);
         };
 
         // ============================================
         // Internationalization
         // ============================================
-        const i18n = {
-            vi: {
-                'page.title': 'Đảo Khủng Long - Quà Tân Thủ',
-                'hero.title': '🎁 Tặng Khủng Long Khởi Đầu',
-                'hero.subtitle': 'Quà chào mừng dành cho tân thủ',
-                'steps.title': '📋 3 步开始游戏',
-                'steps.step1': '注册账号',
-                'steps.step2': '下载 PC 游戏',
-                'steps.step3': '登录游玩',
-                'reg.usernameLabel': '用户名',
-                'reg.passwordLabel': '密码',
-                'reg.confirmLabel': '确认密码',
-                'reg.phoneLabel': '手机号',
-                'reg.getCode': '获取验证码',
-                'reg.codeLabel': '验证码',
-                'reg.submit': '🚀 立即注册',
-                'reg.successTitle': '注册成功！',
-                'reg.successDesc': '您的游戏账号已创建',
-                'reg.accountLabel': '用户名',
-                'reg.pwdLabel': '密码',
-                'reg.phoneLabel2': '手机号',
-                'reg.copyAll': '一键复制全部信息',
-                'reg.copyHint': '复制后可通过 Zalo 发送给自己备份',
-                'reg.downloadTitle': '⬇️ 下载游戏客户端',
-                'reg.downloadMF': 'MediaFire 直接下载',
-                'reg.downloadGD': 'Google Drive（可保存到云端）',
-                'reg.downloadTip': '打开 Google Drive → ⋮ → "保存到我的云端硬盘"',
-                'reg.dklHint': '或直接在电脑浏览器访问',
-                'reg.dklHint2': '下载安装',
-                'reg.wait': '发送中...',
-                'reg.retry': '重试',
-                'reg.seconds': '秒',
-                
-                'toast.copied': 'Đã sao chép!',
-                'clipboard.title': 'Nhận quà tân thủ',
-                'clipboard.desc': 'Vui lòng sao chép mã code',
-                'clipboard.codeLabel': 'MÃ NHẬN QUÀ',
-                'clipboard.copyCode': 'Sao chép mã',
-                'clipboard.hint': 'Thêm CSKH và gửi mã này để nhận quà!',
-                'clipboard.phoneLabel': 'Hoặc sao chép SĐT CSKH',
-                'pc.title': 'Game PC - Đảo Khủng Long',
-                'pc.subtitle': 'Thế giới khủng long 3D sống động, hoành tráng!',
-                'pc.feature1': 'Đồ họa 3D đỉnh cao',
-                'pc.feature1.desc': 'Hình ảnh sắc nét, sống động như thật!',
-                'pc.feature2': 'Sinh tồn làm Long',
-                'pc.feature2.desc': 'Hóa thân khủng long, săn mồi tiến hóa!',
-                'pc.feature3': 'Long trận quyết chiến',
-                'pc.feature3.desc': 'Trăm long tranh hùng, kẻ mạnh vương!',
-                'pc.req.title': '📋 Yêu cầu hệ thống',
-                'pc.req.min': 'Cấu hình tối thiểu',
-                'pc.req.rec': 'Cấu hình đề xuất',
-                'pc.req.networkVal': 'Băng thông cao tốc',
-                'pc.note': 'Nhận quà tân thủ ngay hôm nay để có khởi đầu thuận lợi trong thế giới khủng long!'
-            },
-            cn: {
-                'page.title': '恐龙岛 - PC端游戏福利',
-                'hero.title': '🎁 开局送恐龙',
-                'hero.subtitle': '新玩家欢迎礼',
-                'steps.title': '📋 3 步开始游戏',
-                'steps.step1': '注册账号',
-                'steps.step2': '下载 PC 游戏',
-                'steps.step3': '登录游玩',
-                'reg.usernameLabel': '用户名',
-                'reg.passwordLabel': '密码',
-                'reg.confirmLabel': '确认密码',
-                'reg.phoneLabel': '手机号',
-                'reg.getCode': '获取验证码',
-                'reg.codeLabel': '验证码',
-                'reg.submit': '🚀 立即注册',
-                'reg.successTitle': '注册成功！',
-                'reg.successDesc': '您的游戏账号已创建',
-                'reg.accountLabel': '用户名',
-                'reg.pwdLabel': '密码',
-                'reg.phoneLabel2': '手机号',
-                'reg.copyAll': '一键复制全部信息',
-                'reg.copyHint': '复制后可通过 Zalo 发送给自己备份',
-                'reg.downloadTitle': '⬇️ 下载游戏客户端',
-                'reg.downloadMF': 'MediaFire 直接下载',
-                'reg.downloadGD': 'Google Drive（可保存到云端）',
-                'reg.downloadTip': '打开 Google Drive → ⋮ → "保存到我的云端硬盘"',
-                'reg.dklHint': '或直接在电脑浏览器访问',
-                'reg.dklHint2': '下载安装',
-                'reg.wait': '发送中...',
-                'reg.retry': '重试',
-                'reg.seconds': '秒',
-                
-                'toast.copied': '已复制！',
-                'clipboard.title': '领取新手礼包',
-                'clipboard.desc': '请手动复制口令',
-                'clipboard.codeLabel': '礼包口令',
-                'clipboard.copyCode': '复制口令',
-                'clipboard.hint': '添加客服后发送此口令领取礼包！',
-                'clipboard.phoneLabel': '点击复制客服号',
-                'pc.title': 'PC游戏 - 恐龙岛',
-                'pc.subtitle': '3D恐龙世界，栩栩如生，气势磅礴！',
-                'pc.feature1': '3D画质超高清',
-                'pc.feature1.desc': '画面精致细腻，身临其境！',
-                'pc.feature2': '化身恐龙生存',
-                'pc.feature2.desc': '扮演恐龙，狩猎进化，适者生存！',
-                'pc.feature3': '百龙争霸战场',
-                'pc.feature3.desc': '群雄逐鹿，胜者为王！',
-                'pc.req.title': '📋 系统配置要求',
-                'pc.req.min': '最低配置',
-                'pc.req.rec': '推荐配置',
-                'pc.req.networkVal': '高速宽带连接',
-                'pc.note': '立即领取新手礼包，在恐龙世界中获得顺利开局！'
-            }
-        };
-
-        let currentLang = 'vi';
 
         function setLanguage(lang) {
             currentLang = lang;
             document.documentElement.lang = lang;
-            
+
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (i18n[lang][key]) {
                     el.textContent = i18n[lang][key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (i18n[lang][key]) {
+                    el.placeholder = i18n[lang][key];
                 }
             });
 
@@ -2072,6 +2053,7 @@
         // v2.0 Registration Logic
         // ============================================
         const API_BASE = '';
+        const MOCK_API = location.hostname.includes('github.io') || location.protocol === 'file:';
         const regUsername = document.getElementById('regUsername');
         const regPassword = document.getElementById('regPassword');
         const regConfirm = document.getElementById('regConfirm');
@@ -2158,31 +2140,31 @@
             let ok = true;
             if (name === 'username' || name === 'all') {
                 const v = regUsername.value.trim();
-                if (!v) { if (showError) showFieldError('username', '请输入用户名'); ok = false; }
-                else if (!validateUsername(v)) { if (showError) showFieldError('username', '用户名仅支持6-20位字母和数字'); ok = false; }
+                if (!v) { if (showError) showFieldError('username', t('reg.usernameRequired')); ok = false; }
+                else if (!validateUsername(v)) { if (showError) showFieldError('username', t('reg.usernameInvalid')); ok = false; }
                 else clearFieldError('username');
             }
             if (name === 'password' || name === 'all') {
                 const v = regPassword.value.trim();
-                if (!v) { if (showError) showFieldError('password', '请输入密码'); ok = false; }
-                else if (!validatePassword(v)) { if (showError) showFieldError('password', '密码仅支持6-20位字母、数字和特殊符号(-_+@#$%^&*)'); ok = false; }
+                if (!v) { if (showError) showFieldError('password', t('reg.passwordRequired')); ok = false; }
+                else if (!validatePassword(v)) { if (showError) showFieldError('password', t('reg.passwordInvalid')); ok = false; }
                 else clearFieldError('password');
             }
             if (name === 'confirm' || name === 'all') {
                 const v = regConfirm.value.trim(), p = regPassword.value.trim();
-                if (!v) { if (showError) showFieldError('confirm', '请再次输入密码'); ok = false; }
-                else if (v !== p) { if (showError) showFieldError('confirm', '两次输入的密码不一致'); ok = false; }
+                if (!v) { if (showError) showFieldError('confirm', t('reg.confirmRequired')); ok = false; }
+                else if (v !== p) { if (showError) showFieldError('confirm', t('reg.confirmMismatch')); ok = false; }
                 else clearFieldError('confirm');
             }
             if (name === 'phone' || name === 'all') {
                 const v = regPhone.value.trim().replace(/\D/g, '');
-                if (!v) { if (showError) showFieldError('phone', '请输入手机号'); ok = false; }
-                else if (!validatePhone(v)) { if (showError) showFieldError('phone', '手机号长度必须介于9和10之间'); ok = false; }
+                if (!v) { if (showError) showFieldError('phone', t('reg.phoneRequired')); ok = false; }
+                else if (!validatePhone(v)) { if (showError) showFieldError('phone', t('reg.phoneInvalid')); ok = false; }
                 else clearFieldError('phone');
             }
             if (name === 'code' || name === 'all') {
                 const v = getOtpValue();
-                if (v.length !== 6) { if (showError) showFieldError('code', '验证码长度为6位'); ok = false; }
+                if (v.length !== 6) { if (showError) showFieldError('code', t('reg.codeLength')); ok = false; }
                 else clearFieldError('code');
             }
             return ok;
@@ -2218,27 +2200,36 @@
 
             sendCodeBtn.disabled = true;
             const orig = sendCodeBtn.innerHTML;
-            sendCodeBtn.innerHTML = '<span>发送中...</span>';
+            sendCodeBtn.innerHTML = '<span>' + t('reg.wait') + '</span>';
 
             try {
-                const res = await fetch(`${API_BASE}/api/sendPhoneCode`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone })
-                });
-                const data = await res.json();
-                if (data.code === 0) {
-                    showToast('验证码已发送，请查收短信');
-                    focusOtpBox(0);
-                    codeCountdown = 60;
-                    const t = setInterval(() => {
-                        codeCountdown--;
-                        if (codeCountdown > 0) sendCodeBtn.innerHTML = `<span>${codeCountdown}秒</span>`;
-                        else { clearInterval(t); sendCodeBtn.disabled = false; sendCodeBtn.innerHTML = `<span>重试</span>`; }
-                    }, 1000);
-                } else { throw new Error(data.message); }
+                if (MOCK_API) {
+                    await new Promise(r => setTimeout(r, 600));
+                } else {
+                    const res = await fetch(`${API_BASE}/api/sendPhoneCode`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone })
+                    });
+                    const text = await res.text();
+                    let data;
+                    try { data = JSON.parse(text); } catch { data = { code: -1, message: `HTTP ${res.status}: ${text.slice(0, 100)}` }; }
+                    if (data.code !== 0) throw new Error(data.message || `请求失败 (code:${data.code})`);
+                }
+                showToast(t('reg.codeSent'));
+                focusOtpBox(0);
+                codeCountdown = 60;
+                const t = setInterval(() => {
+                    codeCountdown--;
+                    if (codeCountdown > 0) sendCodeBtn.innerHTML = '<span>' + codeCountdown + t('reg.seconds') + '</span>';
+                    else { clearInterval(t); sendCodeBtn.disabled = false; sendCodeBtn.innerHTML = '<span>' + t('reg.retry') + '</span>'; }
+                }, 1000);
             } catch (err) {
                 sendCodeBtn.disabled = false; sendCodeBtn.innerHTML = orig;
-                showToast(err.message || '网络错误，请重试');
+                if (err.name === 'TypeError') {
+                    showToast(t('reg.officialOnly'));
+                } else {
+                    showToast(err.message || t('reg.networkError'));
+                }
             }
         }
 
@@ -2254,37 +2245,46 @@
 
             registerBtn.disabled = true;
             const orig = registerBtn.innerHTML;
-            registerBtn.innerHTML = '<span>处理中...</span>';
+            registerBtn.innerHTML = '<span>' + t('reg.processing') + '</span>';
 
             try {
-                const res = await fetch(`${API_BASE}/api/regSendCode`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username, password, phone, code,
-                        invitecode: getUrlParam('ref') || '', randstr: '', ticket: ''
-                    })
-                });
-                const data = await res.json();
-                if (data.code === 0) {
-                    savedUsername = data.extra?.username || username;
-                    savedPassword = password;
-                    savedPhone = phone;
-                    document.getElementById('sUsername').textContent = savedUsername;
-                    document.getElementById('sPassword').textContent = savedPassword;
-                    document.getElementById('sPhone').textContent = savedPhone;
-                    registerSection.classList.add('hidden');
-                    successSection.classList.add('active');
-                    document.getElementById('stepsCard').style.display = 'none';
-                    showToast('注册成功！');
-                } else if (data.message.includes('用户名')) { showToast('用户名已存在'); regUsername.focus(); }
-                else if (data.message.includes('手机')) { showToast('手机号已存在'); regPhone.focus(); }
-                else if (data.message.includes('验证码')) { showToast('验证码错误'); focusOtpBox(5); }
-                else { showToast(data.message || '注册失败'); }
+                let responseData;
+                if (MOCK_API) {
+                    await new Promise(r => setTimeout(r, 600));
+                    responseData = { extra: { username } };
+                } else {
+                    const res = await fetch(`${API_BASE}/api/regSendCode`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            username, password, phone, code,
+                            invitecode: getUrlParam('ref') || '', randstr: '', ticket: ''
+                        })
+                    });
+                    const text = await res.text();
+                    let data;
+                    try { data = JSON.parse(text); } catch { data = { code: -1, message: `HTTP ${res.status}: ${text.slice(0, 100)}` }; }
+                    if (data.code === 0) {
+                        responseData = data;
+                    } else if (data.message.includes('用户名')) { showToast(t('reg.usernameExists')); regUsername.focus(); throw new Error(''); }
+                    else if (data.message.includes('手机')) { showToast(t('reg.phoneExists')); regPhone.focus(); throw new Error(''); }
+                    else if (data.message.includes('验证码')) { showToast(t('reg.codeError')); focusOtpBox(5); throw new Error(''); }
+                    else { showToast(data.message || t('reg.registerFailed')); throw new Error(''); }
+                }
+                savedUsername = responseData.extra?.username || username;
+                savedPassword = password;
+                savedPhone = phone;
+                document.getElementById('sUsername').textContent = savedUsername;
+                document.getElementById('sPassword').textContent = savedPassword;
+                document.getElementById('sPhone').textContent = savedPhone;
+                registerSection.classList.add('hidden');
+                successSection.classList.add('active');
+                document.getElementById('stepsCard').style.display = 'none';
+                showToast(t('reg.successTitle'));
             } catch (err) {
                 if (err.name === 'TypeError') {
                     showToast('请通过游戏官网 dkl.vn 访问本页面');
                 } else {
-                    showToast(err.message || '网络错误，请重试');
+                    showToast(err.message || t('reg.networkError'));
                 }
             } finally {
                 registerBtn.disabled = false; registerBtn.innerHTML = orig;
@@ -2294,7 +2294,7 @@
         function copyAllInfo() {
             const text = `账号：${savedUsername}\n密码：${savedPassword}\n手机号：${savedPhone}\n官网：dkl.vn`;
             copyToClipboard(text);
-            showToast('已复制！建议通过 Zalo 发送给自己备份');
+            showToast(t('reg.copySuccess'));
         }
 
         function trackEvent(name) {
@@ -2468,6 +2468,54 @@
             console.log('[Init] DOM already ready, running checkUrlParams now');
             checkUrlParams();
         }
+        // Anchor Nav
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function scrollToAnchor(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                const navHeight = document.getElementById('anchorNav').offsetHeight;
+                const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
+        }
+        function updateAnchorNav() {
+            const threshold = document.getElementById('anchorNav').offsetHeight + 20;
+            let active = 'top';
+            const gi = document.getElementById('gameIntro');
+            const sc = document.getElementById('sysConfig');
+            const giTop = gi ? gi.getBoundingClientRect().top : Infinity;
+            const scTop = sc ? sc.getBoundingClientRect().top : Infinity;
+            if (scTop <= threshold) active = 'sysConfig';
+            else if (giTop <= threshold) active = 'gameIntro';
+            document.querySelectorAll('.anchor-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.anchor === active);
+            });
+        }
+        window.addEventListener('scroll', updateAnchorNav, { passive: true });
+
+        // Dev preview: toggle registration states
+        function devToggleState(state) {
+            if (state === 'success') {
+                document.getElementById('sUsername').textContent = 'testuser888';
+                document.getElementById('sPassword').textContent = 'Test@1234';
+                document.getElementById('sPhone').textContent = '357820961';
+                registerSection.classList.add('hidden');
+                successSection.classList.add('active');
+                document.getElementById('stepsCard').style.display = 'none';
+            } else {
+                registerSection.classList.remove('hidden');
+                successSection.classList.remove('active');
+                document.getElementById('stepsCard').style.display = '';
+            }
+        }
     </script>
+
+    <!-- Dev Preview Controls -->
+    <div class="dev-controls">
+        <button onclick="devToggleState('form')">📝 注册表单</button>
+        <button onclick="devToggleState('success')">✅ 成功页面</button>
+    </div>
 </body>
 </html>
