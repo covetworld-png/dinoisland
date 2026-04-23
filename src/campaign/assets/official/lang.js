@@ -95,14 +95,14 @@ const i18n = {
 
         // Dinosaur names
         'dino.spino': 'Spinosaurus',
-        'dino.trex': 'T-Rex',
+        'dino.trex': 'Khủng Long Bạo Chúa',
         'dino.ankylo': 'Ankylosaurus',
         'dino.brachio': 'Brachiosaurus',
         'dino.tricera': 'Triceratops',
         'dino.sucho': 'Suchomimus',
         'dino.acro': 'Acrocanthosaurus',
         'dino.herrera': 'Herrerasaurus',
-        'dino.ptero': 'Pterosaur'
+        'dino.ptero': 'Khủng Long Cánh'
     },
     cn: {
         'page.title': '恐龙岛 - PC端游戏福利',
