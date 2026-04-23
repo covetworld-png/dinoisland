@@ -94,13 +94,13 @@ const i18n = {
         'pc.note': 'Nhận quà tân thủ ngay hôm nay để có khởi đầu thuận lợi trong thế giới khủng long!',
 
         // Dinosaur names
-        'dino.spino': 'Spinosaurus',
+        'dino.spino': 'Spino_Hypo',
         'dino.trex': 'Khủng Long Bạo Chúa',
         'dino.ankylo': 'Ankylosaurus',
-        'dino.brachio': 'Brachiosaurus',
+        'dino.brachio': 'Puerta',
         'dino.tricera': 'Triceratops',
-        'dino.sucho': 'Suchomimus',
-        'dino.acro': 'Acrocanthosaurus',
+        'dino.sucho': 'Galli',
+        'dino.acro': 'Acro',
         'dino.herrera': 'Herrerasaurus',
         'dino.ptero': 'Khủng Long Cánh'
     },
@@ -199,13 +199,13 @@ const i18n = {
         'pc.note': '立即领取新手礼包，在恐龙世界中获得顺利开局！',
 
         // Dinosaur names
-        'dino.spino': '棘龙',
+        'dino.spino': '脊背龙',
         'dino.trex': '霸王龙',
         'dino.ankylo': '甲龙',
-        'dino.brachio': '腕龙',
+        'dino.brachio': '雷龙',
         'dino.tricera': '三角龙',
-        'dino.sucho': '似鳄龙',
-        'dino.acro': '高棘龙',
+        'dino.sucho': '踢脚鸡',
+        'dino.acro': '高脊龙',
         'dino.herrera': '埃雷拉龙',
         'dino.ptero': '翼龙'
     }
