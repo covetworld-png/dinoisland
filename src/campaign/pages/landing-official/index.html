@@ -2343,8 +2343,10 @@
 
             playIntro() {
                 clearInterval(this.interval);
-                // 移除 transition，实现无动画快速跳切
-                this.slides.forEach(slide => slide.style.transition = 'none');
+                // 快速滑动，短 transition 营造滚动感
+                this.slides.forEach(slide => {
+                    slide.style.transition = 'transform 0.18s linear';
+                });
                 let pos = this.slides.length - 1;
                 const fast = setInterval(() => {
                     this.goToSlide(pos);
@@ -2353,7 +2355,7 @@
                         clearInterval(fast);
                         this.decelerateToFirst();
                     }
-                }, 70);
+                }, 200);
             },
 
             decelerateToFirst() {
