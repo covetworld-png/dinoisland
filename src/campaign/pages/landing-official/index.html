@@ -2555,9 +2555,10 @@
         // Background: auto-switch image/video by network
         // ============================================
         function initBackground() {
+            const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
             const isWechat = /MicroMessenger/i.test(navigator.userAgent);
             const conn = navigator.connection;
-            let useVideo = !isWechat;
+            let useVideo = !isTouch && !isWechat;
 
             if (useVideo && conn) {
                 if (conn.saveData) useVideo = false;
@@ -2569,33 +2570,16 @@
             const bgVideo = document.querySelector('.bg-video');
             if (!bgImage || !bgVideo) return;
 
-            // 默认先显示图片，视频播放成功后再切换（防止黑屏）
-            bgImage.style.display = 'block';
-            bgVideo.style.display = 'none';
-
             if (useVideo) {
-                const tryPlay = () => {
-                    bgVideo.style.display = 'block';
-                    bgVideo.play().then(() => {
-                        bgImage.style.display = 'none';
-                        console.log('[BG] video playing');
-                    }).catch((err) => {
-                        console.warn('[BG] play failed:', err.name);
-                        bgVideo.style.display = 'none';
-                        bgImage.style.display = 'block';
-                    });
-                };
-
-                if (bgVideo.readyState >= 3) {
-                    tryPlay();
-                } else {
-                    bgVideo.addEventListener('canplay', tryPlay, { once: true });
-                    setTimeout(() => {
-                        if (bgVideo.style.display === 'none') {
-                            bgImage.style.display = 'block';
-                        }
-                    }, 3000);
-                }
+                bgImage.style.display = 'none';
+                bgVideo.style.display = 'block';
+                bgVideo.play().catch(() => {
+                    bgVideo.style.display = 'none';
+                    bgImage.style.display = 'block';
+                });
+            } else {
+                bgImage.style.display = 'block';
+                bgVideo.style.display = 'none';
             }
         }
 
