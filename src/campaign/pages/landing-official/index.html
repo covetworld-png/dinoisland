@@ -74,17 +74,17 @@
 
         .bg-play-btn {
             position: fixed;
-            top: 56px;
+            top: 80px;
             left: 16px;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: var(--jungle-800);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(74, 154, 138, 0.3);
+            border: 1px solid var(--gold);
             color: var(--gold);
-            font-size: 14px;
+            font-size: 16px;
             display: none;
             align-items: center;
             justify-content: center;
@@ -94,11 +94,16 @@
             padding: 0;
             line-height: 1;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            animation: pulseBtn 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseBtn {
+            0%, 100% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3); }
         }
 
         .bg-play-btn:hover {
             background: rgba(255, 215, 0, 0.15);
-            border-color: var(--gold);
             transform: scale(1.1);
         }
 
@@ -2631,23 +2636,35 @@
                     // 移动端：显示图片 + 播放按钮
                     bgImage.style.display = 'block';
                     bgVideo.style.display = 'none';
-                    if (playBtn) playBtn.classList.add('active');
+                    if (playBtn) {
+                        playBtn.classList.add('active');
+                        playBtn.classList.remove('hidden');
+                    }
                 } else {
                     // 桌面端：直接尝试视频，成功则隐藏按钮
                     bgImage.style.display = 'none';
                     bgVideo.style.display = 'block';
                     bgVideo.play().then(() => {
-                        if (playBtn) playBtn.classList.add('hidden');
+                        if (playBtn) {
+                            playBtn.classList.add('hidden');
+                            playBtn.classList.remove('active');
+                        }
                     }).catch(() => {
                         bgVideo.style.display = 'none';
                         bgImage.style.display = 'block';
-                        if (playBtn) playBtn.classList.add('active');
+                        if (playBtn) {
+                            playBtn.classList.add('active');
+                            playBtn.classList.remove('hidden');
+                        }
                     });
                 }
             } else {
                 bgImage.style.display = 'block';
                 bgVideo.style.display = 'none';
-                if (playBtn) playBtn.classList.add('hidden');
+                if (playBtn) {
+                    playBtn.classList.add('hidden');
+                    playBtn.classList.remove('active');
+                }
             }
         }
 
