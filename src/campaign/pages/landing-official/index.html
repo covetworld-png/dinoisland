@@ -440,6 +440,34 @@
             border-radius: 4px;
         }
 
+        .dino-name {
+            position: absolute;
+            bottom: 44px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 26, 21, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 6px 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(74, 154, 138, 0.3);
+            color: var(--gold);
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 2;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .carousel-slide.active .dino-name {
+            opacity: 1;
+        }
+
         /* Benefits Section */
         .benefits-list {
             display: flex;
@@ -1309,30 +1337,39 @@
             <div class="carousel-container" id="carousel">
                 <div class="carousel-slide active">
                     <img src="../../assets/official/dinos/spino.png" alt="Spinosaurus">
+                    <div class="dino-name" data-i18n="dino.spino">Spinosaurus</div>
                 </div>
                 <div class="carousel-slide">
                     <img src="../../assets/official/dinos/trex.png" alt="T-Rex">
+                    <div class="dino-name" data-i18n="dino.trex">T-Rex</div>
                 </div>
                 <div class="carousel-slide">
                     <img src="../../assets/official/dinos/ankylosaur.png" alt="Ankylosaurus">
+                    <div class="dino-name" data-i18n="dino.ankylo">Ankylosaurus</div>
                 </div>
                 <div class="carousel-slide">
                     <img src="../../assets/official/dinos/brachio.png" alt="Brachiosaurus">
+                    <div class="dino-name" data-i18n="dino.brachio">Brachiosaurus</div>
                 </div>
                 <div class="carousel-slide">
                     <img src="../../assets/official/dinos/triceratops.png" alt="Triceratops">
+                    <div class="dino-name" data-i18n="dino.tricera">Triceratops</div>
                 </div>
                 <div class="carousel-slide">
                     <img src="../../assets/official/dinos/suchomimus.png" alt="Suchomimus">
+                    <div class="dino-name" data-i18n="dino.sucho">Suchomimus</div>
                 </div>
                 <div class="carousel-slide">
                     <img src="../../assets/official/dinos/acro.png" alt="Acrocanthosaurus">
+                    <div class="dino-name" data-i18n="dino.acro">Acrocanthosaurus</div>
                 </div>
                 <div class="carousel-slide">
                     <img src="../../assets/official/dinos/herrera.png" alt="Herrerasaurus">
+                    <div class="dino-name" data-i18n="dino.herrera">Herrerasaurus</div>
                 </div>
                 <div class="carousel-slide">
                     <img src="../../assets/official/dinos/pterosaur.png" alt="Pterosaur">
+                    <div class="dino-name" data-i18n="dino.ptero">Pterosaur</div>
                 </div>
                 <div class="carousel-indicators">
                     <div class="carousel-dot active" data-index="0"></div>
@@ -2345,6 +2382,7 @@
             updateSlidePosition() {
                 this.slides.forEach((slide, i) => {
                     slide.style.transform = `translateX(${(i - this.currentIndex) * 100}%)`;
+                    slide.classList.toggle('active', i === this.currentIndex);
                 });
                 this.dots.forEach((dot, i) => {
                     dot.classList.toggle('active', i === this.currentIndex);
@@ -2388,6 +2426,9 @@
                     });
 
                     const activeIndex = Math.min(Math.round(currentPosMod), total - 1);
+                    this.slides.forEach((slide, i) => {
+                        slide.classList.toggle('active', i === activeIndex);
+                    });
                     this.dots.forEach((dot, i) => {
                         dot.classList.toggle('active', i === activeIndex);
                     });

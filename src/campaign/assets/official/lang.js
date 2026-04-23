@@ -91,7 +91,18 @@ const i18n = {
         'pc.req.min': 'Cấu hình tối thiểu',
         'pc.req.rec': 'Cấu hình đề xuất',
         'pc.req.networkVal': 'Băng thông cao tốc',
-        'pc.note': 'Nhận quà tân thủ ngay hôm nay để có khởi đầu thuận lợi trong thế giới khủng long!'
+        'pc.note': 'Nhận quà tân thủ ngay hôm nay để có khởi đầu thuận lợi trong thế giới khủng long!',
+
+        // Dinosaur names
+        'dino.spino': 'Spinosaurus',
+        'dino.trex': 'T-Rex',
+        'dino.ankylo': 'Ankylosaurus',
+        'dino.brachio': 'Brachiosaurus',
+        'dino.tricera': 'Triceratops',
+        'dino.sucho': 'Suchomimus',
+        'dino.acro': 'Acrocanthosaurus',
+        'dino.herrera': 'Herrerasaurus',
+        'dino.ptero': 'Pterosaur'
     },
     cn: {
         'page.title': '恐龙岛 - PC端游戏福利',
@@ -185,7 +196,18 @@ const i18n = {
         'pc.req.min': '最低配置',
         'pc.req.rec': '推荐配置',
         'pc.req.networkVal': '高速宽带连接',
-        'pc.note': '立即领取新手礼包，在恐龙世界中获得顺利开局！'
+        'pc.note': '立即领取新手礼包，在恐龙世界中获得顺利开局！',
+
+        // Dinosaur names
+        'dino.spino': '棘龙',
+        'dino.trex': '霸王龙',
+        'dino.ankylo': '甲龙',
+        'dino.brachio': '腕龙',
+        'dino.tricera': '三角龙',
+        'dino.sucho': '似鳄龙',
+        'dino.acro': '高棘龙',
+        'dino.herrera': '埃雷拉龙',
+        'dino.ptero': '翼龙'
     }
 };
 
