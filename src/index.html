@@ -196,6 +196,35 @@
       padding-top: 24px;
       border-top: 1px solid var(--border);
     }
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .copy-btn {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 2px 8px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .copy-btn.copied {
+      border-color: #2ecc71;
+      color: #2ecc71;
+    }
     @media (max-width: 640px) {
       .mode-bar { flex-wrap: wrap; }
       .mode-hint { margin-left: 0; width: 100%; }
@@ -432,6 +461,40 @@
       const hint = document.getElementById('mode-hint');
       const cards = document.querySelectorAll('.card');
 
+      // 初始化：为每个卡片注入复制按钮
+      cards.forEach(card => {
+        const header = card.querySelector('.card-header');
+        const badge = header.querySelector('.badge');
+        if (!badge) return;
+
+        const actions = document.createElement('div');
+        actions.className = 'card-actions';
+
+        // 将 badge 移入 actions
+        actions.appendChild(badge);
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.type = 'button';
+        copyBtn.textContent = '📋 复制';
+        copyBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          navigator.clipboard.writeText(card.dataset.gh).then(() => {
+            copyBtn.classList.add('copied');
+            const original = copyBtn.textContent;
+            copyBtn.textContent = '✓ 已复制';
+            setTimeout(() => {
+              copyBtn.classList.remove('copied');
+              copyBtn.textContent = original;
+            }, 1500);
+          });
+        });
+
+        actions.appendChild(copyBtn);
+        header.appendChild(actions);
+      });
+
       function setMode(mode) {
         const isLocal = mode === 'local';
         btnLocal.classList.toggle('active', isLocal);
@@ -444,10 +507,12 @@
           const pathEl = card.querySelector('.card-path');
           const qrEl = card.querySelector('.qr-code');
           const qrImg = qrEl ? qrEl.querySelector('img') : null;
+          const copyBtn = card.querySelector('.copy-btn');
           if (isLocal) {
             card.href = card.dataset.local;
             if (pathEl) pathEl.textContent = card.dataset.local;
             if (qrEl) qrEl.style.display = 'none';
+            if (copyBtn) copyBtn.style.display = 'none';
           } else {
             card.href = card.dataset.gh;
             if (pathEl) pathEl.textContent = card.dataset.gh;
@@ -455,6 +520,7 @@
               qrEl.style.display = '';
               if (qrImg && !qrImg.src) qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(card.dataset.gh);
             }
+            if (copyBtn) copyBtn.style.display = 'inline-flex';
           }
           card.target = '_blank';
         });
