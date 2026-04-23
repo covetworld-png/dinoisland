@@ -2558,7 +2558,7 @@
             const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
             const isWechat = /MicroMessenger/i.test(navigator.userAgent);
             const conn = navigator.connection;
-            let useVideo = !isTouch && !isWechat;
+            let useVideo = !isWechat;
 
             if (useVideo && conn) {
                 if (conn.saveData) useVideo = false;
@@ -2571,12 +2571,31 @@
             if (!bgImage || !bgVideo) return;
 
             if (useVideo) {
-                bgImage.style.display = 'none';
-                bgVideo.style.display = 'block';
-                bgVideo.play().catch(() => {
-                    bgVideo.style.display = 'none';
+                if (isTouch) {
+                    // 移动端：先显示图片，用户交互后尝试视频
                     bgImage.style.display = 'block';
-                });
+                    bgVideo.style.display = 'none';
+                    const tryVideoOnInteraction = () => {
+                        bgVideo.style.display = 'block';
+                        bgVideo.play().then(() => {
+                            bgImage.style.display = 'none';
+                            console.log('[BG] video playing after interaction');
+                        }).catch(() => {
+                            bgVideo.style.display = 'none';
+                            bgImage.style.display = 'block';
+                        });
+                    };
+                    document.addEventListener('touchstart', tryVideoOnInteraction, { once: true });
+                    document.addEventListener('click', tryVideoOnInteraction, { once: true });
+                } else {
+                    // 桌面端：直接尝试视频
+                    bgImage.style.display = 'none';
+                    bgVideo.style.display = 'block';
+                    bgVideo.play().catch(() => {
+                        bgVideo.style.display = 'none';
+                        bgImage.style.display = 'block';
+                    });
+                }
             } else {
                 bgImage.style.display = 'block';
                 bgVideo.style.display = 'none';
