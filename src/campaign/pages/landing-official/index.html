@@ -2538,124 +2538,155 @@
             btn.innerHTML = '<span>⏳</span><span>' + (currentLang === 'vi' ? 'Đang xử lý...' : '处理中...') + '</span>';
             try {
                 const isVi = currentLang === 'vi';
-                const card = document.createElement('div');
-                card.style.cssText = 'position:relative;width:420px;padding:32px;border-radius:24px;border:2px solid rgba(255,215,0,0.45);color:#e8f5e9;font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.6);overflow:hidden;';
+                const W = 840, H = 1400;
+                const canvas = document.createElement('canvas');
+                canvas.width = W; canvas.height = H;
+                const ctx = canvas.getContext('2d');
 
-                const gameName = isVi ? 'ĐẢO KHỦNG LONG' : '恐龙岛';
-                const gameSub = isVi ? 'Game PC 3D - Thế giới khủng long sống động' : 'PC端3D恐龙世界';
-                const accountLabel = isVi ? 'THÔNG TIN TÀI KHOẢN' : '账号信息';
-                const configLabel = isVi ? 'CẤU HÌNH HỆ THỐNG' : '系统配置要求';
-                const minLabel = isVi ? 'Tối thiểu' : '最低配置';
-                const recLabel = isVi ? 'Đề xuất' : '推荐配置';
-                const accountLbl = isVi ? 'Tài khoản' : '用户名';
-                const pwdLbl = isVi ? 'Mật khẩu' : '密码';
-                const phoneLbl2 = isVi ? 'SĐT' : '手机号';
-                const webLbl = isVi ? 'Website PC' : 'PC端官网';
+                // 背景渐变
+                const grad = ctx.createLinearGradient(0, 0, 0, H);
+                grad.addColorStop(0, '#0d1f17');
+                grad.addColorStop(0.5, '#143326');
+                grad.addColorStop(1, '#0d1f17');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
 
-                const bgImg = document.createElement('img');
-                bgImg.src = bgData || '';
-                bgImg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0.25;z-index:0;';
-                card.appendChild(bgImg);
-
-                const content = document.createElement('div');
-                content.style.cssText = 'position:relative;z-index:1;';
-                content.innerHTML = `
-                    <div style="text-align:center;margin-bottom:22px;">
-                        <img src="${logoData || ''}" style="width:180px;height:auto;margin-bottom:8px;filter:drop-shadow(0 2px 8px rgba(255,215,0,0.25));">
-                        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;letter-spacing:1px;">${gameSub}</div>
-                    </div>
-                    <div style="height:1px;background:rgba(255,215,0,0.25);margin:0 0 18px;"></div>
-                    <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;text-align:center;font-weight:600;">${accountLabel}</div>
-                    <div style="background:rgba(0,0,0,0.35);border-radius:14px;padding:14px 18px;border:1px solid rgba(255,215,0,0.15);margin-bottom:18px;">
-                        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-                            <span style="color:rgba(255,255,255,0.55);font-size:13px;">${accountLbl}</span>
-                            <span style="color:#FFD700;font-size:14px;font-weight:600;font-family:monospace;">${savedUsername}</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-                            <span style="color:rgba(255,255,255,0.55);font-size:13px;">${pwdLbl}</span>
-                            <span style="color:#FFD700;font-size:14px;font-weight:600;font-family:monospace;">${savedPassword}</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-                            <span style="color:rgba(255,255,255,0.55);font-size:13px;">${phoneLbl2}</span>
-                            <span style="color:#FFD700;font-size:14px;font-weight:600;font-family:monospace;">${savedPhone}</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;padding:7px 0 0;">
-                            <span style="color:rgba(255,255,255,0.55);font-size:13px;">${webLbl}</span>
-                            <span style="color:#4ecdc4;font-size:14px;font-weight:600;font-family:monospace;">dkl.vn</span>
-                        </div>
-                    </div>
-                    <div style="height:1px;background:rgba(255,215,0,0.25);margin:0 0 18px;"></div>
-                    <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;text-align:center;font-weight:600;">${configLabel}</div>
-                    <div style="display:flex;gap:12px;margin-bottom:18px;">
-                        <div style="flex:1;background:rgba(0,0,0,0.25);border-radius:12px;padding:12px;border:1px solid rgba(74,154,138,0.2);">
-                            <div style="font-size:11px;color:#4a9a8a;margin-bottom:8px;font-weight:600;">${minLabel}</div>
-                            <div style="font-size:11px;color:rgba(255,255,255,0.75);line-height:1.7;">
-                                OS: Win 10/11 64-bit<br>
-                                CPU: i3 / Ryzen 3<br>
-                                RAM: 8 GB<br>
-                                GPU: GTX 750 / RX 560<br>
-                                Storage: 20 GB
-                            </div>
-                        </div>
-                        <div style="flex:1;background:rgba(0,0,0,0.25);border-radius:12px;padding:12px;border:1px solid rgba(255,215,0,0.2);">
-                            <div style="font-size:11px;color:#FFD700;margin-bottom:8px;font-weight:600;">${recLabel}</div>
-                            <div style="font-size:11px;color:rgba(255,255,255,0.75);line-height:1.7;">
-                                OS: Win 10/11 64-bit<br>
-                                CPU: i7-8700K / R7 3700X<br>
-                                RAM: 16 GB<br>
-                                GPU: RTX 3070 / RX 6800<br>
-                                Storage: 60 GB SSD
-                            </div>
-                        </div>
-                    </div>
-                    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;letter-spacing:0.5px;">
-                        dkl.vn | ${isVi ? 'Đăng ký ngay để nhận quà tân thủ' : '立即注册领取新手礼包'}
-                    </div>
-                `;
-                card.appendChild(content);
-
+                // 加载图片
                 function loadImg(src) {
-                    return new Promise((resolve, reject) => {
+                    return new Promise((resolve) => {
                         const img = new Image();
                         img.crossOrigin = 'anonymous';
                         img.onload = () => resolve(img);
-                        img.onerror = reject;
+                        img.onerror = () => resolve(null);
                         img.src = src;
                     });
                 }
-                async function imgToDataUrl(src) {
-                    const img = await loadImg(src);
-                    const c = document.createElement('canvas');
-                    c.width = img.width; c.height = img.height;
-                    c.getContext('2d').drawImage(img, 0, 0);
-                    return c.toDataURL('image/png');
+                const [bgImg, logoImg] = await Promise.all([
+                    loadImg('../../../assets/official/bg_mech_trex.jpg'),
+                    loadImg('../../../assets/official/logo_official.png')
+                ]);
+
+                // 背景图
+                if (bgImg) { ctx.globalAlpha = 0.25; ctx.drawImage(bgImg, 0, 0, W, H); ctx.globalAlpha = 1.0; }
+
+                // 边框
+                ctx.strokeStyle = 'rgba(255,215,0,0.45)';
+                ctx.lineWidth = 8;
+                ctx.strokeRect(40, 40, W - 80, H - 80);
+
+                // LOGO
+                let y = 100;
+                if (logoImg) {
+                    const lw = 360, lh = logoImg.height * (lw / logoImg.width);
+                    ctx.drawImage(logoImg, (W - lw) / 2, y, lw, lh);
+                    y += lh + 40;
+                } else {
+                    ctx.fillStyle = '#FFD700';
+                    ctx.font = 'bold 56px Cinzel, serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(isVi ? 'ĐẢO KHỦNG LONG' : '恐龙岛', W / 2, y);
+                    y += 80;
                 }
-                let logoData, bgData;
-                try { logoData = await imgToDataUrl('../../../assets/official/logo_official.png'); } catch(e) { logoData = ''; }
-                try { bgData = await imgToDataUrl('../../../assets/official/bg_mech_trex.jpg'); } catch(e) { bgData = ''; }
 
-                const overlay = document.createElement('div');
-                overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);';
-                overlay.appendChild(card);
+                // 副标题
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.font = '24px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(isVi ? 'Game PC 3D - Thế giới khủng long sống động' : 'PC端3D恐龙世界', W / 2, y);
+                y += 60;
 
-                const hint = document.createElement('div');
-                hint.style.cssText = 'color:rgba(255,255,255,0.6);font-size:13px;';
-                hint.textContent = currentLang === 'vi' ? 'Đang tạo ảnh...' : '正在生成截图...';
-                overlay.appendChild(hint);
+                // 分隔线
+                ctx.strokeStyle = 'rgba(255,215,0,0.25)';
+                ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(80, y); ctx.lineTo(W - 80, y); ctx.stroke();
+                y += 50;
 
-                document.body.appendChild(overlay);
+                // 账号信息标题
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.font = 'bold 20px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(isVi ? 'THÔNG TIN TÀI KHOẢN' : '账号信息', W / 2, y);
+                y += 50;
 
-                await new Promise(r => requestAnimationFrame(() => setTimeout(r, 200)));
+                // 账号信息卡片背景
+                ctx.fillStyle = 'rgba(0,0,0,0.35)';
+                ctx.beginPath(); ctx.roundRect(80, y, W - 160, 280, 28); ctx.fill();
+                ctx.strokeStyle = 'rgba(255,215,0,0.15)';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.roundRect(80, y, W - 160, 280, 28); ctx.stroke();
 
-                if (!window.html2canvas) { document.body.removeChild(overlay); throw new Error('no lib'); }
-                const canvas = await html2canvas(card, { backgroundColor: '#0d1f17', scale: 2, useCORS: true });
-                document.body.removeChild(overlay);
+                function drawRow(label, value, color, isLast) {
+                    y += 50;
+                    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+                    ctx.font = '26px Inter, sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(label, 120, y);
+                    ctx.fillStyle = color;
+                    ctx.font = 'bold 28px monospace';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(value, W - 120, y);
+                    if (!isLast) {
+                        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath(); ctx.moveTo(120, y + 16); ctx.lineTo(W - 120, y + 16); ctx.stroke();
+                    }
+                }
+                drawRow(isVi ? 'Tài khoản' : '用户名', savedUsername, '#FFD700', false);
+                drawRow(isVi ? 'Mật khẩu' : '密码', savedPassword, '#FFD700', false);
+                drawRow(isVi ? 'SĐT' : '手机号', savedPhone, '#FFD700', false);
+                drawRow(isVi ? 'Website PC' : 'PC端官网', 'dkl.vn', '#4ecdc4', true);
+                y += 70;
 
+                // 分隔线
+                ctx.strokeStyle = 'rgba(255,215,0,0.25)';
+                ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(80, y); ctx.lineTo(W - 80, y); ctx.stroke();
+                y += 50;
+
+                // 配置标题
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.font = 'bold 20px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(isVi ? 'CẤU HÌNH HỆ THỐNG' : '系统配置要求', W / 2, y);
+                y += 60;
+
+                // 配置卡片（左右两栏）
+                const colW = (W - 160 - 24) / 2;
+                function drawConfigCard(x, title, titleColor, lines) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                    ctx.beginPath(); ctx.roundRect(x, y, colW, 340, 24); ctx.fill();
+                    ctx.fillStyle = titleColor;
+                    ctx.font = 'bold 22px Inter, sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(title, x + 24, y + 50);
+                    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+                    ctx.font = '22px Inter, sans-serif';
+                    lines.forEach((line, i) => {
+                        ctx.fillText(line, x + 24, y + 100 + i * 44);
+                    });
+                }
+                drawConfigCard(80, isVi ? 'Tối thiểu' : '最低配置', '#4a9a8a', [
+                    'OS: Win 10/11 64-bit', 'CPU: i3 / Ryzen 3', 'RAM: 8 GB',
+                    'GPU: GTX 750 / RX 560', 'Storage: 20 GB'
+                ]);
+                drawConfigCard(80 + colW + 24, isVi ? 'Đề xuất' : '推荐配置', '#FFD700', [
+                    'OS: Win 10/11 64-bit', 'CPU: i7-8700K / R7 3700X', 'RAM: 16 GB',
+                    'GPU: RTX 3070 / RX 6800', 'Storage: 60 GB SSD'
+                ]);
+                y += 380;
+
+                // 底部
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.font = '22px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('dkl.vn | ' + (isVi ? 'Đăng ký ngay để nhận quà tân thủ' : '立即注册领取新手礼包'), W / 2, y);
+
+                // 下载
                 const link = document.createElement('a');
                 link.download = `DKL_Account_${savedUsername}_${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                showToast(currentLang === 'vi' ? 'Đã lưu ảnh chụp màn hình!' : '截图已保存！');
+                showToast(isVi ? 'Đã lưu ảnh chụp màn hình!' : '截图已保存！');
             } catch (e) {
                 showToast(currentLang === 'vi' ? 'Lưu ảnh thất bại, vui lòng chụp màn hình thủ công' : '截图失败，请手动截图保存');
             } finally {
