@@ -2285,15 +2285,17 @@
 
         let topAlertTimer = null;
         function showTopAlert(message) {
+            console.log('[showTopAlert]', message);
             const el = document.getElementById('topAlert');
             const txt = document.getElementById('topAlertText');
-            if (!el || !txt) return;
+            if (!el || !txt) { console.log('[showTopAlert] el/txt not found'); return; }
             txt.textContent = message;
             el.classList.add('show');
             if (topAlertTimer) clearTimeout(topAlertTimer);
             topAlertTimer = setTimeout(() => hideTopAlert(), 4000);
         }
         function hideTopAlert() {
+            console.log('[hideTopAlert]');
             const el = document.getElementById('topAlert');
             if (el) el.classList.remove('show');
             if (topAlertTimer) { clearTimeout(topAlertTimer); topAlertTimer = null; }
@@ -2534,7 +2536,7 @@
             try {
                 const isVi = currentLang === 'vi';
                 const card = document.createElement('div');
-                card.style.cssText = 'position:fixed;left:-9999px;top:0;width:420px;padding:32px;background:linear-gradient(145deg,#0d1f17 0%,#143326 50%,#0d1f17 100%);border-radius:24px;border:2px solid rgba(255,215,0,0.45);color:#e8f5e9;font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.6);overflow:hidden;';
+                card.style.cssText = 'position:absolute;left:0;top:0;opacity:0;pointer-events:none;z-index:-1;width:420px;padding:32px;background:linear-gradient(145deg,#0d1f17 0%,#143326 50%,#0d1f17 100%);border-radius:24px;border:2px solid rgba(255,215,0,0.45);color:#e8f5e9;font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.6);overflow:hidden;';
 
                 const gameName = isVi ? 'ĐẢO KHỦNG LONG' : '恐龙岛';
                 const gameSub = isVi ? 'Game PC 3D - Thế giới khủng long sống động' : 'PC端3D恐龙世界';
