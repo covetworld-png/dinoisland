@@ -1198,6 +1198,18 @@
             box-shadow: 0 6px 20px rgba(255,215,0,0.35);
         }
         .btn-copy-all:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,215,0,0.5); }
+        .btn-screenshot {
+            width: 100%; height: 54px; border-radius: 16px; border: 2px solid rgba(255,215,0,0.6);
+            background: transparent; color: var(--gold); font-size: 16px; font-weight: 600;
+            font-family: inherit; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-screenshot:hover { background: rgba(255,215,0,0.1); transform: translateY(-2px); }
+        .screenshot-hint {
+            text-align: center; font-size: 13px; color: var(--gold-light);
+            background: rgba(255,215,0,0.08); padding: 10px 16px; border-radius: 12px;
+            border: 1px dashed rgba(255,215,0,0.3); line-height: 1.5;
+        }
         .download-section { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
         .btn-download {
             height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
@@ -1352,7 +1364,9 @@
                 <div class="success-title" data-i18n="reg.successTitle">注册成功！</div>
                 <div class="success-divider"></div>
 
-                <div class="account-card">
+                <div class="screenshot-hint" data-i18n="reg.screenshotHint">📸 建议截图保存账号信息，防止丢失</div>
+
+                <div class="account-card" id="accountCard">
                     <div class="account-row">
                         <span class="account-label" data-i18n="reg.accountLabel">用户名</span>
                         <span class="account-value" id="sUsername">-</span>
@@ -1370,6 +1384,11 @@
                         <span class="account-value">dkl.vn</span>
                     </div>
                 </div>
+
+                <button class="btn-screenshot" id="screenshotBtn" onclick="screenshotAccountCard()">
+                    <span>📸</span>
+                    <span data-i18n="reg.screenshotBtn">保存截图</span>
+                </button>
 
                 <button class="btn-copy-all" id="copyAllBtn" onclick="copyAllInfo()">
                     <span>📋</span>
@@ -1599,6 +1618,7 @@
         </div>
     </div>
 
+    <script src="../../assets/official/dom-to-image.min.js"></script>
     <script src="../../assets/official/lang.js"></script>
     <script>
         // ============================================
@@ -2505,6 +2525,26 @@
             const text = `${t('reg.accountLabel')}：${savedUsername}\n${t('reg.pwdLabel')}：${savedPassword}\n${t('reg.phoneLabel2')}：${savedPhone}\n${t('reg.officialLabel')}：dkl.vn`;
             copyToClipboard(text);
             showToast(t('reg.copySuccess'));
+        }
+
+        async function screenshotAccountCard() {
+            const card = document.getElementById('accountCard');
+            if (!card || !window.domtoimage) { showToast('截图失败，请手动截图保存'); return; }
+            const btn = document.getElementById('screenshotBtn');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span><span>处理中...</span>';
+            try {
+                const dataUrl = await domtoimage.toPng(card, { bgcolor: '#0a1a15', quality: 1 });
+                const link = document.createElement('a');
+                link.download = `DKL_Account_${savedUsername}_${Date.now()}.png`;
+                link.href = dataUrl;
+                link.click();
+                showToast('截图已保存！');
+            } catch (e) {
+                showToast('截图失败，请手动截图保存');
+            } finally {
+                btn.innerHTML = orig;
+            }
         }
 
         function trackEvent(name) {
