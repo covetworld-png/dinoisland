@@ -2255,7 +2255,6 @@
         const successSection = document.getElementById('successSection');
         const toast = document.getElementById('toast');
 
-        let codeCountdown = 0;
         let savedUsername = '', savedPassword = '', savedPhone = '';
 
         function showToast(message) {
@@ -2359,13 +2358,25 @@
         });
         updateSubmitButton();
 
+        let codeCountdown = 0, codeTimer = null;
+        function startCodeCountdown() {
+            if (codeTimer) clearInterval(codeTimer);
+            codeCountdown = 60;
+            sendCodeBtn.disabled = true;
+            sendCodeBtn.innerHTML = '<span>' + codeCountdown + t('reg.seconds') + '</span>';
+            codeTimer = setInterval(() => {
+                codeCountdown--;
+                if (codeCountdown > 0) sendCodeBtn.innerHTML = '<span>' + codeCountdown + t('reg.seconds') + '</span>';
+                else { clearInterval(codeTimer); codeTimer = null; sendCodeBtn.disabled = false; sendCodeBtn.innerHTML = '<span>' + t('reg.retry') + '</span>'; }
+            }, 1000);
+        }
+
         async function sendPhoneCode() {
             const phone = regPhone.value.trim().replace(/\D/g, '');
             if (!validatePhone(phone)) { validateField('phone', true); regPhone.focus(); return; }
+            if (codeCountdown > 0) return;
 
-            sendCodeBtn.disabled = true;
-            const orig = sendCodeBtn.innerHTML;
-            sendCodeBtn.innerHTML = '<span>' + t('reg.wait') + '</span>';
+            startCodeCountdown();
 
             try {
                 if (MOCK_API) {
@@ -2393,14 +2404,7 @@
                 }
                 showToast(t('reg.codeSent'));
                 focusOtpBox(0);
-                codeCountdown = 60;
-                const t = setInterval(() => {
-                    codeCountdown--;
-                    if (codeCountdown > 0) sendCodeBtn.innerHTML = '<span>' + codeCountdown + t('reg.seconds') + '</span>';
-                    else { clearInterval(t); sendCodeBtn.disabled = false; sendCodeBtn.innerHTML = '<span>' + t('reg.retry') + '</span>'; }
-                }, 1000);
             } catch (err) {
-                sendCodeBtn.disabled = false; sendCodeBtn.innerHTML = orig;
                 if (err.name === 'TypeError') {
                     showTopAlert(t('reg.officialOnly'));
                 } else if (err.message) {
