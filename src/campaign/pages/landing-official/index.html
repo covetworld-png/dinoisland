@@ -2222,7 +2222,7 @@
         // v2.0 Registration Logic
         // ============================================
         const API_BASE = '';
-        const MOCK_API = location.hostname.includes('github.io') || location.protocol === 'file:';
+        const MOCK_API = location.hostname.includes('github.io') || location.protocol === 'file:' || getUrlParam('mock') === '1';
         const regUsername = document.getElementById('regUsername');
         const regPassword = document.getElementById('regPassword');
         const regConfirm = document.getElementById('regConfirm');
