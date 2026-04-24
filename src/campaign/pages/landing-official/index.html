@@ -2539,7 +2539,7 @@
             try {
                 const isVi = currentLang === 'vi';
                 const card = document.createElement('div');
-                card.style.cssText = 'width:420px;padding:32px;border-radius:24px;border:2px solid rgba(255,215,0,0.45);color:#e8f5e9;font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.6);overflow:hidden;background:linear-gradient(145deg,rgba(13,31,23,0.93) 0%,rgba(20,51,38,0.93) 50%,rgba(13,31,23,0.93) 100%),url(../../../assets/official/bg_mech_trex.jpg);background-size:cover;background-position:center;';
+                card.style.cssText = 'position:relative;width:420px;padding:32px;border-radius:24px;border:2px solid rgba(255,215,0,0.45);color:#e8f5e9;font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.6);overflow:hidden;';
 
                 const gameName = isVi ? 'ĐẢO KHỦNG LONG' : '恐龙岛';
                 const gameSub = isVi ? 'Game PC 3D - Thế giới khủng long sống động' : 'PC端3D恐龙世界';
@@ -2552,14 +2552,21 @@
                 const phoneLbl2 = isVi ? 'SĐT' : '手机号';
                 const webLbl = isVi ? 'Website PC' : 'PC端官网';
 
-                card.innerHTML = `
+                const bgImg = document.createElement('img');
+                bgImg.src = '../../../assets/official/bg_mech_trex.jpg';
+                bgImg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0.25;z-index:0;';
+                card.appendChild(bgImg);
+
+                const content = document.createElement('div');
+                content.style.cssText = 'position:relative;z-index:1;';
+                content.innerHTML = `
                     <div style="text-align:center;margin-bottom:22px;">
                         <img src="../../../assets/official/logo_official.png" style="width:180px;height:auto;margin-bottom:8px;filter:drop-shadow(0 2px 8px rgba(255,215,0,0.25));">
                         <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;letter-spacing:1px;">${gameSub}</div>
                     </div>
                     <div style="height:1px;background:rgba(255,215,0,0.25);margin:0 0 18px;"></div>
                     <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;text-align:center;font-weight:600;">${accountLabel}</div>
-                    <div style="background:rgba(0,0,0,0.25);border-radius:14px;padding:14px 18px;border:1px solid rgba(255,215,0,0.15);margin-bottom:18px;">
+                    <div style="background:rgba(0,0,0,0.35);border-radius:14px;padding:14px 18px;border:1px solid rgba(255,215,0,0.15);margin-bottom:18px;">
                         <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
                             <span style="color:rgba(255,255,255,0.55);font-size:13px;">${accountLbl}</span>
                             <span style="color:#FFD700;font-size:14px;font-weight:600;font-family:monospace;">${savedUsername}</span>
@@ -2580,7 +2587,7 @@
                     <div style="height:1px;background:rgba(255,215,0,0.25);margin:0 0 18px;"></div>
                     <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;text-align:center;font-weight:600;">${configLabel}</div>
                     <div style="display:flex;gap:12px;margin-bottom:18px;">
-                        <div style="flex:1;background:rgba(0,0,0,0.2);border-radius:12px;padding:12px;border:1px solid rgba(74,154,138,0.2);">
+                        <div style="flex:1;background:rgba(0,0,0,0.25);border-radius:12px;padding:12px;border:1px solid rgba(74,154,138,0.2);">
                             <div style="font-size:11px;color:#4a9a8a;margin-bottom:8px;font-weight:600;">${minLabel}</div>
                             <div style="font-size:11px;color:rgba(255,255,255,0.75);line-height:1.7;">
                                 OS: Win 10/11 64-bit<br>
@@ -2590,7 +2597,7 @@
                                 Storage: 20 GB
                             </div>
                         </div>
-                        <div style="flex:1;background:rgba(0,0,0,0.2);border-radius:12px;padding:12px;border:1px solid rgba(255,215,0,0.2);">
+                        <div style="flex:1;background:rgba(0,0,0,0.25);border-radius:12px;padding:12px;border:1px solid rgba(255,215,0,0.2);">
                             <div style="font-size:11px;color:#FFD700;margin-bottom:8px;font-weight:600;">${recLabel}</div>
                             <div style="font-size:11px;color:rgba(255,255,255,0.75);line-height:1.7;">
                                 OS: Win 10/11 64-bit<br>
@@ -2605,6 +2612,7 @@
                         dkl.vn | ${isVi ? 'Đăng ký ngay để nhận quà tân thủ' : '立即注册领取新手礼包'}
                     </div>
                 `;
+                card.appendChild(content);
 
                 function preloadImg(src) {
                     return new Promise((resolve, reject) => {
