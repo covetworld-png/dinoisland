@@ -2607,16 +2607,22 @@
                     </div>
                 `;
 
-                const wrapper = document.createElement('div');
-                wrapper.style.cssText = 'position:fixed;top:0;left:0;z-index:99999;visibility:hidden;';
-                wrapper.appendChild(card);
-                document.body.appendChild(wrapper);
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);';
+                overlay.appendChild(card);
+
+                const hint = document.createElement('div');
+                hint.style.cssText = 'color:rgba(255,255,255,0.6);font-size:13px;';
+                hint.textContent = currentLang === 'vi' ? 'Đang tạo ảnh...' : '正在生成截图...';
+                overlay.appendChild(hint);
+
+                document.body.appendChild(overlay);
 
                 await new Promise(r => requestAnimationFrame(() => setTimeout(r, 300)));
 
-                if (!window.html2canvas) { throw new Error('no lib'); }
+                if (!window.html2canvas) { document.body.removeChild(overlay); throw new Error('no lib'); }
                 const canvas = await html2canvas(card, { backgroundColor: '#0d1f17', scale: 2, useCORS: true });
-                document.body.removeChild(wrapper);
+                document.body.removeChild(overlay);
 
                 const link = document.createElement('a');
                 link.download = `DKL_Account_${savedUsername}_${Date.now()}.png`;
