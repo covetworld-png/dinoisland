@@ -627,6 +627,10 @@
             font-size: 18px;
         }
         .top-alert-close:hover { opacity: 1; }
+        @media (max-width: 480px) {
+            .top-alert { padding: 10px 40px 10px 14px; font-size: 13px; }
+            .top-alert-close { right: 8px; width: 24px; height: 24px; font-size: 16px; }
+        }
 
         /* WebView Guide Modal */
         .webview-guide-overlay {
@@ -2373,7 +2377,10 @@
                     });
                     const text = await res.text();
                     let data;
-                    try { data = JSON.parse(text); } catch { data = { code: -1, message: `HTTP ${res.status}: ${text.slice(0, 100)}` }; }
+                    try { data = JSON.parse(text); } catch {
+                        const clean = text.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
+                        data = { code: -1, message: clean || `HTTP ${res.status}` };
+                    }
                     if (data.code !== 0) {
                         if (data.code === 115) { showTopAlert(t('reg.phoneFormatError')); regPhone.focus(); }
                         else if (data.code === 99) { showTopAlert(t('reg.codeSendFailed')); }
@@ -2428,7 +2435,10 @@
                     });
                     const text = await res.text();
                     let data;
-                    try { data = JSON.parse(text); } catch { data = { code: -1, message: `HTTP ${res.status}: ${text.slice(0, 100)}` }; }
+                    try { data = JSON.parse(text); } catch {
+                        const clean = text.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
+                        data = { code: -1, message: clean || `HTTP ${res.status}` };
+                    }
                     if (data.code === 0) {
                         responseData = data;
                     } else if (data.code === 103) { showTopAlert(t('reg.usernameExists')); regUsername.focus(); throw new Error(''); }
@@ -2451,7 +2461,6 @@
                 registerSection.classList.add('hidden');
                 successSection.classList.add('active');
                 document.getElementById('stepsCard').style.display = 'none';
-                setLanguage(currentLang);
                 setLanguage(currentLang);
                 showToast(t('reg.successTitle'));
             } catch (err) {
