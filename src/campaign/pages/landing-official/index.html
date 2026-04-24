@@ -2370,6 +2370,9 @@
             try {
                 if (MOCK_API) {
                     await new Promise(r => setTimeout(r, 600));
+                    const mockErr = getUrlParam('mockError');
+                    if (mockErr === '115') { showTopAlert(t('reg.phoneFormatError')); regPhone.focus(); throw new Error(''); }
+                    if (mockErr === '99') { showTopAlert(t('reg.codeSendFailed')); throw new Error(''); }
                 } else {
                     const res = await fetch(`${API_BASE}/api/sendPhoneCode`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Language': currentLang === 'vi' ? 'vi' : 'zh' },
@@ -2424,6 +2427,26 @@
                 let responseData;
                 if (MOCK_API) {
                     await new Promise(r => setTimeout(r, 600));
+                    const mockErr = getUrlParam('mockError');
+                    const mockMap = {
+                        '103': ['reg.usernameExists', 'username'],
+                        '114': ['reg.phoneExists', 'phone'],
+                        '113': ['reg.codeError', 'code'],
+                        '110': ['reg.tooFrequent', ''],
+                        '115': ['reg.phoneFormatError', 'phone'],
+                        '92': ['reg.paramMissing', ''],
+                        '102': ['reg.formatInvalid', ''],
+                        '101': ['reg.inviteInvalid', ''],
+                        '999': ['reg.systemError', ''],
+                    };
+                    if (mockErr && mockMap[mockErr]) {
+                        const [key, field] = mockMap[mockErr];
+                        showTopAlert(t(key));
+                        if (field === 'username') regUsername.focus();
+                        if (field === 'phone') regPhone.focus();
+                        if (field === 'code') focusOtpBox(5);
+                        throw new Error('');
+                    }
                     responseData = { extra: { username } };
                 } else {
                     const res = await fetch(`${API_BASE}/api/register`, {
