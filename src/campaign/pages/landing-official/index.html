@@ -2693,12 +2693,33 @@
                 ctx.textAlign = 'center';
                 ctx.fillText('dkl.vn | ' + (isVi ? 'Đăng ký ngay để nhận quà tân thủ' : '立即注册领取新手礼包'), W / 2, y);
 
-                // 下载
-                const link = document.createElement('a');
-                link.download = `DKL_Account_${savedUsername}_${Date.now()}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                showToast(isVi ? 'Đã lưu ảnh chụp màn hình!' : '截图已保存！');
+                // 预览 + 下载
+                const dataUrl = canvas.toDataURL('image/png');
+                const preview = document.createElement('div');
+                preview.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:20px;box-sizing:border-box;';
+                const pImg = document.createElement('img');
+                pImg.src = dataUrl;
+                pImg.style.cssText = 'max-width:100%;max-height:70vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.6);border:2px solid rgba(255,215,0,0.3);';
+                preview.appendChild(pImg);
+                const btnRow = document.createElement('div');
+                btnRow.style.cssText = 'display:flex;gap:16px;';
+                const saveBtn = document.createElement('button');
+                saveBtn.textContent = isVi ? '💾 Lưu ảnh' : '💾 保存图片';
+                saveBtn.style.cssText = 'padding:12px 32px;border-radius:12px;border:none;background:linear-gradient(135deg,#FFD700,#B48F00);color:#000;font-size:16px;font-weight:700;cursor:pointer;';
+                saveBtn.onclick = () => {
+                    const a = document.createElement('a');
+                    a.download = `DKL_Account_${savedUsername}_${Date.now()}.png`;
+                    a.href = dataUrl; a.click();
+                    preview.remove();
+                    showToast(isVi ? 'Đã lưu!' : '已保存！');
+                };
+                const closeBtn = document.createElement('button');
+                closeBtn.textContent = isVi ? '❌ Đóng' : '❌ 关闭';
+                closeBtn.style.cssText = 'padding:12px 32px;border-radius:12px;border:2px solid rgba(255,255,255,0.3);background:transparent;color:#fff;font-size:16px;font-weight:600;cursor:pointer;';
+                closeBtn.onclick = () => preview.remove();
+                btnRow.appendChild(saveBtn); btnRow.appendChild(closeBtn);
+                preview.appendChild(btnRow);
+                document.body.appendChild(preview);
             } catch (e) {
                 showToast(currentLang === 'vi' ? 'Lưu ảnh thất bại, vui lòng chụp màn hình thủ công' : '截图失败，请手动截图保存');
             } finally {
