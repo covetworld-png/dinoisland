@@ -2442,8 +2442,11 @@
             const phone = regPhone.value.trim().replace(/\D/g, '');
             const code = getOtpValue();
 
-            const allValid = validateField('all', true);
-            if (!allValid) return;
+            const mockErr = MOCK_API ? getUrlParam('mockError') : '';
+            if (!mockErr) {
+                const allValid = validateField('all', true);
+                if (!allValid) return;
+            }
 
             registerBtn.disabled = true;
             const orig = registerBtn.innerHTML;
