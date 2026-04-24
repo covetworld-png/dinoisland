@@ -2553,7 +2553,7 @@
                 const webLbl = isVi ? 'Website PC' : 'PC端官网';
 
                 const bgImg = document.createElement('img');
-                bgImg.src = '../../../assets/official/bg_mech_trex.jpg';
+                bgImg.src = bgData || '';
                 bgImg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0.25;z-index:0;';
                 card.appendChild(bgImg);
 
@@ -2561,7 +2561,7 @@
                 content.style.cssText = 'position:relative;z-index:1;';
                 content.innerHTML = `
                     <div style="text-align:center;margin-bottom:22px;">
-                        <img src="../../../assets/official/logo_official.png" style="width:180px;height:auto;margin-bottom:8px;filter:drop-shadow(0 2px 8px rgba(255,215,0,0.25));">
+                        <img src="${logoData || ''}" style="width:180px;height:auto;margin-bottom:8px;filter:drop-shadow(0 2px 8px rgba(255,215,0,0.25));">
                         <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;letter-spacing:1px;">${gameSub}</div>
                     </div>
                     <div style="height:1px;background:rgba(255,215,0,0.25);margin:0 0 18px;"></div>
@@ -2614,19 +2614,25 @@
                 `;
                 card.appendChild(content);
 
-                function preloadImg(src) {
+                function loadImg(src) {
                     return new Promise((resolve, reject) => {
                         const img = new Image();
                         img.crossOrigin = 'anonymous';
                         img.onload = () => resolve(img);
-                        img.onerror = () => resolve(null);
+                        img.onerror = reject;
                         img.src = src;
                     });
                 }
-                await Promise.all([
-                    preloadImg('../../../assets/official/logo_official.png'),
-                    preloadImg('../../../assets/official/bg_mech_trex.jpg')
-                ]);
+                async function imgToDataUrl(src) {
+                    const img = await loadImg(src);
+                    const c = document.createElement('canvas');
+                    c.width = img.width; c.height = img.height;
+                    c.getContext('2d').drawImage(img, 0, 0);
+                    return c.toDataURL('image/png');
+                }
+                let logoData, bgData;
+                try { logoData = await imgToDataUrl('../../../assets/official/logo_official.png'); } catch(e) { logoData = ''; }
+                try { bgData = await imgToDataUrl('../../../assets/official/bg_mech_trex.jpg'); } catch(e) { bgData = ''; }
 
                 const overlay = document.createElement('div');
                 overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);';
@@ -2639,10 +2645,10 @@
 
                 document.body.appendChild(overlay);
 
-                await new Promise(r => requestAnimationFrame(() => setTimeout(r, 500)));
+                await new Promise(r => requestAnimationFrame(() => setTimeout(r, 200)));
 
                 if (!window.html2canvas) { document.body.removeChild(overlay); throw new Error('no lib'); }
-                const canvas = await html2canvas(card, { backgroundColor: '#0d1f17', scale: 2, useCORS: true, allowTaint: true });
+                const canvas = await html2canvas(card, { backgroundColor: '#0d1f17', scale: 2, useCORS: true });
                 document.body.removeChild(overlay);
 
                 const link = document.createElement('a');
