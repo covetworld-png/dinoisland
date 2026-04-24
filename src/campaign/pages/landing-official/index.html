@@ -596,6 +596,38 @@
             opacity: 1;
         }
 
+        /* Top Alert */
+        .top-alert {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(180, 30, 30, 0.92);
+            color: #fff;
+            padding: 12px 48px 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 10002;
+            transform: translateY(-100%);
+            transition: transform 0.35s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 100, 100, 0.3);
+            line-height: 1.5;
+        }
+        .top-alert.show { transform: translateY(0); }
+        .top-alert-close {
+            position: absolute;
+            right: 12px; top: 50%;
+            transform: translateY(-50%);
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            font-size: 18px;
+        }
+        .top-alert-close:hover { opacity: 1; }
+
         /* WebView Guide Modal */
         .webview-guide-overlay {
             position: fixed;
@@ -1229,6 +1261,12 @@
     <div class="lang-switcher">
         <button class="lang-btn active" data-lang="vi">TIẾNG VIỆT</button>
         <button class="lang-btn" data-lang="cn">中文</button>
+    </div>
+
+    <!-- Top Alert -->
+    <div class="top-alert" id="topAlert">
+        <span id="topAlertText"></span>
+        <span class="top-alert-close" onclick="hideTopAlert()">&times;</span>
     </div>
 
     <!-- Anchor Nav -->
@@ -2222,6 +2260,22 @@
             setTimeout(() => { toast.classList.remove('show'); }, 2500);
         }
 
+        let topAlertTimer = null;
+        function showTopAlert(message) {
+            const el = document.getElementById('topAlert');
+            const txt = document.getElementById('topAlertText');
+            if (!el || !txt) return;
+            txt.textContent = message;
+            el.classList.add('show');
+            if (topAlertTimer) clearTimeout(topAlertTimer);
+            topAlertTimer = setTimeout(() => hideTopAlert(), 4000);
+        }
+        function hideTopAlert() {
+            const el = document.getElementById('topAlert');
+            if (el) el.classList.remove('show');
+            if (topAlertTimer) { clearTimeout(topAlertTimer); topAlertTimer = null; }
+        }
+
         function getUrlParam(name) {
             return new URLSearchParams(window.location.search).get(name) || '';
         }
@@ -2314,13 +2368,18 @@
                     await new Promise(r => setTimeout(r, 600));
                 } else {
                     const res = await fetch(`${API_BASE}/api/sendPhoneCode`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Language': currentLang === 'vi' ? 'vi' : 'zh' },
                         body: JSON.stringify({ phone })
                     });
                     const text = await res.text();
                     let data;
                     try { data = JSON.parse(text); } catch { data = { code: -1, message: `HTTP ${res.status}: ${text.slice(0, 100)}` }; }
-                    if (data.code !== 0) throw new Error(data.message || `请求失败 (code:${data.code})`);
+                    if (data.code !== 0) {
+                        if (data.code === 115) { showTopAlert(t('reg.phoneFormatError')); regPhone.focus(); }
+                        else if (data.code === 99) { showTopAlert(t('reg.codeSendFailed')); }
+                        else { showTopAlert(data.message || t('reg.networkError')); }
+                        throw new Error('');
+                    }
                 }
                 showToast(t('reg.codeSent'));
                 focusOtpBox(0);
@@ -2333,9 +2392,9 @@
             } catch (err) {
                 sendCodeBtn.disabled = false; sendCodeBtn.innerHTML = orig;
                 if (err.name === 'TypeError') {
-                    showToast(t('reg.officialOnly'));
-                } else {
-                    showToast(err.message || t('reg.networkError'));
+                    showTopAlert(t('reg.officialOnly'));
+                } else if (err.message) {
+                    showTopAlert(err.message);
                 }
             }
         }
@@ -2360,11 +2419,11 @@
                     await new Promise(r => setTimeout(r, 600));
                     responseData = { extra: { username } };
                 } else {
-                    const res = await fetch(`${API_BASE}/api/regSendCode`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    const res = await fetch(`${API_BASE}/api/register`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Language': currentLang === 'vi' ? 'vi' : 'zh' },
                         body: JSON.stringify({
                             username, password, phone, code,
-                            invitecode: getUrlParam('ref') || '', randstr: '', ticket: ''
+                            identity_code: getUrlParam('ref') || '', randstr: '', ticket: ''
                         })
                     });
                     const text = await res.text();
@@ -2372,10 +2431,16 @@
                     try { data = JSON.parse(text); } catch { data = { code: -1, message: `HTTP ${res.status}: ${text.slice(0, 100)}` }; }
                     if (data.code === 0) {
                         responseData = data;
-                    } else if (data.message.includes('用户名')) { showToast(t('reg.usernameExists')); regUsername.focus(); throw new Error(''); }
-                    else if (data.message.includes('手机')) { showToast(t('reg.phoneExists')); regPhone.focus(); throw new Error(''); }
-                    else if (data.message.includes('验证码')) { showToast(t('reg.codeError')); focusOtpBox(5); throw new Error(''); }
-                    else { showToast(data.message || t('reg.registerFailed')); throw new Error(''); }
+                    } else if (data.code === 103) { showTopAlert(t('reg.usernameExists')); regUsername.focus(); throw new Error(''); }
+                    else if (data.code === 114) { showTopAlert(t('reg.phoneExists')); regPhone.focus(); throw new Error(''); }
+                    else if (data.code === 113) { showTopAlert(t('reg.codeError')); focusOtpBox(5); throw new Error(''); }
+                    else if (data.code === 110) { showTopAlert(t('reg.tooFrequent')); throw new Error(''); }
+                    else if (data.code === 115) { showTopAlert(t('reg.phoneFormatError')); regPhone.focus(); throw new Error(''); }
+                    else if (data.code === 92) { showTopAlert(t('reg.paramMissing')); throw new Error(''); }
+                    else if (data.code === 102) { showTopAlert(t('reg.formatInvalid')); throw new Error(''); }
+                    else if (data.code === 101) { showTopAlert(t('reg.inviteInvalid')); throw new Error(''); }
+                    else if (data.code === 999) { showTopAlert(t('reg.systemError')); throw new Error(''); }
+                    else { showTopAlert(data.message || t('reg.registerFailed')); throw new Error(''); }
                 }
                 savedUsername = responseData.extra?.username || username;
                 savedPassword = password;
@@ -2391,9 +2456,9 @@
                 showToast(t('reg.successTitle'));
             } catch (err) {
                 if (err.name === 'TypeError') {
-                    showToast('请通过游戏官网 dkl.vn 访问本页面');
-                } else {
-                    showToast(err.message || t('reg.networkError'));
+                    showTopAlert(t('reg.officialOnly'));
+                } else if (err.message) {
+                    showTopAlert(err.message);
                 }
             } finally {
                 registerBtn.disabled = false; registerBtn.innerHTML = orig;

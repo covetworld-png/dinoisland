@@ -55,6 +55,14 @@ const i18n = {
         'reg.codeError': 'Mã xác nhận không đúng',
         'reg.registerFailed': 'Đăng ký thất bại',
         'reg.copySuccess': 'Đã sao chép! Gửi qua Zalo để lưu trữ',
+        'reg.tooFrequent': 'Thao tác quá thường xuyên, vui lòng thử lại sau',
+        'reg.phoneFormatError': 'Số điện thoại bạn nhập chưa đúng',
+        'reg.paramMissing': 'Tham số nhập không đầy đủ, vui lòng kiểm tra lại',
+        'reg.formatInvalid': 'Tên đăng nhập hoặc mật khẩu không phù hợp với quy định',
+        'reg.inviteInvalid': 'Mã mởi không tồn tại hoặc đã hết hạn',
+        'reg.codeSendFailed': 'Gửi mã xác nhận thất bại',
+        'reg.systemError': 'Hệ thống có lỗi bất thường, vui lòng thử lại sau',
+        'reg.illegalChars': 'Không được chứa ký tự không hợp lệ: {strings}',
 
         // Validation errors
         'reg.usernameRequired': 'Vui lòng nhập tên đăng nhập',
@@ -161,6 +169,14 @@ const i18n = {
         'reg.codeError': '验证码错误',
         'reg.registerFailed': '注册失败',
         'reg.copySuccess': '已复制！建议通过 Zalo 发送给自己备份',
+        'reg.tooFrequent': '操作过于频繁，请稍后再试',
+        'reg.phoneFormatError': '手机号码格式错误',
+        'reg.paramMissing': '输入参数不全，请确认',
+        'reg.formatInvalid': '用户名或密码不符合规范',
+        'reg.inviteInvalid': '邀请码不存在或已失效',
+        'reg.codeSendFailed': '验证码发送失败',
+        'reg.systemError': '系统异常，请稍候再试',
+        'reg.illegalChars': '不能包含非法字符：{strings}',
 
         // Validation errors
         'reg.usernameRequired': '请输入用户名',
