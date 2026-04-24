@@ -2551,19 +2551,23 @@
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, W, H);
 
-                // 加载图片
-                function loadImg(src) {
-                    return new Promise((resolve) => {
+                // 加载图片（fetch + blob URL 绕过浏览器图片加载限制）
+                async function loadImgFetch(src) {
+                    try {
+                        const res = await fetch(src);
+                        if (!res.ok) { console.log('[screenshot] fetch error:', src, res.status); return null; }
+                        const blob = await res.blob();
+                        const url = URL.createObjectURL(blob);
                         const img = new Image();
-                        img.onload = () => resolve(img);
-                        img.onerror = () => { console.log('[screenshot] img error:', src); resolve(null); };
-                        img.src = src;
-                    });
+                        await new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; img.src = url; });
+                        return img.complete && img.naturalWidth > 0 ? img : null;
+                    } catch(e) { console.log('[screenshot] load error:', src, e); return null; }
                 }
                 const [bgImg, logoImg] = await Promise.all([
-                    loadImg('../../../assets/official/bg_mech_trex.jpg'),
-                    loadImg('../../../assets/official/logo_official.png')
+                    loadImgFetch('../../../assets/official/bg_mech_trex.jpg'),
+                    loadImgFetch('../../../assets/official/logo_official.png')
                 ]);
+                console.log('[screenshot] bgImg:', bgImg ? 'ok' : 'null', 'logoImg:', logoImg ? 'ok' : 'null');
 
                 // 背景图
                 if (bgImg) { ctx.globalAlpha = 0.25; ctx.drawImage(bgImg, 0, 0, W, H); ctx.globalAlpha = 1.0; }
