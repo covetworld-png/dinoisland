@@ -2607,12 +2607,25 @@
                 ctx.fillText(isVi ? 'THÔNG TIN TÀI KHOẢN' : '账号信息', W / 2, y);
                 y += 50;
 
+                function drawRoundRect(x, y, w, h, r) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + r, y);
+                    ctx.lineTo(x + w - r, y);
+                    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                    ctx.lineTo(x + w, y + h - r);
+                    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                    ctx.lineTo(x + r, y + h);
+                    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                    ctx.lineTo(x, y + r);
+                    ctx.quadraticCurveTo(x, y, x + r, y);
+                    ctx.closePath();
+                }
                 // 账号信息卡片背景
                 ctx.fillStyle = 'rgba(0,0,0,0.35)';
-                ctx.beginPath(); ctx.roundRect(80, y, W - 160, 280, 28); ctx.fill();
+                drawRoundRect(80, y, W - 160, 280, 28); ctx.fill();
                 ctx.strokeStyle = 'rgba(255,215,0,0.15)';
                 ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.roundRect(80, y, W - 160, 280, 28); ctx.stroke();
+                drawRoundRect(80, y, W - 160, 280, 28); ctx.stroke();
 
                 function drawRow(label, value, color, isLast) {
                     y += 50;
@@ -2653,7 +2666,7 @@
                 const colW = (W - 160 - 24) / 2;
                 function drawConfigCard(x, title, titleColor, lines) {
                     ctx.fillStyle = 'rgba(0,0,0,0.25)';
-                    ctx.beginPath(); ctx.roundRect(x, y, colW, 340, 24); ctx.fill();
+                    drawRoundRect(x, y, colW, 340, 24); ctx.fill();
                     ctx.fillStyle = titleColor;
                     ctx.font = 'bold 22px Inter, sans-serif';
                     ctx.textAlign = 'left';
