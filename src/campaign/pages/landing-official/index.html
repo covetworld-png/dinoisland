@@ -1618,7 +1618,7 @@
         </div>
     </div>
 
-    <script src="../../assets/official/dom-to-image.min.js"></script>
+    <script src="../../assets/official/html2canvas.min.js"></script>
     <script src="../../assets/official/lang.js"></script>
     <script>
         // ============================================
@@ -2536,7 +2536,7 @@
             try {
                 const isVi = currentLang === 'vi';
                 const card = document.createElement('div');
-                card.style.cssText = 'position:absolute;left:0;top:0;opacity:0;pointer-events:none;z-index:-1;width:420px;padding:32px;background:linear-gradient(145deg,#0d1f17 0%,#143326 50%,#0d1f17 100%);border-radius:24px;border:2px solid rgba(255,215,0,0.45);color:#e8f5e9;font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.6);overflow:hidden;';
+                card.style.cssText = 'width:420px;padding:32px;background:linear-gradient(145deg,#0d1f17 0%,#143326 50%,#0d1f17 100%);border-radius:24px;border:2px solid rgba(255,215,0,0.45);color:#e8f5e9;font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.6);overflow:hidden;';
 
                 const gameName = isVi ? 'ĐẢO KHỦNG LONG' : '恐龙岛';
                 const gameSub = isVi ? 'Game PC 3D - Thế giới khủng long sống động' : 'PC端3D恐龙世界';
@@ -2603,16 +2603,21 @@
                         dkl.vn | ${isVi ? 'Đăng ký ngay để nhận quà tân thủ' : '立即注册领取新手礼包'}
                     </div>
                 `;
-                document.body.appendChild(card);
-                await new Promise(r => setTimeout(r, 150));
 
-                if (!window.domtoimage) { throw new Error('no lib'); }
-                const dataUrl = await domtoimage.toPng(card, { bgcolor: '#0d1f17', quality: 1 });
-                document.body.removeChild(card);
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'position:fixed;top:0;left:0;z-index:99999;visibility:hidden;';
+                wrapper.appendChild(card);
+                document.body.appendChild(wrapper);
+
+                await new Promise(r => requestAnimationFrame(() => setTimeout(r, 300)));
+
+                if (!window.html2canvas) { throw new Error('no lib'); }
+                const canvas = await html2canvas(card, { backgroundColor: '#0d1f17', scale: 2, useCORS: true });
+                document.body.removeChild(wrapper);
 
                 const link = document.createElement('a');
                 link.download = `DKL_Account_${savedUsername}_${Date.now()}.png`;
-                link.href = dataUrl;
+                link.href = canvas.toDataURL('image/png');
                 link.click();
                 showToast(currentLang === 'vi' ? 'Đã lưu ảnh chụp màn hình!' : '截图已保存！');
             } catch (e) {
