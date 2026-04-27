@@ -1725,6 +1725,13 @@
             if (savedLang && i18n[savedLang]) {
                 setLanguage(savedLang);
             }
+            // 显示调试信息（环境 + UA）
+            const ua = navigator.userAgent.toLowerCase();
+            const isTikTok = /tiktok|musical_ly|bytedance|bytedancewebview|ttwebview|trill|aweme|snssdk/i.test(ua);
+            const dType = document.getElementById('debugType');
+            const dUA = document.getElementById('debugUA');
+            if (dType) dType.textContent = isTikTok ? 'TIKTOK' : 'OTHER';
+            if (dUA) dUA.textContent = navigator.userAgent;
         }, 0);
 
         // ============================================
@@ -1931,10 +1938,8 @@
             detectEnvironment() {
                 const ua = navigator.userAgent.toLowerCase();
                 
-                // TikTok WebView 检测
-                const isTikTok = /tiktok|musical_ly|bytedance|ttwebview|snssdk/i.test(ua) &&
-                                 !ua.includes('chrome') && 
-                                 !ua.includes('safari');
+                // TikTok WebView 检测（iOS: BytedanceWebview / Android: trill/Aweme）
+                const isTikTok = /tiktok|musical_ly|bytedance|bytedancewebview|ttwebview|trill|aweme|snssdk/i.test(ua);
                 
                 // Facebook WebView 检测
                 const isFB = /fb_iab|fbav\/[\d.]+/i.test(ua) ||
@@ -2633,7 +2638,7 @@
 
                 const dataUrl = canvas.toDataURL('image/png');
                 const fileName = `DKL_Account_${savedUsername}_${Date.now()}.png`;
-                const isTikTok = getUrlParam('tiktok') === '1' || /tiktok|bytedance|ttwebview/i.test(navigator.userAgent);
+                const isTikTok = getUrlParam('tiktok') === '1' || /tiktok|musical_ly|bytedance|bytedancewebview|ttwebview|trill|aweme|snssdk/i.test(navigator.userAgent);
 
                 // TikTok WebView：全屏预览 + 长按保存提示（唯一可靠方案）
                 if (isTikTok) {
@@ -3030,6 +3035,9 @@
     <div class="dev-controls">
         <button onclick="devToggleState('form')">📝 注册表单</button>
         <button onclick="devToggleState('success')">✅ 成功页面</button>
+    </div>
+    <div id="debugBar" style="position:fixed;bottom:0;left:0;right:0;z-index:99998;background:rgba(0,0,0,0.85);color:#0f0;font-size:11px;padding:6px 12px;font-family:monospace;word-break:break-all;max-height:60px;overflow-y:auto;">
+        <b id="debugType">-</b> | <span id="debugUA">-</span>
     </div>
 </body>
 </html>
