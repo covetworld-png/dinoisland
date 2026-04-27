@@ -70,6 +70,24 @@
       "type": "markPoint",
       "name": "第三次宣战活动",
       "color": "#fc8452"
+    },
+    {
+      "date": "2026-04-23",
+      "type": "markPoint",
+      "name": "主播 PK",
+      "color": "#fac858"
+    },
+    {
+      "date": "2026-04-24",
+      "type": "markPoint",
+      "name": "充值排行活动第二届",
+      "color": "#ee6666"
+    },
+    {
+      "date": "2026-04-26",
+      "type": "markPoint",
+      "name": "K 服 3 人充 5000 金币",
+      "color": "#5470c6"
     }
   ],
   "format": {
