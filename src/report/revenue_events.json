@@ -4,6 +4,7 @@
     {
       "date": "2026-03-31",
       "type": "markArea",
+      "category": "活动",
       "name": "主播空降活动",
       "color": "#fac858",
       "endDate": "2026-04-02"
@@ -11,12 +12,14 @@
     {
       "date": "2026-03-31",
       "type": "markLine",
+      "category": "主播",
       "name": "heni 换剧本",
       "color": "#fc8452"
     },
     {
       "date": "2026-04-01",
       "type": "markPoint",
+      "category": "其他",
       "name": "更新大版本",
       "color": "#3ba272",
       "value": 2000
@@ -24,36 +27,49 @@
     {
       "date": "2026-04-04",
       "type": "markPoint",
+      "category": "主播",
       "name": "商单 1500",
       "color": "#fc8452"
     },
     {
       "date": "2026-04-09",
       "type": "markPoint",
+      "category": "主播",
       "name": "阿贤阿梅直播 PK",
       "color": "#cc8775"
     },
     {
       "date": "2026-04-11",
       "type": "markPoint",
+      "category": "活动",
       "name": "第一次宣战成功",
       "color": "#73c0de"
     },
     {
       "date": "2026-04-11",
       "type": "markLine",
+      "category": "其他",
       "name": "tk小手柄上架",
       "color": "#ee6666"
     },
     {
+      "date": "2026-04-14",
+      "type": "markPoint",
+      "category": "主播",
+      "name": "阿贤恢复原来的剧本",
+      "color": "#ea7ccc"
+    },
+    {
       "date": "2026-04-17",
       "type": "markPoint",
+      "category": "其他",
       "name": "版本更新（新领地，团队令，团皮）",
       "color": "#3ba272"
     },
     {
       "date": "2026-04-17",
       "type": "markPoint",
+      "category": "活动",
       "name": "第二次宣战活动",
       "color": "#fc8452",
       "value": 3000
@@ -61,6 +77,7 @@
     {
       "date": "2026-04-17",
       "type": "markPoint",
+      "category": "活动",
       "name": "充值排行榜活动（恐龙变大）",
       "color": "#91cc75",
       "value": 2000
@@ -68,24 +85,28 @@
     {
       "date": "2026-04-19",
       "type": "markPoint",
+      "category": "活动",
       "name": "第三次宣战活动",
       "color": "#fc8452"
     },
     {
       "date": "2026-04-23",
       "type": "markPoint",
+      "category": "主播",
       "name": "主播 PK",
       "color": "#fac858"
     },
     {
       "date": "2026-04-24",
       "type": "markPoint",
+      "category": "活动",
       "name": "充值排行活动第二届",
       "color": "#ee6666"
     },
     {
       "date": "2026-04-26",
       "type": "markPoint",
+      "category": "其他",
       "name": "K 服 3 人充 5000 金币",
       "color": "#5470c6"
     }
@@ -94,6 +115,7 @@
     "date": "YYYY-MM-DD，必须与 daily_metrics.csv 的日期一致",
     "endDate": "markArea 专用，结束日期",
     "type": "markLine(垂直标线) | markPoint(标注点) | markArea(区间高亮)",
+    "category": "事件类型：主播 | 活动 | 其他",
     "name": "事件名称，显示在图表上",
     "color": "十六进制颜色码，可选",
     "value": "markPoint 专用，对应纵轴收入值；若省略则自动取当日收入"
