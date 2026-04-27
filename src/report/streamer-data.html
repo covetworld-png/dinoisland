@@ -271,7 +271,7 @@
                     ctx.lineTo(x, ca.bottom);
                     ctx.strokeStyle = ann.borderColor || ann.backgroundColor || '#e74c3c';
                     ctx.lineWidth = ann.borderWidth || 2;
-                    if (ann.borderDash) ctx.setLineDash(ann.borderDash);
+                    ctx.setLineDash(ann.borderDash || [6, 6]);
                     ctx.stroke();
                     if (ann.label && ann.label.display) {
                         const text = ann.label.content;
