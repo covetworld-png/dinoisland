@@ -265,7 +265,8 @@
                 ctx.fillStyle = 'rgba(255,0,0,0.5)';
                 ctx.fillRect(10, 10, 40, 40);
                 ctx.restore();
-                for (const key in (options.annotations || {})) {
+                console.log('chartArea=', chart.chartArea, 'yAxis.top=', yAxis.top, 'yAxis.bottom=', yAxis.bottom);
+                for (const key in annotations) {
                     const ann = options.annotations[key];
                     if (ann.type === 'line') {
                         const x = xAxis.getPixelForValue(ann.xMin);
