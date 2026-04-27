@@ -259,7 +259,12 @@
                 if (!xAxis || !yAxis) return;
                 const annotations = eventAnnotations._store[chart.canvas.id] || {};
                 const annKeys = Object.keys(annotations);
-                console.log('eventAnnotations afterDraw:', annKeys.length, 'annotations for', chart.canvas.id, 'store keys=', Object.keys(eventAnnotations._store));
+                console.log('eventAnnotations afterDraw:', annKeys.length, 'for', chart.canvas.id);
+                // Debug: draw a visible red square to confirm plugin is running
+                ctx.save();
+                ctx.fillStyle = 'rgba(255,0,0,0.5)';
+                ctx.fillRect(10, 10, 40, 40);
+                ctx.restore();
                 for (const key in (options.annotations || {})) {
                     const ann = options.annotations[key];
                     if (ann.type === 'line') {
