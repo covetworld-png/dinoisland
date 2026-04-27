@@ -255,11 +255,14 @@
                 const ctx = chart.ctx;
                 const xAxis = chart.scales.x;
                 const yAxis = chart.scales.y;
-                if (!xAxis || !yAxis) return;
+                if (!xAxis || !yAxis) { console.log('eventAnnotations: missing axis'); return; }
+                const annKeys = Object.keys(options.annotations || {});
+                console.log('eventAnnotations afterDraw:', annKeys.length, 'annotations');
                 for (const key in (options.annotations || {})) {
                     const ann = options.annotations[key];
                     if (ann.type === 'line') {
                         const x = xAxis.getPixelForValue(ann.xMin);
+                        console.log('line annotation', ann.xMin, 'x=', x);
                         if (x === undefined || x === null) continue;
                         ctx.save();
                         ctx.beginPath();
@@ -285,6 +288,7 @@
                     } else if (ann.type === 'point') {
                         const x = xAxis.getPixelForValue(ann.xValue);
                         const y = yAxis.getPixelForValue(ann.yValue);
+                        console.log('point annotation', ann.xValue, 'x=', x, 'y=', y);
                         if (x === undefined || x === null || y === undefined || y === null) continue;
                         ctx.save();
                         ctx.beginPath();
