@@ -262,75 +262,35 @@
                 if (!ca) return;
                 for (const key in annotations) {
                     const ann = annotations[key];
-                    if (ann.type === 'line') {
-                        const x = xAxis.getPixelForValue(ann.xMin);
-                        if (x === undefined || x === null || isNaN(x)) continue;
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.moveTo(x, ca.top);
-                        ctx.lineTo(x, ca.bottom);
-                        ctx.strokeStyle = ann.borderColor || '#e74c3c';
-                        ctx.lineWidth = ann.borderWidth || 2;
-                        if (ann.borderDash) ctx.setLineDash(ann.borderDash);
-                        ctx.stroke();
-                        if (ann.label && ann.label.display) {
-                            const text = ann.label.content;
-                            const fontSize = (ann.label.font && ann.label.font.size) || 12;
-                            ctx.font = `bold ${fontSize}px sans-serif`;
-                            const pad = 6;
-                            const m = ctx.measureText(text);
-                            const w = m.width + pad * 2;
-                            const h = fontSize + pad * 2;
-                            let lx = x + 8;
-                            let ly = ca.top + 8;
-                            if (lx + w > ca.right) lx = x - w - 8;
-                            ctx.fillStyle = ann.label.backgroundColor || ann.borderColor || '#e74c3c';
-                            ctx.fillRect(lx, ly, w, h);
-                            ctx.fillStyle = ann.label.color || '#fff';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText(text, lx + pad, ly + h / 2);
-                        }
-                        ctx.restore();
-                    } else if (ann.type === 'point') {
-                        const x = xAxis.getPixelForValue(ann.xValue);
-                        const y = yAxis.getPixelForValue(ann.yValue);
-                        if (x === undefined || x === null || y === undefined || y === null || isNaN(x) || isNaN(y)) continue;
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.arc(x, y, ann.radius || 8, 0, 2 * Math.PI);
-                        ctx.fillStyle = ann.backgroundColor || '#e74c3c';
-                        ctx.fill();
-                        ctx.strokeStyle = '#fff';
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
-                        if (ann.label && ann.label.display) {
-                            const text = ann.label.content;
-                            const fontSize = (ann.label.font && ann.label.font.size) || 12;
-                            ctx.font = `bold ${fontSize}px sans-serif`;
-                            const pad = 6;
-                            const m = ctx.measureText(text);
-                            const w = m.width + pad * 2;
-                            const h = fontSize + pad * 2;
-                            let lx = x + 14;
-                            let ly = y - h - 12;
-                            if (lx + w > ca.right) lx = x - w - 14;
-                            if (ly < ca.top) ly = y + 14;
-                            ctx.fillStyle = ann.label.backgroundColor || ann.backgroundColor || '#e74c3c';
-                            ctx.fillRect(lx, ly, w, h);
-                            ctx.fillStyle = ann.label.color || '#fff';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText(text, lx + pad, ly + h / 2);
-                        }
-                        ctx.restore();
-                    } else if (ann.type === 'box') {
-                        const x1 = xAxis.getPixelForValue(ann.xMin);
-                        const x2 = xAxis.getPixelForValue(ann.xMax);
-                        if (x1 === undefined || x2 === undefined) continue;
-                        ctx.save();
-                        ctx.fillStyle = ann.backgroundColor || 'rgba(0,0,0,0.1)';
-                        ctx.fillRect(x1, ca.top, x2 - x1, ca.bottom - ca.top);
-                        ctx.restore();
+                    // Ignore original type, always draw vertical line
+                    const x = xAxis.getPixelForValue(ann.xMin || ann.xValue || ann.date);
+                    if (x === undefined || x === null || isNaN(x)) continue;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(x, ca.top);
+                    ctx.lineTo(x, ca.bottom);
+                    ctx.strokeStyle = ann.borderColor || ann.backgroundColor || '#e74c3c';
+                    ctx.lineWidth = ann.borderWidth || 2;
+                    if (ann.borderDash) ctx.setLineDash(ann.borderDash);
+                    ctx.stroke();
+                    if (ann.label && ann.label.display) {
+                        const text = ann.label.content;
+                        const fontSize = (ann.label.font && ann.label.font.size) || 12;
+                        ctx.font = `bold ${fontSize}px sans-serif`;
+                        const pad = 6;
+                        const m = ctx.measureText(text);
+                        const w = m.width + pad * 2;
+                        const h = fontSize + pad * 2;
+                        let lx = x + 8;
+                        let ly = ca.top + 8;
+                        if (lx + w > ca.right) lx = x - w - 8;
+                        ctx.fillStyle = ann.label.backgroundColor || ann.borderColor || '#e74c3c';
+                        ctx.fillRect(lx, ly, w, h);
+                        ctx.fillStyle = ann.label.color || '#fff';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(text, lx + pad, ly + h / 2);
                     }
+                    ctx.restore();
                 }
             }
         };
