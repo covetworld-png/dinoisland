@@ -2634,42 +2634,22 @@
                 const fileName = `DKL_Account_${savedUsername}_${Date.now()}.png`;
                 const isTikTok = getUrlParam('tiktok') === '1' || /tiktok|musical_ly|bytedance|bytedancewebview|ttwebview|trill|aweme|snssdk/i.test(navigator.userAgent);
 
-                // TikTok WebView：全屏预览 + 分享保存（Android 长按菜单不可用）
+                // TikTok WebView：全屏预览，提示手动截图（WebView 禁用所有保存 API）
                 if (isTikTok) {
                     const preview = document.createElement('div');
-                    preview.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;box-sizing:border-box;';
+                    preview.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:20px;box-sizing:border-box;';
                     const pImg = document.createElement('img');
                     pImg.src = dataUrl;
-                    pImg.style.cssText = 'max-width:100%;max-height:75vh;border-radius:8px;object-fit:contain;';
+                    pImg.style.cssText = 'max-width:100%;max-height:70vh;border-radius:8px;object-fit:contain;';
                     pImg.onclick = () => preview.remove();
                     const hint = document.createElement('div');
-                    hint.textContent = t('screenshot.saveHint');
-                    hint.style.cssText = 'color:#FFD700;font-size:14px;font-weight:600;text-align:center;padding:0 20px;opacity:0.7;';
-                    // 分享保存按钮（Android 上 navigator.share 通常可用）
-                    const shareBtn = document.createElement('button');
-                    shareBtn.textContent = currentLang === 'vi' ? '💾 Lưu ảnh' : '💾 保存图片';
-                    shareBtn.style.cssText = 'padding:12px 36px;border-radius:12px;border:none;background:linear-gradient(135deg,#FFD700,#B48F00);color:#000;font-size:16px;font-weight:700;cursor:pointer;';
-                    shareBtn.onclick = async () => {
-                        try {
-                            const res = await fetch(dataUrl);
-                            const blob = await res.blob();
-                            const file = new File([blob], fileName, { type: 'image/png' });
-                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                                await navigator.share({ files: [file], title: fileName });
-                                showToast(currentLang === 'vi' ? 'Đã chia sẻ!' : '已分享！');
-                            } else {
-                                showToast(currentLang === 'vi' ? 'Không hỗ trợ lưu ảnh' : '不支持保存图片');
-                            }
-                        } catch (e) {
-                            showToast(currentLang === 'vi' ? 'Lưu thất bại, vui lòng chụp màn hình thủ công' : '保存失败，请手动截图');
-                        }
-                    };
+                    hint.textContent = currentLang === 'vi' ? '👆 Vui lòng chụp màn hình để lưu lại' : '👆 请手动截图保存';
+                    hint.style.cssText = 'color:#FFD700;font-size:18px;font-weight:700;text-align:center;padding:0 20px;';
                     const closeBtn = document.createElement('button');
                     closeBtn.textContent = t('screenshot.close');
                     closeBtn.style.cssText = 'padding:10px 28px;border-radius:20px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;font-size:14px;cursor:pointer;';
                     closeBtn.onclick = () => preview.remove();
                     preview.appendChild(pImg);
-                    preview.appendChild(shareBtn);
                     preview.appendChild(hint);
                     preview.appendChild(closeBtn);
                     document.body.appendChild(preview);
