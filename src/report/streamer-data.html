@@ -257,9 +257,9 @@
                 const xAxis = chart.scales.x || chart.scales['x'];
                 const yAxis = chart.scales.y || chart.scales['y'];
                 if (!xAxis || !yAxis) return;
-                const annotations = this._store[chart.canvas.id] || {};
+                const annotations = eventAnnotations._store[chart.canvas.id] || {};
                 const annKeys = Object.keys(annotations);
-                console.log('eventAnnotations afterDraw:', annKeys.length, 'annotations for', chart.canvas.id);
+                console.log('eventAnnotations afterDraw:', annKeys.length, 'annotations for', chart.canvas.id, 'store keys=', Object.keys(eventAnnotations._store));
                 for (const key in (options.annotations || {})) {
                     const ann = options.annotations[key];
                     if (ann.type === 'line') {
@@ -446,6 +446,7 @@ function showTab(tabName) {
             });
             if (annotationOptions && Object.keys(annotationOptions).length > 0) {
                 eventAnnotations._store[ctx.canvas.id] = annotationOptions;
+                console.log('Stored annotations for', ctx.canvas.id, ':', Object.keys(annotationOptions).length);
             }
             return chart;
         }
