@@ -76,24 +76,24 @@
     <div class="container">
         <div class="header">
             <h1>📊 主播数据多维度分析图表</h1>
-            <p>数据更新时间: 2026-04-19 | 分析周期: 2025-11-21 至 2026-04-19</p>
+            <p>数据更新时间: 2026-04-26 | 分析周期: 2026-03-28 至 2026-04-26</p>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-value">¥7,358</div>
+                <div class="stat-value">¥14,354</div>
                 <div class="stat-label">近一周总收入</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">119.0万</div>
+                <div class="stat-value">125.3万</div>
                 <div class="stat-label">近一周总观看</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">+7.4%</div>
+                <div class="stat-value">+5.3%</div>
                 <div class="stat-label">观看周环比</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">-7.7%</div>
+                <div class="stat-value">+95.1%</div>
                 <div class="stat-label">收入周环比</div>
             </div>
         </div>
@@ -117,13 +117,13 @@
                 <div class="card-title">总收入趋势 (含7日移动均线)</div>
                 <div class="chart-container"><canvas id="totalIncomeChart"></canvas></div>
                 <p style="margin-top:15px;color:#666">
-                    <strong>关键发现：</strong>4/13-4/19 vs 4/6-4/12，
-                    总观看次数增长<strong>+7.4%</strong>，
-                    总收入下降<strong>-7.7%</strong>。
+                    <strong>关键发现：</strong>04/20-04/26 vs 04/13-04/19，
+                    总观看次数增长<strong>+5.3%</strong>，
+                    总收入增长<strong>+95.1%</strong>。
                 </p>
             </div>
             <div class="card">
-                <div class="card-title">主播占比（4/13-4/19）</div>
+                <div class="card-title">主播占比（04/20-04/26）</div>
                 <div class="chart-row">
                     <div class="chart-container"><canvas id="pieViewsChart"></canvas></div>
                     <div class="chart-container"><canvas id="pieIncomeChart"></canvas></div>
@@ -148,31 +148,16 @@
                 <div class="chart-container"><canvas id="incomeChart"></canvas></div>
             </div>
             <div class="card">
-                <div class="card-title">周对周收入对比 (04/06-04/12 vs 04/13-04/19)</div>
+                <div class="card-title">周对周收入对比 (04/13-04/19 vs 04/20-04/26)</div>
                 <table>
                     <tr><th>主播</th><th>上周</th><th>本周</th><th>变化额</th><th>变化率</th><th>趋势</th></tr>
-                    
-            <tr><td><strong>阿贤</strong></td><td>¥3411.15</td><td>¥3968.5</td>
-            <td class="positive">+557.3</td><td class="positive">+16.3%</td><td>↑ 增长</td></tr>
-        
-            <tr><td><strong>MYMY</strong></td><td>¥3443.74</td><td>¥2292.37</td>
-            <td class="negative">-1151.4</td><td class="negative">-33.4%</td><td>↓ 下滑</td></tr>
-        
-            <tr><td><strong>志青</strong></td><td>¥213.36</td><td>¥375.41</td>
-            <td class="positive">+162.1</td><td class="positive">+76.0%</td><td>↑ 增长</td></tr>
-        
-            <tr><td><strong>阿园</strong></td><td>¥391.08</td><td>¥357.14</td>
-            <td class="negative">-33.9</td><td class="negative">-8.7%</td><td>→ 稳定</td></tr>
-        
-            <tr><td><strong>Pink</strong></td><td>¥214.23</td><td>¥193.47</td>
-            <td class="negative">-20.8</td><td class="negative">-9.7%</td><td>→ 稳定</td></tr>
-        
-            <tr><td><strong>peo</strong></td><td>¥116.82</td><td>¥71.91</td>
-            <td class="negative">-44.9</td><td class="negative">-38.4%</td><td>↓ 下滑</td></tr>
-        
-            <tr><td><strong>Vanie</strong></td><td>¥183.52</td><td>¥99.7</td>
-            <td class="negative">-83.8</td><td class="negative">-45.7%</td><td>↓ 下滑</td></tr>
-        
+                    <tr><td><strong>阿贤heni</strong></td><td>¥3968.51</td><td>¥7157.36</td><td class="positive">+3188.8</td><td class="positive">+80.4%</td><td>↑ 增长</td></tr>
+            <tr><td><strong>MYMY</strong></td><td>¥2292.35</td><td>¥5704.44</td><td class="positive">+3412.1</td><td class="positive">+148.8%</td><td>↑ 增长</td></tr>
+            <tr><td><strong>志青Ricon</strong></td><td>¥375.41</td><td>¥433.18</td><td class="positive">+57.8</td><td class="positive">+15.4%</td><td>↑ 增长</td></tr>
+            <tr><td><strong>阿园Chua</strong></td><td>¥357.14</td><td>¥320.52</td><td class="negative">-36.6</td><td class="negative">-10.3%</td><td>↓ 下滑</td></tr>
+            <tr><td><strong>Pink</strong></td><td>¥193.48</td><td>¥400.57</td><td class="positive">+207.1</td><td class="positive">+107.0%</td><td>↑ 增长</td></tr>
+            <tr><td><strong>peo</strong></td><td>¥71.91</td><td>¥200.37</td><td class="positive">+128.5</td><td class="positive">+178.6%</td><td>↑ 增长</td></tr>
+            <tr><td><strong>Vanie</strong></td><td>¥99.7</td><td>¥137.12</td><td class="positive">+37.4</td><td class="positive">+37.5%</td><td>↑ 增长</td></tr>
                 </table>
             </div>
         </div>
@@ -228,11 +213,11 @@
                 <div class="comparison-box">
                     <div class="comparison-item">
                         <div class="comparison-label">下午场平均收入</div>
-                        <div class="comparison-value">¥165</div>
+                        <div class="comparison-value">¥78</div>
                     </div>
                     <div class="comparison-item">
                         <div class="comparison-label">晚间场平均收入</div>
-                        <div class="comparisonValue">¥238</div>
+                        <div class="comparison-value">¥59</div>
                     </div>
                 </div>
             </div>
@@ -246,11 +231,11 @@
                 <div class="comparison-box">
                     <div class="comparison-item">
                         <div class="comparison-label">下午场平均收入</div>
-                        <div class="comparison-value">¥273</div>
+                        <div class="comparison-value">¥273</div><div class="comparison-value">¥290</div>
                     </div>
                     <div class="comparison-item">
                         <div class="comparison-label">晚间场平均收入</div>
-                        <div class="comparison-value">¥170</div>
+                        <div class="comparison-value">¥170</div><div class="comparison-value">¥227</div>
                     </div>
                 </div>
             </div>
