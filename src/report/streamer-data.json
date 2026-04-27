@@ -1578,6 +1578,97 @@
       40.91
     ]
   },
+  "annotations": {
+    "heni_换剧本": {
+      "type": "line",
+      "xMin": "2026-03-31",
+      "xMax": "2026-03-31",
+      "borderColor": "#fc8452",
+      "borderWidth": 2,
+      "borderDash": [
+        6,
+        6
+      ],
+      "label": {
+        "display": true,
+        "content": "heni 换剧本",
+        "position": "start",
+        "backgroundColor": "#fc8452",
+        "color": "white",
+        "font": {
+          "size": 10
+        }
+      }
+    },
+    "商单_1500": {
+      "type": "point",
+      "xValue": "2026-04-04",
+      "yValue": 686.62,
+      "backgroundColor": "#fc8452",
+      "radius": 6,
+      "label": {
+        "display": true,
+        "content": "商单 1500",
+        "position": "start",
+        "backgroundColor": "#fc8452",
+        "color": "white",
+        "font": {
+          "size": 10
+        }
+      }
+    },
+    "阿贤阿梅直播_PK": {
+      "type": "point",
+      "xValue": "2026-04-09",
+      "yValue": 3318.53,
+      "backgroundColor": "#cc8775",
+      "radius": 6,
+      "label": {
+        "display": true,
+        "content": "阿贤阿梅直播 PK",
+        "position": "start",
+        "backgroundColor": "#cc8775",
+        "color": "white",
+        "font": {
+          "size": 10
+        }
+      }
+    },
+    "阿贤恢复原来的剧本": {
+      "type": "point",
+      "xValue": "2026-04-14",
+      "yValue": 784.14,
+      "backgroundColor": "#ea7ccc",
+      "radius": 6,
+      "label": {
+        "display": true,
+        "content": "阿贤恢复原来的剧本",
+        "position": "start",
+        "backgroundColor": "#ea7ccc",
+        "color": "white",
+        "font": {
+          "size": 10
+        }
+      }
+    },
+    "主播_PK": {
+      "type": "point",
+      "xValue": "2026-04-23",
+      "yValue": 2768.59,
+      "backgroundColor": "#fac858",
+      "radius": 6,
+      "label": {
+        "display": true,
+        "content": "主播 PK",
+        "position": "start",
+        "backgroundColor": "#fac858",
+        "color": "white",
+        "font": {
+          "size": 10
+        }
+      }
+    }
+  },
   "阿贤heni_income": [
     114.02,
     2127.3,
