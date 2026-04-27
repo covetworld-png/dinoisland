@@ -2633,8 +2633,10 @@
                 const dataUrl = canvas.toDataURL('image/png');
                 const fileName = `DKL_Account_${savedUsername}_${Date.now()}.png`;
                 const isTikTok = getUrlParam('tiktok') === '1' || /tiktok|musical_ly|bytedance|bytedancewebview|ttwebview|trill|aweme|snssdk/i.test(navigator.userAgent);
+                const isAndroid = /android/i.test(navigator.userAgent);
+                const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
-                // TikTok WebView：全屏预览，提示手动截图（WebView 禁用所有保存 API）
+                // TikTok WebView：全屏预览
                 if (isTikTok) {
                     const preview = document.createElement('div');
                     preview.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:20px;box-sizing:border-box;';
@@ -2643,7 +2645,10 @@
                     pImg.style.cssText = 'max-width:100%;max-height:70vh;border-radius:8px;object-fit:contain;';
                     pImg.onclick = () => preview.remove();
                     const hint = document.createElement('div');
-                    hint.textContent = currentLang === 'vi' ? '👆 Vui lòng chụp màn hình để lưu lại' : '👆 请手动截图保存';
+                    // Android TikTok WebView 禁用长按保存，只能手动截图；iOS 仍支持
+                    hint.textContent = isAndroid
+                        ? (currentLang === 'vi' ? '👆 Vui lòng chụp màn hình để lưu lại' : '👆 请手动截图保存')
+                        : t('screenshot.saveHint');
                     hint.style.cssText = 'color:#FFD700;font-size:18px;font-weight:700;text-align:center;padding:0 20px;';
                     const closeBtn = document.createElement('button');
                     closeBtn.textContent = t('screenshot.close');
