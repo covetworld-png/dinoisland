@@ -251,12 +251,13 @@
         // 自定义事件标注插件（不依赖外部 annotation 库）
         const eventAnnotations = {
             id: 'eventAnnotations',
+            _store: {},
             afterDraw(chart, args, options) {
                 const ctx = chart.ctx;
                 const xAxis = chart.scales.x || chart.scales['x'];
                 const yAxis = chart.scales.y || chart.scales['y'];
                 if (!xAxis || !yAxis) return;
-                const annotations = _annotationStore[chart.canvas.id] || {};
+                const annotations = this._store[chart.canvas.id] || {};
                 const annKeys = Object.keys(annotations);
                 console.log('eventAnnotations afterDraw:', annKeys.length, 'annotations for', chart.canvas.id);
                 for (const key in (options.annotations || {})) {
@@ -430,8 +431,6 @@ function showTab(tabName) {
             const Vanie_views_10 = data.Vanie_views_10;
 
 // Global store for annotations (Chart.js instance may be a proxy)
-        const _annotationStore = {};
-
         // Chart.js 配置辅助函数
         function createLineChart(ctx, labels, datasets, title, annotationOptions) {
             const plugins = { legend: { position: 'top' }, title: { display: !!title, text: title } };
@@ -446,7 +445,7 @@ function showTab(tabName) {
                 }
             });
             if (annotationOptions && Object.keys(annotationOptions).length > 0) {
-                _annotationStore[ctx.canvas.id] = annotationOptions;
+                eventAnnotations._store[ctx.canvas.id] = annotationOptions;
             }
             return chart;
         }
