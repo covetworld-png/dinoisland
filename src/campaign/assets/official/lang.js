@@ -113,7 +113,36 @@ const i18n = {
         'dino.acro': 'Acro',
         'dino.herrera': 'Herrerasaurus',
         'dino.ptero': 'Khủng Long Cánh',
-        'btn.play': 'Phát'
+        'btn.play': 'Phát',
+        // Zalo CSKH
+        'zalo.qrTitle': 'Quét mã QR để thêm Zalo CSKH',
+        'zalo.close': 'Đóng',
+        'zalo.guideTitle': 'Mở trong trình duyệt để tiếp tục',
+        'zalo.tiktok.step1': 'Nhấn vào biểu tượng chia sẻ (→)',
+        'zalo.tiktok.step2': 'Chọn "Mở trong Chrome" hoặc "Mở trong Safari"',
+        'zalo.fb.step1': 'Nhấn vào biểu tượng ⋮ (ba chấm) ở góc trên bên phải',
+        'zalo.fb.step2': 'Chọn "Mở trong Chrome" hoặc "Mở trong trình duyệt"',
+        'zalo.ig.step1': 'Nhấn vào biểu tượng ⋮ (ba chấm) ở góc trên bên phải',
+        'zalo.ig.step2': 'Chọn "Mở trong trình duyệt"',
+        'zalo.wx.step1': 'Nhấn vào biểu tượng ⋮ ở góc trên bên phải',
+        'zalo.wx.step2': 'Chọn "Mở trong trình duyệt"',
+        'zalo.backToAdd': 'Quay lại trang này và nhấn nút thêm Zalo CSKH',
+
+        // Screenshot
+        'screenshot.gameTitle': 'ĐẢO KHỦNG LONG',
+        'screenshot.subtitle': 'Game PC 3D - Thế giới khủng long sống động',
+        'screenshot.accountInfo': 'THÔNG TIN TÀI KHOẢN',
+        'screenshot.downloadLabel': 'Link tải PC',
+        'screenshot.configTitle': 'CẤU HÌNH HỆ THỐNG',
+        'screenshot.minConfig': 'Tối thiểu',
+        'screenshot.recConfig': 'Đề xuất',
+        'screenshot.footer': 'Đăng ký ngay để nhận quà tân thủ',
+        'screenshot.saveHint': '👆 Nhấn giữ ảnh để lưu vào album',
+        'screenshot.close': '✕ Đóng',
+        'screenshot.shared': 'Đã chia sẻ!',
+        'screenshot.downloaded': 'Đã tải xuống',
+        'screenshot.failed': 'Lưu ảnh thất bại, vui lòng chụp màn hình thủ công',
+
     },
     cn: {
         'page.title': '恐龙岛 - PC端游戏福利',
@@ -229,7 +258,36 @@ const i18n = {
         'dino.acro': '高脊龙',
         'dino.herrera': '埃雷拉龙',
         'dino.ptero': '翼龙',
-        'btn.play': '播放'
+        'btn.play': '播放',
+        // Zalo CSKH
+        'zalo.qrTitle': '扫描二维码添加 Zalo 客服',
+        'zalo.close': '关闭',
+        'zalo.guideTitle': '在浏览器中打开以继续',
+        'zalo.tiktok.step1': '点击分享按钮 (→)',
+        'zalo.tiktok.step2': '选择"在 Chrome 中打开"或"在 Safari 中打开"',
+        'zalo.fb.step1': '点击右上角菜单按钮 (⋮)',
+        'zalo.fb.step2': '选择"在 Chrome 中打开"或"在浏览器中打开"',
+        'zalo.ig.step1': '点击右上角菜单按钮 (⋮)',
+        'zalo.ig.step2': '选择"在浏览器中打开"',
+        'zalo.wx.step1': '点击右上角菜单按钮 (⋮)',
+        'zalo.wx.step2': '选择"在浏览器中打开"',
+        'zalo.backToAdd': '返回本页面点击添加 Zalo 客服',
+
+        // Screenshot
+        'screenshot.gameTitle': '恐龙岛',
+        'screenshot.subtitle': 'PC端3D恐龙世界',
+        'screenshot.accountInfo': '账号信息',
+        'screenshot.downloadLabel': 'PC端下载地址',
+        'screenshot.configTitle': '系统配置要求',
+        'screenshot.minConfig': '最低配置',
+        'screenshot.recConfig': '推荐配置',
+        'screenshot.footer': '立即注册领取新手礼包',
+        'screenshot.saveHint': '👆 长按图片保存到相册',
+        'screenshot.close': '✕ 关闭',
+        'screenshot.shared': '已唤起分享！',
+        'screenshot.downloaded': '已下载',
+        'screenshot.failed': '截图失败，请手动截图保存',
+
     }
 };
 
