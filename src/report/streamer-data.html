@@ -467,7 +467,7 @@ function showTab(tabName) {
         createLineChart(document.getElementById('totalViewsChart').getContext('2d'), labels30, [
             { label: '总观看', data: totalViewsData, borderColor: '#667eea', backgroundColor: 'rgba(102,126,234,0.1)', tension: 0.4, fill: true },
             { label: '7日移动平均', data: totalViewsMA, borderColor: '#e74c3c', borderDash: [5,5], tension: 0.4, pointRadius: 0 }
-        ]);
+        ], null, data.annotations || {});
         createLineChart(document.getElementById('totalIncomeChart').getContext('2d'), labels30, [
             { label: '总收入', data: totalIncomeData, borderColor: '#27ae60', backgroundColor: 'rgba(39,174,96,0.1)', tension: 0.4, fill: true },
             { label: '7日移动平均', data: totalIncomeMA, borderColor: '#e74c3c', borderDash: [5,5], tension: 0.4, pointRadius: 0 }
@@ -568,7 +568,7 @@ function showTab(tabName) {
             { label: 'Pink', data: Pink_peak, borderColor: '#9b59b6', tension: 0.3 },
             { label: 'peo', data: peo_peak, borderColor: '#1abc9c', tension: 0.3 },
             { label: 'Vanie', data: Vanie_peak, borderColor: '#3498db', tension: 0.3 }
-        ]);
+        ], null, data.annotations || {});
         createLineChart(document.getElementById('followersChart').getContext('2d'), labels30, [
             { label: '阿贤', data: 阿贤heni_followers, borderColor: '#e74c3c', tension: 0.3 },
             { label: 'MYMY', data: MYMY_followers, borderColor: '#2ecc71', tension: 0.3 },
@@ -577,7 +577,7 @@ function showTab(tabName) {
             { label: 'Pink', data: Pink_followers, borderColor: '#9b59b6', tension: 0.3 },
             { label: 'peo', data: peo_followers, borderColor: '#1abc9c', tension: 0.3 },
             { label: 'Vanie', data: Vanie_followers, borderColor: '#3498db', tension: 0.3 }
-        ]);
+        ], null, data.annotations || {});
 
         // 互动
         createLineChart(document.getElementById('interactionChart').getContext('2d'), labels30, [
@@ -588,7 +588,7 @@ function showTab(tabName) {
             { label: 'Pink', data: Pink_interaction, borderColor: '#9b59b6', tension: 0.3 },
             { label: 'peo', data: peo_interaction, borderColor: '#1abc9c', tension: 0.3 },
             { label: 'Vanie', data: Vanie_interaction, borderColor: '#3498db', tension: 0.3 }
-        ]);
+        ], null, data.annotations || {});
         createLineChart(document.getElementById('likesChart').getContext('2d'), labels30, [
             { label: '阿贤', data: 阿贤heni_likes, borderColor: '#e74c3c', tension: 0.3 },
             { label: 'MYMY', data: MYMY_likes, borderColor: '#2ecc71', tension: 0.3 },
@@ -597,7 +597,7 @@ function showTab(tabName) {
             { label: 'Pink', data: Pink_likes, borderColor: '#9b59b6', tension: 0.3 },
             { label: 'peo', data: peo_likes, borderColor: '#1abc9c', tension: 0.3 },
             { label: 'Vanie', data: Vanie_likes, borderColor: '#3498db', tension: 0.3 }
-        ]);
+        ], null, data.annotations || {});
 
         // 时长
         createLineChart(document.getElementById('fanDurationChart').getContext('2d'), labels30, [
@@ -608,7 +608,7 @@ function showTab(tabName) {
             { label: 'Pink', data: Pink_fanDuration, borderColor: '#9b59b6', tension: 0.3 },
             { label: 'peo', data: peo_fanDuration, borderColor: '#1abc9c', tension: 0.3 },
             { label: 'Vanie', data: Vanie_fanDuration, borderColor: '#3498db', tension: 0.3 }
-        ]);
+        ], null, data.annotations || {});
         createLineChart(document.getElementById('avgDurationChart').getContext('2d'), labels30, [
             { label: '阿贤', data: 阿贤heni_avgDuration, borderColor: '#e74c3c', tension: 0.3 },
             { label: 'MYMY', data: MYMY_avgDuration, borderColor: '#2ecc71', tension: 0.3 },
@@ -617,7 +617,7 @@ function showTab(tabName) {
             { label: 'Pink', data: Pink_avgDuration, borderColor: '#9b59b6', tension: 0.3 },
             { label: 'peo', data: peo_avgDuration, borderColor: '#1abc9c', tension: 0.3 },
             { label: 'Vanie', data: Vanie_avgDuration, borderColor: '#3498db', tension: 0.3 }
-        ]);
+        ], null, data.annotations || {});
 
         // 新主播
         new Chart(document.getElementById('peoChart'), {
