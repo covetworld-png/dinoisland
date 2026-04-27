@@ -270,6 +270,14 @@
           </select>
         </div>
         <div class="form-group">
+          <label for="ev-category">分类</label>
+          <select id="ev-category">
+            <option value="主播">主播</option>
+            <option value="活动">活动</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label for="ev-name">事件名称 <span style="color:#d93026">*</span></label>
           <input type="text" id="ev-name" placeholder="如：主播空降活动" />
         </div>
@@ -563,13 +571,14 @@
       if (editingIdx !== idx) return;
       const date = document.getElementById(`edit-date-${idx}`).value;
       const type = document.getElementById(`edit-type-${idx}`).value;
+      const category = document.getElementById(`edit-category-${idx}`).value;
       const name = document.getElementById(`edit-name-${idx}`).value.trim();
       const color = document.getElementById(`edit-color-${idx}`).value;
       if (!date || !name) {
         alert('日期和事件名称不能为空');
         return;
       }
-      const ev = { date, type, name, color };
+      const ev = { date, type, category, name, color };
       if (type === 'markPoint') {
         const valEl = document.getElementById(`edit-value-${idx}`);
         if (valEl) {
@@ -604,7 +613,7 @@
         document.getElementById('events-table').innerHTML = '<p class="empty">暂无标注事件，请从上方表单添加。</p>';
         return;
       }
-      let html = '<table><thead><tr><th>日期</th><th>类型</th><th>事件名称</th><th>颜色</th><th>收入值</th><th style="width:130px;">操作</th></tr></thead><tbody>';
+      let html = '<table><thead><tr><th>日期</th><th>类型</th><th>分类</th><th>事件名称</th><th>颜色</th><th>收入值</th><th style="width:130px;">操作</th></tr></thead><tbody>';
       events.forEach((ev, idx) => {
         const color = ev.color || getDefaultColor(ev.type);
         const dateDisplay = formatDateRange(ev);
@@ -617,6 +626,13 @@
                 <option value="markLine" ${ev.type === 'markLine' ? 'selected' : ''}>markLine</option>
                 <option value="markPoint" ${ev.type === 'markPoint' ? 'selected' : ''}>markPoint</option>
                 <option value="markArea" ${ev.type === 'markArea' ? 'selected' : ''}>markArea</option>
+              </select>
+            </td>
+            <td>
+              <select class="edit-input" data-edit-idx="${idx}" id="edit-category-${idx}" style="width:90px;padding:4px 6px;border:1px solid #dee0e3;border-radius:4px;">
+                <option value="主播" ${ev.category === '主播' ? 'selected' : ''}>主播</option>
+                <option value="活动" ${ev.category === '活动' ? 'selected' : ''}>活动</option>
+                <option value="其他" ${ev.category === '其他' ? 'selected' : ''}>其他</option>
               </select>
             </td>
             <td><input type="text" class="edit-input" data-edit-idx="${idx}" id="edit-name-${idx}" value="${ev.name}" style="width:140px;padding:4px 6px;border:1px solid #dee0e3;border-radius:4px;" /></td>
@@ -647,6 +663,7 @@
           html += `<tr>
             <td>${dateDisplay}</td>
             <td>${ev.type}</td>
+            <td>${ev.category || '-'}</td>
             <td>${ev.name}</td>
             <td><span class="color-dot" style="background:${color}"></span><code>${color}</code></td>
             <td>${valueDisplay}</td>
@@ -775,6 +792,7 @@
           date: "YYYY-MM-DD，必须与 daily_metrics.csv 的日期一致",
           endDate: "markArea 专用，结束日期",
           type: "markLine(垂直标线) | markPoint(标注点) | markArea(区间高亮)",
+          category: "事件分类：主播 | 活动 | 其他",
           name: "事件名称，显示在图表上",
           color: "十六进制颜色码，可选",
           value: "markPoint 专用，对应纵轴收入值；若省略则自动取当日收入"
@@ -794,6 +812,7 @@
       document.getElementById('ev-date').value = '';
       document.getElementById('ev-enddate').value = '';
       document.getElementById('ev-type').value = 'markLine';
+      document.getElementById('ev-category').value = '主播';
       document.getElementById('ev-name').value = '';
       setColorInput(getNextColor());
       document.getElementById('ev-value').value = '';
@@ -825,7 +844,7 @@
         return;
       }
 
-      const ev = { date, type, name, color };
+      const ev = { date, type, category: document.getElementById('ev-category').value, name, color };
       if (type === 'markPoint' && valueRaw !== '') {
         ev.value = Number(valueRaw);
       }
