@@ -98,6 +98,101 @@
       font-family: "SF Mono", Monaco, monospace;
     }
 
+    .qr-generator {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .qr-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .qr-header .section-title {
+      margin-bottom: 0;
+    }
+    .qr-toggle {
+      font-size: 12px;
+      color: var(--muted);
+      transition: transform .2s;
+    }
+    .qr-generator.open .qr-toggle {
+      transform: rotate(180deg);
+    }
+    .qr-body {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height .25s ease, opacity .2s ease;
+    }
+    .qr-generator.open .qr-body {
+      max-height: 400px;
+      opacity: 1;
+    }
+    .qr-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .qr-input {
+      flex: 1;
+      min-width: 200px;
+      background: #14161c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .qr-input:focus {
+      border-color: var(--accent);
+    }
+    .qr-input::placeholder {
+      color: #555b6e;
+    }
+    .qr-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .qr-btn:hover {
+      background: var(--accent-hover);
+    }
+    .qr-result {
+      margin-top: 20px;
+      text-align: center;
+      display: none;
+    }
+    .qr-result img {
+      width: 180px;
+      height: 180px;
+      border-radius: 10px;
+      background: #fff;
+      padding: 6px;
+    }
+    .qr-result-url {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      word-break: break-all;
+      font-family: "SF Mono", Monaco, monospace;
+    }
+
     .section { margin-bottom: 32px; }
     .section-title {
       font-size: 13px;
@@ -248,6 +343,24 @@
         <button id="btn-gh">GitHub Pages</button>
       </div>
       <span class="mode-hint" id="mode-hint">相对路径，适合本地直接打开</span>
+    </div>
+
+    <!-- 二维码生成器 -->
+    <div class="section qr-generator" id="qr-generator">
+      <div class="qr-header" id="qr-header">
+        <div class="section-title">二维码生成器 / QR Code</div>
+        <span class="qr-toggle">▼</span>
+      </div>
+      <div class="qr-body">
+        <div class="qr-input-group">
+          <input type="text" class="qr-input" id="qr-url" placeholder="输入 URL，例如 https://example.com">
+          <button class="qr-btn" id="qr-generate">生成二维码</button>
+        </div>
+        <div class="qr-result" id="qr-result">
+          <img id="qr-img" alt="QR Code">
+          <div class="qr-result-url" id="qr-result-url"></div>
+        </div>
+      </div>
     </div>
 
     <!-- 活动页面 -->
@@ -460,6 +573,34 @@
       const btnGh = document.getElementById('btn-gh');
       const hint = document.getElementById('mode-hint');
       const cards = document.querySelectorAll('.card');
+
+      // 二维码生成器
+      (function() {
+        const generator = document.getElementById('qr-generator');
+        const header = document.getElementById('qr-header');
+        const input = document.getElementById('qr-url');
+        const btn = document.getElementById('qr-generate');
+        const result = document.getElementById('qr-result');
+        const img = document.getElementById('qr-img');
+        const urlText = document.getElementById('qr-result-url');
+
+        header.addEventListener('click', () => {
+          generator.classList.toggle('open');
+        });
+
+        function generate() {
+          const url = input.value.trim();
+          if (!url) return;
+          img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
+          urlText.textContent = url;
+          result.style.display = 'block';
+        }
+
+        btn.addEventListener('click', generate);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') generate();
+        });
+      })();
 
       // 初始化：为每个卡片注入复制按钮
       cards.forEach(card => {
