@@ -267,7 +267,7 @@
                 ctx.restore();
                 console.log('chartArea=', chart.chartArea, 'yAxis.top=', yAxis.top, 'yAxis.bottom=', yAxis.bottom);
                 for (const key in annotations) {
-                    const ann = options.annotations[key];
+                    const ann = annotations[key];
                     if (ann.type === 'line') {
                         const x = xAxis.getPixelForValue(ann.xMin);
                         console.log('line annotation', ann.xMin, 'x=', x);
