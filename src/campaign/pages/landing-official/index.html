@@ -2551,7 +2551,7 @@
                 ctx.font = 'bold 52px Inter, sans-serif';
                 ctx.shadowColor = 'rgba(255,215,0,0.7)';
                 ctx.shadowBlur = 20;
-                ctx.fillText('dkl.vn', W / 2, y);
+                ctx.fillText('DKL.VN', W / 2, y);
                 ctx.shadowBlur = 0;
                 y += 70;
                 ctx.fillStyle = 'rgba(255,255,255,0.5)';
@@ -2591,7 +2591,7 @@
                 drawRow(t('reg.accountLabel'), savedUsername, '#FFD700', false);
                 drawRow(t('reg.pwdLabel'), savedPassword, '#FFD700', false);
                 drawRow(t('reg.phoneLabel2'), savedPhone, '#FFD700', false);
-                drawRow(t('screenshot.downloadLabel'), 'dkl.vn', '#4ecdc4', true);
+                drawRow(t('screenshot.downloadLabel'), 'DKL.VN', '#4ecdc4', true);
                 y += 70;
 
                 ctx.strokeStyle = 'rgba(255,215,0,0.25)';
@@ -2628,7 +2628,7 @@
                 ctx.fillStyle = 'rgba(255,255,255,0.35)';
                 ctx.font = '22px Inter, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('dkl.vn | ' + (t('screenshot.footer')), W / 2, y);
+                ctx.fillText('DKL.VN | ' + (t('screenshot.footer')), W / 2, y);
 
                 const dataUrl = canvas.toDataURL('image/png');
                 const fileName = `DKL_Account_${savedUsername}_${Date.now()}.png`;
