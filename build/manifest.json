@@ -188,7 +188,7 @@
       "srcPage": "src/campaign/pages/005-01-monthly-recharge-king",
       "includeAssets": [],
       "pathRewrite": {},
-      "versioning": "2.0"
+      "versioning": "auto"
     },
     "landing": {
       "srcPage": "src/campaign/pages/landing",

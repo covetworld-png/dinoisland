@@ -1,8 +1,8 @@
 // Countdown for Chí Tôn Long Vươn
 (function() {
     // Event times (UTC+7)
-    const EVENT_START = new Date('2026-05-01T00:00:00+07:00').getTime();
-    const EVENT_END = new Date('2026-05-01T23:59:59+07:00').getTime();
+    const EVENT_START = new Date('2026-04-24T00:00:00+07:00').getTime();
+    const EVENT_END = new Date('2026-04-24T23:59:59+07:00').getTime();
     
     function updateCountdown() {
         const now = new Date().getTime();

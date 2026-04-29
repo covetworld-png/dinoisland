@@ -1,4 +1,4 @@
-// Main JavaScript for Chí Tôn Bạo Long Vương - Season 3
+// Main JavaScript for Chí Tôn Long Vương - Season 2
 
 // Language Toggle
 function toggleLanguage() {
@@ -13,7 +13,7 @@ function toggleLanguage() {
         langLabel.textContent = newLang === 'vi' ? 'VI / 中' : '中 / VI';
     }
     
-    document.title = newLang === 'vi' ? 'Chí Tôn Bạo Long Vương Mùa 3' : '至尊暴龙王 第三届';
+    document.title = newLang === 'vi' ? 'Chí Tôn Long Vương Mùa 2' : '至尊龙王 第二届';
     
     localStorage.setItem('lang', newLang);
     
@@ -269,11 +269,11 @@ function formatCurrency(num) {
 
 // Mock data - initial values shown on page
 const mockData = {
-    topAmount: 0,
-    rank2Amount: 0,
-    rank3Amount: 0,
-    userRank: 0,
-    userAmount: 0
+    topAmount: 88888,
+    rank2Amount: 66666,
+    rank3Amount: 52000,
+    userRank: 5,
+    userAmount: 12800
 };
 
 // Check if already logged in (for demo)
@@ -447,7 +447,7 @@ function init() {
         langLabel.textContent = savedLang === 'vi' ? 'VI / 中' : '中 / VI';
     }
     
-    document.title = savedLang === 'vi' ? 'Chí Tôn Bạo Long Vương Mùa 3' : '至尊暴龙王 第三届';
+    document.title = savedLang === 'vi' ? 'Chí Tôn Long Vương Mùa 2' : '至尊龙王 第二届';
     
     // Sync honor hall with result view data
     syncHonorHall();
