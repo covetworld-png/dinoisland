@@ -1,4 +1,4 @@
-// Main JavaScript for Chí Tôn Long Vương - Season 2
+// Main JavaScript for Chí Tôn Bạo Long Vương - Season 4
 
 // Language Toggle
 function toggleLanguage() {
@@ -13,7 +13,7 @@ function toggleLanguage() {
         langLabel.textContent = newLang === 'vi' ? 'VI / 中' : '中 / VI';
     }
     
-    document.title = newLang === 'vi' ? 'Chí Tôn Long Vương Mùa 2' : '至尊龙王 第二届';
+    document.title = newLang === 'vi' ? 'Chí Tôn Bạo Long Vương Mùa 4' : '至尊暴龙王 第四届';
     
     localStorage.setItem('lang', newLang);
     
@@ -48,8 +48,10 @@ function toggleResult() {
     } else {
         body.classList.remove('state-before', 'state-active', 'state-result');
         body.classList.add(demoPreviousState);
-        // Reset season 2 honor hall only (season 1 is permanent)
+        // Reset season 2-4 honor halls (season 1 is permanent)
         resetSeason2Hall();
+        resetSeason3Hall();
+        resetSeason4Hall();
         if (toggleBtn) {
             toggleBtn.innerHTML = '<span class="lang-vi">Công bố ngưới thắng</span><span class="lang-cn">宣布获胜</span>';
         }
@@ -202,8 +204,8 @@ function renderHistoryList() {
         historyList.innerHTML = autoScriptHistory.map(item => {
             const startStr = item.startTime.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
             const label = lang === 'vi' 
-                ? `Kích thước khủng long +150% • Tự động hóa`
-                : `恐龙体型 +150% • 自动化脚本`;
+                ? `Kích thước khủng long +50% • Tự động hóa`
+                : `恐龙体型 +50% • 自动化脚本`;
             
             let statusHtml = '';
             if (item.status === 'processing') {
@@ -233,7 +235,7 @@ function triggerAutoScript() {
         id: Date.now(),
         startTime: new Date(),
         endTime: null,
-        action: 'auto_script_150',
+        action: 'auto_script_50',
         status: 'processing'
     };
     autoScriptHistory.unshift(historyItem);
@@ -269,11 +271,11 @@ function formatCurrency(num) {
 
 // Mock data - initial values shown on page
 const mockData = {
-    topAmount: 88888,
-    rank2Amount: 66666,
-    rank3Amount: 52000,
-    userRank: 5,
-    userAmount: 12800
+    topAmount: 0,
+    rank2Amount: 0,
+    rank3Amount: 0,
+    userRank: 0,
+    userAmount: 0
 };
 
 // Check if already logged in (for demo)
@@ -341,8 +343,10 @@ function syncHonorHall() {
     if (hallDate) hallDate.style.display = 'flex';
     if (hallCard) hallCard.classList.add('has-winner');
     
-    // Also sync season 2 hall card if it exists
+    // Also sync season 2-4 hall cards
     syncSeason2Hall();
+    syncSeason3Hall();
+    syncSeason4Hall();
 }
 
 function resetSeason2Hall() {
@@ -366,6 +370,35 @@ function resetSeason2Hall() {
         s2Text.style.display = 'block';
     }
     if (s2Date) s2Date.style.display = 'none';
+}
+
+function resetSeason3Hall() {
+    // Season 3 is now permanent data (3Luffy), do not reset
+    // const s3Card = document.getElementById('hall-season3-card');
+    // if (s3Card) s3Card.classList.remove('has-winner');
+}
+
+function resetSeason4Hall() {
+    const s4Card = document.getElementById('hall-season4-card');
+    const s4Name = document.getElementById('hall-s4-name');
+    const s4Account = document.getElementById('hall-s4-account');
+    const s4Text = document.getElementById('hall-s4-text');
+    const s4Date = document.getElementById('hall-s4-date');
+
+    if (s4Card) s4Card.classList.remove('has-winner');
+    if (s4Name) {
+        s4Name.textContent = '?';
+        s4Name.style.display = 'none';
+    }
+    if (s4Account) {
+        s4Account.textContent = '';
+        s4Account.style.display = 'none';
+    }
+    if (s4Text) {
+        s4Text.innerHTML = '<span class="lang-vi">Sắp diễn ra</span><span class="lang-cn">敬请期待</span>';
+        s4Text.style.display = 'block';
+    }
+    if (s4Date) s4Date.style.display = 'none';
 }
 
 function syncSeason2Hall() {
@@ -408,6 +441,62 @@ function syncSeason2Hall() {
     }
 }
 
+function syncSeason3Hall() {
+    // Season 3 data is now permanent (3Luffy / 13219922 / 01/05)
+    // No dynamic sync needed, data is hardcoded in HTML
+}
+
+function syncSeason4Hall() {
+    const winnerName = document.getElementById('winner-name');
+    const winnerAccount = document.getElementById('winner-account');
+    const winnerDate = document.getElementById('winner-date');
+    const s4Card = document.getElementById('hall-season4-card');
+    const s4Name = document.getElementById('hall-s4-name');
+    const s4Account = document.getElementById('hall-s4-account');
+    const s4Text = document.getElementById('hall-s4-text');
+    const s4Date = document.getElementById('hall-s4-date');
+
+    if (!winnerName || !s4Name) return;
+
+    const name = winnerName.textContent.trim();
+    const account = winnerAccount ? winnerAccount.textContent.trim() : '';
+
+    // Always activate the card in result state
+    if (s4Card) s4Card.classList.add('has-winner');
+    if (s4Text) s4Text.style.display = 'none';
+
+    if (name && name !== '?' && name !== '') {
+        if (s4Name) {
+            s4Name.textContent = name;
+            s4Name.style.display = 'block';
+        }
+        if (s4Account) {
+            s4Account.textContent = account;
+            s4Account.style.display = 'block';
+        }
+    } else {
+        // Show placeholder when winner not yet confirmed
+        if (s4Name) {
+            s4Name.textContent = '?';
+            s4Name.style.display = 'block';
+        }
+        if (s4Account) {
+            s4Account.textContent = '';
+            s4Account.style.display = 'none';
+        }
+    }
+
+    if (s4Date && winnerDate) {
+        const date = winnerDate.textContent.trim();
+        if (date && date !== '?') {
+            const dateValue = s4Date.querySelector('.date-value');
+            const shortDate = date.replace(/\/2026$/, '').replace(/2026年/, '');
+            if (dateValue) dateValue.textContent = shortDate;
+            s4Date.style.display = 'flex';
+        }
+    }
+}
+
 // Render all static and dynamic amounts with correct currency suffix
 function renderAmounts() {
     const topAmountEl = document.getElementById('top-amount');
@@ -436,7 +525,7 @@ if (document.readyState === 'loading') {
 }
 
 function init() {
-    console.log('Initializing Season 2...');
+    console.log('Initializing Season 4...');
     
     // Language
     const savedLang = localStorage.getItem('lang') || 'vi';
@@ -447,7 +536,7 @@ function init() {
         langLabel.textContent = savedLang === 'vi' ? 'VI / 中' : '中 / VI';
     }
     
-    document.title = savedLang === 'vi' ? 'Chí Tôn Long Vương Mùa 2' : '至尊龙王 第二届';
+    document.title = savedLang === 'vi' ? 'Chí Tôn Bạo Long Vương Mùa 4' : '至尊暴龙王 第四届';
     
     // Sync honor hall with result view data
     syncHonorHall();
