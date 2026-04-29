@@ -48,8 +48,9 @@ function toggleResult() {
     } else {
         body.classList.remove('state-before', 'state-active', 'state-result');
         body.classList.add(demoPreviousState);
-        // Reset season 2 honor hall only (season 1 is permanent)
+        // Reset season 2 and season 3 honor hall (season 1 is permanent)
         resetSeason2Hall();
+        resetSeason3Hall();
         if (toggleBtn) {
             toggleBtn.innerHTML = '<span class="lang-vi">Công bố ngưới thắng</span><span class="lang-cn">宣布获胜</span>';
         }
@@ -341,8 +342,9 @@ function syncHonorHall() {
     if (hallDate) hallDate.style.display = 'flex';
     if (hallCard) hallCard.classList.add('has-winner');
     
-    // Also sync season 2 hall card if it exists
+    // Also sync season 2 and season 3 hall cards
     syncSeason2Hall();
+    syncSeason3Hall();
 }
 
 function resetSeason2Hall() {
@@ -366,6 +368,29 @@ function resetSeason2Hall() {
         s2Text.style.display = 'block';
     }
     if (s2Date) s2Date.style.display = 'none';
+}
+
+function resetSeason3Hall() {
+    const s3Card = document.getElementById('hall-season3-card');
+    const s3Name = document.getElementById('hall-s3-name');
+    const s3Account = document.getElementById('hall-s3-account');
+    const s3Text = document.getElementById('hall-s3-text');
+    const s3Date = document.getElementById('hall-s3-date');
+
+    if (s3Card) s3Card.classList.remove('has-winner');
+    if (s3Name) {
+        s3Name.textContent = '?';
+        s3Name.style.display = 'none';
+    }
+    if (s3Account) {
+        s3Account.textContent = '';
+        s3Account.style.display = 'none';
+    }
+    if (s3Text) {
+        s3Text.innerHTML = '<span class="lang-vi">Sắp diễn ra</span><span class="lang-cn">敬请期待</span>';
+        s3Text.style.display = 'block';
+    }
+    if (s3Date) s3Date.style.display = 'none';
 }
 
 function syncSeason2Hall() {
@@ -403,6 +428,46 @@ function syncSeason2Hall() {
                 const shortDate = date.replace(/\/2026$/, '').replace(/2026年/, '');
                 if (dateValue) dateValue.textContent = shortDate;
                 s2Date.style.display = 'flex';
+            }
+        }
+    }
+}
+
+function syncSeason3Hall() {
+    const winnerName = document.getElementById('winner-name');
+    const winnerAccount = document.getElementById('winner-account');
+    const winnerDate = document.getElementById('winner-date');
+    const s3Card = document.getElementById('hall-season3-card');
+    const s3Name = document.getElementById('hall-s3-name');
+    const s3Account = document.getElementById('hall-s3-account');
+    const s3Text = document.getElementById('hall-s3-text');
+    const s3Date = document.getElementById('hall-s3-date');
+
+    if (!winnerName || !s3Name) return;
+
+    const name = winnerName.textContent.trim();
+    const account = winnerAccount ? winnerAccount.textContent.trim() : '';
+
+    if (name && name !== '?' && name !== '') {
+        if (s3Card) s3Card.classList.add('has-winner');
+        if (s3Name) {
+            s3Name.textContent = name;
+            s3Name.style.display = 'block';
+        }
+        if (s3Account) {
+            s3Account.textContent = account;
+            s3Account.style.display = 'block';
+        }
+
+        if (s3Text) s3Text.style.display = 'none';
+
+        if (s3Date && winnerDate) {
+            const date = winnerDate.textContent.trim();
+            if (date && date !== '?') {
+                const dateValue = s3Date.querySelector('.date-value');
+                const shortDate = date.replace(/\/2026$/, '').replace(/2026年/, '');
+                if (dateValue) dateValue.textContent = shortDate;
+                s3Date.style.display = 'flex';
             }
         }
     }
