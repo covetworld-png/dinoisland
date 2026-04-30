@@ -188,10 +188,18 @@
       "versioning": "auto"
     },
     "003-03-月巅峰充值榜": {
-      "srcPage": "src/campaign/pages/005-01-monthly-recharge-king",
+      "srcPage": "src/campaign/pages/005-01-monthly-recharge-king/next_s4",
       "includeAssets": [],
       "pathRewrite": {},
-      "versioning": "auto"
+      "versioning": "auto",
+      "note": "默认只打包开发中版本 (next_s4)，如需打包线上版请用 003-03-月巅峰充值榜-current"
+    },
+    "003-03-月巅峰充值榜-current": {
+      "srcPage": "src/campaign/pages/005-01-monthly-recharge-king/current_s3",
+      "includeAssets": [],
+      "pathRewrite": {},
+      "versioning": "auto",
+      "note": "打包线上当前版本 (current_s3)，特殊场景使用"
     },
     "landing": {
       "srcPage": "src/campaign/pages/landing",
