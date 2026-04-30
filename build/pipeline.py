@@ -14,6 +14,7 @@ ROOT = Path(__file__).parent.parent
 MANIFEST_PATH = ROOT / "build" / "manifest.json"
 SKIP_FILES = {".DS_Store"}
 SKIP_EXTS = {".log"}
+SKIP_DIRS = {"deliverables"}
 
 
 def load_manifest():
@@ -22,6 +23,8 @@ def load_manifest():
 
 def skip_file(name: str) -> bool:
     if name in SKIP_FILES:
+        return True
+    if name in SKIP_DIRS:
         return True
     if name.endswith(tuple(SKIP_EXTS)):
         return True
