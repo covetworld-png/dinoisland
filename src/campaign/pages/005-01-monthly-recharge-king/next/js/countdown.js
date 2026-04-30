@@ -1,8 +1,8 @@
 // Countdown for Chí Tôn Bạo Long Vương - Season 4 (Weekly)
 (function() {
     // Event times (UTC+7) - Weekly accumulation: 7 days
-    const WEEK_START = new Date('2026-05-04T00:00:00+07:00').getTime();
-    const WEEK_END = new Date('2026-05-10T23:59:59+07:00').getTime();
+    const WEEK_START = new Date('2026-05-12T00:00:00+07:00').getTime();
+    const WEEK_END = new Date('2026-05-17T23:59:59+07:00').getTime();
     
     function updateCountdown() {
         const now = new Date().getTime();

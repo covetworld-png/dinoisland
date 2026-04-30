@@ -9,7 +9,7 @@
       "confirmed": true,
       "private": true,
       "description": "至尊龙王月巅峰充值榜（原 005-01）",
-      "note": "src 路径保持 005-01-monthly-recharge-king 以兼容已发布 URL"
+      "note": "目录结构: current/线上 + next/开发中 + archive/历届"
     },
     "cs-tool": {
       "source": "projects/001-增长/001-03-landing-page/pages/cs-tool.html",
