@@ -1,4 +1,4 @@
-// Main JavaScript for Chí Tôn Bạo Long Vương - Season 4
+// Main JavaScript for Chí Tôn Bạo Long Vương - Season 3
 
 // Language Toggle
 function toggleLanguage() {
@@ -13,7 +13,7 @@ function toggleLanguage() {
         langLabel.textContent = newLang === 'vi' ? 'VI / 中' : '中 / VI';
     }
     
-    document.title = newLang === 'vi' ? 'Chí Tôn Bạo Long Vương Mùa 4' : '至尊暴龙王 第四届';
+    document.title = newLang === 'vi' ? 'Chí Tôn Bạo Long Vương Mùa 3' : '至尊暴龙王 第三届';
     
     localStorage.setItem('lang', newLang);
     
@@ -48,10 +48,9 @@ function toggleResult() {
     } else {
         body.classList.remove('state-before', 'state-active', 'state-result');
         body.classList.add(demoPreviousState);
-        // Reset season 2-4 honor halls (season 1 is permanent)
+        // Reset season 2 and season 3 honor hall (season 1 is permanent)
         resetSeason2Hall();
         resetSeason3Hall();
-        resetSeason4Hall();
         if (toggleBtn) {
             toggleBtn.innerHTML = '<span class="lang-vi">Công bố ngưới thắng</span><span class="lang-cn">宣布获胜</span>';
         }
@@ -204,8 +203,8 @@ function renderHistoryList() {
         historyList.innerHTML = autoScriptHistory.map(item => {
             const startStr = item.startTime.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
             const label = lang === 'vi' 
-                ? `Kích thước khủng long +50% • Tự động hóa`
-                : `恐龙体型 +50% • 自动化脚本`;
+                ? `Kích thước khủng long +150% • Tự động hóa`
+                : `恐龙体型 +150% • 自动化脚本`;
             
             let statusHtml = '';
             if (item.status === 'processing') {
@@ -235,7 +234,7 @@ function triggerAutoScript() {
         id: Date.now(),
         startTime: new Date(),
         endTime: null,
-        action: 'auto_script_50',
+        action: 'auto_script_150',
         status: 'processing'
     };
     autoScriptHistory.unshift(historyItem);
@@ -343,10 +342,9 @@ function syncHonorHall() {
     if (hallDate) hallDate.style.display = 'flex';
     if (hallCard) hallCard.classList.add('has-winner');
     
-    // Also sync season 2-4 hall cards
+    // Also sync season 2 and season 3 hall cards
     syncSeason2Hall();
     syncSeason3Hall();
-    syncSeason4Hall();
 }
 
 function resetSeason2Hall() {
@@ -373,32 +371,26 @@ function resetSeason2Hall() {
 }
 
 function resetSeason3Hall() {
-    // Season 3 is now permanent data (3Luffy), do not reset
-    // const s3Card = document.getElementById('hall-season3-card');
-    // if (s3Card) s3Card.classList.remove('has-winner');
-}
+    const s3Card = document.getElementById('hall-season3-card');
+    const s3Name = document.getElementById('hall-s3-name');
+    const s3Account = document.getElementById('hall-s3-account');
+    const s3Text = document.getElementById('hall-s3-text');
+    const s3Date = document.getElementById('hall-s3-date');
 
-function resetSeason4Hall() {
-    const s4Card = document.getElementById('hall-season4-card');
-    const s4Name = document.getElementById('hall-s4-name');
-    const s4Account = document.getElementById('hall-s4-account');
-    const s4Text = document.getElementById('hall-s4-text');
-    const s4Date = document.getElementById('hall-s4-date');
-
-    if (s4Card) s4Card.classList.remove('has-winner');
-    if (s4Name) {
-        s4Name.textContent = '?';
-        s4Name.style.display = 'none';
+    if (s3Card) s3Card.classList.remove('has-winner');
+    if (s3Name) {
+        s3Name.textContent = '?';
+        s3Name.style.display = 'none';
     }
-    if (s4Account) {
-        s4Account.textContent = '';
-        s4Account.style.display = 'none';
+    if (s3Account) {
+        s3Account.textContent = '';
+        s3Account.style.display = 'none';
     }
-    if (s4Text) {
-        s4Text.innerHTML = '<span class="lang-vi">Sắp diễn ra</span><span class="lang-cn">敬请期待</span>';
-        s4Text.style.display = 'block';
+    if (s3Text) {
+        s3Text.innerHTML = '<span class="lang-vi">Sắp diễn ra</span><span class="lang-cn">敬请期待</span>';
+        s3Text.style.display = 'block';
     }
-    if (s4Date) s4Date.style.display = 'none';
+    if (s3Date) s3Date.style.display = 'none';
 }
 
 function syncSeason2Hall() {
@@ -442,57 +434,41 @@ function syncSeason2Hall() {
 }
 
 function syncSeason3Hall() {
-    // Season 3 data is now permanent (3Luffy / 13219922 / 01/05)
-    // No dynamic sync needed, data is hardcoded in HTML
-}
-
-function syncSeason4Hall() {
     const winnerName = document.getElementById('winner-name');
     const winnerAccount = document.getElementById('winner-account');
     const winnerDate = document.getElementById('winner-date');
-    const s4Card = document.getElementById('hall-season4-card');
-    const s4Name = document.getElementById('hall-s4-name');
-    const s4Account = document.getElementById('hall-s4-account');
-    const s4Text = document.getElementById('hall-s4-text');
-    const s4Date = document.getElementById('hall-s4-date');
+    const s3Card = document.getElementById('hall-season3-card');
+    const s3Name = document.getElementById('hall-s3-name');
+    const s3Account = document.getElementById('hall-s3-account');
+    const s3Text = document.getElementById('hall-s3-text');
+    const s3Date = document.getElementById('hall-s3-date');
 
-    if (!winnerName || !s4Name) return;
+    if (!winnerName || !s3Name) return;
 
     const name = winnerName.textContent.trim();
     const account = winnerAccount ? winnerAccount.textContent.trim() : '';
 
-    // Always activate the card in result state
-    if (s4Card) s4Card.classList.add('has-winner');
-    if (s4Text) s4Text.style.display = 'none';
-
     if (name && name !== '?' && name !== '') {
-        if (s4Name) {
-            s4Name.textContent = name;
-            s4Name.style.display = 'block';
+        if (s3Card) s3Card.classList.add('has-winner');
+        if (s3Name) {
+            s3Name.textContent = name;
+            s3Name.style.display = 'block';
         }
-        if (s4Account) {
-            s4Account.textContent = account;
-            s4Account.style.display = 'block';
+        if (s3Account) {
+            s3Account.textContent = account;
+            s3Account.style.display = 'block';
         }
-    } else {
-        // Show placeholder when winner not yet confirmed
-        if (s4Name) {
-            s4Name.textContent = '?';
-            s4Name.style.display = 'block';
-        }
-        if (s4Account) {
-            s4Account.textContent = '';
-            s4Account.style.display = 'none';
-        }
-    }
 
-    if (s4Date && winnerDate) {
-        const date = winnerDate.textContent.trim();
-        if (date && date !== '?') {
-            const dateValue = s4Date.querySelector('.date-value');
-            const shortDate = date.replace(/\/2026$/, '').replace(/2026年/, '');
-            if (dateValue) dateValue.textContent = shortDate;
-            s4Date.style.display = 'flex';
+        if (s3Text) s3Text.style.display = 'none';
+
+        if (s3Date && winnerDate) {
+            const date = winnerDate.textContent.trim();
+            if (date && date !== '?') {
+                const dateValue = s3Date.querySelector('.date-value');
+                const shortDate = date.replace(/\/2026$/, '').replace(/2026年/, '');
+                if (dateValue) dateValue.textContent = shortDate;
+                s3Date.style.display = 'flex';
+            }
         }
     }
 }
@@ -525,7 +501,7 @@ if (document.readyState === 'loading') {
 }
 
 function init() {
-    console.log('Initializing Season 4...');
+    console.log('Initializing Season 2...');
     
     // Language
     const savedLang = localStorage.getItem('lang') || 'vi';
@@ -536,7 +512,7 @@ function init() {
         langLabel.textContent = savedLang === 'vi' ? 'VI / 中' : '中 / VI';
     }
     
-    document.title = savedLang === 'vi' ? 'Chí Tôn Bạo Long Vương Mùa 4' : '至尊暴龙王 第四届';
+    document.title = savedLang === 'vi' ? 'Chí Tôn Bạo Long Vương Mùa 3' : '至尊暴龙王 第三届';
     
     // Sync honor hall with result view data
     syncHonorHall();

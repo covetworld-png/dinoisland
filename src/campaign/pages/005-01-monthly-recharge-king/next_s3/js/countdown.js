@@ -1,8 +1,8 @@
-// Countdown for Chí Tôn Bạo Long Vương - Season 4 (Weekly)
+// Countdown for Chí Tôn Long Vươn
 (function() {
-    // Event times (UTC+7) - Weekly accumulation: 7 days
-    const WEEK_START = new Date('2026-05-12T00:00:00+07:00').getTime();
-    const WEEK_END = new Date('2026-05-17T23:59:59+07:00').getTime();
+    // Event times (UTC+7)
+    const EVENT_START = new Date('2026-05-01T00:00:00+07:00').getTime();
+    const EVENT_END = new Date('2026-05-01T23:59:59+07:00').getTime();
     
     function updateCountdown() {
         const now = new Date().getTime();
@@ -13,7 +13,6 @@
         const startHoursEl = document.getElementById('start-hours');
         const startMinutesEl = document.getElementById('start-minutes');
         const startSecondsEl = document.getElementById('start-seconds');
-        const endDaysEl = document.getElementById('end-days');
         const endHoursEl = document.getElementById('end-hours');
         const endMinutesEl = document.getElementById('end-minutes');
         const endSecondsEl = document.getElementById('end-seconds');
@@ -23,12 +22,12 @@
         // Only auto-switch display if manual override is not active
         if (!window.countdownManualOverride) {
             const body = document.body;
-            if (now < WEEK_START) {
+            if (now < EVENT_START) {
                 startBox.style.display = 'block';
                 endBox.style.display = 'none';
                 body.classList.remove('state-before', 'state-active', 'state-result');
                 body.classList.add('state-before');
-            } else if (now < WEEK_END) {
+            } else if (now < EVENT_END) {
                 startBox.style.display = 'none';
                 endBox.style.display = 'block';
                 body.classList.remove('state-before', 'state-active', 'state-result');
@@ -42,7 +41,7 @@
         }
         
         // Update numbers regardless of display mode
-        const startDiff = Math.max(0, WEEK_START - now);
+        const startDiff = Math.max(0, EVENT_START - now);
         const startDays = Math.floor(startDiff / (1000 * 60 * 60 * 24));
         const startHours = Math.floor((startDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const startMinutes = Math.floor((startDiff % (1000 * 60 * 60)) / (1000 * 60));
@@ -53,14 +52,12 @@
         if (startMinutesEl) startMinutesEl.textContent = String(startMinutes).padStart(2, '0');
         if (startSecondsEl) startSecondsEl.textContent = String(startSeconds).padStart(2, '0');
         
-        let endDiff = WEEK_END - now;
+        let endDiff = EVENT_END - now;
         if (endDiff < 0) endDiff = 0;
-        const endDays = Math.floor(endDiff / (1000 * 60 * 60 * 24));
-        const endH = Math.floor((endDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const endH = Math.floor(endDiff / (1000 * 60 * 60));
         const endM = Math.floor((endDiff % (1000 * 60 * 60)) / (1000 * 60));
         const endS = Math.floor((endDiff % (1000 * 60)) / 1000);
         
-        if (endDaysEl) endDaysEl.textContent = String(endDays).padStart(2, '0');
         if (endHoursEl) endHoursEl.textContent = String(endH).padStart(2, '0');
         if (endMinutesEl) endMinutesEl.textContent = String(endM).padStart(2, '0');
         if (endSecondsEl) endSecondsEl.textContent = String(endS).padStart(2, '0');
