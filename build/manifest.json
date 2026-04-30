@@ -4,7 +4,7 @@
     "003-03-月巅峰充值榜": {
       "source": "projects/003-运营/003-03-月巅峰充值榜",
       "src": "src/campaign/pages/005-01-monthly-recharge-king",
-      "type": "campaign-page",
+      "type": "campaign-page-standalone",
       "status": "ready",
       "confirmed": true,
       "private": true,
@@ -155,6 +155,9 @@
         {"from": "src/common/assets/reset.css", "to": "css/reset.css"},
         {"from": "src/common/assets/utils.js", "to": "js/utils.js"}
       ]
+    },
+    "campaign-page-standalone": {
+      "copy": []
     },
     "official-page": {
       "copy": [
