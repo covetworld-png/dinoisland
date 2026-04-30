@@ -119,6 +119,11 @@ body.state-result #rewards { order: 3; }
 body.state-result #honor-hall { order: 4; }
 body.state-result #rules { order: 5; }
 
+/* GM 联系方式仅在结果公布时显示 */
+body:not(.state-result) .gm-only-result {
+    display: none !important;
+}
+
 /* Header */
 .header {
     background: rgba(20, 8, 8, 0.95);
