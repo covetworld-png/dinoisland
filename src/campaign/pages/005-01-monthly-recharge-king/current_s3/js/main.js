@@ -52,7 +52,7 @@ function toggleResult() {
         resetSeason2Hall();
         resetSeason3Hall();
         if (toggleBtn) {
-            toggleBtn.innerHTML = '<span class="lang-vi">Công bố ngưới thắng</span><span class="lang-cn">宣布获胜</span>';
+            toggleBtn.innerHTML = '<span class="lang-vi">Công bố ngườig thắng</span><span class="lang-cn">宣布获胜</span>';
         }
     }
     
@@ -101,7 +101,7 @@ function toggleWinnerMode() {
     const btn = document.getElementById('toggle-winner-btn');
     if (btn) {
         if (demoIsWinner) {
-            btn.innerHTML = '<span class="lang-vi">👑 Đang là ngưới thắng</span><span class="lang-cn">👑 当前为获胜者</span>';
+            btn.innerHTML = '<span class="lang-vi">👑 Đang là ngườig thắng</span><span class="lang-cn">👑 当前为获胜者</span>';
             btn.classList.add('active');
         } else {
             btn.innerHTML = '<span class="lang-vi">👑 Ngưới thắng</span><span class="lang-cn">👑 获胜者视角</span>';
