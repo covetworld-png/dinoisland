@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 MANIFEST_PATH = ROOT / "build" / "manifest.json"
-SKIP_NAMES = {".DS_Store", "node_modules", "__pycache__", "archive", "deliverables"}
+SKIP_NAMES = {".DS_Store", "node_modules", "__pycache__", "archive", "交付物"}
 SKIP_PATTERNS = [".bak", ".log"]
 
 

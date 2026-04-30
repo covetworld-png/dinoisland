@@ -14,7 +14,7 @@ ROOT = Path(__file__).parent.parent
 MANIFEST_PATH = ROOT / "build" / "manifest.json"
 SKIP_FILES = {".DS_Store"}
 SKIP_EXTS = {".log"}
-SKIP_DIRS = {"deliverables"}
+SKIP_DIRS = {"交付物"}
 
 
 def load_manifest():
