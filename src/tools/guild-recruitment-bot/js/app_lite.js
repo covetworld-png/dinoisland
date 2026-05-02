@@ -19,8 +19,6 @@ const i18n = {
     th_player_id: '账号 ID', th_nickname: '昵称', th_server: '服务器',
     th_reg_date: '首次登录', th_tag: '标签',
     th_guild_status: '公会状态', th_online_status: '最近活跃时间',
-    th_action: '操作',
-    btn_copy: '复制ID',
     toast_copy: '已复制账号到剪贴板',
     tag_new: '新用户', tag_returning: '老用户',
     guild_no: '无公会', guild_yes: '已入团',
@@ -41,8 +39,6 @@ const i18n = {
     th_player_id: 'ID TK', th_nickname: 'Biệt danh', th_server: 'Máy chủ',
     th_reg_date: 'Lần đăng nhập đầu', th_tag: 'Nhãn',
     th_guild_status: 'Bang hộI', th_online_status: 'ThờI gian hoạt động gần nhất',
-    th_action: 'Thao tác',
-    btn_copy: 'Copy ID',
     toast_copy: 'Đã sao chép ID',
     tag_new: 'Tân thủ', tag_returning: 'Cũ',
     guild_no: 'Không bang', guild_yes: 'Đã vào bang',
@@ -175,7 +171,7 @@ function renderTable() {
 
   const tbody = document.getElementById('player-table');
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><span>${t('empty')}</span></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><span>${t('empty')}</span></div></td></tr>`;
     return;
   }
 
@@ -195,24 +191,17 @@ function renderTable() {
     const loginTimeBadge = `<span style="color:var(--text-secondary);font-size:12px;">${p.onlineSince}</span>`;
 
     const rowClass = hasGuild ? 'strikethrough' : '';
-
-    let action = '';
-    if (hasGuild) {
-      action = `<span style="color:var(--text-muted);font-size:11px;">✓ ${t('guild_yes')}</span>`;
-    } else {
-      action = `<button class="btn btn-primary" onclick="copyPlayerId('${p.id}')">${t('btn_copy')}</button>`;
-    }
+    const copyBtn = `<button class="btn-copy-id" onclick="copyPlayerId('${p.id}');event.stopPropagation();" title="${t('toast_copy')}">📋</button>`;
 
     return `
       <tr class="${rowClass}">
-        <td data-label="${t('th_player_id')}"><span class="player-id">${p.id}</span></td>
+        <td data-label="${t('th_player_id')}"><span class="player-id">${p.id}</span>${copyBtn}</td>
         <td data-label="${t('th_nickname')}">${p.nickname}</td>
         <td data-label="${t('th_server')}"><span class="server-badge server-${p.server}">${p.server}</span></td>
         <td data-label="${t('th_reg_date')}" style="color:var(--text-secondary);font-size:12px;">${p.regDate}</td>
         <td data-label="${t('th_tag')}"><span class="tag ${tagClass}">${tagText}</span></td>
         <td data-label="${t('th_guild_status')}">${guildBadge}</td>
         <td data-label="${t('th_online_status')}">${loginTimeBadge}</td>
-        <td data-label="${t('th_action')}">${action}</td>
       </tr>
     `;
   }).join('');

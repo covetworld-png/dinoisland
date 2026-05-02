@@ -582,6 +582,14 @@ tbody td { padding: 12px 14px; color: var(--text-primary); vertical-align: middl
 }
 .btn-ghost:hover { background: var(--surface-10); color: var(--text-primary); }
 
+.btn-copy-id {
+  margin-left: 6px; padding: 2px 5px; border: none; border-radius: 4px;
+  background: transparent; color: var(--text-muted); cursor: pointer;
+  font-size: 12px; line-height: 1; transition: all 0.15s;
+  vertical-align: middle;
+}
+.btn-copy-id:hover { background: var(--accent-10); color: var(--gold); }
+
 .strikethrough { opacity: 0.4; }
 .strikethrough td { color: var(--text-muted); }
 .strikethrough .player-id { color: var(--text-muted); }
