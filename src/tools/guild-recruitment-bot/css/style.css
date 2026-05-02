@@ -5,7 +5,7 @@
   --bg-primary: #0a1a15;
   --bg-card: rgba(10, 30, 25, 0.85);
   --bg-hover: rgba(15, 45, 38, 0.9);
-  --bg-overlay: rgba(10, 26, 21, 0.95);
+  --bg-overlay: rgba(10, 26, 21, 0.82);
   --border-color: var(--mist-20);
 
   --accent: #FFD700;
@@ -53,7 +53,7 @@
   --bg-primary: #f1f5f9;
   --bg-card: #ffffff;
   --bg-hover: #f8fafc;
-  --bg-overlay: rgba(255, 255, 255, 0.95);
+  --bg-overlay: rgba(241, 245, 249, 0.88);
   --border-color: rgba(59, 130, 246, 0.15);
 
   --accent: #2563eb;
@@ -104,13 +104,26 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.5;
+  background-image: url('../bg.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* ===== Login Screen ===== */
 .login-screen {
   min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at center, var(--accent-10) 0%, var(--bg-primary) 70%);
+  background: transparent;
 }
 
 .login-card {
