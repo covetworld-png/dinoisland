@@ -13,9 +13,10 @@ const i18n = {
     title: '无公会玩家看板', subtitle: 'Guild-less Player Dashboard',
     refresh: '刷新',
     tab_players: '👥 玩家列表', tab_leaderboard: '🏆 团长排行',
-    stat_active_no_guild: '今日活跃（无公会）',
-    stat_new: '今日新玩家',
+    stat_active: '今日活跃',
+    stat_new: '新玩家',
     stat_returning: '老玩家',
+    stat_no_guild: '无公会',
     stat_joined: '今日入团',
     stat_rate: '转化率',
     filter_all: '全部', filter_new: '新用户', filter_returning: '老用户',
@@ -51,8 +52,9 @@ const i18n = {
     title: 'Bảng ngườI chơI không bang', subtitle: 'Guild-less Player Dashboard',
     refresh: 'Làm mới',
     tab_players: '👥 Danh sách', tab_leaderboard: '🏆 Xếp hạng',
-    stat_active_no_guild: 'Hoạt động hôm nay (không bang)',
-    stat_new: 'Tân thủ hôm nay', stat_returning: 'NgườI chơI cũ',
+    stat_active: 'Hoạt động hôm nay',
+    stat_new: 'Tân thủ', stat_returning: 'NgườI chơI cũ',
+    stat_no_guild: 'Không bang',
     stat_joined: 'Vào bang hôm nay', stat_rate: 'Tỷ lệ chuyển đổI',
     filter_all: 'Tất cả', filter_new: 'Tân thủ', filter_returning: 'Cũ',
     filter_online: 'Online', filter_unclaimed: 'Chưa nhận',
@@ -333,17 +335,18 @@ function renderAll() {
 }
 
 function renderStats() {
-  const noGuild = players.filter(p => p.guildStatus === 'no_guild').length;
   const newCount = players.filter(p => p.tag === 'new').length;
   const retCount = players.filter(p => p.tag === 'returning').length;
+  const noGuild = players.filter(p => p.guildStatus === 'no_guild').length;
   const joined = players.filter(p => p.guildStatus === 'has_guild').length;
   const total = players.length;
   const rate = total > 0 ? ((joined / total) * 100).toFixed(1) : '0.0';
 
   document.getElementById('stats-bar').innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">${t('stat_active_no_guild')}</div>
-      <div class="stat-value gold">${noGuild}</div>
+      <div class="stat-label">${t('stat_active')}</div>
+      <div class="stat-value gold">${total}</div>
+      <div class="stat-sub">${newCount}+${retCount}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">${t('stat_new')}</div>
@@ -352,6 +355,10 @@ function renderStats() {
     <div class="stat-card">
       <div class="stat-label">${t('stat_returning')}</div>
       <div class="stat-value info">${retCount}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">${t('stat_no_guild')}</div>
+      <div class="stat-value warning">${noGuild}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">${t('stat_joined')}</div>
