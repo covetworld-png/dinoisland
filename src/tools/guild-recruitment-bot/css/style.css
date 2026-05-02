@@ -51,9 +51,9 @@
 [data-theme="light"] {
   /* ===== Light Theme ===== */
   --bg-primary: #f1f5f9;
-  --bg-card: rgba(255, 255, 255, 0.82);
-  --bg-hover: rgba(255, 255, 255, 0.92);
-  --bg-overlay: rgba(241, 245, 249, 0.70);
+  --bg-card: rgba(255, 255, 255, 0.55);
+  --bg-hover: rgba(255, 255, 255, 0.72);
+  --bg-overlay: rgba(241, 245, 249, 0.30);
   --border-color: rgba(59, 130, 246, 0.15);
 
   --accent: #2563eb;
@@ -94,6 +94,14 @@
   --on-accent: #ffffff;
   --radius: 12px;
   --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Light theme: remove backdrop blur so transparency is visible */
+[data-theme="light"] .login-card,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .leaderboard-card,
+[data-theme="light"] .table-container {
+  backdrop-filter: none;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
