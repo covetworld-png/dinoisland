@@ -8,7 +8,7 @@ const i18n = {
   zh: {
     title: '无公会玩家看板', subtitle: 'Guild-less Player Dashboard',
     refresh: '刷新',
-    stat_active: '今日活跃',
+    stat_board: '今日看板',
     stat_new: '新玩家',
     stat_returning: '老玩家',
     stat_no_guild: '无公会',
@@ -29,7 +29,7 @@ const i18n = {
   vi: {
     title: 'Bảng ngườI chơI không bang', subtitle: 'Guild-less Player Dashboard',
     refresh: 'Làm mới',
-    stat_active: 'Hoạt động hôm nay',
+    stat_board: 'Bảng hôm nay',
     stat_new: 'Tân thủ', stat_returning: 'NgườI chơI cũ',
     stat_no_guild: 'Không bang',
     stat_joined: 'Vào bang hôm nay', stat_rate: 'Tỷ lệ chuyển đổI',
@@ -115,7 +115,7 @@ function renderStats() {
 
   document.getElementById('stats-bar').innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">${t('stat_active')}</div>
+      <div class="stat-label">${t('stat_board')}</div>
       <div class="stat-value gold">${total}</div>
       <div class="stat-sub">${newCount}+${retCount}</div>
     </div>
