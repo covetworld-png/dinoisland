@@ -8,8 +8,7 @@ const i18n = {
   zh: {
     title: '无公会玩家看板', subtitle: 'Guild-less Player Dashboard',
     refresh: '刷新',
-    stat_online_no_guild: '无公会 · 在线',
-    stat_offline_no_guild: '无公会 · 已离线',
+    stat_no_guild: '无公会',
     stat_new: '新用户',
     stat_returning: '老用户',
     stat_joined: '已完成入团',
@@ -29,8 +28,7 @@ const i18n = {
   vi: {
     title: 'Bảng ngườI chơI không bang', subtitle: 'Guild-less Player Dashboard',
     refresh: 'Làm mới',
-    stat_online_no_guild: 'Không bang · Online',
-    stat_offline_no_guild: 'Không bang · Offline',
+    stat_no_guild: 'Không bang',
     stat_new: 'Tân thủ', stat_returning: 'NgườI chơI cũ',
     stat_joined: 'Đã tham gia bang', stat_rate: 'Tỷ lệ chuyển đổI',
     filter_all: 'Tất cả', filter_new: 'Tân thủ', filter_returning: 'Cũ',
@@ -106,8 +104,7 @@ function renderAll() {
 }
 
 function renderStats() {
-  const onlineNoGuild = players.filter(p => p.guildStatus === 'no_guild' && p.onlineStatus === 'online').length;
-  const offlineNoGuild = players.filter(p => p.guildStatus === 'no_guild' && p.onlineStatus === 'offline').length;
+  const noGuild = players.filter(p => p.guildStatus === 'no_guild').length;
   const newCount = players.filter(p => p.tag === 'new').length;
   const retCount = players.filter(p => p.tag === 'returning').length;
   const joined = players.filter(p => p.guildStatus === 'has_guild').length;
@@ -116,12 +113,8 @@ function renderStats() {
 
   document.getElementById('stats-bar').innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">${t('stat_online_no_guild')}</div>
-      <div class="stat-value gold">${onlineNoGuild}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">${t('stat_offline_no_guild')}</div>
-      <div class="stat-value warning">${offlineNoGuild}</div>
+      <div class="stat-label">${t('stat_no_guild')}</div>
+      <div class="stat-value gold">${noGuild}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">${t('stat_new')}</div>
