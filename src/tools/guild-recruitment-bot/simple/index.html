@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>无公会玩家看板</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="dashboard" class="dashboard">
+    <header class="header">
+      <div class="header-left">
+        <div class="header-logo">🦖</div>
+        <div class="header-title">
+          <span data-i18n="title">无公会玩家看板</span>
+          <span class="header-sub" data-i18n="subtitle">Guild-less Player Dashboard</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="lang-switch">
+          <button class="lang-btn active" data-lang="zh" onclick="switchLang('zh')">中文</button>
+          <button class="lang-btn" data-lang="vi" onclick="switchLang('vi')">Tiếng Việt</button>
+        </div>
+        <div class="theme-switch">
+          <button class="theme-btn" id="theme-btn" onclick="switchTheme()">🌙</button>
+        </div>
+        <button class="refresh-btn" onclick="refreshData()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span data-i18n="refresh">刷新</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="stats-bar" id="stats-bar"></section>
+
+    <div class="main-layout">
+      <!-- Player List Panel -->
+      <div class="panel-players" id="panel-players">
+        <div class="toolbar-wrap">
+          <div class="toolbar-filters">
+            <button class="filter-btn active" data-filter="all" onclick="filterPlayers('all')">
+              <span data-i18n="filter_all">全部</span>
+              <span class="filter-count" id="count-all">0</span>
+            </button>
+            <button class="filter-btn" data-filter="new" onclick="filterPlayers('new')">
+              <span data-i18n="filter_new">新用户</span>
+              <span class="filter-count" id="count-new">0</span>
+            </button>
+            <button class="filter-btn" data-filter="returning" onclick="filterPlayers('returning')">
+              <span data-i18n="filter_returning">老用户</span>
+              <span class="filter-count" id="count-returning">0</span>
+            </button>
+            <button class="filter-btn" data-filter="online" onclick="filterPlayers('online')">
+              <span data-i18n="filter_online">在线中</span>
+              <span class="filter-count" id="count-online">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="th_player_id">账号 ID</th>
+                  <th data-i18n="th_nickname">昵称</th>
+                  <th data-i18n="th_server">服务器</th>
+                  <th data-i18n="th_reg_date">注册日期</th>
+                  <th data-i18n="th_tag">标签</th>
+                  <th data-i18n="th_guild_status">公会状态</th>
+                  <th data-i18n="th_online_status">在线状态</th>
+                </tr>
+              </thead>
+              <tbody id="player-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="js/app.js"></script>
+</body>
+</html>
