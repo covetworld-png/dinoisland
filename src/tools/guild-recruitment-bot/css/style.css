@@ -51,8 +51,8 @@
 [data-theme="light"] {
   /* ===== Light Theme ===== */
   --bg-primary: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-hover: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.82);
+  --bg-hover: rgba(255, 255, 255, 0.92);
   --bg-overlay: rgba(241, 245, 249, 0.70);
   --border-color: rgba(59, 130, 246, 0.15);
 
