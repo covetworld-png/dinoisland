@@ -105,6 +105,27 @@ function switchLang(lang) {
   renderStats();
 }
 
+// ===== Theme =====
+function switchTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateThemeIcon(next);
+}
+
+function updateThemeIcon(theme) {
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = theme === 'light' ? '☀️' : '🌙';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeIcon(saved);
+}
+
 // ===== Auth =====
 const leaderAccounts = [
   { username: 'specter', password: '123456', displayName: 'SPECTER', avatar: 'S', guild: 'Hoả Long', server: 'Q' },
@@ -580,6 +601,7 @@ function showToast(type, message) {
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   document.getElementById('login-username').value = 'specter';
   document.getElementById('login-password').value = '123456';
 });
