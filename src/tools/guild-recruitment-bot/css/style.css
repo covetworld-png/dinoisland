@@ -5,7 +5,7 @@
   --bg-primary: #0a1a15;
   --bg-card: rgba(10, 30, 25, 0.85);
   --bg-hover: rgba(15, 45, 38, 0.9);
-  --bg-overlay: rgba(10, 26, 21, 0.82);
+  --bg-overlay: rgba(10, 26, 21, 0.60);
   --border-color: var(--mist-20);
 
   --accent: #FFD700;
@@ -53,7 +53,7 @@
   --bg-primary: #f1f5f9;
   --bg-card: #ffffff;
   --bg-hover: #f8fafc;
-  --bg-overlay: rgba(241, 245, 249, 0.88);
+  --bg-overlay: rgba(241, 245, 249, 0.70);
   --border-color: rgba(59, 130, 246, 0.15);
 
   --accent: #2563eb;
