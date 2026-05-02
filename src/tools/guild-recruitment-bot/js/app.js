@@ -22,7 +22,7 @@ const i18n = {
     filter_all: '全部', filter_new: '新用户', filter_returning: '老用户',
     filter_online: '在线中', filter_unclaimed: '未认领',
     th_player_id: '账号 ID', th_nickname: '昵称', th_server: '服务器',
-    th_reg_date: '首次登录日期', th_tag: '标签',
+    th_reg_date: '首次登录', th_tag: '标签',
     th_guild_status: '公会状态', th_online_status: '最近登录时间',
     th_claimed_by: '认领人', th_action: '操作',
     tag_new: '新用户', tag_returning: '老用户',
