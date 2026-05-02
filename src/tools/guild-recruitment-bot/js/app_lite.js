@@ -8,10 +8,10 @@ const i18n = {
   zh: {
     title: '无公会玩家看板', subtitle: 'Guild-less Player Dashboard',
     refresh: '刷新',
-    stat_no_guild: '无公会',
-    stat_new: '新用户',
-    stat_returning: '老用户',
-    stat_joined: '已完成入团',
+    stat_active_no_guild: '今日活跃（无公会）',
+    stat_new: '今日新玩家',
+    stat_returning: '老玩家',
+    stat_joined: '今日入团',
     stat_rate: '转化率',
     filter_all: '全部', filter_new: '新用户', filter_returning: '老用户',
     filter_online: '在线中',
@@ -28,9 +28,9 @@ const i18n = {
   vi: {
     title: 'Bảng ngườI chơI không bang', subtitle: 'Guild-less Player Dashboard',
     refresh: 'Làm mới',
-    stat_no_guild: 'Không bang',
-    stat_new: 'Tân thủ', stat_returning: 'NgườI chơI cũ',
-    stat_joined: 'Đã tham gia bang', stat_rate: 'Tỷ lệ chuyển đổI',
+    stat_active_no_guild: 'Hoạt động hôm nay (không bang)',
+    stat_new: 'Tân thủ hôm nay', stat_returning: 'NgườI chơI cũ',
+    stat_joined: 'Vào bang hôm nay', stat_rate: 'Tỷ lệ chuyển đổI',
     filter_all: 'Tất cả', filter_new: 'Tân thủ', filter_returning: 'Cũ',
     filter_online: 'Online',
     th_player_id: 'ID TK', th_nickname: 'Biệt danh', th_server: 'Máy chủ',
@@ -113,7 +113,7 @@ function renderStats() {
 
   document.getElementById('stats-bar').innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">${t('stat_no_guild')}</div>
+      <div class="stat-label">${t('stat_active_no_guild')}</div>
       <div class="stat-value gold">${noGuild}</div>
     </div>
     <div class="stat-card">
