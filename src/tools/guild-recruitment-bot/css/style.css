@@ -582,11 +582,16 @@ tbody td { padding: 12px 14px; color: var(--text-primary); vertical-align: middl
 }
 .btn-ghost:hover { background: var(--surface-10); color: var(--text-primary); }
 
+.id-with-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .btn-copy-id {
-  margin-left: 6px; padding: 3px 6px; border: 1px solid var(--gold);
+  padding: 3px 6px; border: 1px solid var(--gold);
   border-radius: 4px; background: var(--accent-08); color: var(--gold);
   cursor: pointer; font-size: 11px; line-height: 1;
-  transition: all 0.15s; vertical-align: middle;
+  transition: all 0.15s;
 }
 .btn-copy-id:hover { background: var(--gold); color: var(--on-accent); }
 
@@ -715,6 +720,11 @@ tbody td { padding: 12px 14px; color: var(--text-primary); vertical-align: middl
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+  tbody td .id-with-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
   tbody td::before {
     content: attr(data-label);

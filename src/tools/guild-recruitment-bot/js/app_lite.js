@@ -195,7 +195,7 @@ function renderTable() {
 
     return `
       <tr class="${rowClass}">
-        <td data-label="${t('th_player_id')}"><span class="player-id">${p.id}</span>${copyBtn}</td>
+        <td data-label="${t('th_player_id')}"><span class="id-with-copy"><span class="player-id">${p.id}</span>${copyBtn}</span></td>
         <td data-label="${t('th_nickname')}">${p.nickname}</td>
         <td data-label="${t('th_server')}"><span class="server-badge server-${p.server}">${p.server}</span></td>
         <td data-label="${t('th_reg_date')}" style="color:var(--text-secondary);font-size:12px;">${p.regDate}</td>
