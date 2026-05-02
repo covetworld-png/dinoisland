@@ -116,8 +116,9 @@ function switchTheme() {
 }
 
 function updateThemeIcon(theme) {
-  const btn = document.getElementById('theme-btn');
-  if (btn) btn.textContent = theme === 'light' ? '☀️' : '🌙';
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.textContent = theme === 'light' ? '☀️' : '🌙';
+  });
 }
 
 function initTheme() {

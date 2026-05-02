@@ -214,16 +214,23 @@ body {
   display: flex;
 }
 .theme-btn {
-  padding: 5px 10px;
-  border: none;
-  background: var(--surface-05);
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
   color: var(--text-secondary);
-  border-radius: 8px;
+  border-radius: 20px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   transition: all 0.2s;
 }
-.theme-btn:hover { background: var(--surface-10); }
+.theme-btn:hover { background: var(--bg-hover); border-color: var(--accent-30); }
+
+/* 登录页主题切换 */
+.login-theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
 
 .refresh-btn {
   display: flex; align-items: center; gap: 5px;
