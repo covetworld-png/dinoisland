@@ -307,12 +307,12 @@ body::before {
 .filter-btn {
   display: flex; align-items: center; gap: 6px;
   padding: 7px 14px; border: 1px solid var(--border-color);
-  background: transparent; color: var(--text-secondary);
+  background: var(--surface-08); color: var(--text-secondary);
   border-radius: 8px; cursor: pointer; font-size: 13px;
   transition: all 0.2s;
 }
 .filter-btn:hover, .filter-btn.active {
-  background: var(--accent-10);
+  background: var(--accent-15);
   border-color: var(--accent-30);
   color: var(--gold);
 }
