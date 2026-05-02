@@ -39,9 +39,9 @@ const i18n = {
     lb_claims: '认领', lb_joins: '入团', lb_rate: '转化率',
     lb_empty: '暂无数据',
     you: '你',
-    btn_claim: '复制ID',
-    btn_claimed_by_you: '已复制',
-    toast_claim: '已复制账号到剪贴板',
+    btn_claim: '认领',
+    btn_claimed_by_you: '你已认领',
+    toast_claim: '✓ 已认领 #{id}，账号已复制到剪贴板',
     empty: '暂无数据',
   },
   vi: {
@@ -76,9 +76,9 @@ const i18n = {
     lb_claims: 'Nhận', lb_joins: 'Vào bang', lb_rate: 'Tỷ lệ',
     lb_empty: 'Không có dữ liệu',
     you: 'Bạn',
-    btn_claim: 'Copy ID',
-    btn_claimed_by_you: 'Đã sao chép',
-    toast_claim: 'Đã sao chép ID',
+    btn_claim: 'Nhận',
+    btn_claimed_by_you: 'Bạn đã nhận',
+    toast_claim: '✓ Đã nhận #{id}，ID đã sao chép',
     empty: 'Không có dữ liệu',
   }
 };
@@ -427,8 +427,10 @@ function renderTable() {
     let action = '';
     if (hasGuild) {
       action = `<span style="color:var(--text-muted);font-size:11px;">✓ ${t('guild_yes')}</span>`;
+    } else if (hasMyClaim) {
+      action = `<span style="color:var(--gold);font-size:11px;font-weight:500;">✓ ${t('btn_claimed_by_you')}</span>`;
     } else {
-      action = `<button class="btn btn-primary" onclick="copyPlayerId('${p.id}')">${t('btn_claim')}</button>`;
+      action = `<button class="btn btn-primary" onclick="claimPlayer('${p.id}')">${t('btn_claim')}</button>`;
     }
 
     const claimedByText = p.claimedBy.length > 0
@@ -523,12 +525,21 @@ function switchTab(tab) {
 }
 
 // ===== Actions =====
-async function copyPlayerId(playerId) {
+async function claimPlayer(playerId) {
+  if (!currentUser) {
+    showToast('warning', t('please_login'));
+    return;
+  }
+  const p = players.find(x => x.id === playerId);
+  if (!p || p.guildStatus === 'has_guild') return;
+  if (p.claimedBy.includes(currentUser.displayName)) return;
+
+  p.claimedBy.push(currentUser.displayName);
+
+  // 复制 ID 到剪贴板
   try {
     await navigator.clipboard.writeText(playerId);
-    showToast('success', t('toast_claim', { id: playerId }));
   } catch (err) {
-    // fallback
     const ta = document.createElement('textarea');
     ta.value = playerId;
     ta.style.position = 'fixed';
@@ -537,8 +548,11 @@ async function copyPlayerId(playerId) {
     ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
-    showToast('success', t('toast_claim', { id: playerId }));
   }
+
+  renderAll();
+  flashLeaderboard(currentUser.displayName);
+  showToast('success', t('toast_claim', { id: playerId }));
 }
 
 // ===== Filter =====
