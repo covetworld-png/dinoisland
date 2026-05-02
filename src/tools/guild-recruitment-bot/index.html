@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>无公会玩家看板</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">🦖</div>
+      <div class="login-title" data-i18n="login_title">团长登录</div>
+      <div class="login-subtitle" data-i18n="login_subtitle">无公会玩家看板系统</div>
+      <div class="login-form">
+        <div class="form-group">
+          <label data-i18n="label_username">用户名</label>
+          <input type="text" id="login-username" placeholder="specter" value="specter">
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_password">密码</label>
+          <input type="password" id="login-password" placeholder="123456" value="123456">
+        </div>
+        <button class="login-btn" onclick="doLogin()" data-i18n="btn_login">登录</button>
+      </div>
+      <div class="login-hint" data-i18n="login_hint">团长账号: specter(SPECTER) / sktti(SKTTI) / chiuchiu(ChiuChiu) / thien_co / hacam / nhatthuc / nguyetcung / tutien，密码: 123456</div>
+    </div>
+  </div>
+
+  <div id="dashboard" class="dashboard" style="display:none;">
+    <header class="header">
+      <div class="header-left">
+        <div class="header-logo">🦖</div>
+        <div class="header-title">
+          <span data-i18n="title">无公会玩家看板</span>
+          <span class="header-sub" data-i18n="subtitle">Guild-less Player Dashboard</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="current-user">
+          <span class="user-badge" id="current-user-badge">👤 SPECTER · Hoả Long</span>
+        </div>
+        <div class="lang-switch">
+          <button class="lang-btn active" data-lang="zh" onclick="switchLang('zh')">中文</button>
+          <button class="lang-btn" data-lang="vi" onclick="switchLang('vi')">Tiếng Việt</button>
+        </div>
+        <button class="refresh-btn" onclick="refreshData()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span data-i18n="refresh">刷新</span>
+        </button>
+        <button class="logout-btn" onclick="doLogout()" data-i18n="btn_logout">退出</button>
+      </div>
+    </header>
+
+    <section class="stats-bar" id="stats-bar"></section>
+
+    <!-- Mobile Tabs -->
+    <div class="mobile-tabs" id="mobile-tabs">
+      <button class="tab-btn active" data-tab="players" onclick="switchTab('players')">
+        <span data-i18n="tab_players">👥 玩家列表</span>
+      </button>
+      <button class="tab-btn" data-tab="leaderboard" onclick="switchTab('leaderboard')">
+        <span data-i18n="tab_leaderboard">🏆 团长排行</span>
+      </button>
+    </div>
+
+    <div class="main-layout">
+      <!-- Player List Panel -->
+      <div class="panel-players" id="panel-players">
+        <div class="toolbar-wrap">
+          <div class="toolbar-filters">
+            <button class="filter-btn active" data-filter="all" onclick="filterPlayers('all')">
+              <span data-i18n="filter_all">全部</span>
+              <span class="filter-count" id="count-all">0</span>
+            </button>
+            <button class="filter-btn" data-filter="new" onclick="filterPlayers('new')">
+              <span data-i18n="filter_new">新用户</span>
+              <span class="filter-count" id="count-new">0</span>
+            </button>
+            <button class="filter-btn" data-filter="returning" onclick="filterPlayers('returning')">
+              <span data-i18n="filter_returning">老用户</span>
+              <span class="filter-count" id="count-returning">0</span>
+            </button>
+            <button class="filter-btn" data-filter="online" onclick="filterPlayers('online')">
+              <span data-i18n="filter_online">在线中</span>
+              <span class="filter-count" id="count-online">0</span>
+            </button>
+            <button class="filter-btn" data-filter="unclaimed" onclick="filterPlayers('unclaimed')">
+              <span data-i18n="filter_unclaimed">未认领</span>
+              <span class="filter-count" id="count-unclaimed">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="th_player_id">账号 ID</th>
+                  <th data-i18n="th_nickname">昵称</th>
+                  <th data-i18n="th_server">服务器</th>
+                  <th data-i18n="th_reg_date">注册日期</th>
+                  <th data-i18n="th_tag">标签</th>
+                  <th data-i18n="th_guild_status">公会状态</th>
+                  <th data-i18n="th_online_status">在线状态</th>
+                  <th data-i18n="th_claimed_by">认领人</th>
+                  <th data-i18n="th_action">操作</th>
+                </tr>
+              </thead>
+              <tbody id="player-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard Panel -->
+      <div class="panel-leaderboard" id="panel-leaderboard">
+        <div class="leaderboard-card">
+          <div class="leaderboard-header">
+            <div>
+              <span class="leaderboard-title" data-i18n="lb_title">🏆 团长排行榜</span>
+              <span class="leaderboard-sub">今日</span>
+              <span class="leaderboard-range" id="leaderboard-range"></span>
+            </div>
+            <div class="period-switch">
+              <button class="period-btn active" data-period="today" data-i18n="lb_today" onclick="switchPeriod('today')">今日</button>
+              <button class="period-btn" data-period="week" data-i18n="lb_week" onclick="switchPeriod('week')">近一周</button>
+              <button class="period-btn" data-period="month" data-i18n="lb_month" onclick="switchPeriod('month')">本月</button>
+              <button class="period-btn" data-period="total" data-i18n="lb_total" onclick="switchPeriod('total')">累计</button>
+            </div>
+          </div>
+          <div class="leaderboard-list" id="leaderboard-list">
+            <!-- JS render -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="js/app.js"></script>
+</body>
+</html>
