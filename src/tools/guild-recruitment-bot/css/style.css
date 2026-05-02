@@ -51,9 +51,9 @@
 [data-theme="light"] {
   /* ===== Light Theme ===== */
   --bg-primary: #f1f5f9;
-  --bg-card: rgba(255, 255, 255, 0.55);
-  --bg-hover: rgba(255, 255, 255, 0.72);
-  --bg-overlay: rgba(241, 245, 249, 0.30);
+  --bg-card: rgba(255, 255, 255, 0.75);
+  --bg-hover: rgba(255, 255, 255, 0.88);
+  --bg-overlay: rgba(241, 245, 249, 0.45);
   --border-color: rgba(59, 130, 246, 0.15);
 
   --accent: #2563eb;
