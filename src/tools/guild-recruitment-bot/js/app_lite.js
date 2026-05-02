@@ -191,7 +191,7 @@ function renderTable() {
     const loginTimeBadge = `<span style="color:var(--text-secondary);font-size:12px;">${p.onlineSince}</span>`;
 
     const rowClass = hasGuild ? 'strikethrough' : '';
-    const copyBtn = `<button class="btn-copy-id" onclick="copyPlayerId('${p.id}');event.stopPropagation();" title="${t('toast_copy')}">📋</button>`;
+    const copyBtn = `<button class="btn-copy-id" onclick="copyPlayerId('${p.id}');event.stopPropagation();" title="${t('toast_copy')}">复制</button>`;
 
     return `
       <tr class="${rowClass}">
