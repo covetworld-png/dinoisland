@@ -17,8 +17,8 @@ const i18n = {
     filter_all: '全部', filter_new: '新用户', filter_returning: '老用户',
     filter_online: '在线中',
     th_player_id: '账号 ID', th_nickname: '昵称', th_server: '服务器',
-    th_reg_date: '注册日期', th_tag: '标签',
-    th_guild_status: '公会状态', th_online_status: '在线状态',
+    th_reg_date: '首次登录日期', th_tag: '标签',
+    th_guild_status: '公会状态', th_online_status: '最近登录时间',
     tag_new: '新用户', tag_returning: '老用户',
     guild_no: '无公会', guild_yes: '已入团',
     online: '在线', offline: '已离线',
@@ -36,8 +36,8 @@ const i18n = {
     filter_all: 'Tất cả', filter_new: 'Tân thủ', filter_returning: 'Cũ',
     filter_online: 'Online',
     th_player_id: 'ID TK', th_nickname: 'Biệt danh', th_server: 'Máy chủ',
-    th_reg_date: 'Ngày ĐK', th_tag: 'Nhãn',
-    th_guild_status: 'Bang hộI', th_online_status: 'Trạng tháI online',
+    th_reg_date: 'Lần đăng nhập đầu', th_tag: 'Nhãn',
+    th_guild_status: 'Bang hộI', th_online_status: 'ThờI gian đăng nhập gần nhất',
     tag_new: 'Tân thủ', tag_returning: 'Cũ',
     guild_no: 'Không bang', guild_yes: 'Đã vào bang',
     online: 'Online', offline: 'Offline',
@@ -186,25 +186,19 @@ function renderTable() {
       guildBadge = `<span class="status-badge status-online">${t('guild_no')}</span>`;
     }
 
-    let onlineBadge;
-    if (isOnline) {
-      const mins = calcOnlineMinutes(p.onlineSince);
-      onlineBadge = `<span class="status-badge status-online">${t('online')} (${mins}min)</span>`;
-    } else {
-      onlineBadge = `<span class="status-badge status-offline">${t('offline')}${p.offlineTime ? ' · ' + p.offlineTime : ''}</span>`;
-    }
+    const loginTimeBadge = `<span style="color:var(--text-secondary);font-size:12px;">${p.onlineSince}</span>`;
 
     const rowClass = hasGuild ? 'strikethrough' : '';
 
     return `
       <tr class="${rowClass}">
-        <td data-label="${t('th_player_id')}"><span class="player-id">#${p.id}</span></td>
+        <td data-label="${t('th_player_id')}"><span class="player-id">${p.id}</span></td>
         <td data-label="${t('th_nickname')}">${p.nickname}</td>
         <td data-label="${t('th_server')}"><span class="server-badge server-${p.server}">${p.server}</span></td>
         <td data-label="${t('th_reg_date')}" style="color:var(--text-secondary);font-size:12px;">${p.regDate}</td>
         <td data-label="${t('th_tag')}"><span class="tag ${tagClass}">${tagText}</span></td>
         <td data-label="${t('th_guild_status')}">${guildBadge}</td>
-        <td data-label="${t('th_online_status')}">${onlineBadge}</td>
+        <td data-label="${t('th_online_status')}">${loginTimeBadge}</td>
       </tr>
     `;
   }).join('');

@@ -22,8 +22,8 @@ const i18n = {
     filter_all: '全部', filter_new: '新用户', filter_returning: '老用户',
     filter_online: '在线中', filter_unclaimed: '未认领',
     th_player_id: '账号 ID', th_nickname: '昵称', th_server: '服务器',
-    th_reg_date: '注册日期', th_tag: '标签',
-    th_guild_status: '公会状态', th_online_status: '在线状态',
+    th_reg_date: '首次登录日期', th_tag: '标签',
+    th_guild_status: '公会状态', th_online_status: '最近登录时间',
     th_claimed_by: '认领人', th_action: '操作',
     tag_new: '新用户', tag_returning: '老用户',
     guild_no: '无公会', guild_yes: '已入团',
@@ -41,7 +41,7 @@ const i18n = {
     you: '你',
     btn_claim: '复制ID',
     btn_claimed_by_you: '已复制',
-    toast_claim: '✅ 已复制 #{id} 到剪贴板',
+    toast_claim: '已复制账号到剪贴板',
     empty: '暂无数据',
   },
   vi: {
@@ -59,8 +59,8 @@ const i18n = {
     filter_all: 'Tất cả', filter_new: 'Tân thủ', filter_returning: 'Cũ',
     filter_online: 'Online', filter_unclaimed: 'Chưa nhận',
     th_player_id: 'ID TK', th_nickname: 'Biệt danh', th_server: 'Máy chủ',
-    th_reg_date: 'Ngày ĐK', th_tag: 'Nhãn',
-    th_guild_status: 'Bang hộI', th_online_status: 'Trạng tháI online',
+    th_reg_date: 'Lần đăng nhập đầu', th_tag: 'Nhãn',
+    th_guild_status: 'Bang hộI', th_online_status: 'ThờI gian đăng nhập gần nhất',
     th_claimed_by: 'NgườI nhận', th_action: 'Thao tác',
     tag_new: 'Tân thủ', tag_returning: 'Cũ',
     guild_no: 'Không bang', guild_yes: 'Đã vào bang',
@@ -78,7 +78,7 @@ const i18n = {
     you: 'Bạn',
     btn_claim: 'Copy ID',
     btn_claimed_by_you: 'Đã sao chép',
-    toast_claim: '✅ Đã sao chép #{id}',
+    toast_claim: 'Đã sao chép ID',
     empty: 'Không có dữ liệu',
   }
 };
@@ -420,13 +420,7 @@ function renderTable() {
       guildBadge = `<span class="status-badge status-online">${t('guild_no')}</span>`;
     }
 
-    let onlineBadge;
-    if (isOnline) {
-      const mins = calcOnlineMinutes(p.onlineSince);
-      onlineBadge = `<span class="status-badge status-online">${t('online')} (${mins}min)</span>`;
-    } else {
-      onlineBadge = `<span class="status-badge status-offline">${t('offline')}${p.offlineTime ? ' · ' + p.offlineTime : ''}</span>`;
-    }
+    const loginTimeBadge = `<span style="color:var(--text-secondary);font-size:12px;">${p.onlineSince}</span>`;
 
     const rowClass = hasGuild ? 'strikethrough' : (isUnclaimed ? 'row-unclaimed' : '');
 
@@ -443,13 +437,13 @@ function renderTable() {
 
     return `
       <tr class="${rowClass}">
-        <td data-label="${t('th_player_id')}"><span class="player-id">#${p.id}</span></td>
+        <td data-label="${t('th_player_id')}"><span class="player-id">${p.id}</span></td>
         <td data-label="${t('th_nickname')}">${p.nickname}</td>
         <td data-label="${t('th_server')}"><span class="server-badge server-${p.server}">${p.server}</span></td>
         <td data-label="${t('th_reg_date')}" style="color:var(--text-secondary);font-size:12px;">${p.regDate}</td>
         <td data-label="${t('th_tag')}"><span class="tag ${tagClass}">${tagText}</span></td>
         <td data-label="${t('th_guild_status')}">${guildBadge}</td>
-        <td data-label="${t('th_online_status')}">${onlineBadge}</td>
+        <td data-label="${t('th_online_status')}">${loginTimeBadge}</td>
         <td data-label="${t('th_claimed_by')}">${claimedByText}</td>
         <td data-label="${t('th_action')}">${action}</td>
       </tr>
