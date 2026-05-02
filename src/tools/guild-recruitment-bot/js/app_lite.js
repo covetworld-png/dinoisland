@@ -175,7 +175,7 @@ function renderTable() {
 
   const tbody = document.getElementById('player-table');
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><span>${t('empty')}</span></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><span>${t('empty')}</span></div></td></tr>`;
     return;
   }
 
