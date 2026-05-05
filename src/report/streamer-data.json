@@ -1580,15 +1580,7 @@
   },
   "annotations": {
     "heni_换剧本": {
-      "type": "line",
-      "xMin": "2026-03-31",
-      "xMax": "2026-03-31",
-      "borderColor": "#fc8452",
-      "borderWidth": 2,
-      "borderDash": [
-        6,
-        6
-      ],
+      "note": "",
       "label": {
         "display": true,
         "content": "heni 换剧本",
@@ -1598,14 +1590,19 @@
         "font": {
           "size": 10
         }
-      }
+      },
+      "type": "line",
+      "xMin": "2026-03-31",
+      "xMax": "2026-03-31",
+      "borderColor": "#fc8452",
+      "borderWidth": 2,
+      "borderDash": [
+        6,
+        6
+      ]
     },
     "商单_1500": {
-      "type": "point",
-      "xValue": "2026-04-04",
-      "yValue": 686.62,
-      "backgroundColor": "#fc8452",
-      "radius": 6,
+      "note": "",
       "label": {
         "display": true,
         "content": "商单 1500",
@@ -1615,14 +1612,15 @@
         "font": {
           "size": 10
         }
-      }
+      },
+      "type": "point",
+      "xValue": "2026-04-04",
+      "yValue": 686.62,
+      "backgroundColor": "#fc8452",
+      "radius": 6
     },
     "阿贤阿梅直播_PK": {
-      "type": "point",
-      "xValue": "2026-04-09",
-      "yValue": 3318.53,
-      "backgroundColor": "#cc8775",
-      "radius": 6,
+      "note": "",
       "label": {
         "display": true,
         "content": "阿贤阿梅直播 PK",
@@ -1632,14 +1630,15 @@
         "font": {
           "size": 10
         }
-      }
+      },
+      "type": "point",
+      "xValue": "2026-04-09",
+      "yValue": 3318.53,
+      "backgroundColor": "#cc8775",
+      "radius": 6
     },
     "阿贤恢复原来的剧本": {
-      "type": "point",
-      "xValue": "2026-04-14",
-      "yValue": 784.14,
-      "backgroundColor": "#ea7ccc",
-      "radius": 6,
+      "note": "",
       "label": {
         "display": true,
         "content": "阿贤恢复原来的剧本",
@@ -1649,14 +1648,15 @@
         "font": {
           "size": 10
         }
-      }
+      },
+      "type": "point",
+      "xValue": "2026-04-14",
+      "yValue": 784.14,
+      "backgroundColor": "#ea7ccc",
+      "radius": 6
     },
     "主播_PK": {
-      "type": "point",
-      "xValue": "2026-04-23",
-      "yValue": 2768.59,
-      "backgroundColor": "#fac858",
-      "radius": 6,
+      "note": "阿贤heni vs MYMY，当日收入双高峰",
       "label": {
         "display": true,
         "content": "主播 PK",
@@ -1666,7 +1666,42 @@
         "font": {
           "size": 10
         }
-      }
+      },
+      "type": "point",
+      "xValue": "2026-04-23",
+      "yValue": 2768.59,
+      "backgroundColor": "#fac858",
+      "radius": 6
+    }
+  },
+  "streakData": {
+    "阿贤heni": {
+      "max_streak": 6,
+      "current_streak": 1
+    },
+    "MYMY": {
+      "max_streak": 2,
+      "current_streak": 0
+    },
+    "志青Ricon": {
+      "max_streak": 0,
+      "current_streak": 0
+    },
+    "阿园Chua": {
+      "max_streak": 0,
+      "current_streak": 0
+    },
+    "Pink": {
+      "max_streak": 0,
+      "current_streak": 0
+    },
+    "peo": {
+      "max_streak": 0,
+      "current_streak": 0
+    },
+    "Vanie": {
+      "max_streak": 0,
+      "current_streak": 0
     }
   },
   "阿贤heni_income": [
