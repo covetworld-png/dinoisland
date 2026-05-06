@@ -470,6 +470,8 @@
     <button class="text-btn" onclick="exportAllData()">📤 <span data-i18n="exportAllShort">导出全部</span></button>
     <button class="text-btn" onclick="document.getElementById('fileImport').click()">📥 <span data-i18n="importFileShort">导入</span></button>
     <input type="file" id="fileImport" accept=".csv" style="display:none" onchange="importData(this)">
+    <button class="text-btn" onclick="showGitHubSettings()" title="GitHub设置">⚙️</button>
+    <button class="text-btn" onclick="saveToGitHub()" title="保存到GitHub">💾 <span data-i18n="saveToGitHubShort">存GitHub</span></button>
   </div>
 
   <div class="controls">
@@ -712,7 +714,7 @@ const I18N = {
     autoSaved: '✅ Đã tự động lưu', rulesTitle: '📋 Quy Tắc Tính Điểm',
     rulesDaily: 'Điểm Nhật Sai', rulesElim: 'Cơ Chế Loại Trừ', rulesWeekly: 'Điểm Vô Địch Tuần (Chủ Nhật)',
     phWinner: 'Thắng', phLoser: 'Thua', phNote: 'Ghi Chú (tùy chọn)',
-    clearDataShort: 'Xóa tất cả', exportCSVShort: 'Xuất ngày', exportAllShort: 'Xuất tất cả', importFileShort: 'Nhập',
+    clearDataShort: 'Xóa tất cả', exportCSVShort: 'Xuất ngày', exportAllShort: 'Xuất tất cả', importFileShort: 'Nhập', saveToGitHubShort: 'Lưu GH',
     clearWeeklyShort: 'Xóa Vô Địch Tuần', exportWeeklyShort: 'Xuất Vô Địch Tuần', importWeeklyShort: 'Nhập Vô Địch Tuần',
     btnAdd: 'Thêm', btnDel: 'Xóa',
     modalTitle: 'Chọn Ngày và Máy Chủ', btnCancel: 'Hủy', btnConfirm: 'Xác Nhận', alertNeedDate: 'Vui lòng chọn ngày',
@@ -1237,7 +1239,7 @@ function autoSave() {
 
 function saveData() { autoSave(); } // 兼容旧调用
 
-function exportData() {
+function buildDailyCSV() {
   const date = document.getElementById('matchDate').value;
   const server = getCurrentServer();
   const champion = document.getElementById('championAccount').value;
@@ -1261,6 +1263,13 @@ function exportData() {
       csv += `${i + 1},${s.name},${s.wins},${s.losses},${s.total},${s.rate}\n`;
     });
   }
+  return csv;
+}
+
+function exportData() {
+  const csv = buildDailyCSV();
+  const date = document.getElementById('matchDate').value;
+  const server = getCurrentServer();
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2301,6 +2310,117 @@ function importWeeklyData(input) {
   reader.readAsText(file);
 }
 
+
+
+/* ========== GitHub 保存 ========== */
+let githubConfig = {};
+function loadGitHubConfig() {
+  const raw = localStorage.getItem('pvp_github_config');
+  if (raw) try { githubConfig = JSON.parse(raw); } catch(e) {}
+}
+function saveGitHubSettings() {
+  githubConfig = {
+    token: document.getElementById('ghToken').value.trim(),
+    owner: document.getElementById('ghOwner').value.trim(),
+    repo: document.getElementById('ghRepo').value.trim(),
+    path: document.getElementById('ghPath').value.trim(),
+    branch: document.getElementById('ghBranch').value.trim()
+  };
+  localStorage.setItem('pvp_github_config', JSON.stringify(githubConfig));
+  closeGitHubSettings();
+  alert('GitHub 设置已保存');
+}
+function showGitHubSettings() {
+  loadGitHubConfig();
+  document.getElementById('ghToken').value = githubConfig.token || '';
+  document.getElementById('ghOwner').value = githubConfig.owner || 'covetworld-png';
+  document.getElementById('ghRepo').value = githubConfig.repo || 'dinoisland';
+  document.getElementById('ghPath').value = githubConfig.path || 'src/campaign/pages/003-02-pvp-battle/pvp_score_all.csv';
+  document.getElementById('ghBranch').value = githubConfig.branch || 'main';
+  document.getElementById('githubModal').classList.add('open');
+}
+function closeGitHubSettings() {
+  document.getElementById('githubModal').classList.remove('open');
+}
+
+async function saveToGitHub() {
+  loadGitHubConfig();
+  if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) {
+    alert('请先配置 GitHub 信息');
+    showGitHubSettings();
+    return;
+  }
+  if (matches.length === 0) {
+    alert('当前无比赛数据，无法保存');
+    return;
+  }
+  if (!confirm('确定将当日数据提交到 GitHub？')) return;
+
+  // 构建 CSV：先获取现有文件内容，追加当日数据
+  let existingCSV = '';
+  let sha = null;
+  try {
+    const getRes = await fetch(
+      `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}?ref=${githubConfig.branch}`,
+      { headers: { 'Authorization': `token ${githubConfig.token}`, 'Accept': 'application/vnd.github.v3+json' } }
+    );
+    if (getRes.ok) {
+      const fileData = await getRes.json();
+      sha = fileData.sha;
+      existingCSV = decodeURIComponent(escape(atob(fileData.content)));
+    } else if (getRes.status !== 404) {
+      const err = await getRes.json();
+      console.error('获取文件失败:', err);
+    }
+  } catch(e) { console.error('获取现有文件出错:', e); }
+
+  // 生成当日 CSV
+  const dailyCSV = buildDailyCSV();
+
+  // 合并：如果已有内容，追加；否则新建
+  let finalCSV = existingCSV;
+  if (finalCSV) {
+    // 去掉现有内容末尾的换行，追加新块
+    finalCSV = finalCSV.replace(/\n+$/, '') + '\n\n' + dailyCSV;
+  } else {
+    finalCSV = dailyCSV;
+  }
+
+  const contentBase64 = btoa(unescape(encodeURIComponent(finalCSV)));
+  const date = document.getElementById('matchDate').value;
+  const server = getCurrentServer();
+  const commitMessage = `data: 更新 PVP 比赛数据 ${date} ${server}`;
+  const body = { message: commitMessage, content: contentBase64, branch: githubConfig.branch };
+  if (sha) body.sha = sha;
+
+  try {
+    const putRes = await fetch(
+      `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${githubConfig.token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      }
+    );
+    if (putRes.ok) {
+      alert('✅ 已成功提交到 GitHub！');
+    } else {
+      const error = await putRes.json();
+      throw new Error(error.message || `HTTP ${putRes.status}`);
+    }
+  } catch (error) {
+    console.error('GitHub API error:', error);
+    alert('❌ 提交失败: ' + error.message);
+    if (error.message.includes('401') || error.message.includes('Bad credentials')) {
+      setTimeout(() => { if (confirm('Token 可能无效，是否重新配置？')) showGitHubSettings(); }, 500);
+    }
+  }
+}
+
 function escapeHtml(t) {
   const d = document.createElement('div'); d.textContent = t; return d.innerHTML;
 }
@@ -2323,6 +2443,28 @@ function escapeHtml(t) {
       <div class="modal-footer">
         <button class="secondary" onclick="closeSheetModal()" data-i18n="btnCancel">取消</button>
         <button onclick="confirmSheetModal()" data-i18n="btnConfirm">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="githubModal">
+    <div class="modal" style="width:380px;">
+      <h3>GitHub 设置</h3>
+      <div class="modal-body">
+        <label>GitHub Token <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="font-size:11px;color:var(--gold);">创建 Token ↗</a></label>
+        <input type="text" id="ghToken" placeholder="github_pat_..." style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 12px;color:var(--mist);font-size:13px;outline:none;width:100%;">
+        <label>仓库 Owner</label>
+        <input type="text" id="ghOwner" value="covetworld-png" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 12px;color:var(--mist);font-size:13px;outline:none;width:100%;">
+        <label>仓库名</label>
+        <input type="text" id="ghRepo" value="dinoisland" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 12px;color:var(--mist);font-size:13px;outline:none;width:100%;">
+        <label>文件路径</label>
+        <input type="text" id="ghPath" value="src/campaign/pages/003-02-pvp-battle/pvp_score_all.csv" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 12px;color:var(--mist);font-size:13px;outline:none;width:100%;">
+        <label>分支</label>
+        <input type="text" id="ghBranch" value="main" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 12px;color:var(--mist);font-size:13px;outline:none;width:100%;">
+      </div>
+      <div class="modal-footer">
+        <button class="secondary" onclick="closeGitHubSettings()">取消</button>
+        <button onclick="saveGitHubSettings()">保存</button>
       </div>
     </div>
   </div>
