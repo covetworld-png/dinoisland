@@ -1438,12 +1438,23 @@ function normalizeDate(dateStr) {
   if (!dateStr) return '';
   dateStr = dateStr.trim().replace(/^["']|["']$/g, '');
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  // DD/MM/YYYY or D/M/YYYY (Vietnamese / Excel default)
+  // M/D/YYYY or MM/DD/YYYY — smart parse: if first part > 12 it's day (DD/MM),
+  // if second part > 12 it's day (MM/DD), otherwise default MM/DD/YYYY.
   const m1 = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (m1) {
-    const d = m1[1].padStart(2, '0');
-    const mo = m1[2].padStart(2, '0');
-    return m1[3] + '-' + mo + '-' + d;
+    const p1 = parseInt(m1[1], 10);
+    const p2 = parseInt(m1[2], 10);
+    const year = m1[3];
+    if (p1 > 12) {
+      // p1 is day → DD/MM/YYYY
+      return year + '-' + String(p2).padStart(2, '0') + '-' + String(p1).padStart(2, '0');
+    }
+    if (p2 > 12) {
+      // p2 is day → MM/DD/YYYY
+      return year + '-' + String(p1).padStart(2, '0') + '-' + String(p2).padStart(2, '0');
+    }
+    // ambiguous: default MM/DD/YYYY (matches Excel US-style export common in VN workflows)
+    return year + '-' + String(p1).padStart(2, '0') + '-' + String(p2).padStart(2, '0');
   }
   // YYYY/MM/DD or YYYY/M/D
   const m2 = dateStr.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
