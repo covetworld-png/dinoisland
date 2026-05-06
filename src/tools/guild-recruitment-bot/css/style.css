@@ -649,7 +649,7 @@ tbody td { padding: 12px 14px; color: var(--text-primary); vertical-align: middl
   .header-logo { width: 28px; height: 28px; font-size: 14px; }
   .current-user { display: none; }
   .logout-btn { padding: 5px 10px; font-size: 11px; }
-  .lang-switch { display: none; }
+  .lang-switch { display: flex; gap: 4px; }
 
   .stats-bar {
     grid-template-columns: repeat(2, 1fr);
