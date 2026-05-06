@@ -91,6 +91,19 @@
       "private": false,
       "description": "Zalo Wild 测试页"
     },
+    "003-02-周巅峰对决": {
+      "source": "projects/003-运营/003-02-周巅峰对决/pages",
+      "src": "src/campaign/pages/003-02-pvp-battle",
+      "type": "campaign-page-standalone",
+      "status": "ready",
+      "confirmed": true,
+      "private": true,
+      "description": "PVP 巅峰对决活动页 + GM 计分板",
+      "note": "index.html 为活动展示页，scoreboard.html 为 GM 计分工具，共享 assets/pvp-battle/ 静态资源",
+      "copyAssets": [
+        {"from": "projects/003-运营/003-02-周巅峰对决/assets", "to": "src/campaign/assets/pvp-battle"}
+      ]
+    },
     "official-home": {
       "src": "src/official/pages/home",
       "type": "official-page",

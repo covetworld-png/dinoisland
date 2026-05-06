@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PVP 巅峰对决 | 恐龙岛</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a1a15;
+      --bg-card: rgba(10, 30, 25, 0.85);
+      --border: rgba(74, 154, 138, 0.2);
+      --gold: #FFD700;
+      --gold-light: #FFE55C;
+      --gold-dark: #B8860B;
+      --mist: #4a9a8a;
+      --mist-light: #6abaaa;
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* 背景纹理 */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 0%, rgba(74, 154, 138, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(74, 154, 138, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .hero {
+      text-align: center;
+      padding: 40px 0 32px;
+    }
+    .hero h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5);
+      letter-spacing: 2px;
+    }
+    .hero .subtitle {
+      margin-top: 8px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    .hero .badge {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(74, 154, 138, 0.1);
+      color: var(--mist-light);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* Section */
+    .section {
+      margin-top: 24px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+    .card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--mist-light);
+      margin-bottom: 10px;
+    }
+    .card p, .card li {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .card ul {
+      padding-left: 18px;
+    }
+    .card li { margin-bottom: 4px; }
+
+    /* Grid */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 640px) {
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .feature-card {
+      text-align: center;
+      padding: 24px 16px;
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      border-radius: 12px;
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .feature-card h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .feature-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .data-table th {
+      text-align: left;
+      padding: 10px 12px;
+      color: var(--gold);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      background: rgba(74, 154, 138, 0.08);
+    }
+    .data-table td {
+      padding: 10px 12px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid rgba(74, 154, 138, 0.1);
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+
+    /* Highlight */
+    .highlight { color: var(--gold); font-weight: 600; }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .tag-gold {
+      background: rgba(255, 215, 0, 0.12);
+      color: var(--gold);
+      border: 1px solid rgba(255, 215, 0, 0.25);
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--gold), var(--mist));
+      border-radius: 1px;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -22px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--bg-deep);
+      border: 2px solid var(--gold);
+    }
+    .timeline-item h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .timeline-item p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* GM Cards */
+    .gm-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 640px) {
+      .gm-grid { grid-template-columns: 1fr; }
+    }
+    .gm-card {
+      text-align: center;
+    }
+    .gm-card .role {
+      font-size: 13px;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .gm-card .duty {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 32px 0 16px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Hero -->
+    <div class="hero">
+      <h1>⚔ PVP 巅峰对决</h1>
+      <p class="subtitle">周期型 1v1 超级暴龙对战赛 · GM 现场组织</p>
+      <span class="badge">v1.1 · 2026-04-28</span>
+    </div>
+
+    <!-- Overview -->
+    <div class="section">
+      <div class="grid-3">
+        <div class="card feature-card">
+          <div class="feature-icon">📅</div>
+          <h4>周一至周六</h4>
+          <p>日赛产生各服日冠军<br>K 服 / Q 服各自独立</p>
+        </div>
+        <div class="card feature-card">
+          <div class="feature-icon">🏆</div>
+          <h4>每周日</h4>
+          <p>本周日冠军循环赛<br>决出各服周冠军</p>
+        </div>
+        <div class="card feature-card">
+          <div class="feature-icon">🌐</div>
+          <h4>跨国对抗候选</h4>
+          <p>周冠军进入种子名单<br>备战跨服赛事</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule -->
+    <div class="section">
+      <div class="section-title">赛程安排</div>
+      <div class="card">
+        <table class="data-table">
+          <tr>
+            <th>周期</th>
+            <th>内容</th>
+            <th>时段（待定）</th>
+          </tr>
+          <tr>
+            <td><span class="tag">日赛</span></td>
+            <td>K 服日赛</td>
+            <td class="highlight">19:00 ~ 21:00</td>
+          </tr>
+          <tr>
+            <td><span class="tag">日赛</span></td>
+            <td>Q 服日赛</td>
+            <td class="highlight">21:30 ~ 23:30</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-gold">周赛</span></td>
+            <td>各服周冠军赛</td>
+            <td class="highlight">周日 20:00 ~ 22:00</td>
+          </tr>
+        </table>
+        <p style="margin-top:12px;font-size:12px;color:var(--text-muted);">💡 两服间隔 30 分钟，供 GM 休息与数据汇总</p>
+      </div>
+    </div>
+
+    <!-- Daily Rules -->
+    <div class="section">
+      <div class="section-title">日赛规则</div>
+      <div class="card">
+        <h3>对战规则</h3>
+        <ul>
+          <li>1v1 单场无奖励，仅记录胜/败场</li>
+          <li>单日累计败 <span class="highlight">3 场</span> → 当日禁赛</li>
+          <li>连胜 <span class="highlight">3 场</span> → 强制下场回队尾</li>
+          <li>连庄期间 <span class="highlight">不得换龙</span></li>
+          <li>本周已获日冠军者 <span class="highlight">禁止再次参赛</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>日冠军判定</h3>
+        <p>2 小时结束后，统计总胜场，最高者为日冠军。</p>
+        <p style="margin-top:8px;"><span class="tag">同分处理</span> 胜率 → 总场次（少者胜）→ 并列</p>
+      </div>
+    </div>
+
+    <!-- Weekly Rules -->
+    <div class="section">
+      <div class="section-title">周冠军赛规则</div>
+      <div class="card">
+        <h3>参赛资格</h3>
+        <p>仅限本周日冠军参加，最多 6 人，最少 2 人。仅 1 人时直接封为周冠军。</p>
+      </div>
+      <div class="card">
+        <h3>赛制</h3>
+        <ul>
+          <li>单循环，每两人交手 <span class="highlight">1 场</span></li>
+          <li>胜者 <span class="highlight">+1 分</span>，败者 0 分，无平局</li>
+          <li>同分：相互胜负 → 本周累计胜场 → 并列</li>
+          <li>缺席：轮空不替补，对手自动获胜</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Rewards -->
+    <div class="section">
+      <div class="section-title">奖励规则</div>
+      <div class="card">
+        <h3>日冠军奖励</h3>
+        <table class="data-table">
+          <tr>
+            <th>奖项</th>
+            <th>奖励</th>
+            <th>发放</th>
+          </tr>
+          <tr>
+            <td>日冠军</td>
+            <td class="highlight">5 只超暴</td>
+            <td>次日邮件</td>
+          </tr>
+          <tr>
+            <td>并列日冠军</td>
+            <td class="highlight">每人 3 只</td>
+            <td>次日邮件</td>
+          </tr>
+        </table>
+        <p style="margin-top:10px;font-size:13px;">并列时总支出 = 人数 × 3，超出 5 只部分由运营补足。每周最高 30 只。</p>
+      </div>
+      <div class="card">
+        <h3>周冠军奖励</h3>
+        <p>周冠军 <span class="highlight">不设直接奖励</span>，所有完成周赛的参赛者均进入<span class="highlight">跨国对抗候选人名单</span>。</p>
+      </div>
+    </div>
+
+    <!-- GM -->
+    <div class="section">
+      <div class="section-title">GM 组织</div>
+      <div class="card">
+        <p style="margin-bottom:14px;text-align:center;">每场比赛固定配置 <span class="highlight">2 名 GM</span></p>
+        <div class="gm-grid">
+          <div class="card gm-card">
+            <div class="role">🎯 主裁判（记分员）</div>
+            <div class="duty">记录赛果<br>统计胜败场<br>判定冠军排名<br>开启并保存录屏</div>
+          </div>
+          <div class="card gm-card">
+            <div class="role">🛡 场控（排队官）</div>
+            <div class="duty">核验恐龙（仅限超暴）<br>维持排队秩序<br>宣布规则纪律<br>监督 3 连胜强制下场</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>PVP 巅峰对决 · 恐龙岛运营团队</p>
+      <p style="margin-top:4px;">数据公示页面由运营团队提供，目前策划中</p>
+    </div>
+  </div>
+</body>
+</html>
