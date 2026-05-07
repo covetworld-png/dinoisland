@@ -1,0 +1,63 @@
+日期,服务器,冠军账号
+2026-05-07,Q 服,13219629
+
+序号,场次,胜者,胜方账号,败者,负方账号,备注
+1,场次 1,CoBeChimTO,13219629,yugi,,
+2,场次 2,CoBeChimTO,13219629,melody,13221206,
+3,场次 3,CoBeChimTO,13219629,yaochen,13219894,
+4,场次 4,zauzau,13221285,conchobanhbao,13219739,
+5,场次 5,yaochen,13219894,zauzau,13221285,
+6,场次 6,yaochen,13219894,doolong,13226813,
+7,场次 7,zauzau,13221285,yaochen,13219894,
+8,场次 8,zauzau,13221285,bachlong,13219635,
+9,场次 9,zauzau,13221285,yaochen,13219894,
+10,场次 10,ntphat,13226453,bachlong,13219635,
+11,场次 11,chanbomayde,13219961,ntphat,13226453,
+12,场次 12,chanbomayde,13219961,minh95,13225685,
+13,场次 13,ntphat,13226453,chanbomayde,13219961,
+14,场次 14,ntphat,13226453,obito,13219986,
+15,场次 15,chanbomayde,13219961,ntphat,13226453,
+16,场次 16,chanbomayde,13219961,ngochan,13221530,
+17,场次 17,chanbomayde,13219961,nguoicodon,13220294,
+18,场次 18,sunny,13219819,nguoicodon,13220294,
+19,场次 19,sunny,13219819,zauzau,13221285,
+20,场次 20,CoBeChimTO,13219629,sunny,13219819,
+21,场次 21,CoBeChimTO,13219629,kidtv152,13220270,
+22,场次 22,CoBeChimTO,13219629,chanbomayde,13219961,
+23,场次 23,specter,13219626,sunny,13219819,
+24,场次 24,satnguyet,13219858,specter,13219626,
+25,场次 25,satnguyet,13219858,chanbomayde,13219961,
+26,场次 26,satnguyet,13219858,conchobanhbao,13219739,
+27,场次 27,ngochan,13221530,specter,13219626,
+28,场次 28,ngochan,13221530,MIDORII,13220943,
+29,场次 29,ngochan,13221530,specter,13219626,
+30,场次 30,CoBeChimTO,13219629,satnguyet,13219858,
+31,场次 31,CoBeChimTO,13219629,yugi,13219663,
+32,场次 32,CoBeChimTO,13219629,kiding,13223120,
+33,场次 33,CoBeChimTO,13219629,kiding,13223120,
+34,场次 34,CoBeChimTO,13219629,chinsuuuu,,
+35,场次 35,kiding,13223120,CoBeChimTO,13219629,
+36,场次 36,CoBeChimTO,13219629,kiding,13223120,
+
+排名,昵称,胜场,败场,总场次,胜率
+1,CoBeChimTO,12,1,13,92.3%
+2,chanbomayde,5,3,8,62.5%
+3,zauzau,4,2,6,66.7%
+4,ngochan,3,1,4,75.0%
+5,satnguyet,3,1,4,75.0%
+6,ntphat,3,2,5,60.0%
+7,sunny,2,2,4,50.0%
+8,yaochen,2,3,5,40.0%
+9,specter,1,3,4,25.0%
+10,kiding,1,3,4,25.0%
+11,melody,0,1,1,0.0%
+12,doolong,0,1,1,0.0%
+13,minh95,0,1,1,0.0%
+14,obito,0,1,1,0.0%
+15,kidtv152,0,1,1,0.0%
+16,MIDORII,0,1,1,0.0%
+17,chinsuuuu,0,1,1,0.0%
+18,yugi,0,2,2,0.0%
+19,conchobanhbao,0,2,2,0.0%
+20,bachlong,0,2,2,0.0%
+21,nguoicodon,0,2,2,0.0%
