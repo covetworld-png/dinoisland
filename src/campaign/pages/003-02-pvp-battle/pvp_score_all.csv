@@ -61,3 +61,61 @@
 19,conchobanhbao,0,2,2,0.0%
 20,bachlong,0,2,2,0.0%
 21,nguoicodon,0,2,2,0.0%
+
+日期,服务器,冠军账号
+2026-05-06,Q 服,13219675
+
+序号,场次,胜者,胜方账号,败者,负方账号,备注
+1,场次 1,MIDORII,13220943,specter,13219626,
+2,场次 2,MIDORII,13220943,conchobanhbao,13219739,
+3,场次 3,satnguyet,13219858,MIDORII,13220943,
+4,场次 4,satnguyet,13219858,hacthienlongl,13220491,
+5,场次 5,satnguyet,13219858,conchobanhbao,13219739,
+6,场次 6,hacthienlongl,13220491,bilibili,13220975,
+7,场次 7,yenlycte,13219791,hacthienlongl,13220491,
+8,场次 8,tinasha,13220150,yenlycte,13219791,
+9,场次 9,tinasha,13220150,conchobanhbao,13219739,
+10,场次 10,tinasha,13220150,obito,13219986,
+11,场次 11,nguoicodon,13220294,hacthienlongl,13220491,
+12,场次 12,nguoicodon,13220294,lion,13223898,
+13,场次 13,kiding,13223120,nguoicodon,13220294,
+14,场次 14,kiding,13223120,lion,13223898,
+15,场次 15,chip,13219675,kiding,13223120,
+16,场次 16,chip,13219675,MIDORII,13220943,
+17,场次 17,chip,13219675,heartfilia,13226870,
+18,场次 18,MIDORII,13220943,kiding,13223120,
+19,场次 19,MIDORII,13220943,heartfilia,13226870,
+20,场次 20,MIDORII,13220943,kiding,13223120,
+21,场次 21,vuongkz,13219666,nguoicodon,13220294,
+22,场次 22,vuongkz,13219666,anh2,13220149,
+23,场次 23,tinkerbell,13229203,vuongkz,13219666,
+24,场次 24,tinkerbell,13229203,satnguyet,13219858,
+25,场次 25,tinkerbell,13229203,vuongkz,13219666,
+26,场次 26,tinasha,13220150,anh2,13220149,
+27,场次 27,tinasha,13220150,chip,13219675,
+28,场次 28,tinasha,13220150,tinkerbell,13229203,
+29,场次 29,satnguyet,13219858,MIDORII,13220943,
+30,场次 30,vuongkz,13219666,satnguyet,13219858,
+31,场次 31,chip,13219675,vuongkz,13219666,
+32,场次 32,chip,13219675,tinasha,13220150,
+33,场次 33,chip,13219675,satnguyet,13219858,
+34,场次 34,chip,13219675,tinasha,13220150,Trận 34 Chip và tinasha hoà
+
+排名,昵称,胜场,败场,总场次,胜率
+1,chip,7,1,8,87.5%
+2,tinasha,6,2,8,75.0%
+3,MIDORII,5,3,8,62.5%
+4,satnguyet,4,3,7,57.1%
+5,tinkerbell,3,1,4,75.0%
+6,vuongkz,3,3,6,50.0%
+7,nguoicodon,2,2,4,50.0%
+8,kiding,2,3,5,40.0%
+9,yenlycte,1,1,2,50.0%
+10,hacthienlongl,1,3,4,25.0%
+11,specter,0,1,1,0.0%
+12,bilibili,0,1,1,0.0%
+13,obito,0,1,1,0.0%
+14,lion,0,2,2,0.0%
+15,heartfilia,0,2,2,0.0%
+16,anh2,0,2,2,0.0%
+17,conchobanhbao,0,3,3,0.0%
