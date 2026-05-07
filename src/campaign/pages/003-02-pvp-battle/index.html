@@ -1,484 +1,169 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PVP 巅峰对决 · 恐龙岛</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:      #0a110e;
-      --surface: rgba(16, 28, 22, 0.72);
-      --fg:      #e8e4df;
-      --muted:   #6b8a7a;
-      --border:  #1e2d26;
-      --accent:  #f5c542;
-
-      --accent2: #2dd4a0;
-      --accent3: #ff6b35;
-      --accent-soft:  color-mix(in oklch, var(--accent) 14%, transparent);
-      --accent2-soft: color-mix(in oklch, var(--accent2) 14%, transparent);
-      --fg-soft:      color-mix(in oklch, var(--fg) 6%, transparent);
-
-      --font-display: 'DM Serif Display', Georgia, serif;
-      --font-body:    'Be Vietnam Pro', -apple-system, system-ui, sans-serif;
-      --font-mono:    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
-
-      --fs-h1: clamp(44px, 6vw, 76px);
-      --fs-h2: clamp(32px, 4vw, 48px);
-      --fs-h3: 22px;
-      --fs-lead: 19px;
-      --fs-body: 16px;
-      --fs-meta: 13px;
-
-      --gap-xs: 8px;
-      --gap-sm: 12px;
-      --gap-md: 20px;
-      --gap-lg: 32px;
-      --gap-xl: 56px;
-      --gap-2xl: 96px;
-      --container: 1120px;
-      --gutter: 32px;
-
-      --radius: 10px;
-      --radius-lg: 16px;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; }
-    html { -webkit-text-size-adjust: 100%; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: var(--font-body);
-      font-size: var(--fs-body);
-      line-height: 1.6;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-    }
-    img, svg { display: block; max-width: 100%; }
-    a { color: inherit; text-decoration: none; }
-    button { font: inherit; cursor: pointer; }
-    p { text-wrap: pretty; }
-    h1, h2, h3, h4 { text-wrap: balance; }
-
-    .container {
-      max-width: var(--container);
-      margin-inline: auto;
-      padding-inline: var(--gutter);
-    }
-    .section {
-      padding-block: clamp(48px, 8vw, var(--gap-2xl));
-    }
-    .section + .section { border-top: 1px solid var(--border); }
-    .stack { display: flex; flex-direction: column; }
-    .stack > * + * { margin-top: var(--gap-md); }
-    .row { display: flex; align-items: center; gap: var(--gap-md); }
-    .row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-md); }
-    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap-lg); }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-lg); }
-    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap-md); }
-    .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: var(--gap-xl); align-items: start; }
-    .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: var(--gap-xl); align-items: start; }
-    @media (max-width: 920px) {
-      .grid-2, .grid-3, .grid-4, .grid-2-1, .grid-1-2 { grid-template-columns: 1fr; }
-    }
-
-    .h1, h1 { font-family: var(--font-display); font-size: var(--fs-h1); line-height: 1.04; letter-spacing: -0.02em; margin: 0; }
-    .h2, h2 { font-family: var(--font-display); font-size: var(--fs-h2); line-height: 1.1; letter-spacing: -0.015em; margin: 0; }
-    .h3, h3 { font-size: var(--fs-h3); font-weight: 600; line-height: 1.3; letter-spacing: -0.005em; margin: 0; }
-    .lead   { font-size: var(--fs-lead); line-height: 1.55; color: var(--muted); max-width: 60ch; margin: 0; }
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin: 0 0 var(--gap-md);
-    }
-    .meta { font-family: var(--font-mono); font-size: var(--fs-meta); color: var(--muted); }
-    .num  { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-
-    .topnav {
-      position: sticky; top: 0; z-index: 10;
-      background: color-mix(in oklch, var(--bg) 92%, transparent);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-    .topnav-inner { display: flex; align-items: center; justify-content: space-between; padding-block: 14px; }
-    .topnav .logo { font-family: var(--font-display); font-size: 19px; font-weight: 600; letter-spacing: -0.01em; }
-    .topnav nav { display: flex; gap: var(--gap-lg); }
-    .topnav nav a { font-size: 14px; color: var(--muted); }
-    .topnav nav a:hover { color: var(--fg); }
-    .pagefoot { padding-block: var(--gap-xl); color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
-    .pagefoot .row-between { flex-wrap: wrap; gap: var(--gap-md); }
-
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 11px 20px;
-      border-radius: var(--radius);
-      border: 1px solid transparent;
-      font-size: 15px;
-      font-weight: 500;
-      letter-spacing: -0.005em;
-      transition: transform 0.05s ease, background 0.15s ease, border-color 0.15s ease;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-    .btn-primary:hover { background: color-mix(in oklch, var(--accent) 88%, black); }
-    .btn-secondary { background: transparent; color: var(--fg); border-color: var(--border); }
-    .btn-secondary:hover { border-color: var(--fg); }
-    .btn-ghost { background: transparent; color: var(--fg); border-color: transparent; padding-inline: 8px; }
-    .btn-ghost:hover { color: var(--accent); }
-    .btn-arrow::after { content: '\2192'; transition: transform 0.15s ease; }
-    .btn-arrow:hover::after { transform: translateX(2px); }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      backdrop-filter: blur(12px);
-      border-top: 1px solid color-mix(in oklch, var(--accent) 15%, transparent);
-    }
-    .card-flat { background: transparent; border: 0; padding: 0; }
-    .card-rule { background: transparent; border: 0; border-top: 1px solid var(--fg); padding: 24px 0 0; border-radius: 0; }
-
-    .feature .feature-mark {
-      width: 36px; height: 36px;
-      display: grid; place-items: center;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--accent);
-      margin-bottom: var(--gap-md);
-    }
-    .feature .feature-mark svg { width: 18px; height: 18px; }
-    .feature h3 { margin-bottom: 6px; }
-    .feature p  { margin: 0; color: var(--muted); font-size: 15px; }
-
-    .stat .stat-num {
-      font-family: var(--font-display);
-      font-size: clamp(56px, 8vw, 96px);
-      line-height: 0.95;
-      letter-spacing: -0.04em;
-      color: var(--accent);
-      font-weight: 600;
-    }
-    .stat .stat-label { color: var(--muted); font-size: 14px; margin-top: 8px; max-width: 24ch; }
-    .stat .stat-unit  { font-size: 0.5em; opacity: 0.7; margin-left: 2px; }
-
-    .quote {
-      font-family: var(--font-display);
-      font-size: clamp(24px, 2.6vw, 32px);
-      line-height: 1.32;
-      letter-spacing: -0.01em;
-      max-width: 28ch;
-    }
-    .quote-author { color: var(--muted); font-size: 14px; margin-top: var(--gap-md); }
-    .quote-mark   {
-      font-family: var(--font-display);
-      font-size: 140px; line-height: 0.7;
-      color: var(--accent); opacity: 0.18;
-      margin-bottom: -28px;
-    }
-
-    .pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 4px 10px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      border-radius: 999px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-    .pill-emerald {
-      background: var(--accent2-soft);
-      color: var(--accent2);
-    }
-    .tag {
-      display: inline-flex; align-items: center;
-      padding: 4px 10px;
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      font-size: 12px;
-    }
-
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field label { font-size: 13px; color: var(--muted); }
-    .input, .textarea {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--surface);
-      color: var(--fg);
-      font: inherit;
-      font-size: 15px;
-    }
-    .input:focus, .textarea:focus {
-      outline: 2px solid var(--accent-soft);
-      border-color: var(--accent);
-    }
-    .textarea { min-height: 96px; resize: vertical; line-height: 1.55; }
-
-    .ds-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .ds-table th, .ds-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
-    .ds-table th { color: var(--muted); font-weight: 500; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
-    .ds-table tbody tr:hover { background: var(--fg-soft); }
-    .ds-table .num-col { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
-
-    .ph-img {
-      background:
-        linear-gradient(135deg, var(--accent-soft), var(--fg-soft)),
-        var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      aspect-ratio: 16 / 10;
-      display: grid; place-items: center;
-      color: var(--muted);
-      font-family: var(--font-mono);
-      font-size: 12px;
-      letter-spacing: 0.04em;
-    }
-    .ph-img.square    { aspect-ratio: 1 / 1; }
-    .ph-img.portrait  { aspect-ratio: 3 / 4; }
-    .ph-img.wide      { aspect-ratio: 16 / 9; }
-
-    .rule  { border: 0; border-top: 1px solid var(--border); margin: 0; }
-    .rule-strong { border: 0; border-top: 1px solid var(--fg); margin: 0; }
-
-    .hero          { padding-block: clamp(80px, 12vw, 160px); }
-    .hero-center   { text-align: center; max-width: 32ch; margin-inline: auto; }
-    .hero h1       { margin-bottom: var(--gap-md); }
-    .hero .lead    { margin-bottom: var(--gap-lg); }
-    .hero-cta      { display: inline-flex; gap: var(--gap-sm); flex-wrap: wrap; }
-    .hero-center .hero-cta { justify-content: center; }
-    .hero-split    { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-2xl); align-items: center; }
-    @media (max-width: 920px) { .hero-split { grid-template-columns: 1fr; } }
-
-    .log-row { display: grid; grid-template-columns: 120px 1fr 100px; gap: var(--gap-lg); padding: 22px 0; border-top: 1px solid var(--border); align-items: baseline; }
-    .log-row .meta { color: var(--muted); }
-    .log-row h3 { font-size: 19px; }
-    .log-row .pull { text-align: right; }
-
-    /* ─── Extra classes for dinosaur-island theme ─────────────────────── */
-    .hero-glow {
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-glow::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 20% 20%, color-mix(in oklch, var(--accent) 6%, transparent) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 80% at 80% 80%, color-mix(in oklch, var(--accent2) 4%, transparent) 0%, transparent 50%);
-      pointer-events: none;
-    }
-    .hero-glow .container { position: relative; z-index: 1; }
-
-    .schedule-time {
-      font-family: var(--font-mono);
-      font-size: 13px;
-      color: var(--accent);
-    }
-    .reward-highlight {
-      font-family: var(--font-display);
-      font-size: clamp(40px, 5vw, 64px);
-      line-height: 0.95;
-      color: var(--accent);
-      font-weight: 600;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>巅峰对决 · 恐龙岛</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a110e;--surface:rgba(16,28,22,0.72);--fg:#e8e4df;--muted:#6b8a7a;--border:#1e2d26;--accent:#f5c542;--accent2:#2dd4a0;--font-display:'DM Serif Display',Georgia,serif;--font-body:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;--font-mono:ui-monospace,'JetBrains Mono',Menlo,monospace}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer}
+.container{max-width:1120px;margin-inline:auto;padding-inline:32px}
+.section{padding-block:clamp(48px,8vw,96px)}
+.section+.section{border-top:1px solid var(--border)}
+.topnav{position:sticky;top:0;z-index:10;background:color-mix(in oklch,var(--bg) 92%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.topnav-inner{display:flex;align-items:center;justify-content:space-between;padding-block:14px}
+.topnav .logo{font-family:var(--font-display);font-size:20px;letter-spacing:-0.01em}
+.topnav nav{display:flex;gap:28px}
+.topnav nav a{font-size:14px;color:var(--muted);transition:color .15s}
+.topnav nav a:hover{color:var(--fg)}
+.topnav .gm-link{display:none;font-size:13px;color:var(--accent);border:1px solid var(--accent);padding:6px 14px;border-radius:8px}
+.topnav .gm-link.show{display:inline-flex}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:10px;border:1px solid transparent;font-size:15px;font-weight:500;transition:all .15s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--accent);color:var(--bg)}
+.btn-primary:hover{filter:brightness(0.92)}
+.btn-secondary{background:transparent;color:var(--fg);border-color:var(--border)}
+.btn-secondary:hover{border-color:var(--fg)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;backdrop-filter:blur(12px);border-top:1px solid color-mix(in oklch,var(--accent) 15%,transparent)}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin:0 0 16px}
+.h1{font-family:var(--font-display);font-size:clamp(44px,6vw,76px);line-height:1.04;margin:0}
+.h2{font-family:var(--font-display);font-size:clamp(32px,4vw,48px);line-height:1.1;margin:0}
+.lead{font-size:18px;color:var(--muted);max-width:56ch;margin:0}
+.muted{color:var(--muted);font-size:14px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:32px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.grid-7{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+@media(max-width:920px){.grid-2,.grid-3,.grid-7{grid-template-columns:1fr}}
+.hero{padding-block:clamp(80px,12vw,160px);text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,color-mix(in oklch,var(--accent) 6%,transparent) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 100%,color-mix(in oklch,var(--accent2) 4%,transparent) 0%,transparent 50%);pointer-events:none}
+.hero .container{position:relative;z-index:1}
+.hero h1{margin-bottom:20px}
+.hero .lead{margin:0 auto 32px}
+.hero-cta{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:color-mix(in oklch,var(--accent) 14%,transparent);color:var(--accent);border-radius:999px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase}
+.pill-emerald{background:color-mix(in oklch,var(--accent2) 14%,transparent);color:var(--accent2)}
+.report-card{text-align:center}
+.report-card .server-tag{font-family:var(--font-mono);font-size:12px;color:var(--accent);margin-bottom:12px}
+.report-card .champ-name{font-family:var(--font-display);font-size:32px;margin-bottom:4px}
+.report-card .champ-acc{font-family:var(--font-mono);font-size:13px;color:var(--muted)}
+.report-card .stats{display:flex;justify-content:center;gap:24px;margin-top:20px}
+.report-card .stat-num{font-family:var(--font-display);font-size:28px;color:var(--accent)}
+.report-card .stat-label{font-size:12px;color:var(--muted)}
+.hall-day{text-align:center;padding:20px 12px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.hall-day .day-label{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-bottom:8px}
+.hall-day .server-tag{font-size:11px;color:var(--accent);margin-bottom:8px}
+.hall-day .champ-name{font-family:var(--font-display);font-size:18px;margin-bottom:4px;word-break:break-all}
+.hall-day .champ-acc{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.hall-day.empty{opacity:0.4}
+.match-card{display:flex;align-items:center;justify-content:center;gap:16px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.match-card .player{text-align:center;flex:1}
+.match-card .player-name{font-family:var(--font-display);font-size:20px}
+.match-card .player-acc{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.match-card .vs{font-family:var(--font-mono);font-size:14px;color:var(--muted)}
+.match-card .result{font-family:var(--font-mono);font-size:13px;color:var(--accent);min-width:48px;text-align:center}
+.match-card.pending .result{color:var(--muted)}
+.reward-block{text-align:center;padding:40px 28px}
+.reward-block .reward-icon{font-size:48px;margin-bottom:16px}
+.reward-block .reward-num{font-family:var(--font-display);font-size:clamp(40px,5vw,64px);color:var(--accent);line-height:1}
+.reward-block .reward-label{font-size:15px;color:var(--muted);margin-top:12px}
+.reward-block .reward-desc{font-size:13px;color:var(--muted);margin-top:16px;max-width:32ch;margin-inline:auto}
+.rule-list{list-style:none;padding:0;margin:0}
+.rule-list li{padding:10px 0;border-bottom:1px solid var(--border);color:var(--muted);font-size:15px;display:flex;gap:8px}
+.rule-list li:last-child{border-bottom:0}
+.rule-list li::before{content:'◆';color:var(--accent);font-size:10px;margin-top:6px}
+.rule-list li strong{color:var(--fg);font-weight:600}
+.schedule-row{display:flex;align-items:baseline;gap:24px;padding:18px 0;border-top:1px solid var(--border)}
+.schedule-row:first-child{border-top:0}
+.schedule-time{font-family:var(--font-mono);font-size:14px;color:var(--accent);min-width:80px}
+.schedule-title{font-size:17px;font-weight:600}
+.schedule-desc{color:var(--muted);font-size:14px;margin-top:2px}
+.pagefoot{padding-block:48px;color:var(--muted);font-size:13px;border-top:1px solid var(--border)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:100}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:360px;max-width:90vw}
+.modal h3{margin:0 0 16px;font-size:18px}
+.modal-body{display:flex;flex-direction:column;gap:12px}
+.modal-body input{width:100%;padding:10px 14px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;color:var(--fg);font-size:14px;outline:none}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.modal-footer button{padding:8px 16px;border-radius:8px;border:none;font-size:13px;cursor:pointer}
+.modal-footer .secondary{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.modal-footer button:not(.secondary){background:var(--accent);color:var(--bg);font-weight:600}
+.candidate-list{display:flex;flex-wrap:wrap;gap:10px}
+.candidate-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:999px;font-size:14px}
+.candidate-tag .week-num{font-family:var(--font-mono);font-size:11px;color:var(--accent)}
+.ds-table{width:100%;border-collapse:collapse;font-size:14px}
+.ds-table th,.ds-table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border)}
+.ds-table th{color:var(--muted);font-weight:500;font-family:var(--font-mono);font-size:12px;letter-spacing:0.04em;text-transform:uppercase}
+#gm-trigger{cursor:pointer}
+</style>
 </head>
 <body>
-  <header class="topnav" data-od-id="topnav">
-    <div class="container topnav-inner">
-      <span class="logo">恐龙岛</span>
-      <nav>
-        <a href="#rules">规则</a>
-        <a href="#schedule">赛程</a>
-        <a href="#rewards">奖励</a>
-      </nav>
-      <a class="btn btn-primary" href="scoreboard.html">计分板</a>
-    </div>
-  </header>
+<header class="topnav"><div class="container topnav-inner"><span class="logo">恐龙岛</span><nav><a href="#daily-report">战报</a><a href="#hall">入围</a><a href="#rules">法则</a><a href="#rewards">嘉奖</a></nav><div><a class="gm-link" id="gmLink" href="scoreboard.html">GM 计分板</a><span id="gm-trigger" onclick="openGmModal()" style="font-size:11px;color:var(--muted);margin-left:12px;user-select:none;">GM</span></div></div></header>
 
-  <main id="content">
-    <!-- 1. Hero -->
-    <section class="section hero hero-glow" data-od-id="hero">
-      <div class="container hero-center">
-        <p class="eyebrow">Sự Kiện PVP Tuần Hoàn</p>
-        <h1>巅峰对决</h1>
-        <p class="lead">周期型 1v1 超级暴龙对战赛。周一至周六日赛产生冠军，周日单循环决出周冠军。</p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="scoreboard.html">进入计分板</a>
-          <a class="btn btn-secondary" href="#rules">查看规则</a>
-        </div>
-      </div>
-    </section>
+<main>
+<section class="hero"><div class="container"><p class="eyebrow">ĐẤU TRƯỜNG ĐỈNH CAO</p><h1 class="h1">巅峰对决</h1><p class="lead">七日鏖战，周日加冕。唯有站上巅峰，才配被铭记。</p><div class="hero-cta"><a class="btn btn-primary" href="#daily-report">查看今日战报</a><a class="btn btn-secondary" href="#rules">竞技法则</a></div></div></section>
 
-    <!-- 2. Features -->
-    <section class="section" data-od-id="features">
-      <div class="container stack" style="gap: 56px;">
-        <div style="max-width: 36ch;">
-          <p class="eyebrow">Cấu Trúc Giải Đấu</p>
-          <h2>三周一个周期，日赛叠加周赛。</h2>
-        </div>
-        <div class="grid-3">
-          <div class="feature card-flat">
-            <div class="feature-mark">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M3 12h18"/></svg>
-            </div>
-            <h3>周一至周六 · 日赛</h3>
-            <p>每日限时 2 小时，K 服与 Q 服各自独立进行。胜场最高者封为日冠军，获得超暴奖励。</p>
-          </div>
-          <div class="feature card-flat">
-            <div class="feature-mark">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
-            </div>
-            <h3>周日 · 周冠军赛</h3>
-            <p>本周所有日冠军进入单循环赛，每两人交手一场。积分最高者加冕周冠军，进入跨国候选名单。</p>
-          </div>
-          <div class="feature card-flat">
-            <div class="feature-mark">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h10M4 17h16"/></svg>
-            </div>
-            <h3>跨国对抗候选</h3>
-            <p>所有完成周赛的选手均进入跨国对抗候选人名单，备战跨服顶级赛事，争夺更高荣誉。</p>
-          </div>
-        </div>
-      </div>
-    </section>
+<section class="section" id="daily-report"><div class="container"><p class="eyebrow">Chiến Báo Hôm Nay</p><h2 class="h2" style="margin-bottom:40px">战场速递</h2><div class="grid-2" id="report-grid"><div class="card report-card"><div class="server-tag">K 服战场</div><div class="champ-name" id="k-champ">—</div><div class="champ-acc" id="k-acc"></div><div class="stats"><div class="stat-item"><div class="stat-num" id="k-matches">—</div><div class="stat-label">场次</div></div><div class="stat-item"><div class="stat-num" id="k-rate">—</div><div class="stat-label">胜率</div></div></div></div><div class="card report-card"><div class="server-tag">Q 服战场</div><div class="champ-name" id="q-champ">—</div><div class="champ-acc" id="q-acc"></div><div class="stats"><div class="stat-item"><div class="stat-num" id="q-matches">—</div><div class="stat-label">场次</div></div><div class="stat-item"><div class="stat-num" id="q-rate">—</div><div class="stat-label">胜率</div></div></div></div></div></div></section>
 
-    <!-- 3. Rules -->
-    <section class="section" id="rules" data-od-id="rules">
-      <div class="container">
-        <div style="max-width: 36ch; margin-bottom: 48px;">
-          <p class="eyebrow">Quy Tắc Đối Kháng</p>
-          <h2>公平竞技，严格执行淘汰与连胜机制。</h2>
-        </div>
-        <div class="grid-2">
-          <div class="card">
-            <p class="pill pill-emerald" style="margin-bottom: 16px;">日赛规则</p>
-            <ul style="padding-left: 18px; color: var(--muted); font-size: 15px; line-height: 2;">
-              <li>1v1 单场无奖励，仅记录胜/败场</li>
-              <li>单日累计败 <strong style="color: var(--fg);">3 场</strong> → 当日禁赛</li>
-              <li>连胜 <strong style="color: var(--fg);">3 场</strong> → 强制下场回队尾</li>
-              <li>连庄期间 <strong style="color: var(--fg);">不得换龙</strong></li>
-              <li>本周已获日冠军者 <strong style="color: var(--fg);">禁止再次参赛</strong></li>
-            </ul>
-          </div>
-          <div class="card">
-            <p class="pill" style="margin-bottom: 16px;">周冠军赛规则</p>
-            <ul style="padding-left: 18px; color: var(--muted); font-size: 15px; line-height: 2;">
-              <li>仅限本周日冠军参加（2~6 人）</li>
-              <li>单循环，每两人交手 <strong style="color: var(--fg);">1 场</strong></li>
-              <li>胜者 <strong style="color: var(--fg);">+1 分</strong>，败者 0 分，无平局</li>
-              <li>同分：相互胜负 → 累计胜场 → 并列</li>
-              <li>缺席者轮空不替补，对手自动获胜</li>
-            </ul>
-          </div>
-        </div>
-        <div class="card" style="margin-top: 20px;">
-          <p style="color: var(--muted); font-size: 15px;">2 小时结束后统计总胜场，最高者为日冠军。同分时依次比较：胜率 → 总场次少者 → 并列。</p>
-        </div>
-      </div>
-    </section>
+<section class="section" id="hall"><div class="container"><p class="eyebrow">Điện Danh Dự</p><h2 class="h2" style="margin-bottom:40px">本周荣誉殿堂</h2><div class="grid-7" id="hall-grid"><div class="hall-day"><div class="day-label">周一</div><div class="server-tag">K 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周一</div><div class="server-tag">Q 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周二</div><div class="server-tag">K 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周二</div><div class="server-tag">Q 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周三</div><div class="server-tag">K 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周三</div><div class="server-tag">Q 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周四</div><div class="server-tag">K 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周四</div><div class="server-tag">Q 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周五</div><div class="server-tag">K 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周五</div><div class="server-tag">Q 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周六</div><div class="server-tag">K 服</div><div class="champ-name">—</div></div><div class="hall-day"><div class="day-label">周六</div><div class="server-tag">Q 服</div><div class="champ-name">—</div></div><div class="hall-day" style="background:color-mix(in oklch,var(--accent) 8%,var(--surface));border-color:color-mix(in oklch,var(--accent) 25%,var(--border))"><div class="day-label">周日</div><div class="server-tag">巅峰对决</div><div class="champ-name" style="color:var(--accent)">待加冕</div></div></div></div></section>
 
-    <!-- 4. Schedule & Rewards -->
-    <section class="section" id="schedule" data-od-id="schedule-rewards">
-      <div class="container">
-        <div class="grid-2">
-          <div>
-            <p class="eyebrow">Lịch Trình</p>
-            <h2 style="margin-bottom: 32px;">赛程安排</h2>
-            <div class="stack" style="gap: 0;">
-              <div class="log-row" style="border-top: 0; padding-top: 0;">
-                <span class="meta schedule-time">19:00</span>
-                <div>
-                  <h3>K 服日赛</h3>
-                  <p style="margin: 4px 0 0; color: var(--muted); font-size: 14px;">2 小时限时对战，GM 现场记录赛果</p>
-                </div>
-                <span class="pull"><span class="pill pill-emerald">Nhật Sai</span></span>
-              </div>
-              <div class="log-row">
-                <span class="meta schedule-time">21:30</span>
-                <div>
-                  <h3>Q 服日赛</h3>
-                  <p style="margin: 4px 0 0; color: var(--muted); font-size: 14px;">同规则独立进行，间隔 30 分钟</p>
-                </div>
-                <span class="pull"><span class="pill pill-emerald">Nhật Sai</span></span>
-              </div>
-              <div class="log-row">
-                <span class="meta schedule-time">20:00</span>
-                <div>
-                  <h3>周冠军赛</h3>
-                  <p style="margin: 4px 0 0; color: var(--muted); font-size: 14px;">单循环，胜者 +1 分</p>
-                </div>
-                <span class="pull"><span class="pill">Vô Địch Tuần</span></span>
-              </div>
-            </div>
-          </div>
-          <div id="rewards">
-            <p class="eyebrow">Phần Thưởng</p>
-            <h2 style="margin-bottom: 32px;">奖励规则</h2>
-            <div class="card" style="text-align: center; margin-bottom: 20px;">
-              <div class="reward-highlight">5</div>
-              <p style="color: var(--muted); font-size: 14px; margin-top: 8px;">超暴 / 日冠军 · 次日邮件发放</p>
-              <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">并列日冠军每人 3 只。并列时总支出 = 人数 × 3，超出 5 只部分由运营补足。每周最高 30 只。</p>
-            </div>
-            <div class="card" style="text-align: center; border-top-color: color-mix(in oklch, var(--accent2) 15%, transparent);">
-              <div class="reward-highlight" style="color: var(--accent2);">∞</div>
-              <p style="color: var(--muted); font-size: 14px; margin-top: 8px;">跨国对抗候选资格</p>
-              <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">所有完成周赛的选手均进入候选人名单</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+<section class="section" id="bracket"><div class="container"><p class="eyebrow">Trận Chiến Đỉnh Cao</p><h2 class="h2" style="margin-bottom:40px">巅峰对决 · 单循环对阵</h2><div id="weekly-matches" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"><div class="match-card pending"><div class="player"><div class="player-name">?</div></div><div class="vs">VS</div><div class="player"><div class="player-name">?</div></div><div class="result">待进行</div></div></div><div id="weekly-standings" style="margin-top:40px"><h3 style="font-size:18px;margin-bottom:20px">积分榜</h3><table class="ds-table"><thead><tr><th>排名</th><th>选手</th><th style="text-align:right">胜场</th><th style="text-align:right">积分</th></tr></thead><tbody id="standings-body"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted)">周日比赛结束后更新</td></tr></tbody></table></div></div></section>
 
-    <!-- 5. GM -->
-    <section class="section" data-od-id="gm">
-      <div class="container">
-        <div style="text-align: center; max-width: 48ch; margin: 0 auto 48px;">
-          <p class="eyebrow">Tổ Chức GM</p>
-          <h2>每场比赛固定 2 名 GM</h2>
-        </div>
-        <div class="grid-2">
-          <div class="card" style="text-align: center;">
-            <p style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px;">主裁判</p>
-            <p style="color: var(--muted); font-size: 15px; line-height: 1.9;">记录赛果 · 统计胜败场<br>判定冠军排名 · 开启并保存录屏</p>
-          </div>
-          <div class="card" style="text-align: center; border-top-color: color-mix(in oklch, var(--accent2) 15%, transparent);">
-            <p style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent2); margin-bottom: 16px;">场控</p>
-            <p style="color: var(--muted); font-size: 15px; line-height: 1.9;">核验恐龙（仅限超暴）<br>维持排队秩序 · 监督 3 连胜强制下场</p>
-          </div>
-        </div>
-      </div>
-    </section>
+<section class="section" id="candidates"><div class="container"><p class="eyebrow">Đối Kháng Xuyên Quốc</p><h2 class="h2" style="margin-bottom:40px">跨国争锋候选名单</h2><p class="muted" style="margin-bottom:24px">每一周的周冕之王，都将进入跨国争锋的候选池。</p><div class="candidate-list" id="candidate-list"><span style="color:var(--muted)">暂无数据</span></div></div></section>
 
-    <!-- 6. CTA -->
-    <section class="section" data-od-id="cta-strip" style="text-align: center;">
-      <div class="container" style="max-width: 600px;">
-        <h2>准备好进入竞技场了吗？</h2>
-        <p class="lead" style="margin: 16px auto 32px;">GM 使用计分板实时记录赛果，数据自动保存，支持 CSV 导入导出。</p>
-        <a class="btn btn-primary" href="scoreboard.html">进入计分板</a>
-      </div>
-    </section>
-  </main>
+<section class="section" id="rewards"><div class="container"><p class="eyebrow">Vinh Dự</p><h2 class="h2" style="margin-bottom:40px">荣耀嘉奖</h2><div class="grid-2"><div class="card reward-block" style="border-top-color:color-mix(in oklch,var(--accent) 15%,transparent)"><div class="reward-icon">👑</div><div class="reward-num">5</div><div class="reward-label">超暴龙 · 日胜王者</div><div class="reward-desc">日冠军次日邮件发放。并列时每人 3 只，超出部分由运营补足。</div></div><div class="card reward-block" style="border-top-color:color-mix(in oklch,var(--accent2) 15%,transparent)"><div class="reward-icon">🌍</div><div class="reward-num" style="color:var(--accent2)">∞</div><div class="reward-label">跨国争锋候选资格 · 周冕之王</div><div class="reward-desc">全服广播通告，进入跨国对抗候选池，备战跨服顶级赛事。</div></div></div></div></section>
 
-  <footer class="pagefoot" data-od-id="footer">
-    <div class="container row-between">
-      <span>恐龙岛运营团队 · PVP 巅峰对决</span>
-      <span class="meta">v1.2 · 数据公示页面</span>
-    </div>
-  </footer>
+<section class="section" id="rules"><div class="container"><p class="eyebrow">Pháp Tắc</p><h2 class="h2" style="margin-bottom:40px">竞技法则</h2><div class="grid-2"><div class="card"><p class="pill pill-emerald" style="margin-bottom:20px">日赛法则</p><ul class="rule-list"><li>1v1 单场无奖励，仅记录胜/败场</li><li>单日累计败 <strong>3 场</strong> → 当日退场</li><li>连胜 <strong>3 场</strong> → 强制封刀回队尾</li><li>连庄期间 <strong>不得换龙</strong></li><li>本周已获日胜者 <strong>禁赛</strong></li></ul></div><div class="card"><p class="pill" style="margin-bottom:20px">巅峰法则</p><ul class="rule-list"><li>仅限本周日胜者参加（2~6 人）</li><li>单循环，每两人交手 <strong>1 场</strong></li><li>胜者 <strong>+1 分</strong>，败者 0 分，无平局</li><li>同分：相互胜负 → 累计胜场 → 并列</li><li>缺席者轮空不替补，对手自动获胜</li></ul></div></div></div></section>
+
+<section class="section" id="schedule"><div class="container"><p class="eyebrow">Lịch Trình</p><h2 class="h2" style="margin-bottom:32px">赛程时刻</h2><div><div class="schedule-row"><span class="schedule-time">周一至周六</span><div><div class="schedule-title">日赛战场</div><div class="schedule-desc">19:00 K 服 / 21:30 Q 服 · 限时 2 小时</div></div></div><div class="schedule-row"><span class="schedule-time">周日</span><div><div class="schedule-title">巅峰对决</div><div class="schedule-desc">20:00 · 单循环加冕战</div></div></div></div></div></section>
+
+<section class="section" id="gm"><div class="container"><div style="text-align:center;max-width:48ch;margin:0 auto 48px"><p class="eyebrow">Tổ Chức</p><h2 class="h2">赛事组织</h2></div><div class="grid-2"><div class="card" style="text-align:center"><p style="font-family:var(--font-mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:16px">主裁判</p><p class="muted" style="line-height:1.9">记录赛果 · 统计胜败场<br>判定冠军排名 · 开启并保存录屏</p></div><div class="card" style="text-align:center;border-top-color:color-mix(in oklch,var(--accent2) 15%,transparent)"><p style="font-family:var(--font-mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent2);margin-bottom:16px">场控</p><p class="muted" style="line-height:1.9">核验恐龙（仅限超暴）<br>维持排队秩序 · 监督连胜封刀</p></div></div></div></section>
+</main>
+
+<footer class="pagefoot"><div class="container" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px"><span>恐龙岛运营团队 · 巅峰对决</span><span style="color:var(--muted);font-size:12px">数据公示页面 · v2.0</span></div></footer>
+
+<div class="modal-overlay" id="gmModal"><div class="modal"><h3>GM 通道</h3><div class="modal-body"><input type="password" id="gmPassword" placeholder="输入密码" onkeydown="if(event.key==='Enter')checkGmPassword()"></div><div class="modal-footer"><button class="secondary" onclick="closeGmModal()">取消</button><button onclick="checkGmPassword()">确认</button></div></div></div>
+
+<script>
+// Minimal fallback data
+const DEFAULT_PVP_DATA=[
+  {date:"2026-05-04",server:"K 服",championAccount:"13220547",championName:"atula",matches:[{winner:"atula",loser:"khoai"},{winner:"atula",loser:"longthandien"},{winner:"atula",loser:"khoai"},{winner:"satvuong",loser:"the7storm"},{winner:"satvuong",loser:"huyetnguyet"},{winner:"atula",loser:"satvuong"}]},
+  {date:"2026-05-04",server:"Q 服",championAccount:"13219644",championName:"nini",matches:[{winner:"tieubaolong",loser:"bachlong"},{winner:"cobechimto",loser:"tieubaolong"},{winner:"cobechimto",loser:"bachlong"},{winner:"cobechimto",loser:"specter"},{winner:"nini",loser:"codoc"},{winner:"nini",loser:"gialong"},{winner:"nini",loser:"anh2"},{winner:"tieubaolong",loser:"gialong"},{winner:"tieubaolong",loser:"nguoicodon"},{winner:"tieubaolong",loser:"bebe5"},{winner:"bebe5",loser:"hanhan"},{winner:"bebe5",loser:"vietden"},{winner:"bebe5",loser:"hanhan"},{winner:"specter",loser:"midorii"},{winner:"conchobanhbao",loser:"specter"},{winner:"asula",loser:"conchobanhbao"},{winner:"asula",loser:"nguoicodon"},{winner:"osiris",loser:"asula"},{winner:"specter",loser:"osiris"},{winner:"specter",loser:"gialong"},{winner:"specter",loser:"vietden"},{winner:"cobechimto",loser:"tieubaolong"},{winner:"nini",loser:"bebe5"},{winner:"specter",loser:"cobechimto"},{winner:"nini",loser:"specter"}]},
+  {date:"2026-05-05",server:"Q 服",championAccount:"13220110",championName:"chip",matches:[]}
+];
+
+function calcStats(matches){const s={};matches.forEach(m=>{if(!s[m.winner])s[m.winner]={wins:0,losses:0};if(!s[m.loser])s[m.loser]={wins:0,losses:0};s[m.winner].wins++;s[m.loser].losses++});const arr=Object.keys(s).map(n=>{const t=s[n];return{name:n,wins:t.wins,losses:t.losses,total:t.wins+t.losses,rate:t.wins+t.losses?(t.wins/(t.wins+t.losses)*100).toFixed(1)+'%':'0%'}});arr.sort((a,b)=>b.wins-a.wins||parseFloat(b.rate)-parseFloat(a.rate)||a.total-b.total);return arr}
+
+function getTopChampion(matches){const stats=calcStats(matches);return stats[0]||null}
+
+async function loadData(){try{const res=await fetch('./pvp_score_all.csv');const text=await res.text();return parseCSV(text)}catch(e){console.log('Fetch CSV failed, using fallback');return DEFAULT_PVP_DATA}}
+
+function parseCSV(text){const lines=text.trim().split(/?
+/).map(l=>l.trim()).filter(l=>l);const blocks=[];let cur=null;for(const line of lines){const cols=line.split(',');if(/^\d{4}-\d{2}-\d{2}$/.test(cols[0]?.trim())){if(cur)blocks.push(cur);cur={date:cols[0].trim(),server:cols[1]?.trim()||'',championAccount:cols[2]?.trim()||'',championName:'',matches:[]}}else if(cur&&cols.length>=5&&!isNaN(parseInt(cols[0]))){cur.matches.push({winner:cols[2]?.trim()||'',loser:cols[4]?.trim()||''})}}if(cur)blocks.push(cur);blocks.forEach(b=>{const top=getTopChampion(b.matches);if(top)b.championName=top.name});return blocks}
+
+function renderReport(blocks){const k=blocks.filter(b=>b.server.includes('K')).pop();const q=blocks.filter(b=>b.server.includes('Q')).pop();if(k){const top=getTopChampion(k.matches);document.getElementById('k-champ').textContent=top?top.name:'—';document.getElementById('k-acc').textContent=k.championAccount||'';document.getElementById('k-matches').textContent=k.matches.length;document.getElementById('k-rate').textContent=top?top.rate:'—'}if(q){const top=getTopChampion(q.matches);document.getElementById('q-champ').textContent=top?top.name:'—';document.getElementById('q-acc').textContent=q.championAccount||'';document.getElementById('q-matches').textContent=q.matches.length;document.getElementById('q-rate').textContent=top?top.rate:'—'}}
+
+function renderHall(blocks){const days=document.querySelectorAll('#hall-grid .hall-day');const dayMap={};blocks.forEach(b=>{const d=new Date(b.date);const dayNum=d.getDay();const idx=dayNum===0?6:dayNum-1;const key=idx*2+(b.server.includes('K')?0:1);dayMap[key]=b});days.forEach((el,i)=>{if(i>=12)return;const b=dayMap[i];if(b){const nameEl=el.querySelector('.champ-name');nameEl.textContent=b.championName||'—';if(b.championAccount){const acc=document.createElement('div');acc.className='champ-acc';acc.textContent=b.championAccount;nameEl.after(acc)}}else{el.classList.add('empty')}})}
+
+function renderWeekly(blocks){const champs=[];blocks.forEach(b=>{if(b.championName)champs.push({name:b.championName,account:b.championAccount,server:b.server})});if(champs.length<2)return;const container=document.getElementById('weekly-matches');container.innerHTML='';const pairs=[];for(let i=0;i<champs.length;i++)for(let j=i+1;j<champs.length;j++)pairs.push([champs[i],champs[j]]);pairs.forEach(([a,b])=>{container.innerHTML+=`<div class="match-card pending"><div class="player"><div class="player-name">${a.name}</div><div class="player-acc">${a.account||''}</div></div><div class="vs">VS</div><div class="player"><div class="player-name">${b.name}</div><div class="player-acc">${b.account||''}</div></div><div class="result">待进行</div></div>`})}
+
+function renderCandidates(blocks){const list=document.getElementById('candidate-list');const champs=blocks.filter(b=>b.championName).map(b=>b.championName);if(champs.length===0){list.innerHTML='<span style="color:var(--muted)">暂无数据</span>';return}list.innerHTML=champs.map((n,i)=>`<span class="candidate-tag"><span class="week-num">第${i+1}周</span>${n}</span>`).join('')}
+
+async function init(){const blocks=await loadData();renderReport(blocks);renderHall(blocks);renderWeekly(blocks);renderCandidates(blocks)}
+init();
+
+// GM login
+const GM_PASSWORD='pvp2024';
+function openGmModal(){document.getElementById('gmModal').classList.add('open');document.getElementById('gmPassword').focus()}
+function closeGmModal(){document.getElementById('gmModal').classList.remove('open')}
+function checkGmPassword(){const val=document.getElementById('gmPassword').value;if(val===GM_PASSWORD){localStorage.setItem('pvp_gm_auth','1');document.getElementById('gmLink').classList.add('show');closeGmModal()}else{alert('密码错误')}}
+if(localStorage.getItem('pvp_gm_auth')==='1')document.getElementById('gmLink').classList.add('show');
+</script>
 </body>
 </html>
