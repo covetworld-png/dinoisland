@@ -119,3 +119,22 @@
 15,heartfilia,0,2,2,0.0%
 16,anh2,0,2,2,0.0%
 17,conchobanhbao,0,3,3,0.0%
+
+日期,服务器,冠军账号
+2026-05-04,K 服,13220547
+
+序号,场次,胜者,胜方账号,败者,负方账号,备注
+1,场次 1,atula,,khoai,,
+2,场次 2,atula,,longthandien,,
+3,场次 3,atula,,khoai,,
+4,场次 4,satvuong,,the7storm,,
+5,场次 5,satvuong,,huyetnguyet,,
+6,场次 6,atula,,satvuong,,
+
+排名,昵称,胜场,败场,总场次,胜率
+1,atula,4,0,4,100.0%
+2,satvuong,2,1,3,66.7%
+3,longthandien,0,1,1,0.0%
+4,the7storm,0,1,1,0.0%
+5,huyetnguyet,0,1,1,0.0%
+6,khoai,0,2,2,0.0%
