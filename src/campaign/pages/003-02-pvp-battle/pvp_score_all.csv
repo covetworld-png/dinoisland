@@ -153,3 +153,60 @@
 34,场次 34,CoBeChimTO,13219629,chinsuuuu,,
 35,场次 35,kiding,13223120,CoBeChimTO,13219629,
 36,场次 36,CoBeChimTO,13219629,kiding,13223120,
+
+日期,服务器,冠军账号
+2026-05-08,Q 服,13220547
+
+序号,场次,胜者,胜方账号,败者,负方账号,备注
+1,场次 1,asula,13220547,sealcute,13219750,
+2,场次 2,asula,13220547,tieubaolong,13222125,
+3,场次 3,asula,13220547,tieubaolong,13222125,
+4,场次 4,cyon,13219713,heartfilia,13226870,
+5,场次 5,cyon,13219713,nguoicodon,13220294,
+6,场次 6,cyon,13219713,maymay,13220082,
+7,场次 7,xu2828,13225962,heartfilia,13226870,
+8,场次 8,xu2828,13225962,MIDORII,13220943,
+9,场次 9,xu2828,13225962,vincenzo,13219911,
+10,场次 10,nguoicodon,13220294,chinsuuuu,13229206,
+11,场次 11,nguoicodon,13220294,heartfilia,13226870,
+12,场次 12,sktt1,13219668,nguoicodon,13220294,
+13,场次 13,sktt1,13219668,tinkerbell,13229203,
+14,场次 14,sktt1,13219668,nguoicodon,13220294,
+15,场次 15,tinkerbell,13229203,satnguyet,13219858,
+16,场次 16,satnguyet,13219858,tinkerbell,13229203,
+17,场次 17,tannloc,13224360,satnguyet,13219858,
+18,场次 18,tannloc,13224360,tinkerbell,13229203,
+19,场次 19,tannloc,13224360,t1keria,13219771,
+20,场次 20,asula,13220547,cyon,13219713,
+21,场次 21,asula,13220547,xu2828,13225962,
+22,场次 22,asula,13220547,sktt1,13219668,
+23,场次 23,tannloc,13224360,cyon,13219713,
+24,场次 24,tannloc,13224360,sktt1,13219668,
+25,场次 25,asula,13220547,tannloc,13224360,
+26,场次 26,asula,13220547,yenlyxinhiu,13219791,
+27,场次 27,asula,13220547,hacthienlongl,13220491,
+28,场次 28,asula,13220547,hacthienlongl,13220491,
+29,场次 29,asula,13220547,chanbomayde,13219961,
+30,场次 30,asula,13220547,chanbomayde,13219961,
+31,场次 31,asula,13220547,chanbomayde,13219961,
+
+排名,昵称,胜场,败场,总场次,胜率
+1,asula,13,0,13,100.0%
+2,tannloc,5,1,6,83.3%
+3,xu2828,3,1,4,75.0%
+4,cyon,3,2,5,60.0%
+5,sktt1,3,2,5,60.0%
+6,nguoicodon,2,3,5,40.0%
+7,satnguyet,1,2,3,33.3%
+8,tinkerbell,1,3,4,25.0%
+9,sealcute,0,1,1,0.0%
+10,maymay,0,1,1,0.0%
+11,MIDORII,0,1,1,0.0%
+12,vincenzo,0,1,1,0.0%
+13,chinsuuuu,0,1,1,0.0%
+14,t1keria,0,1,1,0.0%
+15,yenlyxinhiu,0,1,1,0.0%
+16,tieubaolong,0,2,2,0.0%
+17,hacthienlongl,0,2,2,0.0%
+18,heartfilia,0,3,3,0.0%
+19,chanbomayde,0,3,3,0.0%
