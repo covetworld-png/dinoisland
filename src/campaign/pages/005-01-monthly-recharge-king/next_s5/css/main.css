@@ -32,12 +32,18 @@ body {
     display: inline;
 }
 
-body[data-lang="cn"] .lang-vi {
-    display: none;
+body[data-lang="cn"] .lang-vi,
+body[data-lang="cn"] .lang-vi.state-before-only,
+body[data-lang="cn"] .lang-vi.state-active-only,
+body[data-lang="cn"] .lang-vi.state-result-only {
+    display: none !important;
 }
 
-body[data-lang="vi"] .lang-cn {
-    display: none;
+body[data-lang="vi"] .lang-cn,
+body[data-lang="vi"] .lang-cn.state-before-only,
+body[data-lang="vi"] .lang-cn.state-active-only,
+body[data-lang="vi"] .lang-cn.state-result-only {
+    display: none !important;
 }
 
 /* Page Background - Deep Sea Tyrant */
@@ -92,13 +98,13 @@ body.state-before #rank,
 body.state-before #result-view,
 body.state-active #result-view,
 body.state-result #rank,
-body.state-result .countdown-section {
+body.state-result .countdown-section,
+body.state-result .upgrade-banner,
+body.state-result #timeline {
     display: none;
 }
 
-body.state-result #hero-king-img {
-    display: none;
-}
+/* Hero image visible in all states */
 
 body.state-before .hero { order: 1; }
 body.state-before #rewards { order: 2; }
@@ -1068,6 +1074,65 @@ body:not(.state-result) .gm-only-result {
 .winner-date {
     color: var(--text-muted);
     font-size: 1rem;
+}
+
+/* Extra Award - subdued style */
+.extra-award-divider {
+    text-align: center;
+    margin: 24px 0 12px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.extra-winner-bar {
+    background: rgba(8, 18, 28, 0.6);
+    border: 1px solid rgba(90, 158, 200, 0.15);
+    border-radius: 10px;
+    padding: 16px 20px;
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.extra-winner-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.extra-winner-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.extra-winner-name {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.extra-winner-account {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.extra-winner-amount {
+    color: var(--gold);
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+}
+
+.extra-winner-date {
+    color: var(--text-muted);
+    font-size: 0.8rem;
 }
 
 /* Hall Carousel */

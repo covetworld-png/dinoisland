@@ -106,7 +106,7 @@ function toggleWinnerMode() {
             btn.innerHTML = '<span class="lang-vi">👑 Đang là người thắng</span><span class="lang-cn">👑 当前为获胜者</span>';
             btn.classList.add('active');
         } else {
-            btn.innerHTML = '<span class="lang-vi">👑 Ngưới thắng</span><span class="lang-cn">👑 获胜者视角</span>';
+            btn.innerHTML = '<span class="lang-vi">👑 Người thắng</span><span class="lang-cn">👑 获胜者视角</span>';
             btn.classList.remove('active');
         }
     }
@@ -205,7 +205,7 @@ function renderHistoryList() {
         historyList.innerHTML = autoScriptHistory.map(item => {
             const startStr = item.startTime.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
             const label = lang === 'vi' 
-                ? `Kích thước khủng long +50% • Tự động hóa`
+                ? `Kích thườc khủng long +50% • Tự động hóa`
                 : `恐龙体型 +50% • 自动化脚本`;
             
             let statusHtml = '';
