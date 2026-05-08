@@ -1,664 +1,717 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ĐẢO KHỦNG LONG · 恐龙岛充值中心</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dino Island — 页面导航</title>
   <style>
     :root {
-      --bg:          #080a0f;
-      --surface:     #11131a;
-      --fg:          #f0eee9;
-      --muted:       #6e6b75;
-      --border:      #1e2030;
-      --accent:      #d4a843;
-      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
-      --fg-soft:     color-mix(in oklch, var(--fg) 6%, transparent);
-      --tier-green:  #3ecf6e;
-      --tier-blue:   #4a9eff;
-      --tier-gold:   #d4a843;
-      --tier-purple: #b46ef7;
-      --tier-cyan:   #00d4aa;
-      --tier-orange: #ff8c42;
-      --warn:        #e85757;
-      --warn-soft:   #ff7a7a;
-      --info:        #4a9eff;
-      --info-soft:   #7ab8ff;
-      --font-display: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
-      --font-body:    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      --font-mono:    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
-      --fs-h2: clamp(28px, 3.5vw, 44px);
-      --fs-h3: 22px;
-      --fs-body: 16px;
-      --fs-meta: 13px;
-      --gap-xs: 8px;
-      --gap-sm: 12px;
-      --gap-md: 20px;
-      --gap-lg: 32px;
-      --gap-xl: 56px;
-      --container: 1200px;
-      --gutter: 32px;
-      --radius: 12px;
-      --radius-lg: 20px;
+      --bg: #0f1115;
+      --card: #1a1d23;
+      --border: #2a2e36;
+      --text: #e0e2e8;
+      --muted: #8b92a8;
+      --accent: #4f8cff;
+      --accent-hover: #6fa0ff;
+      --private: #ff9f43;
+      --private-bg: rgba(255, 159, 67, 0.08);
     }
-    *, *::before, *::after { box-sizing: border-box; }
-    html { -webkit-text-size-adjust: 100%; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: var(--bg);
-      color: var(--fg);
-      font-family: var(--font-body);
-      font-size: var(--fs-body);
-      line-height: 1.55;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
+      color: var(--text);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    h1 .logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 20px;
     }
 
-    img, svg { display: block; max-width: 100%; }
-    a { color: inherit; text-decoration: none; }
-    button { font: inherit; cursor: pointer; }
-
-    .container { max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
-    .section { padding-block: clamp(48px, 8vw, var(--gap-xl)); }
-    .section + .section { border-top: 1px solid var(--border); }
-    .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin: 0 0 var(--gap-md); }
-    .h2, h2 { font-family: var(--font-display); font-size: var(--fs-h2); line-height: 1.1; letter-spacing: -0.015em; margin: 0; }
-    .meta { font-family: var(--font-mono); font-size: var(--fs-meta); color: var(--muted); }
-
-    /* ===== NAV ===== */
-    .topnav {
-      position: sticky; top: 0; z-index: 10;
-      background: color-mix(in oklch, var(--bg) 80%, transparent);
-      backdrop-filter: blur(16px) saturate(1.2);
-      border-bottom: 1px solid var(--border);
-    }
-    .topnav-inner { display: flex; align-items: center; justify-content: space-between; padding-block: 14px; gap: var(--gap-md); }
-    .topnav .logo { font-family: var(--font-display); font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
-    .topnav nav { display: flex; gap: var(--gap-lg); }
-    .topnav nav a { font-size: 14px; color: var(--muted); transition: color 0.15s; }
-    .topnav nav a:hover { color: var(--fg); }
-    .user-info { display: flex; align-items: center; gap: var(--gap-md); font-size: 13px; color: var(--muted); flex-wrap: wrap; }
-
-    /* ===== BUTTONS ===== */
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 12px 24px; border-radius: var(--radius);
-      border: 1px solid transparent; font-size: 15px; font-weight: 500;
-      transition: transform 0.05s, background 0.15s, border-color 0.15s;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
-    .btn-primary:hover { background: color-mix(in oklch, var(--accent) 88%, white); }
-    .btn-secondary { background: transparent; color: var(--fg); border-color: var(--border); }
-    .btn-secondary:hover { border-color: var(--fg); }
-
-    /* ===== CORE — 左右沉浸式 ===== */
-    .core-section { padding-block: clamp(40px, 6vw, 72px); }
-    .core-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.6fr;
-      gap: var(--gap-xl);
-      align-items: start;
-    }
-    @media (max-width: 1024px) { .core-grid { grid-template-columns: 1fr; } }
-
-    .left-col { display: flex; flex-direction: column; gap: var(--gap-lg); }
-
-    .featured-event {
-      background: var(--surface);
+    /* Toggle */
+    .mode-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      padding: 10px 14px;
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .mode-bar .label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .mode-switch {
+      display: inline-flex;
+      background: #14161c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
       overflow: hidden;
-      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .featured-event:hover {
-      border-color: color-mix(in oklch, var(--accent) 25%, var(--border));
-      box-shadow: 0 20px 60px color-mix(in oklch, var(--accent) 8%, transparent);
+    .mode-switch button {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
     }
-    .featured-event .event-img {
-      width: 100%; height: 380px;
-      background: linear-gradient(135deg, #1a1408, #0d0b05);
-      display: flex; align-items: center; justify-content: center;
+    .mode-switch button.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .mode-hint {
+      margin-left: auto;
+      color: #555b6e;
+      font-size: 12px;
+      font-family: "SF Mono", Monaco, monospace;
+    }
+
+    .qr-generator {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .qr-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .qr-header .section-title {
+      margin-bottom: 0;
+    }
+    .qr-toggle {
+      font-size: 12px;
+      color: var(--muted);
+      transition: transform .2s;
+    }
+    .qr-generator.open .qr-toggle {
+      transform: rotate(180deg);
+    }
+    .qr-body {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height .25s ease, opacity .2s ease;
+    }
+    .qr-generator.open .qr-body {
+      max-height: 400px;
+      opacity: 1;
+    }
+    .qr-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .qr-input {
+      flex: 1;
+      min-width: 200px;
+      background: #14161c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .qr-input:focus {
+      border-color: var(--accent);
+    }
+    .qr-input::placeholder {
+      color: #555b6e;
+    }
+    .qr-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .qr-btn:hover {
+      background: var(--accent-hover);
+    }
+    .qr-result {
+      margin-top: 20px;
+      text-align: center;
+      display: none;
+    }
+    .qr-result img {
+      width: 180px;
+      height: 180px;
+      border-radius: 10px;
+      background: #fff;
+      padding: 6px;
+    }
+    .qr-result-url {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      word-break: break-all;
+      font-family: "SF Mono", Monaco, monospace;
+    }
+
+    .section { margin-bottom: 32px; }
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      padding-left: 4px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s, transform 0.1s;
+      text-decoration: none;
+      color: inherit;
       position: relative;
+      z-index: 1;
     }
-    .featured-event .event-img::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
-      background: linear-gradient(to top, var(--surface), transparent);
-      pointer-events: none;
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      z-index: 20;
     }
-    .event-placeholder {
-      position: relative; z-index: 1;
-      width: 200px; height: 200px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, color-mix(in oklch, var(--accent) 25%, transparent), transparent 60%),
-                  radial-gradient(circle at 70% 70%, color-mix(in oklch, var(--warn) 15%, transparent), transparent 50%);
-      border: 2px dashed color-mix(in oklch, var(--accent) 30%, var(--border));
-      display: grid; place-items: center;
-      color: var(--muted); font-family: var(--font-mono); font-size: 12px; text-align: center;
+    .card:hover .qr-code {
+      display: block;
     }
-    .featured-event .event-body { padding: 24px; }
-    .event-tag {
-      display: inline-flex; padding: 4px 12px; border-radius: 999px;
-      font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em;
-      text-transform: uppercase; margin-bottom: 10px;
-      background: var(--accent-soft); color: var(--accent);
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
-    .featured-event h3 { font-size: 20px; margin-bottom: 6px; }
-    .featured-event p { color: var(--muted); font-size: 14px; margin: 0 0 var(--gap-md); }
-    .event-meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-    .event-meta svg { width: 14px; height: 14px; color: var(--accent); }
-    .event-rewards { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-    .reward {
-      padding: 4px 10px; background: var(--accent-soft); color: var(--accent);
-      border-radius: 999px; font-size: 12px; font-family: var(--font-mono); letter-spacing: 0.02em;
+    .card-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-
-    /* 活动日历 */
-    .event-calendar {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 20px;
+    .badge-public { background: rgba(79, 140, 255, 0.12); color: var(--accent); }
+    .badge-private { background: var(--private-bg); color: var(--private); }
+    .card-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .card-path {
+      font-size: 11px;
+      color: #555b6e;
+      font-family: "SF Mono", Monaco, monospace;
+      margin-top: 4px;
+      word-break: break-all;
     }
-    .event-calendar h4 { font-size: 14px; margin: 0 0 14px; }
-    .cal-list { display: flex; flex-direction: column; gap: 10px; }
-    .cal-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px; background: color-mix(in oklch, var(--bg) 50%, transparent);
-      border-radius: var(--radius); border: 1px solid transparent;
-      transition: border-color 0.15s; cursor: pointer;
+    .qr-code {
+      text-align: center;
+      display: none;
+      position: absolute;
+      top: calc(100% - 1px);
+      left: -1px;
+      right: -1px;
+      z-index: 10;
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      padding: 10px;
     }
-    .cal-item:hover { border-color: var(--border); }
-    .cal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .cal-dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent-soft); }
-    .cal-dot.upcoming { background: var(--info); }
-    .cal-info { flex: 1; min-width: 0; }
-    .cal-title { font-size: 13px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cal-date { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
-    .cal-badge {
-      font-family: var(--font-mono); font-size: 10px; padding: 2px 8px;
-      border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap;
+    .qr-code img {
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      background: #fff;
+      padding: 4px;
     }
-
-    /* 右侧充值区 */
-    .recharge-side {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 24px;
+    .qr-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
     }
-    .notice-bar {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 8px 16px; margin-bottom: var(--gap-md);
-      background: color-mix(in oklch, var(--warn) 10%, transparent);
-      border: 1px solid color-mix(in oklch, var(--warn) 20%, transparent);
-      border-radius: var(--radius); color: var(--warn-soft); font-size: 13px;
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
     }
-    .server-select {
-      width: 100%; max-width: 280px; padding: 12px 16px;
-      border: 1px solid var(--border); border-radius: var(--radius);
-      background: var(--surface); color: var(--fg); font: inherit; font-size: 15px;
-      margin-bottom: var(--gap-md); cursor: pointer;
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
     }
-    .server-select:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
-
-    .tier-grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap-md); }
-    .tier-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-md); margin-top: var(--gap-md); }
+    .copy-btn {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 2px 8px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .copy-btn.copied {
+      border-color: #2ecc71;
+      color: #2ecc71;
+    }
     @media (max-width: 640px) {
-      .tier-grid-4, .tier-grid-3 { grid-template-columns: 1fr; }
+      .mode-bar { flex-wrap: wrap; }
+      .mode-hint { margin-left: 0; width: 100%; }
     }
-
-    .tier-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); overflow: hidden; position: relative;
-      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; cursor: pointer;
+    @media (max-width: 480px) {
+      body { padding: 24px 16px; }
+      h1 { font-size: 22px; }
+      .grid { grid-template-columns: 1fr; }
     }
-    .tier-card:hover {
-      transform: translateY(-4px);
-      border-color: color-mix(in oklch, var(--tier-color) 30%, var(--border));
-      box-shadow: 0 16px 40px color-mix(in oklch, var(--tier-color) 8%, transparent);
-    }
-    .tier-badge {
-      position: absolute; top: 10px; right: 10px;
-      padding: 3px 10px; border-radius: 999px;
-      font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em;
-      text-transform: uppercase; font-weight: 600; z-index: 2;
-    }
-    .tier-badge.popular { background: var(--tier-blue); color: #fff; }
-    .tier-badge.value { background: var(--tier-gold); color: var(--bg); }
-    .tier-badge.new { background: var(--tier-cyan); color: var(--bg); }
-    .tier-img {
-      width: 100%; aspect-ratio: 4/3;
-      background:
-        radial-gradient(circle at 50% 80%, color-mix(in oklch, var(--tier-color) 20%, transparent) 0%, transparent 70%),
-        linear-gradient(180deg, color-mix(in oklch, var(--tier-color) 5%, var(--surface)) 0%, var(--surface) 100%);
-      display: grid; place-items: center;
-    }
-    .ph-text { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 0.04em; }
-    .tier-body { padding: 16px; text-align: center; }
-    .tier-price { font-family: var(--font-display); font-size: 26px; font-weight: 600; color: var(--fg); line-height: 1; margin-bottom: 4px; }
-    .tier-price .unit { font-size: 12px; color: var(--muted); font-family: var(--font-body); font-weight: 400; }
-    .tier-coins { font-family: var(--font-mono); font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-    .tier-name { font-size: 13px; color: var(--muted); margin: 0; }
-    .tier-green { --tier-color: var(--tier-green); }
-    .tier-blue { --tier-color: var(--tier-blue); }
-    .tier-gold { --tier-color: var(--tier-gold); }
-    .tier-purple { --tier-color: var(--tier-purple); }
-    .tier-cyan { --tier-color: var(--tier-cyan); }
-    .tier-orange { --tier-color: var(--tier-orange); }
-
-    /* 天气/时间控制台 */
-    .console-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-md); margin-top: var(--gap-md); }
-    .console-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); overflow: hidden; position: relative;
-      transition: border-color 0.2s; cursor: pointer;
-    }
-    .console-card:hover { border-color: color-mix(in oklch, var(--tier-orange) 30%, var(--border)); }
-    .console-img {
-      width: 100%; aspect-ratio: 16/7;
-      background: linear-gradient(135deg, color-mix(in oklch, var(--tier-orange) 8%, var(--surface)), var(--surface));
-      display: grid; place-items: center;
-    }
-    .console-body { padding: 12px; text-align: center; }
-    .console-body p { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
-    .use-entry {
-      position: absolute; bottom: 12px; right: 12px;
-      font-family: var(--font-mono); font-size: 10px; padding: 4px 10px;
-      border-radius: var(--radius); background: color-mix(in oklch, var(--tier-orange) 15%, transparent);
-      color: var(--tier-orange); border: 1px solid color-mix(in oklch, var(--tier-orange) 30%, transparent);
-      opacity: 0; transition: opacity 0.2s;
-    }
-    .console-card:hover .use-entry { opacity: 1; }
-    @media (max-width: 640px) { .console-row { grid-template-columns: 1fr; } }
-
-    /* ===== MORE EVENTS ===== */
-    .event-card-sm {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 24px;
-      display: flex; gap: var(--gap-md); align-items: flex-start;
-      transition: border-color 0.2s; cursor: pointer;
-    }
-    .event-card-sm:hover { border-color: color-mix(in oklch, var(--accent) 25%, var(--border)); }
-    .event-thumb {
-      width: 72px; height: 72px; border-radius: var(--radius);
-      background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft));
-      flex-shrink: 0; display: grid; place-items: center;
-      color: var(--muted); font-family: var(--font-mono); font-size: 10px;
-    }
-    .event-content h4 { font-size: 16px; margin-bottom: 4px; }
-    .event-content p { color: var(--muted); font-size: 14px; margin: 0; }
-    .event-tag-sm {
-      display: inline-flex; padding: 2px 8px; border-radius: 999px;
-      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em;
-      text-transform: uppercase; margin-bottom: 6px;
-      background: var(--accent-soft); color: var(--accent);
-    }
-
-    /* ===== MEDIA ===== */
-    .media-layout { margin-top: var(--gap-xl); display: grid; grid-template-columns: 2fr 1fr; gap: var(--gap-lg); }
-    @media (max-width: 920px) { .media-layout { grid-template-columns: 1fr; } }
-    .media-main {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); aspect-ratio: 16/9;
-      overflow: hidden; position: relative; display: grid; place-items: center;
-    }
-    .media-overlay {
-      position: absolute; inset: 0; display: grid; place-items: center;
-      background: color-mix(in oklch, var(--bg) 40%, transparent); pointer-events: none;
-    }
-    .media-overlay svg { width: 64px; height: 64px; color: var(--fg); opacity: 0.8; }
-    .media-thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-md); }
-    .media-thumb {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); aspect-ratio: 16/10;
-      overflow: hidden; display: grid; place-items: center;
-    }
-    .ph-img {
-      width: 100%; height: 100%;
-      background: linear-gradient(135deg, var(--accent-soft), var(--fg-soft));
-      display: grid; place-items: center;
-      color: var(--muted); font-family: var(--font-mono); font-size: 11px;
-    }
-
-    /* ===== ANNOUNCEMENTS ===== */
-    .announce-list { margin-top: var(--gap-xl); max-width: 800px; }
-    .announce-item {
-      display: grid; grid-template-columns: auto auto 1fr auto;
-      gap: var(--gap-md); align-items: center;
-      padding: 18px 0; border-bottom: 1px solid var(--border);
-      transition: background 0.15s; cursor: pointer;
-    }
-    .announce-item:hover { background: var(--fg-soft); margin-inline: -16px; padding-inline: 16px; border-radius: var(--radius); }
-    .tag {
-      padding: 3px 10px; border-radius: 999px;
-      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em;
-      text-transform: uppercase; white-space: nowrap;
-    }
-    .tag.notice { background: color-mix(in oklch, var(--info) 15%, transparent); color: var(--info-soft); }
-    .tag.event { background: var(--accent-soft); color: var(--accent); }
-    .tag.maintenance { background: color-mix(in oklch, var(--warn) 15%, transparent); color: var(--warn-soft); }
-    .date { font-family: var(--font-mono); font-size: 13px; color: var(--muted); white-space: nowrap; }
-    .title { font-size: 15px; color: var(--fg); }
-    .arrow { color: var(--muted); font-size: 12px; }
-    @media (max-width: 640px) {
-      .announce-item { grid-template-columns: 1fr; gap: var(--gap-xs); }
-      .announce-item .date { order: -1; }
-    }
-
-    /* ===== DOWNLOADS ===== */
-    .download-bar { display: flex; justify-content: center; gap: var(--gap-xl); flex-wrap: wrap; }
-    .download-bar a {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-size: 14px; color: var(--muted); transition: color 0.15s;
-      padding: 10px 20px; border-radius: var(--radius); border: 1px solid transparent;
-    }
-    .download-bar a:hover { color: var(--accent); border-color: var(--border); }
-    .flame { width: 14px; height: 14px; color: var(--warn); }
-
-    /* ===== FLOATING ===== */
-    .float-qr {
-      position: fixed; top: 80px; right: 20px; z-index: 5;
-      width: 110px; padding: 10px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: var(--radius); text-align: center;
-    }
-    .qr-placeholder { width: 90px; height: 90px; background: var(--bg); border-radius: 4px; margin: 0 auto 6px; display: grid; place-items: center; color: var(--muted); font-size: 10px; font-family: var(--font-mono); }
-    .qr-label { font-size: 10px; color: var(--muted); }
-    .float-badge { position: fixed; top: 210px; right: 20px; z-index: 5; width: 90px; height: 90px; }
-    @media (max-width: 920px) { .float-qr, .float-badge { display: none; } }
-
-    /* ===== FOOTER ===== */
-    .pagefoot { padding-block: var(--gap-xl); color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
-    .row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-md); flex-wrap: wrap; }
   </style>
 </head>
 <body>
-  <header class="topnav">
-    <div class="container topnav-inner">
-      <div style="display: flex; align-items: center; gap: var(--gap-lg); flex-wrap: wrap;">
-        <span class="logo">ĐẢO KHỦNG LONG</span>
-        <nav>
-          <a href="index.html">回到首页</a>
-          <a href="#">订单列表</a>
-          <a href="#">宣战</a>
-          <a href="#">日报</a>
-        </nav>
+  <div class="container">
+    <h1><span class="logo">🦖</span> Dino Island 页面导航</h1>
+    <p class="subtitle">所有项目页面的汇总入口，支持本地 / GitHub Pages 两种路径模式</p>
+
+    <div class="mode-bar">
+      <span class="label">路径模式</span>
+      <div class="mode-switch">
+        <button id="btn-local" class="active">本地 (Local)</button>
+        <button id="btn-gh">GitHub Pages</button>
       </div>
-      <div class="user-info">
-        <span style="font-family: var(--font-mono); font-size: 12px;">Aa</span>
-        <span>登录账号：covetworld</span>
-        <span>游戏账号：13225799</span>
-        <span>个人中心 ↓</span>
+      <span class="mode-hint" id="mode-hint">相对路径，适合本地直接打开</span>
+    </div>
+
+    <!-- 二维码生成器 -->
+    <div class="section qr-generator" id="qr-generator">
+      <div class="qr-header" id="qr-header">
+        <div class="section-title">二维码生成器 / QR Code</div>
+        <span class="qr-toggle">▼</span>
+      </div>
+      <div class="qr-body">
+        <div class="qr-input-group">
+          <input type="text" class="qr-input" id="qr-url" placeholder="输入 URL，例如 https://example.com">
+          <button class="qr-btn" id="qr-generate">生成二维码</button>
+        </div>
+        <div class="qr-result" id="qr-result">
+          <img id="qr-img" alt="QR Code">
+          <div class="qr-result-url" id="qr-result-url"></div>
+        </div>
       </div>
     </div>
-  </header>
 
-  <main id="content">
-    <!-- ===== 核心区域：左右沉浸式 ===== -->
-    <section class="core-section">
-      <div class="container core-grid">
-        <!-- 左侧：活动 + 日历 -->
-        <div class="left-col">
-          <div class="featured-event">
-            <div class="event-img">
-              <div class="event-placeholder">[ 活动<br>封面 ]</div>
-            </div>
-            <div class="event-body">
-              <span class="event-tag">进行中</span>
-              <h3>限时双倍充值返利</h3>
-              <p>活动期间充值任意档位，即可获得双倍金币返还，最高可得10000金币。</p>
-              <div class="event-meta">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026.05.01 — 2026.05.07
-              </div>
-              <div class="event-rewards">
-                <span class="reward">双倍金币</span>
-                <span class="reward">限定称号</span>
-                <span class="reward">额外抽奖</span>
-              </div>
-              <button class="btn btn-primary" style="width: 100%; justify-content: center;">查看详情</button>
-            </div>
+    <!-- 活动页面 -->
+    <div class="section">
+      <div class="section-title">活动页面 / Campaign</div>
+      <div class="grid">
+        <a class="card"
+           data-local="campaign/pages/landing-official/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/landing-official/index.html">
+          <div class="card-header">
+            <span class="card-title">官方落地页</span>
+            <span class="badge badge-public">Public</span>
           </div>
+          <div class="card-desc">官方品牌落地页</div>
+          <div class="card-path">campaign/pages/landing-official/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
 
-          <div class="event-calendar">
-            <h4>📅 活动日历</h4>
-            <div class="cal-list">
-              <div class="cal-item">
-                <div class="cal-dot active"></div>
-                <div class="cal-info">
-                  <div class="cal-title">限时双倍充值返利</div>
-                  <div class="cal-date">2026.05.01 — 2026.05.07</div>
-                </div>
-                <span class="cal-badge">进行中</span>
-              </div>
-              <div class="cal-item">
-                <div class="cal-dot upcoming"></div>
-                <div class="cal-info">
-                  <div class="cal-title">恐龙竞技大赛</div>
-                  <div class="cal-date">2026.05.10 — 2026.05.15</div>
-                </div>
-                <span class="cal-badge">即将开启</span>
-              </div>
-              <div class="cal-item">
-                <div class="cal-dot upcoming"></div>
-                <div class="cal-info">
-                  <div class="cal-title">新服开启庆典</div>
-                  <div class="cal-date">2026.05.20 — 2026.05.27</div>
-                </div>
-                <span class="cal-badge">新服</span>
-              </div>
-            </div>
+        <a class="card"
+           data-local="campaign/pages/landing/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/landing/index.html">
+          <div class="card-header">
+            <span class="card-title">主播落地页</span>
+            <span class="badge badge-public">Public</span>
           </div>
+          <div class="card-desc">主播推广专用落地页</div>
+          <div class="card-path">campaign/pages/landing/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
 
-        </div>
-
-        <!-- 右侧：充值区 -->
-        <div class="recharge-side">
-          <div class="notice-bar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg>
-            每个订单只能扫码支付一次
+        <a class="card"
+           data-local="campaign/pages/streamer-dropin/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/streamer-dropin/index.html">
+          <div class="card-header">
+            <span class="card-title">主播空降活动页</span>
+            <span class="badge badge-public">Public</span>
           </div>
-          <select class="server-select">
-            <option>请选择服务器列表</option>
-          </select>
+          <div class="card-desc">主播空降活动专题页面</div>
+          <div class="card-path">campaign/pages/streamer-dropin/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
 
-          <!-- 原有4档 -->
-          <div class="tier-grid-4">
-            <div class="tier-card tier-green">
-              <div class="tier-img"><div class="ph-text">[ 龙裔包 ]</div></div>
-              <div class="tier-body">
-                <div class="tier-price">130K <span class="unit">VND</span></div>
-                <div class="tier-coins">50 金币</div>
-                <p class="tier-name">荒岛初生龙裔包</p>
-              </div>
-            </div>
-            <div class="tier-card tier-blue">
-              <div class="tier-badge popular">Most Popular</div>
-              <div class="tier-img"><div class="ph-text">[ 战龙包 ]</div></div>
-              <div class="tier-body">
-                <div class="tier-price">250K <span class="unit">VND</span></div>
-                <div class="tier-coins">100 金币</div>
-                <p class="tier-name">蛮荒进化战龙包</p>
-              </div>
-            </div>
-            <div class="tier-card tier-gold">
-              <div class="tier-badge value">Best Value</div>
-              <div class="tier-img"><div class="ph-text">[ 蓄能包 ]</div></div>
-              <div class="tier-body">
-                <div class="tier-price">2200K <span class="unit">VND</span></div>
-                <div class="tier-coins">1000 金币</div>
-                <p class="tier-name">荒岛霸主蓄能包</p>
-              </div>
-            </div>
-            <div class="tier-card tier-purple">
-              <div class="tier-badge value">Best Value</div>
-              <div class="tier-img"><div class="ph-text">[ 至尊包 ]</div></div>
-              <div class="tier-body">
-                <div class="tier-price">9000K <span class="unit">VND</span></div>
-                <div class="tier-coins">5000 金币</div>
-                <p class="tier-name">史前万龙至尊包</p>
-              </div>
-            </div>
+        <a class="card"
+           data-local="campaign/pages/invite-activity/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/invite-activity/index.html">
+          <div class="card-header">
+            <span class="card-title">邀请活动页</span>
+            <span class="badge badge-public">Public</span>
           </div>
+          <div class="card-desc">玩家邀请活动专题页面</div>
+          <div class="card-path">campaign/pages/invite-activity/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
 
-          <!-- 新增3档 -->
-          <div class="tier-grid-3">
-            <div class="tier-card tier-cyan">
-              <div class="tier-badge new">New</div>
-              <div class="tier-img"><div class="ph-text">[ 签到卡 ]</div></div>
-              <div class="tier-body">
-                <div class="tier-price">198 <span class="unit">兽币</span></div>
-                <div class="tier-coins">连续签到道具</div>
-                <p class="tier-name">签到卡</p>
-              </div>
-            </div>
-            <div class="tier-card tier-orange">
-              <div class="tier-badge new">New</div>
-              <div class="tier-img"><div class="ph-text">[ 天气卡 ]</div></div>
-              <div class="tier-body">
-                <div class="tier-price">— <span class="unit">限时</span></div>
-                <div class="tier-coins">更改天气能力</div>
-                <p class="tier-name">天气卡</p>
-              </div>
-            </div>
-            <div class="tier-card tier-orange">
-              <div class="tier-badge new">New</div>
-              <div class="tier-img"><div class="ph-text">[ 时间卡 ]</div></div>
-              <div class="tier-body">
-                <div class="tier-price">— <span class="unit">限时</span></div>
-                <div class="tier-coins">更改时间能力</div>
-                <p class="tier-name">时间卡</p>
-              </div>
-            </div>
+        <a class="card"
+           data-local="campaign/pages/005-01-monthly-recharge-king/current_s4/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/005-01-monthly-recharge-king/current_s4/index.html">
+          <div class="card-header">
+            <span class="card-title">月巅峰充值榜 · S4 当前线上</span>
+            <span class="badge badge-public">Public</span>
           </div>
+          <div class="card-desc">至尊暴龙王月巅峰充值榜 — 第四届 · 炎天暴龙王</div>
+          <div class="card-path">campaign/pages/005-01-monthly-recharge-king/current_s4/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
 
-          <!-- 天气/时间控制台 -->
-          <div class="console-row">
-            <div class="console-card">
-              <div class="console-img"><div class="ph-text">☀️ 🌧️ ❄️</div></div>
-              <div class="console-body">
-                <p>天气控制台</p>
-                <button class="btn btn-secondary" style="width: 100%; padding: 8px; font-size: 13px; justify-content: center;">进入使用界面</button>
-              </div>
-              <div class="use-entry">已购买</div>
-            </div>
-            <div class="console-card">
-              <div class="console-img"><div class="ph-text">🌅 🌙 🕐</div></div>
-              <div class="console-body">
-                <p>时间控制台</p>
-                <button class="btn btn-secondary" style="width: 100%; padding: 8px; font-size: 13px; justify-content: center;">进入使用界面</button>
-              </div>
-              <div class="use-entry">已购买</div>
-            </div>
+        <a class="card"
+           data-local="campaign/pages/005-01-monthly-recharge-king/next_s5/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/campaign/pages/005-01-monthly-recharge-king/next_s5/index.html">
+          <div class="card-header">
+            <span class="card-title">月巅峰充值榜 · S5 开发中</span>
+            <span class="badge badge-private">Private</span>
           </div>
-        </div>
+          <div class="card-desc">至尊暴龙王月巅峰充值榜 — 第五届 · 怒海王 · 双轨竞逐</div>
+          <div class="card-path">campaign/pages/005-01-monthly-recharge-king/next_s5/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
       </div>
-    </section>
-
-    <!-- ===== 更多活动 ===== -->
-    <section class="section">
-      <div class="container">
-        <p class="eyebrow">More Events</p>
-        <h2>更多活动</h2>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap-lg); margin-top: var(--gap-xl);">
-          <div class="event-card-sm">
-            <div class="event-thumb">[ 活动图 ]</div>
-            <div class="event-content">
-              <span class="event-tag-sm">即将开启</span>
-              <h4>恐龙竞技大赛</h4>
-              <p>全服PVP争霸赛即将打响，登顶排行榜赢取限定坐骑与稀有称号。</p>
-            </div>
-          </div>
-          <div class="event-card-sm">
-            <div class="event-thumb">[ 活动图 ]</div>
-            <div class="event-content">
-              <span class="event-tag-sm">新服</span>
-              <h4>新服开启庆典</h4>
-              <p>S15新服「烈焰峡谷」正式开放，开服前7日登录即送SSR级战龙。</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 游戏实录 ===== -->
-    <section class="section">
-      <div class="container">
-        <p class="eyebrow">Media</p>
-        <h2>游戏实录</h2>
-        <div class="media-layout">
-          <div class="media-main">
-            <div class="ph-text">[ 游戏视频 ]</div>
-            <div class="media-overlay">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            </div>
-          </div>
-          <div class="media-thumbs">
-            <div class="media-thumb"><div class="ph-img">[ 截图1 ]</div></div>
-            <div class="media-thumb"><div class="ph-img">[ 截图2 ]</div></div>
-            <div class="media-thumb"><div class="ph-img">[ 截图3 ]</div></div>
-            <div class="media-thumb"><div class="ph-img">[ 截图4 ]</div></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 官方公告 ===== -->
-    <section class="section">
-      <div class="container">
-        <p class="eyebrow">News</p>
-        <h2>官方公告</h2>
-        <div class="announce-list">
-          <div class="announce-item">
-            <span class="tag maintenance">维护</span>
-            <span class="date">2026-05-01</span>
-            <span class="title">5月1日服务器维护通知</span>
-            <span class="arrow">→</span>
-          </div>
-          <div class="announce-item">
-            <span class="tag event">活动</span>
-            <span class="date">2026-04-28</span>
-            <span class="title">五一登录有礼活动开启公告</span>
-            <span class="arrow">→</span>
-          </div>
-          <div class="announce-item">
-            <span class="tag notice">公告</span>
-            <span class="date">2026-04-25</span>
-            <span class="title">v2.5.0版本更新内容一览</span>
-            <span class="arrow">→</span>
-          </div>
-          <div class="announce-item">
-            <span class="tag event">活动</span>
-            <span class="date">2026-04-20</span>
-            <span class="title">S15新服「烈焰峡谷」开启预告</span>
-            <span class="arrow">→</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 下载 ===== -->
-    <section class="section" style="padding-block: var(--gap-xl);">
-      <div class="container">
-        <div class="download-bar">
-          <a href="#"><svg class="flame" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c0 0-6 6-6 12a6 6 0 0 0 12 0c0-6-6-12-6-12zm0 16a4 4 0 0 1-4-4c0-3 2-6 4-8 2 2 4 5 4 8a4 4 0 0 1-4 4z"/></svg>Link tải game 1</a>
-          <a href="#"><svg class="flame" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c0 0-6 6-6 12a6 6 0 0 0 12 0c0-6-6-12-6-12zm0 16a4 4 0 0 1-4-4c0-3 2-6 4-8 2 2 4 5 4 8a4 4 0 0 1-4 4z"/></svg>Link tải game 2</a>
-          <a href="#"><svg class="flame" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c0 0-6 6-6 12a6 6 0 0 0 12 0c0-6-6-12-6-12zm0 16a4 4 0 0 1-4-4c0-3 2-6 4-8 2 2 4 5 4 8a4 4 0 0 1-4 4z"/></svg>Link tải game 3</a>
-          <a href="#"><svg class="flame" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c0 0-6 6-6 12a6 6 0 0 0 12 0c0-6-6-12-6-12zm0 16a4 4 0 0 1-4-4c0-3 2-6 4-8 2 2 4 5 4 8a4 4 0 0 1-4 4z"/></svg>Link tải game 4</a>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <div class="float-qr" aria-label="客服二维码">
-    <div class="qr-placeholder">QR</div>
-    <div class="qr-label">客服</div>
-  </div>
-  <div class="float-badge" aria-label="徽章">
-    <div class="qr-placeholder" style="width:90px;height:90px;border-radius:50%;">徽章</div>
-  </div>
-
-  <footer class="pagefoot">
-    <div class="container row-between">
-      <span>ĐẢO KHỦNG LONG</span>
-      <span class="meta">恐龙岛 · 充值中心</span>
     </div>
-  </footer>
+
+    <!-- 官网 -->
+    <div class="section">
+      <div class="section-title">官网 / Official</div>
+      <div class="grid">
+        <a class="card"
+           data-local="official/pages/home/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/official/pages/home/index.html">
+          <div class="card-header">
+            <span class="card-title">官网首页</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">Dino Island 官方网站首页</div>
+          <div class="card-path">official/pages/home/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 工具 -->
+    <div class="section">
+      <div class="section-title">工具 / Tools</div>
+      <div class="grid">
+        <a class="card"
+           data-local="tools/cs-tool/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/cs-tool/index.html">
+          <div class="card-header">
+            <span class="card-title">客服工具</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">客服专用辅助工具（内部）</div>
+          <div class="card-path">tools/cs-tool/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+
+        <a class="card"
+           data-local="tools/game-data-search/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/game-data-search/index.html">
+          <div class="card-header">
+            <span class="card-title">游戏数据搜索</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">游戏数据查询与检索工具（内部）</div>
+          <div class="card-path">tools/game-data-search/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+
+        <a class="card"
+           data-local="tools/video-downloader/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/video-downloader/index.html">
+          <div class="card-header">
+            <span class="card-title">视频下载器</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">内部视频下载工具</div>
+          <div class="card-path">tools/video-downloader/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+
+        <a class="card"
+           data-local="tools/zalo-compat-test/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/zalo-compat-test/index.html">
+          <div class="card-header">
+            <span class="card-title">Zalo 兼容测试</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">Zalo 浏览器兼容测试页面</div>
+          <div class="card-path">tools/zalo-compat-test/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+
+        <a class="card"
+           data-local="tools/zalo-wild-test/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/zalo-wild-test/index.html">
+          <div class="card-header">
+            <span class="card-title">Zalo Wild 测试</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">Zalo Wild 功能测试页面</div>
+          <div class="card-path">tools/zalo-wild-test/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+
+        <a class="card"
+           data-local="tools/guild-recruitment-bot/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/guild-recruitment-bot/index.html">
+          <div class="card-header">
+            <span class="card-title">无公会玩家看板</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">团长认领 + 排行榜（完整版）</div>
+          <div class="card-path">tools/guild-recruitment-bot/</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+
+        <a class="card"
+           data-local="tools/guild-recruitment-bot/index_lite.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/tools/guild-recruitment-bot/index_lite.html">
+          <div class="card-header">
+            <span class="card-title">无公会玩家看板 · Lite</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">只读看板，无交互（简化版）</div>
+          <div class="card-path">tools/guild-recruitment-bot/index_lite.html</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 数据报告 -->
+    <div class="section">
+      <div class="section-title">数据报告 / Reports</div>
+      <div class="grid">
+        <a class="card"
+           data-local="report/streamer-data.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/report/streamer-data.html">
+          <div class="card-header">
+            <span class="card-title">主播数据报告</span>
+            <span class="badge badge-private">Private</span>
+          </div>
+          <div class="card-desc">主播数据分析报告（内部）</div>
+          <div class="card-path">report/streamer-data.html</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+
+        <a class="card"
+           data-local="report/revenue-event-analysis.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/report/revenue-event-analysis.html">
+          <div class="card-header">
+            <span class="card-title">收入波动与事件关联分析</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">收入波动与游戏事件关联分析工具</div>
+          <div class="card-path">report/revenue-event-analysis.html</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 其他 -->
+    <div class="section">
+      <div class="section-title">其他 / Other</div>
+      <div class="grid">
+        <a class="card"
+           data-local="common/index.html"
+           data-gh="https://covetworld-png.github.io/dinoisland/src/common/index.html">
+          <div class="card-header">
+            <span class="card-title">Common</span>
+            <span class="badge badge-public">Public</span>
+          </div>
+          <div class="card-desc">公共组件与样式预览</div>
+          <div class="card-path">common/index.html</div>
+          <div class="qr-code"><img alt=""><div class="qr-label">扫码访问</div></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      仓库: <code>covetworld-png/dinoisland</code> &nbsp;|&nbsp;
+      基础地址: <code>https://covetworld-png.github.io/dinoisland/src/</code>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const btnLocal = document.getElementById('btn-local');
+      const btnGh = document.getElementById('btn-gh');
+      const hint = document.getElementById('mode-hint');
+      const cards = document.querySelectorAll('.card');
+
+      // 二维码生成器
+      (function() {
+        const generator = document.getElementById('qr-generator');
+        const header = document.getElementById('qr-header');
+        const input = document.getElementById('qr-url');
+        const btn = document.getElementById('qr-generate');
+        const result = document.getElementById('qr-result');
+        const img = document.getElementById('qr-img');
+        const urlText = document.getElementById('qr-result-url');
+
+        header.addEventListener('click', () => {
+          generator.classList.toggle('open');
+        });
+
+        function generate() {
+          const url = input.value.trim();
+          if (!url) return;
+          img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
+          urlText.textContent = url;
+          result.style.display = 'block';
+        }
+
+        btn.addEventListener('click', generate);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') generate();
+        });
+      })();
+
+      // 初始化：为每个卡片注入复制按钮
+      cards.forEach(card => {
+        const header = card.querySelector('.card-header');
+        const badge = header.querySelector('.badge');
+        if (!badge) return;
+
+        const actions = document.createElement('div');
+        actions.className = 'card-actions';
+
+        // 将 badge 移入 actions
+        actions.appendChild(badge);
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.type = 'button';
+        copyBtn.textContent = '📋 复制';
+        copyBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          navigator.clipboard.writeText(card.dataset.gh).then(() => {
+            copyBtn.classList.add('copied');
+            const original = copyBtn.textContent;
+            copyBtn.textContent = '✓ 已复制';
+            setTimeout(() => {
+              copyBtn.classList.remove('copied');
+              copyBtn.textContent = original;
+            }, 1500);
+          });
+        });
+
+        actions.appendChild(copyBtn);
+        header.appendChild(actions);
+      });
+
+      function setMode(mode) {
+        const isLocal = mode === 'local';
+        btnLocal.classList.toggle('active', isLocal);
+        btnGh.classList.toggle('active', !isLocal);
+        hint.textContent = isLocal
+          ? '相对路径，适合本地直接打开 src/index.html'
+          : '完整 HTTPS 链接，适合线上访问或分享给他人';
+
+        cards.forEach(card => {
+          const pathEl = card.querySelector('.card-path');
+          const qrEl = card.querySelector('.qr-code');
+          const qrImg = qrEl ? qrEl.querySelector('img') : null;
+          const copyBtn = card.querySelector('.copy-btn');
+          if (isLocal) {
+            card.href = card.dataset.local;
+            if (pathEl) pathEl.textContent = card.dataset.local;
+            if (qrEl) qrEl.style.display = 'none';
+            if (copyBtn) copyBtn.style.display = 'none';
+          } else {
+            card.href = card.dataset.gh;
+            if (pathEl) pathEl.textContent = card.dataset.gh;
+            if (qrEl) {
+              qrEl.style.display = '';
+              if (qrImg && !qrImg.src) qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(card.dataset.gh);
+            }
+            if (copyBtn) copyBtn.style.display = 'inline-flex';
+          }
+          card.target = '_blank';
+        });
+      }
+
+      btnLocal.addEventListener('click', () => setMode('local'));
+      btnGh.addEventListener('click', () => setMode('gh'));
+
+      // 默认根据当前环境自动判断：本地文件 / localhost / 127.0.0.1 均视为本地
+      const isLocalEnv = location.protocol === 'file:' ||
+                         location.hostname === 'localhost' ||
+                         location.hostname === '127.0.0.1';
+      setMode(isLocalEnv ? 'local' : 'gh');
+    })();
+  </script>
 </body>
 </html>
