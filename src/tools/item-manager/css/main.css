@@ -411,19 +411,19 @@ body::after {
   display:block; font-weight:600; color:var(--gold);
   margin-bottom:10px; font-size:0.9rem;
 }
-.form-textarea {
+.form-textarea, .textarea {
   width:100%; padding:14px;
   background:var(--surface-2);
   border:1.5px solid var(--border); border-radius:var(--r);
   color:var(--fg); font-family:inherit; font-size:0.95rem;
   resize:vertical; transition:0.2s; line-height:1.55;
 }
-.form-textarea:focus {
+.form-textarea:focus, .textarea:focus {
   outline:none;
   border-color:var(--gold);
   box-shadow:0 0 0 3px var(--gold-dim), 0 0 16px var(--gold-dim);
 }
-.form-textarea::placeholder { color:rgba(71,85,105,0.5); }
+.form-textarea::placeholder, .textarea::placeholder { color:rgba(71,85,105,0.5); }
 .char-count {
   text-align:right; font-size:0.75rem; color:var(--muted);
   margin-top:6px; font-family:var(--font-mono);
