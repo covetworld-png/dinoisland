@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trung Tâm Đạo Cụ | 道具管理中心</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css?v=6">
+</head>
+<body data-lang="vi">
+
+  <header class="topnav" data-od-id="topnav">
+    <div class="container topnav-inner">
+      <span class="logo">
+        <span class="lang-vi">Trung Tâm Đạo Cụ</span>
+        <span class="lang-cn">道具管理中心</span>
+      </span>
+      <div class="row" style="gap: 12px;">
+        <div class="user-badge" id="user-badge">
+          <span id="user-name">Player</span>
+        </div>
+        <button class="lang-toggle" onclick="toggleLanguage()">
+          <span id="current-lang">VI / 中</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="content">
+    <!-- Hero removed: title redundant with topnav logo -->
+
+    <!-- Inventory Stats -->
+    <section class="section" data-od-id="inventory" style="padding-top: var(--gap-md);">
+      <div class="container">
+        <div class="grid-3 inventory-grid">
+          <div class="card inventory-card" id="inv-weather">
+            <div class="inv-icon">🌦️</div>
+            <div class="inv-name">
+              <span class="lang-vi">Thẻ Thờ Tiết</span>
+              <span class="lang-cn">天气卡</span>
+            </div>
+            <div class="inv-count num" id="count-weather">0</div>
+          </div>
+          <div class="card inventory-card" id="inv-time">
+            <div class="inv-icon">🕐</div>
+            <div class="inv-name">
+              <span class="lang-vi">Thẻ Thờ Gian</span>
+              <span class="lang-cn">时间卡</span>
+            </div>
+            <div class="inv-count num" id="count-time">0</div>
+          </div>
+          <div class="card inventory-card" id="inv-announcement">
+            <div class="inv-icon">📢</div>
+            <div class="inv-name">
+              <span class="lang-vi">Thẻ Thông Báo</span>
+              <span class="lang-cn">公告卡</span>
+            </div>
+            <div class="inv-count num" id="count-announcement">0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tool Panels -->
+    <section class="section" data-od-id="tools">
+      <div class="container">
+        <nav class="tab-nav">
+          <button class="tab-btn active" data-tab="weather" onclick="switchTab('weather')">
+            <span>🌦️</span>
+            <span class="lang-vi">Thờ Tiết</span>
+            <span class="lang-cn">天气卡</span>
+          </button>
+          <button class="tab-btn" data-tab="time" onclick="switchTab('time')">
+            <span>🕐</span>
+            <span class="lang-vi">Thờ Gian</span>
+            <span class="lang-cn">时间卡</span>
+          </button>
+          <button class="tab-btn" data-tab="announcement" onclick="switchTab('announcement')">
+            <span>📢</span>
+            <span class="lang-vi">Thông Báo</span>
+            <span class="lang-cn">全服公告</span>
+          </button>
+        </nav>
+
+        <!-- Weather Panel -->
+        <div class="tab-panel active" id="panel-weather">
+          <div class="panel-card">
+            <div class="panel-header row-between">
+              <h3>
+                <span class="lang-vi">Thẻ Thờ Tiết</span>
+                <span class="lang-cn">天气卡</span>
+              </h3>
+              <div class="status-indicator" id="status-weather">
+                <span class="status-dot idle"></span>
+                <span class="status-text">
+                  <span class="lang-vi">Sẵn sàng</span>
+                  <span class="lang-cn">就绪</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="conflict-banner" id="conflict-weather" style="display: none;">
+              <span>⚠️</span>
+              <span class="conflict-text" id="conflict-text-weather"></span>
+            </div>
+
+            <div class="countdown-banner" id="countdown-weather" style="display: none;">
+              <span>⏱️</span>
+              <span class="countdown-label">
+                <span class="lang-vi">Còn lại</span>
+                <span class="lang-cn">剩余</span>
+              </span>
+              <span class="countdown-value num" id="countdown-value-weather">05:00</span>
+            </div>
+
+            <div class="options-grid" id="options-weather">
+              <button class="option-btn" data-value="sunshine"><span class="option-emoji">☀️</span><span class="lang-vi">Nắng</span><span class="lang-cn">阳光</span></button>
+              <button class="option-btn" data-value="cloudy_fog"><span class="option-emoji">🌫️</span><span class="lang-vi">Âm u</span><span class="lang-cn">阴天起雾</span></button>
+              <button class="option-btn" data-value="light_rain"><span class="option-emoji">🌧️</span><span class="lang-vi">Mưa nhỏ</span><span class="lang-cn">小雨</span></button>
+              <button class="option-btn" data-value="snow"><span class="option-emoji">❄️</span><span class="lang-vi">Tuyết</span><span class="lang-cn">下雪</span></button>
+              <button class="option-btn" data-value="heavy_rain"><span class="option-emoji">⛈️</span><span class="lang-vi">Mưa bão</span><span class="lang-cn">暴雨</span></button>
+              <button class="option-btn" data-value="cloudy"><span class="option-emoji">☁️</span><span class="lang-vi">Nhiều mây</span><span class="lang-cn">多云</span></button>
+              <button class="option-btn" data-value="fog"><span class="option-emoji">🌁</span><span class="lang-vi">Sương mù</span><span class="lang-cn">雾</span></button>
+              <button class="option-btn" data-value="partly_cloudy"><span class="option-emoji">⛅</span><span class="lang-vi">Nửa mây</span><span class="lang-cn">半云</span></button>
+              <button class="option-btn" data-value="rain_sun"><span class="option-emoji">🌦️</span><span class="lang-vi">Mưa+Nắng</span><span class="lang-cn">雨_阳光</span></button>
+              <button class="option-btn" data-value="sandstorm"><span class="option-emoji">🌪️</span><span class="lang-vi">Bão cát</span><span class="lang-cn">沙尘</span></button>
+            </div>
+
+            <button class="btn btn-primary btn-use" id="btn-use-weather" onclick="useWeatherCard()">
+              <span class="lang-vi">Sử dụng Thẻ Thờ Tiết</span>
+              <span class="lang-cn">使用天气卡</span>
+            </button>
+
+            <div class="instruction-box">
+              <strong>
+                <span class="lang-vi">Hướng dẫn sử dụng</span>
+                <span class="lang-cn">使用说明</span>
+              </strong>
+              <ul>
+                <li>
+                  <span class="lang-vi">Chọn loại thờ tiết mong muốn, sau đó nhấn nút sử dụng.</span>
+                  <span class="lang-cn">选择想要的天气类型，然后点击使用按钮。</span>
+                </li>
+                <li>
+                  <span class="lang-vi">Thẻ có hiệu lực <strong>5 phút</strong>, trong thờ gian này ngườ chơi khác không thể sử dụng.</span>
+                  <span class="lang-cn">卡片有效期<strong>5分钟</strong>，在此期间其他玩家无法使用。</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time Panel -->
+        <div class="tab-panel" id="panel-time">
+          <div class="panel-card">
+            <div class="panel-header row-between">
+              <h3>
+                <span class="lang-vi">Thẻ Thờ Gian</span>
+                <span class="lang-cn">时间卡</span>
+              </h3>
+              <div class="status-indicator" id="status-time">
+                <span class="status-dot idle"></span>
+                <span class="status-text">
+                  <span class="lang-vi">Sẵn sàng</span>
+                  <span class="lang-cn">就绪</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="conflict-banner" id="conflict-time" style="display: none;">
+              <span>⚠️</span>
+              <span class="conflict-text" id="conflict-text-time"></span>
+            </div>
+
+            <div class="countdown-banner" id="countdown-time" style="display: none;">
+              <span>⏱️</span>
+              <span class="countdown-label">
+                <span class="lang-vi">Còn lại</span>
+                <span class="lang-cn">剩余</span>
+              </span>
+              <span class="countdown-value num" id="countdown-value-time">05:00</span>
+            </div>
+
+            <div class="options-grid time-options" id="options-time">
+              <button class="option-btn" data-value="dawn"><span class="option-emoji">🌅</span><span class="lang-vi">Bình minh</span><span class="lang-cn">清晨</span></button>
+              <button class="option-btn" data-value="day"><span class="option-emoji">☀️</span><span class="lang-vi">Ban ngày</span><span class="lang-cn">白天</span></button>
+              <button class="option-btn" data-value="dusk"><span class="option-emoji">🌇</span><span class="lang-vi">Hoàng hôn</span><span class="lang-cn">黄昏</span></button>
+              <button class="option-btn" data-value="night"><span class="option-emoji">🌙</span><span class="lang-vi">Đêm khuya</span><span class="lang-cn">深夜</span></button>
+            </div>
+
+            <button class="btn btn-primary btn-use" id="btn-use-time" onclick="useTimeCard()">
+              <span class="lang-vi">Sử dụng Thẻ Thờ Gian</span>
+              <span class="lang-cn">使用时间卡</span>
+            </button>
+
+            <div class="instruction-box">
+              <strong>
+                <span class="lang-vi">Hướng dẫn sử dụng</span>
+                <span class="lang-cn">使用说明</span>
+              </strong>
+              <ul>
+                <li>
+                  <span class="lang-vi">Chọn thờ điểm trong ngày mong muốn, sau đó nhấn nút sử dụng.</span>
+                  <span class="lang-cn">选择想要的时段，然后点击使用按钮。</span>
+                </li>
+                <li>
+                  <span class="lang-vi">Thẻ có hiệu lực <strong>5 phút</strong>, trong thờ gian này ngườ chơi khác không thể sử dụng.</span>
+                  <span class="lang-cn">卡片有效期<strong>5分钟</strong>，在此期间其他玩家无法使用。</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Announcement Panel -->
+        <div class="tab-panel" id="panel-announcement">
+          <div class="panel-card">
+            <div class="panel-header row-between">
+              <h3>
+                <span class="lang-vi">Thông Báo Toàn Server</span>
+                <span class="lang-cn">全服公告</span>
+              </h3>
+              <div class="status-indicator" id="status-announcement">
+                <span class="status-dot idle"></span>
+                <span class="status-text">
+                  <span class="lang-vi">Sẵn sàng</span>
+                  <span class="lang-cn">就绪</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="field" style="margin-bottom: var(--gap-md);">
+              <label for="announcement-content">
+                <span class="lang-vi">Nội dung thông báo</span>
+                <span class="lang-cn">公告内容</span>
+              </label>
+              <textarea id="announcement-content" class="textarea" rows="4" maxlength="200" placeholder="Nhập nội dung... / 输入内容..."></textarea>
+              <div class="char-count"><span class="num" id="char-count">0</span> / 200</div>
+            </div>
+
+            <button class="btn btn-primary btn-use" id="btn-submit-announcement" onclick="submitAnnouncement()">
+              <span class="lang-vi">Gửi Đến Duyệt</span>
+              <span class="lang-cn">提交审核</span>
+            </button>
+
+            <div class="instruction-box">
+              <strong>
+                <span class="lang-vi">Quy trình duyệt</span>
+                <span class="lang-cn">审核流程</span>
+              </strong>
+              <div class="flow-steps">
+                <div class="flow-step"><div class="flow-dot active">1</div><div class="flow-label"><span class="lang-vi">Gửi</span><span class="lang-cn">提交</span></div></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step"><div class="flow-dot" id="flow-dot-review">2</div><div class="flow-label"><span class="lang-vi">Duyệt</span><span class="lang-cn">审核</span></div></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step"><div class="flow-dot" id="flow-dot-queue">3</div><div class="flow-label"><span class="lang-vi">Chờ</span><span class="lang-cn">待发送</span></div></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step"><div class="flow-dot" id="flow-dot-sent">4</div><div class="flow-label"><span class="lang-vi">Gửi</span><span class="lang-cn">已发送</span></div></div>
+              </div>
+            </div>
+
+            <div class="my-announcements" id="my-announcements-section" style="display: none;">
+              <h3 class="h3" style="margin-bottom: var(--gap-sm); font-size: 16px;">
+                <span class="lang-vi">Thông Báo Của Tôi</span>
+                <span class="lang-cn">我的公告</span>
+              </h3>
+              <div class="announcement-list" id="announcement-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- History -->
+    <section class="section" data-od-id="history">
+      <div class="container">
+        <h2 class="h2" style="margin-bottom: var(--gap-md); font-size: 22px;">
+          <span class="lang-vi">Lịch Sử Sử Dụng</span>
+          <span class="lang-cn">使用历史</span>
+        </h2>
+        <div class="history-card">
+          <div class="history-empty" id="history-empty">
+            <span class="lang-vi">Chưa có lịch sử sử dụng</span>
+            <span class="lang-cn">暂无使用记录</span>
+          </div>
+          <div class="history-list" id="history-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pagefoot" data-od-id="footer">
+    <div class="container row-between">
+      <span>
+        <span class="lang-vi">Trung Tâm Đạo Cụ | Khủng Long Đảo</span>
+        <span class="lang-cn">道具管理中心 | 恐龙岛</span>
+      </span>
+      <span class="meta">2026</span>
+    </div>
+  </footer>
+
+  <div id="toast-container"></div>
+
+  <script src="js/main.js?v=3"></script>
+</body>
+</html>
