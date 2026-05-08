@@ -2093,7 +2093,7 @@ function renderWeekly() {
   const champBox = document.getElementById('weeklyChampionBox');
   if (champBox) champBox.style.display = players.length > 0 ? 'block' : 'none';
   const champEl = document.getElementById('weeklyChampionName');
-  if (sorted.length === 0) {
+  if (sorted.length === 0 || Object.keys(results).length === 0) {
     champEl.textContent = '—';
     champEl.style.color = '';
   } else {
