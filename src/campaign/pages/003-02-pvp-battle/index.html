@@ -168,7 +168,7 @@ const DEFAULT_PVP_DATA=[
   {date:"2026-05-05",server:"Q 服",championAccount:"13220110",championName:"chip",matches:[]}
 ];
 
-function calcStats(matches){const s={};matches.forEach(m=>{if(!s[m.winner])s[m.winner]={wins:0,losses:0};if(!s[m.loser])s[m.loser]={wins:0,losses:0};s[m.winner].wins++;s[m.loser].losses++});const arr=Object.keys(s).map(n=>{const t=s[n];return{name:n,wins:t.wins,losses:t.losses,total:t.wins+t.losses,rate:t.wins+t.losses?(t.wins/(t.wins+t.losses)*100).toFixed(1)+'%':'0%'});arr.sort((a,b)=>b.wins-a.wins||parseFloat(b.rate)-parseFloat(a.rate)||a.total-b.total);return arr}
+function calcStats(matches){const s={};matches.forEach(m=>{if(!s[m.winner])s[m.winner]={wins:0,losses:0};if(!s[m.loser])s[m.loser]={wins:0,losses:0};s[m.winner].wins++;s[m.loser].losses++});const arr=Object.keys(s).map(n=>{const t=s[n];return{name:n,wins:t.wins,losses:t.losses,total:t.wins+t.losses,rate:t.wins+t.losses?(t.wins/(t.wins+t.losses)*100).toFixed(1)+'%':'0%'}});arr.sort((a,b)=>b.wins-a.wins||parseFloat(b.rate)-parseFloat(a.rate)||a.total-b.total);return arr}
 
 function getTop3(matches){return calcStats(matches).slice(0,3)}
 
