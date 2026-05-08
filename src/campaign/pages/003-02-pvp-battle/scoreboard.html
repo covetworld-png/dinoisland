@@ -2343,6 +2343,26 @@ function closeGitHubSettings() {
   document.getElementById('githubModal').classList.remove('open');
 }
 
+function removeDateBlock(csvText, date, server) {
+  const lines = csvText.split(/\r?\n/);
+  let startIdx = -1;
+  let endIdx = lines.length;
+  for (let i = 0; i < lines.length; i++) {
+    const cols = lines[i].split(',');
+    const lineDate = cols[0]?.trim();
+    const lineServer = cols[1]?.trim();
+    if (lineDate === date && lineServer === server) {
+      startIdx = i;
+    } else if (startIdx !== -1 && /^\d{4}-\d{2}-\d{2}$/.test(lineDate)) {
+      endIdx = i;
+      break;
+    }
+  }
+  if (startIdx === -1) return csvText;
+  const result = [...lines.slice(0, startIdx), ...lines.slice(endIdx)];
+  return result.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
 async function saveToGitHub() {
   loadGitHubConfig();
   if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) {
@@ -2354,9 +2374,11 @@ async function saveToGitHub() {
     alert('当前无比赛数据，无法保存');
     return;
   }
-  if (!confirm('确定将当日数据提交到 GitHub？')) return;
 
-  // 构建 CSV：先获取现有文件内容，追加当日数据
+  const date = document.getElementById('matchDate').value;
+  const server = getCurrentServer();
+
+  // 获取现有文件内容
   let existingCSV = '';
   let sha = null;
   try {
@@ -2374,21 +2396,36 @@ async function saveToGitHub() {
     }
   } catch(e) { console.error('获取现有文件出错:', e); }
 
+  // 检查当天数据是否已存在
+  if (existingCSV) {
+    const hasExisting = existingCSV.split(/\r?\n/).some(line => {
+      const cols = line.split(',');
+      return cols[0]?.trim() === date && cols[1]?.trim() === server;
+    });
+    if (hasExisting) {
+      if (!confirm(`⚠️ ${date} ${server} 的数据已存在于 GitHub。\n\n选择"确定"用当前数据覆盖旧数据。\n选择"取消"则保留现有数据。`)) {
+        return;
+      }
+      existingCSV = removeDateBlock(existingCSV, date, server);
+    } else {
+      if (!confirm('确定将当日数据提交到 GitHub？')) return;
+    }
+  } else {
+    if (!confirm('确定将当日数据提交到 GitHub？')) return;
+  }
+
   // 生成当日 CSV
   const dailyCSV = buildDailyCSV();
 
-  // 合并：如果已有内容，追加；否则新建
+  // 合并
   let finalCSV = existingCSV;
   if (finalCSV) {
-    // 去掉现有内容末尾的换行，追加新块
     finalCSV = finalCSV.replace(/\n+$/, '') + '\n\n' + dailyCSV;
   } else {
     finalCSV = dailyCSV;
   }
 
   const contentBase64 = btoa(unescape(encodeURIComponent(finalCSV)));
-  const date = document.getElementById('matchDate').value;
-  const server = getCurrentServer();
   const commitMessage = `data: 更新 PVP 比赛数据 ${date} ${server}`;
   const body = { message: commitMessage, content: contentBase64, branch: githubConfig.branch };
   if (sha) body.sha = sha;
