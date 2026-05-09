@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Đạo Cụ | 道具管理中心</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=10">
+  <link rel="stylesheet" href="css/main.css?v=11">
 </head>
 <body data-lang="vi">
 
@@ -47,31 +47,23 @@
     <!-- Inventory Stats -->
     <section class="section" data-od-id="inventory" style="padding-top: var(--gap-md);">
       <div class="container">
-        <div class="grid-3 inventory-grid">
-          <div class="card inventory-card" id="inv-weather">
-            <div class="inv-icon">🌦️</div>
-            <div class="inv-name">
-              <span class="lang-vi">Thẻ Thờ Tiết</span>
-              <span class="lang-cn">天气卡</span>
+        <div class="inventory-bag">
+          <div class="bag-grid">
+            <div class="bag-cell" id="inv-weather">
+              <div class="cell-icon">🌦️</div>
+              <div class="cell-count" id="count-weather">0</div>
             </div>
-            <div class="inv-count num" id="count-weather">0</div>
-          </div>
-          <div class="card inventory-card" id="inv-time">
-            <div class="inv-icon">🕐</div>
-            <div class="inv-name">
-              <span class="lang-vi">Thẻ Thờ Gian</span>
-              <span class="lang-cn">时间卡</span>
+            <div class="bag-cell" id="inv-time">
+              <div class="cell-icon">🕐</div>
+              <div class="cell-count" id="count-time">0</div>
             </div>
-            <div class="inv-count num" id="count-time">0</div>
-          </div>
-          <div class="card inventory-card" id="inv-announcement">
-            <div class="inv-icon">📢</div>
-            <div class="inv-name">
-              <span class="lang-vi">Thẻ Thông Báo</span>
-              <span class="lang-cn">公告卡</span>
+            <div class="bag-cell" id="inv-announcement">
+              <div class="cell-icon">📢</div>
+              <div class="cell-count" id="count-announcement">0</div>
             </div>
-            <div class="inv-count num" id="count-announcement">0</div>
+            <div class="bag-cell empty-slot"></div>
           </div>
+        </div>
         </div>
       </div>
     </section>
