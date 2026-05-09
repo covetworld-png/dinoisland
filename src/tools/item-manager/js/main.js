@@ -179,6 +179,9 @@ class ItemManager {
     }
 
     init() {
+        // 权限检查 - 如需实际 API 校验请替换 checkAuth() 实现
+        if (typeof checkAuth === 'function' && !checkAuth()) return;
+
         this.cleanupHistory();
         this.renderInventory();
         this.renderAllPanels();
@@ -815,6 +818,28 @@ function submitAnnouncement() {
         document.getElementById('announcement-content').value = '';
         document.getElementById('char-count').textContent = '0';
     }
+}
+
+/* ── auth check ── */
+/**
+ * 权限检查入口
+ * 实际项目中请替换为真实的 API 校验，例如：
+ *   const res = await fetch('/api/check-auth', { headers: { Authorization: 'Bearer ' + token } });
+ *   if (!res.ok) { showAuthOverlay(); return false; }
+ */
+function checkAuth() {
+    const token = localStorage.getItem('itemManager_token');
+    // 默认放行（无 token 时演示模式），如需强制登录请取消下行注释：
+    // if (!token) { showAuthOverlay(); return false; }
+    return true;
+}
+
+function showAuthOverlay() {
+    const overlay = document.getElementById('auth-overlay');
+    const content = document.getElementById('content');
+    if (overlay) overlay.classList.add('show');
+    if (content) content.style.display = 'none';
+    document.body.style.overflow = 'hidden';
 }
 
 // Initialize

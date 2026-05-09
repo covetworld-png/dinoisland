@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Đạo Cụ | 道具管理中心</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=8">
+  <link rel="stylesheet" href="css/main.css?v=9">
 </head>
 <body data-lang="vi">
 
@@ -25,6 +25,21 @@
       </div>
     </div>
   </header>
+
+  <!-- Auth Overlay -->
+  <div id="auth-overlay" class="auth-overlay">
+    <div class="auth-box">
+      <div class="auth-icon">🔒</div>
+      <h2 class="lang-vi">Quyền Truy Cập Bị Từ Chối</h2>
+      <h2 class="lang-cn">权限不足</h2>
+      <p class="lang-vi">Phiên đăng nhập đã hết hạn hoặc bạn không có quyền truy cập trang này. Vui lòng đăng nhập lại.</p>
+      <p class="lang-cn">登录已过期或您无权访问此页面，请重新登录。</p>
+      <button class="btn btn-primary" onclick="location.reload()">
+        <span class="lang-vi">Đăng Nhập Lại</span>
+        <span class="lang-cn">重新登录</span>
+      </button>
+    </div>
+  </div>
 
   <main id="content">
     <!-- Hero removed: title redundant with topnav logo -->
@@ -289,6 +304,6 @@
 
   <div id="toast-container"></div>
 
-  <script src="js/main.js?v=3"></script>
+  <script src="js/main.js?v=4"></script>
 </body>
 </html>

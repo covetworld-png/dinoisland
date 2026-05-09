@@ -547,6 +547,30 @@ body::after {
   to   { opacity:0; transform:translateX(16px); }
 }
 
+/* ── auth overlay ── */
+.auth-overlay {
+  position:fixed; inset:0;
+  background:rgba(7,10,15,0.95);
+  backdrop-filter:blur(16px);
+  z-index:200;
+  display:none; align-items:center; justify-content:center;
+}
+.auth-overlay.show { display:flex; }
+.auth-box {
+  text-align:center; padding:48px 32px;
+  max-width:420px; width:90%;
+}
+.auth-icon { font-size:3.2rem; margin-bottom:20px; opacity:0.9; }
+.auth-box h2 {
+  font-family:var(--font-display); color:var(--gold);
+  font-size:1.4rem; margin-bottom:14px;
+  text-shadow:0 0 20px var(--gold-glow);
+}
+.auth-box p {
+  color:var(--fg-2); font-size:0.95rem;
+  line-height:1.7; margin-bottom:32px;
+}
+
 /* ── footer ── */
 .pagefoot {
   padding-block:32px; color:var(--muted); font-size:13px;
