@@ -26,6 +26,7 @@ const i18n = {
     toast_new_user: '新用户 #{id} 已登录',
     toast_returning_user: '回流用户 #{id} 已登录',
     empty: '暂无数据',
+    auth_error: '您的登录已过期或无访问权限，请重新登录团长账号后刷新页面。',
   },
   vi: {
     title: 'Bảng ngườI chơI không bang', subtitle: 'Guild-less Player Dashboard',
@@ -46,6 +47,7 @@ const i18n = {
     toast_new_user: 'Tân thủ #{id} đã đăng nhập',
     toast_returning_user: 'NgườI cũ #{id} đã đăng nhập',
     empty: 'Không có dữ liệu',
+    auth_error: 'Phiên đăng nhập đã hết hạn hoặc tài khoản không có quyền. Vui lòng đăng nhập lại tài khoản đoàn trưởng và làm mới trang.',
   }
 };
 
@@ -90,6 +92,7 @@ let players = [
 ];
 
 let currentFilter = 'all';
+let hasAuthError = false;
 
 // ===== Helpers =====
 function calcOnlineMinutes(since) {
@@ -100,14 +103,41 @@ function calcOnlineMinutes(since) {
   return Math.max(0, current - start);
 }
 
+// ===== Auth Error =====
+function renderAuthError() {
+  const tbody = document.getElementById('player-table');
+  const btnText = currentLang === 'vi' ? 'Đăng nhập lại' : '重新登录';
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="7">
+        <div class="auth-error-card">
+          <div class="auth-error-icon">🔒</div>
+          <div class="auth-error-desc">${t('auth_error')}</div>
+          <button class="auth-error-btn" onclick="location.reload()">${btnText}</button>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
 // ===== Render =====
 function renderAll() {
+  if (hasAuthError) {
+    renderStats();
+    renderFilters();
+    renderAuthError();
+    return;
+  }
   renderStats();
   renderFilters();
   renderTable();
 }
 
 function renderStats() {
+  if (hasAuthError) {
+    document.getElementById('stats-bar').innerHTML = '';
+    return;
+  }
   const newCount = players.filter(p => p.tag === 'new').length;
   const retCount = players.filter(p => p.tag === 'returning').length;
   const noGuild = players.filter(p => p.guildStatus === 'no_guild').length;
@@ -146,6 +176,10 @@ function renderStats() {
 }
 
 function renderFilters() {
+  if (hasAuthError) {
+    document.querySelectorAll('.filter-count').forEach(el => el.textContent = '0');
+    return;
+  }
   const total = players.length;
   const newCount = players.filter(p => p.tag === 'new').length;
   const retCount = players.filter(p => p.tag === 'returning').length;

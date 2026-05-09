@@ -587,6 +587,45 @@ tbody td { padding: 12px 14px; color: var(--text-primary); vertical-align: middl
   align-items: center;
   gap: 6px;
 }
+
+/* Auth Error Card */
+.auth-error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 12px;
+}
+.auth-error-icon { font-size: 48px; opacity: 0.6; }
+.auth-error-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.auth-error-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  max-width: 360px;
+  line-height: 1.6;
+}
+.auth-error-btn {
+  margin-top: 8px;
+  padding: 8px 24px;
+  background: var(--accent-08);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.auth-error-btn:hover {
+  background: var(--gold);
+  color: var(--on-accent);
+}
 .btn-copy-id {
   padding: 3px 6px; border: 1px solid var(--gold);
   border-radius: 4px; background: var(--accent-08); color: var(--gold);
