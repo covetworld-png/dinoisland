@@ -702,6 +702,10 @@ const I18N = {
     importMultiOK: '导入成功！{n} 天数据已保存。\n日期：{dates}',
     existingDataLabel: '已有数据：',
     phAccount: '账号', phAccountOptional: '账号（可选）',
+    confirmWin: '确认「{winner}」获胜？\n\n{p1} vs {p2}',
+    confirmRemoveResult: '确认删除这场比赛结果？\n\n{p1} vs {p2}',
+    cancelAbsent: '取消缺席', markAbsent: '标记缺席',
+    winBtn: '胜', absentLabel: '缺席', absentCSV: '(缺席)',
   },
   vi: {
     title: '⚔ Bảng Điểm Nhật Sai', subtitle: 'PVP Đỉnh Phong Đối Quyết · Công Cụ Ghi Điểm GM',
@@ -1905,7 +1909,7 @@ function setWeeklyResult(p1, p2, winner) {
 }
 
 function confirmSetWeeklyResult(p1, p2, winner) {
-  const msg = '确认「' + winner + '」获胜？\n\n' + p1 + ' vs ' + p2;
+  const msg = t('confirmWin').replace('{winner}', winner).replace('{p1}', p1).replace('{p2}', p2);
   if (confirm(msg)) setWeeklyResult(p1, p2, winner);
 }
 
@@ -1917,7 +1921,7 @@ function removeWeeklyResult(p1, p2) {
 }
 
 function confirmRemoveWeeklyResult(p1, p2) {
-  const msg = '确认删除这场比赛结果？\n\n' + p1 + ' vs ' + p2;
+  const msg = t('confirmRemoveResult').replace('{p1}', p1).replace('{p2}', p2);
   if (confirm(msg)) removeWeeklyResult(p1, p2);
 }
 
@@ -1943,7 +1947,7 @@ function renderWeekly() {
       const isAbsent = absent.includes(p);
       return '<span class="player-tag' + (isAbsent ? ' absent' : '') + '">' +
         formatWeeklyPlayer(p) +
-        '<button class="absent-btn" onclick="toggleWeeklyAbsent(\'' + escapeHtml(p).replace(/'/g, "\\'") + '\')" title="' + (isAbsent ? '取消缺席' : '标记缺席') + '">' + (isAbsent ? '✓' : '✕') + '</button>' +
+        '<button class="absent-btn" onclick="toggleWeeklyAbsent(\'' + escapeHtml(p).replace(/'/g, "\\'") + '\')" title="' + (isAbsent ? t('cancelAbsent') : t('markAbsent')) + '">' + (isAbsent ? '✓' : '✕') + '</button>' +
         '</span>';
     }).join('');
   }
@@ -1973,18 +1977,18 @@ function renderWeekly() {
       let p2NameColor = getColor(s.p2);
       if (done) {
         cardClass = 'done';
-        headerRight = '<span class="schedule-status-win">✓ ' + escapeHtml(winner) + ' 胜</span>' +
+        headerRight = '<span class="schedule-status-win">✓ ' + escapeHtml(winner) + ' ' + t('winBtn') + '</span>' +
           '<button class="schedule-del-btn" onclick="removeWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('btnDel') + '</button>';
         if (winner !== s.p1) p1NameColor = 'var(--text2)';
         if (winner !== s.p2) p2NameColor = 'var(--text2)';
       } else if (p1Absent || p2Absent) {
         cardClass = 'absent';
-        headerRight = '<span class="schedule-status-skip">缺席</span>';
+        headerRight = '<span class="schedule-status-skip">' + t('absentLabel') + '</span>';
         p1NameColor = 'var(--text2)';
         p2NameColor = 'var(--text2)';
       } else {
-        p1WinBtn = '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">胜</button>';
-        p2WinBtn = '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">胜</button>';
+        p1WinBtn = '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
+        p2WinBtn = '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
       }
       const p1Acc = weeklyPlayerAccounts[s.p1];
       const p2Acc = weeklyPlayerAccounts[s.p2];
@@ -2208,7 +2212,7 @@ function exportWeeklyData() {
   csv += '参赛名单\n';
   players.forEach(p => {
     const acc = weeklyPlayerAccounts[p] || '';
-    csv += p + ',' + acc + (absent.includes(p) ? ',(缺席)' : '') + '\n';
+    csv += p + ',' + acc + (absent.includes(p) ? ',' + t('absentCSV') : '') + '\n';
   });
   csv += '\n';
   
