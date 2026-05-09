@@ -245,7 +245,7 @@
                                 <span class="lang-vi">Đăng nhập để cập nhật số vàng nạp realtime</span>
                                 <span class="lang-cn">登录以实时更新您的充值金额</span>
                             </p>
-                            <button class="btn btn-large" id="login-btn">
+                            <button class="btn btn-large" id="login-btn" onclick="window.handleLogin()">
                                 <span class="lang-vi">Đăng nhập</span>
                                 <span class="lang-cn">登录</span>
                             </button>
@@ -354,8 +354,8 @@
                                     </div>
                                 </div>
                                 <div class="current-leader-status">
-                                    <span class="lang-vi">Nếu không ai vượt qua sau đó, sẽ được xác nhận giải thường khi kết thúc sự kiện.</span>
-                                    <span class="lang-cn">若后续无人超越，活动结束即确认获奖。</span>
+                                    <span class="lang-vi">Ngườờ dẫn đầu đã loại trừ ngườờ đứng đầu bảng tích lũy (không thể đồng thờ đạt 2 giải).</span>
+                                    <span class="lang-cn">当前领先者已排除累积榜第一的玩家（不可同时获得两奖）。</span>
                                 </div>
                             </div>
 
@@ -368,8 +368,8 @@
                                 </div>
                                 <div class="side-reward-item">
                                     <div class="dot"></div>
-                                    <span class="lang-vi">Cộng dồn với giải Chí Tôn Bạo Long Vương</span>
-                                    <span class="lang-cn">可与至尊暴龙王奖励叠加</span>
+                                    <span class="lang-vi">Không thể đồng thờ đạt giải Chí Tôn Bạo Long Vương</span>
+                                    <span class="lang-cn">不可与至尊暴龙王奖同时获得</span>
                                 </div>
                             </div>
                         </div>
@@ -439,8 +439,8 @@
                                     <span class="lang-cn">6天中单日最高者获得</span>
                                 </div>
                                 <div class="reward-card-footer highlight">
-                                    <span class="lang-vi">✨ Cộng dồn với giải chính</span>
-                                    <span class="lang-cn">✨ 可与至尊暴龙王奖励叠加</span>
+                                    <span class="lang-vi">✨ Không cộng dồn với giải chính</span>
+                                    <span class="lang-cn">✨ 不可与至尊暴龙王奖同时获得</span>
                                 </div>
                             </div>
                         </div>
@@ -845,8 +845,8 @@
                                     <span class="lang-cn">排名规则</span>
                                 </strong>
                                 <p>
-                                    <span class="lang-vi"><strong>Giải Chí Tôn Bạo Long Vương:</strong> Người đứng đầu bảng tích lũy 6 ngày. <strong>Giải Đỉnh Cao Ngày:</strong> Người có số tiền nạp trong 1 ngày cao nhất (trong 6 ngày). Nếu bằng nhau, ưu tiên người đạt trước (theo thời gian thanh toán đơn hàng thành công).</span>
-                                    <span class="lang-cn"><strong>至尊暴龙王奖：</strong>6日累积排名第一。 <strong>单日巅峰奖：</strong>6天中单日充值最高者。金额相同时，优先完成该金额者获胜（以订单支付成功时间为准）。</span>
+                                    <span class="lang-vi"><strong>Giải Chí Tôn Bạo Long Vương:</strong> Ngườờ đứng đầu bảng tích lũy 6 ngày. <strong>Giải Đỉnh Cao Ngày:</strong> Ngườờ có số tiền nạp trong 1 ngày cao nhất (trong 6 ngày). <strong>Hai giải không thể đồng thờ đạt được.</strong> Nếu ngườờ đứng đầu bảng tích lũy cũng là ngườờ nạp cao nhất trong 1 ngày, giải Đỉnh Cao Ngày sẽ <strong>tuân thứ tự cho ngườờ xếp thứ 2 của ngày đó</strong>. Nếu bằng nhau, ưu tiên ngườờ đạt trước (theo thởi gian thanh toán đơn hàng thành công).</span>
+                                    <span class="lang-cn"><strong>至尊暴龙王奖：</strong>6日累积排名第一。<strong>单日巅峰奖：</strong>6天中单日充值最高者。<strong>两奖不可同时获得。</strong>若累积榜第一的玩家同时是某日的单日最高充值者，则该日单日巅峰奖<strong>顺延给当日第二名</strong>。金额相同时，优先完成该金额者获胜（以订单支付成功时间为准）。</span>
                                 </p>
                             </div>
                         </div>
@@ -871,8 +871,8 @@
                                     <span class="lang-cn">道具奖励发放</span>
                                 </strong>
                                 <p>
-                                    <span class="lang-vi">Phần thưởng vật phẩm (Thẻ cường hóa) được phát qua thư trong game trong vòng <strong>1 ngày làm việc</strong> sau khi kết thúc sự kiện. <strong>Chí Tôn Bạo Long Vương:</strong> Thẻ cường hóa ×50. <strong>Giải Đỉnh Cao Ngày:</strong> Thẻ cường hóa ×30. Hai giải có thể đồng thời đạt được và cộng dồn.</span>
-                                    <span class="lang-cn">道具奖励（强化卡）在活动结束后 <strong>1 个工作日内</strong>通过游戏内邮件发放。<strong>至尊暴龙王奖：</strong>强化卡×50。<strong>单日巅峰奖：</strong>强化卡×30。两奖可同时获得，<strong>奖励叠加</strong>。</span>
+                                    <span class="lang-vi">Phần thưởng vật phẩm (Thẻ cường hóa) được phát qua thư trong game trong vòng <strong>1 ngày làm việc</strong> sau khi kết thúc sự kiện. <strong>Chí Tôn Bạo Long Vương:</strong> Thẻ cường hóa ×50. <strong>Giải Đỉnh Cao Ngày:</strong> Thẻ cường hóa ×30. Hai giải không thể đồng thởi đạt được, mỗi ngườờ chơi chỉ nhận 1 giải.</span>
+                                    <span class="lang-cn">道具奖励（强化卡）在活动结束后 <strong>1 个工作日内</strong>通过游戏内邮件发放。<strong>至尊暴龙王奖：</strong>强化卡×50。<strong>单日巅峰奖：</strong>强化卡×30。<strong>两奖不可同时获得</strong>，每位玩家仅限获得其一。</span>
                                 </p>
                             </div>
                         </div>

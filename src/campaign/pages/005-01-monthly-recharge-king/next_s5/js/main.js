@@ -308,6 +308,12 @@ window.handleLogin = function() {
         console.log('My rank box shown');
     }
     
+    // Update rank display
+    const myRankNum = document.getElementById('my-rank-num');
+    const userRankDisplay = document.getElementById('user-rank-display');
+    if (myRankNum) myRankNum.textContent = mockData.userRank;
+    if (userRankDisplay) userRankDisplay.textContent = '#' + mockData.userRank;
+    
     // Update display
     updateUserDisplay();
     
@@ -571,7 +577,6 @@ function initHallCarousel() {
     if (nextBtn) nextBtn.style.display = 'none';
     if (dots) dots.style.display = 'none';
 }
-    updateHallCarousel();
 }
 
 function init() {
