@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>无公会用户招募日报 - 2026-05-08</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0a1a15;
+  --bg-card: rgba(10, 30, 25, 0.9);
+  --border: rgba(74, 154, 138, 0.2);
+  --text: #e8f5f0;
+  --text-muted: #7aa89a;
+  --accent: #FFD700;
+  --green: #4ade80;
+  --red: #f87171;
+  --blue: #60a5fa;
+  --orange: #fb923c;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+  padding: 20px;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+h1 { font-size: 22px; font-weight: 600; }
+h1 span { color: var(--accent); }
+.meta { color: var(--text-muted); font-size: 13px; }
+
+.legend-bar {
+  display: flex; gap: 16px; font-size: 12px; margin-bottom: 16px;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+.dot-baseline { background: rgba(74, 154, 138, 0.3); border: 1px solid rgba(74, 154, 138, 0.5); }
+.dot-transition { background: rgba(255, 215, 0, 0.3); border: 1px solid rgba(255, 215, 0, 0.5); }
+.dot-intervention { background: rgba(248, 113, 113, 0.3); border: 1px solid rgba(248, 113, 113, 0.5); }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.card-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.card-value { font-size: 26px; font-weight: 700; color: var(--accent); }
+.card-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.card-value.green { color: var(--green); }
+.card-value.red { color: var(--red); }
+
+.charts { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.chart-title { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; }
+.chart-wrap { position: relative; height: 280px; }
+
+.section { margin-bottom: 24px; }
+.section-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.section-title::before { content: ""; display: inline-block; width: 4px; height: 16px; background: var(--accent); border-radius: 2px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+th { color: var(--text-muted); font-weight: 500; background: rgba(255,255,255,0.02); }
+tr:hover { background: rgba(255,255,255,0.03); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.highlight { color: var(--accent); font-weight: 600; }
+
+.badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.badge-baseline { background: rgba(74, 154, 138, 0.15); color: var(--green); }
+.badge-transition { background: rgba(255, 215, 0, 0.15); color: var(--accent); }
+.badge-intervention { background: rgba(248, 113, 113, 0.15); color: var(--red); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 768px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+.note {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.note strong { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>🦖 无公会用户招募 <span>日报</span></h1>
+      <div class="meta">统计日期: 2026-05-08 | 生成时间: 2026-05-09 16:15</div>
+    </div>
+  </header>
+
+  <div class="legend-bar">
+    <div class="legend-item"><div class="legend-dot dot-baseline"></div>基线期 (5/5-5/7)</div>
+    <div class="legend-item"><div class="legend-dot dot-transition"></div>过渡期 (5/8)</div>
+    <div class="legend-item"><div class="legend-dot dot-intervention"></div>干预期 (5/9+)</div>
+  </div>
+
+  <div class="note">
+    <strong>口径：</strong>新用户 = game_dau_hour 中首次活跃日期 = 当日；老用户 = 之前活跃过 + 当日活跃 + 当日无公会。
+    入团率 = 当日入团 / 该群体人数；内部团占比 = 入内部团 / 该群体入团总数。
+    基线期平均新用户入团率: 30.2%，老用户入团率: 15.0%
+  </div>
+
+  <div class="section">
+    <div class="section-title">2026-05-08 核心指标</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">新用户（首次活跃）</div>
+        <div class="card-value">18</div>
+        <div class="card-sub">入团 6 | 率 33.3%</div>
+      </div>
+      <div class="card">
+        <div class="card-label">新用户内部团占比</div>
+        <div class="card-value">83.3%</div>
+        <div class="card-sub">内部团 5 / 总入团 6</div>
+      </div>
+      <div class="card">
+        <div class="card-label">老用户（无公会+活跃）</div>
+        <div class="card-value">25</div>
+        <div class="card-sub">入团 3 | 率 12.0%</div>
+      </div>
+      <div class="card">
+        <div class="card-label">老用户内部团占比</div>
+        <div class="card-value">33.3%</div>
+        <div class="card-sub">内部团 1 / 总入团 3</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts">
+    <div class="chart-box">
+      <div class="chart-title">📊 入团人数（柱状）与入团率（折线）</div>
+      <div class="chart-wrap"><canvas id="chartMain"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">⏱️ 分公会新用户响应速度趋势（分钟，对数轴）</div>
+      <div class="chart-wrap"><canvas id="chartResponse"></canvas></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="section">
+      <div class="section-title">新用户响应速度明细 (2026-05-08)</div>
+      <table>
+        <thead><tr><th>UID</th><th>昵称</th><th>公会</th><th class="num">响应</th></tr></thead>
+        <tbody><tr><td>13229573</td><td>long10</td><td>Nhật Thực</td><td class='num'>1h5m</td></tr>
+<tr><td>13229579</td><td>langkhach</td><td>Nhật Thực</td><td class='num'>1h55m</td></tr>
+<tr><td>13229562</td><td>okethoi</td><td>Hoả Long</td><td class='num'>2h3m</td></tr>
+<tr><td>13229573</td><td>HUKAN</td><td>GOD DINO</td><td class='num'>3h24m</td></tr>
+<tr><td>13229568</td><td>milkbanana</td><td>Hắc Ám</td><td class='num'>11h10m</td></tr>
+<tr><td>13229358</td><td>hungga</td><td>Nhật Thực</td><td class='num'>130h20m</td></tr>
+</tbody>
+      </table>
+    </div>
+    <div class="section">
+      <div class="section-title">分公会新用户平均响应速度 (2026-05-08)</div>
+      <table>
+        <thead><tr><th>公会</th><th class="num">人数</th><th class="num">平均响应</th></tr></thead>
+        <tbody><tr><td>Hoả Long</td><td class='num'>1</td><td class='num'>2h3m</td></tr>
+<tr><td>GOD DINO</td><td class='num'>1</td><td class='num'>3h24m</td></tr>
+<tr><td>Hắc Ám</td><td class='num'>1</td><td class='num'>11h10m</td></tr>
+<tr><td>Nhật Thực</td><td class='num'>3</td><td class='num'>44h27m</td></tr>
+</tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">内部团流入明细 (2026-05-08)</div>
+    <table>
+      <thead><tr><th>公会</th><th>团长</th><th class="num">新用户</th><th class="num">老用户</th><th class="num">合计</th></tr></thead>
+      <tbody><tr><td><span style='color:#4ade80;font-size:11px;'>[Q]</span> Hoả Long</td><td>SPECTER</td><td class='num'>1</td><td class='num'>1</td><td class='num' style='font-weight:600;'>2</td></tr>
+<tr><td><span style='color:#4ade80;font-size:11px;'>[Q]</span> GOD DINO</td><td>SKTTI</td><td class='num'>1</td><td class='num'>1</td><td class='num' style='font-weight:600;'>2</td></tr>
+<tr><td><span style='color:#4ade80;font-size:11px;'>[Q]</span> God King</td><td>ChiuChiu</td><td class='num'>0</td><td class='num'>0</td><td class='num' style='font-weight:600;'>0</td></tr>
+<tr><td><span style='color:#4ade80;font-size:11px;'>[Q]</span> NguyệtCung</td><td>NguyệtCung</td><td class='num'>0</td><td class='num'>0</td><td class='num' style='font-weight:600;'>0</td></tr>
+<tr><td><span style='color:#4ade80;font-size:11px;'>[Q]</span> Tu Tiên</td><td>TUTien</td><td class='num'>0</td><td class='num'>0</td><td class='num' style='font-weight:600;'>0</td></tr>
+<tr><td><span style='color:#60a5fa;font-size:11px;'>[K]</span> Thiên Cơ</td><td>Thiên Cơ</td><td class='num'>0</td><td class='num'>1</td><td class='num' style='font-weight:600;'>1</td></tr>
+<tr><td><span style='color:#60a5fa;font-size:11px;'>[K]</span> Hắc Ám</td><td>Hắc Ám</td><td class='num'>1</td><td class='num'>2</td><td class='num' style='font-weight:600;'>3</td></tr>
+<tr><td><span style='color:#60a5fa;font-size:11px;'>[K]</span> Nhật Thực</td><td>Nhật Thực</td><td class='num'>3</td><td class='num'>1</td><td class='num' style='font-weight:600;'>4</td></tr>
+</tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">历史数据</div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th class="num">新用户</th>
+            <th class="num">新入团</th>
+            <th class="num">新入团率</th>
+            <th class="num">新内团</th>
+            <th class="num">老用户</th>
+            <th class="num">老入团</th>
+            <th class="num">老入团率</th>
+            <th class="num">老内团</th>
+          </tr>
+        </thead>
+        <tbody><tr>
+            <td><span class="badge badge-transition">过渡</span> 2026-05-08</td>
+            <td class="num">18</td>
+            <td class="num highlight">6</td>
+            <td class="num">33.3%</td>
+            <td class="num">5</td>
+            <td class="num">25</td>
+            <td class="num highlight">3</td>
+            <td class="num">12.0%</td>
+            <td class="num">1</td>
+        </tr><tr>
+            <td><span class="badge badge-baseline">基线</span> 2026-05-07</td>
+            <td class="num">19</td>
+            <td class="num highlight">7</td>
+            <td class="num">36.8%</td>
+            <td class="num">4</td>
+            <td class="num">18</td>
+            <td class="num highlight">5</td>
+            <td class="num">27.8%</td>
+            <td class="num">1</td>
+        </tr><tr>
+            <td><span class="badge badge-baseline">基线</span> 2026-05-06</td>
+            <td class="num">16</td>
+            <td class="num highlight">1</td>
+            <td class="num">6.2%</td>
+            <td class="num">1</td>
+            <td class="num">41</td>
+            <td class="num highlight">2</td>
+            <td class="num">4.9%</td>
+            <td class="num">1</td>
+        </tr><tr>
+            <td><span class="badge badge-baseline">基线</span> 2026-05-05</td>
+            <td class="num">10</td>
+            <td class="num highlight">3</td>
+            <td class="num">30.0%</td>
+            <td class="num">0</td>
+            <td class="num">43</td>
+            <td class="num highlight">3</td>
+            <td class="num">7.0%</td>
+            <td class="num">1</td>
+        </tr><tr>
+            <td><span class="badge badge-baseline">基线</span> 2026-05-04</td>
+            <td class="num">18</td>
+            <td class="num highlight">7</td>
+            <td class="num">38.9%</td>
+            <td class="num">7</td>
+            <td class="num">35</td>
+            <td class="num highlight">7</td>
+            <td class="num">20.0%</td>
+            <td class="num">5</td>
+        </tr><tr>
+            <td><span class="badge badge-baseline">基线</span> 2026-05-03</td>
+            <td class="num">12</td>
+            <td class="num highlight">3</td>
+            <td class="num">25.0%</td>
+            <td class="num">3</td>
+            <td class="num">24</td>
+            <td class="num highlight">5</td>
+            <td class="num">20.8%</td>
+            <td class="num">2</td>
+        </tr><tr>
+            <td><span class="badge badge-baseline">基线</span> 2026-05-02</td>
+            <td class="num">9</td>
+            <td class="num highlight">4</td>
+            <td class="num">44.4%</td>
+            <td class="num">2</td>
+            <td class="num">32</td>
+            <td class="num highlight">3</td>
+            <td class="num">9.4%</td>
+            <td class="num">3</td>
+        </tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const labels = ["05-02\n(\u57fa\u7ebf)", "05-03\n(\u57fa\u7ebf)", "05-04\n(\u57fa\u7ebf)", "05-05\n(\u57fa\u7ebf)", "05-06\n(\u57fa\u7ebf)", "05-07\n(\u57fa\u7ebf)", "05-08\n(\u8fc7\u6e21)"];
+const newJoined = [4, 3, 7, 3, 1, 7, 6];
+const oldJoined = [3, 5, 7, 3, 2, 5, 3];
+const newRate = [44.4, 25.0, 38.9, 30.0, 6.2, 36.8, 33.3];
+const oldRate = [9.4, 20.8, 20.0, 7.0, 4.9, 27.8, 12.0];
+
+new Chart(document.getElementById('chartMain'), {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        type: 'bar',
+        label: '新用户入团数',
+        data: newJoined,
+        backgroundColor: 'rgba(74, 154, 138, 0.4)',
+        borderColor: 'rgba(74, 154, 138, 0.7)',
+        borderWidth: 1,
+        yAxisID: 'y',
+        order: 2,
+        pointStyle: 'rect',
+        pointRadius: 0
+      },
+      {
+        type: 'bar',
+        label: '老用户入团数',
+        data: oldJoined,
+        backgroundColor: 'rgba(255, 215, 0, 0.35)',
+        borderColor: 'rgba(255, 215, 0, 0.6)',
+        borderWidth: 1,
+        yAxisID: 'y',
+        order: 3,
+        pointStyle: 'rect',
+        pointRadius: 0
+      },
+      {
+        type: 'line',
+        label: '新用户入团率 (%)',
+        data: newRate,
+        borderColor: '#4ade80',
+        backgroundColor: '#4ade80',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointBackgroundColor: '#0a1a15',
+        pointBorderColor: '#4ade80',
+        pointBorderWidth: 2,
+        pointStyle: 'line',
+        yAxisID: 'y1',
+        tension: 0.3,
+        order: 0
+      },
+      {
+        type: 'line',
+        label: '老用户入团率 (%)',
+        data: oldRate,
+        borderColor: '#FFD700',
+        backgroundColor: '#FFD700',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointBackgroundColor: '#0a1a15',
+        pointBorderColor: '#FFD700',
+        pointBorderWidth: 2,
+        pointStyle: 'line',
+        yAxisID: 'y1',
+        tension: 0.3,
+        order: 1
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: { color: '#e8f5f0', usePointStyle: true },
+        position: 'top'
+      },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            return ctx.dataset.label + ': ' + ctx.parsed.y;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#7aa89a', maxRotation: 0 },
+        grid: { color: 'rgba(74,154,138,0.1)' }
+      },
+      y: {
+        position: 'left',
+        type: 'linear',
+        ticks: { color: '#7aa89a' },
+        grid: { color: 'rgba(74,154,138,0.1)' },
+        title: { display: true, text: '入团人数', color: '#7aa89a' }
+      },
+      y1: {
+        position: 'right',
+        type: 'linear',
+        ticks: { color: '#FFD700' },
+        grid: { display: false },
+        title: { display: true, text: '入团率 (%)', color: '#FFD700' }
+      }
+    }
+  }
+});
+
+const trendLabels = ["05-02", "05-03", "05-04", "05-06", "05-07", "05-08"];
+const trendDatasets = [{"label": "Ho\u1ea3 Long", "data": [null, null, null, null, null, 123], "borderColor": "#4ade80", "backgroundColor": "#4ade80", "borderWidth": 2, "pointRadius": 4, "spanGaps": true, "tension": 0.3}, {"label": "GOD DINO", "data": [null, 183, null, 106, null, 204], "borderColor": "#60a5fa", "backgroundColor": "#60a5fa", "borderWidth": 2, "pointRadius": 4, "spanGaps": true, "tension": 0.3}, {"label": "H\u1eafc \u00c1m", "data": [8112, 382, 145, null, 480, 670], "borderColor": "#f87171", "backgroundColor": "#f87171", "borderWidth": 2, "pointRadius": 4, "spanGaps": true, "tension": 0.3}, {"label": "Nh\u1eadt Th\u1ef1c", "data": [null, 1256, 2098, null, 153, 2667], "borderColor": "#FFD700", "backgroundColor": "#FFD700", "borderWidth": 2, "pointRadius": 4, "spanGaps": true, "tension": 0.3}];
+
+new Chart(document.getElementById('chartResponse'), {
+  type: 'line',
+  data: {
+    labels: trendLabels,
+    datasets: trendDatasets
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: { color: '#e8f5f0', usePointStyle: true, boxWidth: 8 },
+        position: 'top'
+      },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            let v = ctx.parsed.y;
+            return ctx.dataset.label + ': ' + (v ? Math.round(v) + ' 分钟' : '无数据');
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#7aa89a' },
+        grid: { color: 'rgba(74,154,138,0.1)' }
+      },
+      y: {
+        type: 'logarithmic',
+        ticks: {
+          color: '#7aa89a',
+          callback: function(value) {
+            if (value >= 60) return Math.round(value/60) + 'h';
+            return value + 'm';
+          }
+        },
+        grid: { color: 'rgba(74,154,138,0.1)' },
+        title: { display: true, text: '响应时间（对数轴）', color: '#7aa89a' }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
