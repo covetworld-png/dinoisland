@@ -335,7 +335,7 @@ def fmt_min(m):
 
 
 def generate_html(stats_list, today_stats, today_guild_inflow, today_response,
-                  today_response_by_guild, response_trend, report_date):
+                  today_response_by_guild, response_trend, report_date, start_date, all_days_data):
     
     baseline = [s for s in stats_list if s['phase'] == '基线']
     avg_new_rate = round(sum(s['new_rate'] for s in baseline) / len(baseline), 1) if baseline else 0
@@ -383,6 +383,7 @@ def generate_html(stats_list, today_stats, today_guild_inflow, today_response,
     old_rate_json = json.dumps(old_rate_js)
     trend_labels_json = json.dumps(trend_labels)
     trend_datasets_json = json.dumps(trend_datasets)
+    all_days_data_json = json.dumps(all_days_data, default=str)
     
     response_rows = ""
     for r in today_response:
@@ -404,7 +405,7 @@ def generate_html(stats_list, today_stats, today_guild_inflow, today_response,
     history_rows = ""
     for s in reversed(stats_list):
         phase_badge = {'基线': 'badge-baseline', '过渡': 'badge-transition', '干预': 'badge-intervention'}[s['phase']]
-        history_rows += f"""<tr>
+        history_rows += f"""<tr data-date="{s['date']}">
             <td><span class="badge {phase_badge}">{s['phase']}</span> {s['date']}</td>
             <td class="num">{s['new_users']}</td>
             <td class="num highlight">{s['new_joined']}</td>
@@ -452,6 +453,20 @@ header {{
 h1 {{ font-size: 22px; font-weight: 600; }}
 h1 span {{ color: var(--accent); }}
 .meta {{ color: var(--text-muted); font-size: 13px; }}
+
+.date-picker {{
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}}
+.date-picker:focus {{ border-color: var(--accent); }}
+
+.history-row.active {{ background: rgba(255, 215, 0, 0.08); }}
 
 .legend-bar {{
   display: flex; gap: 16px; font-size: 12px; margin-bottom: 16px;
@@ -529,7 +544,10 @@ tr:hover {{ background: rgba(255,255,255,0.03); }}
   <header>
     <div>
       <h1>🦖 无公会用户招募 <span>日报</span></h1>
-      <div class="meta">统计日期: {report_date} | 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}</div>
+      <div class="meta">统计日期: <span id="current-date">{report_date}</span> | 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}</div>
+    </div>
+    <div>
+      <input type="date" id="datePicker" class="date-picker" value="{report_date}" min="{start_date}" max="{report_date}">
     </div>
   </header>
 
@@ -546,27 +564,27 @@ tr:hover {{ background: rgba(255,255,255,0.03); }}
   </div>
 
   <div class="section">
-    <div class="section-title">{report_date} 核心指标</div>
+    <div class="section-title" id="section-title">{report_date} 核心指标</div>
     <div class="cards">
       <div class="card">
         <div class="card-label">新用户（首次活跃）</div>
-        <div class="card-value">{today_stats['new_users']}</div>
-        <div class="card-sub">入团 {today_stats['new_joined']} | 率 {today_stats['new_rate']}%</div>
+        <div class="card-value" id="card-new-users">{today_stats['new_users']}</div>
+        <div class="card-sub" id="card-new-sub">入团 <span id="card-new-joined">{today_stats['new_joined']}</span> | 率 <span id="card-new-rate">{today_stats['new_rate']}</span>%</div>
       </div>
       <div class="card">
         <div class="card-label">新用户内部团占比</div>
-        <div class="card-value">{today_stats['new_internal_rate']}%</div>
-        <div class="card-sub">内部团 {today_stats['new_internal']} / 总入团 {today_stats['new_joined']}</div>
+        <div class="card-value" id="card-new-internal-rate">{today_stats['new_internal_rate']}%</div>
+        <div class="card-sub">内部团 <span id="card-new-internal">{today_stats['new_internal']}</span> / 总入团 <span id="card-new-joined2">{today_stats['new_joined']}</span></div>
       </div>
       <div class="card">
         <div class="card-label">老用户（无公会+活跃）</div>
-        <div class="card-value">{today_stats['old_users']}</div>
-        <div class="card-sub">入团 {today_stats['old_joined']} | 率 {today_stats['old_rate']}%</div>
+        <div class="card-value" id="card-old-users">{today_stats['old_users']}</div>
+        <div class="card-sub" id="card-old-sub">入团 <span id="card-old-joined">{today_stats['old_joined']}</span> | 率 <span id="card-old-rate">{today_stats['old_rate']}</span>%</div>
       </div>
       <div class="card">
         <div class="card-label">老用户内部团占比</div>
-        <div class="card-value">{today_stats['old_internal_rate']}%</div>
-        <div class="card-sub">内部团 {today_stats['old_internal']} / 总入团 {today_stats['old_joined']}</div>
+        <div class="card-value" id="card-old-internal-rate">{today_stats['old_internal_rate']}%</div>
+        <div class="card-sub">内部团 <span id="card-old-internal">{today_stats['old_internal']}</span> / 总入团 <span id="card-old-joined2">{today_stats['old_joined']}</span></div>
       </div>
     </div>
   </div>
@@ -584,26 +602,26 @@ tr:hover {{ background: rgba(255,255,255,0.03); }}
 
   <div class="two-col">
     <div class="section">
-      <div class="section-title">新用户响应速度明细 ({report_date})</div>
+      <div class="section-title" id="response-title">新用户响应速度明细 ({report_date})</div>
       <table>
         <thead><tr><th>UID</th><th>昵称</th><th>公会</th><th class="num">响应</th></tr></thead>
-        <tbody>{response_rows}</tbody>
+        <tbody id="response-tbody">{response_rows}</tbody>
       </table>
     </div>
     <div class="section">
-      <div class="section-title">分公会新用户平均响应速度 ({report_date})</div>
+      <div class="section-title" id="guild-response-title">分公会新用户平均响应速度 ({report_date})</div>
       <table>
         <thead><tr><th>公会</th><th class="num">人数</th><th class="num">平均响应</th></tr></thead>
-        <tbody>{guild_response_rows}</tbody>
+        <tbody id="guild-response-tbody">{guild_response_rows}</tbody>
       </table>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">内部团流入明细 ({report_date})</div>
+    <div class="section-title" id="inflow-title">内部团流入明细 ({report_date})</div>
     <table>
       <thead><tr><th>公会</th><th>团长</th><th class="num">新用户</th><th class="num">老用户</th><th class="num">合计</th></tr></thead>
-      <tbody>{guild_inflow_rows}</tbody>
+      <tbody id="inflow-tbody">{guild_inflow_rows}</tbody>
     </table>
   </div>
 
@@ -624,7 +642,7 @@ tr:hover {{ background: rgba(255,255,255,0.03); }}
             <th class="num">老内团</th>
           </tr>
         </thead>
-        <tbody>{history_rows}</tbody>
+        <tbody id="history-tbody">{history_rows}</tbody>
       </table>
     </div>
   </div>
@@ -632,6 +650,7 @@ tr:hover {{ background: rgba(255,255,255,0.03); }}
 </div>
 
 <script>
+const allDaysData = {all_days_data_json};
 const labels = {labels_json};
 const newJoined = {new_joined_json};
 const oldJoined = {old_joined_json};
@@ -786,6 +805,90 @@ new Chart(document.getElementById('chartResponse'), {{
     }}
   }}
 }});
+
+// 日期切换功能
+function fmtMin(m) {{
+  if (m === null || m === undefined) return '-';
+  return (m >= 60 ? Math.floor(m/60) + 'h' : '') + (m % 60) + 'm';
+}}
+
+function renderDate(date) {{
+  const data = allDaysData[date];
+  if (!data) return;
+  const st = data.stats;
+  const gi = data.guild_inflow;
+  const resp = data.response;
+  const respGuild = data.response_by_guild;
+  
+  // 更新标题
+  document.getElementById('current-date').textContent = date;
+  document.getElementById('section-title').textContent = date + ' 核心指标';
+  document.getElementById('response-title').textContent = '新用户响应速度明细 (' + date + ')';
+  document.getElementById('guild-response-title').textContent = '分公会新用户平均响应速度 (' + date + ')';
+  document.getElementById('inflow-title').textContent = '内部团流入明细 (' + date + ')';
+  
+  // 更新核心指标卡片
+  document.getElementById('card-new-users').textContent = st.new_users;
+  document.getElementById('card-new-joined').textContent = st.new_joined;
+  document.getElementById('card-new-rate').textContent = st.new_rate;
+  document.getElementById('card-new-sub').innerHTML = '入团 <span id="card-new-joined">' + st.new_joined + '</span> | 率 <span id="card-new-rate">' + st.new_rate + '</span>%';
+  document.getElementById('card-new-internal-rate').textContent = st.new_internal_rate + '%';
+  document.getElementById('card-new-internal').textContent = st.new_internal;
+  document.getElementById('card-new-joined2').textContent = st.new_joined;
+  
+  document.getElementById('card-old-users').textContent = st.old_users;
+  document.getElementById('card-old-joined').textContent = st.old_joined;
+  document.getElementById('card-old-rate').textContent = st.old_rate;
+  document.getElementById('card-old-sub').innerHTML = '入团 <span id="card-old-joined">' + st.old_joined + '</span> | 率 <span id="card-old-rate">' + st.old_rate + '</span>%';
+  document.getElementById('card-old-internal-rate').textContent = st.old_internal_rate + '%';
+  document.getElementById('card-old-internal').textContent = st.old_internal;
+  document.getElementById('card-old-joined2').textContent = st.old_joined;
+  
+  // 更新响应速度明细表
+  let respHtml = '';
+  if (resp && resp.length > 0) {{
+    for (const r of resp) {{
+      respHtml += '<tr><td>' + r.game_uid + '</td><td>' + (r.nick_name || '-') + '</td><td>' + r.guild_name + '</td><td class="num">' + fmtMin(r.diff_minutes) + '</td></tr>';
+    }}
+  }} else {{
+    respHtml = '<tr><td colspan="4" style="text-align:center;color:#7aa89a;">无数据</td></tr>';
+  }}
+  document.getElementById('response-tbody').innerHTML = respHtml;
+  
+  // 更新分公会平均响应表
+  let respGuildHtml = '';
+  if (respGuild && respGuild.length > 0) {{
+    for (const r of respGuild) {{
+      respGuildHtml += '<tr><td>' + r.guild_name + '</td><td class="num">' + r.cnt + '</td><td class="num">' + fmtMin(r.avg_min) + '</td></tr>';
+    }}
+  }} else {{
+    respGuildHtml = '<tr><td colspan="3" style="text-align:center;color:#7aa89a;">无数据</td></tr>';
+  }}
+  document.getElementById('guild-response-tbody').innerHTML = respGuildHtml;
+  
+  // 更新内部团流入明细表
+  const colors = {{'Q': '#4ade80', 'K': '#60a5fa'}};
+  let inflowHtml = '';
+  for (const g of gi) {{
+    const sc = colors[g.server] || '#999';
+    inflowHtml += '<tr><td><span style="color:' + sc + ';font-size:11px;">[' + g.server + ']</span> ' + g.guild + '</td><td>' + g.leader + '</td><td class="num">' + g.new_cnt + '</td><td class="num">' + g.old_cnt + '</td><td class="num" style="font-weight:600;">' + g.total + '</td></tr>';
+  }}
+  document.getElementById('inflow-tbody').innerHTML = inflowHtml;
+  
+  // 历史表高亮
+  document.querySelectorAll('#history-tbody tr').forEach(tr => {{
+    tr.classList.toggle('active', tr.dataset.date === date);
+  }});
+}}
+
+document.getElementById('datePicker').addEventListener('change', function(e) {{
+  renderDate(e.target.value);
+}});
+
+// 初始高亮当前日期
+document.querySelectorAll('#history-tbody tr').forEach(tr => {{
+  tr.classList.toggle('active', tr.dataset.date === '{report_date}');
+}});
 </script>
 </body>
 </html>'''
@@ -819,7 +922,7 @@ def git_commit_push(output_path, report_date):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='生成无公会用户招募日报 v3.2')
+    parser = argparse.ArgumentParser(description='生成无公会用户招募日报 v3.3')
     parser.add_argument('--date', help='指定日期 (YYYY-MM-DD)，默认昨日')
     parser.add_argument('--days', type=int, default=7, help='趋势图天数')
     parser.add_argument('--output', help='输出路径')
@@ -837,14 +940,31 @@ def main():
     conn = get_conn()
     try:
         stats_list = query_range(conn, start_date, report_date)
-        today_stats = query_daily(conn, report_date)
-        today_guild_inflow = query_guild_inflow(conn, report_date)
-        today_response = query_response(conn, report_date)
-        today_response_by_guild = query_response_by_guild(conn, report_date)
         response_trend = query_response_trend(conn, start_date, report_date)
         
+        # 查询趋势范围内每一天的完整数据（供前端日期切换）
+        all_days_data = {}
+        cur_dt = datetime.strptime(start_date, '%Y-%m-%d')
+        end_dt = datetime.strptime(report_date, '%Y-%m-%d')
+        while cur_dt <= end_dt:
+            d = cur_dt.strftime('%Y-%m-%d')
+            print(f"  查询 {d} 的数据...")
+            all_days_data[d] = {
+                'stats': query_daily(conn, d),
+                'guild_inflow': query_guild_inflow(conn, d),
+                'response': query_response(conn, d),
+                'response_by_guild': query_response_by_guild(conn, d),
+            }
+            cur_dt += timedelta(days=1)
+        
+        today_stats = all_days_data[report_date]['stats']
+        today_guild_inflow = all_days_data[report_date]['guild_inflow']
+        today_response = all_days_data[report_date]['response']
+        today_response_by_guild = all_days_data[report_date]['response_by_guild']
+        
         html = generate_html(stats_list, today_stats, today_guild_inflow,
-                             today_response, today_response_by_guild, response_trend, report_date)
+                             today_response, today_response_by_guild, response_trend,
+                             report_date, start_date, all_days_data)
         
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(html)
