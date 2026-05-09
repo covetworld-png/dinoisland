@@ -204,8 +204,10 @@ function renderTable() {
   else if (currentFilter === 'online') filtered = players.filter(p => p.onlineStatus === 'online');
 
   filtered.sort((a, b) => {
-    if (a.guildStatus === 'no_guild' && b.guildStatus === 'has_guild') return -1;
-    if (a.guildStatus === 'has_guild' && b.guildStatus === 'no_guild') return 1;
+    const aHasGuild = String(a.guildStatus).includes('has_guild');
+    const bHasGuild = String(b.guildStatus).includes('has_guild');
+    if (!aHasGuild && bHasGuild) return -1;
+    if (aHasGuild && !bHasGuild) return 1;
     return 0;
   });
 
