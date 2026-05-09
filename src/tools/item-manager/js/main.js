@@ -90,6 +90,31 @@ function simulateServerPoll(manager) {
     }
 }
 
+// Time conversion helpers (game value 0-2400 ↔ natural minutes 0-1439)
+function gameValToMinutes(gv) {
+    const hh = Math.floor(gv / 100);
+    const mm = Math.round((gv % 100) * 0.6);
+    return hh * 60 + mm;
+}
+function minutesToGameVal(minutes) {
+    const hh = Math.floor(minutes / 60);
+    const mm = minutes % 60;
+    return hh * 100 + Math.round(mm * 100 / 60);
+}
+function minutesToHHMM(minutes) {
+    const hh = Math.floor(minutes / 60);
+    const mm = minutes % 60;
+    return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+}
+function parseHHMM(str) {
+    const m = String(str).trim().match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return null;
+    const hh = parseInt(m[1], 10);
+    const mm = parseInt(m[2], 10);
+    if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+    return hh * 60 + mm;
+}
+
 // Simulated server-polling interval (ms)
 const SERVER_POLL_INTERVAL = 8000;
 
@@ -316,31 +341,37 @@ class ItemManager {
         const presets = document.querySelectorAll('#time-presets .preset-btn');
         if (!input || !slider || !display) return;
 
-        const update = (val) => {
-            let v = parseInt(val, 10);
-            if (isNaN(v) || v < 0) v = 0;
-            if (v > 2400) v = 2400;
-            input.value = v;
-            slider.value = v;
-            const hh = Math.floor(v / 100);
-            const mm = Math.round((v % 100) * 0.6);
-            display.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
-            this.selectedOptions.time = v;
+        const updateFromMinutes = (minutes) => {
+            minutes = Math.max(0, Math.min(1439, minutes));
+            const gv = minutesToGameVal(minutes);
+            input.value = minutesToHHMM(minutes);
+            slider.value = minutes;
+            display.textContent = minutesToHHMM(minutes);
+            this.selectedOptions.time = gv;
         };
 
         input.addEventListener('change', () => {
-            update(input.value);
+            const minutes = parseHHMM(input.value);
+            if (minutes !== null) {
+                updateFromMinutes(minutes);
+            } else {
+                // revert to current value
+                const gv = this.selectedOptions.time || 1200;
+                input.value = minutesToHHMM(gameValToMinutes(gv));
+            }
             presets.forEach(b => b.classList.remove('selected'));
         });
         slider.addEventListener('input', () => {
-            update(slider.value);
+            const minutes = parseInt(slider.value, 10) || 0;
+            updateFromMinutes(minutes);
             presets.forEach(b => b.classList.remove('selected'));
         });
         presets.forEach(btn => {
             btn.addEventListener('click', () => {
                 presets.forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
-                update(btn.dataset.value);
+                const gv = parseInt(btn.dataset.value, 10);
+                updateFromMinutes(gameValToMinutes(gv));
             });
         });
     }
@@ -922,14 +953,13 @@ class ItemManager {
         const presets = container.querySelectorAll('.preset-btn');
         const lock = this.checkConflict('time');
 
-        // 同步选中值到UI
+        // 同步选中值到UI（内部 gameVal → 前端自然时间）
         const sel = this.selectedOptions.time;
         if (sel !== null && sel !== undefined && input && slider && display) {
-            input.value = sel;
-            slider.value = sel;
-            const hh = Math.floor(sel / 100);
-            const mm = Math.round((sel % 100) * 0.6);
-            display.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+            const minutes = gameValToMinutes(sel);
+            input.value = minutesToHHMM(minutes);
+            slider.value = minutes;
+            display.textContent = minutesToHHMM(minutes);
         }
 
         // 更新预设按钮选中状态
@@ -1213,16 +1243,15 @@ function adjustTime(delta) {
     const slider = document.getElementById('time-slider');
     const display = document.getElementById('time-display');
     if (!input) return;
-    let v = parseInt(input.value, 10) || 0;
-    v += delta;
-    if (v < 0) v = 0;
-    if (v > 2400) v = 2400;
-    input.value = v;
-    if (slider) slider.value = v;
-    const hh = Math.floor(v / 100);
-    const mm = Math.round((v % 100) * 0.6);
-    if (display) display.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
-    window.itemManager.selectedOptions.time = v;
+    let minutes = gameValToMinutes(window.itemManager.selectedOptions.time || 1200);
+    minutes += delta;
+    if (minutes < 0) minutes = 0;
+    if (minutes > 1439) minutes = 1439;
+    const gv = minutesToGameVal(minutes);
+    input.value = minutesToHHMM(minutes);
+    if (slider) slider.value = minutes;
+    if (display) display.textContent = minutesToHHMM(minutes);
+    window.itemManager.selectedOptions.time = gv;
     // 取消预设选中状态
     document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.classList.remove('selected'));
 }

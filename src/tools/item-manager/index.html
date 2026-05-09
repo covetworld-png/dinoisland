@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Đạo Cụ</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=20">
+  <link rel="stylesheet" href="css/main.css?v=21">
 </head>
 <body data-lang="vi">
 
@@ -237,19 +237,19 @@
             <div class="time-setter" id="time-setter">
               <div class="time-display">
                 <div class="time-value-row">
-                  <input type="text" id="time-input" class="time-input" value="1200" maxlength="4" inputmode="numeric">
+                  <input type="text" id="time-input" class="time-input" value="12:00" maxlength="5" placeholder="HH:MM">
                   <span id="time-display" class="time-value-text">12:00</span>
                 </div>
                 <div class="time-slider-wrap">
-                  <input type="range" id="time-slider" class="time-slider" min="0" max="2400" step="10" value="1200">
+                  <input type="range" id="time-slider" class="time-slider" min="0" max="1439" step="1" value="720">
                 </div>
                 <div class="time-adjust">
-                  <button class="time-btn" onclick="adjustTime(-100)">−</button>
+                  <button class="time-btn" onclick="adjustTime(-60)">−</button>
                   <span class="time-hint">
                     <span class="lang-vi">0–2400</span>
                     <span class="lang-cn">0–2400</span>
                   </span>
-                  <button class="time-btn" onclick="adjustTime(100)">+</button>
+                  <button class="time-btn" onclick="adjustTime(60)">+</button>
                 </div>
               </div>
               <div class="time-presets" id="time-presets">
@@ -448,6 +448,6 @@
 
   <div id="toast-container"></div>
 
-  <script src="js/main.js?v=10"></script>
+  <script src="js/main.js?v=11"></script>
 </body>
 </html>
