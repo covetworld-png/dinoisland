@@ -361,7 +361,20 @@
     .qr-placeholder { width: 90px; height: 90px; background: var(--bg); border-radius: 4px; margin: 0 auto 6px; display: grid; place-items: center; color: var(--muted); font-size: 10px; font-family: var(--font-mono); }
     .qr-label { font-size: 10px; color: var(--muted); }
     .float-badge { position: fixed; top: 210px; right: 20px; z-index: 5; width: 90px; height: 90px; }
-    @media (max-width: 920px) { .float-qr, .float-badge { display: none; } }
+    .float-download {
+      position: fixed; bottom: 32px; right: 32px; z-index: 5;
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 24px;
+      background: var(--accent); color: var(--bg);
+      border-radius: 999px;
+      font-size: 15px; font-weight: 600;
+      box-shadow: 0 8px 32px color-mix(in oklch, var(--accent) 30%, transparent);
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+    }
+    .float-download:hover { transform: translateY(-2px); box-shadow: 0 12px 40px color-mix(in oklch, var(--accent) 40%, transparent); }
+    .float-download svg { width: 18px; height: 18px; }
+    @media (max-width: 920px) { .float-qr, .float-badge, .float-download { display: none; } }
 
     /* ===== FOOTER ===== */
     .pagefoot { padding-block: var(--gap-xl); color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
@@ -380,17 +393,11 @@
           <a href="#">日报</a>
         </nav>
       </div>
-      <div style="display: flex; align-items: center; gap: var(--gap-md); flex-wrap: wrap;">
-        <a href="#downloads" class="btn btn-primary" style="padding: 10px 20px; font-size: 14px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-          下载游戏
-        </a>
-        <div class="user-info">
-          <span style="font-family: var(--font-mono); font-size: 12px;">Aa</span>
-          <span>登录账号：covetworld</span>
-          <span>游戏账号：13225799</span>
-          <span>个人中心 ↓</span>
-        </div>
+      <div class="user-info">
+        <span style="font-family: var(--font-mono); font-size: 12px;">Aa</span>
+        <span>登录账号：covetworld</span>
+        <span>游戏账号：13225799</span>
+        <span>个人中心 ↓</span>
       </div>
     </div>
   </header>
@@ -659,6 +666,10 @@
   <div class="float-badge" aria-label="徽章">
     <div class="qr-placeholder" style="width:90px;height:90px;border-radius:50%;">徽章</div>
   </div>
+  <a href="#downloads" class="float-download" aria-label="下载游戏">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    下载游戏
+  </a>
 
   <footer class="pagefoot">
     <div class="container row-between">
