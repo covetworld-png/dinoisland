@@ -2395,55 +2395,73 @@ function parseAllCSV(text) {
 }
 
 async function loadFromGitHub() {
-  loadGitHubConfig();
-  if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) {
-    alert('请先配置 GitHub 信息');
-    showGitHubSettings();
-    return;
-  }
   if (!confirm('确定从 GitHub 恢复所有历史数据到本地？\n这将覆盖本地已有的同名日期数据。')) return;
 
+  let csvText = '';
+  let source = '';
+
+  // 方式1：直接 fetch 公开 CSV（无需 token，适合新设备快速恢复）
   try {
-    const res = await fetch(
-      `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}?ref=${githubConfig.branch}`,
-      { headers: { 'Authorization': `token ${githubConfig.token}`, 'Accept': 'application/vnd.github.v3+json' } }
-    );
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'HTTP ' + res.status);
+    const res = await fetch('./pvp_score_all.csv?_=' + Date.now());
+    if (res.ok) {
+      csvText = await res.text();
+      source = '服务器';
     }
-    const data = await res.json();
-    const csvText = decodeURIComponent(escape(atob(data.content)));
-    const blocks = parseAllCSV(csvText);
+  } catch(e) {}
 
-    let count = 0;
-    blocks.forEach(block => {
-      const key = 'pvp_score_' + block.date + '_' + block.server;
-      const playerColors = {};
-      let colorIdx = 0;
-      block.matches.forEach(m => {
-        if (m.winner && !playerColors[m.winner]) {
-          playerColors[m.winner] = COLORS[colorIdx % COLORS.length];
-          colorIdx++;
-        }
-        if (m.loser && !playerColors[m.loser]) {
-          playerColors[m.loser] = COLORS[colorIdx % COLORS.length];
-          colorIdx++;
-        }
-      });
-      localStorage.setItem(key, JSON.stringify({
-        date: block.date,
-        server: block.server,
-        matches: block.matches,
-        playerColors: playerColors,
-        colorIdx: colorIdx,
-        championAccount: block.championAccount,
-        championNames: calcChampionNames(block.matches)
-      }));
-      count++;
+  // 方式2：通过 GitHub API（需要 token，备用）
+  if (!csvText) {
+    loadGitHubConfig();
+    if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) {
+      alert('直接获取失败，且未配置 GitHub 信息，请先配置');
+      showGitHubSettings();
+      return;
+    }
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}?ref=${githubConfig.branch}`,
+        { headers: { 'Authorization': `token ${githubConfig.token}`, 'Accept': 'application/vnd.github.v3+json' } }
+      );
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      csvText = decodeURIComponent(escape(atob(data.content)));
+      source = 'GitHub';
+    } catch (error) {
+      alert('❌ 恢复失败: ' + error.message);
+      return;
+    }
+  }
+
+  const blocks = parseAllCSV(csvText);
+
+  let count = 0;
+  blocks.forEach(block => {
+    const key = 'pvp_score_' + block.date + '_' + block.server;
+    const playerColors = {};
+    let colorIdx = 0;
+    block.matches.forEach(m => {
+      if (m.winner && !playerColors[m.winner]) {
+        playerColors[m.winner] = COLORS[colorIdx % COLORS.length];
+        colorIdx++;
+      }
+      if (m.loser && !playerColors[m.loser]) {
+        playerColors[m.loser] = COLORS[colorIdx % COLORS.length];
+        colorIdx++;
+      }
     });
+    localStorage.setItem(key, JSON.stringify({
+      date: block.date,
+      server: block.server,
+      matches: block.matches,
+      playerColors: playerColors,
+      colorIdx: colorIdx,
+      championAccount: block.championAccount,
+      championNames: calcChampionNames(block.matches)
+    }));
+    count++;
+  });
 
-    alert(`✅ 已从 GitHub 恢复 ${count} 天的数据到本地！`);
+  alert(`✅ 已从${source}恢复 ${count} 天的数据到本地！`);
     loadFromStorage();
   } catch (error) {
     console.error('GitHub pull error:', error);
