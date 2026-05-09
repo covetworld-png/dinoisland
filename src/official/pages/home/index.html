@@ -20,6 +20,7 @@
       --tier-purple: #b46ef7;
       --tier-cyan:   #00d4aa;
       --tier-orange: #ff8c42;
+      --tier-pink:   #ff6b9d;
       --warn:        #e85757;
       --warn-soft:   #ff7a7a;
       --info:        #4a9eff;
@@ -199,9 +200,10 @@
     .server-select:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
 
     .tier-grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap-md); }
-    .tier-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-md); margin-top: var(--gap-md); }
+    .tier-grid-new { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap-md); margin-top: var(--gap-md); }
+    @media (max-width: 1024px) { .tier-grid-new { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 640px) {
-      .tier-grid-4, .tier-grid-3 { grid-template-columns: 1fr; }
+      .tier-grid-4, .tier-grid-new { grid-template-columns: 1fr; }
     }
 
     .tier-card {
@@ -242,6 +244,7 @@
     .tier-purple { --tier-color: var(--tier-purple); }
     .tier-cyan { --tier-color: var(--tier-cyan); }
     .tier-orange { --tier-color: var(--tier-orange); }
+    .tier-pink   { --tier-color: var(--tier-pink); }
 
     /* 天气/时间控制台 */
     .console-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-md); margin-top: var(--gap-md); }
@@ -510,8 +513,8 @@
             </div>
           </div>
 
-          <!-- 新增3档 -->
-          <div class="tier-grid-3">
+          <!-- 新增4档 — 功能卡扩展 -->
+          <div class="tier-grid-new">
             <div class="tier-card tier-cyan">
               <div class="tier-badge new">New</div>
               <div class="tier-img"><div class="ph-text">[ 签到卡 ]</div></div>
@@ -537,6 +540,15 @@
                 <div class="tier-price">— <span class="unit">限时</span></div>
                 <div class="tier-coins">更改时间能力</div>
                 <p class="tier-name">时间卡</p>
+              </div>
+            </div>
+            <div class="tier-card tier-pink">
+              <div class="tier-badge new">New</div>
+              <div class="tier-img"><div class="ph-text">[ 公告卡 ]</div></div>
+              <div class="tier-body">
+                <div class="tier-price">— <span class="unit">限时</span></div>
+                <div class="tier-coins">全服公告能力</div>
+                <p class="tier-name">全服公告卡</p>
               </div>
             </div>
           </div>
