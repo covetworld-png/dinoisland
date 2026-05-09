@@ -217,10 +217,10 @@ function renderTable() {
 
   tbody.innerHTML = filtered.map(p => {
     // 处理多服务器数据（Q/K 拼接）
-    const servers = String(p.server).split('/');
-    const nicknames = String(p.nickname).split('/');
-    const guildStatuses = String(p.guildStatus).split('/');
-    const guildNames = p.guildName ? String(p.guildName).split('/') : [];
+    const servers = String(p.server).split(/\s*\/\s*/);
+    const nicknames = String(p.nickname).split(/\s*\/\s*/);
+    const guildStatuses = String(p.guildStatus).split(/\s*\/\s*/);
+    const guildNames = p.guildName ? String(p.guildName).split(/\s*\/\s*/) : [];
 
     // 服务器 badge：拆分为多个，中间用 / 分隔
     const serverBadges = servers.map(s =>
