@@ -2226,14 +2226,24 @@ function exportWeeklyData() {
   csv += '\n';
   
   csv += '比赛结果\n';
-  for (const key in results) {
-    const [a, b] = key.split('|');
-    csv += a + ',' + b + ',' + results[key] + '\n';
+  csv += '#选手A,选手B,胜者\n';
+  // 导出所有对阵（含未进行的），空白表示无结果
+  if (weeklySchedule.length > 0) {
+    for (const s of weeklySchedule) {
+      const key = [s.p1, s.p2].sort().join('|');
+      const winner = results[key] || '';
+      csv += s.p1 + ',' + s.p2 + ',' + winner + '\n';
+    }
+  } else {
+    for (const key in results) {
+      const [a, b] = key.split('|');
+      csv += a + ',' + b + ',' + results[key] + '\n';
+    }
   }
   csv += '\n';
   
   csv += '积分榜\n';
-  csv += '排名,昵称,账号,胜场,败场,积分\n';
+  csv += '#排名,昵称,账号,胜场,败场,积分\n';
   const sorted = Object.keys(stats).sort((a, b) => stats[b].points - stats[a].points);
   sorted.forEach((name, i) => {
     const s = stats[name];
@@ -2264,7 +2274,7 @@ function importWeeklyData(input) {
   reader.onload = e => {
     const text = e.target.result.trim();
     try {
-      const rows = text.split('\\n').map(r => r.trim()).filter(r => r);
+      const rows = text.split(/\r?\n/).map(r => r.trim()).filter(r => r);
       let section = '';
       const newPlayers = [];
       const newAccounts = {};
@@ -2274,6 +2284,7 @@ function importWeeklyData(input) {
       let metaServer = '';
       
       for (const row of rows) {
+        if (row.startsWith('#')) continue; // 跳过注释行
         if (row.startsWith('参赛名单') || row.startsWith('Danh sách')) { section = 'players'; continue; }
         if (row.startsWith('比赛结果') || row.startsWith('Kết quả')) { section = 'results'; continue; }
         if (row.startsWith('积分榜') || row.startsWith('Bảng xếp hạng')) { section = 'stats'; continue; }
