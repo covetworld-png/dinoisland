@@ -189,12 +189,10 @@ function renderFilters() {
   const total = players.length;
   const newCount = players.filter(p => p.tag === 'new').length;
   const retCount = players.filter(p => p.tag === 'returning').length;
-  const onlineCount = players.filter(p => p.onlineStatus === 'online').length;
 
   document.getElementById('count-all').textContent = total;
   document.getElementById('count-new').textContent = newCount;
   document.getElementById('count-returning').textContent = retCount;
-  document.getElementById('count-online').textContent = onlineCount;
 }
 
 function renderTable() {
