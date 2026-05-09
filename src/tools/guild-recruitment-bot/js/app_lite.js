@@ -227,11 +227,10 @@ function renderTable() {
       `<span class="server-badge server-${s}">${s}</span>`
     ).join('<span class="server-sep">/</span>');
 
-    // 昵称：去重，相同只显示一个；不同则缩小字体并排显示
-    const uniqueNicknames = [...new Set(nicknames)];
-    const nicknameDisplay = uniqueNicknames.length === 1
-      ? uniqueNicknames[0]
-      : `<span class="nickname-multi">${uniqueNicknames.join(' / ')}</span>`;
+    // 昵称：双服按 / 分隔显示，不去重
+    const nicknameDisplay = nicknames.length > 1
+      ? `<span class="nickname-multi">${nicknames.join(' / ')}</span>`
+      : nicknames[0];
 
     // 公会状态：多服务器时分别显示
     let guildBadge;
