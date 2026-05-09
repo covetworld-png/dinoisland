@@ -657,6 +657,14 @@ tbody td { padding: 12px 14px; color: var(--text-primary); vertical-align: middl
   color: #4ade80;
   border: 1px solid rgba(34,197,94,0.25);
 }
+.server-sep {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 2px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  opacity: 0.5;
+}
 .btn-copy-id {
   padding: 3px 6px; border: 1px solid var(--gold);
   border-radius: 4px; background: var(--accent-08); color: var(--gold);

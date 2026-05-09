@@ -89,6 +89,11 @@ let players = [
   { id: '13220149', nickname: 'AnH2', server: 'K', regDate: '2026-04-27', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'offline', onlineSince: '11:00:00', offlineTime: '12:45:00' },
   { id: '13220150', nickname: 'Fnasha', server: 'Q', regDate: '2026-04-10', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '12:35:00', offlineTime: null },
   { id: '13220178', nickname: 'nhoknhok', server: 'K', regDate: '2026-04-29', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '12:20:00', offlineTime: null },
+  // 多服务器测试数据
+  { id: '13229549', nickname: 'EmSee/EmSee', server: 'Q/K', regDate: '2026-05-09', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '08:00:00', offlineTime: null },
+  { id: '13227200', nickname: 'TaoLaCho/TaoLaCho', server: 'Q/K', regDate: '2026-04-01', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '04:00:00', offlineTime: null },
+  { id: '13225575', nickname: 'cuccucthanbi/chacuatao', server: 'Q/K', regDate: '2026-03-07', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '10:00:00', offlineTime: null },
+  { id: '13229999', nickname: 'PlayerA/PlayerB', server: 'Q/K', regDate: '2026-05-09', tag: 'new', guildStatus: 'has_guild/no_guild', guildName: 'TOP.Legend/', onlineStatus: 'online', onlineSince: '11:30:00', offlineTime: null },
 ];
 
 let currentFilter = 'all';
@@ -216,10 +221,10 @@ function renderTable() {
     const guildStatuses = String(p.guildStatus).split('/');
     const guildNames = p.guildName ? String(p.guildName).split('/') : [];
 
-    // 服务器 badge：拆分为多个
+    // 服务器 badge：拆分为多个，中间用 / 分隔
     const serverBadges = servers.map(s =>
       `<span class="server-badge server-${s}">${s}</span>`
-    ).join('');
+    ).join('<span class="server-sep">/</span>');
 
     // 昵称：去重，相同只显示一个；不同则缩小字体并排显示
     const uniqueNicknames = [...new Set(nicknames)];
