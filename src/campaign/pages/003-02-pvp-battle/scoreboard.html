@@ -385,8 +385,8 @@
 
   /* Matrix */
   .matrix-wrap { margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:auto; }
-  .matrix-wrap table { width:auto; min-width:100%; table-layout:auto; }
-  .matrix-wrap th, .matrix-wrap td { text-align:center; white-space:nowrap; }
+  .matrix-wrap table { width:100%; table-layout:fixed; }
+  .matrix-wrap th, .matrix-wrap td { text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .matrix-wrap td { padding:8px 12px; }
   .matrix-cell .vs-btn { padding:4px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text2); cursor:pointer; font-size:12px; }
   .matrix-cell .vs-btn:hover { background:rgba(74,154,138,0.1); border-color:var(--mist); }
@@ -2032,7 +2032,9 @@ function renderWeekly() {
     matrixTable.style.display = 'table';
     
     const headRow = document.getElementById('weeklyMatrixHead');
-    headRow.innerHTML = '<th>—</th>' + players.map(p => '<th style="color:' + getColor(p) + '">' + escapeHtml(p) + '</th>').join('');
+    const colCount = players.length + 1;
+    const colWidth = 'calc(100% / ' + colCount + ')';
+    headRow.innerHTML = '<th style="width:' + colWidth + '">—</th>' + players.map(p => '<th style="color:' + getColor(p) + ';width:' + colWidth + '">' + escapeHtml(p) + '</th>').join('');
     
     const body = document.getElementById('weeklyMatrixBody');
     body.innerHTML = '';
