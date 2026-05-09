@@ -33,8 +33,8 @@ def norm(s):
 
 TARGET_GUILDS = [norm(l["guild"]) for l in LEADERS]
 
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '..',
-    'projects/001-增长/001-04-guild-recruitment-bot/frontend')
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'src/report')
+OUTPUT_FILENAME = 'guild-recruitment.html'
 
 
 def get_conn():
@@ -793,16 +793,42 @@ new Chart(document.getElementById('chartResponse'), {{
     return html
 
 
+def git_commit_push(output_path, report_date):
+    """自动提交并推送到 GitHub"""
+    import subprocess
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    try:
+        # 检查是否有变更
+        result = subprocess.run(
+            ['git', 'diff', '--quiet', '--', output_path],
+            cwd=repo_root, capture_output=True
+        )
+        if result.returncode == 0:
+            print(f"  文件无变更，跳过 git 提交")
+            return
+        
+        subprocess.run(['git', 'add', output_path], cwd=repo_root, check=True)
+        subprocess.run(
+            ['git', 'commit', '-m', f'update(guild-report): 日报 {report_date}'],
+            cwd=repo_root, check=True
+        )
+        subprocess.run(['git', 'push', 'origin', 'main'], cwd=repo_root, check=True)
+        print(f"  ✓ 已推送至 GitHub")
+    except subprocess.CalledProcessError as e:
+        print(f"  ✗ git 操作失败: {e}")
+
+
 def main():
-    parser = argparse.ArgumentParser(description='生成无公会用户招募日报 v3.1')
+    parser = argparse.ArgumentParser(description='生成无公会用户招募日报 v3.2')
     parser.add_argument('--date', help='指定日期 (YYYY-MM-DD)，默认昨日')
     parser.add_argument('--days', type=int, default=7, help='趋势图天数')
     parser.add_argument('--output', help='输出路径')
+    parser.add_argument('--push', action='store_true', help='生成后自动 git commit + push')
     args = parser.parse_args()
     
     report_date = args.date or (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     start_date = (datetime.strptime(report_date, '%Y-%m-%d') - timedelta(days=args.days-1)).strftime('%Y-%m-%d')
-    output_path = args.output or os.path.join(OUTPUT_DIR, 'report.html')
+    output_path = args.output or os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
     print(f"正在生成 {report_date} 的报告...")
@@ -826,6 +852,9 @@ def main():
         print(f"✓ 已生成: {output_path}")
         print(f"  新用户（首次活跃）: {today_stats['new_users']} | 入团 {today_stats['new_joined']} ({today_stats['new_rate']}%)")
         print(f"  老用户（无公会活跃）: {today_stats['old_users']} | 入团 {today_stats['old_joined']} ({today_stats['old_rate']}%)")
+        
+        if args.push:
+            git_commit_push(output_path, report_date)
     finally:
         conn.close()
 
