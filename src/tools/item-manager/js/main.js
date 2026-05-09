@@ -694,10 +694,10 @@ class ItemManager {
 
     // Render Methods
     renderInventory() {
-        document.getElementById('count-weather').textContent = this.user.inventory.weatherCard;
-        document.getElementById('count-time').textContent = this.user.inventory.timeCard;
-        document.getElementById('count-announcement').textContent = this.user.inventory.announcementCard;
-        document.getElementById('count-flow').textContent = this.user.inventory.flowCard;
+        document.getElementById('count-weather').textContent = '×' + this.user.inventory.weatherCard;
+        document.getElementById('count-time').textContent = '×' + this.user.inventory.timeCard;
+        document.getElementById('count-announcement').textContent = '×' + this.user.inventory.announcementCard;
+        document.getElementById('count-flow').textContent = '×' + this.user.inventory.flowCard;
 
         ['weather', 'time', 'announcement', 'flow'].forEach(type => {
             const card = document.getElementById(`inv-${type}`);
