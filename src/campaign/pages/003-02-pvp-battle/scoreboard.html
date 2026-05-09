@@ -1378,6 +1378,8 @@ function importData(input) {
         const isNumber = /^\d+$/.test(firstCol);
         const hasRoundMarker = secondCol.includes('场次') || secondCol.includes('Trận');
         if (!isNumber || !hasRoundMarker) continue; // 跳过统计汇总行等非比赛数据
+        // 根据 header 列数补齐数据行，防止 header 7 列但数据行 5 列时的错位解析
+        while (cols.length < headerCols.length) cols.push('');
         // 根据数据行实际列数解析，兼容 7列(含账号) / 5列(旧格式)
         if (cols.length >= 7) {
           matches.push({ winner: cols[2].trim(), winnerAccount: cols[3]?.trim() || '', loser: cols[4].trim(), loserAccount: cols[5]?.trim() || '', note: (cols[6] || '').trim() });
