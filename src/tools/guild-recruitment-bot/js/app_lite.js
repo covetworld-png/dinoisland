@@ -210,28 +210,59 @@ function renderTable() {
   }
 
   tbody.innerHTML = filtered.map(p => {
-    const hasGuild = p.guildStatus === 'has_guild';
+    // 处理多服务器数据（Q/K 拼接）
+    const servers = String(p.server).split('/');
+    const nicknames = String(p.nickname).split('/');
+    const guildStatuses = String(p.guildStatus).split('/');
+    const guildNames = p.guildName ? String(p.guildName).split('/') : [];
+
+    // 服务器 badge：拆分为多个
+    const serverBadges = servers.map(s =>
+      `<span class="server-badge server-${s}">${s}</span>`
+    ).join('');
+
+    // 昵称：去重，相同只显示一个；不同则缩小字体并排显示
+    const uniqueNicknames = [...new Set(nicknames)];
+    const nicknameDisplay = uniqueNicknames.length === 1
+      ? uniqueNicknames[0]
+      : `<span class="nickname-multi">${uniqueNicknames.join(' / ')}</span>`;
+
+    // 公会状态：多服务器时分别显示
+    let guildBadge;
+    if (servers.length > 1 && guildStatuses.length > 1) {
+      // 多服务器：每服一个状态
+      const statusTexts = guildStatuses.map((gs, i) => {
+        const has = gs === 'has_guild';
+        const s = servers[i] || servers[0];
+        const name = guildNames[i] || '';
+        if (has) {
+          return `<span class="guild-server-tag guild-joined">${s}·${t('guild_yes')}${name ? ' ' + name : ''}</span>`;
+        }
+        return `<span class="guild-server-tag guild-free">${s}·${t('guild_no')}</span>`;
+      });
+      guildBadge = `<span class="guild-multi">${statusTexts.join('')}</span>`;
+    } else {
+      const hasGuild = p.guildStatus === 'has_guild';
+      if (hasGuild) {
+        guildBadge = `<span class="status-badge status-joined">${t('guild_yes')}${p.guildName ? ' · ' + p.guildName : ''}</span>`;
+      } else {
+        guildBadge = `<span class="status-badge status-online">${t('guild_no')}</span>`;
+      }
+    }
+
     const isOnline = p.onlineStatus === 'online';
     const tagClass = p.tag === 'new' ? 'tag-new' : 'tag-returning';
     const tagText = p.tag === 'new' ? t('tag_new') : t('tag_returning');
-
-    let guildBadge;
-    if (hasGuild) {
-      guildBadge = `<span class="status-badge status-joined">${t('guild_yes')}${p.guildName ? ' · ' + p.guildName : ''}</span>`;
-    } else {
-      guildBadge = `<span class="status-badge status-online">${t('guild_no')}</span>`;
-    }
-
     const loginTimeBadge = `<span style="color:var(--text-secondary);font-size:12px;">${p.onlineSince}</span>`;
-
-    const rowClass = hasGuild ? 'strikethrough' : '';
+    const anyHasGuild = guildStatuses.includes('has_guild');
+    const rowClass = anyHasGuild ? 'strikethrough' : '';
     const copyBtn = `<button class="btn-copy-id" onclick="copyPlayerId('${p.id}');event.stopPropagation();" title="${t('toast_copy')}">复制</button>`;
 
     return `
       <tr class="${rowClass}">
         <td data-label="${t('th_player_id')}"><span class="id-with-copy"><span class="player-id">${p.id}</span>${copyBtn}</span></td>
-        <td data-label="${t('th_nickname')}">${p.nickname}</td>
-        <td data-label="${t('th_server')}"><span class="server-badge server-${p.server}">${p.server}</span></td>
+        <td data-label="${t('th_nickname')}">${nicknameDisplay}</td>
+        <td data-label="${t('th_server')}">${serverBadges}</td>
         <td data-label="${t('th_reg_date')}" style="color:var(--text-secondary);font-size:12px;">${p.regDate}</td>
         <td data-label="${t('th_tag')}"><span class="tag ${tagClass}">${tagText}</span></td>
         <td data-label="${t('th_guild_status')}">${guildBadge}</td>
