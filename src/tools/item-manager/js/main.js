@@ -3,10 +3,103 @@
 // LocalStorage-based state with cross-tab sync
 // ============================================
 
-const LS_KEY_STATE = 'itemManager_state_v1';
-const LS_KEY_USER = 'itemManager_user_v1';
 const USE_DURATION = 5 * 60 * 1000; // 5 minutes in ms
 const FLOW_DURATION = 60 * 60 * 1000; // 60 minutes in ms
+
+// Server-scoped localStorage keys
+function getServerId() {
+    return localStorage.getItem('itemManager_serverId') || 's1';
+}
+function lsKeyState() { return `itemManager_state_v1_${getServerId()}`; }
+function lsKeyUser()  { return `itemManager_user_v1_${getServerId()}`; }
+function lsKeyLogs()   { return `itemManager_logs_v1_${getServerId()}`; }
+
+// 服务器切换
+function switchServer(sid) {
+    localStorage.setItem('itemManager_serverId', sid);
+    location.reload();
+}
+
+// 模拟服务端轮询：跨服务器感知其他玩家操作
+function simulateServerPoll(manager) {
+    const servers = ['s1','s2','s3'];
+    const current = getServerId();
+    const otherServers = servers.filter(s => s !== current);
+    
+    // 每轮随机挑选一个其他服务器，模拟该服务器上有玩家使用了道具
+    const target = otherServers[Math.floor(Math.random() * otherServers.length)];
+    const types = ['weather','time','flow'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const bots = [
+        {vi:'Ngườ chơi 7723', cn:'玩家7723'},
+        {vi:'Ngườ chơi 8844', cn:'玩家8844'},
+        {vi:'Ngườ chơi 5566', cn:'玩家5566'},
+        {vi:'Ngườ chơi 3399', cn:'玩家3399'},
+        {vi:'Ngườ chơi 1122', cn:'玩家1122'}
+    ];
+    const bot = bots[Math.floor(Math.random() * bots.length)];
+    
+    // 只在 30% 概率触发，避免过于频繁
+    if (Math.random() > 0.7) {
+        const stateKey = `itemManager_state_v1_${target}`;
+        let state = localStorage.getItem(stateKey);
+        if (!state) {
+            state = { globalLocks:{weather:null,time:null,flow:null}, announcements:[], history:[] };
+        } else {
+            state = JSON.parse(state);
+        }
+        
+        const now = Date.now();
+        const duration = 30 * 60 * 1000; // 30 min
+        
+        if (type === 'flow') {
+            state.globalLocks.flow = {
+                startTime: now, endTime: now + 60 * 60 * 1000,
+                username: bot.vi, usernameCn: bot.cn, server: target
+            };
+        } else {
+            state.globalLocks[type] = {
+                startTime: now, endTime: now + duration,
+                username: bot.vi, usernameCn: bot.cn, server: target
+            };
+        }
+        
+        state.history.unshift({
+            type, item: type, username: bot.vi, usernameCn: bot.cn,
+            server: target, timestamp: now
+        });
+        if (state.history.length > 50) state.history.pop();
+        
+        localStorage.setItem(stateKey, JSON.stringify(state));
+        
+        // 如果当前面板打开，刷新显示
+        const tab = document.querySelector(`.tab-btn[data-tab="${type}"]`);
+        if (tab && tab.classList.contains('active')) {
+            manager.renderPanel(type);
+        }
+        
+        // 显示跨服务器通知
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        const t = I18N[lang];
+        const name = lang === 'vi' ? bot.vi : bot.cn;
+        const itemNames = {weather:t.items.weather, time:t.items.time, flow:t.items.flow};
+        const msg = lang === 'vi'
+            ? `${name} (${target}) đã sử dụng ${itemNames[type]}`
+            : `${name} (${target}) 使用了 ${itemNames[type]}`;
+        showToast(msg, 'info');
+    }
+}
+
+// Simulated server-polling interval (ms)
+const SERVER_POLL_INTERVAL = 8000;
+
+// Fake other-player names for server simulation
+const BOT_NAMES = [
+    { vi: 'Ngườ chơi 7723', cn: '玩家7723' },
+    { vi: 'Ngườ chơi 9142', cn: '玩家9142' },
+    { vi: 'Ngườ chơi 3301', cn: '玩家3301' },
+    { vi: 'Ngườ chơi 5528', cn: '玩家5528' },
+];
 
 // Translations
 const I18N = {
@@ -136,18 +229,18 @@ class ItemManager {
         this.state = this.loadState();
         this.countdowns = { weather: null, time: null };
         this.currentTab = 'weather';
-        this.selectedOptions = { weather: null, time: null };
+        this.selectedOptions = { weather: null, time: 1200 };
         this.init();
     }
 
     loadUser() {
-        let user = localStorage.getItem(LS_KEY_USER);
+        let user = localStorage.getItem(lsKeyUser());
         if (user) {
             user = JSON.parse(user);
             // Merge new fields for backward compatibility
             if (!user.inventory) user.inventory = {};
             if (user.inventory.flowCard === undefined) user.inventory.flowCard = 3;
-            localStorage.setItem(LS_KEY_USER, JSON.stringify(user));
+            localStorage.setItem(lsKeyUser(), JSON.stringify(user));
             return user;
         }
         const id = 'player_' + Math.random().toString(36).substr(2, 6);
@@ -163,12 +256,12 @@ class ItemManager {
                 flowCard: 3
             }
         };
-        localStorage.setItem(LS_KEY_USER, JSON.stringify(user));
+        localStorage.setItem(lsKeyUser(), JSON.stringify(user));
         return user;
     }
 
     loadState() {
-        const state = localStorage.getItem(LS_KEY_STATE);
+        const state = localStorage.getItem(lsKeyState());
         if (state) {
             const parsed = JSON.parse(state);
             if (!parsed.globalLocks) parsed.globalLocks = {};
@@ -183,11 +276,11 @@ class ItemManager {
     }
 
     saveState() {
-        localStorage.setItem(LS_KEY_STATE, JSON.stringify(this.state));
+        localStorage.setItem(lsKeyState(), JSON.stringify(this.state));
     }
 
     saveUser() {
-        localStorage.setItem(LS_KEY_USER, JSON.stringify(this.user));
+        localStorage.setItem(lsKeyUser(), JSON.stringify(this.user));
     }
 
     init() {
@@ -202,6 +295,54 @@ class ItemManager {
         this.processAnnouncements();
         this.setupEventListeners();
         this.setupStorageSync();
+        this.setupTimeSetter();
+        this.startServerPolling();
+    }
+
+    startServerPolling() {
+        // 每 8-15 秒模拟一次其他服务器玩家操作
+        const poll = () => {
+            simulateServerPoll(this);
+            const next = 8000 + Math.random() * 7000;
+            setTimeout(poll, next);
+        };
+        setTimeout(poll, 5000);
+    }
+
+    setupTimeSetter() {
+        const input = document.getElementById('time-input');
+        const slider = document.getElementById('time-slider');
+        const display = document.getElementById('time-display');
+        const presets = document.querySelectorAll('#time-presets .preset-btn');
+        if (!input || !slider || !display) return;
+
+        const update = (val) => {
+            let v = parseInt(val, 10);
+            if (isNaN(v) || v < 0) v = 0;
+            if (v > 2400) v = 2400;
+            input.value = v;
+            slider.value = v;
+            const hh = Math.floor(v / 100);
+            const mm = Math.round((v % 100) * 0.6);
+            display.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+            this.selectedOptions.time = v;
+        };
+
+        input.addEventListener('change', () => {
+            update(input.value);
+            presets.forEach(b => b.classList.remove('selected'));
+        });
+        slider.addEventListener('input', () => {
+            update(slider.value);
+            presets.forEach(b => b.classList.remove('selected'));
+        });
+        presets.forEach(btn => {
+            btn.addEventListener('click', () => {
+                presets.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                update(btn.dataset.value);
+            });
+        });
     }
 
     cleanupHistory() {
@@ -305,7 +446,7 @@ class ItemManager {
         }
 
         const selected = this.selectedOptions.time;
-        if (!selected) {
+        if (selected === null || selected === undefined) {
             showToast(t.selectOption, 'warning');
             return;
         }
@@ -322,7 +463,9 @@ class ItemManager {
         this.saveUser();
 
         const now = Date.now();
-        const detail = t.timeNames[selected] || selected;
+        const hh = Math.floor(selected / 100);
+        const mm = Math.round((selected % 100) * 0.6);
+        const detail = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
         this.state.globalLocks.time = {
             userId: this.user.userId,
             username: this.user.username,
@@ -350,7 +493,7 @@ class ItemManager {
         this.renderTimePanel();
         this.renderHistory();
         this.startCountdowns();
-        showToast(t.useSuccess(t.history.time), 'success');
+        showToast(t.useSuccess(`${t.history.time} (${detail})`), 'success');
     }
 
     // Use Flow Card
@@ -596,6 +739,15 @@ class ItemManager {
                         }
                         if (btn) btn.disabled = true;
 
+                        // Time setter controls disable during conflict
+                        if (type === 'time') {
+                            const timeInput = document.getElementById('time-input');
+                            const timeSlider = document.getElementById('time-slider');
+                            if (timeInput) timeInput.disabled = true;
+                            if (timeSlider) timeSlider.disabled = true;
+                            document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = true);
+                        }
+
                         if (conflictBanner) {
                             if (isMine) {
                                 conflictBanner.style.display = 'none';
@@ -653,6 +805,16 @@ class ItemManager {
                         btn.disabled = (type === 'weather' && this.user.inventory.weatherCard <= 0) ||
                                        (type === 'time' && this.user.inventory.timeCard <= 0) ||
                                        (type === 'flow' && this.user.inventory.flowCard <= 0);
+                    }
+
+                    // Time setter controls re-enable when no conflict
+                    if (type === 'time') {
+                        const timeInput = document.getElementById('time-input');
+                        const timeSlider = document.getElementById('time-slider');
+                        const hasCards = this.user.inventory.timeCard > 0;
+                        if (timeInput) timeInput.disabled = !hasCards;
+                        if (timeSlider) timeSlider.disabled = !hasCards;
+                        document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = !hasCards);
                     }
                     if (conflictBanner) conflictBanner.style.display = 'none';
 
@@ -751,17 +913,34 @@ class ItemManager {
     }
 
     renderTimePanel() {
-        const container = document.getElementById('options-time');
+        const container = document.getElementById('panel-time');
         if (!container) return;
 
-        container.querySelectorAll('.option-btn').forEach(btn => {
-            btn.onclick = () => {
-                if (btn.disabled) return;
-                container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                this.selectedOptions.time = btn.dataset.value;
-            };
+        const input = document.getElementById('time-input');
+        const slider = document.getElementById('time-slider');
+        const display = document.getElementById('time-display');
+        const presets = container.querySelectorAll('.preset-btn');
+        const lock = this.checkConflict('time');
+
+        // 同步选中值到UI
+        const sel = this.selectedOptions.time;
+        if (sel !== null && sel !== undefined && input && slider && display) {
+            input.value = sel;
+            slider.value = sel;
+            const hh = Math.floor(sel / 100);
+            const mm = Math.round((sel % 100) * 0.6);
+            display.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+        }
+
+        // 更新预设按钮选中状态
+        presets.forEach(btn => {
+            btn.classList.toggle('selected', parseInt(btn.dataset.value,10) === sel);
         });
+
+        // 如果有冲突，禁用所有时间设置控件
+        if (input) input.disabled = !!lock;
+        if (slider) slider.disabled = !!lock;
+        presets.forEach(btn => { btn.disabled = !!lock; });
     }
 
     renderFlowPanel() {
@@ -899,7 +1078,7 @@ class ItemManager {
 
     setupStorageSync() {
         window.addEventListener('storage', (e) => {
-            if (e.key === LS_KEY_STATE) {
+            if (e.key === lsKeyState()) {
                 this.loadState();
                 this.renderAllPanels();
                 this.renderHistory();
@@ -1026,6 +1205,26 @@ function useWeatherCard() {
 
 function useTimeCard() {
     if (window.itemManager) window.itemManager.useTimeCard();
+}
+
+function adjustTime(delta) {
+    if (!window.itemManager) return;
+    const input = document.getElementById('time-input');
+    const slider = document.getElementById('time-slider');
+    const display = document.getElementById('time-display');
+    if (!input) return;
+    let v = parseInt(input.value, 10) || 0;
+    v += delta;
+    if (v < 0) v = 0;
+    if (v > 2400) v = 2400;
+    input.value = v;
+    if (slider) slider.value = v;
+    const hh = Math.floor(v / 100);
+    const mm = Math.round((v % 100) * 0.6);
+    if (display) display.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+    window.itemManager.selectedOptions.time = v;
+    // 取消预设选中状态
+    document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.classList.remove('selected'));
 }
 
 function submitAnnouncement() {

@@ -20,6 +20,15 @@
       "private": true,
       "description": "客服工具页面"
     },
+    "item-manager": {
+      "source": "projects/003-运营/003-xx-道具管理",
+      "src": "src/tools/item-manager",
+      "type": "tool-page",
+      "status": "ready",
+      "confirmed": true,
+      "private": true,
+      "description": "道具管理系统"
+    },
     "streamer-data-report": {
       "src": "src/report/streamer-data.html",
       "type": "report",
