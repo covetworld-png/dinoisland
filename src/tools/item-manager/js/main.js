@@ -966,6 +966,19 @@ function switchTab(tab) {
     }
 }
 
+function toggleTab(tab) {
+    const isActive = document.querySelector(`.tab-btn[data-tab="${tab}"]`)?.classList.contains('active');
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', !isActive && btn.dataset.tab === tab);
+    });
+    document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('active', !isActive && panel.id === `panel-${tab}`);
+    });
+    if (window.itemManager) {
+        window.itemManager.currentTab = isActive ? null : tab;
+    }
+}
+
 function useFlowCard() {
     if (window.itemManager) window.itemManager.useFlowCard();
 }
@@ -974,25 +987,13 @@ function stopFlowCard() {
     if (window.itemManager) window.itemManager.stopFlowCard();
 }
 
-// Quick use from inventory bar
+// Quick use from inventory bar — opens detail panel only
 function quickUseWeather() {
     switchTab('weather');
-    if (window.itemManager) {
-        if (!window.itemManager.selectedOptions.weather) {
-            window.itemManager.selectedOptions.weather = 'sunshine';
-        }
-        window.itemManager.useWeatherCard();
-    }
 }
 
 function quickUseTime() {
     switchTab('time');
-    if (window.itemManager) {
-        if (!window.itemManager.selectedOptions.time) {
-            window.itemManager.selectedOptions.time = 'dawn';
-        }
-        window.itemManager.useTimeCard();
-    }
 }
 
 function quickUseAnnouncement() {
@@ -1004,7 +1005,6 @@ function quickUseAnnouncement() {
 
 function quickUseFlow() {
     switchTab('flow');
-    if (window.itemManager) window.itemManager.useFlowCard();
 }
 
 // Global actions
