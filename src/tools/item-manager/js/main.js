@@ -929,21 +929,33 @@ function showToast(message, type = 'info') {
 }
 
 // Language Toggle
-function toggleLanguage() {
-    const body = document.body;
-    const currentLang = body.getAttribute('data-lang') || 'vi';
-    const newLang = currentLang === 'vi' ? 'cn' : 'vi';
-    body.setAttribute('data-lang', newLang);
-    document.getElementById('current-lang').textContent = newLang === 'vi' ? 'VI / 中' : '中 / VI';
-    localStorage.setItem('lang', newLang);
+function applyLangUI(lang) {
+    document.body.setAttribute('data-lang', lang);
+    document.getElementById('current-lang').textContent = lang === 'vi' ? 'VI / 中' : '中 / VI';
+
+    // Update title
+    document.title = lang === 'vi' ? 'Trung Tâm Đạo Cụ' : '道具管理中心';
+
+    // Update textarea placeholder
+    const textarea = document.getElementById('announcement-content');
+    if (textarea) {
+        textarea.placeholder = lang === 'vi' ? 'Nhập nội dung...' : '输入内容...';
+    }
 
     // Update user name
     const userNameEl = document.getElementById('user-name');
     if (userNameEl && window.itemManager) {
-        userNameEl.textContent = newLang === 'vi' 
-            ? window.itemManager.user.username 
+        userNameEl.textContent = lang === 'vi'
+            ? window.itemManager.user.username
             : window.itemManager.user.usernameCn;
     }
+}
+
+function toggleLanguage() {
+    const currentLang = document.body.getAttribute('data-lang') || 'vi';
+    const newLang = currentLang === 'vi' ? 'cn' : 'vi';
+    localStorage.setItem('lang', newLang);
+    applyLangUI(newLang);
 
     // Re-render
     if (window.itemManager) {
@@ -1052,15 +1064,13 @@ let itemManager;
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         const savedLang = localStorage.getItem('lang') || 'vi';
-        document.body.setAttribute('data-lang', savedLang);
-        document.getElementById('current-lang').textContent = savedLang === 'vi' ? 'VI / 中' : '中 / VI';
+        applyLangUI(savedLang);
         itemManager = new ItemManager();
         window.itemManager = itemManager;
     });
 } else {
     const savedLang = localStorage.getItem('lang') || 'vi';
-    document.body.setAttribute('data-lang', savedLang);
-    document.getElementById('current-lang').textContent = savedLang === 'vi' ? 'VI / 中' : '中 / VI';
+    applyLangUI(savedLang);
     itemManager = new ItemManager();
     window.itemManager = itemManager;
 }
