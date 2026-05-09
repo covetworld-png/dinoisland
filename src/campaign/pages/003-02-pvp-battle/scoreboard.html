@@ -2059,7 +2059,8 @@ function renderWeekly() {
           const winner = results[key];
           let cell = '<td class="matrix-cell">';
           if (winner) {
-            cell += '<span class="result-win">' + escapeHtml(winner) + ' ' + t('csvWinner') + '</span>';
+            if (winner === players[i]) cell += '<span class="result-win">' + t('csvWinner') + '</span>';
+            else cell += '<span class="result-loss">' + t('csvLoser') + '</span>';
           } else {
             const p1Absent = absent.includes(players[i]);
             const p2Absent = absent.includes(players[j]);
