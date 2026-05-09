@@ -145,43 +145,42 @@ body::after {
 }
 
 /* ── inventory ── */
-.inventory-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:28px; }
+.inventory-grid { display:grid; grid-template-columns:repeat(3,100px); gap:14px; justify-content:center; margin-bottom:28px; }
 
-.inventory-card {
+.bag-slot {
   position:relative;
-  background:var(--surface);
-  border:1.5px solid var(--border);
-  border-radius:var(--r-lg);
-  padding:28px 16px 22px;
-  text-align:center;
-  transition:0.35s cubic-bezier(0.4,0,0.2,1);
-  overflow:hidden;
+  width:100px; height:100px;
+  background:rgba(10,15,22,0.95);
+  border:2px solid rgba(148,163,184,0.15);
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.3s;
+  box-shadow:inset 0 2px 12px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.3);
 }
-.inventory-card::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:2px;
-  background:linear-gradient(90deg, transparent, var(--gold), transparent);
-  opacity:0.5; transition:opacity 0.35s;
+.bag-slot::before {
+  content:''; position:absolute; inset:4px;
+  border:1px dashed rgba(148,163,184,0.1);
+  border-radius:6px; pointer-events:none;
 }
-.inventory-card::after {
-  content:''; position:absolute; inset:0; border-radius:inherit;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);
-  pointer-events:none;
+.bag-slot:hover {
+  border-color:rgba(240,160,48,0.4);
+  box-shadow:inset 0 2px 12px rgba(0,0,0,0.6), 0 0 24px rgba(240,160,48,0.12);
 }
-.inventory-card:hover {
-  transform:translateY(-4px);
-  border-color:rgba(240,160,48,0.35);
-  box-shadow:0 12px 40px rgba(0,0,0,0.4), 0 0 30px var(--gold-dim);
-}
-.inventory-card:hover::before { opacity:1; }
-.inventory-card.empty { opacity:0.45; }
-.inventory-card.empty .inv-count { color:var(--muted); text-shadow:none; }
+.bag-slot.empty { opacity:0.35; }
+.bag-slot.empty .slot-icon { filter:grayscale(0.8) opacity(0.4); }
+.bag-slot.empty .slot-count { opacity:0.4; }
 
-.inv-icon { font-size:2rem; margin-bottom:6px; filter:drop-shadow(0 0 8px rgba(240,160,48,0.3)); }
-.inv-name { font-size:0.78rem; color:var(--muted); margin-bottom:6px; font-weight:500; letter-spacing:0.3px; }
-.inv-count {
-  font-family:var(--font-mono); font-size:2.2rem; font-weight:800;
-  color:var(--gold); text-shadow:0 0 20px var(--gold-glow);
-  transition:transform 0.3s;
+.slot-icon { font-size:2.4rem; filter:drop-shadow(0 0 10px rgba(240,160,48,0.25)); }
+.slot-count {
+  position:absolute; bottom:5px; right:5px;
+  min-width:22px; height:20px; padding:0 5px;
+  background:rgba(7,10,15,0.95);
+  border:1px solid rgba(240,160,48,0.35);
+  border-radius:4px;
+  color:var(--gold); font-family:var(--font-mono);
+  font-size:0.75rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  text-shadow:0 0 8px var(--gold-glow);
 }
 .inventory-card:hover .inv-count { transform:scale(1.1); }
 
