@@ -403,6 +403,49 @@ body::after {
   filter:grayscale(0.5); box-shadow:none;
 }
 .btn-use { margin-bottom:20px; }
+.btn-secondary {
+  background:transparent; border:1.5px solid var(--border);
+  color:var(--fg-2); padding:14px 28px;
+  border-radius:var(--r); font-size:0.9rem; font-weight:600;
+  cursor:pointer; transition:all 0.25s; font-family:inherit;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+.btn-secondary:hover {
+  border-color:var(--red); color:var(--red);
+  background:rgba(239,68,68,0.06);
+  box-shadow:0 4px 16px rgba(239,68,68,0.15);
+}
+
+/* ── game time display ── */
+.game-time-display {
+  text-align:center; padding:28px 20px; margin-bottom:20px;
+  background:var(--surface-2); border:1.5px solid var(--border);
+  border-radius:var(--r-lg); position:relative; overflow:hidden;
+}
+.game-time-display::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity:0.4;
+}
+.game-time-label {
+  font-size:0.78rem; color:var(--muted);
+  margin-bottom:8px; letter-spacing:1px; text-transform:uppercase;
+}
+.game-time-value {
+  font-family:var(--font-mono); font-size:3.2rem; font-weight:800;
+  color:var(--gold); text-shadow:0 0 30px var(--gold-glow);
+  letter-spacing:2px; line-height:1.1;
+}
+.game-time-hint {
+  font-size:0.75rem; color:var(--muted); margin-top:10px;
+}
+.game-time-display.active {
+  border-color:rgba(240,160,48,0.3);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.03), 0 0 30px var(--gold-dim);
+}
+.game-time-display.active .game-time-value {
+  animation:pulse-glow 2s infinite;
+}
 
 /* ── instruction ── */
 .instruction-box {
@@ -526,6 +569,7 @@ body::after {
 .history-item:hover { transform:translateX(4px); background:rgba(17,24,32,0.9); }
 .history-item.weather      { border-left-color:var(--blue); }
 .history-item.time         { border-left-color:var(--gold); }
+.history-item.flow         { border-left-color:var(--green); }
 .history-item.announcement { border-left-color:var(--purple); }
 .history-icon { font-size:1.2rem; flex-shrink:0; }
 .history-info { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
