@@ -93,7 +93,7 @@ let players = [
   { id: '13229549', nickname: 'EmSee/EmSee', server: 'Q/K', regDate: '2026-05-09', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '08:00:00', offlineTime: null },
   { id: '13227200', nickname: 'TaoLaCho/TaoLaCho', server: 'Q/K', regDate: '2026-04-01', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '04:00:00', offlineTime: null },
   { id: '13225575', nickname: 'cuccucthanbi/chacuatao', server: 'Q/K', regDate: '2026-03-07', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '10:00:00', offlineTime: null },
-  { id: '13229999', nickname: 'PlayerA/PlayerB', server: 'Q/K', regDate: '2026-05-09', tag: 'new', guildStatus: 'has_guild/no_guild', guildName: 'TOP.Legend/', onlineStatus: 'online', onlineSince: '11:30:00', offlineTime: null },
+  { id: '13229999', nickname: 'PlayerA/PlayerB', server: 'Q/K', regDate: '2026-05-09', tag: 'new', guildStatus: 'has_guild/no_guild', guildName: 'TOP.Legend', onlineStatus: 'online', onlineSince: '11:30:00', offlineTime: null },
 ];
 
 let currentFilter = 'all';
