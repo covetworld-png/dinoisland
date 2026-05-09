@@ -2462,11 +2462,7 @@ async function loadFromGitHub() {
   });
 
   alert(`✅ 已从${source}恢复 ${count} 天的数据到本地！`);
-    loadFromStorage();
-  } catch (error) {
-    console.error('GitHub pull error:', error);
-    alert('❌ 恢复失败: ' + error.message);
-  }
+  loadFromStorage();
 }
 
 function removeDateBlock(csvText, date, server) {
