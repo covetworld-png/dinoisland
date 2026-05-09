@@ -709,9 +709,13 @@ class ItemManager {
 
         ['weather', 'time', 'announcement', 'flow'].forEach(type => {
             const card = document.getElementById(`inv-${type}`);
+            const btn = document.getElementById(`btn-slot-${type}`);
             const count = this.user.inventory[type + 'Card'];
             if (card) {
                 card.classList.toggle('empty', count <= 0);
+            }
+            if (btn) {
+                btn.disabled = count <= 0;
             }
         });
     }
@@ -968,6 +972,39 @@ function useFlowCard() {
 
 function stopFlowCard() {
     if (window.itemManager) window.itemManager.stopFlowCard();
+}
+
+// Quick use from inventory bar
+function quickUseWeather() {
+    switchTab('weather');
+    if (window.itemManager) {
+        if (!window.itemManager.selectedOptions.weather) {
+            window.itemManager.selectedOptions.weather = 'sunshine';
+        }
+        window.itemManager.useWeatherCard();
+    }
+}
+
+function quickUseTime() {
+    switchTab('time');
+    if (window.itemManager) {
+        if (!window.itemManager.selectedOptions.time) {
+            window.itemManager.selectedOptions.time = 'dawn';
+        }
+        window.itemManager.useTimeCard();
+    }
+}
+
+function quickUseAnnouncement() {
+    switchTab('announcement');
+    setTimeout(() => {
+        document.getElementById('announcement-content')?.focus();
+    }, 150);
+}
+
+function quickUseFlow() {
+    switchTab('flow');
+    if (window.itemManager) window.itemManager.useFlowCard();
 }
 
 // Global actions
