@@ -9,6 +9,10 @@
 !build/
 !build/**
 
+# Except scripts (utility scripts)
+!scripts/
+!scripts/**
+
 # Ignore public (static assets)
 public/
 
