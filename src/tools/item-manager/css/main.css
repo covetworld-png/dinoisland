@@ -146,7 +146,7 @@ body::after {
 
 /* ── inventory ── */
 .inventory-bag {
-  max-width:240px; margin:0 auto 28px;
+  max-width:400px; margin:0 auto 28px;
   background:rgba(10,15,22,0.95);
   border:2px solid rgba(148,163,184,0.15);
   border-radius:12px;
@@ -154,7 +154,7 @@ body::after {
   box-shadow:0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03);
 }
 .bag-grid {
-  display:grid; grid-template-columns:repeat(2,1fr); gap:8px;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
 }
 .bag-cell {
   position:relative; aspect-ratio:1;
