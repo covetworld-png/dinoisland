@@ -143,7 +143,12 @@ class ItemManager {
     loadUser() {
         let user = localStorage.getItem(LS_KEY_USER);
         if (user) {
-            return JSON.parse(user);
+            user = JSON.parse(user);
+            // Merge new fields for backward compatibility
+            if (!user.inventory) user.inventory = {};
+            if (user.inventory.flowCard === undefined) user.inventory.flowCard = 3;
+            localStorage.setItem(LS_KEY_USER, JSON.stringify(user));
+            return user;
         }
         const id = 'player_' + Math.random().toString(36).substr(2, 6);
         const num = getRandomInt(1000, 9999);
@@ -165,10 +170,13 @@ class ItemManager {
     loadState() {
         const state = localStorage.getItem(LS_KEY_STATE);
         if (state) {
-            return JSON.parse(state);
+            const parsed = JSON.parse(state);
+            if (!parsed.globalLocks) parsed.globalLocks = {};
+            if (parsed.globalLocks.flow === undefined) parsed.globalLocks.flow = null;
+            return parsed;
         }
         return {
-            globalLocks: { weather: null, time: null },
+            globalLocks: { weather: null, time: null, flow: null },
             announcements: [],
             history: []
         };
