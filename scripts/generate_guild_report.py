@@ -407,17 +407,50 @@ h1 {{ font-size: 22px; font-weight: 600; }}
 h1 span {{ color: var(--accent); }}
 .meta {{ color: var(--text-muted); font-size: 13px; }}
 
+.date-picker-wrap {{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}}
+.date-picker-wrap svg {{
+  position: absolute;
+  left: 12px;
+  width: 18px;
+  height: 18px;
+  fill: var(--accent);
+  pointer-events: none;
+  z-index: 1;
+}}
 .date-picker {{
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
+  border: 1.5px solid rgba(255, 215, 0, 0.4);
+  border-radius: 10px;
+  padding: 10px 14px 10px 38px;
   color: var(--text);
   font-size: 14px;
   font-family: inherit;
   outline: none;
+  cursor: pointer;
+  min-width: 140px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }}
-.date-picker:focus {{ border-color: var(--accent); }}
+.date-picker:hover {{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.15);
+}}
+.date-picker:focus {{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+}}
+.date-picker::-webkit-calendar-picker-indicator {{
+  opacity: 0;
+  cursor: pointer;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}}
 
 .history-row.active {{ background: rgba(255, 215, 0, 0.08); }}
 
@@ -500,7 +533,10 @@ tr:hover {{ background: rgba(255,255,255,0.03); }}
       <div class="meta">统计日期: <span id="current-date">{report_date}</span> | 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}</div>
     </div>
     <div>
-      <input type="date" id="datePicker" class="date-picker" value="{report_date}" min="{start_date}" max="{report_date}">
+      <div class="date-picker-wrap">
+        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5z"/></svg>
+        <input type="date" id="datePicker" class="date-picker" value="{report_date}" min="{start_date}" max="{report_date}">
+      </div>
     </div>
   </header>
 
