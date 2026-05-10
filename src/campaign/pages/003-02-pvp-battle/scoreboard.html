@@ -190,19 +190,20 @@
   .modal h3 { margin:0 0 16px; font-size:16px; color:var(--mist); }
   .modal-body { display:flex; flex-direction:column; gap:12px; }
   .modal-body label { font-size:13px; color:var(--text2); }
-  .modal-body .date-picker-wrap {
+  .date-picker-wrap, .weekly-date-wrap {
     position:relative; cursor:pointer;
     background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.08);
     border-radius:6px; padding:8px 12px; display:flex; align-items:center;
   }
-  .modal-body .date-picker-wrap::before {
+  .date-picker-wrap::before, .weekly-date-wrap::before {
     content:'📅'; font-size:15px; margin-right:8px;
   }
-  .modal-body input[type="date"] {
+  .modal-body input[type="date"], .weekly-date-wrap input[type="date"] {
     background:transparent; border:none; color:var(--mist); font-size:14px;
     outline:none; width:100%; cursor:pointer;
   }
-  .modal-body input[type="date"]::-webkit-calendar-picker-indicator {
+  .modal-body input[type="date"]::-webkit-calendar-picker-indicator,
+  .weekly-date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
     opacity:0; cursor:pointer; position:absolute; right:0; top:0;
     width:100%; height:100%;
   }
@@ -218,10 +219,12 @@
     background:#4f46e5; color:#fff;
   }
   [data-theme="light"] .modal { background:#fff; border-color:rgba(0,0,0,0.08); }
-  [data-theme="light"] .modal-body .date-picker-wrap {
+  [data-theme="light"] .modal-body .date-picker-wrap,
+  [data-theme="light"] .weekly-date-wrap {
     background:#fff; border-color:rgba(0,0,0,0.12);
   }
-  [data-theme="light"] .modal-body input[type="date"] {
+  [data-theme="light"] .modal-body input[type="date"],
+  [data-theme="light"] .weekly-date-wrap input[type="date"] {
     color:#1c1917;
   }
   [data-theme="light"] #weeklyDate {
@@ -568,7 +571,9 @@
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:4px;">
           <button class="server-btn" style="padding:6px 8px;font-size:12px;" onclick="shiftWeek(-7)" title="上周">⬅</button>
-          <input type="date" id="weeklyDate" onchange="loadWeeklyData()" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;">
+          <div class="weekly-date-wrap" style="padding:6px 10px;" onclick="document.getElementById('weeklyDate').showPicker?.()">
+            <input type="date" id="weeklyDate" onchange="loadWeeklyData()" style="font-size:13px;">
+          </div>
           <button class="server-btn" style="padding:6px 8px;font-size:12px;" onclick="shiftWeek(7)" title="下周">➡</button>
         </div>
         <select id="weeklyDatePreset" onchange="if(this.value){document.getElementById('weeklyDate').value=this.value;loadWeeklyData();}" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;">
