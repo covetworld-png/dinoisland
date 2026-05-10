@@ -1289,19 +1289,24 @@ class ItemManager {
             });
         }
 
-        // Update user info bar display
-        const userNameEl = document.getElementById('user-name');
-        const userServerEl = document.getElementById('user-server');
+        // Update player identity display
+        const playerNameEl = document.getElementById('player-id-name');
+        const playerServerEl = document.getElementById('player-id-server');
         const serverSelect = document.getElementById('server-select');
-        if (userNameEl) {
+        const userNameEl = document.getElementById('user-name');
+        if (playerNameEl) {
             const lang = document.body.getAttribute('data-lang') || 'vi';
-            userNameEl.textContent = lang === 'vi' ? this.user.username : this.user.usernameCn;
+            playerNameEl.textContent = lang === 'vi' ? this.user.username : this.user.usernameCn;
         }
-        if (userServerEl) {
-            userServerEl.textContent = getServerId() + '服';
+        if (playerServerEl) {
+            playerServerEl.textContent = getServerId() + '服';
         }
         if (serverSelect) {
             serverSelect.value = getServerId();
+        }
+        if (userNameEl) {
+            const lang = document.body.getAttribute('data-lang') || 'vi';
+            userNameEl.textContent = lang === 'vi' ? this.user.username : this.user.usernameCn;
         }
     }
 
@@ -1350,8 +1355,14 @@ function applyLangUI(lang) {
         textarea.placeholder = lang === 'vi' ? 'Nhập nội dung...' : '输入内容...';
     }
 
-    // Update user name
+    // Update player identity
+    const playerNameEl = document.getElementById('player-id-name');
     const userNameEl = document.getElementById('user-name');
+    if (playerNameEl && window.itemManager) {
+        playerNameEl.textContent = lang === 'vi'
+            ? window.itemManager.user.username
+            : window.itemManager.user.usernameCn;
+    }
     if (userNameEl && window.itemManager) {
         userNameEl.textContent = lang === 'vi'
             ? window.itemManager.user.username
