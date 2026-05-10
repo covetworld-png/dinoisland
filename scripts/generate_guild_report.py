@@ -904,25 +904,21 @@ def git_commit_push(output_path, report_date):
             ['git', 'commit', '-m', f'update(guild-report): 日报 {report_date}'],
             cwd=repo_root, check=True
         )
-        subprocess.run(
-            ['git', '-c', 'http.version=HTTP/1.1', 'push', 'origin', 'main'],
-            cwd=repo_root, check=True
-        )
+        subprocess.run(['git', 'push', 'origin', 'main'], cwd=repo_root, check=True)
         print(f"  ✓ 已推送至 GitHub")
     except subprocess.CalledProcessError as e:
         print(f"  ✗ git 操作失败: {e}")
-        raise
 
 
 def main():
-    parser = argparse.ArgumentParser(description='生成无公会用户招募日报 v3.4')
-    parser.add_argument('--date', help='指定日期 (YYYY-MM-DD)，默认当日')
+    parser = argparse.ArgumentParser(description='生成无公会用户招募日报 v3.3')
+    parser.add_argument('--date', help='指定日期 (YYYY-MM-DD)，默认昨日')
     parser.add_argument('--days', type=int, default=7, help='趋势图天数')
     parser.add_argument('--output', help='输出路径')
     parser.add_argument('--push', action='store_true', help='生成后自动 git commit + push')
     args = parser.parse_args()
     
-    report_date = args.date or datetime.now().strftime('%Y-%m-%d')
+    report_date = args.date or (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     start_date = (datetime.strptime(report_date, '%Y-%m-%d') - timedelta(days=args.days-1)).strftime('%Y-%m-%d')
     output_path = args.output or os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
