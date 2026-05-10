@@ -904,17 +904,14 @@ def git_commit_push(output_path, report_date):
             ['git', 'commit', '-m', f'update(guild-report): 日报 {report_date}'],
             cwd=repo_root, check=True
         )
-        subprocess.run(
-            ['git', '-c', 'http.version=HTTP/1.1', 'push', 'origin', 'main'],
-            cwd=repo_root, check=True
-        )
+        subprocess.run(['git', 'push', 'origin', 'main'], cwd=repo_root, check=True)
         print(f"  ✓ 已推送至 GitHub")
     except subprocess.CalledProcessError as e:
         print(f"  ✗ git 操作失败: {e}")
 
 
 def main():
-    parser = argparse.ArgumentParser(description='生成无公会用户招募日报 v3.4')
+    parser = argparse.ArgumentParser(description='生成无公会用户招募日报 v3.3')
     parser.add_argument('--date', help='指定日期 (YYYY-MM-DD)，默认昨日')
     parser.add_argument('--days', type=int, default=7, help='趋势图天数')
     parser.add_argument('--output', help='输出路径')
