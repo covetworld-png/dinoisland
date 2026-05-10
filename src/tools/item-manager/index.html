@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Đạo Cụ</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=27">
+  <link rel="stylesheet" href="css/main.css?v=28">
 </head>
 <body data-lang="vi">
 
@@ -47,17 +47,16 @@
         <div class="player-identity">
           <div class="player-id-left">
             <select class="server-select" id="server-select" onchange="switchServer(this.value)">
-              <option value="Q">Q服</option>
-              <option value="K">K服</option>
+              <option value="Q">Server Q</option>
+              <option value="K">Server K</option>
             </select>
           </div>
           <div class="player-id-center">
-            <div class="player-id-label">
-              <span class="lang-vi">Ngườ Chơi</span>
-              <span class="lang-cn">当前玩家</span>
+            <div class="player-id-name" id="player-id-name">SPECTER</div>
+            <div class="player-id-meta">
+              <span class="player-id-server" id="player-id-server">Server Q</span>
+              <span class="player-id-guild" id="player-id-guild">Hoả Long</span>
             </div>
-            <div class="player-id-name" id="player-id-name">Player</div>
-            <div class="player-id-server" id="player-id-server">Q服</div>
           </div>
           <div class="player-id-right">
             <div class="player-id-avatar" id="player-id-avatar">🎮</div>
@@ -546,6 +545,6 @@
 
   <div id="toast-container"></div>
 
-  <script src="js/main.js?v=17"></script>
+  <script src="js/main.js?v=18"></script>
 </body>
 </html>

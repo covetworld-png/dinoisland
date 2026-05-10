@@ -134,23 +134,25 @@ body::after {
 }
 .player-id-center {
   flex:1; display:flex; flex-direction:column;
-  align-items:center; gap:4px; text-align:center;
-}
-.player-id-label {
-  font-size:0.72rem; color:var(--muted);
-  letter-spacing:1px; text-transform:uppercase;
+  align-items:center; gap:6px; text-align:center;
 }
 .player-id-name {
-  font-family:var(--font-display); font-size:1.5rem;
+  font-family:var(--font-display); font-size:1.6rem;
   font-weight:700; color:var(--gold);
   text-shadow:0 0 20px var(--gold-glow);
   letter-spacing:1px;
 }
+.player-id-meta {
+  display:flex; align-items:center; gap:10px;
+  font-size:0.78rem; color:var(--muted);
+}
 .player-id-server {
-  font-family:var(--font-mono); font-size:0.85rem;
-  font-weight:700; color:var(--blue);
+  font-family:var(--font-mono); font-weight:700; color:var(--blue);
   text-shadow:0 0 8px var(--blue-glow);
   letter-spacing:0.5px;
+}
+.player-id-guild {
+  font-weight:500; color:var(--fg-2);
 }
 .player-id-right {
   flex-shrink:0;

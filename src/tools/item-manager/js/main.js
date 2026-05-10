@@ -337,11 +337,12 @@ class ItemManager {
             return user;
         }
         const id = 'player_' + Math.random().toString(36).substr(2, 6);
-        const num = getRandomInt(1000, 9999);
+        const realNames = ['SPECTER','ChiuChiu','NguyệtCung','Thiên Cơ','Hắc Ám','Nhật Thực','TUTien','SKTTI','CoDoc','PAULZ','Soul','TOP龙mixuka','C007TITI','GKTieuLynh','Nolan','Leyla'];
+        const name = realNames[getRandomInt(0, realNames.length - 1)];
         user = {
             userId: id,
-            username: `Người chơi ${num}`,
-            usernameCn: `玩家${num}`,
+            username: name,
+            usernameCn: name,
             inventory: {
                 weatherCard: 3,
                 timeCard: 3,
@@ -1292,17 +1293,23 @@ class ItemManager {
         // Update player identity display
         const playerNameEl = document.getElementById('player-id-name');
         const playerServerEl = document.getElementById('player-id-server');
+        const playerGuildEl = document.getElementById('player-id-guild');
         const serverSelect = document.getElementById('server-select');
         const userNameEl = document.getElementById('user-name');
+        const sid = getServerId();
         if (playerNameEl) {
             const lang = document.body.getAttribute('data-lang') || 'vi';
             playerNameEl.textContent = lang === 'vi' ? this.user.username : this.user.usernameCn;
         }
         if (playerServerEl) {
-            playerServerEl.textContent = getServerId() + '服';
+            playerServerEl.textContent = 'Server ' + sid;
+        }
+        if (playerGuildEl) {
+            const guilds = { Q: 'Hoả Long', K: 'Hắc Ám' };
+            playerGuildEl.textContent = guilds[sid] || '';
         }
         if (serverSelect) {
-            serverSelect.value = getServerId();
+            serverSelect.value = sid;
         }
         if (userNameEl) {
             const lang = document.body.getAttribute('data-lang') || 'vi';
