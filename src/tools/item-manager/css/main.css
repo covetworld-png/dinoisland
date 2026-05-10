@@ -465,27 +465,6 @@ body::after {
   border-radius:var(--r-lg); padding:20px; margin-bottom:16px;
   text-align:center;
 }
-.time-value-row {
-  display:flex; align-items:center; justify-content:center; gap:16px;
-  flex-wrap:wrap;
-}
-.time-value-text {
-  font-family:var(--font-mono); font-size:1.6rem; font-weight:700;
-  color:var(--gold); text-shadow:0 0 16px var(--gold-glow);
-  min-width:80px; text-align:center;
-}
-.time-input {
-  width:120px; padding:10px;
-  background:var(--surface); border:1.5px solid var(--border);
-  border-radius:var(--r); color:var(--gold); font-family:var(--font-mono);
-  font-size:2rem; font-weight:800; text-align:center;
-  letter-spacing:4px; text-shadow:0 0 20px var(--gold-glow);
-  outline:none; transition:0.2s;
-}
-.time-input:focus {
-  border-color:var(--gold);
-  box-shadow:0 0 0 3px var(--gold-dim), 0 0 20px var(--gold-dim);
-}
 .time-slider-wrap { margin:16px 0; }
 .time-slider {
   width:100%; height:6px;

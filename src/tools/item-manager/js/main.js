@@ -405,17 +405,15 @@ class ItemManager {
     }
 
     setupTimeSetter() {
-        const input = document.getElementById('time-input');
         const slider = document.getElementById('time-slider');
         const skyTime = document.getElementById('sky-time');
         const presets = document.querySelectorAll('#time-presets .preset-btn');
-        if (!input || !slider) return;
+        if (!slider) return;
 
         const updateFromMinutes = (minutes) => {
             minutes = Math.max(0, Math.min(1439, minutes));
             const gv = minutesToGameVal(minutes);
             const hhmm = minutesToHHMM(minutes);
-            input.value = hhmm;
             slider.value = minutes;
             if (skyTime) skyTime.textContent = hhmm;
             this.selectedOptions.time = gv;
@@ -424,16 +422,6 @@ class ItemManager {
             updateSky(hh, mm);
         };
 
-        input.addEventListener('change', () => {
-            const minutes = parseHHMM(input.value);
-            if (minutes !== null) {
-                updateFromMinutes(minutes);
-            } else {
-                const gv = this.selectedOptions.time || 1200;
-                input.value = minutesToHHMM(gameValToMinutes(gv));
-            }
-            presets.forEach(b => b.classList.remove('selected'));
-        });
         slider.addEventListener('input', () => {
             const minutes = parseInt(slider.value, 10) || 0;
             updateFromMinutes(minutes);
@@ -897,9 +885,7 @@ class ItemManager {
 
                         // Time setter controls disable during conflict
                         if (type === 'time') {
-                            const timeInput = document.getElementById('time-input');
                             const timeSlider = document.getElementById('time-slider');
-                            if (timeInput) timeInput.disabled = true;
                             if (timeSlider) timeSlider.disabled = true;
                             document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = true);
                         }
@@ -983,10 +969,8 @@ class ItemManager {
 
                     // Time setter controls re-enable when no conflict
                     if (type === 'time') {
-                        const timeInput = document.getElementById('time-input');
                         const timeSlider = document.getElementById('time-slider');
                         const hasCards = this.user.inventory.timeCard > 0;
-                        if (timeInput) timeInput.disabled = !hasCards;
                         if (timeSlider) timeSlider.disabled = !hasCards;
                         document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = !hasCards);
                     }
@@ -1106,7 +1090,6 @@ class ItemManager {
         const container = document.getElementById('panel-time');
         if (!container) return;
 
-        const input = document.getElementById('time-input');
         const slider = document.getElementById('time-slider');
         const skyTime = document.getElementById('sky-time');
         const presets = container.querySelectorAll('.preset-btn');
@@ -1114,10 +1097,9 @@ class ItemManager {
 
         // 同步选中值到UI（内部 gameVal → 前端自然时间）
         const sel = this.selectedOptions.time;
-        if (sel !== null && sel !== undefined && input && slider) {
+        if (sel !== null && sel !== undefined && slider) {
             const minutes = gameValToMinutes(sel);
             const hhmm = minutesToHHMM(minutes);
-            input.value = hhmm;
             slider.value = minutes;
             if (skyTime) skyTime.textContent = hhmm;
             const hh = Math.floor(minutes / 60);
@@ -1131,7 +1113,6 @@ class ItemManager {
         });
 
         // 如果有冲突，禁用所有时间设置控件
-        if (input) input.disabled = !!lock;
         if (slider) slider.disabled = !!lock;
         presets.forEach(btn => { btn.disabled = !!lock; });
     }
@@ -1464,17 +1445,14 @@ function useDinoGrowCard() {
 
 function adjustTime(delta) {
     if (!window.itemManager) return;
-    const input = document.getElementById('time-input');
     const slider = document.getElementById('time-slider');
     const skyTime = document.getElementById('sky-time');
-    if (!input) return;
     let minutes = gameValToMinutes(window.itemManager.selectedOptions.time || 1200);
     minutes += delta;
     if (minutes < 0) minutes = 0;
     if (minutes > 1439) minutes = 1439;
     const gv = minutesToGameVal(minutes);
     const hhmm = minutesToHHMM(minutes);
-    input.value = hhmm;
     if (slider) slider.value = minutes;
     if (skyTime) skyTime.textContent = hhmm;
     window.itemManager.selectedOptions.time = gv;
