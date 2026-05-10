@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Đạo Cụ</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=22">
+  <link rel="stylesheet" href="css/main.css?v=23">
 </head>
 <body data-lang="vi">
 
@@ -17,14 +17,13 @@
       </span>
       <div class="row" style="gap: 12px;">
         <select class="server-select" id="server-select" onchange="switchServer(this.value)">
-          <option value="s1">Server 1</option>
-          <option value="s2">Server 2</option>
-          <option value="s3">Server 3</option>
-          <option value="s4">Server 4</option>
-          <option value="s5">Server 5</option>
+          <option value="Q">Q服</option>
+          <option value="K">K服</option>
         </select>
-        <div class="user-badge" id="user-badge">
-          <span id="user-name">Player</span>
+        <div class="user-info-bar" id="user-info-bar">
+          <span class="user-server" id="user-server">Q服</span>
+          <span class="user-divider"></span>
+          <span class="user-name" id="user-name">Player</span>
         </div>
         <button class="lang-toggle" onclick="toggleLanguage()">
           <span id="current-lang">VI / 中</span>
@@ -251,10 +250,18 @@
             </div>
 
             <div class="time-setter" id="time-setter">
+              <div class="time-sky" id="time-sky">
+                <div class="sky-bg" id="sky-bg"></div>
+                <div class="sky-celestial" id="sky-celestial"></div>
+                <div class="sky-time" id="sky-time">12:00</div>
+                <div class="sky-period" id="sky-period">
+                  <span class="lang-vi">Ban ngày</span>
+                  <span class="lang-cn">白天</span>
+                </div>
+              </div>
               <div class="time-display">
                 <div class="time-value-row">
                   <input type="text" id="time-input" class="time-input" value="12:00" maxlength="5" placeholder="HH:MM">
-                  <span id="time-display" class="time-value-text">12:00</span>
                 </div>
                 <div class="time-slider-wrap">
                   <input type="range" id="time-slider" class="time-slider" min="0" max="1439" step="1" value="720">
@@ -528,6 +535,6 @@
 
   <div id="toast-container"></div>
 
-  <script src="js/main.js?v=12"></script>
+  <script src="js/main.js?v=13"></script>
 </body>
 </html>

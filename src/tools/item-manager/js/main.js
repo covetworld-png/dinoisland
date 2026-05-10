@@ -8,7 +8,7 @@ const FLOW_DURATION = 60 * 60 * 1000; // 60 minutes in ms
 
 // Server-scoped localStorage keys
 function getServerId() {
-    return localStorage.getItem('itemManager_serverId') || 's1';
+    return localStorage.getItem('itemManager_serverId') || 'Q';
 }
 function lsKeyState() { return `itemManager_state_v1_${getServerId()}`; }
 function lsKeyUser()  { return `itemManager_user_v1_${getServerId()}`; }
@@ -18,6 +18,60 @@ function lsKeyLogs()   { return `itemManager_logs_v1_${getServerId()}`; }
 function switchServer(sid) {
     localStorage.setItem('itemManager_serverId', sid);
     location.reload();
+}
+
+// 时间天空效果：根据 HH:MM 渲染太阳/月亮位置和天空颜色
+function updateSky(hh, mm) {
+    const skyBg = document.getElementById('sky-bg');
+    const cel = document.getElementById('sky-celestial');
+    const periodEl = document.getElementById('sky-period');
+    if (!skyBg || !cel) return;
+
+    const hour = hh + mm / 60;
+    // 越南河内5月近似日出日落
+    const sunrise = 5.33;  // 05:20
+    const sunset = 18.25;  // 18:15
+
+    function pos(angleDeg) {
+        const rad = (angleDeg - 90) * Math.PI / 180;
+        return {
+            x: 50 + 35 * Math.cos(rad),
+            y: 50 + 35 * Math.sin(rad)
+        };
+    }
+
+    let periodText = '';
+
+    if (hour >= sunrise && hour <= sunset) {
+        const pct = (hour - sunrise) / (sunset - sunrise);
+        const p = pos(pct * 180);
+        cel.className = 'sky-celestial sun';
+        cel.style.left = p.x + '%';
+        cel.style.top = p.y + '%';
+        const brightness = Math.sin(pct * Math.PI);
+        const r = Math.round(10 + brightness * 30);
+        const g = Math.round(26 + brightness * 80);
+        const b = Math.round(21 + brightness * 120);
+        skyBg.style.background = 'radial-gradient(circle at ' + p.x + '% ' + p.y + '%, rgba(255,215,0,0.25) 0%, rgb(' + r + ',' + g + ',' + b + ') 60%, rgb(' + Math.round(r*0.5) + ',' + Math.round(g*0.5) + ',' + Math.round(b*0.6) + ') 100%)';
+        if (hour < 7) periodText = '<span class="lang-vi">Bình minh</span><span class="lang-cn">清晨</span>';
+        else if (hour < 17) periodText = '<span class="lang-vi">Ban ngày</span><span class="lang-cn">白天</span>';
+        else periodText = '<span class="lang-vi">Hoàng hôn</span><span class="lang-cn">黄昏</span>';
+    } else {
+        let pct;
+        if (hour > sunset) {
+            pct = (hour - sunset) / (24 - sunset + sunrise);
+        } else {
+            pct = (hour + 24 - sunset) / (24 - sunset + sunrise);
+        }
+        const p = pos(pct * 180);
+        cel.className = 'sky-celestial moon';
+        cel.style.left = p.x + '%';
+        cel.style.top = p.y + '%';
+        skyBg.style.background = 'radial-gradient(circle at 50% 100%, rgba(74,154,138,0.15) 0%, #0a1a15 60%, #050d0a 100%)';
+        periodText = '<span class="lang-vi">Đêm khuya</span><span class="lang-cn">深夜</span>';
+    }
+
+    if (periodEl) periodEl.innerHTML = periodText;
 }
 
 // 模拟服务端轮询：跨服务器感知其他玩家操作
@@ -343,17 +397,21 @@ class ItemManager {
     setupTimeSetter() {
         const input = document.getElementById('time-input');
         const slider = document.getElementById('time-slider');
-        const display = document.getElementById('time-display');
+        const skyTime = document.getElementById('sky-time');
         const presets = document.querySelectorAll('#time-presets .preset-btn');
-        if (!input || !slider || !display) return;
+        if (!input || !slider) return;
 
         const updateFromMinutes = (minutes) => {
             minutes = Math.max(0, Math.min(1439, minutes));
             const gv = minutesToGameVal(minutes);
-            input.value = minutesToHHMM(minutes);
+            const hhmm = minutesToHHMM(minutes);
+            input.value = hhmm;
             slider.value = minutes;
-            display.textContent = minutesToHHMM(minutes);
+            if (skyTime) skyTime.textContent = hhmm;
             this.selectedOptions.time = gv;
+            const hh = Math.floor(minutes / 60);
+            const mm = minutes % 60;
+            updateSky(hh, mm);
         };
 
         input.addEventListener('change', () => {
@@ -361,7 +419,6 @@ class ItemManager {
             if (minutes !== null) {
                 updateFromMinutes(minutes);
             } else {
-                // revert to current value
                 const gv = this.selectedOptions.time || 1200;
                 input.value = minutesToHHMM(gameValToMinutes(gv));
             }
@@ -1041,17 +1098,21 @@ class ItemManager {
 
         const input = document.getElementById('time-input');
         const slider = document.getElementById('time-slider');
-        const display = document.getElementById('time-display');
+        const skyTime = document.getElementById('sky-time');
         const presets = container.querySelectorAll('.preset-btn');
         const lock = this.checkConflict('time');
 
         // 同步选中值到UI（内部 gameVal → 前端自然时间）
         const sel = this.selectedOptions.time;
-        if (sel !== null && sel !== undefined && input && slider && display) {
+        if (sel !== null && sel !== undefined && input && slider) {
             const minutes = gameValToMinutes(sel);
-            input.value = minutesToHHMM(minutes);
+            const hhmm = minutesToHHMM(minutes);
+            input.value = hhmm;
             slider.value = minutes;
-            display.textContent = minutesToHHMM(minutes);
+            if (skyTime) skyTime.textContent = hhmm;
+            const hh = Math.floor(minutes / 60);
+            const mm = minutes % 60;
+            updateSky(hh, mm);
         }
 
         // 更新预设按钮选中状态
@@ -1219,11 +1280,19 @@ class ItemManager {
             });
         }
 
-        // Update user name display
+        // Update user info bar display
         const userNameEl = document.getElementById('user-name');
+        const userServerEl = document.getElementById('user-server');
+        const serverSelect = document.getElementById('server-select');
         if (userNameEl) {
             const lang = document.body.getAttribute('data-lang') || 'vi';
             userNameEl.textContent = lang === 'vi' ? this.user.username : this.user.usernameCn;
+        }
+        if (userServerEl) {
+            userServerEl.textContent = getServerId() + '服';
+        }
+        if (serverSelect) {
+            serverSelect.value = getServerId();
         }
     }
 
@@ -1370,17 +1439,19 @@ function adjustTime(delta) {
     if (!window.itemManager) return;
     const input = document.getElementById('time-input');
     const slider = document.getElementById('time-slider');
-    const display = document.getElementById('time-display');
+    const skyTime = document.getElementById('sky-time');
     if (!input) return;
     let minutes = gameValToMinutes(window.itemManager.selectedOptions.time || 1200);
     minutes += delta;
     if (minutes < 0) minutes = 0;
     if (minutes > 1439) minutes = 1439;
     const gv = minutesToGameVal(minutes);
-    input.value = minutesToHHMM(minutes);
+    const hhmm = minutesToHHMM(minutes);
+    input.value = hhmm;
     if (slider) slider.value = minutes;
-    if (display) display.textContent = minutesToHHMM(minutes);
+    if (skyTime) skyTime.textContent = hhmm;
     window.itemManager.selectedOptions.time = gv;
+    updateSky(Math.floor(minutes / 60), minutes % 60);
     // 取消预设选中状态
     document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.classList.remove('selected'));
 }
