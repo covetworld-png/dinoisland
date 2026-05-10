@@ -21,9 +21,11 @@ function switchServer(sid) {
 }
 
 // 时间天空效果：根据 HH:MM 渲染太阳/月亮位置和天空颜色
-function updateSky(hh, mm) {
-    const skyBg = document.getElementById('sky-bg');
-    const periodEl = document.getElementById('sky-period');
+function updateSky(hh, mm, prefix) {
+    prefix = prefix || 'sky';
+    const skyBg = document.getElementById(prefix + '-bg');
+    const periodEl = document.getElementById(prefix + '-period');
+    const timeEl = document.getElementById(prefix + '-time');
     if (!skyBg) return;
 
     const hour = hh + mm / 60;
@@ -91,7 +93,7 @@ function simulateServerPoll(manager) {
     
     // 每轮随机挑选一个其他服务器，模拟该服务器上有玩家使用了道具
     const target = otherServers[Math.floor(Math.random() * otherServers.length)];
-    const types = ['weather','time','flow','dinoGrow'];
+    const types = ['weather','time','flow'];
     const type = types[Math.floor(Math.random() * types.length)];
     const bots = [
         {vi:'Ngườ chơi 7723', cn:'玩家7723'},
@@ -199,6 +201,10 @@ const I18N = {
         conflictTime: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Gian, còn lại ${time}`,
         conflictDinoGrow: (name, time) => `Ngườ chơi ${name} đang sử dụng Thẻ Tăng Trưởng, còn lại ${time}`,
         noItem: 'Không đủ đạo cụ',
+        connectingServer: 'Đang kết nối server...',
+        serverErrorConflict: 'Server: Có ngườ chơi khác đang sử dụng đạo cụ này, vui lòng thử lại sau',
+        serverErrorNoItem: 'Server: Không đủ đạo cụ',
+        serverErrorSystem: (code) => `Server: Lỗi hệ thống, vui lòng liên hệ CSKH (Mã lỗi: ${code})`,
         selectOption: 'Vui lòng chọn một tùy chọn',
         useSuccess: (type) => `Sử dụng ${type} thành công!`,
         useFailed: 'Sử dụng thất bại, vui lòng thử lại',
@@ -206,6 +212,8 @@ const I18N = {
         enterContent: 'Vui lòng nhập nội dung thông báo',
         timeUp: 'Hết thờ gian, đã tự động kết thúc',
         approved: 'Thông báo đã được duyệt',
+        clickToSend: 'Đã duyệt, nhấn để gửi',
+        sendAnnouncement: 'Gửi Thông Báo',
         sent: 'Thông báo đã được gửi toàn server',
         history: {
             weather: 'Thẻ Thời Tiết',
@@ -247,8 +255,14 @@ const I18N = {
         conflictWeather: (name, time) => `玩家 ${name} 正在使用天气卡，剩余 ${time}`,
         conflictTime: (name, time) => `玩家 ${name} 正在使用时间卡，剩余 ${time}`,
         conflictFlow: (name, time) => `玩家 ${name} 正在使用时间流动卡，剩余 ${time}`,
+        conflictFlowByTime: (time) => `时间卡正在使用中 (${time})，无法启动时间流动`,
+        conflictTimeByFlow: (time) => `时间流动正在运行中 (${time})，无法使用时间卡`,
         conflictDinoGrow: (name, time) => `玩家 ${name} 正在使用恐龙变大卡，剩余 ${time}`,
         noItem: '道具不足',
+        connectingServer: '正在连接服务端...',
+        serverErrorConflict: '服务端返回：有其他玩家正在使用该道具，请稍后再试',
+        serverErrorNoItem: '服务端返回：道具数量不足',
+        serverErrorSystem: (code) => `服务端返回：系统异常，请联系客服处理（异常代码：${code}）`,
         selectOption: '请选择一个选项',
         useSuccess: (type) => `${type} 使用成功！`,
         useFailed: '使用失败，请重试',
@@ -256,6 +270,8 @@ const I18N = {
         enterContent: '请输入公告内容',
         timeUp: '时间结束，已自动重置',
         approved: '公告已通过审核',
+        clickToSend: '审核已通过，点击发送',
+        sendAnnouncement: '发送公告',
         sent: '公告已发送至全服',
         history: {
             weather: '天气卡',
@@ -392,6 +408,7 @@ class ItemManager {
         this.setupStorageSync();
         this.setupTimeSetter();
         this.startServerPolling();
+        setupDebugMock();
     }
 
     startServerPolling() {
@@ -465,8 +482,37 @@ class ItemManager {
         return lock;
     }
 
+    // Simulate server request with loading state
+    async simulateServerUse(type) {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        const t = I18N[lang];
+
+        // Show loading toast
+        const loadingToast = document.createElement('div');
+        loadingToast.className = 'toast info loading';
+        loadingToast.innerHTML = `<span>⏳</span><span>${t.connectingServer}</span>`;
+        const container = document.getElementById('toast-container');
+        if (container) container.appendChild(loadingToast);
+
+        // Simulate network delay
+        await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
+
+        // Remove loading toast
+        if (loadingToast.parentNode) loadingToast.remove();
+
+        // Check mock error (set via window.mockNextError or debug UI)
+        if (window.__mockServerError) {
+            const err = window.__mockServerError;
+            window.__mockServerError = null;
+            return err;
+        }
+
+        // Default: success
+        return { success: true };
+    }
+
     // Use Weather Card
-    useWeatherCard() {
+    async useWeatherCard() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
 
@@ -486,6 +532,19 @@ class ItemManager {
             const remaining = conflict.endTime - Date.now();
             const name = lang === 'vi' ? conflict.username : (conflict.usernameCn || conflict.username);
             showToast(t.conflictWeather(name, formatTime(remaining)), 'warning');
+            return;
+        }
+
+        // Simulate server request
+        const serverResult = await this.simulateServerUse('weather');
+        if (!serverResult.success) {
+            if (serverResult.code === 'CONFLICT') {
+                showToast(t.serverErrorConflict, 'warning');
+            } else if (serverResult.code === 'NO_ITEM') {
+                showToast(t.serverErrorNoItem, 'error');
+            } else if (serverResult.code === 'SYSTEM_ERROR') {
+                showToast(t.serverErrorSystem(serverResult.errorCode || 'ERR_500'), 'error');
+            }
             return;
         }
 
@@ -528,7 +587,7 @@ class ItemManager {
     }
 
     // Use Time Card
-    useTimeCard() {
+    async useTimeCard() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
 
@@ -548,6 +607,27 @@ class ItemManager {
             const remaining = conflict.endTime - Date.now();
             const name = lang === 'vi' ? conflict.username : (conflict.usernameCn || conflict.username);
             showToast(t.conflictTime(name, formatTime(remaining)), 'warning');
+            return;
+        }
+
+        // Time and Flow are mutually exclusive
+        const flowLock = this.checkConflict('flow');
+        if (flowLock) {
+            const remaining = flowLock.endTime - Date.now();
+            showToast(t.conflictTimeByFlow(formatTime(remaining)), 'warning');
+            return;
+        }
+
+        // Simulate server request
+        const serverResult = await this.simulateServerUse('time');
+        if (!serverResult.success) {
+            if (serverResult.code === 'CONFLICT') {
+                showToast(t.serverErrorConflict, 'warning');
+            } else if (serverResult.code === 'NO_ITEM') {
+                showToast(t.serverErrorNoItem, 'error');
+            } else if (serverResult.code === 'SYSTEM_ERROR') {
+                showToast(t.serverErrorSystem(serverResult.errorCode || 'ERR_500'), 'error');
+            }
             return;
         }
 
@@ -589,7 +669,7 @@ class ItemManager {
     }
 
     // Use Flow Card
-    useFlowCard() {
+    async useFlowCard() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
 
@@ -603,6 +683,27 @@ class ItemManager {
             const remaining = conflict.endTime - Date.now();
             const name = lang === 'vi' ? conflict.username : (conflict.usernameCn || conflict.username);
             showToast(t.conflictFlow(name, formatTime(remaining)), 'warning');
+            return;
+        }
+
+        // Time and Flow are mutually exclusive
+        const timeLock = this.checkConflict('time');
+        if (timeLock) {
+            const remaining = timeLock.endTime - Date.now();
+            showToast(t.conflictFlowByTime(formatTime(remaining)), 'warning');
+            return;
+        }
+
+        // Simulate server request
+        const serverResult = await this.simulateServerUse('flow');
+        if (!serverResult.success) {
+            if (serverResult.code === 'CONFLICT') {
+                showToast(t.serverErrorConflict, 'warning');
+            } else if (serverResult.code === 'NO_ITEM') {
+                showToast(t.serverErrorNoItem, 'error');
+            } else if (serverResult.code === 'SYSTEM_ERROR') {
+                showToast(t.serverErrorSystem(serverResult.errorCode || 'ERR_500'), 'error');
+            }
             return;
         }
 
@@ -641,7 +742,7 @@ class ItemManager {
     }
 
     // Use Dino Grow Card
-    useDinoGrowCard() {
+    async useDinoGrowCard() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
 
@@ -650,11 +751,17 @@ class ItemManager {
             return;
         }
 
-        const conflict = this.checkConflict('dinoGrow');
-        if (conflict) {
-            const remaining = conflict.endTime - Date.now();
-            const name = lang === 'vi' ? conflict.username : (conflict.usernameCn || conflict.username);
-            showToast(t.conflictDinoGrow(name, formatTime(remaining)), 'warning');
+        // Dino grow does not conflict with other players
+        // Simulate server request
+        const serverResult = await this.simulateServerUse('dinoGrow');
+        if (!serverResult.success) {
+            if (serverResult.code === 'CONFLICT') {
+                showToast(t.serverErrorConflict, 'warning');
+            } else if (serverResult.code === 'NO_ITEM') {
+                showToast(t.serverErrorNoItem, 'error');
+            } else if (serverResult.code === 'SYSTEM_ERROR') {
+                showToast(t.serverErrorSystem(serverResult.errorCode || 'ERR_500'), 'error');
+            }
             return;
         }
 
@@ -702,6 +809,11 @@ class ItemManager {
             return;
         }
 
+        const confirmMsg = lang === 'vi'
+            ? 'Bạn có chắc muốn dừng dòng chảy thờ gian? Thẻ sẽ bị tiêu hao và không hoàn lại.'
+            : '确定要停止时间流动吗？卡片将被消耗且不予返还。';
+        if (!confirm(confirmMsg)) return;
+
         // Clear lock
         this.state.globalLocks.flow = null;
 
@@ -717,6 +829,7 @@ class ItemManager {
         this.renderFlowPanel();
         this.renderHistory();
         this.startCountdowns();
+        updateSky(12, 0, 'flow-sky');
         showToast(I18N[lang].timeUp, 'info');
     }
 
@@ -775,46 +888,64 @@ class ItemManager {
                 this.renderAnnouncementPanel();
                 this.renderHistory();
                 showToast(I18N[document.body.getAttribute('data-lang') || 'vi'].approved, 'info');
-
-                // Simulate send after approval
-                setTimeout(() => {
-                    this.loadState();
-                    const ann2 = this.state.announcements.find(a => a.id === announcementId);
-                    if (ann2 && ann2.status === 'approved') {
-                        ann2.status = 'queued';
-                        this.saveState();
-                        this.renderAnnouncementPanel();
-
-                        setTimeout(() => {
-                            this.loadState();
-                            const ann3 = this.state.announcements.find(a => a.id === announcementId);
-                            if (ann3 && ann3.status === 'queued') {
-                                ann3.status = 'sent';
-                                ann3.sendTime = Date.now();
-                                this.saveState();
-
-                                // Add to history
-                                this.state.history.unshift({
-                                    id: generateId(),
-                                    type: 'announcement',
-                                    userId: this.user.userId,
-                                    username: this.user.username,
-                                    usernameCn: this.user.usernameCn,
-                                    detail: ann3.content.substring(0, 30) + (ann3.content.length > 30 ? '...' : ''),
-                                    startTime: ann3.submitTime,
-                                    endTime: ann3.sendTime,
-                                    status: 'completed'
-                                });
-                                this.saveState();
-                                this.renderAnnouncementPanel();
-                                this.renderHistory();
-                                showToast(I18N[document.body.getAttribute('data-lang') || 'vi'].sent, 'success');
-                            }
-                        }, getRandomInt(3000, 8000));
-                    }
-                }, getRandomInt(2000, 5000));
+                // User must manually click send after approval
             }
         }, reviewDelay);
+    }
+
+    resetInventory() {
+        this.user.inventory = {
+            weatherCard: 3,
+            timeCard: 3,
+            announcementCard: 3,
+            flowCard: 3,
+            dinoGrowCard: 3
+        };
+        this.saveUser();
+        this.renderInventory();
+        this.renderAllPanels();
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        showToast(lang === 'vi' ? 'Đã khôi phục đạo cụ!' : '道具已重置！', 'success');
+    }
+
+    sendAnnouncement(announcementId) {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        const t = I18N[lang];
+        this.loadState();
+        const ann = this.state.announcements.find(a => a.id === announcementId);
+        if (!ann || ann.status !== 'approved') {
+            showToast(t.useFailed, 'error');
+            return;
+        }
+        ann.status = 'sent';
+        ann.sendTime = Date.now();
+        this.saveState();
+
+        // Add to history
+        this.state.history.unshift({
+            id: generateId(),
+            type: 'announcement',
+            userId: this.user.userId,
+            username: this.user.username,
+            usernameCn: this.user.usernameCn,
+            detail: ann.content.substring(0, 30) + (ann.content.length > 30 ? '...' : ''),
+            startTime: ann.submitTime,
+            endTime: ann.sendTime,
+            status: 'completed'
+        });
+        this.saveState();
+
+        this.renderAnnouncementPanel();
+        this.renderHistory();
+        showToast(t.sent, 'success');
+
+        // Wait a few seconds so user can see the "sent" state, then reset flow
+        setTimeout(() => {
+            this.loadState();
+            this.state.announcements = this.state.announcements.filter(a => a.userId !== this.user.userId);
+            this.saveState();
+            this.renderAnnouncementPanel();
+        }, 4000);
     }
 
     // Countdown Management
@@ -845,7 +976,10 @@ class ItemManager {
                     const remaining = lock.endTime - Date.now();
                     const isMine = lock.userId === this.user.userId;
 
-                    if (remaining > 0) {
+                    // Dino grow countdown only shows for current user (no conflict)
+                    if (remaining > 0 && type === 'dinoGrow' && !isMine) {
+                        banner.style.display = 'none';
+                    } else if (remaining > 0) {
                         banner.style.display = 'flex';
                         value.textContent = formatTime(remaining);
                         banner.className = isMine 
@@ -866,14 +1000,15 @@ class ItemManager {
                             const hh = Math.floor(gameMinutes / 60);
                             const mm = Math.floor(gameMinutes % 60);
                             const timeStr = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
-                            const timeDisplay = document.getElementById('game-time-value');
+                            const timeDisplay = document.getElementById('flow-sky-time');
                             const stopBtn = document.getElementById('btn-stop-flow');
                             const useBtn = document.getElementById('btn-use-flow');
-                            const display = document.getElementById('game-time-display');
+                            const display = document.getElementById('flow-sky');
                             if (timeDisplay) timeDisplay.textContent = timeStr;
                             if (stopBtn) stopBtn.style.display = isMine ? 'block' : 'none';
                             if (useBtn) useBtn.style.display = 'none';
                             if (display) display.classList.add('active');
+                            updateSky(hh, mm, 'flow-sky');
                         }
 
                         if (options) {
@@ -881,7 +1016,8 @@ class ItemManager {
                                 btn.disabled = true;
                             });
                         }
-                        if (btn) btn.disabled = true;
+                        // Dino grow does not conflict with other players
+                        if (btn) btn.disabled = type === 'dinoGrow' ? this.user.inventory.dinoGrowCard <= 0 : true;
 
                         // Time setter controls disable during conflict
                         if (type === 'time') {
@@ -890,8 +1026,8 @@ class ItemManager {
                             document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = true);
                         }
 
-                        // Dino grow visual effect during active
-                        if (type === 'dinoGrow') {
+                        // Dino grow visual effect during active (only for current user)
+                        if (type === 'dinoGrow' && isMine) {
                             const dinoChar = document.getElementById('dino-character');
                             const dinoAura = document.getElementById('dino-aura');
                             const dinoStatus = document.getElementById('dino-status');
@@ -907,7 +1043,8 @@ class ItemManager {
                         }
 
                         if (conflictBanner) {
-                            if (isMine) {
+                            // Dino grow does not conflict with other players
+                            if (isMine || type === 'dinoGrow') {
                                 conflictBanner.style.display = 'none';
                             } else {
                                 conflictBanner.style.display = 'flex';
@@ -927,7 +1064,6 @@ class ItemManager {
                                     if (type === 'weather') msg = t.conflictWeather(name, formatTime(remaining));
                                     else if (type === 'time') msg = t.conflictTime(name, formatTime(remaining));
                                     else if (type === 'flow') msg = t.conflictFlow(name, formatTime(remaining));
-                                    else if (type === 'dinoGrow') msg = t.conflictDinoGrow(name, formatTime(remaining));
                                     textEl.textContent = msg + (detail ? ` (${detail})` : '');
                                 }
                             }
@@ -948,31 +1084,56 @@ class ItemManager {
                         this.renderPanel(type);
                     }
                 } else {
+                    // Cross-type mutual exclusion: time ↔ flow
+                    const crossLock = type === 'time' ? this.checkConflict('flow') : type === 'flow' ? this.checkConflict('time') : null;
+                    if (crossLock) {
+                        const remaining = crossLock.endTime - Date.now();
+                        if (statusDot) statusDot.className = 'status-dot busy';
+                        if (statusText) {
+                            statusText.innerHTML = `<span class="lang-vi">Đang bận</span><span class="lang-cn">占用中</span>`;
+                        }
+                        if (conflictBanner) {
+                            conflictBanner.style.display = 'flex';
+                            const textEl = document.getElementById(`conflict-text-${type}`);
+                            if (textEl) {
+                                const msg = type === 'time'
+                                    ? t.conflictTimeByFlow(formatTime(remaining))
+                                    : t.conflictFlowByTime(formatTime(remaining));
+                                textEl.textContent = msg;
+                            }
+                        }
+                        if (btn) btn.disabled = true;
+                        if (type === 'time') {
+                            const timeSlider = document.getElementById('time-slider');
+                            if (timeSlider) timeSlider.disabled = true;
+                            document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = true);
+                        }
+                    } else {
+                        if (statusDot) statusDot.className = 'status-dot idle';
+                        if (statusText) {
+                            statusText.innerHTML = `<span class="lang-vi">${t.ready}</span><span class="lang-cn">${t.ready}</span>`;
+                        }
+                        if (conflictBanner) conflictBanner.style.display = 'none';
+                        if (btn) {
+                            btn.disabled = (type === 'weather' && this.user.inventory.weatherCard <= 0) ||
+                                           (type === 'time' && this.user.inventory.timeCard <= 0) ||
+                                           (type === 'flow' && this.user.inventory.flowCard <= 0) ||
+                                           (type === 'dinoGrow' && this.user.inventory.dinoGrowCard <= 0);
+                        }
+                        // Time setter controls re-enable when no conflict
+                        if (type === 'time') {
+                            const timeSlider = document.getElementById('time-slider');
+                            const hasCards = this.user.inventory.timeCard > 0;
+                            if (timeSlider) timeSlider.disabled = !hasCards;
+                            document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = !hasCards);
+                        }
+                    }
+
                     banner.style.display = 'none';
-                    if (statusDot) {
-                        statusDot.className = 'status-dot idle';
-                    }
-                    if (statusText) {
-                        statusText.innerHTML = `<span class="lang-vi">${t.ready}</span><span class="lang-cn">${t.ready}</span>`;
-                    }
                     if (options) {
                         options.querySelectorAll('.option-btn').forEach(btn => {
                             btn.disabled = false;
                         });
-                    }
-                    if (btn) {
-                        btn.disabled = (type === 'weather' && this.user.inventory.weatherCard <= 0) ||
-                                       (type === 'time' && this.user.inventory.timeCard <= 0) ||
-                                       (type === 'flow' && this.user.inventory.flowCard <= 0) ||
-                                       (type === 'dinoGrow' && this.user.inventory.dinoGrowCard <= 0);
-                    }
-
-                    // Time setter controls re-enable when no conflict
-                    if (type === 'time') {
-                        const timeSlider = document.getElementById('time-slider');
-                        const hasCards = this.user.inventory.timeCard > 0;
-                        if (timeSlider) timeSlider.disabled = !hasCards;
-                        document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = !hasCards);
                     }
 
                     // Dino grow reset visual
@@ -987,20 +1148,20 @@ class ItemManager {
                             dinoStatus.innerHTML = '<span class="lang-vi">Kích thước bình thường</span><span class="lang-cn">正常体型</span>';
                         }
                     }
-                    if (conflictBanner) conflictBanner.style.display = 'none';
 
                     // Flow-specific: reset game time display
-                    if (type === 'flow') {
-                        const timeDisplay = document.getElementById('game-time-value');
+                    if (type === 'flow' && !crossLock) {
+                        const timeDisplay = document.getElementById('flow-sky-time');
                         const stopBtn = document.getElementById('btn-stop-flow');
                         const useBtn = document.getElementById('btn-use-flow');
-                        const display = document.getElementById('game-time-display');
-                        const hint = display?.querySelector('.game-time-hint');
+                        const display = document.getElementById('flow-sky');
+                        const period = document.getElementById('flow-sky-period');
                         if (timeDisplay) timeDisplay.textContent = '12:00';
                         if (stopBtn) stopBtn.style.display = 'none';
                         if (useBtn) useBtn.style.display = 'block';
                         if (display) display.classList.remove('active');
-                        if (hint) hint.innerHTML = `<span class="lang-vi">Thờ gian đang đứng yên tại 12:00</span><span class="lang-cn">时间静止在 12:00</span>`;
+                        if (period) period.innerHTML = '<span class="lang-vi">Thờ gian đang đứng yên tại 12:00</span><span class="lang-cn">时间静止在 12:00</span>';
+                        updateSky(12, 0, 'flow-sky');
                     }
                 }
             });
@@ -1021,13 +1182,7 @@ class ItemManager {
                 ann.status = 'approved';
                 ann.approveTime = Date.now();
             }
-            if (ann.status === 'approved' && ann.approveTime && Date.now() - ann.approveTime > 10000) {
-                ann.status = 'queued';
-            }
-            if (ann.status === 'queued' && Date.now() - (ann.approveTime || ann.submitTime) > 20000) {
-                ann.status = 'sent';
-                ann.sendTime = Date.now();
-            }
+            // Approved announcements stay approved until user manually sends
         });
         this.saveState();
         this.renderAnnouncementPanel();
@@ -1094,6 +1249,7 @@ class ItemManager {
         const skyTime = document.getElementById('sky-time');
         const presets = container.querySelectorAll('.preset-btn');
         const lock = this.checkConflict('time');
+        const flowLock = this.checkConflict('flow');
 
         // 同步选中值到UI（内部 gameVal → 前端自然时间）
         const sel = this.selectedOptions.time;
@@ -1112,22 +1268,24 @@ class ItemManager {
             btn.classList.toggle('selected', parseInt(btn.dataset.value,10) === sel);
         });
 
-        // 如果有冲突，禁用所有时间设置控件
-        if (slider) slider.disabled = !!lock;
-        presets.forEach(btn => { btn.disabled = !!lock; });
+        // 如果有冲突或被flow互斥，禁用所有时间设置控件
+        const disabled = !!lock || !!flowLock;
+        if (slider) slider.disabled = disabled;
+        presets.forEach(btn => { btn.disabled = disabled; });
     }
 
     renderFlowPanel() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
         const lock = this.checkConflict('flow');
+        const timeLock = this.checkConflict('time');
         const btn = document.getElementById('btn-use-flow');
         const stopBtn = document.getElementById('btn-stop-flow');
-        const display = document.getElementById('game-time-display');
-        const hint = display?.querySelector('.game-time-hint');
+        const display = document.getElementById('flow-sky');
+        const period = document.getElementById('flow-sky-period');
 
         if (btn) {
-            btn.disabled = this.user.inventory.flowCard <= 0 || !!lock;
+            btn.disabled = this.user.inventory.flowCard <= 0 || !!lock || !!timeLock;
         }
         if (stopBtn) {
             stopBtn.style.display = lock && lock.userId === this.user.userId ? 'block' : 'none';
@@ -1135,17 +1293,19 @@ class ItemManager {
         if (display) {
             display.classList.toggle('active', !!lock);
         }
-        if (hint) {
+        if (period) {
             if (lock) {
-                hint.innerHTML = `<span class="lang-vi">Thờ gian đang chảy...</span><span class="lang-cn">时间正在流动...</span>`;
+                // Period text is updated by countdown tick via updateSky
             } else {
-                hint.innerHTML = `<span class="lang-vi">Thờ gian đang đứng yên tại 12:00</span><span class="lang-cn">时间静止在 12:00</span>`;
+                period.innerHTML = '<span class="lang-vi">Thờ gian đang đứng yên tại 12:00</span><span class="lang-cn">时间静止在 12:00</span>';
+                updateSky(12, 0, 'flow-sky');
             }
         }
     }
 
     renderDinoGrowPanel() {
         const lock = this.checkConflict('dinoGrow');
+        const myLock = lock && lock.userId === this.user.userId;
         const btn = document.getElementById('btn-use-dino-grow');
         const dinoChar = document.getElementById('dino-character');
         const dinoAura = document.getElementById('dino-aura');
@@ -1153,7 +1313,8 @@ class ItemManager {
         const lang = document.body.getAttribute('data-lang') || 'vi';
 
         if (btn) {
-            btn.disabled = this.user.inventory.dinoGrowCard <= 0 || !!lock;
+            // Dino grow does not conflict with other players; only disable if current user is active
+            btn.disabled = this.user.inventory.dinoGrowCard <= 0 || !!myLock;
         }
 
         if (lock) {
@@ -1181,18 +1342,21 @@ class ItemManager {
         const myAnnouncements = this.state.announcements.filter(a => a.userId === this.user.userId);
         const hasPending = myAnnouncements.some(a => a.status === 'pending_review');
         const hasApproved = myAnnouncements.some(a => a.status === 'approved');
-        const hasQueued = myAnnouncements.some(a => a.status === 'queued');
         const hasSent = myAnnouncements.some(a => a.status === 'sent');
 
+        const dotSubmit = document.getElementById('flow-dot-submit');
         const dotReview = document.getElementById('flow-dot-review');
         const dotQueue = document.getElementById('flow-dot-queue');
         const dotSent = document.getElementById('flow-dot-sent');
 
+        if (dotSubmit) {
+            dotSubmit.className = 'flow-dot' + (myAnnouncements.length > 0 ? ' completed' : '');
+        }
         if (dotReview) {
-            dotReview.className = 'flow-dot' + (hasPending ? ' active' : hasApproved || hasQueued || hasSent ? ' completed' : '');
+            dotReview.className = 'flow-dot' + (hasPending ? ' active' : hasApproved || hasSent ? ' completed' : '');
         }
         if (dotQueue) {
-            dotQueue.className = 'flow-dot' + (hasQueued ? ' active' : hasSent ? ' completed' : '');
+            dotQueue.className = 'flow-dot' + (hasApproved ? ' active' : hasSent ? ' completed' : '');
         }
         if (dotSent) {
             dotSent.className = 'flow-dot' + (hasSent ? ' completed' : '');
@@ -1211,11 +1375,15 @@ class ItemManager {
         section.style.display = 'block';
         list.innerHTML = myAnnouncements.map(ann => {
             const timeStr = formatDateTime(ann.submitTime);
+            const sendBtn = ann.status === 'approved'
+                ? `<button class="btn btn-sm btn-send" onclick="window.itemManager.sendAnnouncement('${ann.id}')">${t.sendAnnouncement}</button>`
+                : '';
             return `
                 <div class="announcement-item">
                     <div class="announcement-content">${escapeHtml(ann.content)}</div>
                     <div class="announcement-meta">
                         <span class="status-badge ${ann.status}">${t.status[ann.status] || ann.status}</span>
+                        ${sendBtn}
                         <span class="announcement-time">${timeStr}</span>
                     </div>
                 </div>
@@ -1461,6 +1629,10 @@ function adjustTime(delta) {
     document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.classList.remove('selected'));
 }
 
+function resetInventory() {
+    if (window.itemManager) window.itemManager.resetInventory();
+}
+
 function submitAnnouncement() {
     const content = document.getElementById('announcement-content')?.value || '';
     if (window.itemManager) {
@@ -1468,6 +1640,33 @@ function submitAnnouncement() {
         document.getElementById('announcement-content').value = '';
         document.getElementById('char-count').textContent = '0';
     }
+}
+
+// Debug panel: simulate server errors
+function toggleDebugPanel() {
+    const panel = document.getElementById('debug-panel');
+    const btn = document.querySelector('.debug-toggle');
+    if (!panel) return;
+    const isVisible = panel.style.display !== 'none';
+    panel.style.display = isVisible ? 'none' : 'block';
+    if (btn) btn.classList.toggle('active', !isVisible);
+}
+
+function setupDebugMock() {
+    const radios = document.querySelectorAll('input[name="mock-error"]');
+    radios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            const val = radio.value;
+            if (!val) {
+                window.__mockServerError = null;
+            } else if (val === 'SYSTEM_ERROR') {
+                const code = `ERR_500_${String(Math.floor(Math.random() * 900) + 100).padStart(3, '0')}`;
+                window.__mockServerError = { success: false, code: val, errorCode: code };
+            } else {
+                window.__mockServerError = { success: false, code: val };
+            }
+        });
+    });
 }
 
 /* ── auth check ── */
