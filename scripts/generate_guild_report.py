@@ -407,6 +407,70 @@ h1 {{ font-size: 22px; font-weight: 600; }}
 h1 span {{ color: var(--accent); }}
 .meta {{ color: var(--text-muted); font-size: 13px; }}
 
+.sky-widget {{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 12px;
+}}
+.sky-circle {{
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}}
+.sky-bg {{
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transition: background 1s ease;
+}}
+.celestial {{
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  transition: all 1s ease;
+}}
+.sun {{
+  background: #FFD700;
+  box-shadow: 0 0 10px #FFD700, 0 0 20px rgba(255,215,0,0.4);
+}}
+.moon {{
+  background: #e8e8e8;
+  box-shadow: 0 0 8px rgba(232,232,232,0.5);
+}}
+.moon::after {{
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 50%;
+  top: 3px;
+  left: 5px;
+}}
+.sky-info {{
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}}
+.sky-time {{
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}}
+.sky-label {{
+  font-size: 10px;
+  color: var(--text-muted);
+}}
+
 .date-picker-wrap {{
   position: relative;
   display: inline-flex;
@@ -530,9 +594,19 @@ tr:hover {{ background: rgba(255,255,255,0.03); }}
   <header>
     <div>
       <h1>🦖 无公会用户招募 <span>日报</span></h1>
-      <div class="meta">统计日期: <span id="current-date">{report_date}</span> | 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}</div>
+      <div class="meta">生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}</div>
     </div>
-    <div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="sky-widget">
+        <div class="sky-circle">
+          <div class="sky-bg" id="skyBg"></div>
+          <div class="celestial" id="celestial"></div>
+        </div>
+        <div class="sky-info">
+          <span class="sky-time" id="vnTime">--:--</span>
+          <span class="sky-label">越南 UTC+7</span>
+        </div>
+      </div>
       <div class="date-picker-wrap">
         <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5z"/></svg>
         <input type="date" id="datePicker" class="date-picker" value="{report_date}" min="{start_date}" max="{report_date}">
@@ -874,6 +948,63 @@ document.getElementById('datePicker').addEventListener('change', function(e) {{
   renderDate(e.target.value);
 }});
 
+// 越南日出日落效果
+function updateSky() {{
+  const now = new Date();
+  // 越南 UTC+7
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const vn = new Date(utc + 7 * 3600000);
+  const hour = vn.getHours() + vn.getMinutes() / 60;
+  
+  // 河内5月近似日出日落
+  const sunrise = 5.33;  // 05:20
+  const sunset = 18.25;  // 18:15
+  
+  const skyBg = document.getElementById('skyBg');
+  const cel = document.getElementById('celestial');
+  const timeEl = document.getElementById('vnTime');
+  
+  timeEl.textContent = vn.getHours().toString().padStart(2,'0') + ':' + vn.getMinutes().toString().padStart(2,'0');
+  
+  function pos(angleDeg) {{
+    const rad = (angleDeg - 90) * Math.PI / 180;
+    return {{
+      x: 50 + 35 * Math.cos(rad),
+      y: 50 + 35 * Math.sin(rad)
+    }};
+  }}
+  
+  if (hour >= sunrise && hour <= sunset) {{
+    // 白天
+    const pct = (hour - sunrise) / (sunset - sunrise);
+    const p = pos(pct * 180);
+    cel.className = 'celestial sun';
+    cel.style.left = p.x + '%';
+    cel.style.top = p.y + '%';
+    // 天空色随太阳高度变化
+    const brightness = Math.sin(pct * Math.PI);
+    const r = Math.round(10 + brightness * 30);
+    const g = Math.round(26 + brightness * 80);
+    const b = Math.round(21 + brightness * 120);
+    skyBg.style.background = 'radial-gradient(circle at ' + p.x + '% ' + p.y + '%, rgba(255,215,0,0.25) 0%, rgb(' + r + ',' + g + ',' + b + ') 60%, rgb(' + Math.round(r*0.5) + ',' + Math.round(g*0.5) + ',' + Math.round(b*0.6) + ') 100%)';
+  }} else {{
+    // 夜晚
+    let pct;
+    if (hour > sunset) {{
+      pct = (hour - sunset) / (24 - sunset + sunrise);
+    }} else {{
+      pct = (hour + 24 - sunset) / (24 - sunset + sunrise);
+    }}
+    const p = pos(pct * 180);
+    cel.className = 'celestial moon';
+    cel.style.left = p.x + '%';
+    cel.style.top = p.y + '%';
+    skyBg.style.background = 'radial-gradient(circle at 50% 100%, rgba(74,154,138,0.15) 0%, #0a1a15 60%, #050d0a 100%)';
+  }}
+}}
+updateSky();
+setInterval(updateSky, 60000);
+
 // 初始高亮当前日期
 document.querySelectorAll('#history-tbody tr').forEach(tr => {{
   tr.classList.toggle('active', tr.dataset.date === '{report_date}');
@@ -904,21 +1035,25 @@ def git_commit_push(output_path, report_date):
             ['git', 'commit', '-m', f'update(guild-report): 日报 {report_date}'],
             cwd=repo_root, check=True
         )
-        subprocess.run(['git', 'push', 'origin', 'main'], cwd=repo_root, check=True)
+        subprocess.run(
+            ['git', '-c', 'http.version=HTTP/1.1', 'push', 'origin', 'main'],
+            cwd=repo_root, check=True
+        )
         print(f"  ✓ 已推送至 GitHub")
     except subprocess.CalledProcessError as e:
         print(f"  ✗ git 操作失败: {e}")
+        raise
 
 
 def main():
-    parser = argparse.ArgumentParser(description='生成无公会用户招募日报 v3.3')
-    parser.add_argument('--date', help='指定日期 (YYYY-MM-DD)，默认昨日')
+    parser = argparse.ArgumentParser(description='生成无公会用户招募日报 v3.4')
+    parser.add_argument('--date', help='指定日期 (YYYY-MM-DD)，默认当日')
     parser.add_argument('--days', type=int, default=7, help='趋势图天数')
     parser.add_argument('--output', help='输出路径')
     parser.add_argument('--push', action='store_true', help='生成后自动 git commit + push')
     args = parser.parse_args()
     
-    report_date = args.date or (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+    report_date = args.date or datetime.now().strftime('%Y-%m-%d')
     start_date = (datetime.strptime(report_date, '%Y-%m-%d') - timedelta(days=args.days-1)).strftime('%Y-%m-%d')
     output_path = args.output or os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
