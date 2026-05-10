@@ -218,6 +218,7 @@ def query_response(conn, date_str):
             pu.game_uid,
             COALESCE(ui.nick_name, pu.username) as nick_name,
             gn.guild_name,
+            gug.server_id,
             TIMESTAMPDIFF(MINUTE, pu.created_at, gug.joined_at) as diff_minutes
         FROM prod_users pu
         JOIN game_user_guilds gug ON pu.game_uid = gug.game_uid
@@ -340,7 +341,8 @@ def generate_html(stats_list, today_stats, today_guild_inflow, today_response,
     
     response_rows = ""
     for r in today_response:
-        response_rows += f"<tr><td>{r['game_uid']}</td><td>{r['nick_name'] or '-'}</td><td>{r['guild_name']}</td><td class='num'>{fmt_min(r['diff_minutes'])}</td></tr>\n"
+        server_color = '#4ade80' if r.get('server_id') == 'Q' else '#60a5fa' if r.get('server_id') == 'K' else '#999'
+        response_rows += f"<tr><td class='num'><span style='color:{server_color};font-weight:600;font-size:12px;'>[{r.get('server_id','?')}]</span></td><td style='font-weight:600;'>{r['game_uid']}</td><td>{r['nick_name'] or '-'}</td><td>{r['guild_name']}</td><td class='num'>{fmt_min(r['diff_minutes'])}</td></tr>\n"
     if not response_rows:
         response_rows = "<tr><td colspan='4' style='text-align:center;color:#7aa89a;'>无数据</td></tr>"
     
@@ -667,7 +669,7 @@ tr:hover {{ background: rgba(255,255,255,0.03); }}
     <div class="section">
       <div class="section-title" id="response-title">新用户响应速度明细 ({report_date})</div>
       <table>
-        <thead><tr><th>UID</th><th>昵称</th><th>公会</th><th class="num">响应</th></tr></thead>
+        <thead><tr><th class="num">服</th><th>UID</th><th>昵称</th><th>公会</th><th class="num">响应</th></tr></thead>
         <tbody id="response-tbody">{response_rows}</tbody>
       </table>
     </div>
@@ -911,7 +913,8 @@ function renderDate(date) {{
   let respHtml = '';
   if (resp && resp.length > 0) {{
     for (const r of resp) {{
-      respHtml += '<tr><td>' + r.game_uid + '</td><td>' + (r.nick_name || '-') + '</td><td>' + r.guild_name + '</td><td class="num">' + fmtMin(r.diff_minutes) + '</td></tr>';
+      var sColor = r.server_id === 'Q' ? '#4ade80' : r.server_id === 'K' ? '#60a5fa' : '#999';
+      respHtml += '<tr><td class="num"><span style="color:' + sColor + ';font-weight:600;font-size:12px;">[' + (r.server_id || '?') + ']</span></td><td style="font-weight:600;">' + r.game_uid + '</td><td>' + (r.nick_name || '-') + '</td><td>' + r.guild_name + '</td><td class="num">' + fmtMin(r.diff_minutes) + '</td></tr>';
     }}
   }} else {{
     respHtml = '<tr><td colspan="4" style="text-align:center;color:#7aa89a;">无数据</td></tr>';
