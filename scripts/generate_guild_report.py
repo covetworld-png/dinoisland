@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-无公会用户招募效果日报生成器 v3.1
-口径：新用户 = game_dau_hour 首次活跃日期 = 当日；老用户 = 之前活跃过 + 当日活跃 + 无公会
+无公会用户招募效果日报生成器 v3.4
+口径：新用户 = prod_users 注册日期(create_time) = 当日；老用户 = 注册日期 < 当日 + 当日活跃 + 无公会
 """
 
 import argparse
@@ -54,16 +54,12 @@ def phase_label(date_str):
 def query_daily(conn, date_str):
     cur = conn.cursor()
     
-    # ---- 新用户：game_dau_hour 中首次活跃日期 = 当日 ----
+    # ---- 新用户：prod_users 注册日期 = 当日 ----
     cur.execute(f"""
         SELECT COUNT(DISTINCT dh.game_uid) as cnt
         FROM game_dau_hour dh
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON dh.game_uid = ufa.game_uid
-        WHERE dh.active_date = '{date_str}' AND ufa.first_active = '{date_str}'
+        JOIN prod_users pu ON dh.game_uid = pu.game_uid
+        WHERE dh.active_date = '{date_str}' AND DATE(pu.create_time) = '{date_str}'
     """)
     new_users = cur.fetchone()['cnt'] or 0
     
@@ -71,13 +67,9 @@ def query_daily(conn, date_str):
     cur.execute(f"""
         SELECT COUNT(DISTINCT dh.game_uid) as cnt
         FROM game_dau_hour dh
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON dh.game_uid = ufa.game_uid
+        JOIN prod_users pu ON dh.game_uid = pu.game_uid
         JOIN game_user_guilds gug ON dh.game_uid = gug.game_uid
-        WHERE dh.active_date = '{date_str}' AND ufa.first_active = '{date_str}'
+        WHERE dh.active_date = '{date_str}' AND DATE(pu.create_time) = '{date_str}'
           AND DATE(gug.joined_at) = '{date_str}'
     """)
     new_joined = cur.fetchone()['cnt'] or 0
@@ -86,30 +78,22 @@ def query_daily(conn, date_str):
     cur.execute(f"""
         SELECT COUNT(DISTINCT dh.game_uid) as cnt
         FROM game_dau_hour dh
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON dh.game_uid = ufa.game_uid
+        JOIN prod_users pu ON dh.game_uid = pu.game_uid
         JOIN game_user_guilds gug ON dh.game_uid = gug.game_uid
         LEFT JOIN game_guild_names gn ON gug.guild_id = gn.guild_id AND gug.server_id = gn.server_id
-        WHERE dh.active_date = '{date_str}' AND ufa.first_active = '{date_str}'
+        WHERE dh.active_date = '{date_str}' AND DATE(pu.create_time) = '{date_str}'
           AND DATE(gug.joined_at) = '{date_str}'
           AND gn.guild_name IN ({','.join(["'"+g+"'" for g in TARGET_GUILDS])})
     """)
     new_internal = cur.fetchone()['cnt'] or 0
     
-    # ---- 老用户：之前活跃过 + 当日活跃 + 当日无公会 ----
+    # ---- 老用户：注册日期 < 当日 + 当日活跃 + 当日无公会 ----
     cur.execute(f"""
         SELECT COUNT(DISTINCT dh.game_uid) as cnt
         FROM game_dau_hour dh
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON dh.game_uid = ufa.game_uid
+        JOIN prod_users pu ON dh.game_uid = pu.game_uid
         WHERE dh.active_date = '{date_str}'
-          AND ufa.first_active < '{date_str}'
+          AND DATE(pu.create_time) < '{date_str}'
           AND NOT EXISTS (
               SELECT 1 FROM game_user_guilds gug
               WHERE gug.game_uid = dh.game_uid
@@ -122,14 +106,10 @@ def query_daily(conn, date_str):
     cur.execute(f"""
         SELECT COUNT(DISTINCT dh.game_uid) as cnt
         FROM game_dau_hour dh
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON dh.game_uid = ufa.game_uid
+        JOIN prod_users pu ON dh.game_uid = pu.game_uid
         JOIN game_user_guilds gug ON dh.game_uid = gug.game_uid
         WHERE dh.active_date = '{date_str}'
-          AND ufa.first_active < '{date_str}'
+          AND DATE(pu.create_time) < '{date_str}'
           AND DATE(gug.joined_at) = '{date_str}'
           AND NOT EXISTS (
               SELECT 1 FROM game_user_guilds gug2
@@ -143,15 +123,11 @@ def query_daily(conn, date_str):
     cur.execute(f"""
         SELECT COUNT(DISTINCT dh.game_uid) as cnt
         FROM game_dau_hour dh
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON dh.game_uid = ufa.game_uid
+        JOIN prod_users pu ON dh.game_uid = pu.game_uid
         JOIN game_user_guilds gug ON dh.game_uid = gug.game_uid
         LEFT JOIN game_guild_names gn ON gug.guild_id = gn.guild_id AND gug.server_id = gn.server_id
         WHERE dh.active_date = '{date_str}'
-          AND ufa.first_active < '{date_str}'
+          AND DATE(pu.create_time) < '{date_str}'
           AND DATE(gug.joined_at) = '{date_str}'
           AND NOT EXISTS (
               SELECT 1 FROM game_user_guilds gug2
@@ -195,36 +171,28 @@ def query_guild_inflow(conn, date_str):
     """分公会流入明细，区分新/老用户"""
     cur = conn.cursor()
     
-    # 新用户流入（first_active = join_date）
+    # 新用户流入（注册日期 = join_date）
     cur.execute(f"""
         SELECT COALESCE(gn.guild_name, '未知') as guild_name, COUNT(DISTINCT gug.game_uid) as cnt
         FROM game_user_guilds gug
         LEFT JOIN game_guild_names gn ON gug.guild_id = gn.guild_id AND gug.server_id = gn.server_id
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON gug.game_uid = ufa.game_uid
+        JOIN prod_users pu ON gug.game_uid = pu.game_uid
         WHERE DATE(gug.joined_at) = '{date_str}'
           AND gn.guild_name IN ({','.join(["'"+g+"'" for g in TARGET_GUILDS])})
-          AND ufa.first_active = DATE(gug.joined_at)
+          AND DATE(pu.create_time) = DATE(gug.joined_at)
         GROUP BY gn.guild_name
     """)
     new_rows = {norm(r['guild_name']): r['cnt'] for r in cur.fetchall()}
     
-    # 老用户流入（first_active < join_date）
+    # 老用户流入（注册日期 < join_date）
     cur.execute(f"""
         SELECT COALESCE(gn.guild_name, '未知') as guild_name, COUNT(DISTINCT gug.game_uid) as cnt
         FROM game_user_guilds gug
         LEFT JOIN game_guild_names gn ON gug.guild_id = gn.guild_id AND gug.server_id = gn.server_id
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON gug.game_uid = ufa.game_uid
+        JOIN prod_users pu ON gug.game_uid = pu.game_uid
         WHERE DATE(gug.joined_at) = '{date_str}'
           AND gn.guild_name IN ({','.join(["'"+g+"'" for g in TARGET_GUILDS])})
-          AND ufa.first_active < DATE(gug.joined_at)
+          AND DATE(pu.create_time) < DATE(gug.joined_at)
         GROUP BY gn.guild_name
     """)
     old_rows = {norm(r['guild_name']): r['cnt'] for r in cur.fetchall()}
@@ -243,7 +211,7 @@ def query_guild_inflow(conn, date_str):
 
 
 def query_response(conn, date_str):
-    """新用户响应速度：首次活跃日期 = 入团日期"""
+    """新用户响应速度：注册日期 = 入团日期"""
     cur = conn.cursor()
     cur.execute(f"""
         SELECT 
@@ -255,14 +223,9 @@ def query_response(conn, date_str):
         JOIN game_user_guilds gug ON pu.game_uid = gug.game_uid
         LEFT JOIN game_guild_names gn ON gug.guild_id = gn.guild_id AND gug.server_id = gn.server_id
         LEFT JOIN user_game_info ui ON pu.game_uid = ui.game_uid AND ui.server_id = gug.server_id
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON pu.game_uid = ufa.game_uid
         WHERE DATE(gug.joined_at) = '{date_str}'
           AND gn.guild_name IN ({','.join(["'"+g+"'" for g in TARGET_GUILDS])})
-          AND ufa.first_active = DATE(gug.joined_at)
+          AND DATE(pu.create_time) = DATE(gug.joined_at)
           AND gug.joined_at >= pu.created_at
           AND pu.game_uid >= 13219600
         ORDER BY diff_minutes
@@ -273,7 +236,7 @@ def query_response(conn, date_str):
 
 
 def query_response_by_guild(conn, date_str):
-    """分公会平均响应速度（仅新用户）"""
+    """分公会平均响应速度（仅新用户：注册日期 = 入团日期）"""
     cur = conn.cursor()
     cur.execute(f"""
         SELECT gn.guild_name, COUNT(*) as cnt,
@@ -281,14 +244,9 @@ def query_response_by_guild(conn, date_str):
         FROM prod_users pu
         JOIN game_user_guilds gug ON pu.game_uid = gug.game_uid
         LEFT JOIN game_guild_names gn ON gug.guild_id = gn.guild_id AND gug.server_id = gn.server_id
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON pu.game_uid = ufa.game_uid
         WHERE DATE(gug.joined_at) = '{date_str}'
           AND gn.guild_name IN ({','.join(["'"+g+"'" for g in TARGET_GUILDS])})
-          AND ufa.first_active = DATE(gug.joined_at)
+          AND DATE(pu.create_time) = DATE(gug.joined_at)
           AND gug.joined_at >= pu.created_at
           AND pu.game_uid >= 13219600
         GROUP BY gn.guild_name
@@ -307,14 +265,9 @@ def query_response_trend(conn, start_date, end_date):
         FROM prod_users pu
         JOIN game_user_guilds gug ON pu.game_uid = gug.game_uid
         LEFT JOIN game_guild_names gn ON gug.guild_id = gn.guild_id AND gug.server_id = gn.server_id
-        JOIN (
-            SELECT game_uid, MIN(active_date) as first_active
-            FROM game_dau_hour
-            GROUP BY game_uid
-        ) ufa ON pu.game_uid = ufa.game_uid
         WHERE DATE(gug.joined_at) BETWEEN '{start_date}' AND '{end_date}'
           AND gn.guild_name IN ({','.join(["'"+g+"'" for g in TARGET_GUILDS])})
-          AND ufa.first_active = DATE(gug.joined_at)
+          AND DATE(pu.create_time) = DATE(gug.joined_at)
           AND gug.joined_at >= pu.created_at
           AND pu.game_uid >= 13219600
         GROUP BY DATE(gug.joined_at), gn.guild_name
@@ -558,7 +511,7 @@ tr:hover {{ background: rgba(255,255,255,0.03); }}
   </div>
 
   <div class="note">
-    <strong>口径：</strong>新用户 = game_dau_hour 中首次活跃日期 = 当日；老用户 = 之前活跃过 + 当日活跃 + 当日无公会。
+    <strong>口径：</strong>新用户 = prod_users 注册日期 = 当日；老用户 = 注册日期 < 当日 + 当日活跃 + 当日无公会。
     入团率 = 当日入团 / 该群体人数；内部团占比 = 入内部团 / 该群体入团总数。
     基线期平均新用户入团率: {avg_new_rate}%，老用户入团率: {avg_old_rate}%
   </div>
@@ -567,7 +520,7 @@ tr:hover {{ background: rgba(255,255,255,0.03); }}
     <div class="section-title" id="section-title">{report_date} 核心指标</div>
     <div class="cards">
       <div class="card">
-        <div class="card-label">新用户（首次活跃）</div>
+        <div class="card-label">新用户（当日注册）</div>
         <div class="card-value" id="card-new-users">{today_stats['new_users']}</div>
         <div class="card-sub" id="card-new-sub">入团 <span id="card-new-joined">{today_stats['new_joined']}</span> | 率 <span id="card-new-rate">{today_stats['new_rate']}</span>%</div>
       </div>
@@ -970,7 +923,7 @@ def main():
             f.write(html)
         
         print(f"✓ 已生成: {output_path}")
-        print(f"  新用户（首次活跃）: {today_stats['new_users']} | 入团 {today_stats['new_joined']} ({today_stats['new_rate']}%)")
+        print(f"  新用户（当日注册）: {today_stats['new_users']} | 入团 {today_stats['new_joined']} ({today_stats['new_rate']}%)")
         print(f"  老用户（无公会活跃）: {today_stats['old_users']} | 入团 {today_stats['old_joined']} ({today_stats['old_rate']}%)")
         
         if args.push:
