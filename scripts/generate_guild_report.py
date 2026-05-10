@@ -886,6 +886,7 @@ function renderDate(date) {{
   const respGuild = data.response_by_guild;
   
   // 更新标题
+  document.getElementById('current-date').textContent = date;
   document.getElementById('section-title').textContent = date + ' 核心指标';
   document.getElementById('response-title').textContent = '新用户响应速度明细 (' + date + ')';
   document.getElementById('guild-response-title').textContent = '分公会新用户平均响应速度 (' + date + ')';
@@ -916,7 +917,7 @@ function renderDate(date) {{
       respHtml += '<tr><td class="num"><span style="color:' + sColor + ';font-weight:600;font-size:12px;">[' + (r.server_id || '?') + ']</span></td><td style="font-weight:600;">' + r.game_uid + '</td><td>' + (r.nick_name || '-') + '</td><td>' + r.guild_name + '</td><td class="num">' + fmtMin(r.diff_minutes) + '</td></tr>';
     }}
   }} else {{
-    respHtml = '<tr><td colspan="5" style="text-align:center;color:#7aa89a;">无数据</td></tr>';
+    respHtml = '<tr><td colspan="4" style="text-align:center;color:#7aa89a;">无数据</td></tr>';
   }}
   document.getElementById('response-tbody').innerHTML = respHtml;
   
