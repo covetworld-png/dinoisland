@@ -2019,7 +2019,12 @@ function renderWeekly() {
       let p2NameColor = getColor(s.p2);
       if (done) {
         cardClass = 'done';
-        headerRight = '<span class="schedule-status-win">✓ ' + escapeHtml(winner) + ' ' + t('winBtn') + '</span>' +
+        let winLabel = '✓ ' + escapeHtml(winner) + ' ' + t('winBtn');
+        // 临时缺席标记：CoBeChimTO 缺席 vs asula
+        if (key === 'asula|CoBeChimTO' && winner === 'asula') {
+          winLabel += ' <span style="font-size:11px;color:var(--text2);">(CoBeChimTO 缺席)</span>';
+        }
+        headerRight = '<span class="schedule-status-win">' + winLabel + '</span>' +
           '<button class="schedule-del-btn" onclick="removeWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('btnDel') + '</button>';
         if (winner !== s.p1) p1NameColor = 'var(--text2)';
         if (winner !== s.p2) p2NameColor = 'var(--text2)';
