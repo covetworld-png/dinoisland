@@ -405,24 +405,25 @@ body::after {
 /* ── time setter ── */
 .time-setter { margin-bottom:24px; }
 .time-sky {
-  position:relative; height:220px; border-radius:var(--r-lg);
-  overflow:visible; margin-bottom:16px;
+  position:relative; height:160px; border-radius:var(--r-lg);
+  overflow:hidden; margin-bottom:16px;
   border:1.5px solid var(--border); display:flex;
   flex-direction:column; align-items:center; justify-content:center;
 }
 .sky-bg {
   position:absolute; inset:0;
   transition:background 1.2s ease;
+  background:radial-gradient(ellipse 70% 55% at 50% 30%, rgba(255,200,80,0.2) 0%, rgb(30,80,100) 50%, rgb(15,40,55) 100%);
 }
 .sky-time {
   position:relative; z-index:2;
-  font-family:var(--font-mono); font-size:2.8rem; font-weight:800;
+  font-family:var(--font-mono); font-size:2rem; font-weight:800;
   color:#fff; text-shadow:0 2px 16px rgba(0,0,0,0.6);
-  letter-spacing:2px;
+  letter-spacing:2px; white-space:nowrap;
 }
 .sky-period {
   position:relative; z-index:2;
-  font-size:0.85rem; font-weight:600; margin-top:6px;
+  font-size:0.8rem; font-weight:600; margin-top:4px;
   color:rgba(255,255,255,0.8); letter-spacing:1px;
   text-shadow:0 1px 8px rgba(0,0,0,0.5);
 }
