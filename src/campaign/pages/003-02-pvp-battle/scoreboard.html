@@ -2172,10 +2172,7 @@ function calcWeeklyStats(players, results, absent) {
   for (const key in results) {
     const winner = results[key];
     const parts = key.split('|');
-    if (parts.length < 2) continue;
     const loser = parts[0] === winner ? parts[1] : parts[0];
-    // 防御：跳过 winner/loser 不在选手名单中的脏数据
-    if (!stats[winner] || !stats[loser]) continue;
     stats[winner].wins++;
     stats[winner].points++;
     stats[winner].h2h[loser] = 'W';
@@ -2294,14 +2291,8 @@ function importWeeklyData(input) {
         if (row.startsWith('积分榜') || row.startsWith('Bảng xếp hạng')) { section = 'stats'; continue; }
         if (row.includes(',') && !section && !metaDate) {
           const parts = row.split(',');
-          const rawDate = (parts[0] || '').trim();
-          // 兼容 ISO 2026-05-10 和 M/D/YYYY 5/10/2026
-          if (parts.length >= 2 && /^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
-            metaDate = rawDate;
-            metaServer = parts[1];
-          } else if (parts.length >= 2 && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(rawDate)) {
-            const m = rawDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (m) metaDate = m[3] + '-' + m[1].padStart(2, '0') + '-' + m[2].padStart(2, '0');
+          if (parts.length >= 2 && /^\d{4}-\d{2}-\d{2}$/.test(parts[0])) {
+            metaDate = parts[0];
             metaServer = parts[1];
           }
           continue;
@@ -2319,13 +2310,10 @@ function importWeeklyData(input) {
           }
         } else if (section === 'results') {
           const parts = row.split(',');
-          const p1 = (parts[0] || '').trim();
-          const p2 = (parts[1] || '').trim();
-          const winner = (parts[2] || '').trim();
-          // 过滤空行、X/空白标记（表示未进行）
-          if (!p1 || !p2 || !winner || winner === 'X' || winner === 'x') continue;
-          const key = [p1, p2].sort().join('|');
-          newResults[key] = winner;
+          if (parts.length >= 3) {
+            const key = [parts[0].trim(), parts[1].trim()].sort().join('|');
+            newResults[key] = parts[2].trim();
+          }
         }
       }
       
@@ -2344,7 +2332,7 @@ function importWeeklyData(input) {
       autoSaveWeekly();
       renderWeekly();
       alert(t('alertImportOK', {n: Object.keys(newResults).length}));
-    } catch (err) { alert(t('alertParseFail') + ' (' + err.message + ')'); console.error(err); }
+    } catch (err) { alert(t('alertParseFail')); }
     input.value = '';
   };
   reader.readAsText(file);
