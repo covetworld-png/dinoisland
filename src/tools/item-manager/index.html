@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Đạo Cụ</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=31">
+  <link rel="stylesheet" href="css/main.css?v=40">
 </head>
 <body data-lang="vi">
 
@@ -15,13 +15,37 @@
         <span class="lang-vi">Trung Tâm Đạo Cụ</span>
         <span class="lang-cn">道具管理中心</span>
       </span>
-      <div class="row" style="gap: 12px;">
+      <div class="row" style="gap: 12px; align-items: center;">
+        <button class="debug-toggle" onclick="toggleDebugPanel()" title="模拟测试">🧪</button>
         <button class="lang-toggle" onclick="toggleLanguage()">
           <span id="current-lang">VI / 中</span>
         </button>
       </div>
     </div>
   </header>
+
+  <!-- Debug Panel -->
+  <div id="debug-panel" class="debug-panel" style="display: none;">
+    <div class="container">
+      <div class="debug-inner">
+        <strong>🧪 模拟服务端响应 / Mô phỏng phản hồi server</strong>
+        <div class="debug-options">
+          <label><input type="radio" name="mock-error" value="" checked> 正常成功 / Thành công</label>
+          <label><input type="radio" name="mock-error" value="CONFLICT"> 被占用 / Đang bận</label>
+          <label><input type="radio" name="mock-error" value="NO_ITEM"> 数量不足 / Không đủ</label>
+          <label><input type="radio" name="mock-error" value="SYSTEM_ERROR"> 系统异常 / Lỗi hệ thống</label>
+        </div>
+        <div class="debug-divider"></div>
+        <div class="debug-row">
+          <button class="btn-reset-inv" onclick="resetInventory()">
+            <span class="lang-vi">🔄 Khôi phục đạo cụ (mỗi loại ×3)</span>
+            <span class="lang-cn">🔄 重置道具库存 (每种 ×3)</span>
+          </button>
+        </div>
+        <small>下一次使用道具时生效 / Có hiệu lực khi sử dụng đạo cụ tiếp theo</small>
+      </div>
+    </div>
+  </div>
 
   <!-- Auth Overlay -->
   <div id="auth-overlay" class="auth-overlay">
@@ -225,8 +249,8 @@
                   <span class="lang-cn">选择想要的天气类型，然后点击使用按钮。</span>
                 </li>
                 <li>
-                  <span class="lang-vi">Thẻ có hiệu lực <strong>5 phút</strong>, trong thờ gian này ngườ chơi khác không thể sử dụng.</span>
-                  <span class="lang-cn">卡片有效期<strong>5分钟</strong>，在此期间其他玩家无法使用。</span>
+                  <span class="lang-vi">Thẻ có hiệu lực <strong>5 phút</strong>.</span>
+                  <span class="lang-cn">卡片有效期<strong>5分钟</strong>。</span>
                 </li>
               </ul>
             </div>
@@ -351,7 +375,7 @@
                 <span class="lang-cn">审核流程</span>
               </strong>
               <div class="flow-steps">
-                <div class="flow-step"><div class="flow-dot active">1</div><div class="flow-label"><span class="lang-vi">Gửi</span><span class="lang-cn">提交</span></div></div>
+                <div class="flow-step"><div class="flow-dot" id="flow-dot-submit">1</div><div class="flow-label"><span class="lang-vi">Gửi</span><span class="lang-cn">提交</span></div></div>
                 <div class="flow-arrow">→</div>
                 <div class="flow-step"><div class="flow-dot" id="flow-dot-review">2</div><div class="flow-label"><span class="lang-vi">Duyệt</span><span class="lang-cn">审核</span></div></div>
                 <div class="flow-arrow">→</div>
@@ -427,8 +451,8 @@
                   <span class="lang-cn">使用卡片让你的恐龙体型增大<strong>50%</strong>，持续有效时间。</span>
                 </li>
                 <li>
-                  <span class="lang-vi">Thẻ có hiệu lực <strong>5 phút</strong>, trong thờ gian này ngườ chơi khác không thể sử dụng.</span>
-                  <span class="lang-cn">卡片有效期<strong>5分钟</strong>，在此期间其他玩家无法使用。</span>
+                  <span class="lang-vi">Thẻ có hiệu lực <strong>5 phút</strong>.</span>
+                  <span class="lang-cn">卡片有效期<strong>5分钟</strong>。</span>
                 </li>
               </ul>
             </div>
@@ -466,15 +490,12 @@
               <span class="countdown-value num" id="countdown-value-flow">60:00</span>
             </div>
 
-            <div class="game-time-display" id="game-time-display">
-              <div class="game-time-label">
-                <span class="lang-vi">Thờ Gian Game</span>
-                <span class="lang-cn">游戏时间</span>
-              </div>
-              <div class="game-time-value" id="game-time-value">12:00</div>
-              <div class="game-time-hint">
-                <span class="lang-vi">Thờ gian đang đứng yên tại 12:00</span>
-                <span class="lang-cn">时间静止在 12:00</span>
+            <div class="flow-sky" id="flow-sky">
+              <div class="flow-sky-bg" id="flow-sky-bg"></div>
+              <div class="flow-sky-time" id="flow-sky-time">12:00</div>
+              <div class="flow-sky-period" id="flow-sky-period">
+                <span class="lang-vi">Thờ gian đang đứng yên</span>
+                <span class="lang-cn">时间静止中</span>
               </div>
             </div>
 
@@ -542,6 +563,6 @@
 
   <div id="toast-container"></div>
 
-  <script src="js/main.js?v=21"></script>
+  <script src="js/main.js?v=31"></script>
 </body>
 </html>
