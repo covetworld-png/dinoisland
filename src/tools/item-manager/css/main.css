@@ -412,20 +412,7 @@ body::after {
 }
 .sky-bg {
   position:absolute; inset:0;
-  transition:background 0.8s ease;
-}
-.sky-celestial {
-  position:absolute; width:48px; height:48px; border-radius:50%;
-  transition:all 0.8s ease; z-index:1;
-  transform:translate(-50%, -50%);
-}
-.sky-celestial.sun {
-  background:radial-gradient(circle at 35% 35%, #fff7c2, #f0a030 50%, transparent 70%);
-  box-shadow:0 0 40px rgba(240,160,48,0.6), 0 0 80px rgba(240,160,48,0.2);
-}
-.sky-celestial.moon {
-  background:radial-gradient(circle at 35% 35%, #e2e8f0, #94a3b8 50%, transparent 70%);
-  box-shadow:0 0 30px rgba(148,163,184,0.4), 0 0 60px rgba(148,163,184,0.1);
+  transition:background 1.2s ease;
 }
 .sky-time {
   position:relative; z-index:2;

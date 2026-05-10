@@ -23,18 +23,16 @@ function switchServer(sid) {
 // 时间天空效果：根据 HH:MM 渲染太阳/月亮位置和天空颜色
 function updateSky(hh, mm) {
     const skyBg = document.getElementById('sky-bg');
-    const cel = document.getElementById('sky-celestial');
     const periodEl = document.getElementById('sky-period');
-    if (!skyBg || !cel) return;
+    if (!skyBg) return;
 
     const hour = hh + mm / 60;
     // 越南河内5月近似日出日落
     const sunrise = 5.33;  // 05:20
     const sunset = 18.25;  // 18:15
 
-    // 弧形轨迹：从左地平线 → 天顶 → 右地平线
-    function arcPos(pct) {
-        // pct: 0=升起(左侧), 0.5=天顶(正中上方), 1=落下(右侧)
+    // 光源弧形轨迹：从左地平线 → 天顶 → 右地平线
+    function lightPos(pct) {
         const x = 5 + pct * 90;                      // 5% ~ 95%
         const y = 88 - Math.sin(pct * Math.PI) * 78; // 底部88% → 顶部10% → 底部88%
         return { x, y };
@@ -43,43 +41,42 @@ function updateSky(hh, mm) {
     let periodText = '';
 
     if (hour >= sunrise && hour <= sunset) {
-        // 白天：太阳
+        // 白天
         const pct = (hour - sunrise) / (sunset - sunrise);
-        const p = arcPos(pct);
-        cel.className = 'sky-celestial sun';
-        cel.style.left = p.x + '%';
-        cel.style.top = p.y + '%';
-
-        // 天空亮度随太阳高度变化
+        const p = lightPos(pct);
         const elevation = Math.sin(pct * Math.PI); // 0→1→0
-        const r = Math.round(8 + elevation * 40);
-        const g = Math.round(20 + elevation * 90);
-        const b = Math.round(18 + elevation * 130);
-        // 地平线方向：太阳在哪侧，那侧更亮
-        const glowX = p.x;
-        const glowY = Math.min(90, p.y + 20);
-        skyBg.style.background = 'radial-gradient(ellipse 80% 60% at ' + glowX + '% ' + glowY + '%, rgba(255,200,80,' + (0.15 + elevation * 0.2) + ') 0%, rgb(' + r + ',' + g + ',' + b + ') 50%, rgb(' + Math.round(r*0.4) + ',' + Math.round(g*0.45) + ',' + Math.round(b*0.55) + ') 100%)';
+
+        // 天空基色随太阳高度变化
+        const r = Math.round(8 + elevation * 35);
+        const g = Math.round(18 + elevation * 85);
+        const b = Math.round(16 + elevation * 125);
+
+        // 多层径向渐变模拟光源：暖色核心 → 过渡光环 → 天空基色
+        const coreOpacity = 0.25 + elevation * 0.35;
+        const haloOpacity = 0.08 + elevation * 0.12;
+        skyBg.style.background =
+            'radial-gradient(circle at ' + p.x + '% ' + p.y + '%, rgba(255,230,150,' + coreOpacity + ') 0%, transparent 35%), ' +
+            'radial-gradient(ellipse 70% 55% at ' + p.x + '% ' + Math.min(95, p.y + 25) + '%, rgba(255,190,80,' + haloOpacity + ') 0%, transparent 60%), ' +
+            'linear-gradient(180deg, rgb(' + Math.round(r*1.2) + ',' + Math.round(g*1.1) + ',' + Math.round(b*1.3) + ') 0%, rgb(' + r + ',' + g + ',' + b + ') 40%, rgb(' + Math.round(r*0.5) + ',' + Math.round(g*0.55) + ',' + Math.round(b*0.65) + ') 100%)';
 
         if (hour < 7) periodText = '<span class="lang-vi">Bình minh</span><span class="lang-cn">清晨</span>';
         else if (hour < 17) periodText = '<span class="lang-vi">Ban ngày</span><span class="lang-cn">白天</span>';
         else periodText = '<span class="lang-vi">Hoàng hôn</span><span class="lang-cn">黄昏</span>';
     } else {
-        // 夜晚：月亮
+        // 夜晚
         let pct;
         if (hour > sunset) {
             pct = (hour - sunset) / (24 - sunset + sunrise);
         } else {
             pct = (hour + 24 - sunset) / (24 - sunset + sunrise);
         }
-        const p = arcPos(pct);
-        cel.className = 'sky-celestial moon';
-        cel.style.left = p.x + '%';
-        cel.style.top = p.y + '%';
+        const p = lightPos(pct);
 
-        // 夜空：月亮方向微亮
-        const glowX = p.x;
-        const glowY = Math.min(90, p.y + 15);
-        skyBg.style.background = 'radial-gradient(ellipse 70% 50% at ' + glowX + '% ' + glowY + '%, rgba(148,163,184,0.12) 0%, #0a1218 55%, #050a0f 100%)';
+        // 夜空：冷色调光源
+        skyBg.style.background =
+            'radial-gradient(circle at ' + p.x + '% ' + p.y + '%, rgba(200,220,255,0.15) 0%, transparent 30%), ' +
+            'radial-gradient(ellipse 60% 45% at ' + p.x + '% ' + Math.min(95, p.y + 20) + '%, rgba(120,160,200,0.08) 0%, transparent 55%), ' +
+            'linear-gradient(180deg, #0c1420 0%, #080f18 50%, #04080f 100%)';
         periodText = '<span class="lang-vi">Đêm khuya</span><span class="lang-cn">深夜</span>';
     }
 
