@@ -119,6 +119,25 @@ function formatDate(dateStr) {
     : dateStr;
 }
 
+function formatDateTime(value) {
+  if (!value) return '-';
+  // 处理完整日期时间：YYYY-MM-DD HH:mm:ss
+  const fullMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/);
+  if (fullMatch) {
+    const [, y, m, d, hh, mm] = fullMatch;
+    if (currentLang === 'vi') {
+      return `${d}/${m}/${y} ${hh}:${mm}`;
+    }
+    return `${y}-${m}-${d} ${hh}:${mm}`;
+  }
+  // 处理只有时间：HH:mm:ss
+  const timeMatch = value.match(/^(\d{2}):(\d{2}):\d{2}$/);
+  if (timeMatch) {
+    return `${timeMatch[1]}:${timeMatch[2]}`;
+  }
+  return value;
+}
+
 // ===== Auth Error =====
 function renderAuthError() {
   const tbody = document.getElementById('player-table');
@@ -268,7 +287,7 @@ function renderTable() {
     const isOnline = p.onlineStatus === 'online';
     const tagClass = p.tag === 'new' ? 'tag-new' : 'tag-returning';
     const tagText = p.tag === 'new' ? t('tag_new') : t('tag_returning');
-    const loginTimeBadge = `<span style="color:var(--text-secondary);font-size:12px;">${p.onlineSince}</span>`;
+    const loginTimeBadge = `<span style="color:var(--text-secondary);font-size:12px;">${formatDateTime(p.onlineSince)}</span>`;
     const anyHasGuild = guildStatuses.includes('has_guild');
     const rowClass = anyHasGuild ? 'strikethrough' : '';
     const copyBtn = `<button class="btn-copy-id" onclick="copyPlayerId('${p.id}');event.stopPropagation();" title="${t('toast_copy')}">复制</button>`;
