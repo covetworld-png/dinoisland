@@ -32,42 +32,54 @@ function updateSky(hh, mm) {
     const sunrise = 5.33;  // 05:20
     const sunset = 18.25;  // 18:15
 
-    function pos(angleDeg) {
-        const rad = (angleDeg - 90) * Math.PI / 180;
-        return {
-            x: 50 + 35 * Math.cos(rad),
-            y: 50 + 35 * Math.sin(rad)
-        };
+    // 弧形轨迹：从左地平线 → 天顶 → 右地平线
+    function arcPos(pct) {
+        // pct: 0=升起(左侧), 0.5=天顶(正中上方), 1=落下(右侧)
+        const x = 5 + pct * 90;                      // 5% ~ 95%
+        const y = 88 - Math.sin(pct * Math.PI) * 78; // 底部88% → 顶部10% → 底部88%
+        return { x, y };
     }
 
     let periodText = '';
 
     if (hour >= sunrise && hour <= sunset) {
+        // 白天：太阳
         const pct = (hour - sunrise) / (sunset - sunrise);
-        const p = pos(pct * 180);
+        const p = arcPos(pct);
         cel.className = 'sky-celestial sun';
         cel.style.left = p.x + '%';
         cel.style.top = p.y + '%';
-        const brightness = Math.sin(pct * Math.PI);
-        const r = Math.round(10 + brightness * 30);
-        const g = Math.round(26 + brightness * 80);
-        const b = Math.round(21 + brightness * 120);
-        skyBg.style.background = 'radial-gradient(circle at ' + p.x + '% ' + p.y + '%, rgba(255,215,0,0.25) 0%, rgb(' + r + ',' + g + ',' + b + ') 60%, rgb(' + Math.round(r*0.5) + ',' + Math.round(g*0.5) + ',' + Math.round(b*0.6) + ') 100%)';
+
+        // 天空亮度随太阳高度变化
+        const elevation = Math.sin(pct * Math.PI); // 0→1→0
+        const r = Math.round(8 + elevation * 40);
+        const g = Math.round(20 + elevation * 90);
+        const b = Math.round(18 + elevation * 130);
+        // 地平线方向：太阳在哪侧，那侧更亮
+        const glowX = p.x;
+        const glowY = Math.min(90, p.y + 20);
+        skyBg.style.background = 'radial-gradient(ellipse 80% 60% at ' + glowX + '% ' + glowY + '%, rgba(255,200,80,' + (0.15 + elevation * 0.2) + ') 0%, rgb(' + r + ',' + g + ',' + b + ') 50%, rgb(' + Math.round(r*0.4) + ',' + Math.round(g*0.45) + ',' + Math.round(b*0.55) + ') 100%)';
+
         if (hour < 7) periodText = '<span class="lang-vi">Bình minh</span><span class="lang-cn">清晨</span>';
         else if (hour < 17) periodText = '<span class="lang-vi">Ban ngày</span><span class="lang-cn">白天</span>';
         else periodText = '<span class="lang-vi">Hoàng hôn</span><span class="lang-cn">黄昏</span>';
     } else {
+        // 夜晚：月亮
         let pct;
         if (hour > sunset) {
             pct = (hour - sunset) / (24 - sunset + sunrise);
         } else {
             pct = (hour + 24 - sunset) / (24 - sunset + sunrise);
         }
-        const p = pos(pct * 180);
+        const p = arcPos(pct);
         cel.className = 'sky-celestial moon';
         cel.style.left = p.x + '%';
         cel.style.top = p.y + '%';
-        skyBg.style.background = 'radial-gradient(circle at 50% 100%, rgba(74,154,138,0.15) 0%, #0a1a15 60%, #050d0a 100%)';
+
+        // 夜空：月亮方向微亮
+        const glowX = p.x;
+        const glowY = Math.min(90, p.y + 15);
+        skyBg.style.background = 'radial-gradient(ellipse 70% 50% at ' + glowX + '% ' + glowY + '%, rgba(148,163,184,0.12) 0%, #0a1218 55%, #050a0f 100%)';
         periodText = '<span class="lang-vi">Đêm khuya</span><span class="lang-cn">深夜</span>';
     }
 

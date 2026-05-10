@@ -405,8 +405,8 @@ body::after {
 /* ── time setter ── */
 .time-setter { margin-bottom:24px; }
 .time-sky {
-  position:relative; height:180px; border-radius:var(--r-lg);
-  overflow:hidden; margin-bottom:16px;
+  position:relative; height:220px; border-radius:var(--r-lg);
+  overflow:visible; margin-bottom:16px;
   border:1.5px solid var(--border); display:flex;
   flex-direction:column; align-items:center; justify-content:center;
 }
@@ -417,6 +417,7 @@ body::after {
 .sky-celestial {
   position:absolute; width:48px; height:48px; border-radius:50%;
   transition:all 0.8s ease; z-index:1;
+  transform:translate(-50%, -50%);
 }
 .sky-celestial.sun {
   background:radial-gradient(circle at 35% 35%, #fff7c2, #f0a030 50%, transparent 70%);
@@ -487,12 +488,12 @@ body::after {
   gap:16px;
 }
 .time-btn {
-  width:36px; height:36px;
+  min-width:52px; height:36px; padding:0 10px;
   background:var(--surface); border:1.5px solid var(--border);
   border-radius:var(--r); color:var(--fg);
-  font-size:1.2rem; font-weight:700; cursor:pointer;
+  font-size:0.85rem; font-weight:600; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
-  transition:0.2s;
+  transition:0.2s; font-family:var(--font-mono); letter-spacing:0.5px;
 }
 .time-btn:hover {
   border-color:var(--gold); color:var(--gold);
