@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Đạo Cụ</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=40">
+  <link rel="stylesheet" href="css/main.css?v=41">
 </head>
 <body data-lang="vi">
 
@@ -51,12 +51,12 @@
   <div id="auth-overlay" class="auth-overlay">
     <div class="auth-box">
       <div class="auth-icon">🔒</div>
-      <h2 class="lang-vi">Quyền Truy Cập Bị Từ Chối</h2>
+      <h2 class="lang-vi">Quyền truy cập bị từ chối</h2>
       <h2 class="lang-cn">权限不足</h2>
       <p class="lang-vi">Phiên đăng nhập đã hết hạn hoặc bạn không có quyền truy cập trang này. Vui lòng đăng nhập lại.</p>
       <p class="lang-cn">登录已过期或您无权访问此页面，请重新登录。</p>
       <button class="btn btn-primary" onclick="location.reload()">
-        <span class="lang-vi">Đăng Nhập Lại</span>
+        <span class="lang-vi">Đăng nhập lại</span>
         <span class="lang-cn">重新登录</span>
       </button>
     </div>
@@ -69,22 +69,20 @@
     <section class="section" data-od-id="player-identity" style="padding-top: var(--gap-md);">
       <div class="container">
         <div class="player-identity">
-          <div class="player-id-left">
-            <select class="server-select" id="server-select" onchange="switchServer(this.value)">
-              <option value="Q">Server Q</option>
-              <option value="K">Server K</option>
-            </select>
-          </div>
-          <div class="player-id-center">
-            <div class="player-id-name" id="player-id-name">SPECTER</div>
-            <div class="player-id-meta">
-              <span class="player-id-server" id="player-id-server">Server Q</span>
-              <span class="player-id-guild" id="player-id-guild">Hoả Long</span>
+          <div class="player-id-row">
+            <div class="player-id-field">
+              <span class="player-id-label">Tài khoản</span>
+              <span class="player-id-value" id="player-id-account">13225515</span>
+            </div>
+            <div class="player-id-field">
+              <span class="player-id-label">Máy chủ</span>
+              <select class="server-select" id="server-select" onchange="switchServer(this.value)">
+                <option value="Q">Q服</option>
+                <option value="K">K服</option>
+              </select>
             </div>
           </div>
-          <div class="player-id-right">
-            <div class="player-id-avatar" id="player-id-avatar">🎮</div>
-          </div>
+          <div class="player-id-name" id="player-id-name">Longka</div>
         </div>
       </div>
     </section>
@@ -95,25 +93,25 @@
         <div class="inventory-bar">
           <div class="bag-cell" id="inv-weather">
             <div class="cell-name">
-              <span class="lang-vi">Thờ Tiết</span>
+              <span class="lang-vi">Thời Tiết</span>
               <span class="lang-cn">天气卡</span>
             </div>
             <div class="cell-icon">🌦️</div>
             <div class="cell-count" id="count-weather">×0</div>
             <button class="btn-slot-use" id="btn-slot-weather" onclick="quickUseWeather()">
-              <span class="lang-vi">Sử Dụng</span>
+              <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
             </button>
           </div>
           <div class="bag-cell" id="inv-time">
             <div class="cell-name">
-              <span class="lang-vi">Thờ Gian</span>
+              <span class="lang-vi">Thời Gian</span>
               <span class="lang-cn">时间卡</span>
             </div>
             <div class="cell-icon">🕐</div>
             <div class="cell-count" id="count-time">×0</div>
             <button class="btn-slot-use" id="btn-slot-time" onclick="quickUseTime()">
-              <span class="lang-vi">Sử Dụng</span>
+              <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
             </button>
           </div>
@@ -125,7 +123,7 @@
             <div class="cell-icon">📢</div>
             <div class="cell-count" id="count-announcement">×0</div>
             <button class="btn-slot-use" id="btn-slot-announcement" onclick="quickUseAnnouncement()">
-              <span class="lang-vi">Sử Dụng</span>
+              <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
             </button>
           </div>
@@ -137,7 +135,7 @@
             <div class="cell-icon">⏳</div>
             <div class="cell-count" id="count-flow">×0</div>
             <button class="btn-slot-use" id="btn-slot-flow" onclick="quickUseFlow()">
-              <span class="lang-vi">Sử Dụng</span>
+              <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
             </button>
           </div>
@@ -149,7 +147,7 @@
             <div class="cell-icon">🦖</div>
             <div class="cell-count" id="count-dino-grow">×0</div>
             <button class="btn-slot-use" id="btn-slot-dino-grow" onclick="quickUseDinoGrow()">
-              <span class="lang-vi">Sử Dụng</span>
+              <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
             </button>
           </div>
@@ -164,12 +162,12 @@
         <nav class="tab-nav">
           <button class="tab-btn" data-tab="weather" onclick="toggleTab('weather')">
             <span>🌦️</span>
-            <span class="lang-vi">Thờ Tiết</span>
+            <span class="lang-vi">Thời Tiết</span>
             <span class="lang-cn">天气卡</span>
           </button>
           <button class="tab-btn" data-tab="time" onclick="toggleTab('time')">
             <span>🕐</span>
-            <span class="lang-vi">Thờ Gian</span>
+            <span class="lang-vi">Thời Gian</span>
             <span class="lang-cn">时间卡</span>
           </button>
           <button class="tab-btn" data-tab="announcement" onclick="toggleTab('announcement')">
@@ -194,7 +192,7 @@
           <div class="panel-card">
             <div class="panel-header row-between">
               <h3>
-                <span class="lang-vi">Thẻ Thờ Tiết</span>
+                <span class="lang-vi">Thẻ Thời Tiết</span>
                 <span class="lang-cn">天气卡</span>
               </h3>
               <div class="status-indicator" id="status-weather">
@@ -234,7 +232,7 @@
             </div>
 
             <button class="btn btn-primary btn-use" id="btn-use-weather" onclick="useWeatherCard()">
-              <span class="lang-vi">Sử dụng Thẻ Thờ Tiết</span>
+              <span class="lang-vi">Sử dụng Thẻ Thời Tiết</span>
               <span class="lang-cn">使用天气卡</span>
             </button>
 
@@ -262,7 +260,7 @@
           <div class="panel-card">
             <div class="panel-header row-between">
               <h3>
-                <span class="lang-vi">Thẻ Thờ Gian</span>
+                <span class="lang-vi">Thẻ Thời Gian</span>
                 <span class="lang-cn">时间卡</span>
               </h3>
               <div class="status-indicator" id="status-time">
@@ -315,7 +313,7 @@
             </div>
 
             <button class="btn btn-primary btn-use" id="btn-use-time" onclick="useTimeCard()">
-              <span class="lang-vi">Sử dụng Thẻ Thờ Gian</span>
+              <span class="lang-vi">Sử dụng Thẻ Thời Gian</span>
               <span class="lang-cn">使用时间卡</span>
             </button>
 
@@ -343,7 +341,7 @@
           <div class="panel-card">
             <div class="panel-header row-between">
               <h3>
-                <span class="lang-vi">Thông Báo Toàn Server</span>
+                <span class="lang-vi">Thông báo toàn server</span>
                 <span class="lang-cn">全服公告</span>
               </h3>
               <div class="status-indicator" id="status-announcement">
@@ -365,7 +363,7 @@
             </div>
 
             <button class="btn btn-primary btn-use" id="btn-submit-announcement" onclick="submitAnnouncement()">
-              <span class="lang-vi">Gửi Đến Duyệt</span>
+              <span class="lang-vi">Gửi đến duyệt</span>
               <span class="lang-cn">提交审核</span>
             </button>
 
@@ -464,7 +462,7 @@
           <div class="panel-card">
             <div class="panel-header row-between">
               <h3>
-                <span class="lang-vi">Thẻ Dòng Chảy Thờ Gian</span>
+                <span class="lang-vi">Thẻ Dòng Chảy Thời Gian</span>
                 <span class="lang-cn">时间流动卡</span>
               </h3>
               <div class="status-indicator" id="status-flow">
@@ -494,17 +492,17 @@
               <div class="flow-sky-bg" id="flow-sky-bg"></div>
               <div class="flow-sky-time" id="flow-sky-time">12:00</div>
               <div class="flow-sky-period" id="flow-sky-period">
-                <span class="lang-vi">Thờ gian đang đứng yên</span>
+                <span class="lang-vi">thời gian đang đứng yên</span>
                 <span class="lang-cn">时间静止中</span>
               </div>
             </div>
 
             <button class="btn btn-primary btn-use" id="btn-use-flow" onclick="useFlowCard()">
-              <span class="lang-vi">Khởi Động Dòng Chảy</span>
+              <span class="lang-vi">Khởi động dòng chảy</span>
               <span class="lang-cn">启动时间流动</span>
             </button>
             <button class="btn btn-secondary btn-stop" id="btn-stop-flow" onclick="stopFlowCard()" style="display:none; margin-top:12px;">
-              <span class="lang-vi">Dừng Dòng Chảy</span>
+              <span class="lang-vi">Dừng dòng chảy</span>
               <span class="lang-cn">停止时间流动</span>
             </button>
 
@@ -537,7 +535,7 @@
     <section class="section" data-od-id="history">
       <div class="container">
         <h2 class="h2" style="margin-bottom: var(--gap-md); font-size: 22px;">
-          <span class="lang-vi">Lịch Sử Sử Dụng</span>
+          <span class="lang-vi">Lịch Sử Sử dụng</span>
           <span class="lang-cn">使用历史</span>
         </h2>
         <div class="history-card">
@@ -563,6 +561,6 @@
 
   <div id="toast-container"></div>
 
-  <script src="js/main.js?v=31"></script>
+  <script src="js/main.js?v=32"></script>
 </body>
 </html>

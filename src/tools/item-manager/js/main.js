@@ -199,7 +199,7 @@ const I18N = {
         busy: 'Đang bận',
         conflictWeather: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Tiết, còn lại ${time}`,
         conflictTime: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Gian, còn lại ${time}`,
-        conflictDinoGrow: (name, time) => `Ngườ chơi ${name} đang sử dụng Thẻ Tăng Trưởng, còn lại ${time}`,
+        conflictDinoGrow: (name, time) => `Ngườ chơi ${name} đang sử dụng Thẻ tăng trưởng, còn lại ${time}`,
         noItem: 'Không đủ đạo cụ',
         connectingServer: 'Đang kết nối server...',
         serverErrorConflict: 'Server: Có ngườ chơi khác đang sử dụng đạo cụ này, vui lòng thử lại sau',
@@ -213,13 +213,13 @@ const I18N = {
         timeUp: 'Hết thờ gian, đã tự động kết thúc',
         approved: 'Thông báo đã được duyệt',
         clickToSend: 'Đã duyệt, nhấn để gửi',
-        sendAnnouncement: 'Gửi Thông Báo',
+        sendAnnouncement: 'Gửi thông báo',
         sent: 'Thông báo đã được gửi toàn server',
         history: {
             weather: 'Thẻ Thời Tiết',
             time: 'Thẻ Thời Gian',
-            announcement: 'Thông Báo',
-            dinoGrow: 'Thẻ Tăng Trưởng'
+            announcement: 'Thông báo',
+            dinoGrow: 'Thẻ tăng trưởng'
         },
         status: {
             pending_review: 'Chờ duyệt',
@@ -353,12 +353,10 @@ class ItemManager {
             return user;
         }
         const id = 'player_' + Math.random().toString(36).substr(2, 6);
-        const realNames = ['SPECTER','ChiuChiu','NguyệtCung','Thiên Cơ','Hắc Ám','Nhật Thực','TUTien','SKTTI','CoDoc','PAULZ','Soul','TOP龙mixuka','C007TITI','GKTieuLynh','Nolan','Leyla'];
-        const name = realNames[getRandomInt(0, realNames.length - 1)];
         user = {
             userId: id,
-            username: name,
-            usernameCn: name,
+            username: 'Longka',
+            usernameCn: 'Longka',
             inventory: {
                 weatherCard: 3,
                 timeCard: 3,
@@ -1441,28 +1439,13 @@ class ItemManager {
 
         // Update player identity display
         const playerNameEl = document.getElementById('player-id-name');
-        const playerServerEl = document.getElementById('player-id-server');
-        const playerGuildEl = document.getElementById('player-id-guild');
         const serverSelect = document.getElementById('server-select');
-        const userNameEl = document.getElementById('user-name');
         const sid = getServerId();
         if (playerNameEl) {
-            const lang = document.body.getAttribute('data-lang') || 'vi';
-            playerNameEl.textContent = lang === 'vi' ? this.user.username : this.user.usernameCn;
-        }
-        if (playerServerEl) {
-            playerServerEl.textContent = 'Server ' + sid;
-        }
-        if (playerGuildEl) {
-            const guilds = { Q: 'Hoả Long', K: 'Hắc Ám' };
-            playerGuildEl.textContent = guilds[sid] || '';
+            playerNameEl.textContent = 'Longka';
         }
         if (serverSelect) {
             serverSelect.value = sid;
-        }
-        if (userNameEl) {
-            const lang = document.body.getAttribute('data-lang') || 'vi';
-            userNameEl.textContent = lang === 'vi' ? this.user.username : this.user.usernameCn;
         }
     }
 
@@ -1513,16 +1496,8 @@ function applyLangUI(lang) {
 
     // Update player identity
     const playerNameEl = document.getElementById('player-id-name');
-    const userNameEl = document.getElementById('user-name');
-    if (playerNameEl && window.itemManager) {
-        playerNameEl.textContent = lang === 'vi'
-            ? window.itemManager.user.username
-            : window.itemManager.user.usernameCn;
-    }
-    if (userNameEl && window.itemManager) {
-        userNameEl.textContent = lang === 'vi'
-            ? window.itemManager.user.username
-            : window.itemManager.user.usernameCn;
+    if (playerNameEl) {
+        playerNameEl.textContent = 'Longka';
     }
 }
 
