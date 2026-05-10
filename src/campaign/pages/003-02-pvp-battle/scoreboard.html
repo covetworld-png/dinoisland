@@ -566,7 +566,14 @@
 
     <div class="controls" style="margin-top:16px;">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <input type="date" id="weeklyDate" onchange="loadWeeklyData()" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <button class="server-btn" style="padding:6px 8px;font-size:12px;" onclick="shiftWeek(-7)" title="上周">⬅</button>
+          <input type="date" id="weeklyDate" onchange="loadWeeklyData()" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;">
+          <button class="server-btn" style="padding:6px 8px;font-size:12px;" onclick="shiftWeek(7)" title="下周">➡</button>
+        </div>
+        <select id="weeklyDatePreset" onchange="if(this.value){document.getElementById('weeklyDate').value=this.value;loadWeeklyData();}" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;">
+          <option value="">📋 已有周赛</option>
+        </select>
         <span id="weeklyServerDisplay" style="font-size:13px;color:var(--text2);"></span>
         <button class="server-btn" id="weeklyBtnK" onclick="switchServer('K 服')">K 服</button>
         <button class="server-btn active" id="weeklyBtnQ" onclick="switchServer('Q 服')">Q 服</button>
@@ -1779,7 +1786,31 @@ function switchTab(tab) {
 }
 
 /* ========== 周赛逻辑 ========== */
+function shiftWeek(days) {
+  const el = document.getElementById('weeklyDate');
+  if (!el.value) return;
+  const d = new Date(el.value + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  el.value = d.toISOString().slice(0, 10);
+  loadWeeklyData();
+}
+function initWeeklyDatePreset() {
+  const sel = document.getElementById('weeklyDatePreset');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">📋 已有周赛</option>';
+  const dates = Object.keys(DEFAULT_WEEKLY_DATA).sort();
+  dates.forEach(date => {
+    const servers = Object.keys(DEFAULT_WEEKLY_DATA[date]).sort();
+    servers.forEach(srv => {
+      const opt = document.createElement('option');
+      opt.value = date;
+      opt.textContent = date + ' · ' + srv;
+      sel.appendChild(opt);
+    });
+  });
+}
 function initWeeklyView() {
+  initWeeklyDatePreset();
   const el = document.getElementById('weeklyDate');
   if (!el.value) {
     const today = new Date();
