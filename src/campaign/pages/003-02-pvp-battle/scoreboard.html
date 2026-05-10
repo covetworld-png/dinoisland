@@ -657,10 +657,11 @@ const DEFAULT_WEEKLY_DATA = {
     "Q 服": {
       players: ['nini','JUDI45','chip','CoBeChimTO','asula','maymay'],
       accounts: {nini:'13219644',JUDI45:'13220110',chip:'13219675',CoBeChimTO:'13219629',asula:'13220547',maymay:'13226453'},
-      absent: [],
+      absent: ['JUDI45','chip','maymay'],
       results: {
         'asula|nini':'nini',
-        'CoBeChimTO|nini':'nini'
+        'CoBeChimTO|nini':'nini',
+        'asula|CoBeChimTO':'CoBeChimTO'
       },
       schedule: [
         {p1:'chip',p2:'CoBeChimTO'},{p1:'JUDI45',p2:'maymay'},{p1:'nini',p2:'CoBeChimTO'},{p1:'nini',p2:'JUDI45'},
@@ -2191,17 +2192,22 @@ function calcWeeklyStats(players, results, absent) {
   const stats = {};
   players.forEach(p => stats[p] = { wins: 0, losses: 0, points: 0, h2h: {} });
   
-  absent.forEach(abs => {
-    players.forEach(opp => {
-      if (opp !== abs && !absent.includes(opp)) {
-        stats[opp].wins++;
-        stats[opp].points++;
-        stats[opp].h2h[abs] = 'W';
-        stats[abs].losses++;
-        stats[abs].h2h[opp] = 'L';
-      }
+  // 2026-05-10 Q 服特殊处理：全局缺席不自动给对手加分
+  const skipAbsentBonus = document.getElementById('weeklyDate').value === '2026-05-10' && getCurrentServer() === 'Q 服';
+  
+  if (!skipAbsentBonus) {
+    absent.forEach(abs => {
+      players.forEach(opp => {
+        if (opp !== abs && !absent.includes(opp)) {
+          stats[opp].wins++;
+          stats[opp].points++;
+          stats[opp].h2h[abs] = 'W';
+          stats[abs].losses++;
+          stats[abs].h2h[opp] = 'L';
+        }
+      });
     });
-  });
+  }
   
   for (const key in results) {
     const winner = results[key];
