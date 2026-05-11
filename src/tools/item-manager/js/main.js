@@ -204,17 +204,17 @@ const I18N = {
         connectingServer: 'Đang kết nối server...',
         serverErrorConflict: 'Server: Có ngườ chơi khác đang sử dụng đạo cụ này, vui lòng thử lại sau',
         serverErrorNoItem: 'Server: Không đủ đạo cụ',
-        serverErrorSystem: (code) => `Server: Lỗi hệ thống, vui lòng liên hệ CSKH (Mã lỗi: ${code})`,
+        serverErrorSystem: () => `Lỗi hệ thống, vui lòng liên hệ quản trị viên`,
         selectOption: 'Vui lòng chọn một tùy chọn',
         useSuccess: (type) => `Sử dụng ${type} thành công!`,
         useFailed: 'Sử dụng thất bại, vui lòng thử lại',
         submitSuccess: 'Gửi thông báo thành công, đang chờ duyệt',
         enterContent: 'Vui lòng nhập nội dung thông báo',
         timeUp: 'Hết thờ gian, đã tự động kết thúc',
-        approved: 'Thông báo đã được duyệt',
+        approved: 'Thông báo đã đườc duyệt',
         clickToSend: 'Đã duyệt, nhấn để gửi',
         sendAnnouncement: 'Gửi thông báo',
-        sent: 'Thông báo đã được gửi toàn server',
+        sent: 'Thông báo đã đườc gửi toàn server',
         history: {
             weather: 'Thẻ Thời Tiết',
             time: 'Thẻ Thời Gian',
@@ -262,7 +262,7 @@ const I18N = {
         connectingServer: '正在连接服务端...',
         serverErrorConflict: '服务端返回：有其他玩家正在使用该道具，请稍后再试',
         serverErrorNoItem: '服务端返回：道具数量不足',
-        serverErrorSystem: (code) => `服务端返回：系统异常，请联系客服处理（异常代码：${code}）`,
+        serverErrorSystem: () => `系统错误，请联系管理员`,
         selectOption: '请选择一个选项',
         useSuccess: (type) => `${type} 使用成功！`,
         useFailed: '使用失败，请重试',
@@ -342,6 +342,12 @@ class ItemManager {
     }
 
     loadUser() {
+        const sid = getServerId();
+        const serverNicknames = {
+            Q: { vi: 'robo', cn: 'robo' },
+            K: { vi: '东皇没大', cn: '东皇没大' }
+        };
+        const nick = serverNicknames[sid] || { vi: 'robo', cn: 'robo' };
         let user = localStorage.getItem(lsKeyUser());
         if (user) {
             user = JSON.parse(user);
@@ -349,14 +355,16 @@ class ItemManager {
             if (!user.inventory) user.inventory = {};
             if (user.inventory.flowCard === undefined) user.inventory.flowCard = 3;
             if (user.inventory.dinoGrowCard === undefined) user.inventory.dinoGrowCard = 3;
+            // Update nickname per server
+            user.username = nick.vi;
+            user.usernameCn = nick.cn;
             localStorage.setItem(lsKeyUser(), JSON.stringify(user));
             return user;
         }
-        const id = 'player_' + Math.random().toString(36).substr(2, 6);
         user = {
-            userId: id,
-            username: 'Longka',
-            usernameCn: 'Longka',
+            userId: 'player_13225799',
+            username: nick.vi,
+            usernameCn: nick.cn,
             inventory: {
                 weatherCard: 3,
                 timeCard: 3,
@@ -492,21 +500,27 @@ class ItemManager {
         const container = document.getElementById('toast-container');
         if (container) container.appendChild(loadingToast);
 
-        // Simulate network delay
-        await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
+        try {
+            // Simulate network delay
+            await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
 
-        // Remove loading toast
-        if (loadingToast.parentNode) loadingToast.remove();
+            // Remove loading toast
+            if (loadingToast.parentNode) loadingToast.remove();
 
-        // Check mock error (set via window.mockNextError or debug UI)
-        if (window.__mockServerError) {
-            const err = window.__mockServerError;
-            window.__mockServerError = null;
-            return err;
+            // Check mock error (set via window.mockNextError or debug UI)
+            if (window.__mockServerError) {
+                const err = window.__mockServerError;
+                window.__mockServerError = null;
+                return err;
+            }
+
+            // Default: success
+            return { success: true };
+        } catch (e) {
+            // AGENTS.md §7.6：500/网络错误兜底
+            if (loadingToast.parentNode) loadingToast.remove();
+            return { success: false, code: 'SYSTEM_ERROR' };
         }
-
-        // Default: success
-        return { success: true };
     }
 
     // Use Weather Card
@@ -541,7 +555,7 @@ class ItemManager {
             } else if (serverResult.code === 'NO_ITEM') {
                 showToast(t.serverErrorNoItem, 'error');
             } else if (serverResult.code === 'SYSTEM_ERROR') {
-                showToast(t.serverErrorSystem(serverResult.errorCode || 'ERR_500'), 'error');
+                showToast(t.serverErrorSystem(), 'error');
             }
             return;
         }
@@ -624,7 +638,7 @@ class ItemManager {
             } else if (serverResult.code === 'NO_ITEM') {
                 showToast(t.serverErrorNoItem, 'error');
             } else if (serverResult.code === 'SYSTEM_ERROR') {
-                showToast(t.serverErrorSystem(serverResult.errorCode || 'ERR_500'), 'error');
+                showToast(t.serverErrorSystem(), 'error');
             }
             return;
         }
@@ -700,7 +714,7 @@ class ItemManager {
             } else if (serverResult.code === 'NO_ITEM') {
                 showToast(t.serverErrorNoItem, 'error');
             } else if (serverResult.code === 'SYSTEM_ERROR') {
-                showToast(t.serverErrorSystem(serverResult.errorCode || 'ERR_500'), 'error');
+                showToast(t.serverErrorSystem(), 'error');
             }
             return;
         }
@@ -758,7 +772,7 @@ class ItemManager {
             } else if (serverResult.code === 'NO_ITEM') {
                 showToast(t.serverErrorNoItem, 'error');
             } else if (serverResult.code === 'SYSTEM_ERROR') {
-                showToast(t.serverErrorSystem(serverResult.errorCode || 'ERR_500'), 'error');
+                showToast(t.serverErrorSystem(), 'error');
             }
             return;
         }
@@ -1442,7 +1456,7 @@ class ItemManager {
         const serverSelect = document.getElementById('server-select');
         const sid = getServerId();
         if (playerNameEl) {
-            playerNameEl.textContent = 'Longka';
+            playerNameEl.textContent = this.user.username;
         }
         if (serverSelect) {
             serverSelect.value = sid;
@@ -1496,8 +1510,9 @@ function applyLangUI(lang) {
 
     // Update player identity
     const playerNameEl = document.getElementById('player-id-name');
-    if (playerNameEl) {
-        playerNameEl.textContent = 'Longka';
+    const manager = window.itemManager;
+    if (playerNameEl && manager) {
+        playerNameEl.textContent = manager.user.username;
     }
 }
 
@@ -1642,6 +1657,11 @@ function setupDebugMock() {
             }
         });
     });
+    // Restore mock-expired checkbox state
+    const expiredCb = document.getElementById('mock-expired');
+    if (expiredCb) {
+        expiredCb.checked = localStorage.getItem('itemManager_mockExpired') === '1';
+    }
 }
 
 /* ── auth check ── */
@@ -1649,21 +1669,36 @@ function setupDebugMock() {
  * 权限检查入口
  * 实际项目中请替换为真实的 API 校验，例如：
  *   const res = await fetch('/api/check-auth', { headers: { Authorization: 'Bearer ' + token } });
- *   if (!res.ok) { showAuthOverlay(); return false; }
+ *   if (!res.ok) { showAuthBanner(); return false; }
  */
 function checkAuth() {
     const token = localStorage.getItem('itemManager_token');
     // 默认放行（无 token 时演示模式），如需强制登录请取消下行注释：
-    // if (!token) { showAuthOverlay(); return false; }
+    // if (!token) { showAuthBanner(); return false; }
+    // Mock: simulate login expired
+    if (localStorage.getItem('itemManager_mockExpired') === '1') {
+        showAuthBanner();
+        return false;
+    }
     return true;
 }
 
-function showAuthOverlay() {
-    const overlay = document.getElementById('auth-overlay');
-    const content = document.getElementById('content');
-    if (overlay) overlay.classList.add('show');
-    if (content) content.style.display = 'none';
-    document.body.style.overflow = 'hidden';
+function showAuthBanner() {
+    const banner = document.getElementById('auth-banner');
+    if (banner) banner.style.display = 'block';
+}
+
+function handleRelogin() {
+    localStorage.removeItem('itemManager_mockExpired');
+    window.location.reload();
+}
+
+function toggleMockExpired(checked) {
+    if (checked) {
+        localStorage.setItem('itemManager_mockExpired', '1');
+    } else {
+        localStorage.removeItem('itemManager_mockExpired');
+    }
 }
 
 // Initialize

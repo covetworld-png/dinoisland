@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Đạo Cụ</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=41">
+  <link rel="stylesheet" href="css/main.css?v=53">
 </head>
 <body data-lang="vi">
 
@@ -36,6 +36,10 @@
           <label><input type="radio" name="mock-error" value="SYSTEM_ERROR"> 系统异常 / Lỗi hệ thống</label>
         </div>
         <div class="debug-divider"></div>
+        <div class="debug-options">
+          <label><input type="checkbox" id="mock-expired" onchange="toggleMockExpired(this.checked)"> 模拟登录过期 / Mô phỏng hết hạn đăng nhập</label>
+        </div>
+        <div class="debug-divider"></div>
         <div class="debug-row">
           <button class="btn-reset-inv" onclick="resetInventory()">
             <span class="lang-vi">🔄 Khôi phục đạo cụ (mỗi loại ×3)</span>
@@ -47,18 +51,18 @@
     </div>
   </div>
 
-  <!-- Auth Overlay -->
-  <div id="auth-overlay" class="auth-overlay">
-    <div class="auth-box">
-      <div class="auth-icon">🔒</div>
-      <h2 class="lang-vi">Quyền truy cập bị từ chối</h2>
-      <h2 class="lang-cn">权限不足</h2>
-      <p class="lang-vi">Phiên đăng nhập đã hết hạn hoặc bạn không có quyền truy cập trang này. Vui lòng đăng nhập lại.</p>
-      <p class="lang-cn">登录已过期或您无权访问此页面，请重新登录。</p>
-      <button class="btn btn-primary" onclick="location.reload()">
-        <span class="lang-vi">Đăng nhập lại</span>
-        <span class="lang-cn">重新登录</span>
-      </button>
+  <!-- Auth Banner -->
+  <div id="auth-banner" class="auth-banner" style="display:none;">
+    <div class="container">
+      <div class="auth-banner-inner">
+        <span>🔒</span>
+        <span class="lang-vi">Phiên đăng nhập của bạn đã hết hạn, vui lòng đăng nhập lại</span>
+        <span class="lang-cn">您的登录已过期，请重新登录</span>
+        <button class="btn btn-sm btn-primary" onclick="handleRelogin()" style="width:auto">
+          <span class="lang-vi">Đăng nhập lại</span>
+          <span class="lang-cn">重新登录</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -69,20 +73,24 @@
     <section class="section" data-od-id="player-identity" style="padding-top: var(--gap-md);">
       <div class="container">
         <div class="player-identity">
-          <div class="player-id-row">
-            <div class="player-id-field">
-              <span class="player-id-label">Tài khoản</span>
-              <span class="player-id-value" id="player-id-account">13225515</span>
-            </div>
-            <div class="player-id-field">
-              <span class="player-id-label">Máy chủ</span>
-              <select class="server-select" id="server-select" onchange="switchServer(this.value)">
-                <option value="Q">Q服</option>
-                <option value="K">K服</option>
-              </select>
-            </div>
+          <div class="player-id-account-corner">
+            <span class="player-id-label">
+              <span class="lang-vi">Tài khoản</span>
+              <span class="lang-cn">账号</span>
+            </span>
+            <span class="player-id-value" id="player-id-account">13225799</span>
           </div>
           <div class="player-id-name" id="player-id-name">Longka</div>
+          <div class="player-id-server-row">
+            <span class="player-id-label">
+              <span class="lang-vi">Máy chủ</span>
+              <span class="lang-cn">服务器</span>
+            </span>
+            <select class="server-select" id="server-select" onchange="switchServer(this.value)">
+              <option value="Q">Q服 — Quân Đoàn Chiến</option>
+              <option value="K">K服 — Khủng Long Chiến</option>
+            </select>
+          </div>
         </div>
       </div>
     </section>
@@ -561,6 +569,6 @@
 
   <div id="toast-container"></div>
 
-  <script src="js/main.js?v=32"></script>
+  <script src="js/main.js?v=45"></script>
 </body>
 </html>
