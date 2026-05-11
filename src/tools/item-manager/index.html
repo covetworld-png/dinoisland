@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Đạo Cụ</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=53">
+  <link rel="stylesheet" href="css/main.css?v=56">
 </head>
 <body data-lang="vi">
 
@@ -147,14 +147,38 @@
               <span class="lang-cn">使用</span>
             </button>
           </div>
-          <div class="bag-cell" id="inv-dino-grow">
+          <div class="bag-cell" id="inv-dino-grow-50">
             <div class="cell-name">
-              <span class="lang-vi">Tăng Trưởng</span>
-              <span class="lang-cn">恐龙变大</span>
+              <span class="lang-vi">+50%</span>
+              <span class="lang-cn">+50%</span>
             </div>
             <div class="cell-icon">🦖</div>
-            <div class="cell-count" id="count-dino-grow">×0</div>
-            <button class="btn-slot-use" id="btn-slot-dino-grow" onclick="quickUseDinoGrow()">
+            <div class="cell-count" id="count-dino-grow-50">×0</div>
+            <button class="btn-slot-use" id="btn-slot-dino-grow-50" onclick="quickUseDinoGrow('grow50')">
+              <span class="lang-vi">Sử dụng</span>
+              <span class="lang-cn">使用</span>
+            </button>
+          </div>
+          <div class="bag-cell" id="inv-dino-grow-100">
+            <div class="cell-name">
+              <span class="lang-vi">x2</span>
+              <span class="lang-cn">x2</span>
+            </div>
+            <div class="cell-icon">🦖</div>
+            <div class="cell-count" id="count-dino-grow-100">×0</div>
+            <button class="btn-slot-use" id="btn-slot-dino-grow-100" onclick="quickUseDinoGrow('grow100')">
+              <span class="lang-vi">Sử dụng</span>
+              <span class="lang-cn">使用</span>
+            </button>
+          </div>
+          <div class="bag-cell" id="inv-dino-shrink-50">
+            <div class="cell-name">
+              <span class="lang-vi">-50%</span>
+              <span class="lang-cn">-50%</span>
+            </div>
+            <div class="cell-icon">🦕</div>
+            <div class="cell-count" id="count-dino-shrink-50">×0</div>
+            <button class="btn-slot-use" id="btn-slot-dino-shrink-50" onclick="quickUseDinoGrow('shrink50')">
               <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
             </button>
@@ -190,8 +214,8 @@
           </button>
           <button class="tab-btn" data-tab="dino-grow" onclick="toggleTab('dino-grow')">
             <span>🦖</span>
-            <span class="lang-vi">Tăng Trưởng</span>
-            <span class="lang-cn">恐龙变大</span>
+            <span class="lang-vi">Kích Thước</span>
+            <span class="lang-cn">体型变化</span>
           </button>
         </nav>
 
@@ -401,13 +425,13 @@
           </div>
         </div>
 
-        <!-- Dino Grow Panel -->
+        <!-- Dino Size Panel -->
         <div class="tab-panel" id="panel-dino-grow">
           <div class="panel-card">
             <div class="panel-header row-between">
               <h3>
-                <span class="lang-vi">Thẻ Tăng Trưởng Khủng Long</span>
-                <span class="lang-cn">恐龙变大卡</span>
+                <span class="lang-vi">Thay Đổi Kích Thước</span>
+                <span class="lang-cn">体型变化</span>
               </h3>
               <div class="status-indicator" id="status-dino-grow">
                 <span class="status-dot idle"></span>
@@ -441,10 +465,20 @@
               </div>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-use-dino-grow" onclick="useDinoGrowCard()">
-              <span class="lang-vi">Sử dụng Thẻ Tăng Trưởng</span>
-              <span class="lang-cn">使用恐龙变大卡</span>
-            </button>
+            <div class="dino-size-options">
+              <button class="btn btn-primary btn-use" id="btn-use-dino-grow-50" onclick="useDinoSizeCard('grow50')">
+                <span class="lang-vi">Sử dụng +50%</span>
+                <span class="lang-cn">使用 +50%</span>
+              </button>
+              <button class="btn btn-primary btn-use" id="btn-use-dino-grow-100" onclick="useDinoSizeCard('grow100')">
+                <span class="lang-vi">Sử dụng x2</span>
+                <span class="lang-cn">使用 x2</span>
+              </button>
+              <button class="btn btn-primary btn-use" id="btn-use-dino-shrink-50" onclick="useDinoSizeCard('shrink50')">
+                <span class="lang-vi">Sử dụng -50%</span>
+                <span class="lang-cn">使用 -50%</span>
+              </button>
+            </div>
 
             <div class="instruction-box">
               <strong>
@@ -453,12 +487,20 @@
               </strong>
               <ul>
                 <li>
-                  <span class="lang-vi">Sử dụng thẻ để khủng long của bạn tăng kích thước <strong>50%</strong> trong thờ gian hiệu lực.</span>
-                  <span class="lang-cn">使用卡片让你的恐龙体型增大<strong>50%</strong>，持续有效时间。</span>
+                  <span class="lang-vi"><strong>+50%</strong>: Khủng long tăng kích thước 50%.</span>
+                  <span class="lang-cn"><strong>+50%</strong>: 恐龙体型增大50%.</span>
                 </li>
                 <li>
-                  <span class="lang-vi">Thẻ có hiệu lực <strong>5 phút</strong>.</span>
-                  <span class="lang-cn">卡片有效期<strong>5分钟</strong>。</span>
+                  <span class="lang-vi"><strong>x2</strong>: Khủng long tăng gấp đôi kích thước.</span>
+                  <span class="lang-cn"><strong>x2</strong>: 恐龙体型翻倍.</span>
+                </li>
+                <li>
+                  <span class="lang-vi"><strong>-50%</strong>: Khủng long giảm 50% kích thước.</span>
+                  <span class="lang-cn"><strong>-50%</strong>: 恐龙体型缩小50%.</span>
+                </li>
+                <li>
+                  <span class="lang-vi">Mỗi loại có hiệu lực <strong>5 phút</strong>.</span>
+                  <span class="lang-cn">每种有效期<strong>5分钟</strong>。</span>
                 </li>
               </ul>
             </div>
@@ -569,6 +611,6 @@
 
   <div id="toast-container"></div>
 
-  <script src="js/main.js?v=45"></script>
+  <script src="js/main.js?v=48"></script>
 </body>
 </html>

@@ -109,7 +109,7 @@ function simulateServerPoll(manager) {
         const stateKey = `itemManager_state_v1_${target}`;
         let state = localStorage.getItem(stateKey);
         if (!state) {
-            state = { globalLocks:{weather:null,time:null,flow:null}, announcements:[], history:[] };
+            state = { globalLocks:{weather:null,time:null,flow:null,dinoSize:null}, announcements:[], history:[] };
         } else {
             state = JSON.parse(state);
         }
@@ -199,7 +199,7 @@ const I18N = {
         busy: 'Đang bận',
         conflictWeather: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Tiết, còn lại ${time}`,
         conflictTime: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Gian, còn lại ${time}`,
-        conflictDinoGrow: (name, time) => `Ngườ chơi ${name} đang sử dụng Thẻ tăng trưởng, còn lại ${time}`,
+        conflictDinoSize: (name, time) => `Ngườ chơi ${name} đang thay đổi kích thước, còn lại ${time}`,
         noItem: 'Không đủ đạo cụ',
         connectingServer: 'Đang kết nối server...',
         serverErrorConflict: 'Server: Có ngườ chơi khác đang sử dụng đạo cụ này, vui lòng thử lại sau',
@@ -219,7 +219,9 @@ const I18N = {
             weather: 'Thẻ Thời Tiết',
             time: 'Thẻ Thời Gian',
             announcement: 'Thông báo',
-            dinoGrow: 'Thẻ tăng trưởng'
+            dinoGrow50: 'Khủng Long +50%',
+            dinoGrow100: 'Khủng Long x2',
+            dinoShrink50: 'Khủng Long -50%'
         },
         status: {
             pending_review: 'Chờ duyệt',
@@ -257,7 +259,7 @@ const I18N = {
         conflictFlow: (name, time) => `玩家 ${name} 正在使用时间流动卡，剩余 ${time}`,
         conflictFlowByTime: (time) => `时间卡正在使用中 (${time})，无法启动时间流动`,
         conflictTimeByFlow: (time) => `时间流动正在运行中 (${time})，无法使用时间卡`,
-        conflictDinoGrow: (name, time) => `玩家 ${name} 正在使用恐龙变大卡，剩余 ${time}`,
+        conflictDinoSize: (name, time) => `玩家 ${name} 正在改变体型，剩余 ${time}`,
         noItem: '道具不足',
         connectingServer: '正在连接服务端...',
         serverErrorConflict: '服务端返回：有其他玩家正在使用该道具，请稍后再试',
@@ -278,7 +280,9 @@ const I18N = {
             time: '时间卡',
             announcement: '全服公告',
             flow: '时间流动卡',
-            dinoGrow: '恐龙变大卡'
+            dinoGrow50: '仅限恐龙变大 50%',
+            dinoGrow100: '恐龙变大 100%',
+            dinoShrink50: '恐龙变小 50%'
         },
         status: {
             pending_review: '待审核',
@@ -335,7 +339,7 @@ class ItemManager {
     constructor() {
         this.user = this.loadUser();
         this.state = this.loadState();
-        this.countdowns = { weather: null, time: null, dinoGrow: null };
+        this.countdowns = { weather: null, time: null, dinoSize: null };
         this.currentTab = 'weather';
         this.selectedOptions = { weather: null, time: 1200 };
         this.init();
@@ -354,7 +358,9 @@ class ItemManager {
             // Merge new fields for backward compatibility
             if (!user.inventory) user.inventory = {};
             if (user.inventory.flowCard === undefined) user.inventory.flowCard = 3;
-            if (user.inventory.dinoGrowCard === undefined) user.inventory.dinoGrowCard = 3;
+            if (user.inventory.dinoGrow50 === undefined) user.inventory.dinoGrow50 = 3;
+            if (user.inventory.dinoGrow100 === undefined) user.inventory.dinoGrow100 = 2;
+            if (user.inventory.dinoShrink50 === undefined) user.inventory.dinoShrink50 = 3;
             // Update nickname per server
             user.username = nick.vi;
             user.usernameCn = nick.cn;
@@ -370,7 +376,9 @@ class ItemManager {
                 timeCard: 3,
                 announcementCard: 3,
                 flowCard: 3,
-                dinoGrowCard: 3
+                dinoGrow50: 3,
+                dinoGrow100: 2,
+                dinoShrink50: 3
             }
         };
         localStorage.setItem(lsKeyUser(), JSON.stringify(user));
@@ -386,7 +394,7 @@ class ItemManager {
             return parsed;
         }
         return {
-            globalLocks: { weather: null, time: null, flow: null, dinoGrow: null },
+            globalLocks: { weather: null, time: null, flow: null, dinoSize: null },
             announcements: [],
             history: []
         };
@@ -753,19 +761,18 @@ class ItemManager {
         showToast(t.useSuccess(t.history.flow), 'success');
     }
 
-    // Use Dino Grow Card
-    async useDinoGrowCard() {
+    // Use Dino Size Card
+    async useDinoSizeCard(sizeType) {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
+        const inventoryKey = sizeType === 'grow50' ? 'dinoGrow50' : sizeType === 'grow100' ? 'dinoGrow100' : 'dinoShrink50';
 
-        if (this.user.inventory.dinoGrowCard <= 0) {
+        if (this.user.inventory[inventoryKey] <= 0) {
             showToast(t.noItem, 'error');
             return;
         }
 
-        // Dino grow does not conflict with other players
-        // Simulate server request
-        const serverResult = await this.simulateServerUse('dinoGrow');
+        const serverResult = await this.simulateServerUse('dinoSize');
         if (!serverResult.success) {
             if (serverResult.code === 'CONFLICT') {
                 showToast(t.serverErrorConflict, 'warning');
@@ -777,27 +784,35 @@ class ItemManager {
             return;
         }
 
-        this.user.inventory.dinoGrowCard--;
+        this.user.inventory[inventoryKey]--;
         this.saveUser();
 
+        const sizeLabels = {
+            grow50: { vi: '+50%', cn: '+50%', scale: 1.5 },
+            grow100: { vi: 'x2', cn: 'x2', scale: 2.0 },
+            shrink50: { vi: '-50%', cn: '-50%', scale: 0.5 }
+        };
+        const label = sizeLabels[sizeType];
+
         const now = Date.now();
-        this.state.globalLocks.dinoGrow = {
+        this.state.globalLocks.dinoSize = {
             userId: this.user.userId,
             username: this.user.username,
             usernameCn: this.user.usernameCn,
             startTime: now,
             endTime: now + USE_DURATION,
-            detail: 'grow',
-            detailName: '50%'
+            sizeType: sizeType,
+            detail: sizeType,
+            detailName: label.cn
         };
 
         this.state.history.unshift({
             id: generateId(),
-            type: 'dinoGrow',
+            type: sizeType,
             userId: this.user.userId,
             username: this.user.username,
             usernameCn: this.user.usernameCn,
-            detail: '+50%',
+            detail: label.cn,
             startTime: now,
             endTime: now + USE_DURATION,
             status: 'active'
@@ -805,10 +820,10 @@ class ItemManager {
 
         this.saveState();
         this.renderInventory();
-        this.renderDinoGrowPanel();
+        this.renderDinoSizePanel();
         this.renderHistory();
         this.startCountdowns();
-        showToast(t.useSuccess(t.history.dinoGrow), 'success');
+        showToast(t.useSuccess(t.history[sizeType]), 'success');
     }
 
     stopFlowCard() {
@@ -911,7 +926,9 @@ class ItemManager {
             timeCard: 3,
             announcementCard: 3,
             flowCard: 3,
-            dinoGrowCard: 3
+            dinoGrow50: 3,
+            dinoGrow100: 2,
+            dinoShrink50: 3
         };
         this.saveUser();
         this.renderInventory();
@@ -962,7 +979,7 @@ class ItemManager {
 
     // Countdown Management
     startCountdowns() {
-        ['weather', 'time', 'flow', 'dinoGrow'].forEach(type => {
+        ['weather', 'time', 'flow', 'dinoSize'].forEach(type => {
             if (this.countdowns[type]) {
                 clearInterval(this.countdowns[type]);
                 this.countdowns[type] = null;
@@ -970,7 +987,7 @@ class ItemManager {
         });
 
         const tick = () => {
-            ['weather', 'time', 'flow', 'dinoGrow'].forEach(type => {
+            ['weather', 'time', 'flow', 'dinoSize'].forEach(type => {
                 const lock = this.checkConflict(type);
                 const banner = document.getElementById(`countdown-${type}`);
                 const value = document.getElementById(`countdown-value-${type}`);
@@ -988,8 +1005,8 @@ class ItemManager {
                     const remaining = lock.endTime - Date.now();
                     const isMine = lock.userId === this.user.userId;
 
-                    // Dino grow countdown only shows for current user (no conflict)
-                    if (remaining > 0 && type === 'dinoGrow' && !isMine) {
+                    // Dino size countdown only shows for current user (no conflict)
+                    if (remaining > 0 && type === 'dinoSize' && !isMine) {
                         banner.style.display = 'none';
                     } else if (remaining > 0) {
                         banner.style.display = 'flex';
@@ -1028,8 +1045,16 @@ class ItemManager {
                                 btn.disabled = true;
                             });
                         }
-                        // Dino grow does not conflict with other players
-                        if (btn) btn.disabled = type === 'dinoGrow' ? this.user.inventory.dinoGrowCard <= 0 : true;
+                        // Dino size does not conflict with other players
+                        if (btn && type === 'dinoSize') {
+                            const hasLock = !!this.checkConflict('dinoSize');
+                            if (btn.id === 'btn-use-dino-grow-50') btn.disabled = this.user.inventory.dinoGrow50 <= 0 || hasLock;
+                            else if (btn.id === 'btn-use-dino-grow-100') btn.disabled = this.user.inventory.dinoGrow100 <= 0 || hasLock;
+                            else if (btn.id === 'btn-use-dino-shrink-50') btn.disabled = this.user.inventory.dinoShrink50 <= 0 || hasLock;
+                            else btn.disabled = true;
+                        } else if (btn) {
+                            btn.disabled = true;
+                        }
 
                         // Time setter controls disable during conflict
                         if (type === 'time') {
@@ -1038,25 +1063,32 @@ class ItemManager {
                             document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = true);
                         }
 
-                        // Dino grow visual effect during active (only for current user)
-                        if (type === 'dinoGrow' && isMine) {
+                        // Dino size visual effect during active (only for current user)
+                        if (type === 'dinoSize' && isMine) {
                             const dinoChar = document.getElementById('dino-character');
                             const dinoAura = document.getElementById('dino-aura');
                             const dinoStatus = document.getElementById('dino-status');
-                            const lang = document.body.getAttribute('data-lang') || 'vi';
-                            if (dinoChar) dinoChar.classList.add('grown');
+                            const sizeType = lock.sizeType || 'grow50';
+                            const sizeLabels = {
+                                grow50: { vi: 'Khủng long đã tăng kích thước 50%!', cn: '恐龙已增大50%！' },
+                                grow100: { vi: 'Khủng long đã tăng gấp đôi kích thước!', cn: '恐龙体型已翻倍！' },
+                                shrink50: { vi: 'Khủng long đã giảm 50% kích thước!', cn: '恐龙已缩小50%！' }
+                            };
+                            const label = sizeLabels[sizeType];
+                            if (dinoChar) {
+                                dinoChar.classList.add('grown');
+                                dinoChar.style.transform = sizeType === 'grow50' ? 'scale(1.5)' : sizeType === 'grow100' ? 'scale(2.0)' : 'scale(0.5)';
+                            }
                             if (dinoAura) dinoAura.classList.add('active');
                             if (dinoStatus) {
                                 dinoStatus.classList.add('grown');
-                                dinoStatus.innerHTML = lang === 'vi'
-                                    ? '<span class="lang-vi">Khủng long đã tăng kích thước 50%!</span><span class="lang-cn">恐龙已增大50%！</span>'
-                                    : '<span class="lang-vi">Khủng long đã tăng kích thước 50%!</span><span class="lang-cn">恐龙已增大50%！</span>';
+                                dinoStatus.innerHTML = `<span class="lang-vi">${label.vi}</span><span class="lang-cn">${label.cn}</span>`;
                             }
                         }
 
                         if (conflictBanner) {
-                            // Dino grow does not conflict with other players
-                            if (isMine || type === 'dinoGrow') {
+                            // Dino size does not conflict with other players
+                            if (isMine || type === 'dinoSize') {
                                 conflictBanner.style.display = 'none';
                             } else {
                                 conflictBanner.style.display = 'flex';
@@ -1127,10 +1159,16 @@ class ItemManager {
                         }
                         if (conflictBanner) conflictBanner.style.display = 'none';
                         if (btn) {
-                            btn.disabled = (type === 'weather' && this.user.inventory.weatherCard <= 0) ||
-                                           (type === 'time' && this.user.inventory.timeCard <= 0) ||
-                                           (type === 'flow' && this.user.inventory.flowCard <= 0) ||
-                                           (type === 'dinoGrow' && this.user.inventory.dinoGrowCard <= 0);
+                            if (type === 'dinoSize') {
+                                const hasLock = !!this.checkConflict('dinoSize');
+                                if (btn.id === 'btn-use-dino-grow-50') btn.disabled = this.user.inventory.dinoGrow50 <= 0 || hasLock;
+                                else if (btn.id === 'btn-use-dino-grow-100') btn.disabled = this.user.inventory.dinoGrow100 <= 0 || hasLock;
+                                else if (btn.id === 'btn-use-dino-shrink-50') btn.disabled = this.user.inventory.dinoShrink50 <= 0 || hasLock;
+                            } else {
+                                btn.disabled = (type === 'weather' && this.user.inventory.weatherCard <= 0) ||
+                                               (type === 'time' && this.user.inventory.timeCard <= 0) ||
+                                               (type === 'flow' && this.user.inventory.flowCard <= 0);
+                            }
                         }
                         // Time setter controls re-enable when no conflict
                         if (type === 'time') {
@@ -1148,12 +1186,15 @@ class ItemManager {
                         });
                     }
 
-                    // Dino grow reset visual
-                    if (type === 'dinoGrow') {
+                    // Dino size reset visual
+                    if (type === 'dinoSize') {
                         const dinoChar = document.getElementById('dino-character');
                         const dinoAura = document.getElementById('dino-aura');
                         const dinoStatus = document.getElementById('dino-status');
-                        if (dinoChar) dinoChar.classList.remove('grown');
+                        if (dinoChar) {
+                            dinoChar.classList.remove('grown');
+                            dinoChar.style.transform = '';
+                        }
                         if (dinoAura) dinoAura.classList.remove('active');
                         if (dinoStatus) {
                             dinoStatus.classList.remove('grown');
@@ -1181,7 +1222,7 @@ class ItemManager {
 
         tick();
         const interval = setInterval(tick, 1000);
-        ['weather', 'time', 'flow', 'dinoGrow'].forEach(type => {
+        ['weather', 'time', 'flow', 'dinoSize'].forEach(type => {
             this.countdowns[type] = interval;
         });
     }
@@ -1206,12 +1247,23 @@ class ItemManager {
         document.getElementById('count-time').textContent = '×' + this.user.inventory.timeCard;
         document.getElementById('count-announcement').textContent = '×' + this.user.inventory.announcementCard;
         document.getElementById('count-flow').textContent = '×' + this.user.inventory.flowCard;
-        document.getElementById('count-dino-grow').textContent = '×' + this.user.inventory.dinoGrowCard;
+        document.getElementById('count-dino-grow-50').textContent = '×' + this.user.inventory.dinoGrow50;
+        document.getElementById('count-dino-grow-100').textContent = '×' + this.user.inventory.dinoGrow100;
+        document.getElementById('count-dino-shrink-50').textContent = '×' + this.user.inventory.dinoShrink50;
 
-        ['weather', 'time', 'announcement', 'flow', 'dino-grow'].forEach(type => {
+        const invMap = [
+            { type: 'weather', key: 'weatherCard' },
+            { type: 'time', key: 'timeCard' },
+            { type: 'announcement', key: 'announcementCard' },
+            { type: 'flow', key: 'flowCard' },
+            { type: 'dino-grow-50', key: 'dinoGrow50' },
+            { type: 'dino-grow-100', key: 'dinoGrow100' },
+            { type: 'dino-shrink-50', key: 'dinoShrink50' }
+        ];
+        invMap.forEach(({ type, key }) => {
             const card = document.getElementById(`inv-${type}`);
             const btn = document.getElementById(`btn-slot-${type}`);
-            const count = this.user.inventory[type + 'Card'];
+            const count = this.user.inventory[key];
             if (card) {
                 card.classList.toggle('empty', count <= 0);
             }
@@ -1226,7 +1278,7 @@ class ItemManager {
         this.renderTimePanel();
         this.renderAnnouncementPanel();
         this.renderFlowPanel();
-        this.renderDinoGrowPanel();
+        this.renderDinoSizePanel();
     }
 
     renderPanel(type) {
@@ -1234,7 +1286,7 @@ class ItemManager {
         else if (type === 'time') this.renderTimePanel();
         else if (type === 'announcement') this.renderAnnouncementPanel();
         else if (type === 'flow') this.renderFlowPanel();
-        else if (type === 'dino-grow') this.renderDinoGrowPanel();
+        else if (type === 'dino-grow') this.renderDinoSizePanel();
     }
 
     renderWeatherPanel() {
@@ -1315,29 +1367,43 @@ class ItemManager {
         }
     }
 
-    renderDinoGrowPanel() {
-        const lock = this.checkConflict('dinoGrow');
+    renderDinoSizePanel() {
+        const lock = this.checkConflict('dinoSize');
         const myLock = lock && lock.userId === this.user.userId;
-        const btn = document.getElementById('btn-use-dino-grow');
+        const btn50 = document.getElementById('btn-use-dino-grow-50');
+        const btn100 = document.getElementById('btn-use-dino-grow-100');
+        const btnShrink = document.getElementById('btn-use-dino-shrink-50');
         const dinoChar = document.getElementById('dino-character');
         const dinoAura = document.getElementById('dino-aura');
         const dinoStatus = document.getElementById('dino-status');
         const lang = document.body.getAttribute('data-lang') || 'vi';
 
-        if (btn) {
-            // Dino grow does not conflict with other players; only disable if current user is active
-            btn.disabled = this.user.inventory.dinoGrowCard <= 0 || !!myLock;
-        }
+        if (btn50) btn50.disabled = this.user.inventory.dinoGrow50 <= 0 || !!myLock;
+        if (btn100) btn100.disabled = this.user.inventory.dinoGrow100 <= 0 || !!myLock;
+        if (btnShrink) btnShrink.disabled = this.user.inventory.dinoShrink50 <= 0 || !!myLock;
 
         if (lock) {
-            if (dinoChar) dinoChar.classList.add('grown');
+            const sizeType = lock.sizeType || 'grow50';
+            const sizeLabels = {
+                grow50: { vi: 'Khủng long đã tăng kích thước 50%!', cn: '恐龙已增大50%！' },
+                grow100: { vi: 'Khủng long đã tăng gấp đôi kích thước!', cn: '恐龙体型已翻倍！' },
+                shrink50: { vi: 'Khủng long đã giảm 50% kích thước!', cn: '恐龙已缩小50%！' }
+            };
+            const label = sizeLabels[sizeType];
+            if (dinoChar) {
+                dinoChar.classList.add('grown');
+                dinoChar.style.transform = sizeType === 'grow50' ? 'scale(1.5)' : sizeType === 'grow100' ? 'scale(2.0)' : 'scale(0.5)';
+            }
             if (dinoAura) dinoAura.classList.add('active');
             if (dinoStatus) {
                 dinoStatus.classList.add('grown');
-                dinoStatus.innerHTML = '<span class="lang-vi">Khủng long đã tăng kích thước 50%!</span><span class="lang-cn">恐龙已增大50%！</span>';
+                dinoStatus.innerHTML = `<span class="lang-vi">${label.vi}</span><span class="lang-cn">${label.cn}</span>`;
             }
         } else {
-            if (dinoChar) dinoChar.classList.remove('grown');
+            if (dinoChar) {
+                dinoChar.classList.remove('grown');
+                dinoChar.style.transform = '';
+            }
             if (dinoAura) dinoAura.classList.remove('active');
             if (dinoStatus) {
                 dinoStatus.classList.remove('grown');
@@ -1422,7 +1488,7 @@ class ItemManager {
         empty.style.display = 'none';
         list.style.display = 'flex';
         list.innerHTML = myHistory.slice(0, 20).map(item => {
-            const icon = item.type === 'weather' ? '🌦️' : item.type === 'time' ? '🕐' : item.type === 'flow' ? '⏳' : item.type === 'dinoGrow' ? '🦖' : '📢';
+            const icon = item.type === 'weather' ? '🌦️' : item.type === 'time' ? '🕐' : item.type === 'flow' ? '⏳' : item.type.startsWith('dino') ? '🦖' : '📢';
             const title = t.history[item.type] || item.type;
             const timeStr = formatDateTime(item.startTime);
             const statusLabel = t.status[item.status] || item.status;
@@ -1584,7 +1650,7 @@ function quickUseFlow() {
     switchTab('flow');
 }
 
-function quickUseDinoGrow() {
+function quickUseDinoGrow(sizeType) {
     switchTab('dino-grow');
 }
 
@@ -1597,8 +1663,8 @@ function useTimeCard() {
     if (window.itemManager) window.itemManager.useTimeCard();
 }
 
-function useDinoGrowCard() {
-    if (window.itemManager) window.itemManager.useDinoGrowCard();
+function useDinoSizeCard(sizeType) {
+    if (window.itemManager) window.itemManager.useDinoSizeCard(sizeType);
 }
 
 function adjustTime(delta) {
