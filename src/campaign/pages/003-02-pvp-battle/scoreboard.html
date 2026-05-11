@@ -673,7 +673,7 @@ const DEFAULT_WEEKLY_DATA = {
       results: {
         'asula|nini':'nini',
         'CoBeChimTO|nini':'nini',
-        'asula|CoBeChimTO':'asula'
+        'CoBeChimTO|asula':'asula'
       },
       schedule: [
         {p1:'chip',p2:'CoBeChimTO'},{p1:'JUDI45',p2:'maymay'},{p1:'nini',p2:'CoBeChimTO'},{p1:'nini',p2:'JUDI45'},
@@ -2057,7 +2057,7 @@ function renderWeekly() {
         cardClass = 'done';
         let winLabel = '✓ ' + escapeHtml(winner) + ' ' + t('winBtn');
         // 临时缺席标记：CoBeChimTO 缺席 vs asula
-        if (key === 'asula|CoBeChimTO' && winner === 'asula') {
+        if (key === 'CoBeChimTO|asula' && winner === 'asula') {
           winLabel += ' <span style="font-size:11px;color:var(--text2);">(CoBeChimTO 缺席)</span>';
         }
         headerRight = '<span class="schedule-status-win">' + winLabel + '</span>' +
