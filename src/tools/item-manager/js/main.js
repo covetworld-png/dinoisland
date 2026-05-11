@@ -199,7 +199,7 @@ const I18N = {
         busy: 'Đang bận',
         conflictWeather: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Tiết, còn lại ${time}`,
         conflictTime: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Gian, còn lại ${time}`,
-        conflictDinoGrow: (name, time) => `Ngườ chơi ${name} đang sử dụng Thẻ tăng trưởng, còn lại ${time}`,
+        conflictDinoGrow: (name, time) => `Ngườ chơi ${name} đang sử dụng Khủng Long +50%, còn lại ${time}`,
         noItem: 'Không đủ đạo cụ',
         connectingServer: 'Đang kết nối server...',
         serverErrorConflict: 'Server: Có ngườ chơi khác đang sử dụng đạo cụ này, vui lòng thử lại sau',
@@ -219,7 +219,7 @@ const I18N = {
             weather: 'Thẻ Thời Tiết',
             time: 'Thẻ Thời Gian',
             announcement: 'Thông báo',
-            dinoGrow: 'Thẻ tăng trưởng'
+            dinoGrow: 'Khủng Long +50%'
         },
         status: {
             pending_review: 'Chờ duyệt',
@@ -257,7 +257,7 @@ const I18N = {
         conflictFlow: (name, time) => `玩家 ${name} 正在使用时间流动卡，剩余 ${time}`,
         conflictFlowByTime: (time) => `时间卡正在使用中 (${time})，无法启动时间流动`,
         conflictTimeByFlow: (time) => `时间流动正在运行中 (${time})，无法使用时间卡`,
-        conflictDinoGrow: (name, time) => `玩家 ${name} 正在使用恐龙变大卡，剩余 ${time}`,
+        conflictDinoGrow: (name, time) => `玩家 ${name} 正在使用仅限恐龙变大 50%，剩余 ${time}`,
         noItem: '道具不足',
         connectingServer: '正在连接服务端...',
         serverErrorConflict: '服务端返回：有其他玩家正在使用该道具，请稍后再试',
@@ -278,7 +278,7 @@ const I18N = {
             time: '时间卡',
             announcement: '全服公告',
             flow: '时间流动卡',
-            dinoGrow: '恐龙变大卡'
+            dinoGrow: '仅限恐龙变大 50%'
         },
         status: {
             pending_review: '待审核',
