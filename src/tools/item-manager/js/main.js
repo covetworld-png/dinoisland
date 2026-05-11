@@ -220,7 +220,7 @@ const I18N = {
             time: 'Thẻ Thời Gian',
             announcement: 'Thông báo',
             dinoGrow50: 'Khủng Long +50%',
-            dinoGrow100: 'Khủng Long x2',
+            dinoGrow100: 'Khủng Long +100%',
             dinoShrink50: 'Khủng Long -50%'
         },
         status: {
@@ -281,7 +281,7 @@ const I18N = {
             announcement: '全服公告',
             flow: '时间流动卡',
             dinoGrow50: '仅限恐龙变大 50%',
-            dinoGrow100: '恐龙变大 100%',
+            dinoGrow100: '恐龙+100%',
             dinoShrink50: '恐龙变小 50%'
         },
         status: {
