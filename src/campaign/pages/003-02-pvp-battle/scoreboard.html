@@ -2053,12 +2053,17 @@ function renderWeekly() {
       let p2WinBtn = '';
       let p1NameColor = getColor(s.p1);
       let p2NameColor = getColor(s.p2);
+      let p1AbsentTag = '';
+      let p2AbsentTag = '';
+      const absentBadge = '<span style="font-size:10px;color:var(--danger);margin-left:4px;font-weight:600;">❌缺席</span>';
       if (done) {
         cardClass = 'done';
         let winLabel = '✓ ' + escapeHtml(winner) + ' ' + t('winBtn');
         // 临时缺席标记：CoBeChimTO 缺席 vs asula
         if (key === 'CoBeChimTO|asula' && winner === 'asula') {
           winLabel += ' <span style="font-size:11px;color:var(--text2);">(CoBeChimTO 缺席)</span>';
+          if (s.p1 === 'CoBeChimTO') p1AbsentTag = absentBadge;
+          if (s.p2 === 'CoBeChimTO') p2AbsentTag = absentBadge;
         }
         headerRight = '<span class="schedule-status-win">' + winLabel + '</span>' +
           '<button class="schedule-del-btn" onclick="removeWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('btnDel') + '</button>';
@@ -2069,6 +2074,8 @@ function renderWeekly() {
         headerRight = '<span class="schedule-status-skip">' + t('absentLabel') + '</span>';
         p1NameColor = 'var(--text2)';
         p2NameColor = 'var(--text2)';
+        if (p1Absent) p1AbsentTag = absentBadge;
+        if (p2Absent) p2AbsentTag = absentBadge;
       } else {
         p1WinBtn = '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
         p2WinBtn = '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
@@ -2083,14 +2090,18 @@ function renderWeekly() {
         '<div class="schedule-body">' +
           '<div class="side left">' + p1WinBtn +
             '<div style="display:flex;flex-direction:column;min-width:0;">' +
-              '<span class="schedule-name" style="color:' + p1NameColor + '">' + escapeHtml(s.p1) + '</span>' +
+              '<div style="display:flex;align-items:center;min-width:0;">' +
+                '<span class="schedule-name" style="color:' + p1NameColor + '">' + escapeHtml(s.p1) + '</span>' + p1AbsentTag +
+              '</div>' +
               (p1Acc ? '<span class="schedule-account">' + escapeHtml(p1Acc) + '</span>' : '') +
             '</div>' +
           '</div>' +
           '<span class="schedule-vs">VS</span>' +
           '<div class="side right">' +
             '<div style="display:flex;flex-direction:column;align-items:flex-end;min-width:0;">' +
-              '<span class="schedule-name" style="color:' + p2NameColor + '">' + escapeHtml(s.p2) + '</span>' +
+              '<div style="display:flex;align-items:center;min-width:0;">' +
+                '<span class="schedule-name" style="color:' + p2NameColor + '">' + escapeHtml(s.p2) + '</span>' + p2AbsentTag +
+              '</div>' +
               (p2Acc ? '<span class="schedule-account">' + escapeHtml(p2Acc) + '</span>' : '') +
             '</div>' + p2WinBtn +
           '</div>' +
