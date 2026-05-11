@@ -219,9 +219,9 @@ const I18N = {
             weather: 'Thẻ Thời Tiết',
             time: 'Thẻ Thời Gian',
             announcement: 'Thông báo',
-            dinoGrow50: 'Kích thước +50%',
-            dinoGrow100: 'Kích thước +100%',
-            dinoShrink50: 'Kích thước -50%'
+            dinoGrow50: 'Khủng Long +50%',
+            dinoGrow100: 'Khủng Long +100%',
+            dinoShrink50: 'Khủng Long -50%'
         },
         status: {
             pending_review: 'Chờ duyệt',
@@ -280,9 +280,9 @@ const I18N = {
             time: '时间卡',
             announcement: '全服公告',
             flow: '时间流动卡',
-            dinoGrow50: '体型+50%',
-            dinoGrow100: '体型+100%',
-            dinoShrink50: '体型-50%'
+            dinoGrow50: '仅限恐龙变大 50%',
+            dinoGrow100: '恐龙+100%',
+            dinoShrink50: '恐龙变小 50%'
         },
         status: {
             pending_review: '待审核',
@@ -1070,9 +1070,9 @@ class ItemManager {
                             const dinoStatus = document.getElementById('dino-status');
                             const sizeType = lock.sizeType || 'grow50';
                             const sizeLabels = {
-                                grow50: { vi: 'Đã tăng kích thước 50%!', cn: '体型已增大50%！' },
-                                grow100: { vi: 'Đã tăng gấp đôi kích thước!', cn: '体型已翻倍！' },
-                                shrink50: { vi: 'Đã giảm 50% kích thước!', cn: '体型已缩小50%！' }
+                                grow50: { vi: 'Khủng long đã tăng kích thước 50%!', cn: '恐龙已增大50%！' },
+                                grow100: { vi: 'Khủng long đã tăng gấp đôi kích thước!', cn: '恐龙体型已翻倍！' },
+                                shrink50: { vi: 'Khủng long đã giảm 50% kích thước!', cn: '恐龙已缩小50%！' }
                             };
                             const label = sizeLabels[sizeType];
                             if (dinoChar) {
@@ -1385,9 +1385,9 @@ class ItemManager {
         if (lock) {
             const sizeType = lock.sizeType || 'grow50';
             const sizeLabels = {
-                grow50: { vi: 'Đã tăng kích thước 50%!', cn: '体型已增大50%！' },
-                grow100: { vi: 'Đã tăng gấp đôi kích thước!', cn: '体型已翻倍！' },
-                shrink50: { vi: 'Đã giảm 50% kích thước!', cn: '体型已缩小50%！' }
+                grow50: { vi: 'Khủng long đã tăng kích thước 50%!', cn: '恐龙已增大50%！' },
+                grow100: { vi: 'Khủng long đã tăng gấp đôi kích thước!', cn: '恐龙体型已翻倍！' },
+                shrink50: { vi: 'Khủng long đã giảm 50% kích thước!', cn: '恐龙已缩小50%！' }
             };
             const label = sizeLabels[sizeType];
             if (dinoChar) {
