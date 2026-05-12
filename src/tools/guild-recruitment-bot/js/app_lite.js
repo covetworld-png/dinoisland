@@ -138,11 +138,10 @@ function formatDateTime(value) {
 }
 
 function formatTimeOnly(hh, mm) {
-  const h = parseInt(hh, 10);
   const m = parseInt(mm, 10);
   if (m === 0) {
-    // 整点：vi 用 H 后缀，zh 用 时 后缀
-    return currentLang === 'vi' ? `${h}H` : `${h}时`;
+    // 整点：vi 用 HHH，zh 用 HH时（保留前导零）
+    return currentLang === 'vi' ? `${hh}H` : `${hh}时`;
   }
   return `${hh}:${mm}`;
 }
