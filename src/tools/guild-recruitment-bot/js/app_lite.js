@@ -238,10 +238,8 @@ function renderTable() {
   else if (currentFilter === 'online') filtered = players.filter(p => p.onlineStatus === 'online');
 
   filtered.sort((a, b) => {
-    const aGs = a.guildStatus || a.guild_id || '';
-    const bGs = b.guildStatus || b.guild_id || '';
-    const aHasGuild = String(aGs).includes('has_guild') || (String(aGs) !== '' && String(aGs) !== ' / ');
-    const bHasGuild = String(bGs).includes('has_guild') || (String(bGs) !== '' && String(bGs) !== ' / ');
+    const aHasGuild = (a.guildStatus === 'has_guild') || (!!a.guild_id && a.guild_id !== '' && a.guild_id !== ' / ');
+    const bHasGuild = (b.guildStatus === 'has_guild') || (!!b.guild_id && b.guild_id !== '' && b.guild_id !== ' / ');
     if (!aHasGuild && bHasGuild) return -1;
     if (aHasGuild && !bHasGuild) return 1;
     return 0;
@@ -276,6 +274,7 @@ function renderTable() {
     // 判断是否有公会（兼容 mock guildStatus 和 服务端 guild_id）
     const hasGuildFn = (gs, gn) => {
       if (gs === 'has_guild') return true;
+      if (gs === 'no_guild') return false;
       if (!gs || gs === '' || gs === ' / ') return false;
       return true;
     };
