@@ -126,7 +126,7 @@ function formatDateTime(value) {
   if (serverMatch) {
     const [, y, m, d, hh] = serverMatch;
     const datePart = currentLang === 'vi' ? `${d}/${m}/${y}` : `${y}-${m}-${d}`;
-    const timePart = currentLang === 'vi' ? `${hh}H` : `${hh}时`;
+    const timePart = `${hh}H`;
     return `${datePart} ${timePart}`;
   }
   // 处理完整日期时间：YYYY-MM-DD HH:mm:ss
@@ -134,13 +134,13 @@ function formatDateTime(value) {
   if (fullMatch) {
     const [, y, m, d, hh, mm] = fullMatch;
     const datePart = currentLang === 'vi' ? `${d}/${m}/${y}` : `${y}-${m}-${d}`;
-    const timePart = currentLang === 'vi' ? `${hh}H` : `${hh}时`;
+    const timePart = `${hh}H`;
     return `${datePart} ${timePart}`;
   }
   // 处理只有时间：HH:mm:ss
   const timeMatch = value.match(/^(\d{2}):(\d{2}):\d{2}$/);
   if (timeMatch) {
-    return currentLang === 'vi' ? `${timeMatch[1]}H` : `${timeMatch[1]}时`;
+    return `${timeMatch[1]}H`;
   }
   return value;
 }
