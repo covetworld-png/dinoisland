@@ -543,19 +543,19 @@
   <div class="stats-section">
     <h2 data-i18n="rulesTitle">📋 积分规则</h2>
     <div class="card" style="margin-bottom:10px;">
-      <h3 style="color:var(--gold);font-size:15px;margin-bottom:8px;" data-i18n="rulesDaily">日赛积分</h3>
+      <h3 style="color:var(--gold);font-size:15px;margin-bottom:8px;" data-i18n="rulesPreliminary">初赛规则</h3>
       <ul style="font-size:13px;color:var(--text2);line-height:1.8;padding-left:18px;">
-        <li data-i18n="ruleWin1">每胜一场积 <span style="color:var(--success);font-weight:600;">1 分</span>，败一场不积分</li>
-        <li data-i18n="ruleWin2">日冠军 = 当日胜场积分最高者</li>
-        <li data-i18n="ruleWin3">同分判定：① 胜率更高 → ② 总场次更少（效率优先）→ ③ 并列</li>
+        <li data-i18n="rulePre1">败者<span style="color:var(--success);font-weight:600;">无淘汰</span>，可继续参赛</li>
+        <li data-i18n="rulePre2">连胜 <span style="color:var(--warn);font-weight:600;">3 场</span> → 成为种子选手，标记后<span style="color:var(--danger);font-weight:600;">不能再参加初赛</span></li>
+        <li data-i18n="rulePre3">累计产生 <span style="color:var(--gold);font-weight:600;">6 名种子</span>后，初赛结束，进入复赛</li>
       </ul>
     </div>
     <div class="card" style="margin-bottom:10px;">
-      <h3 style="color:var(--warn);font-size:15px;margin-bottom:8px;" data-i18n="rulesElim">日赛淘汰机制</h3>
+      <h3 style="color:var(--mist-light);font-size:15px;margin-bottom:8px;" data-i18n="rulesFinal">复赛规则</h3>
       <ul style="font-size:13px;color:var(--text2);line-height:1.8;padding-left:18px;">
-        <li data-i18n="ruleElim1">单日累计败 <span style="color:var(--danger);font-weight:600;">3 场</span> → 当日淘汰，不可再参赛</li>
-        <li data-i18n="ruleElim2">连胜 <span style="color:var(--warn);font-weight:600;">3 场</span> → 强制下场，回队尾重新排队</li>
-        <li data-i18n="ruleElim3">本周已获日冠军者 → 禁止再次参加本周日赛</li>
+        <li data-i18n="ruleFinal1">6 名种子选手进行<span style="color:var(--success);font-weight:600;">单循环赛</span>（15 场）</li>
+        <li data-i18n="ruleFinal2">每胜一场积 <span style="color:var(--success);font-weight:600;">1 分</span>，败 0 分，无平局</li>
+        <li data-i18n="ruleFinal3">日冠军 = <span style="color:var(--gold);font-weight:600;">复赛积分最高者</span></li>
       </ul>
     </div>
     <div class="card">
@@ -760,12 +760,13 @@ const I18N = {
     csvMatch: '场次', csvWinner: '胜', csvLoser: '败', csvNote: '备注',
     csvRank: '排名', csvName: '昵称', csvWins: '胜场', csvLosses: '败场',
     csvTotal: '总场次', csvRate: '胜率',
-    ruleWin1: '每胜一场积 1 分，败一场不积分',
-    ruleWin2: '日冠军 = 当日胜场积分最高者',
-    ruleWin3: '同分判定：① 胜率更高 → ② 总场次更少（效率优先）→ ③ 并列',
-    ruleElim1: '单日累计败 3 场 → 当日淘汰，不可再参赛',
-    ruleElim2: '连胜 3 场 → 强制下场，回队尾重新排队',
-    ruleElim3: '本周已获日冠军者 → 禁止再次参加本周日赛',
+    rulesPreliminary: '初赛规则', rulesFinal: '复赛规则',
+    rulePre1: '败者无淘汰，可继续参赛',
+    rulePre2: '连胜 3 场 → 成为种子选手，标记后不能再参加初赛',
+    rulePre3: '累计产生 6 名种子后，初赛结束，进入复赛',
+    ruleFinal1: '6 名种子选手进行单循环赛（15 场）',
+    ruleFinal2: '每胜一场积 1 分，败 0 分，无平局',
+    ruleFinal3: '日冠军 = 复赛积分最高者',
     ruleWeek1: '仅限本周日冠军参加，单循环赛制',
     ruleWeek2: '每胜一场积 1 分，败 0 分，无平局',
     ruleWeek3: '同分判定：① 相互对战胜负 → ② 本周累计胜场总数 → ③ 并列',
