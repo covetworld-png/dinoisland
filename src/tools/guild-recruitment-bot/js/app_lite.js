@@ -51,7 +51,7 @@ const i18n = {
   }
 };
 
-let currentLang = 'zh';
+let currentLang = localStorage.getItem('lang') || 'zh';
 
 function t(key, params = {}) {
   let text = i18n[currentLang][key] || key;
@@ -61,6 +61,7 @@ function t(key, params = {}) {
 
 function switchLang(lang) {
   currentLang = lang;
+  localStorage.setItem('lang', lang);
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === lang);
   });
