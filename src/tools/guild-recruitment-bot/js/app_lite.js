@@ -121,29 +121,28 @@ function formatDate(dateStr) {
 
 function formatDateTime(value) {
   if (!value) return '-';
+  // 处理服务端格式：YYYY-MM-DD HHh（如 2026-05-10 00h）
+  const serverMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2})h$/i);
+  if (serverMatch) {
+    const [, y, m, d, hh] = serverMatch;
+    const datePart = currentLang === 'vi' ? `${d}/${m}/${y}` : `${y}-${m}-${d}`;
+    const timePart = currentLang === 'vi' ? `${hh}H` : `${hh}时`;
+    return `${datePart} ${timePart}`;
+  }
   // 处理完整日期时间：YYYY-MM-DD HH:mm:ss
   const fullMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/);
   if (fullMatch) {
-    const [, y, m, d, hh, mm, ss] = fullMatch;
+    const [, y, m, d, hh, mm] = fullMatch;
     const datePart = currentLang === 'vi' ? `${d}/${m}/${y}` : `${y}-${m}-${d}`;
-    const timePart = formatTimeOnly(hh, mm);
+    const timePart = currentLang === 'vi' ? `${hh}H` : `${hh}时`;
     return `${datePart} ${timePart}`;
   }
   // 处理只有时间：HH:mm:ss
   const timeMatch = value.match(/^(\d{2}):(\d{2}):\d{2}$/);
   if (timeMatch) {
-    return formatTimeOnly(timeMatch[1], timeMatch[2]);
+    return currentLang === 'vi' ? `${timeMatch[1]}H` : `${timeMatch[1]}时`;
   }
   return value;
-}
-
-function formatTimeOnly(hh, mm) {
-  const m = parseInt(mm, 10);
-  if (m === 0) {
-    // 整点：vi 用 HHH，zh 用 HH时（保留前导零）
-    return currentLang === 'vi' ? `${hh}H` : `${hh}时`;
-  }
-  return `${hh}:${mm}`;
 }
 
 // ===== Auth Error =====
@@ -239,8 +238,10 @@ function renderTable() {
   else if (currentFilter === 'online') filtered = players.filter(p => p.onlineStatus === 'online');
 
   filtered.sort((a, b) => {
-    const aHasGuild = String(a.guildStatus).includes('has_guild');
-    const bHasGuild = String(b.guildStatus).includes('has_guild');
+    const aGs = a.guildStatus || a.guild_id || '';
+    const bGs = b.guildStatus || b.guild_id || '';
+    const aHasGuild = String(aGs).includes('has_guild') || (String(aGs) !== '' && String(aGs) !== ' / ');
+    const bHasGuild = String(bGs).includes('has_guild') || (String(bGs) !== '' && String(bGs) !== ' / ');
     if (!aHasGuild && bHasGuild) return -1;
     if (aHasGuild && !bHasGuild) return 1;
     return 0;
@@ -264,17 +265,28 @@ function renderTable() {
       `<span class="server-badge server-${s}">${s}</span>`
     ).join('<span class="server-sep">/</span>');
 
-    // 昵称：双服按 / 分隔显示，不去重
-    const nicknameDisplay = nicknames.length > 1
-      ? `<span class="nickname-multi">${nicknames.join(' / ')}</span>`
-      : nicknames[0];
+    // 昵称：双服按 / 分隔显示，不去重；空昵称显示为 "—"
+    const validNicknames = nicknames.filter(n => n.trim() !== '');
+    const nicknameDisplay = validNicknames.length === 0
+      ? '—'
+      : validNicknames.length > 1
+        ? `<span class="nickname-multi">${validNicknames.join(' / ')}</span>`
+        : validNicknames[0];
+
+    // 判断是否有公会（兼容 mock guildStatus 和 服务端 guild_id）
+    const hasGuildFn = (gs, gn) => {
+      if (gs === 'has_guild') return true;
+      if (!gs || gs === '' || gs === ' / ') return false;
+      return true;
+    };
 
     // 公会状态：多服务器时分别显示
     let guildBadge;
+    const actualGuildStatus = p.guildStatus || p.guild_id || '';
+    const actualGuildName = p.guildName || p.guild_name || '';
     if (servers.length > 1 && guildStatuses.length > 1) {
-      // 多服务器：每服一个状态
       const statusTexts = guildStatuses.map((gs, i) => {
-        const has = gs === 'has_guild';
+        const has = hasGuildFn(gs, guildNames[i]);
         const s = servers[i] || servers[0];
         const name = guildNames[i] || '';
         if (has) {
@@ -284,18 +296,19 @@ function renderTable() {
       });
       guildBadge = `<span class="guild-multi">${statusTexts.join('')}</span>`;
     } else {
-      const hasGuild = p.guildStatus === 'has_guild';
+      const hasGuild = hasGuildFn(actualGuildStatus, actualGuildName);
       if (hasGuild) {
-        guildBadge = `<span class="status-badge status-joined">${t('guild_yes')}${p.guildName ? ' · ' + p.guildName : ''}</span>`;
+        guildBadge = `<span class="status-badge status-joined">${t('guild_yes')}${actualGuildName ? ' · ' + actualGuildName : ''}</span>`;
       } else {
         guildBadge = `<span class="status-badge status-online">${t('guild_no')}</span>`;
       }
     }
 
-    const tagClass = p.tag === 'new' ? 'tag-new' : 'tag-returning';
-    const tagText = p.tag === 'new' ? t('tag_new') : t('tag_returning');
-    const loginTimeBadge = `<span style="color:var(--text-secondary);font-size:12px;">${formatDateTime(p.onlineSince)}</span>`;
-    const anyHasGuild = guildStatuses.includes('has_guild');
+    const tagKey = p.tag === 'new' ? 'new' : 'returning';
+    const tagClass = tagKey === 'new' ? 'tag-new' : 'tag-returning';
+    const tagText = tagKey === 'new' ? t('tag_new') : t('tag_returning');
+    const loginTimeBadge = `<span style="color:var(--text-secondary);font-size:12px;">${formatDateTime(p.onlineSince || p.last_active_time)}</span>`;
+    const anyHasGuild = guildStatuses.some(gs => hasGuildFn(gs, ''));
     const rowClass = anyHasGuild ? 'strikethrough' : '';
     const copyBtn = `<button class="btn-copy-id" onclick="copyPlayerId('${p.id}');event.stopPropagation();" title="${t('toast_copy')}">复制</button>`;
 
