@@ -350,7 +350,7 @@ function refreshData() {
     const servers = ['Q','K'];
     const newId = 10000 + Math.floor(Math.random() * 89999);
     const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+    const timeStr = `${now.getHours().toString().padStart(2,'0')}:00:00`;
     const isNewUser = Math.random() > 0.4;
 
     players.unshift({
