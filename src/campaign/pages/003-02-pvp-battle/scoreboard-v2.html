@@ -1,0 +1,3206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">日赛记分板 2.0 · PVP 巅峰对决</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a1a15;
+    --card: rgba(10,30,25,0.9);
+    --border: rgba(74,154,138,0.25);
+    --gold: #FFD700;
+    --gold-dim: rgba(255,215,0,0.15);
+    --mist: #4a9a8a;
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --success: #10b981;
+  }
+  [data-theme="light"] {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --border: #e7e5e4;
+    --gold: #b45309;
+    --gold-dim: rgba(180,83,9,0.1);
+    --mist: #57534e;
+    --text: #1c1917;
+    --text2: #78716c;
+    --danger: #dc2626;
+    --warn: #d97706;
+    --success: #059669;
+  }
+  [data-theme="light"] body::before {
+    background: radial-gradient(ellipse at 20% 0%, rgba(99,102,241,0.04) 0%, transparent 50%);
+  }
+  [data-theme="light"] .controls button:not(.server-btn) {
+    background: #4f46e5; color: #fff;
+  }
+  [data-theme="light"] .controls button.secondary {
+    background: transparent; border-color: #d6d3d1; color: #78716c;
+  }
+  [data-theme="light"] .controls input,
+  [data-theme="light"] .controls select,
+  [data-theme="light"] .input-row input,
+  [data-theme="light"] .champion-box input {
+    background: #f5f5f4; border-color: #e7e5e4; color: #1c1917;
+  }
+  [data-theme="light"] .theme-toggle,
+  [data-theme="light"] .lang-toggle {
+    background: #fff; border-color: #e7e5e4; color: #57534e;
+  }
+  [data-theme="light"] .btn-del {
+    background: rgba(239,68,68,0.08); border-color: rgba(220,38,38,0.4); color: #dc2626;
+    width:32px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center;
+  }
+  [data-theme="light"] .btn-add {
+    background: #4f46e5; color: #fff; font-weight:700;
+  }
+  [data-theme="light"] .savebar button {
+    background: #4f46e5; color: #fff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.5;
+    min-height:100vh;
+    padding-bottom:40px;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background: radial-gradient(ellipse at 20% 0%, rgba(74,154,138,0.07) 0%, transparent 50%);
+    pointer-events:none; z-index:0;
+  }
+  .wrap { max-width:1400px; margin:0 auto; padding:20px 24px; position:relative; z-index:1; }
+  .theme-toggle {
+    position:absolute; top:20px; right:24px;
+    background:var(--card); border:1px solid var(--border); color:var(--text);
+    width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:18px;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .2s;
+  }
+  .theme-toggle:hover { transform:scale(1.1); }
+  .lang-toggle {
+    position:absolute; top:20px; right:72px;
+    background:var(--card); border:1px solid var(--border); color:var(--text);
+    width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:18px;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .2s;
+  }
+  .lang-toggle:hover { transform:scale(1.1); }
+
+  .top-actions {
+    display:flex; gap:8px; justify-content:flex-end;
+    margin-top:-6px; margin-bottom:10px;
+  }
+  .text-btn {
+    background:transparent; border:1px solid var(--border); color:var(--text2);
+    font-size:12px; font-weight:500; padding:4px 10px; border-radius:6px;
+    cursor:pointer; display:inline-flex; align-items:center; gap:4px;
+    transition: all .2s;
+  }
+  .text-btn:hover {
+    background:var(--card); color:var(--text);
+  }
+  [data-theme="light"] .text-btn {
+    border-color:#e7e5e4; color:#78716c;
+  }
+  [data-theme="light"] .text-btn:hover {
+    background:#fff; color:#1c1917;
+  }
+
+  /* Header */
+  .header { text-align:center; padding:20px 0 10px; }
+  .header h1 { font-size:22px; font-weight:700; color:var(--gold); letter-spacing:1px; }
+  [data-theme="light"] .header h1 { color:#4f46e5; }
+  .header .meta { color:var(--text2); font-size:13px; margin-top:4px; }
+
+  /* Controls */
+  .controls {
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:14px 16px; margin-top:16px; backdrop-filter:blur(10px);
+    position:relative; z-index:20;
+  }
+  .controls label { font-size:13px; color:var(--text2); }
+
+  .controls input, .controls select {
+    background:rgba(0,0,0,0.3); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:6px 10px; font-size:13px; outline:none;
+  }
+  .controls button:not(.server-btn) {
+    background:linear-gradient(135deg, var(--gold), var(--warn));
+    border:none; color:#0a1a15; font-weight:700; padding:8px 18px;
+    border-radius:8px; cursor:pointer; font-size:13px;
+  }
+  .controls button.secondary {
+    background:transparent; border:1px solid var(--border); color:var(--mist);
+  }
+  .sheet-info-wrap { position:relative; margin-left:auto; }
+  .sheet-info {
+    font-size:13px; color:var(--text2);
+    background:rgba(74,154,138,0.1); padding:4px 12px; border-radius:6px;
+    cursor:pointer; display:inline-flex; align-items:center; gap:4px; user-select:none;
+  }
+  .sheet-info::after { content:'▼'; font-size:9px; opacity:0.6; }
+  .sheet-info.open::after { content:'▲'; }
+  [data-theme="light"] .sheet-info {
+    background:rgba(74,154,138,0.06); color:#57534e;
+  }
+  .sheet-dropdown {
+    position:absolute; right:0; top:calc(100% + 4px);
+    background:var(--bg); border:1px solid var(--border);
+    border-radius:8px; padding:6px; min-width:180px;
+    z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.5);
+  }
+  .sheet-dropdown-item {
+    padding:6px 10px; border-radius:6px; cursor:pointer;
+    font-size:12px; color:var(--text2);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .sheet-dropdown-item:hover {
+    background:rgba(74,154,138,0.1); color:var(--mist);
+  }
+  .sheet-dropdown-item.active {
+    background:linear-gradient(135deg, var(--gold), var(--warn)); color:#0a1a15; font-weight:600;
+  }
+  [data-theme="light"] .sheet-dropdown-item.active {
+    background:#4f46e5; color:#fff;
+  }
+  [data-theme="light"] .sheet-dropdown {
+    background:#fff; border-color:#e7e5e4;
+  }
+  [data-theme="light"] .sheet-dropdown-item:hover {
+    background:rgba(74,154,138,0.06);
+  }
+  .modal-overlay {
+    position:fixed; top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center;
+    z-index:100;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--panel); border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px; padding:24px; width:320px; max-width:90vw;
+  }
+  .modal h3 { margin:0 0 16px; font-size:16px; color:var(--mist); }
+  .modal-body { display:flex; flex-direction:column; gap:12px; }
+  .modal-body label { font-size:13px; color:var(--text2); }
+  .date-picker-wrap, .weekly-date-wrap {
+    position:relative; cursor:pointer;
+    background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.08);
+    border-radius:6px; padding:8px 12px; display:flex; align-items:center;
+  }
+  .date-picker-wrap::before, .weekly-date-wrap::before {
+    content:'📅'; font-size:15px; margin-right:8px;
+  }
+  .modal-body input[type="date"], .weekly-date-wrap input[type="date"] {
+    background:transparent; border:none; color:var(--mist); font-size:14px;
+    outline:none; width:100%; cursor:pointer;
+  }
+  .modal-body input[type="date"]::-webkit-calendar-picker-indicator,
+  .weekly-date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity:0; cursor:pointer; position:absolute; right:0; top:0;
+    width:100%; height:100%;
+  }
+  .modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
+  .modal-footer button { padding:8px 16px; border-radius:6px; border:none; cursor:pointer; font-size:13px; }
+  .modal-footer button.secondary {
+    background:transparent; border:1px solid var(--border); color:var(--text2);
+  }
+  .modal-footer button:not(.secondary) {
+    background:linear-gradient(135deg, var(--gold), var(--warn)); color:#0a1a15; font-weight:700;
+  }
+  [data-theme="light"] .modal-footer button:not(.secondary) {
+    background:#4f46e5; color:#fff;
+  }
+  [data-theme="light"] .modal { background:#fff; border-color:rgba(0,0,0,0.08); }
+  [data-theme="light"] .modal-body .date-picker-wrap,
+  [data-theme="light"] .weekly-date-wrap {
+    background:#fff; border-color:rgba(0,0,0,0.12);
+  }
+  [data-theme="light"] .modal-body input[type="date"],
+  [data-theme="light"] .weekly-date-wrap input[type="date"] {
+    color:#1c1917;
+  }
+  [data-theme="light"] #weeklyDate {
+    background:#f5f5f4 !important; border-color:#e7e5e4 !important; color:#1c1917 !important;
+  }
+  [data-theme="light"] .modal-footer button.secondary { border-color:#e7e5e4; color:#78716c; }
+  .data-label { font-size:12px; color:var(--text2); margin-bottom:6px; }
+  .data-tag {
+    display:inline-block; font-size:12px; padding:4px 10px; border-radius:5px;
+    background:var(--card); border:1px solid var(--border); color:var(--text2);
+    cursor:pointer; margin:0 4px 4px 0; transition:all .2s;
+  }
+  .data-tag:hover { background:rgba(74,154,138,0.1); border-color:var(--mist); }
+  .data-tag.active {
+    background:linear-gradient(135deg, var(--gold), var(--warn)); color:#0a1a15; font-weight:600; border-color:transparent;
+  }
+  [data-theme="light"] .data-tag { background:#fff; border-color:#e7e5e4; color:#78716c; }
+  [data-theme="light"] .data-tag:hover { background:rgba(79,70,229,0.06); border-color:#4f46e5; color:#4f46e5; }
+  [data-theme="light"] .data-tag.active { background:#4f46e5; color:#fff; }
+  .server-toggle { display:flex; gap:6px; }
+  .server-btn {
+    background:#1e3d36; border:none; color:#4a7a70;
+    padding:6px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:500;
+    transition: all .2s;
+  }
+  .server-btn.active {
+    background:linear-gradient(135deg, var(--gold), var(--warn)); color:#0a1a15; font-weight:800;
+    box-shadow: 0 0 12px rgba(255,183,77,0.5), 0 2px 6px rgba(0,0,0,0.3);
+    transform: scale(1.06);
+  }
+  [data-theme="light"] .server-btn {
+    background:#e7e5e4; border:1px solid #a8a29e; color:#44403c;
+  }
+  [data-theme="light"] .server-btn.active {
+    background:#4f46e5; color:#fff; border-color:#4f46e5;
+    box-shadow: 0 0 12px rgba(79,70,229,0.3);
+  }
+
+  /* Table */
+  .table-wrap {
+    margin-top:16px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; overflow:auto; backdrop-filter:blur(10px);
+  }
+  table { width:100%; border-collapse:collapse; font-size:14px; min-width:800px; }
+  th {
+    background:rgba(74,154,138,0.12); color:var(--gold); font-weight:600;
+    text-align:left; padding:10px 12px; border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  td { padding:10px 12px; border-bottom:1px solid rgba(74,154,138,0.12); color:var(--text2); white-space:nowrap; }
+  tr:last-child td { border-bottom:none; }
+  .col-match { width:1px; }
+  .col-alert { width:1px; }
+  .col-note  { width:250px; }
+  .col-action { width:1px; }
+  th:nth-of-type(2), th:nth-of-type(3) { width:1px; }
+  .nickname { font-weight:600; font-size:15px; }
+  .alert-tag {
+    display:inline-block; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:500;
+    white-space:nowrap;
+  }
+  .alert-streak { background:rgba(245,158,11,0.15); color:var(--warn); border:1px solid rgba(245,158,11,0.3); }
+  [data-theme="light"] .alert-streak { background:rgba(79,70,229,0.08); color:#4f46e5; border-color:rgba(79,70,229,0.2); }
+  .alert-elim { background:rgba(239,68,68,0.15); color:var(--danger); border:1px solid rgba(239,68,68,0.3); }
+  .btn-del {
+    background:transparent; border:1px solid rgba(239,68,68,0.4); color:var(--danger);
+    width:32px; height:28px; border-radius:6px; cursor:pointer; font-size:12px;
+    display:inline-flex; align-items:center; justify-content:center; padding:0;
+  }
+  .btn-add {
+    background:linear-gradient(135deg, var(--gold), var(--warn)); border:none; color:#0a1a15; font-weight:700;
+    padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px;
+    white-space:nowrap;
+  }
+  .input-row { background:rgba(74,154,138,0.06); }
+  .input-row td { border-bottom:none; }
+  .input-row input {
+    width:100%; min-width:80px; background:rgba(0,0,0,0.3); border:1px solid var(--border);
+    color:var(--text); border-radius:8px; padding:8px 10px; font-size:14px; outline:none;
+  }
+  .input-row input::placeholder { color:var(--text2); }
+
+  /* Status Panel */
+  .status-panel {
+    margin-top:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px;
+  }
+  .player-chip {
+    background:var(--card); border:1px solid var(--border); border-radius:10px;
+    padding:10px 12px; text-align:center; backdrop-filter:blur(8px);
+  }
+  .player-chip .name { font-weight:600; font-size:14px; }
+  .player-chip .stats { font-size:12px; color:var(--text2); margin-top:4px; }
+  .player-chip .streak { color:var(--warn); font-weight:600; }
+  [data-theme="light"] .player-chip .streak { color:#4f46e5; }
+  .player-chip .elim { color:var(--danger); font-weight:600; }
+
+  /* Daily Stats */
+  .stats-section {
+    margin-top:20px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:20px; backdrop-filter:blur(10px);
+  }
+  .stats-section h2 { font-size:16px; color:var(--gold); margin-bottom:14px; }
+  [data-theme="light"] .stats-section h2 { color:#4f46e5; }
+  .champion-box {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:16px;
+    padding:14px; background:var(--gold-dim); border:1px solid rgba(255,215,0,0.25);
+    border-radius:12px;
+  }
+  [data-theme="light"] .champion-box {
+    background:rgba(79,70,229,0.06); border-color:rgba(79,70,229,0.15);
+  }
+  .champion-box label { font-size:14px; color:var(--gold); font-weight:600; }
+  [data-theme="light"] .champion-box label { color:#4f46e5; }
+  .champion-box input {
+    flex:1; min-width:160px; background:rgba(0,0,0,0.3); border:1px solid var(--border);
+    color:var(--text); border-radius:8px; padding:8px 12px; font-size:14px;
+  }
+  .champion-box .name { font-size:16px; font-weight:700; color:var(--gold); }
+  [data-theme="light"] .champion-box .name { color:#4f46e5; }
+
+  /* Empty state */
+  .empty { text-align:center; padding:30px; color:var(--text2); font-size:14px; }
+
+  /* Tie notice */
+  .tie-notice { color:var(--warn); font-size:13px; margin-top:8px; }
+  [data-theme="light"] .tie-notice { color:#4f46e5; }
+
+  /* Save bar */
+  .savebar { margin-top:16px; display:flex; gap:10px; justify-content:flex-end; }
+  .savebar button {
+    background:var(--mist); border:none; color:#fff; font-weight:600;
+    padding:10px 24px; border-radius:10px; cursor:pointer; font-size:14px;
+  }
+
+  /* Header switch */
+  .header-switch {
+    position:absolute; left:24px; top:20px;
+    display:flex; gap:4px;
+  }
+  .header-switch button {
+    background:transparent; border:1px solid var(--border); color:var(--text2);
+    padding:6px 12px; border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  .header-switch button.active {
+    background:var(--mist); color:#fff; border-color:var(--mist);
+  }
+  [data-theme="light"] .header-switch button {
+    border-color:#e7e5e4; color:#78716c;
+  }
+  [data-theme="light"] .header-switch button.active {
+    background:#4f46e5; color:#fff; border-color:#4f46e5;
+  }
+
+  /* Weekly view */
+  .weekly-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+  .weekly-players { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+  .player-tag { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:var(--card); border:1px solid var(--border); border-radius:8px; font-size:13px; }
+  .player-tag.absent { opacity:0.5; text-decoration:line-through; }
+  .player-tag .absent-btn { background:none; border:none; color:var(--text2); cursor:pointer; font-size:11px; padding:0; }
+  .player-tag .absent-btn:hover { color:var(--danger); }
+
+  /* Matrix */
+  .matrix-wrap { margin-top:16px; background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:auto; }
+  .matrix-wrap table { width:100%; table-layout:fixed; }
+  .matrix-wrap th, .matrix-wrap td { text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .matrix-wrap td { padding:8px 12px; }
+  .matrix-cell .vs-btn { padding:4px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text2); cursor:pointer; font-size:12px; }
+  .matrix-cell .vs-btn:hover { background:rgba(74,154,138,0.1); border-color:var(--mist); }
+  .matrix-cell .result-win { color:var(--success); font-weight:600; }
+  .matrix-cell .result-loss { color:var(--danger); font-weight:600; }
+  [data-theme="light"] .matrix-cell .vs-btn { background:#f5f5f4; border-color:#e7e5e4; }
+  [data-theme="light"] .matrix-cell .vs-btn:hover { background:rgba(79,70,229,0.06); border-color:#4f46e5; color:#4f46e5; }
+
+  .schedule-section { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .schedule-section h2 { margin:0 0 12px; font-size:15px; color:var(--mist); }
+  .schedule-list { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
+  @media (max-width: 960px) { .schedule-list { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .schedule-list { grid-template-columns: 1fr; } }
+  .schedule-card {
+    display:flex; flex-direction:column; gap:4px;
+    background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px;
+    padding:8px 18px; font-size:14px; transition: all .2s;
+  }
+  .schedule-card.done { border-left:4px solid var(--success); }
+  .schedule-card.pending { border-left:4px solid var(--gold); }
+  .schedule-card.absent { opacity:0.4; border-left:4px solid var(--text2); }
+  .schedule-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
+  .schedule-num {
+    min-width:24px; height:24px; display:flex; align-items:center; justify-content:center;
+    background:var(--gold-dim); color:var(--gold); border-radius:6px;
+    font-size:12px; font-weight:700;
+  }
+  .schedule-body { display:flex; align-items:center; gap:6px; }
+  .schedule-body .side { display:flex; align-items:center; gap:6px; flex:1; min-width:0; }
+  .schedule-body .side.left { justify-content:flex-start; }
+  .schedule-body .side.right { justify-content:flex-end; }
+  .schedule-vs { color:var(--text2); font-size:11px; font-weight:700; flex-shrink:0; }
+  .schedule-name { font-size:15px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .schedule-account { font-size:11px; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .schedule-win-btn {
+    background:var(--gold-dim); color:var(--gold); border:1px solid var(--gold);
+    border-radius:6px; padding:3px 10px; font-size:12px; font-weight:700; cursor:pointer;
+    transition: all .15s; flex-shrink:0;
+  }
+  .schedule-win-btn:hover { background:var(--gold); color:#0a1a15; }
+  .schedule-del-btn {
+    background:transparent; color:var(--danger); border:1px solid var(--danger);
+    border-radius:6px; padding:2px 8px; font-size:11px; cursor:pointer; flex-shrink:0;
+  }
+  .schedule-del-btn:hover { background:var(--danger); color:#fff; }
+  .schedule-status-win { color:var(--success); font-size:13px; font-weight:700; }
+  .schedule-status-skip { color:var(--text2); font-size:13px; font-weight:600; }
+  [data-theme="light"] .schedule-card { background:#fff; }
+  [data-theme="light"] .schedule-card.pending { border-left-color:#4f46e5; }
+  [data-theme="light"] .schedule-card.done { border-left-color:#059669; }
+  [data-theme="light"] .schedule-num { background:rgba(79,70,229,0.1); color:#4f46e5; }
+  [data-theme="light"] .schedule-win-btn { background:rgba(79,70,229,0.1); color:#4f46e5; border-color:#4f46e5; }
+  [data-theme="light"] .schedule-win-btn:hover { background:#4f46e5; color:#fff; }
+
+  .rules-section { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .rules-section h3 { margin:0 0 12px; font-size:15px; color:var(--mist); }
+  .rules-section ol { color:var(--text2); font-size:13px; margin:0; padding-left:18px; }
+  .rules-section ol li { margin-bottom:4px; }
+  [data-theme="light"] .rules-section { background:#fff; }
+  [data-theme="light"] .schedule-section { background:#fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="header-switch">
+      <button class="active" onclick="switchTab('daily')" id="tabDaily" data-i18n="tabDaily">日赛计分板</button>
+      <button onclick="switchTab('weekly')" id="tabWeekly" data-i18n="tabWeekly">周赛计分板</button>
+    </div>
+    <h1 id="mainTitle" data-i18n="title">⚔ 日赛记分板</h1>
+    <p class="meta" data-i18n="subtitle">PVP 巅峰对决 · GM 现场记分工具</p>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button class="lang-toggle" onclick="toggleLang()" id="langBtn">🇨🇳</button>
+  </div>
+
+  <input type="date" id="matchDate" style="display:none">
+  <div id="dailyView">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+    <a href="scoreboard.html" style="font-size:13px;color:var(--text2);text-decoration:none;">← <span data-i18n="backToV1">返回 1.0 模式</span></a>
+  </div>
+  <div class="top-actions">
+    <button class="text-btn" onclick="clearData()">🗑️ <span data-i18n="clearDataShort">清空</span></button>
+    <button class="text-btn" onclick="exportData()">📤 <span data-i18n="exportCSVShort">导出当日</span></button>
+    <button class="text-btn" onclick="exportAllData()">📤 <span data-i18n="exportAllShort">导出全部</span></button>
+    <button class="text-btn" onclick="document.getElementById('fileImport').click()">📥 <span data-i18n="importFileShort">导入</span></button>
+    <input type="file" id="fileImport" accept=".csv" style="display:none" onchange="importData(this)">
+    <button class="text-btn" onclick="showGitHubSettings()" title="GitHub设置">⚙️</button>
+    <button class="text-btn" onclick="saveToGitHub()" title="保存到GitHub">💾 <span data-i18n="saveToGitHubShort">存GitHub</span></button>
+    <button class="text-btn" onclick="loadFromGitHub()" title="从GitHub恢复">📂 <span data-i18n="loadFromGitHubShort">恢复</span></button>
+  </div>
+
+  <!-- 日赛内子切换: 初赛/复赛 -->
+  <div class="header-switch" id="subViewSwitch" style="margin-bottom:16px;">
+    <button class="active" onclick="switchSubView('preliminary')" id="tabPreliminary" data-i18n="tabPreliminary">初赛</button>
+    <button onclick="switchSubView('final')" id="tabFinal" data-i18n="tabFinal">复赛</button>
+  </div>
+
+  <!-- 初赛视图 -->
+  <div id="preliminaryContainer">
+  <div class="controls">
+    <button onclick="newSheet()" data-i18n="newSheet">🔄 新建比赛</button>
+    <div class="sheet-info-wrap">
+      <span class="sheet-info" id="sheetInfo" onclick="toggleSheetDropdown()"></span>
+      <div class="sheet-dropdown" id="sheetDropdown" style="display:none;">
+        <div class="sheet-dropdown-list" id="sheetDropdownList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-match" data-i18n="colMatch">场次</th>
+          <th data-i18n="colWinner">胜者</th>
+          <th data-i18n="colLoser">败者</th>
+          <th class="col-alert" data-i18n="colAlert">提示</th>
+          <th class="col-note" data-i18n="colNote">备注</th>
+          <th class="col-action" data-i18n="colAction">操作</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="emptyState" class="empty" style="display:none;" data-i18n="emptyState">暂无比赛记录，请添加第一条数据</div>
+  </div>
+
+  <div class="status-panel" id="statusPanel"></div>
+
+  <div class="stats-section">
+    <div class="champion-box" style="margin-bottom:12px;">
+      <span data-i18n="champion">🏆 日冠军：</span>
+      <span class="name" id="championName">—</span>
+      <label data-i18n="account">数字账号</label>
+      <input type="text" id="championAccount" data-i18n-placeholder="accountPlaceholder" placeholder="填写获胜者数字账号" onchange="autoSave()">
+    </div>
+    <div class="tie-notice" id="tieNotice" style="margin-bottom:12px;"></div>
+    <h2 data-i18n="dailyStats">📊 日终积分统计</h2>
+    <table>
+      <thead>
+        <tr><th data-i18n="colRank">排名</th><th data-i18n="colName">昵称</th><th data-i18n="colWins">胜场</th><th data-i18n="colLosses">败场</th><th data-i18n="colTotal">总场次</th><th data-i18n="colRate">胜率</th><th style="width:40px;">操作</th></tr>
+      </thead>
+      <tbody id="statsBody"></tbody>
+    </table>
+
+    <div class="savebar">
+      <span id="autoSaveStatus" style="color:var(--text2);font-size:13px;margin-right:auto;" data-i18n="autoSaved">✅ 已自动保存到本地</span>
+    </div>
+  </div>
+
+  <!-- 积分规则 -->
+  <div class="stats-section">
+    <h2 data-i18n="rulesTitle">📋 积分规则</h2>
+    <div class="card" style="margin-bottom:10px;">
+      <h3 style="color:var(--gold);font-size:15px;margin-bottom:8px;" data-i18n="rulesDaily">日赛积分</h3>
+      <ul style="font-size:13px;color:var(--text2);line-height:1.8;padding-left:18px;">
+        <li data-i18n="ruleWin1">每胜一场积 <span style="color:var(--success);font-weight:600;">1 分</span>，败一场不积分</li>
+        <li data-i18n="ruleWin2">日冠军 = 当日胜场积分最高者</li>
+        <li data-i18n="ruleWin3">同分判定：① 胜率更高 → ② 总场次更少（效率优先）→ ③ 并列</li>
+      </ul>
+    </div>
+    <div class="card" style="margin-bottom:10px;">
+      <h3 style="color:var(--warn);font-size:15px;margin-bottom:8px;" data-i18n="rulesElim">日赛淘汰机制</h3>
+      <ul style="font-size:13px;color:var(--text2);line-height:1.8;padding-left:18px;">
+        <li data-i18n="ruleElim1">单日累计败 <span style="color:var(--danger);font-weight:600;">3 场</span> → 当日淘汰，不可再参赛</li>
+        <li data-i18n="ruleElim2">连胜 <span style="color:var(--warn);font-weight:600;">3 场</span> → 强制下场，回队尾重新排队</li>
+        <li data-i18n="ruleElim3">本周已获日冠军者 → 禁止再次参加本周日赛</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--mist-light);font-size:15px;margin-bottom:8px;" data-i18n="rulesWeekly">周冠军赛积分（周日）</h3>
+      <ul style="font-size:13px;color:var(--text2);line-height:1.8;padding-left:18px;">
+        <li data-i18n="ruleWeek1">仅限本周日冠军参加，单循环赛制</li>
+        <li data-i18n="ruleWeek2">每胜一场积 <span style="color:var(--success);font-weight:600;">1 分</span>，败 0 分，无平局</li>
+        <li data-i18n="ruleWeek3">同分判定：① 相互对战胜负 → ② 本周累计胜场总数 → ③ 并列</li>
+      </ul>
+    </div>
+  </div>
+  </div><!-- /preliminaryContainer -->
+
+  <!-- 复赛视图 -->
+  <div id="finalContainer" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h2 style="font-size:18px;color:var(--gold);margin:0;">🏆 <span data-i18n="tabFinal">复赛</span></h2>
+      <div style="display:flex;gap:8px;">
+        <button class="text-btn" onclick="clearFinalData()">🗑️ <span data-i18n="clearWeeklyShort">清空</span></button>
+        <button class="text-btn" onclick="exportFinalData()">📤 <span data-i18n="exportWeeklyShort">导出复赛</span></button>
+      </div>
+    </div>
+    <div class="schedule-section" style="margin-bottom:16px;">
+      <h3 style="font-size:15px;color:var(--mist);margin-bottom:10px;">📅 <span data-i18n="weeklySchedule">赛程</span></h3>
+      <div id="finalScheduleList"></div>
+    </div>
+    <div class="standings-section">
+      <h3 style="font-size:15px;color:var(--mist);margin-bottom:10px;">📊 <span data-i18n="weeklyStandings">排名</span></h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border);">
+            <th style="text-align:left;padding:8px;"><span data-i18n="colRank">排名</span></th>
+            <th style="text-align:left;padding:8px;"><span data-i18n="colName">昵称</span></th>
+            <th style="text-align:center;padding:8px;"><span data-i18n="colWins">胜</span></th>
+            <th style="text-align:center;padding:8px;"><span data-i18n="colLosses">负</span></th>
+            <th style="text-align:center;padding:8px;"><span data-i18n="weeklyPoints">积分</span></th>
+          </tr>
+        </thead>
+        <tbody id="finalStandingsBody"></tbody>
+      </table>
+    </div>
+  </div><!-- /finalContainer -->
+  </div><!-- /dailyView -->
+
+  <!-- 周赛视图 -->
+  <div id="weeklyView" style="display:none;">
+  <div class="top-actions">
+    <button class="text-btn" onclick="clearWeeklyData()">🗑️ <span data-i18n="clearWeeklyShort">清空周赛</span></button>
+    <button class="text-btn" onclick="exportWeeklyData()">📤 <span data-i18n="exportWeeklyShort">导出周赛</span></button>
+    <button class="text-btn" onclick="document.getElementById('weeklyFileImport').click()">📥 <span data-i18n="importWeeklyShort">导入周赛</span></button>
+    <input type="file" id="weeklyFileImport" accept=".csv" style="display:none" onchange="importWeeklyData(this)">
+  </div>
+
+    <div class="controls" style="margin-top:16px;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <button class="server-btn" style="padding:6px 8px;font-size:12px;" onclick="shiftWeek(-7)" title="上周">⬅</button>
+          <div class="weekly-date-wrap" style="padding:6px 10px;" onclick="document.getElementById('weeklyDate').showPicker?.()">
+            <input type="date" id="weeklyDate" onchange="loadWeeklyData()" style="font-size:13px;">
+          </div>
+          <button class="server-btn" style="padding:6px 8px;font-size:12px;" onclick="shiftWeek(7)" title="下周">➡</button>
+        </div>
+        <select id="weeklyDatePreset" onchange="if(this.value){document.getElementById('weeklyDate').value=this.value;loadWeeklyData();}" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;">
+          <option value="">📋 已有周赛</option>
+        </select>
+        <span id="weeklyServerDisplay" style="font-size:13px;color:var(--text2);"></span>
+        <button class="server-btn" id="weeklyBtnK" onclick="switchServer('K 服')">K 服</button>
+        <button class="server-btn active" id="weeklyBtnQ" onclick="switchServer('Q 服')">Q 服</button>
+        <button class="text-btn" onclick="refreshWeeklyPlayers()">🔄 <span data-i18n="refreshPlayers">刷新名单</span></button>
+      </div>
+    </div>
+
+    <div class="weekly-players" id="weeklyPlayers"></div>
+
+    <div class="champion-box" id="weeklyChampionBox" style="margin-top:16px;display:none;">
+      <span data-i18n="weeklyChampion">🏆 周冠军：</span>
+      <span class="name" id="weeklyChampionName">—</span>
+    </div>
+
+    <div class="schedule-section" id="weeklyScheduleSection" style="display:none;margin-top:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <h2 data-i18n="scheduleTitle">🎲 比赛赛程（随机顺序）</h2>
+        <button class="text-btn" onclick="generateWeeklySchedule()" data-i18n="reshuffle">🔀 重新随机</button>
+      </div>
+      <div class="schedule-list" id="weeklyScheduleList"></div>
+    </div>
+
+    <div class="matrix-wrap" id="weeklyMatrixWrap">
+      <div class="empty" id="weeklyEmpty" style="padding:30px;" data-i18n="weeklyEmpty">等待开赛</div>
+      <table id="weeklyMatrix" style="display:none;">
+        <thead><tr id="weeklyMatrixHead"><th>—</th></tr></thead>
+        <tbody id="weeklyMatrixBody"></tbody>
+      </table>
+    </div>
+
+    <div class="stats-section" style="margin-top:20px;">
+      <h2 data-i18n="weeklyStats">📊 周赛积分榜</h2>
+      <table style="table-layout:fixed">
+        <thead>
+          <tr><th style="width:60px" data-i18n="colRank">排名</th><th data-i18n="colName">昵称</th><th style="width:80px" data-i18n="colWins">胜场</th><th style="width:80px" data-i18n="colLosses">败场</th><th style="width:80px" data-i18n="colPoints">积分</th></tr>
+        </thead>
+        <tbody id="weeklyStatsBody"></tbody>
+      </table>
+    </div>
+
+    <div class="rules-section" style="margin-top:24px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;">
+      <h3 style="margin:0 0 12px;font-size:15px;color:var(--mist);">📋 周冠军赛规则</h3>
+      <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+        <p style="margin:0 0 8px;"><strong style="color:var(--text);">参赛资格</strong>：本周一至周六本服日冠军参加，最多6人，最少2人。</p>
+        <p style="margin:0 0 8px;"><strong style="color:var(--text);">赛制</strong>：单循环，每两名参赛者交手1场，胜者得1分，败者得0分，无平局。</p>
+        <p style="margin:0 0 8px;"><strong style="color:var(--text);">缺席处理</strong>：无法参赛者视为弃赛，其所有对手自动获得本场胜利（积1分）。</p>
+        <p style="margin:0 0 8px;"><strong style="color:var(--text);">同分判定（优先级依次递减）</strong>：</p>
+        <ol style="margin:0 0 8px;padding-left:18px;">
+          <li>相互对战胜负关系；</li>
+          <li>若形成循环胜负（连环套），比较本周累计胜场总数；</li>
+          <li>仍相同则并列周冠军。</li>
+        </ol>
+      </div>
+    </div>
+  </div><!-- /weeklyView -->
+
+</div>
+
+<script>
+var currentServer = "Q 服";
+var modalServer = "Q 服";
+/* ========== 配置 ========== */
+const COLORS = [
+  '#60a5fa','#34d399','#fbbf24','#a78bfa','#f472b6',
+  '#22d3ee','#fb923c','#e879f9','#f87171','#2dd4bf',
+  '#818cf8','#facc15','#c084fc','#38bdf8','#a3e635'
+];
+
+/* ========== 状态 ========== */
+let matches = [];      // 初赛比赛记录 [{winner,loser,note?}]
+let playerColors = {}; // name -> hex
+let colorIdx = 0;
+let currentChampionNames = []; // 日冠军昵称列表（含并列）
+let editingMatchIdx = -1; // 当前正在编辑的比赛索引
+let editingPlayerName = ''; // 当前正在编辑的玩家昵称
+let seeds = []; // 2.0 种子选手名单
+let finalData = null; // 2.0 复赛数据 {players, accounts, results, schedule}
+let currentSubView = 'preliminary'; // 2.0 日赛子视图: preliminary | final
+
+/* ========== 周赛状态 ========== */
+let weeklyPlayers = [];
+let weeklyAbsent = [];
+let weeklyResults = {}; // 'P1|P2' -> winner
+let weeklyDate = '';
+let weeklyPlayerAccounts = {}; // name -> account
+let weeklySchedule = []; // [{p1, p2}] 随机赛程
+
+/* ========== 周赛默认数据 ========== */
+const DEFAULT_WEEKLY_DATA = {
+  "2026-05-10": {
+    "Q 服": {
+      players: ['nini','JUDI45','chip','CoBeChimTO','asula','maymay'],
+      accounts: {nini:'13219644',JUDI45:'13220110',chip:'13219675',CoBeChimTO:'13219629',asula:'13220547',maymay:'13226453'},
+      absent: ['JUDI45','chip','maymay'],
+      results: {
+        'asula|nini':'nini',
+        'CoBeChimTO|nini':'nini',
+        'CoBeChimTO|asula':'asula'
+      },
+      schedule: [
+        {p1:'chip',p2:'CoBeChimTO'},{p1:'JUDI45',p2:'maymay'},{p1:'nini',p2:'CoBeChimTO'},{p1:'nini',p2:'JUDI45'},
+        {p1:'nini',p2:'maymay'},{p1:'nini',p2:'asula'},{p1:'JUDI45',p2:'chip'},{p1:'CoBeChimTO',p2:'asula'},
+        {p1:'JUDI45',p2:'asula'},{p1:'nini',p2:'chip'},{p1:'JUDI45',p2:'CoBeChimTO'},{p1:'chip',p2:'asula'},
+        {p1:'chip',p2:'maymay'},{p1:'CoBeChimTO',p2:'maymay'},{p1:'asula',p2:'maymay'}
+      ]
+    }
+  }
+};
+
+const I18N = {
+  zh: {
+    title: '⚔ 日赛记分板 2.0', subtitle: 'PVP 巅峰对决 · GM 现场记分工具',
+    date: '日期', server: '服务器', newSheet: '🔄 新建比赛',
+    exportCSV: '📤 导出 CSV', importFile: '📥 导入文件', importJSON: '📥 导入 CSV',
+    colMatch: '场次', colWinner: '胜', colLoser: '败', colAlert: '提示',
+    colNote: '备注', colAction: '操作', emptyState: '暂无比赛记录，请添加第一条数据',
+    dailyStats: '📊 日终积分统计', colRank: '排名', colName: '昵称', colWins: '胜场',
+    colLosses: '败场', colTotal: '总场次', colRate: '胜率',
+    champion: '🏆 日冠军：', account: '数字账号', accountPlaceholder: '填写获胜者数字账号',
+    autoSaved: '✅ 已自动保存到本地', rulesTitle: '📋 积分规则',
+    rulesDaily: '日赛积分', rulesElim: '日赛淘汰机制', rulesWeekly: '周冠军赛积分（周日）',
+    phWinner: '胜', phLoser: '败', phNote: '备注（可选）',
+    clearDataShort: '清空全部', exportCSVShort: '导出当日', exportAllShort: '导出全部', importFileShort: '导入', saveToGitHubShort: '存GitHub', loadFromGitHubShort: '恢复',
+    clearWeeklyShort: '清空周赛', exportWeeklyShort: '导出周赛', importWeeklyShort: '导入周赛',
+    btnAdd: '添加', btnDel: '删除',
+    modalTitle: '选择日期和服务器', btnCancel: '取消', btnConfirm: '确认', alertNeedDate: '请选择日期',
+    alertNeedNames: '请输入胜者和败者昵称', alertSameName: '胜者和败者不能相同',
+    alertConfirmDel: '确定删除这条记录？', alertConfirmNew: '当前有未保存数据，确定新建？', alertClearEmpty: '没有数据可清空', alertClearConfirmAll: '确定清空全部历史数据？此操作不可恢复。',
+    alertConfirmImport: '该日期和服务器下已有保存的数据，导入将覆盖，继续？', alertSwitchServer: '是否切换服务器并导入？',
+    alertCSVError: 'CSV 格式错误：缺少表头', alertParseFail: '文件解析失败',
+    alertImportOK: '✅ 导入成功，共 {n} 条记录',
+    alertStreak: '连胜3场，强制下场', alertElim: '败3场，已淘汰',
+    statusElim: '已淘汰', statusStreak: '连胜 {n}', statusIdle: '待机中',
+    statsLabel: '胜 {w} · 败 {l} · {s}', tie: '（并列）',
+    tieNotice: '⚠️ 出现并列，需按规则进一步判定（胜率→总场次），或确认并列冠军。',
+    csvDate: '日期', csvServer: '服务器', csvChampion: '冠军账号', csvNo: '序号',
+    csvMatch: '场次', csvWinner: '胜', csvLoser: '败', csvNote: '备注',
+    csvRank: '排名', csvName: '昵称', csvWins: '胜场', csvLosses: '败场',
+    csvTotal: '总场次', csvRate: '胜率',
+    ruleWin1: '每胜一场积 1 分，败一场不积分',
+    ruleWin2: '日冠军 = 当日胜场积分最高者',
+    ruleWin3: '同分判定：① 胜率更高 → ② 总场次更少（效率优先）→ ③ 并列',
+    ruleElim1: '单日累计败 3 场 → 当日淘汰，不可再参赛',
+    ruleElim2: '连胜 3 场 → 强制下场，回队尾重新排队',
+    ruleElim3: '本周已获日冠军者 → 禁止再次参加本周日赛',
+    ruleWeek1: '仅限本周日冠军参加，单循环赛制',
+    ruleWeek2: '每胜一场积 1 分，败 0 分，无平局',
+    ruleWeek3: '同分判定：① 相互对战胜负 → ② 本周累计胜场总数 → ③ 并列',
+    tabDaily: '日赛计分板', tabWeekly: '周赛计分板',
+    tabPreliminary: '初赛', tabFinal: '复赛',
+    seedLabel: '种子', prelimEnd: '初赛结束，6 名种子已产生',
+    alertSeed: '{name} 已是种子选手，不能再参赛',
+    alertPrelimFull: '已有 6 名种子，初赛已结束',
+    generateFinal: '生成复赛',
+    backToV1: '返回 1.0 模式',
+    sectionPreliminary: '初赛',
+    sectionSeeds: '种子选手',
+    sectionFinal: '复赛',
+    sectionFinalStandings: '复赛排名',
+    seedCounter: '种子 {n}/6',
+    alertNeed6Seeds: '种子不足 6 人，无法生成复赛',
+    emptyFinal: '暂无复赛数据，请先在初赛中产生 6 名种子',
+    alertConfirmClearFinal: '确定清空复赛数据？',
+    refreshPlayers: '自动导入日赛冠军', weeklyStats: '📊 周赛积分榜',
+    weeklyChampion: '🏆 周冠军：', weeklyEmpty: '等待开赛',
+    colPoints: '积分',
+    noHistoryData: '暂无历史数据',
+    nameRequired: '昵称不能为空',
+    noWeeklyChampions: '本周暂无日赛冠军数据，请确认周一至周六的日赛已记录且已判定冠军。',
+    scheduleTitle: '🎲 比赛赛程（随机顺序）',
+    reshuffle: '🔀 重新随机',
+    importMultiOK: '导入成功！{n} 天数据已保存。\n日期：{dates}',
+    existingDataLabel: '已有数据：',
+    phAccount: '账号', phAccountOptional: '账号（可选）',
+    confirmWin: '确认「{winner}」获胜？\n\n{p1} vs {p2}',
+    confirmRemoveResult: '确认删除这场比赛结果？\n\n{p1} vs {p2}',
+    cancelAbsent: '取消缺席', markAbsent: '标记缺席',
+    winBtn: '胜', absentLabel: '缺席', absentCSV: '(缺席)',
+  },
+  vi: {
+    title: '⚔ Bảng Điểm Nhật Sai 2.0', subtitle: 'PVP Đỉnh Phong Đối Quyết · Công Cụ Ghi Điểm GM',
+    date: 'Ngày', server: 'Máy Chủ', newSheet: '🔄 Tạo Trận Mới',
+    exportCSV: '📤 Xuất CSV', importFile: '📥 Nhập File', importJSON: '📥 Nhập JSON',
+    colMatch: 'Trận', colWinner: 'Thắng', colLoser: 'Thua', colAlert: 'Cảnh Báo',
+    colNote: 'Ghi Chú', colAction: 'Thao Tác', emptyState: 'Chưa có dữ liệu, hãy thêm trận đầu tiên',
+    dailyStats: '📊 Bảng Xếp Hạng Tổng Trong Ngày', colRank: 'STT', colName: 'Tên', colWins: 'Thắng',
+    colLosses: 'Thua', colTotal: 'Tổng Trận', colRate: 'Tỷ Lệ Thắng',
+    champion: '🏆 Vô Địch Ngày：', account: 'ID Số', accountPlaceholder: 'Nhập ID số người thắng',
+    autoSaved: '✅ Đã tự động lưu', rulesTitle: '📋 Quy Tắc Tính Điểm',
+    rulesDaily: 'Điểm Nhật Sai', rulesElim: 'Cơ Chế Loại Trừ', rulesWeekly: 'Điểm Vô Địch Tuần (Chủ Nhật)',
+    phWinner: 'Thắng', phLoser: 'Thua', phNote: 'Ghi Chú (tùy chọn)',
+    clearDataShort: 'Xóa tất cả', exportCSVShort: 'Xuất ngày', exportAllShort: 'Xuất tất cả', importFileShort: 'Nhập', saveToGitHubShort: 'Lưu GH', loadFromGitHubShort: 'Khôi phục',
+    clearWeeklyShort: 'Xóa Vô Địch Tuần', exportWeeklyShort: 'Xuất Vô Địch Tuần', importWeeklyShort: 'Nhập Vô Địch Tuần',
+    btnAdd: 'Thêm', btnDel: 'Xóa',
+    modalTitle: 'Chọn Ngày và Máy Chủ', btnCancel: 'Hủy', btnConfirm: 'Xác Nhận', alertNeedDate: 'Vui lòng chọn ngày',
+    alertNeedNames: 'Vui lòng nhập tên người thắng và thua', alertSameName: 'Người thắng và thua không thể cùng một người',
+    alertConfirmDel: 'Xác nhận xóa bản ghi này?', alertConfirmNew: 'Có dữ liệu chưa lưu, xác nhận tạo mới?', alertClearEmpty: 'Không có dữ liệu để xóa', alertClearConfirmAll: 'Xác nhận xóa toàn bộ dữ liệu lịch sử? Thao tác này không thể hoàn tác.',
+    alertConfirmImport: 'Đã có dữ liệu đã lưu cho ngày và máy chủ này, nhập file sẽ ghi đè, tiếp tục?', alertSwitchServer: 'Chuyển máy chủ và nhập?',
+    alertCSVError: 'Lỗi định dạng CSV: thiếu tiêu đề', alertParseFail: 'Phân tích file thất bại',
+    alertImportOK: '✅ Nhập thành công, {n} bản ghi',
+    alertStreak: 'Thắng 3 trận, bắt buộc xuống sân', alertElim: 'Thua 3 trận, đã loại',
+    statusElim: 'Đã Loại', statusStreak: 'Thắng Liên Tiếp {n}', statusIdle: 'Chờ',
+    statsLabel: 'Thắng {w} · Thua {l} · {s}', tie: '（Đồng Hạng）',
+    tieNotice: '⚠️ Có đồng hạng, cần phân định theo quy tắc (tỷ lệ thắng → tổng trận), hoặc xác nhận đồng hạng.',
+    csvDate: 'Ngày', csvServer: 'Máy Chủ', csvChampion: 'ID Vô Địch', csvNo: 'STT',
+    csvMatch: 'Trận', csvWinner: 'Thắng', csvLoser: 'Thua', csvNote: 'Ghi Chú',
+    csvRank: 'STT', csvName: 'Tên', csvWins: 'Thắng', csvLosses: 'Thua',
+    csvTotal: 'Tổng Trận', csvRate: 'Tỷ Lệ Thắng',
+    ruleWin1: 'Thắng 1 trận +1 điểm, thua không có điểm',
+    ruleWin2: 'Vô địch ngày = người có điểm cao nhất',
+    ruleWin3: 'Phân định đồng điểm: ① Tỷ lệ thắng cao hơn → ② Tổng trận ít hơn → ③ Đồng hạng',
+    ruleElim1: 'Thua 3 trận trong ngày → bị loại, không thể tham gia lại',
+    ruleElim2: 'Thắng 3 trận liên tiếp → bắt buộc xuống sân, về cuối hàng chờ',
+    ruleElim3: 'Đã vô địch nhật sai trong tuần → không tham gia lại nhật sai tuần này',
+    ruleWeek1: 'Chỉ dành cho vô địch ngày trong tuần, thi đấu vòng tròn',
+    ruleWeek2: 'Thắng +1 điểm, thua 0, không hòa',
+    ruleWeek3: 'Phân định đồng điểm: ① Đối đầu trực tiếp → ② Tổng số trận thắng tuần này → ③ Đồng hạng',
+    tabDaily: 'Bảng Điểm Nhật Sai', tabWeekly: 'Bảng Điểm Tuần',
+    refreshPlayers: 'Tự động nhập vô địch nhật sai', weeklyStats: '📊 Bảng Xếp Hạng Vô Địch Tuần',
+    weeklyChampion: '🏆 Vô Địch Tuần：', weeklyEmpty: 'Đang chờ bắt đầu',
+    colPoints: 'Điểm',
+    noHistoryData: 'Chưa có dữ liệu lịch sử',
+    nameRequired: 'Tên không được để trống',
+    noWeeklyChampions: 'Chưa có dữ liệu vô địch nhật sai tuần này, vui lòng xác nhận dữ liệu nhật sai Thứ Hai-Thứ Bảy đã ghi và đã phân định vô địch.',
+    scheduleTitle: '🎲 Lịch Thi Đấu (Ngẫu Nhiên)',
+    reshuffle: '🔀 Xáo Trộn Lại',
+    importMultiOK: 'Nhập thành công! {n} ngày dữ liệu đã lưu.\nNgày: {dates}',
+    existingDataLabel: 'Đã có dữ liệu:',
+    phAccount: 'ID', phAccountOptional: 'ID (tùy chọn)',
+    confirmWin: 'Xác nhận「{winner}」thắng？\n\n{p1} vs {p2}',
+    confirmRemoveResult: 'Xác nhận xóa kết quả trận đấu này？\n\n{p1} vs {p2}',
+    cancelAbsent: 'Hủy vắng mặt', markAbsent: 'Đánh dấu vắng mặt',
+    winBtn: 'Thắng', absentLabel: 'Vắng mặt', absentCSV: '(Vắng mặt)',
+  }
+};
+const DEFAULT_PVP_DATA = [{"date":"2026-05-04","server":"K 服","championAccount":"13220547","matches":[{"winner":"atula","winnerAccount":"","loser":"khoai","loserAccount":"","note":""},{"winner":"atula","winnerAccount":"","loser":"longthandien","loserAccount":"","note":""},{"winner":"atula","winnerAccount":"","loser":"khoai","loserAccount":"","note":""},{"winner":"satvuong","winnerAccount":"","loser":"the7storm","loserAccount":"","note":""},{"winner":"satvuong","winnerAccount":"","loser":"huyetnguyet","loserAccount":"","note":""},{"winner":"atula","winnerAccount":"","loser":"satvuong","loserAccount":"","note":""}],"playerColors":{"atula":"#60a5fa","khoai":"#34d399","longthandien":"#fbbf24","satvuong":"#a78bfa","the7storm":"#f472b6","huyetnguyet":"#22d3ee"},"colorIdx":6},{"date":"2026-05-04","server":"Q 服","championAccount":"13219644","matches":[{"winner":"tieubaolong","winnerAccount":"","loser":"bachlong","loserAccount":"","note":""},{"winner":"cobechimto","winnerAccount":"","loser":"tieubaolong","loserAccount":"","note":""},{"winner":"cobechimto","winnerAccount":"","loser":"bachlong","loserAccount":"","note":""},{"winner":"cobechimto","winnerAccount":"","loser":"specter","loserAccount":"","note":""},{"winner":"nini","winnerAccount":"","loser":"codoc","loserAccount":"","note":""},{"winner":"nini","winnerAccount":"","loser":"gialong","loserAccount":"","note":""},{"winner":"nini","winnerAccount":"","loser":"anh2","loserAccount":"","note":""},{"winner":"tieubaolong","winnerAccount":"","loser":"gialong","loserAccount":"","note":""},{"winner":"tieubaolong","winnerAccount":"","loser":"nguoicodon","loserAccount":"","note":""},{"winner":"tieubaolong","winnerAccount":"","loser":"bebe5","loserAccount":"","note":""},{"winner":"bebe5","winnerAccount":"","loser":"hanhan","loserAccount":"","note":""},{"winner":"bebe5","winnerAccount":"","loser":"vietden","loserAccount":"","note":""},{"winner":"bebe5","winnerAccount":"","loser":"hanhan","loserAccount":"","note":""},{"winner":"specter","winnerAccount":"","loser":"midorii","loserAccount":"","note":""},{"winner":"conchobanhbao","winnerAccount":"","loser":"specter","loserAccount":"","note":""},{"winner":"asula","winnerAccount":"","loser":"conchobanhbao","loserAccount":"","note":""},{"winner":"asula","winnerAccount":"","loser":"nguoicodon","loserAccount":"","note":""},{"winner":"osiris","winnerAccount":"","loser":"asula","loserAccount":"","note":""},{"winner":"specter","winnerAccount":"","loser":"osiris","loserAccount":"","note":""},{"winner":"specter","winnerAccount":"","loser":"gialong","loserAccount":"","note":""},{"winner":"specter","winnerAccount":"","loser":"vietden","loserAccount":"","note":""},{"winner":"cobechimto","winnerAccount":"","loser":"tieubaolong","loserAccount":"","note":""},{"winner":"nini","winnerAccount":"","loser":"bebe5","loserAccount":"","note":""},{"winner":"specter","winnerAccount":"","loser":"cobechimto","loserAccount":"","note":""},{"winner":"nini","winnerAccount":"","loser":"specter","loserAccount":"","note":"chung kết"}],"playerColors":{"tieubaolong":"#60a5fa","bachlong":"#34d399","cobechimto":"#fbbf24","specter":"#a78bfa","nini":"#f472b6","codoc":"#22d3ee","gialong":"#fb923c","anh2":"#e879f9","nguoicodon":"#f87171","bebe5":"#2dd4bf","hanhan":"#818cf8","vietden":"#facc15","midorii":"#c084fc","conchobanhbao":"#38bdf8","asula":"#a3e635","osiris":"#60a5fa"},"colorIdx":16},{"date":"2026-05-05","server":"Q 服","championAccount":"13220110","matches":[{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"khunglon","loserAccount":"13222479","note":"13219629/13222479"},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"MIDORII","loserAccount":"13220943","note":"13220943"},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"BEBE5","loserAccount":"13219756","note":"13219756"},{"winner":"BEBE5","winnerAccount":"13219756","loser":"thanlong","loserAccount":"13222310","note":"13222310"},{"winner":"chip","winnerAccount":"13219675","loser":"BEBE5","loserAccount":"13219756","note":"13219675"},{"winner":"chip","winnerAccount":"","loser":"chanbomayde","loserAccount":"13219961","note":"13219961"},{"winner":"chip","winnerAccount":"13219675","loser":"MIDORII","loserAccount":"13220943","note":""},{"winner":"Tinasha","winnerAccount":"13220150","loser":"conchobanhbao","loserAccount":"13219739","note":"13220150/13219739"},{"winner":"BEBE5","winnerAccount":"13219756","loser":"Tinasha","loserAccount":"13220150","note":""},{"winner":"BEBE5","winnerAccount":"13219756","loser":"chanbomayde","loserAccount":"13219961","note":""},{"winner":"thanlong","winnerAccount":"13222310","loser":"conchobanhbao","loserAccount":"13219739","note":""},{"winner":"chanbomayde","winnerAccount":"13219961","loser":"thanlong","loserAccount":"13222310","note":""},{"winner":"chanbomayde","winnerAccount":"13219961","loser":"BiCaCa","loserAccount":"13219748","note":"13219748"},{"winner":"chanbomayde","winnerAccount":"13219961","loser":"NguoiCoDon","loserAccount":"13220294","note":"13220294"},{"winner":"Kiding","winnerAccount":"13223120","loser":"BiCaCa","loserAccount":"13219748","note":"13223120"},{"winner":"Kiding","winnerAccount":"13223120","loser":"NguoiCoDon","loserAccount":"13220294","note":""},{"winner":"BiCaCa","winnerAccount":"13219748","loser":"Kiding","loserAccount":"13223120","note":""},{"winner":"JUDI45","winnerAccount":"13220110","loser":"BiCaCa","loserAccount":"13219748","note":"13220110"},{"winner":"JUDI45","winnerAccount":"13220110","loser":"Kiding","loserAccount":"13223120","note":""},{"winner":"JUDI45","winnerAccount":"13220110","loser":"thanlong","loserAccount":"13222310","note":""},{"winner":"NguoiCoDon","winnerAccount":"13220294","loser":"PinPin","loserAccount":"13221253","note":"13221253"},{"winner":"NguoiCoDon","winnerAccount":"13220294","loser":"MIDORII","loserAccount":"13220943","note":""},{"winner":"conchobanhbao","winnerAccount":"13219739","loser":"NguoiCoDon","loserAccount":"13220294","note":""},{"winner":"Kiding","winnerAccount":"13223120","loser":"conchobanhbao","loserAccount":"13219739","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"chip","loserAccount":"13219675","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"BEBE5","loserAccount":"13219756","note":""},{"winner":"JUDI45","winnerAccount":"13220110","loser":"CoBeChimTO","loserAccount":"13219629","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"JUDI45","loserAccount":"13220110","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"Kiding","loserAccount":"13223120","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"CoBeChimTO","loserAccount":"13219629","note":""},{"winner":"JUDI45","winnerAccount":"13220110","loser":"chanbomayde","loserAccount":"13219961","note":""},{"winner":"JUDI45","winnerAccount":"13220110","loser":"CoBeChimTO","loserAccount":"13219629","note":""},{"winner":"JUDI45","winnerAccount":"13220110","loser":"chip","loserAccount":"13219675","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"bilibili","loserAccount":"","note":"13219728"},{"winner":"JUDI45","winnerAccount":"13220110","loser":"bilibili","loserAccount":"","note":""},{"winner":"JUDI45","winnerAccount":"13220110","loser":"chip","loserAccount":"13219675","note":""},{"winner":"JUDI45","winnerAccount":"13220110","loser":"bilibili","loserAccount":"","note":""},{"winner":"ASuLa","winnerAccount":"13220547","loser":"JUDI45","loserAccount":"13220110","note":"13220547"}],"playerColors":{"CoBeChimTO":"#60a5fa","khunglon":"#34d399","MIDORII":"#fbbf24","BEBE5":"#a78bfa","thanlong":"#f472b6","chip":"#22d3ee","chanbomayde":"#fb923c","Tinasha":"#e879f9","conchobanhbao":"#f87171","BiCaCa":"#2dd4bf","NguoiCoDon":"#818cf8","Kiding":"#facc15","JUDI45":"#c084fc","PinPin":"#38bdf8","bilibili":"#a3e635","ASuLa":"#60a5fa"},"colorIdx":16},{"date":"2026-05-06","server":"Q 服","championAccount":"13219675","matches":[{"winner":"MIDORII","winnerAccount":"13220943","loser":"specter","loserAccount":"13219626","note":""},{"winner":"MIDORII","winnerAccount":"13220943","loser":"conchobanhbao","loserAccount":"13219739","note":""},{"winner":"satnguyet","winnerAccount":"13219858","loser":"MIDORII","loserAccount":"13220943","note":""},{"winner":"satnguyet","winnerAccount":"13219858","loser":"hacthienlongl","loserAccount":"13220491","note":""},{"winner":"satnguyet","winnerAccount":"13219858","loser":"conchobanhbao","loserAccount":"13219739","note":""},{"winner":"hacthienlongl","winnerAccount":"13220491","loser":"bilibili","loserAccount":"13220975","note":""},{"winner":"yenlycte","winnerAccount":"13219791","loser":"hacthienlongl","loserAccount":"13220491","note":""},{"winner":"tinasha","winnerAccount":"13220150","loser":"yenlycte","loserAccount":"13219791","note":""},{"winner":"tinasha","winnerAccount":"13220150","loser":"conchobanhbao","loserAccount":"13219739","note":""},{"winner":"tinasha","winnerAccount":"13220150","loser":"obito","loserAccount":"13219986","note":""},{"winner":"nguoicodon","winnerAccount":"13220294","loser":"hacthienlongl","loserAccount":"13220491","note":""},{"winner":"nguoicodon","winnerAccount":"13220294","loser":"lion","loserAccount":"13223898","note":""},{"winner":"kiding","winnerAccount":"13223120","loser":"nguoicodon","loserAccount":"13220294","note":""},{"winner":"kiding","winnerAccount":"13223120","loser":"lion","loserAccount":"13223898","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"kiding","loserAccount":"13223120","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"MIDORII","loserAccount":"13220943","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"heartfilia","loserAccount":"13226870","note":""},{"winner":"MIDORII","winnerAccount":"13220943","loser":"kiding","loserAccount":"13223120","note":""},{"winner":"MIDORII","winnerAccount":"13220943","loser":"heartfilia","loserAccount":"13226870","note":""},{"winner":"MIDORII","winnerAccount":"13220943","loser":"kiding","loserAccount":"13223120","note":""},{"winner":"vuongkz","winnerAccount":"13219666","loser":"nguoicodon","loserAccount":"13220294","note":""},{"winner":"vuongkz","winnerAccount":"13219666","loser":"anh2","loserAccount":"13220149","note":""},{"winner":"tinkerbell","winnerAccount":"13229203","loser":"vuongkz","loserAccount":"13219666","note":""},{"winner":"tinkerbell","winnerAccount":"13229203","loser":"satnguyet","loserAccount":"13219858","note":""},{"winner":"tinkerbell","winnerAccount":"13229203","loser":"vuongkz","loserAccount":"13219666","note":""},{"winner":"tinasha","winnerAccount":"13220150","loser":"anh2","loserAccount":"13220149","note":""},{"winner":"tinasha","winnerAccount":"13220150","loser":"chip","loserAccount":"13219675","note":""},{"winner":"tinasha","winnerAccount":"13220150","loser":"tinkerbell","loserAccount":"13229203","note":""},{"winner":"satnguyet","winnerAccount":"13219858","loser":"MIDORII","loserAccount":"13220943","note":""},{"winner":"vuongkz","winnerAccount":"13219666","loser":"satnguyet","loserAccount":"13219858","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"vuongkz","loserAccount":"13219666","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"tinasha","loserAccount":"13220150","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"satnguyet","loserAccount":"13219858","note":""},{"winner":"chip","winnerAccount":"13219675","loser":"tinasha","loserAccount":"13220150","note":"Trận 34 Chip và tinasha hoà"}],"playerColors":{"MIDORII":"#60a5fa","specter":"#34d399","conchobanhbao":"#fbbf24","satnguyet":"#a78bfa","hacthienlongl":"#f472b6","bilibili":"#22d3ee","yenlycte":"#fb923c","tinasha":"#e879f9","obito":"#f87171","nguoicodon":"#2dd4bf","lion":"#818cf8","kiding":"#facc15","chip":"#c084fc","heartfilia":"#38bdf8","vuongkz":"#a3e635","anh2":"#60a5fa","tinkerbell":"#34d399"},"colorIdx":17},{"date":"2026-05-07","server":"Q 服","championAccount":"13219629","matches":[{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"yugi","loserAccount":"","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"melody","loserAccount":"13221206","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"yaochen","loserAccount":"13219894","note":""},{"winner":"zauzau","winnerAccount":"13221285","loser":"conchobanhbao","loserAccount":"13219739","note":""},{"winner":"yaochen","winnerAccount":"13219894","loser":"zauzau","loserAccount":"13221285","note":""},{"winner":"yaochen","winnerAccount":"13219894","loser":"doolong","loserAccount":"13226813","note":""},{"winner":"zauzau","winnerAccount":"13221285","loser":"yaochen","loserAccount":"13219894","note":""},{"winner":"zauzau","winnerAccount":"13221285","loser":"bachlong","loserAccount":"13219635","note":""},{"winner":"zauzau","winnerAccount":"13221285","loser":"yaochen","loserAccount":"13219894","note":""},{"winner":"ntphat","winnerAccount":"13226453","loser":"bachlong","loserAccount":"13219635","note":""},{"winner":"chanbomayde","winnerAccount":"13219961","loser":"ntphat","loserAccount":"13226453","note":""},{"winner":"chanbomayde","winnerAccount":"13219961","loser":"minh95","loserAccount":"13225685","note":""},{"winner":"ntphat","winnerAccount":"13226453","loser":"chanbomayde","loserAccount":"13219961","note":""},{"winner":"ntphat","winnerAccount":"13226453","loser":"obito","loserAccount":"13219986","note":""},{"winner":"chanbomayde","winnerAccount":"13219961","loser":"ntphat","loserAccount":"13226453","note":""},{"winner":"chanbomayde","winnerAccount":"13219961","loser":"ngochan","loserAccount":"13221530","note":""},{"winner":"chanbomayde","winnerAccount":"13219961","loser":"nguoicodon","loserAccount":"13220294","note":""},{"winner":"sunny","winnerAccount":"13219819","loser":"nguoicodon","loserAccount":"13220294","note":""},{"winner":"sunny","winnerAccount":"13219819","loser":"zauzau","loserAccount":"13221285","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"sunny","loserAccount":"13219819","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"kidtv152","loserAccount":"13220270","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"chanbomayde","loserAccount":"13219961","note":""},{"winner":"specter","winnerAccount":"13219626","loser":"sunny","loserAccount":"13219819","note":""},{"winner":"satnguyet","winnerAccount":"13219858","loser":"specter","loserAccount":"13219626","note":""},{"winner":"satnguyet","winnerAccount":"13219858","loser":"chanbomayde","loserAccount":"13219961","note":""},{"winner":"satnguyet","winnerAccount":"13219858","loser":"conchobanhbao","loserAccount":"13219739","note":""},{"winner":"ngochan","winnerAccount":"13221530","loser":"specter","loserAccount":"13219626","note":""},{"winner":"ngochan","winnerAccount":"13221530","loser":"MIDORII","loserAccount":"13220943","note":""},{"winner":"ngochan","winnerAccount":"13221530","loser":"specter","loserAccount":"13219626","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"satnguyet","loserAccount":"13219858","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"yugi","loserAccount":"13219663","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"kiding","loserAccount":"13223120","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"kiding","loserAccount":"13223120","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"chinsuuuu","loserAccount":"","note":""},{"winner":"kiding","winnerAccount":"13223120","loser":"CoBeChimTO","loserAccount":"13219629","note":""},{"winner":"CoBeChimTO","winnerAccount":"13219629","loser":"kiding","loserAccount":"13223120","note":""}],"playerColors":{"CoBeChimTO":"#60a5fa","yugi":"#34d399","melody":"#fbbf24","yaochen":"#a78bfa","zauzau":"#f472b6","conchobanhbao":"#22d3ee","doolong":"#fb923c","bachlong":"#e879f9","ntphat":"#f87171","chanbomayde":"#2dd4bf","minh95":"#818cf8","obito":"#facc15","ngochan":"#c084fc","nguoicodon":"#38bdf8","sunny":"#a3e635","kidtv152":"#60a5fa","specter":"#34d399","satnguyet":"#fbbf24","MIDORII":"#a78bfa","kiding":"#f472b6","chinsuuuu":"#22d3ee"},"colorIdx":21},
+{date:"2026-05-08",server:"Q 服",championAccount:"13220547",matches:[{winner:"asula",winnerAccount:"13220547",loser:"sealcute",loserAccount:"13219750",note:""},{winner:"asula",winnerAccount:"13220547",loser:"tieubaolong",loserAccount:"13222125",note:""},{winner:"asula",winnerAccount:"13220547",loser:"tieubaolong",loserAccount:"13222125",note:""},{winner:"cyon",winnerAccount:"13219713",loser:"heartfilia",loserAccount:"13226870",note:""},{winner:"cyon",winnerAccount:"13219713",loser:"nguoicodon",loserAccount:"13220294",note:""},{winner:"cyon",winnerAccount:"13219713",loser:"maymay",loserAccount:"13220082",note:""},{winner:"xu2828",winnerAccount:"13225962",loser:"heartfilia",loserAccount:"13226870",note:""},{winner:"xu2828",winnerAccount:"13225962",loser:"MIDORII",loserAccount:"13220943",note:""},{winner:"xu2828",winnerAccount:"13225962",loser:"vincenzo",loserAccount:"13219911",note:""},{winner:"nguoicodon",winnerAccount:"13220294",loser:"chinsuuuu",loserAccount:"13229206",note:""},{winner:"nguoicodon",winnerAccount:"13220294",loser:"heartfilia",loserAccount:"13226870",note:""},{winner:"sktt1",winnerAccount:"13219668",loser:"nguoicodon",loserAccount:"13220294",note:""},{winner:"sktt1",winnerAccount:"13219668",loser:"tinkerbell",loserAccount:"13229203",note:""},{winner:"sktt1",winnerAccount:"13219668",loser:"nguoicodon",loserAccount:"13220294",note:""},{winner:"tinkerbell",winnerAccount:"13229203",loser:"satnguyet",loserAccount:"13219858",note:""},{winner:"satnguyet",winnerAccount:"13219858",loser:"tinkerbell",loserAccount:"13229203",note:""},{winner:"tannloc",winnerAccount:"13224360",loser:"satnguyet",loserAccount:"13219858",note:""},{winner:"tannloc",winnerAccount:"13224360",loser:"tinkerbell",loserAccount:"13229203",note:""},{winner:"tannloc",winnerAccount:"13224360",loser:"t1keria",loserAccount:"13219771",note:""},{winner:"asula",winnerAccount:"13220547",loser:"cyon",loserAccount:"13219713",note:""},{winner:"asula",winnerAccount:"13220547",loser:"xu2828",loserAccount:"13225962",note:""},{winner:"asula",winnerAccount:"13220547",loser:"sktt1",loserAccount:"13219668",note:""},{winner:"tannloc",winnerAccount:"13224360",loser:"cyon",loserAccount:"13219713",note:""},{winner:"tannloc",winnerAccount:"13224360",loser:"sktt1",loserAccount:"13219668",note:""},{winner:"asula",winnerAccount:"13220547",loser:"tannloc",loserAccount:"13224360",note:""},{winner:"asula",winnerAccount:"13220547",loser:"yenlyxinhiu",loserAccount:"13219791",note:""},{winner:"asula",winnerAccount:"13220547",loser:"hacthienlongl",loserAccount:"13220491",note:""},{winner:"asula",winnerAccount:"13220547",loser:"hacthienlongl",loserAccount:"13220491",note:""},{winner:"asula",winnerAccount:"13220547",loser:"chanbomayde",loserAccount:"13219961",note:""},{winner:"asula",winnerAccount:"13220547",loser:"chanbomayde",loserAccount:"13219961",note:""},{winner:"asula",winnerAccount:"13220547",loser:"chanbomayde",loserAccount:"13219961",note:""}],playerColors:{"asula":"#60a5fa","sealcute":"#34d399","tieubaolong":"#fbbf24","cyon":"#a78bfa","heartfilia":"#f472b6","nguoicodon":"#22d3ee","maymay":"#fb923c","xu2828":"#e879f9","MIDORII":"#f87171","vincenzo":"#2dd4bf","chinsuuuu":"#818cf8","sktt1":"#facc15","tinkerbell":"#c084fc","satnguyet":"#38bdf8","tannloc":"#a3e635","t1keria":"#60a5fa","yenlyxinhiu":"#34d399","hacthienlongl":"#fbbf24","chanbomayde":"#a78bfa"},colorIdx:19}
+,{date:"2026-05-09",server:"Q 服",championAccount:"13226453",matches:[{winner:"ntphat",winnerAccount:"13226453",loser:"yumiie",loserAccount:"13220281",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"ntphat",loserAccount:"13226453",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"hacthienlongl",loserAccount:"13220491",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"conchobanhbao",loserAccount:"13219739",note:""},{winner:"hacthienlongl",winnerAccount:"13220491",loser:"kidtv152",loserAccount:"13220270",note:""},{winner:"hacthienlongl",winnerAccount:"13220491",loser:"vani",loserAccount:"13220319",note:""},{winner:"hacthienlongl",winnerAccount:"13220491",loser:"conchobanhbao",loserAccount:"13219739",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"hacthienlongl",loserAccount:"13220491",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"zauzau",loserAccount:"13221285",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"bebe5",loserAccount:"13219756",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"hacthienlongl",loserAccount:"13220491",note:""},{winner:"satnguyet",winnerAccount:"13219858",loser:"kidtv152",loserAccount:"13220270",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"satnguyet",loserAccount:"13219858",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"satnguyet",loserAccount:"13219858",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"hanhan",loserAccount:"13229204",note:""},{winner:"maymay",winnerAccount:"13220082",loser:"hanhan",loserAccount:"13229204",note:""}],playerColors:{"ntphat":"#60a5fa","yumiie":"#34d399","maymay":"#fbbf24","hacthienlongl":"#a78bfa","conchobanhbao":"#f472b6","kidtv152":"#22d3ee","vani":"#fb923c","zauzau":"#e879f9","bebe5":"#f87171","satnguyet":"#2dd4bf","hanhan":"#818cf8"},colorIdx:11}
+];
+
+function initDefaultData() {
+  // 2.0 模式不使用 1.0 的默认数据，清空以避免干扰
+  DEFAULT_PVP_DATA.forEach(function(block) {
+    const key = 'pvp_score_v2_' + block.date + '_' + block.server;
+    // 2.0 不预填历史数据，由 GM 现场录入
+  });
+}
+
+let lang = localStorage.getItem('pvp_lang') || 'zh';
+function t(key, vars = {}) {
+  let s = (I18N[lang] && I18N[lang][key]) || key;
+  Object.keys(vars).forEach(k => { s = s.replace('{' + k + '}', vars[k]); });
+  return s;
+}
+function toggleLang() {
+  lang = lang === 'zh' ? 'vi' : 'zh';
+  localStorage.setItem('pvp_lang', lang);
+  document.getElementById('langBtn').textContent = lang === 'zh' ? '🇨🇳' : '🇻🇳';
+  applyLang();
+  render();
+}
+function applyLang() {
+  document.documentElement.lang = lang === 'vi' ? 'vi' : 'zh-CN';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (I18N[lang] && I18N[lang][key]) el.textContent = t(key);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (I18N[lang] && I18N[lang][key]) el.placeholder = t(key);
+  });
+  const pageTitle = document.getElementById('pageTitle');
+  const mainTitle = document.getElementById('mainTitle');
+  const titleText = (document.getElementById('weeklyView').style.display !== 'none' ? '⚔ ' + t('tabWeekly') : t('title'));
+  if (pageTitle) pageTitle.textContent = titleText + ' · PVP 巅峰对决';
+  if (mainTitle) mainTitle.textContent = titleText;
+  updateSheetInfo();
+  renderSheetDropdown();
+  renderModalDataList();
+  if (document.getElementById('weeklyView').style.display !== 'none') {
+    renderWeekly();
+  }
+}
+
+/* ========== 初始化 ========== */
+function initTheme() {
+  const saved = localStorage.getItem('pvp_theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (prefersDark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeBtn').textContent = theme === 'dark' ? '🌙' : '☀️';
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('pvp_theme', next);
+  document.getElementById('themeBtn').textContent = next === 'dark' ? '🌙' : '☀️';
+}
+initTheme();
+applyLang();
+initDefaultData();
+
+try {
+  document.getElementById('matchDate').value = new Date().toISOString().slice(0, 10);
+} catch(e) {}
+loadFromStorage();
+render();
+updateSheetInfo();
+
+// 周赛矩阵事件委托
+const weeklyMatrixEl = document.getElementById('weeklyMatrix');
+if (weeklyMatrixEl) {
+  weeklyMatrixEl.addEventListener('click', function(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const p1 = btn.dataset.p1;
+    const p2 = btn.dataset.p2;
+    if (action === 'set') {
+      setWeeklyResult(p1, p2, btn.dataset.winner);
+    } else if (action === 'remove') {
+      removeWeeklyResult(p1, p2);
+    }
+  });
+}
+
+/* ========== 核心逻辑 ========== */
+function getColor(name) {
+  if (!playerColors[name]) {
+    playerColors[name] = COLORS[colorIdx % COLORS.length];
+    colorIdx++;
+  }
+  return playerColors[name];
+}
+
+function updatePlayerDatalist() {
+  const list = document.getElementById('playerDatalist');
+  if (!list) return;
+  const players = new Set();
+  const accounts = {};
+  matches.forEach(m => {
+    players.add(m.winner);
+    players.add(m.loser);
+    if (m.winnerAccount && !accounts[m.winner]) accounts[m.winner] = m.winnerAccount;
+    if (m.loserAccount && !accounts[m.loser]) accounts[m.loser] = m.loserAccount;
+  });
+  list.innerHTML = Array.from(players).map(p => {
+    const acc = accounts[p];
+    return '<option value="' + escapeHtml(p) + '"' + (acc ? ' label="' + escapeHtml(acc) + '"' : '') + '>' + escapeHtml(p) + (acc ? ' (' + escapeHtml(acc) + ')' : '') + '</option>';
+  }).join('');
+}
+
+function autoFillAccount(inputId, accountInputId) {
+  const name = document.getElementById(inputId)?.value.trim();
+  if (!name) return;
+  for (const m of matches) {
+    if (m.winner === name && m.winnerAccount) {
+      const accInput = document.getElementById(accountInputId);
+      if (accInput && !accInput.value.trim()) accInput.value = m.winnerAccount;
+      return;
+    }
+    if (m.loser === name && m.loserAccount) {
+      const accInput = document.getElementById(accountInputId);
+      if (accInput && !accInput.value.trim()) accInput.value = m.loserAccount;
+      return;
+    }
+  }
+}
+
+function addMatch() {
+  const w = document.getElementById('rowWinner').value.trim();
+  const wa = (document.getElementById('rowWinnerAccount')?.value || '').trim();
+  const l = document.getElementById('rowLoser').value.trim();
+  const la = (document.getElementById('rowLoserAccount')?.value || '').trim();
+  const n = document.getElementById('rowNote').value.trim();
+  if (!w || !l) { alert(t('alertNeedNames')); return; }
+  if (w === l) { alert(t('alertSameName')); return; }
+
+  // 2.0 种子验证
+  const currentSeeds = calcSeedsFromMatches();
+  if (currentSeeds.includes(w)) { alert(t('alertSeed').replace('{name}', w)); return; }
+  if (currentSeeds.includes(l)) { alert(t('alertSeed').replace('{name}', l)); return; }
+  if (currentSeeds.length >= 6) { alert(t('alertPrelimFull')); return; }
+
+  matches.push({ winner: w, winnerAccount: wa, loser: l, loserAccount: la, note: n });
+  render();
+  autoSave();
+  setTimeout(() => document.getElementById('rowWinner').focus(), 0);
+}
+
+function deleteMatch(idx) {
+  if (!confirm(t('alertConfirmDel'))) return;
+  matches.splice(idx, 1);
+  if (editingMatchIdx === idx) editingMatchIdx = -1;
+  else if (editingMatchIdx > idx) editingMatchIdx--;
+  render();
+  autoSave();
+  updateSheetInfo();
+  renderSheetDropdown();
+}
+
+function editMatch(idx) {
+  editingMatchIdx = idx;
+  render();
+}
+
+function saveMatchEdit(idx) {
+  const old = matches[idx];
+  const w = document.getElementById('editWinner' + idx)?.value.trim();
+  const wa = document.getElementById('editWinnerAccount' + idx)?.value.trim() || '';
+  const l = document.getElementById('editLoser' + idx)?.value.trim();
+  const la = document.getElementById('editLoserAccount' + idx)?.value.trim() || '';
+  const n = document.getElementById('editNote' + idx)?.value.trim() || '';
+  if (!w || !l) { alert(t('alertNeedNames')); return; }
+  if (w === l) { alert(t('alertSameName')); return; }
+
+  const winnerNameChanged = old.winner !== w;
+  const loserNameChanged = old.loser !== l;
+  const winnerAccChanged = old.winnerAccount !== wa;
+  const loserAccChanged = old.loserAccount !== la;
+
+  let changes = [];
+  if (winnerNameChanged) changes.push('胜者昵称：「' + old.winner + '」→「' + w + '」');
+  else if (winnerAccChanged) changes.push('胜者账号：「' + old.winner + '」的账号改为「' + wa + '」');
+  if (loserNameChanged) changes.push('败者昵称：「' + old.loser + '」→「' + l + '」');
+  else if (loserAccChanged) changes.push('败者账号：「' + old.loser + '」的账号改为「' + la + '」');
+
+  if (changes.length > 0) {
+    const affectedW = winnerNameChanged || winnerAccChanged ? matches.filter(m => m.winner === old.winner).length : 0;
+    const affectedL = loserNameChanged || loserAccChanged ? matches.filter(m => m.loser === old.loser).length : 0;
+    let detail = changes.join('\n');
+    if (affectedW > 1 || affectedL > 1) detail += '\n\n将同步影响 ' + (affectedW + affectedL) + ' 条记录（含本场）';
+    if (!confirm('检测到变更，是否同步到所有同名记录？\n\n' + detail)) return;
+  }
+
+  // 同步胜者
+  if (winnerNameChanged || winnerAccChanged) {
+    matches.forEach(m => {
+      if (m.winner === old.winner) { m.winner = w; m.winnerAccount = wa; }
+    });
+    if (winnerNameChanged && playerColors[old.winner]) {
+      playerColors[w] = playerColors[old.winner];
+      delete playerColors[old.winner];
+    }
+  }
+  // 同步败者
+  if (loserNameChanged || loserAccChanged) {
+    matches.forEach(m => {
+      if (m.loser === old.loser) { m.loser = l; m.loserAccount = la; }
+    });
+    if (loserNameChanged && playerColors[old.loser]) {
+      playerColors[l] = playerColors[old.loser];
+      delete playerColors[old.loser];
+    }
+  }
+
+  // 更新当前这条（确保本条数据与输入一致）
+  matches[idx] = { winner: w, winnerAccount: wa, loser: l, loserAccount: la, note: n };
+
+  const champInput = document.getElementById('championAccount');
+  if (champInput) {
+    if (champInput.value.trim() === old.winner) champInput.value = w;
+    if (champInput.value.trim() === old.loser) champInput.value = l;
+  }
+  editingMatchIdx = -1;
+  render();
+  autoSave();
+  updatePlayerDatalist();
+  renderSheetDropdown();
+}
+
+function cancelMatchEdit() {
+  editingMatchIdx = -1;
+  render();
+}
+
+function editPlayer(name) {
+  editingPlayerName = name;
+  render();
+}
+
+function savePlayerEdit(oldName) {
+  const newName = document.getElementById('editPlayerName')?.value.trim();
+  const newAccount = document.getElementById('editPlayerAccount')?.value.trim() || '';
+  if (!newName) { alert(t('nameRequired')); return; }
+  if (newName !== oldName && matches.some(m => m.winner === newName || m.loser === newName)) {
+    if (!confirm('已存在名为「' + newName + '」的玩家，是否继续？')) return;
+  }
+  matches.forEach(m => {
+    if (m.winner === oldName) { m.winner = newName; if (newAccount) m.winnerAccount = newAccount; }
+    if (m.loser === oldName) { m.loser = newName; if (newAccount) m.loserAccount = newAccount; }
+  });
+  if (playerColors[oldName]) {
+    playerColors[newName] = playerColors[oldName];
+    delete playerColors[oldName];
+  }
+  const champInput = document.getElementById('championAccount');
+  if (champInput && champInput.value.trim() === oldName) champInput.value = newName;
+  editingPlayerName = '';
+  render();
+  autoSave();
+  updatePlayerDatalist();
+  renderSheetDropdown();
+}
+
+function cancelPlayerEdit() {
+  editingPlayerName = '';
+  render();
+}
+
+function calcSeedsFromMatches() {
+  const streaks = {};
+  const seedsSet = new Set();
+  for (const m of matches) {
+    if (!streaks[m.winner]) streaks[m.winner] = 0;
+    if (!streaks[m.loser])  streaks[m.loser]  = 0;
+    streaks[m.winner]++;
+    streaks[m.loser] = 0;
+    if (streaks[m.winner] === 3 && !seedsSet.has(m.winner)) {
+      seedsSet.add(m.winner);
+    }
+  }
+  return Array.from(seedsSet);
+}
+
+function calcRunningStats() {
+  const s = {}; // name -> {wins, losses, consecutiveWins}
+  const rowAlerts = [];
+  const seedsSet = new Set(calcSeedsFromMatches());
+  seeds = Array.from(seedsSet);
+
+  for (let i = 0; i < matches.length; i++) {
+    const m = matches[i];
+    if (!s[m.winner]) s[m.winner] = { wins:0, losses:0, consecutiveWins:0 };
+    if (!s[m.loser])  s[m.loser]  = { wins:0, losses:0, consecutiveWins:0 };
+
+    s[m.winner].wins++;
+    s[m.winner].consecutiveWins++;
+
+    s[m.loser].losses++;
+    s[m.loser].consecutiveWins = 0;
+
+    const alerts = [];
+    if (seedsSet.has(m.winner)) {
+      alerts.push('<span class="alert-tag alert-streak">🌱 ' + t('seedLabel') + '</span>');
+    }
+    if (seedsSet.size >= 6) {
+      alerts.push('<span class="alert-tag alert-success">✅ ' + t('prelimEnd') + '</span>');
+    }
+    rowAlerts.push(alerts.join(' '));
+  }
+  return { stats: s, rowAlerts };
+}
+
+
+
+function render() {
+  // 2.0 子视图控制
+  document.getElementById('preliminaryContainer').style.display = currentSubView === 'preliminary' ? 'block' : 'none';
+  document.getElementById('finalContainer').style.display = currentSubView === 'final' ? 'block' : 'none';
+  if (currentSubView === 'final') {
+    renderFinal();
+    return;
+  }
+
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('emptyState');
+  tbody.innerHTML = '';
+
+  const hasMatches = matches.length > 0;
+  empty.style.display = hasMatches ? 'none' : 'block';
+
+  const { stats, rowAlerts } = calcRunningStats();
+
+  // 渲染已有记录
+  matches.forEach((m, i) => {
+    const tr = document.createElement('tr');
+    if (i === editingMatchIdx) {
+      tr.innerHTML = `
+        <td>` + t('csvMatch') + ' ' + (i + 1) + `</td>
+        <td><input type="text" id="editWinner${i}" value="${escapeHtml(m.winner)}" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:13px;"><br><input type="text" id="editWinnerAccount${i}" value="${escapeHtml(m.winnerAccount || '')}" placeholder="${t('phAccount')}" style="width:100%;font-size:11px;color:var(--text2);margin-top:3px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 6px;"></td>
+        <td><input type="text" id="editLoser${i}" value="${escapeHtml(m.loser)}" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:13px;"><br><input type="text" id="editLoserAccount${i}" value="${escapeHtml(m.loserAccount || '')}" placeholder="${t('phAccount')}" style="width:100%;font-size:11px;color:var(--text2);margin-top:3px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 6px;"></td>
+        <td>—</td>
+        <td><input type="text" id="editNote${i}" value="${escapeHtml(m.note || '')}" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:13px;"></td>
+        <td><div style="display:flex;gap:4px;align-items:center;"><button class="btn-add" onclick="saveMatchEdit(${i})">保存</button><button class="btn-del" onclick="cancelMatchEdit()">取消</button></div></td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td>` + t('csvMatch') + ' ' + (i + 1) + `</td>
+        <td><span class="nickname" style="color:${getColor(m.winner)}">${escapeHtml(m.winner)}</span>${m.winnerAccount ? '<br><span style="font-size:11px;color:var(--text2);">' + escapeHtml(m.winnerAccount) + '</span>' : ''}</td>
+        <td><span class="nickname" style="color:${getColor(m.loser)}">${escapeHtml(m.loser)}</span>${m.loserAccount ? '<br><span style="font-size:11px;color:var(--text2);">' + escapeHtml(m.loserAccount) + '</span>' : ''}</td>
+        <td>${rowAlerts[i]}</td>
+        <td>${m.note ? escapeHtml(m.note) : '—'}</td>
+        <td><div style="display:flex;gap:4px;align-items:center;"><button class="btn-del" onclick="editMatch(${i})" title="编辑"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-del" onclick="deleteMatch(${i})" title="' + t('btnDel') + '"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button></div></td>
+      `;
+    }
+    tbody.appendChild(tr);
+  });
+
+  // 输入行（始终显示在表格末尾）
+  const inputTr = document.createElement('tr');
+  inputTr.className = 'input-row';
+  inputTr.innerHTML = `
+    <td>—</td>
+    <td><input type="text" id="rowWinner" list="playerDatalist" placeholder="${t('phWinner')}" onkeydown="if(event.key==='Enter')document.getElementById('rowWinnerAccount').focus()" oninput="autoFillAccount('rowWinner','rowWinnerAccount')"><br><input type="text" id="rowWinnerAccount" placeholder="${t('phAccountOptional')}" style="font-size:12px;color:var(--text2);margin-top:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;width:100%;" onkeydown="if(event.key==='Enter')document.getElementById('rowLoser').focus()"></td>
+    <td><input type="text" id="rowLoser" list="playerDatalist" placeholder="${t('phLoser')}" onkeydown="if(event.key==='Enter')document.getElementById('rowLoserAccount').focus()" oninput="autoFillAccount('rowLoser','rowLoserAccount')"><br><input type="text" id="rowLoserAccount" placeholder="${t('phAccountOptional')}" style="font-size:12px;color:var(--text2);margin-top:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;width:100%;" onkeydown="if(event.key==='Enter')document.getElementById('rowNote').focus()"></td>
+    <td>—</td>
+    <td><input type="text" id="rowNote" placeholder="${t('phNote')}" onkeydown="if(event.key==='Enter')addMatch()"></td>
+    <td><button class="btn-add" onclick="addMatch()">${t('btnAdd')}</button></td>
+  `;
+  tbody.appendChild(inputTr);
+
+  if (!hasMatches) {
+    document.getElementById('statusPanel').innerHTML = '';
+    document.getElementById('statsBody').innerHTML = '';
+    document.getElementById('championName').textContent = '—';
+    document.getElementById('tieNotice').textContent = '';
+    return;
+  }
+
+  // 渲染实时状态面板
+  const sp = document.getElementById('statusPanel');
+  sp.innerHTML = '';
+  // 种子计数
+  const seedCount = seeds.length;
+  const seedCounter = document.createElement('div');
+  seedCounter.style.cssText = 'font-size:13px;color:var(--gold);margin-bottom:10px;font-weight:600;';
+  seedCounter.textContent = t('seedCounter', {n: seedCount});
+  sp.appendChild(seedCounter);
+
+  Object.keys(stats).sort().forEach(name => {
+    const st = stats[name];
+    const chip = document.createElement('div');
+    chip.className = 'player-chip';
+    let statusHtml = '';
+    if (seeds.includes(name)) statusHtml = '<span class="streak">🌱 ' + t('seedLabel') + '</span>';
+    else if (st.consecutiveWins > 0) statusHtml = '<span class="streak">' + t('statusStreak', {n: st.consecutiveWins}) + '</span>';
+    else statusHtml = '<span style="color:var(--text2)">' + t('statusIdle') + '</span>';
+    chip.innerHTML = '<div class="name" style="color:' + getColor(name) + '">' + escapeHtml(name) + '</div><div class="stats">' + t('statsLabel', {w: st.wins, l: st.losses, s: statusHtml}) + '</div>';
+    sp.appendChild(chip);
+  });
+
+  // 初赛结束提示 + 生成复赛按钮
+  if (seedCount >= 6) {
+    const endDiv = document.createElement('div');
+    endDiv.style.cssText = 'margin-top:12px;padding:10px;background:var(--gold-dim);border:1px solid var(--gold);border-radius:8px;text-align:center;';
+    endDiv.innerHTML = '<div style="color:var(--gold);font-weight:600;margin-bottom:8px;">' + t('prelimEnd') + '</div>' +
+      '<button class="btn-add" onclick="generateFinalFromPreliminary()">' + t('generateFinal') + '</button>';
+    sp.appendChild(endDiv);
+  }
+
+  // 渲染日终积分统计
+  const finalStats = Object.keys(stats).map(name => {
+    const st = stats[name];
+    const total = st.wins + st.losses;
+    return { name, wins: st.wins, losses: st.losses, total, rate: total ? (st.wins/total*100).toFixed(1) + '%' : '0%' };
+  }).sort((a, b) => b.wins - a.wins || parseFloat(b.rate) - parseFloat(a.rate) || a.total - b.total);
+
+  function getPlayerAccount(name) {
+    for (const m of matches) {
+      if (m.winner === name && m.winnerAccount) return m.winnerAccount;
+      if (m.loser === name && m.loserAccount) return m.loserAccount;
+    }
+    return '';
+  }
+  const sb = document.getElementById('statsBody');
+  sb.innerHTML = '';
+  finalStats.forEach((s, i) => {
+    const acc = getPlayerAccount(s.name);
+    const tr = document.createElement('tr');
+    if (editingPlayerName === s.name) {
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td><input type="text" id="editPlayerName" value="${escapeHtml(s.name)}" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:13px;"><br><input type="text" id="editPlayerAccount" value="${escapeHtml(acc)}" placeholder="${t('phAccount')}" style="width:100%;font-size:11px;color:var(--text2);margin-top:3px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 6px;"></td>
+        <td style="color:var(--success);font-weight:600;">${s.wins}</td>
+        <td>${s.losses}</td>
+        <td>${s.total}</td>
+        <td>${s.rate}</td>
+        <td><div style="display:flex;gap:4px;align-items:center;"><button class="btn-add" onclick="savePlayerEdit('${escapeHtml(s.name).replace(/'/g, "\\'")}')">保存</button><button class="btn-del" onclick="cancelPlayerEdit()">取消</button></div></td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td><span style="color:${getColor(s.name)};font-weight:600;">${escapeHtml(s.name)}</span>${acc ? '<br><span style="font-size:11px;color:var(--text2);">' + escapeHtml(acc) + '</span>' : ''}</td>
+        <td style="color:var(--success);font-weight:600;">${s.wins}</td>
+        <td>${s.losses}</td>
+        <td>${s.total}</td>
+        <td>${s.rate}</td>
+        <td><button class="btn-del" onclick="editPlayer('${escapeHtml(s.name).replace(/'/g, "\\'")}')" title="编辑"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></td>
+      `;
+    }
+    sb.appendChild(tr);
+  });
+
+  // 判定日冠军
+  const top = finalStats[0];
+  const ties = top ? finalStats.filter(s => s.wins === top.wins && parseFloat(s.rate) === parseFloat(top.rate) && s.total === top.total) : [];
+  const champName = document.getElementById('championName');
+  const tieNotice = document.getElementById('tieNotice');
+  if (top) {
+    if (ties.length > 1) {
+      champName.textContent = ties.map(t => t.name).join('、') + t('tie');
+      tieNotice.textContent = t('tieNotice');
+      currentChampionNames = ties.map(t => t.name);
+    } else {
+      champName.textContent = top.name;
+      tieNotice.textContent = '';
+      currentChampionNames = [top.name];
+      // 自动回填冠军数字账号（从比赛记录中提取）
+      const champAccInput = document.getElementById('championAccount');
+      if (champAccInput && !champAccInput.value.trim()) {
+        for (const m of matches) {
+          if (m.winner === top.name && m.winnerAccount) {
+            champAccInput.value = m.winnerAccount;
+            break;
+          }
+        }
+      }
+    }
+  } else {
+    champName.textContent = '—';
+    tieNotice.textContent = '';
+    currentChampionNames = [];
+  }
+  updatePlayerDatalist();
+}
+
+/* ========== 存储 ========== */
+function getKey() {
+  const d = document.getElementById('matchDate').value;
+  const s = getCurrentServer();
+  return `pvp_score_v2_${d}_${s}`;
+}
+
+function autoSave() {
+  const date = document.getElementById('matchDate').value;
+  const server = getCurrentServer();
+  const champion = document.getElementById('championAccount').value;
+  if (matches.length === 0 && !champion && !finalData) {
+    localStorage.removeItem(getKey());
+  } else {
+    const data = {
+      date, server, matches, playerColors, colorIdx,
+      championAccount: champion,
+      championNames: currentChampionNames,
+      seeds,
+      finalData
+    };
+    localStorage.setItem(getKey(), JSON.stringify(data));
+  }
+  const status = document.getElementById('autoSaveStatus');
+  if (status) {
+    status.textContent = t('autoSaved') + ' ' + new Date().toLocaleTimeString();
+    status.style.color = 'var(--success)';
+    setTimeout(() => { status.style.color = 'var(--text2)'; }, 2000);
+  }
+}
+
+function saveData() { autoSave(); } // 兼容旧调用
+
+function buildDailyCSV() {
+  const date = document.getElementById('matchDate').value;
+  const server = getCurrentServer();
+  const champion = document.getElementById('championAccount').value;
+  let csv = t('csvDate') + ',' + t('csvServer') + ',' + t('csvChampion') + '\n';
+  csv += `${date},${server},${champion || ''}\n\n`;
+
+  // === 初赛 ===
+  csv += '=== ' + t('sectionPreliminary') + ' ===\n';
+  csv += t('csvNo') + ',' + t('csvMatch') + ',' + t('csvWinner') + ',胜方账号,' + t('csvLoser') + ',负方账号,' + t('csvNote') + '\n';
+  matches.forEach((m, i) => {
+    const note = (m.note || '').replace(/,/g, '，');
+    csv += `${i + 1},` + t('csvMatch') + ' ' + (i + 1) + `,${m.winner},${m.winnerAccount || ''},${m.loser},${m.loserAccount || ''},${note}\n`;
+  });
+
+  // === 种子选手 ===
+  const currentSeeds = calcSeedsFromMatches();
+  if (currentSeeds.length > 0) {
+    csv += '\n=== ' + t('sectionSeeds') + ' ===\n';
+    csv += t('csvNo') + ',' + t('csvName') + ',数字账号\n';
+    currentSeeds.forEach((name, i) => {
+      let acc = '';
+      for (const m of matches) {
+        if (m.winner === name && m.winnerAccount) { acc = m.winnerAccount; break; }
+        if (m.loser === name && m.loserAccount) { acc = m.loserAccount; break; }
+      }
+      csv += `${i + 1},${name},${acc}\n`;
+    });
+  }
+
+  // === 复赛 ===
+  if (finalData) {
+    csv += '\n=== ' + t('sectionFinal') + ' ===\n';
+    csv += t('csvNo') + ',' + t('csvMatch') + ',' + t('csvWinner') + ',胜方账号,' + t('csvLoser') + ',负方账号\n';
+    finalData.schedule.forEach((s, i) => {
+      const key = [s.p1, s.p2].sort().join('|');
+      const winner = finalData.results[key] || '';
+      const loser = winner === s.p1 ? s.p2 : (winner === s.p2 ? s.p1 : '');
+      csv += `${i + 1},` + t('csvMatch') + ' ' + (i + 1) + `,${winner},${winner ? (finalData.accounts[winner] || '') : ''},${loser},${loser ? (finalData.accounts[loser] || '') : ''}\n`;
+    });
+
+    // 复赛排名
+    const stats = calcWeeklyStats(finalData.players, finalData.results, []);
+    const sorted = Object.keys(stats).sort((a, b) => {
+      if (stats[b].points !== stats[a].points) return stats[b].points - stats[a].points;
+      const h2hA = stats[a].h2h[b];
+      const h2hB = stats[b].h2h[a];
+      if (h2hA === 'W' && h2hB === 'L') return -1;
+      if (h2hA === 'L' && h2hB === 'W') return 1;
+      return 0;
+    });
+    csv += '\n=== ' + t('sectionFinalStandings') + ' ===\n';
+    csv += t('csvRank') + ',' + t('csvName') + ',' + t('csvWins') + ',' + t('csvLosses') + ',' + t('weeklyPoints') + '\n';
+    sorted.forEach((name, i) => {
+      const st = stats[name];
+      csv += `${i + 1},${name},${st.wins},${st.losses},${st.points}\n`;
+    });
+  }
+
+  return csv;
+}
+
+function exportData() {
+  const csv = buildDailyCSV();
+  const date = document.getElementById('matchDate').value;
+  const server = getCurrentServer();
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pvp_score_v2_${date}_${server.replace(' ','')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportAllData() {
+  let csv = t('csvDate') + ',' + t('csvServer') + ',' + t('csvChampion') + '\n';
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('pvp_score_v2_')) keys.push(k);
+  }
+  keys.sort();
+  let totalMatches = 0;
+  keys.forEach(key => {
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      if (!data.matches || data.matches.length === 0) return;
+      const keyParts = key.replace('pvp_score_', '').split('_');
+      const date = data.date || keyParts[0];
+      const server = data.server || keyParts.slice(1).join(' ') || '';
+      const champion = data.championAccount || '';
+      csv += '\n' + date + ',' + server + ',' + champion + '\n';
+      csv += t('csvNo') + ',' + t('csvMatch') + ',' + t('csvWinner') + ',胜方账号,' + t('csvLoser') + ',负方账号,' + t('csvNote') + '\n';
+      data.matches.forEach((m, i) => {
+        const note = (m.note || '').replace(/,/g, '，');
+        csv += (i + 1) + ',' + t('csvMatch') + ' ' + (i + 1) + ',' + m.winner + ',' + (m.winnerAccount || '') + ',' + m.loser + ',' + (m.loserAccount || '') + ',' + note + '\n';
+      });
+      totalMatches += data.matches.length;
+    } catch (e) {}
+  });
+  if (totalMatches === 0) { alert(t('noHistoryData')); return; }
+  const blob2 = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url2 = URL.createObjectURL(blob2);
+  const a2 = document.createElement('a');
+  a2.href = url2;
+  a2.download = 'pvp_score_v2_all.csv';
+  a2.click();
+  URL.revokeObjectURL(url2);
+}
+
+function isDateLike(str) {
+  if (!str) return false;
+  return /^\d{4}-\d{2}-\d{2}$/.test(str) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str);
+}
+
+function importV2Data(rows, input) {
+  let metaDate = '', metaServer = '', metaChampion = '';
+  if (rows.length >= 2 && (rows[0].includes('日期') || rows[0].includes('Ngày'))) {
+    const metaCols = rows[1].split(',');
+    metaDate = normalizeDate(metaCols[0]?.trim() || '');
+    metaServer = (metaCols[1]?.trim() || getCurrentServer());
+    metaChampion = (metaCols[2]?.trim() || '');
+  }
+  if (metaServer === 'K') metaServer = 'K 服';
+  if (metaServer === 'Q') metaServer = 'Q 服';
+
+  // 按 === 区块分割
+  const sections = {};
+  let currentSection = null;
+  for (const row of rows) {
+    if (row.startsWith('===')) {
+      currentSection = row.replace(/===\s*|\s*===/g, '').trim();
+      sections[currentSection] = [];
+    } else if (currentSection) {
+      sections[currentSection].push(row);
+    }
+  }
+
+  // 解析初赛
+  const prelimMatches = [];
+  const prelimSectionName = t('sectionPreliminary');
+  const prelimRows = sections[prelimSectionName] || [];
+  let prelimHeaderIdx = -1;
+  prelimRows.forEach((r, i) => {
+    if (r.startsWith('序号') || r.startsWith('STT')) {
+      const cols = r.split(',');
+      const secondCol = (cols[1] || '').trim();
+      if (secondCol.includes('场次') || secondCol.includes('Trận') || secondCol.includes('Match')) {
+        prelimHeaderIdx = i;
+      }
+    }
+  });
+  if (prelimHeaderIdx >= 0) {
+    for (let i = prelimHeaderIdx + 1; i < prelimRows.length; i++) {
+      const cols = prelimRows[i].split(',');
+      if (cols.length < 4) continue;
+      const firstCol = cols[0].trim();
+      const secondCol = cols[1].trim();
+      if (!/^\d+$/.test(firstCol)) continue;
+      if (!secondCol.includes('场次') && !secondCol.includes('Trận') && !secondCol.includes('Match')) continue;
+      while (cols.length < 7) cols.push('');
+      prelimMatches.push({ winner: cols[2].trim(), winnerAccount: cols[3]?.trim() || '', loser: cols[4].trim(), loserAccount: cols[5]?.trim() || '', note: (cols[6] || '').trim() });
+    }
+  }
+
+  // 解析种子
+  const importedSeeds = [];
+  const seedSectionName = t('sectionSeeds');
+  const seedRows = sections[seedSectionName] || [];
+  let seedHeaderIdx = -1;
+  seedRows.forEach((r, i) => {
+    if (r.includes('昵称') || r.includes('Tên') || r.includes('Name')) seedHeaderIdx = i;
+  });
+  if (seedHeaderIdx >= 0) {
+    for (let i = seedHeaderIdx + 1; i < seedRows.length; i++) {
+      const cols = seedRows[i].split(',');
+      if (cols.length >= 2 && cols[1].trim()) importedSeeds.push(cols[1].trim());
+    }
+  }
+
+  // 解析复赛结果
+  const finalMatches = [];
+  const finalSectionName = t('sectionFinal');
+  const finalRows = sections[finalSectionName] || [];
+  let finalHeaderIdx = -1;
+  finalRows.forEach((r, i) => {
+    if (r.startsWith('序号') || r.startsWith('STT')) {
+      const cols = r.split(',');
+      const secondCol = (cols[1] || '').trim();
+      if (secondCol.includes('场次') || secondCol.includes('Trận') || secondCol.includes('Match')) {
+        finalHeaderIdx = i;
+      }
+    }
+  });
+  if (finalHeaderIdx >= 0) {
+    for (let i = finalHeaderIdx + 1; i < finalRows.length; i++) {
+      const cols = finalRows[i].split(',');
+      if (cols.length < 4) continue;
+      const firstCol = cols[0].trim();
+      if (!/^\d+$/.test(firstCol)) continue;
+      finalMatches.push({ winner: cols[2].trim(), loser: cols[4].trim() });
+    }
+  }
+
+  // 确认覆盖
+  const raw = localStorage.getItem(getKey());
+  const hasStoredData = raw && (() => { try { const d = JSON.parse(raw); return (d.matches && d.matches.length > 0) || !!d.finalData; } catch(e) { return false; } })();
+  if (hasStoredData && !confirm(t('alertConfirmImport'))) { input.value = ''; return; }
+  if (metaServer && metaServer !== getCurrentServer()) {
+    if (!confirm(t('csvServer') + ': ' + metaServer + ', ' + t('server') + ': ' + getCurrentServer() + '. ' + t('alertSwitchServer'))) { input.value = ''; return; }
+    switchServer(metaServer);
+  }
+
+  if (metaDate) document.getElementById('matchDate').value = metaDate;
+  if (metaChampion) document.getElementById('championAccount').value = metaChampion;
+  matches = prelimMatches;
+  seeds = importedSeeds;
+
+  // 重建复赛数据
+  if (importedSeeds.length >= 2) {
+    const accounts = {};
+    for (const m of prelimMatches) {
+      if (importedSeeds.includes(m.winner) && m.winnerAccount) accounts[m.winner] = m.winnerAccount;
+      if (importedSeeds.includes(m.loser) && m.loserAccount) accounts[m.loser] = m.loserAccount;
+    }
+    const schedule = [];
+    for (let i = 0; i < importedSeeds.length; i++) {
+      for (let j = i + 1; j < importedSeeds.length; j++) {
+        schedule.push({ p1: importedSeeds[i], p2: importedSeeds[j] });
+      }
+    }
+    const results = {};
+    for (const fm of finalMatches) {
+      if (fm.winner && fm.loser) {
+        const key = [fm.winner, fm.loser].sort().join('|');
+        results[key] = fm.winner;
+      }
+    }
+    finalData = { players: importedSeeds.slice(), accounts, results, schedule };
+  } else {
+    finalData = null;
+  }
+
+  render(); autoSave();
+  updateSheetInfo();
+  alert(t('alertImportOK', {n: prelimMatches.length}));
+  input.value = '';
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result.replace(/^\uFEFF/, '').trim();
+    const rows = text.split('\n').map(r => r.trim()).filter(r => r);
+
+    // 2.0 多区块格式检测
+    if (rows.some(r => r.startsWith('==='))) {
+      importV2Data(rows, input);
+      return;
+    }
+
+    const csvNoKeys = ['序号', 'STT'];
+    const headerIndices = [];
+    rows.forEach((r, i) => {
+      if (csvNoKeys.some(k => r.startsWith(k))) {
+        // 过滤统计表 header（如 STT,Tên,...），只保留比赛数据 header（第二列含 场次/Trận）
+        const cols = r.split(',');
+        const secondCol = (cols[1] || '').trim();
+        if (secondCol.includes('场次') || secondCol.includes('Trận') || secondCol.includes('Match')) {
+          headerIndices.push(i);
+        }
+      }
+    });
+    if (headerIndices.length === 0) { alert(t('alertCSVError')); input.value = ''; return; }
+
+    // 解析每个数据块
+    const blocks = [];
+    headerIndices.forEach((hi, idx) => {
+      let metaRow = null;
+      for (let back = 1; back <= 3 && hi - back >= 0; back++) {
+        const cols = rows[hi - back].split(',');
+        if (isDateLike(cols[0] && cols[0].trim())) {
+          metaRow = rows[hi - back].split(',').map(c => c.trim());
+          break;
+        }
+      }
+      const matches = [];
+      const endIdx = idx < headerIndices.length - 1 ? headerIndices[idx + 1] : rows.length;
+      const headerCols = rows[hi].split(',');
+      const hasAccountCols = headerCols.length >= 7;
+      for (let i = hi + 1; i < endIdx; i++) {
+        const cols = rows[i].split(',');
+        if (cols.length < 4) continue;
+        // 识别比赛数据行：第一列为序号数字，第二列含场次标记
+        const firstCol = cols[0].trim();
+        const secondCol = cols[1].trim();
+        const isNumber = /^\d+$/.test(firstCol);
+        const hasRoundMarker = secondCol.includes('场次') || secondCol.includes('Trận');
+        if (!isNumber || !hasRoundMarker) continue; // 跳过统计汇总行等非比赛数据
+        // 根据 header 列数补齐数据行，防止 header 7 列但数据行 5 列时的错位解析
+        while (cols.length < headerCols.length) cols.push('');
+        // 根据数据行实际列数解析，兼容 7列(含账号) / 5列(旧格式)
+        if (cols.length >= 7) {
+          matches.push({ winner: cols[2].trim(), winnerAccount: cols[3]?.trim() || '', loser: cols[4].trim(), loserAccount: cols[5]?.trim() || '', note: (cols[6] || '').trim() });
+        } else if (cols.length === 6 && hasAccountCols) {
+          // header 有 7 列但数据行仅 6 列（末尾空备注被省略），仍按含账号解析
+          matches.push({ winner: cols[2].trim(), winnerAccount: cols[3]?.trim() || '', loser: cols[4].trim(), loserAccount: cols[5]?.trim() || '', note: '' });
+        } else if (cols.length >= 5) {
+          matches.push({ winner: cols[2].trim(), loser: cols[3].trim(), note: (cols[4] || '').trim() });
+        } else {
+          matches.push({ winner: cols[2].trim(), loser: cols[3].trim(), note: '' });
+        }
+      }
+      let srv = metaRow ? (metaRow[1] || '').trim() : getCurrentServer();
+      // 兼容旧导出文件中的服务器名（K/Q 没有空格）
+      if (srv === 'K') srv = 'K 服';
+      if (srv === 'Q') srv = 'Q 服';
+      blocks.push({
+        date: metaRow ? normalizeDate(metaRow[0]) : document.getElementById('matchDate').value,
+        server: srv,
+        champion: metaRow ? (metaRow[2] || '').trim() : '',
+        matches: matches
+      });
+    });
+
+    const totalMatches = blocks.reduce((sum, b) => sum + b.matches.length, 0);
+    if (totalMatches === 0) { alert(t('alertCSVError')); input.value = ''; return; }
+
+    if (blocks.length === 1) {
+      // 单日导入：保持原有确认覆盖 + 服务器切换逻辑
+      const raw = localStorage.getItem(getKey());
+      const hasStoredData = raw && (() => { try { const d = JSON.parse(raw); return (d.matches && d.matches.length > 0) || !!d.championAccount; } catch(e) { return false; } })();
+      if (hasStoredData && !confirm(t('alertConfirmImport'))) { input.value = ''; return; }
+      const b = blocks[0];
+      const currentServer = getCurrentServer();
+      if (b.server && b.server !== currentServer) {
+        if (!confirm(t('csvServer') + ': ' + b.server + ', ' + t('server') + ': ' + currentServer + '. ' + t('alertSwitchServer'))) { input.value = ''; return; }
+        switchServer(b.server);
+      }
+      matches = b.matches;
+      if (b.date) document.getElementById('matchDate').value = b.date;
+      if (b.champion) document.getElementById('championAccount').value = b.champion;
+      // 若 CSV 未提供冠军账号，从比赛记录自动推断（按胜场→胜率→总场次取第一）
+      const champAccInput = document.getElementById('championAccount');
+      if (champAccInput && !champAccInput.value.trim() && matches.length > 0) {
+        const stats = {};
+        matches.forEach(m => {
+          if (!stats[m.winner]) stats[m.winner] = {wins:0,losses:0};
+          if (!stats[m.loser]) stats[m.loser] = {wins:0,losses:0};
+          stats[m.winner].wins++; stats[m.loser].losses++;
+        });
+        const top = Object.keys(stats).map(n => {
+          const s = stats[n];
+          const t = s.wins + s.losses;
+          return {name:n, wins:s.wins, rate:t ? s.wins/t : 0, total:t};
+        }).sort((a,b) => b.wins - a.wins || b.rate - a.rate || a.total - b.total)[0];
+        if (top) {
+          const tie = Object.values(stats).some(s => {
+            const t = s.wins + s.losses;
+            return s.wins === top.wins && (t ? s.wins/t : 0) === top.rate && t === top.total;
+          });
+          if (!tie) {
+            for (const m of matches) {
+              if (m.winner === top.name && m.winnerAccount) {
+                champAccInput.value = m.winnerAccount; break;
+              }
+            }
+          }
+        }
+      }
+      render(); autoSave();
+      updateSheetInfo();
+      alert(t('alertImportOK', {n: b.matches.length}));
+    } else {
+      // 多日导入
+      if (!confirm(`检测到 ${blocks.length} 天的数据，共 ${totalMatches} 场比赛。是否导入？`)) { input.value = ''; return; }
+      blocks.forEach(b => {
+        const key = 'pvp_score_' + b.date + '_' + b.server;
+        const existing = localStorage.getItem(key);
+        const existingData = existing ? JSON.parse(existing) : {};
+        localStorage.setItem(key, JSON.stringify({
+          date: b.date, server: b.server,
+          championAccount: b.champion,
+          matches: b.matches,
+          playerColors: existingData.playerColors || {},
+          colorIdx: existingData.colorIdx || 0
+        }));
+      });
+      render(); autoSave();
+      updateSheetInfo();
+      const dateList = blocks.map(b => formatDateDisplay(b.date)).join(', ');
+      alert(t('importMultiOK', {n: blocks.length, dates: dateList}));
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+
+function loadFromStorage() {
+  const raw = localStorage.getItem(getKey());
+  if (raw) {
+    try {
+      const data = JSON.parse(raw);
+      matches = data.matches || [];
+      playerColors = data.playerColors || {};
+      colorIdx = data.colorIdx || 0;
+      document.getElementById('championAccount').value = data.championAccount || '';
+      currentChampionNames = data.championNames || [];
+      seeds = data.seeds || [];
+      finalData = data.finalData || null;
+    } catch(e) {}
+  }
+}
+
+function newSheet(skipConfirm) {
+  if (skipConfirm) {
+    matches = []; playerColors = {}; colorIdx = 0; seeds = []; finalData = null;
+    document.getElementById('championAccount').value = '';
+    render();
+    return;
+  }
+  if ((matches.length > 0 || finalData) && !confirm(t('alertConfirmNew'))) return;
+  openSheetModal();
+}
+
+function normalizeDate(dateStr) {
+  if (!dateStr) return '';
+  dateStr = dateStr.trim().replace(/^["']|["']$/g, '');
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  // M/D/YYYY or MM/DD/YYYY — smart parse: if first part > 12 it's day (DD/MM),
+  // if second part > 12 it's day (MM/DD), otherwise default MM/DD/YYYY.
+  const m1 = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m1) {
+    const p1 = parseInt(m1[1], 10);
+    const p2 = parseInt(m1[2], 10);
+    const year = m1[3];
+    if (p1 > 12) {
+      // p1 is day → DD/MM/YYYY
+      return year + '-' + String(p2).padStart(2, '0') + '-' + String(p1).padStart(2, '0');
+    }
+    if (p2 > 12) {
+      // p2 is day → MM/DD/YYYY
+      return year + '-' + String(p1).padStart(2, '0') + '-' + String(p2).padStart(2, '0');
+    }
+    // ambiguous: default MM/DD/YYYY (matches Excel US-style export common in VN workflows)
+    return year + '-' + String(p1).padStart(2, '0') + '-' + String(p2).padStart(2, '0');
+  }
+  // YYYY/MM/DD or YYYY/M/D
+  const m2 = dateStr.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  if (m2) {
+    const mo = m2[2].padStart(2, '0');
+    const d = m2[3].padStart(2, '0');
+    return m2[1] + '-' + mo + '-' + d;
+  }
+  return dateStr;
+}
+
+function formatDateDisplay(dateStr) {
+  if (!dateStr || dateStr === '—') return '—';
+  if (lang === 'vi') {
+    const p = dateStr.split('-');
+    if (p.length === 3) return p[2] + '/' + p[1] + '/' + p[0];
+  }
+  return dateStr;
+}
+
+function updateSheetInfo() {
+  const date = document.getElementById('matchDate').value;
+  const server = getCurrentServer();
+  const el = document.getElementById('sheetInfo');
+  if (el) el.textContent = formatDateDisplay(date || '—') + ' · ' + (server || '—');
+}
+
+function toggleSheetDropdown() {
+  const dropdown = document.getElementById('sheetDropdown');
+  const info = document.getElementById('sheetInfo');
+  if (dropdown.style.display === 'none') {
+    renderSheetDropdown();
+    dropdown.style.display = 'block';
+    info.classList.add('open');
+  } else {
+    dropdown.style.display = 'none';
+    info.classList.remove('open');
+  }
+}
+
+function renderSheetDropdown() {
+  const list = document.getElementById('sheetDropdownList');
+  const items = getAllDataKeys();
+  const currentDate = document.getElementById('matchDate').value;
+  const currentSrv = getCurrentServer();
+  if (!items.length) {
+    list.innerHTML = '<div style="padding:8px;color:var(--text2);font-size:12px;">' + t('noHistoryData') + '</div>';
+    return;
+  }
+  var html = '';
+  items.forEach(item => {
+    item.servers.forEach(srv => {
+      const isActive = item.date === currentDate && srv === currentSrv;
+      html += '<div class="sheet-dropdown-item' + (isActive ? ' active' : '') + '" onclick="switchToSheet(\'' + item.date + '\', ' + '\'' + srv + '\'' + ')">' +
+        '<span>' + formatDateDisplay(item.date) + '</span>' +
+        '<span style="opacity:0.7;">' + srv + '</span>' +
+        '</div>';
+    });
+  });
+  list.innerHTML = html;
+}
+
+function switchToSheet(date, server) {
+  document.getElementById('sheetDropdown').style.display = 'none';
+  document.getElementById('sheetInfo').classList.remove('open');
+  document.getElementById('matchDate').value = date;
+  currentServer = server;
+  matches = []; playerColors = {}; colorIdx = 0;
+  document.getElementById('championAccount').value = '';
+  loadFromStorage();
+  render();
+  updateSheetInfo();
+}
+
+function openSheetModal() {
+  document.getElementById('sheetModal').classList.add('open');
+  document.getElementById('modalDate').value = document.getElementById('matchDate').value || new Date().toISOString().slice(0,10);
+  modalServer = getCurrentServer();
+  const btnK = document.getElementById('modalBtnK');
+  const btnQ = document.getElementById('modalBtnQ');
+  if (modalServer === 'K 服') { btnK.classList.add('active'); btnQ.classList.remove('active'); }
+  else { btnK.classList.remove('active'); btnQ.classList.add('active'); }
+  renderModalDataList();
+}
+
+function getAllDataKeys() {
+  const map = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('pvp_score_')) {
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
+        if (!data.matches || data.matches.length === 0) continue;
+        const parts = key.replace('pvp_score_', '').split('_');
+        if (parts.length >= 2 && parts[0] && /^\d{4}-\d{2}-\d{2}$/.test(parts[0])) {
+          if (!map[parts[0]]) map[parts[0]] = new Set();
+          map[parts[0]].add(parts.slice(1).join(' '));
+        }
+      } catch(e) {}
+    }
+  }
+  return Object.keys(map).sort().map(d => ({ date: d, servers: [...map[d]].sort() }));
+}
+
+function renderModalDataList() {
+  const container = document.getElementById('modalDataList');
+  if (!container) return;
+  const items = getAllDataKeys();
+  const currentDate = document.getElementById('modalDate').value;
+  if (!items.length) { container.innerHTML = ''; return; }
+  container.innerHTML = '<div class="data-label">' + t('existingDataLabel') + '</div>' +
+    items.map(item => {
+      const isActive = item.date === currentDate;
+      return '<span class="data-tag' + (isActive ? ' active' : '') + '" onclick="quickOpenDate(\'' + item.date + '\', \'' + item.servers[0] + '\')">' + formatDateDisplay(item.date) + ' (' + item.servers.join('/') + ')</span>';
+    }).join('');
+}
+
+function quickOpenDate(date, server) {
+  document.getElementById('modalDate').value = date;
+  modalSwitchServer(server);
+  renderModalDataList();
+}
+function closeSheetModal() {
+  document.getElementById('sheetModal').classList.remove('open');
+}
+function modalSwitchServer(srv) {
+  modalServer = srv;
+  const btnK = document.getElementById('modalBtnK');
+  const btnQ = document.getElementById('modalBtnQ');
+  if (modalServer === 'K 服') { btnK.classList.add('active'); btnQ.classList.remove('active'); }
+  else { btnK.classList.remove('active'); btnQ.classList.add('active'); }
+}
+function confirmSheetModal() {
+  try {
+    const date = document.getElementById('modalDate').value;
+    if (!date) { alert(t('alertNeedDate')); return; }
+    const targetKey = 'pvp_score_' + date + '_' + modalServer;
+    const existing = localStorage.getItem(targetKey);
+    if (existing) {
+      try {
+        const d = JSON.parse(existing);
+        const hasData = (d.matches && d.matches.length > 0) || !!d.championAccount;
+        if (hasData && !confirm(t('alertConfirmImport'))) return;
+      } catch(e) {}
+    }
+    document.getElementById('matchDate').value = date;
+    currentServer = modalServer;
+    matches = []; playerColors = {}; colorIdx = 0;
+    document.getElementById('championAccount').value = '';
+    loadFromStorage();
+    render();
+    updateSheetInfo();
+    closeSheetModal();
+  } catch (err) {
+    alert('confirmSheetModal 错误: ' + err.message);
+    console.error(err);
+  }
+}
+
+function clearData() {
+  let hasAnyData = matches.length > 0 || finalData;
+  if (!hasAnyData) {
+    for (let i = 0; i < localStorage.length; i++) {
+      if (localStorage.key(i)?.startsWith('pvp_score_v2_')) { hasAnyData = true; break; }
+    }
+  }
+  if (!hasAnyData) { alert(t('alertClearEmpty')); return; }
+  if (!confirm(t('alertClearConfirmAll'))) return;
+  matches = []; playerColors = {}; colorIdx = 0; seeds = []; finalData = null;
+  document.getElementById('championAccount').value = '';
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('pvp_score_')) localStorage.removeItem(key);
+  }
+  render();
+  updateSheetInfo();
+  renderSheetDropdown();
+}
+
+
+
+
+function switchServer(srv) {
+  currentServer = srv;
+  matches = []; playerColors = {}; colorIdx = 0;
+  document.getElementById('championAccount').value = '';
+  loadFromStorage();
+  render();
+  updateSheetInfo();
+  // 同步更新周赛服务器显示
+  const weeklyDisp = document.getElementById('weeklyServerDisplay');
+  if (weeklyDisp) weeklyDisp.textContent = srv;
+  const wk = document.getElementById('weeklyBtnK');
+  const wq = document.getElementById('weeklyBtnQ');
+  if (wk && wq) {
+    if (srv === 'K 服') { wk.classList.add('active'); wq.classList.remove('active'); }
+    else { wk.classList.remove('active'); wq.classList.add('active'); }
+  }
+  if (document.getElementById('weeklyView').style.display !== 'none') {
+    loadWeeklyData();
+  }
+}
+
+function getCurrentServer() {
+  return currentServer;
+}
+
+
+/* ========== Tab 切换 ========== */
+function switchTab(tab) {
+  const tabDaily = document.getElementById('tabDaily');
+  const tabWeekly = document.getElementById('tabWeekly');
+  if (tab === 'daily') {
+    tabDaily.classList.add('active');
+    tabWeekly.classList.remove('active');
+  } else {
+    tabDaily.classList.remove('active');
+    tabWeekly.classList.add('active');
+  }
+  document.getElementById('dailyView').style.display = tab === 'daily' ? 'block' : 'none';
+  document.getElementById('weeklyView').style.display = tab === 'weekly' ? 'block' : 'none';
+  const pageTitle = document.getElementById('pageTitle');
+  const mainTitle = document.getElementById('mainTitle');
+  const titleText = (tab === 'weekly' ? '⚔ ' + t('tabWeekly') : t('title'));
+  if (pageTitle) pageTitle.textContent = titleText + ' · PVP 巅峰对决';
+  if (mainTitle) mainTitle.textContent = titleText;
+  if (tab === 'weekly') {
+    initWeeklyView();
+  }
+}
+
+/* ========== 周赛逻辑 ========== */
+function shiftWeek(days) {
+  const el = document.getElementById('weeklyDate');
+  if (!el.value) return;
+  const d = new Date(el.value + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  el.value = d.toISOString().slice(0, 10);
+  loadWeeklyData();
+}
+function initWeeklyDatePreset() {
+  const sel = document.getElementById('weeklyDatePreset');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">📋 已有周赛</option>';
+  const dates = Object.keys(DEFAULT_WEEKLY_DATA).sort();
+  dates.forEach(date => {
+    const servers = Object.keys(DEFAULT_WEEKLY_DATA[date]).sort();
+    servers.forEach(srv => {
+      const opt = document.createElement('option');
+      opt.value = date;
+      opt.textContent = date + ' · ' + srv;
+      sel.appendChild(opt);
+    });
+  });
+}
+function initWeeklyView() {
+  initWeeklyDatePreset();
+  const el = document.getElementById('weeklyDate');
+  if (!el.value) {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() + daysToSunday);
+    el.value = sunday.toISOString().slice(0, 10);
+  }
+  const srv = getCurrentServer();
+  document.getElementById('weeklyServerDisplay').textContent = srv;
+  const wk = document.getElementById('weeklyBtnK');
+  const wq = document.getElementById('weeklyBtnQ');
+  if (wk && wq) {
+    if (srv === 'K 服') { wk.classList.add('active'); wq.classList.remove('active'); }
+    else { wk.classList.remove('active'); wq.classList.add('active'); }
+  }
+  loadWeeklyData();
+}
+
+function getWeeklyKey() {
+  const date = document.getElementById('weeklyDate').value;
+  return 'pvp_weekly_' + date + '_' + getCurrentServer();
+}
+
+function loadWeeklyData() {
+  const key = getWeeklyKey();
+  const raw = localStorage.getItem(key);
+  if (raw) {
+    try {
+      const d = JSON.parse(raw);
+      weeklyPlayers = d.players || [];
+      weeklyAbsent = d.absent || [];
+      weeklyResults = d.results || {};
+      weeklyPlayerAccounts = d.accounts || {};
+      weeklySchedule = d.schedule || [];
+    } catch(e) {
+      weeklyPlayers = []; weeklyAbsent = []; weeklyResults = {}; weeklyPlayerAccounts = {}; weeklySchedule = [];
+    }
+  } else {
+    // 若本地无数据，尝试加载默认周赛数据
+    const date = document.getElementById('weeklyDate').value;
+    const srv = getCurrentServer();
+    const defaults = DEFAULT_WEEKLY_DATA[date] && DEFAULT_WEEKLY_DATA[date][srv];
+    if (defaults) {
+      weeklyPlayers = defaults.players || [];
+      weeklyAbsent = defaults.absent || [];
+      weeklyResults = defaults.results || {};
+      weeklyPlayerAccounts = defaults.accounts || {};
+      weeklySchedule = defaults.schedule || [];
+      autoSaveWeekly();
+    } else {
+      weeklyPlayers = []; weeklyAbsent = []; weeklyResults = {}; weeklyPlayerAccounts = {}; weeklySchedule = [];
+    }
+  }
+  renderWeekly();
+}
+
+function autoSaveWeekly() {
+  const data = {
+    date: document.getElementById('weeklyDate').value,
+    server: getCurrentServer(),
+    players: weeklyPlayers,
+    absent: weeklyAbsent,
+    results: weeklyResults,
+    accounts: weeklyPlayerAccounts,
+    schedule: weeklySchedule
+  };
+  localStorage.setItem(getWeeklyKey(), JSON.stringify(data));
+}
+
+function calcChampionNames(matches) {
+  if (!matches || matches.length === 0) return [];
+  const stats = {};
+  matches.forEach(m => {
+    stats[m.winner] = stats[m.winner] || {wins:0, losses:0};
+    stats[m.winner].wins++;
+    stats[m.loser] = stats[m.loser] || {wins:0, losses:0};
+    stats[m.loser].losses++;
+  });
+  const finalStats = Object.keys(stats).map(name => {
+    const st = stats[name];
+    const total = st.wins + st.losses;
+    return {name, wins: st.wins, losses: st.losses, total, rate: total ? st.wins/total : 0};
+  }).sort((a, b) => b.wins - a.wins || b.rate - a.rate || a.total - b.total);
+  const top = finalStats[0];
+  if (!top) return [];
+  const ties = finalStats.filter(s => s.wins === top.wins && s.rate === top.rate && s.total === top.total);
+  return ties.map(t => t.name);
+}
+
+function refreshWeeklyPlayers() {
+  const weekDate = document.getElementById('weeklyDate').value;
+  if (!weekDate) { alert(t('alertNeedDate')); return; }
+  const server = getCurrentServer();
+  const [y, m, d] = weekDate.split('-').map(Number);
+  const champions = new Set();
+  const accounts = {};
+  for (let i = 0; i < 6; i++) {
+    const dateObj = new Date(y, m - 1, d - 6 + i);
+    const dateStr = dateObj.getFullYear() + '-' + String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + String(dateObj.getDate()).padStart(2, '0');
+    const key = 'pvp_score_' + dateStr + '_' + server;
+    // 排除 2.0 数据，避免误判
+    const v2Key = 'pvp_score_v2_' + dateStr + '_' + server;
+    if (localStorage.getItem(v2Key)) continue;
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      try {
+        const data = JSON.parse(raw);
+        // 跳过没有实际比赛记录的日期
+        if (!data.matches || data.matches.length === 0) continue;
+        const acc = (data.championAccount || '').trim();
+        let names = data.championNames;
+        if (!names || !Array.isArray(names) || names.length === 0) {
+          names = calcChampionNames(data.matches);
+        }
+        if (names.length > 0) {
+          names.forEach(n => {
+            champions.add(n);
+            if (acc && !accounts[n]) accounts[n] = acc;
+          });
+        } else if (acc) {
+          champions.add(acc);
+          if (!accounts[acc]) accounts[acc] = acc;
+        }
+      } catch(e) {}
+    }
+  }
+  weeklyPlayers = Array.from(champions);
+  weeklyAbsent = [];
+  weeklyResults = {};
+  weeklyPlayerAccounts = accounts;
+  autoSaveWeekly();
+  renderWeekly();
+  if (weeklyPlayers.length === 0) {
+    alert(t('noWeeklyChampions'));
+  }
+}
+
+function generateWeeklySchedule() {
+  const players = weeklyPlayers;
+  if (players.length < 2) { weeklySchedule = []; autoSaveWeekly(); renderWeekly(); return; }
+  const schedule = [];
+  for (let i = 0; i < players.length; i++) {
+    for (let j = i + 1; j < players.length; j++) {
+      schedule.push({ p1: players[i], p2: players[j] });
+    }
+  }
+  // Fisher-Yates 随机打乱
+  for (let i = schedule.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [schedule[i], schedule[j]] = [schedule[j], schedule[i]];
+  }
+  weeklySchedule = schedule;
+  autoSaveWeekly();
+  renderWeekly();
+}
+
+/* ========== 2.0 复赛逻辑 ========== */
+function switchSubView(view) {
+  currentSubView = view;
+  document.getElementById('tabPreliminary').className = view === 'preliminary' ? 'active' : '';
+  document.getElementById('tabFinal').className = view === 'final' ? 'active' : '';
+  document.getElementById('preliminaryContainer').style.display = view === 'preliminary' ? 'block' : 'none';
+  document.getElementById('finalContainer').style.display = view === 'final' ? 'block' : 'none';
+  if (view === 'final') renderFinal();
+}
+
+function generateFinalFromPreliminary() {
+  const currentSeeds = calcSeedsFromMatches();
+  if (currentSeeds.length < 6) {
+    alert(t('alertNeed6Seeds'));
+    return;
+  }
+  // 提取种子选手的账号信息
+  const accounts = {};
+  for (const m of matches) {
+    if (currentSeeds.includes(m.winner) && m.winnerAccount) {
+      accounts[m.winner] = m.winnerAccount;
+    }
+    if (currentSeeds.includes(m.loser) && m.loserAccount) {
+      accounts[m.loser] = m.loserAccount;
+    }
+  }
+  // 生成单循环赛程（15场）
+  const schedule = [];
+  for (let i = 0; i < currentSeeds.length; i++) {
+    for (let j = i + 1; j < currentSeeds.length; j++) {
+      schedule.push({ p1: currentSeeds[i], p2: currentSeeds[j] });
+    }
+  }
+  // Fisher-Yates 随机打乱
+  for (let i = schedule.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [schedule[i], schedule[j]] = [schedule[j], schedule[i]];
+  }
+  finalData = {
+    players: currentSeeds.slice(),
+    accounts: accounts,
+    results: {},
+    schedule: schedule
+  };
+  autoSave();
+  switchSubView('final');
+}
+
+function setFinalResult(p1, p2, winner) {
+  if (!finalData) return;
+  const key = [p1, p2].sort().join('|');
+  finalData.results[key] = winner;
+  autoSave();
+  renderFinal();
+}
+
+function removeFinalResult(p1, p2) {
+  if (!finalData) return;
+  const key = [p1, p2].sort().join('|');
+  delete finalData.results[key];
+  autoSave();
+  renderFinal();
+}
+
+function clearFinalData() {
+  if (!confirm(t('alertConfirmClearFinal'))) return;
+  finalData = null;
+  autoSave();
+  switchSubView('preliminary');
+}
+
+function exportFinalData() {
+  if (!finalData) return;
+  const date = document.getElementById('matchDate').value;
+  const server = getCurrentServer();
+  let csv = t('csvDate') + ',' + t('csvServer') + '\n';
+  csv += `${date},${server}\n\n`;
+  csv += '=== ' + t('sectionFinal') + ' ===\n';
+  csv += t('csvNo') + ',' + t('csvMatch') + ',' + t('csvWinner') + ',胜方账号,' + t('csvLoser') + ',负方账号\n';
+  finalData.schedule.forEach((s, i) => {
+    const key = [s.p1, s.p2].sort().join('|');
+    const winner = finalData.results[key] || '';
+    const loser = winner === s.p1 ? s.p2 : (winner === s.p2 ? s.p1 : '');
+    csv += `${i + 1},` + t('csvMatch') + ' ' + (i + 1) + `,${winner},${winner ? (finalData.accounts[winner] || '') : ''},${loser},${loser ? (finalData.accounts[loser] || '') : ''}\n`;
+  });
+  csv += '\n=== ' + t('sectionFinalStandings') + ' ===\n';
+  csv += t('csvRank') + ',' + t('csvName') + ',' + t('csvWins') + ',' + t('csvLosses') + ',' + t('weeklyPoints') + '\n';
+  const stats = calcWeeklyStats(finalData.players, finalData.results, []);
+  const sorted = Object.keys(stats).sort((a, b) => {
+    if (stats[b].points !== stats[a].points) return stats[b].points - stats[a].points;
+    const h2hA = stats[a].h2h[b];
+    const h2hB = stats[b].h2h[a];
+    if (h2hA === 'W' && h2hB === 'L') return -1;
+    if (h2hA === 'L' && h2hB === 'W') return 1;
+    return 0;
+  });
+  sorted.forEach((name, i) => {
+    const st = stats[name];
+    csv += `${i + 1},${name},${st.wins},${st.losses},${st.points}\n`;
+  });
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pvp_score_v2_final_${date}_${server.replace(' ','')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function renderFinal() {
+  if (!finalData) {
+    document.getElementById('finalScheduleList').innerHTML = '<div class="empty">' + t('emptyFinal') + '</div>';
+    document.getElementById('finalStandingsBody').innerHTML = '';
+    return;
+  }
+  const { players, results, schedule, accounts } = finalData;
+
+  // 赛程卡片
+  const scheduleList = document.getElementById('finalScheduleList');
+  scheduleList.innerHTML = schedule.map((s, idx) => {
+    const key = [s.p1, s.p2].sort().join('|');
+    const winner = results[key];
+    const done = !!winner;
+    let cardClass = 'pending';
+    let headerRight = '';
+    let p1WinBtn = '';
+    let p2WinBtn = '';
+    let p1NameColor = getColor(s.p1);
+    let p2NameColor = getColor(s.p2);
+    if (done) {
+      cardClass = 'done';
+      headerRight = '<span class="schedule-status-win">✓ ' + escapeHtml(winner) + ' ' + t('winBtn') + '</span>' +
+        '<button class="schedule-del-btn" onclick="removeFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('btnDel') + '</button>';
+      if (winner !== s.p1) p1NameColor = 'var(--text2)';
+      if (winner !== s.p2) p2NameColor = 'var(--text2)';
+    } else {
+      p1WinBtn = '<button class="schedule-win-btn" onclick="setFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
+      p2WinBtn = '<button class="schedule-win-btn" onclick="setFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
+    }
+    const p1Acc = accounts[s.p1];
+    const p2Acc = accounts[s.p2];
+    return '<div class="schedule-card ' + cardClass + '">' +
+      '<div class="schedule-card-header">' +
+        '<div class="schedule-num">' + (idx + 1) + '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' + headerRight + '</div>' +
+      '</div>' +
+      '<div class="schedule-body">' +
+        '<div class="side left">' + p1WinBtn +
+          '<div style="display:flex;flex-direction:column;min-width:0;">' +
+            '<div style="display:flex;align-items:center;min-width:0;">' +
+              '<span class="schedule-name" style="color:' + p1NameColor + '">' + escapeHtml(s.p1) + '</span>' +
+            '</div>' +
+            (p1Acc ? '<span class="schedule-account">' + escapeHtml(p1Acc) + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<span class="schedule-vs">VS</span>' +
+        '<div class="side right">' +
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;min-width:0;">' +
+            '<div style="display:flex;align-items:center;min-width:0;">' +
+              '<span class="schedule-name" style="color:' + p2NameColor + '">' + escapeHtml(s.p2) + '</span>' +
+            '</div>' +
+            (p2Acc ? '<span class="schedule-account">' + escapeHtml(p2Acc) + '</span>' : '') +
+          '</div>' + p2WinBtn +
+        '</div>' +
+      '</div>' +
+      '</div>';
+  }).join('');
+
+  // 排名
+  const stats = calcWeeklyStats(players, results, []);
+  const sorted = Object.keys(stats).sort((a, b) => {
+    if (stats[b].points !== stats[a].points) return stats[b].points - stats[a].points;
+    const h2hA = stats[a].h2h[b];
+    const h2hB = stats[b].h2h[a];
+    if (h2hA === 'W' && h2hB === 'L') return -1;
+    if (h2hA === 'L' && h2hB === 'W') return 1;
+    return 0;
+  });
+  const standingsBody = document.getElementById('finalStandingsBody');
+  standingsBody.innerHTML = sorted.map((name, i) => {
+    const st = stats[name];
+    return '<tr style="border-bottom:1px solid var(--border);">' +
+      '<td style="padding:8px;">' + (i + 1) + '</td>' +
+      '<td style="padding:8px;"><span class="nickname" style="color:' + getColor(name) + '">' + escapeHtml(name) + '</span></td>' +
+      '<td style="padding:8px;text-align:center;">' + st.wins + '</td>' +
+      '<td style="padding:8px;text-align:center;">' + st.losses + '</td>' +
+      '<td style="padding:8px;text-align:center;font-weight:600;color:var(--gold);">' + st.points + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function toggleWeeklyAbsent(name) {
+  const idx = weeklyAbsent.indexOf(name);
+  if (idx >= 0) weeklyAbsent.splice(idx, 1);
+  else weeklyAbsent.push(name);
+  autoSaveWeekly();
+  renderWeekly();
+}
+
+function setWeeklyResult(p1, p2, winner) {
+  const key = [p1, p2].sort().join('|');
+  weeklyResults[key] = winner;
+  autoSaveWeekly();
+  renderWeekly();
+}
+
+function confirmSetWeeklyResult(p1, p2, winner) {
+  const msg = t('confirmWin').replace('{winner}', winner).replace('{p1}', p1).replace('{p2}', p2);
+  if (confirm(msg)) setWeeklyResult(p1, p2, winner);
+}
+
+function removeWeeklyResult(p1, p2) {
+  const key = [p1, p2].sort().join('|');
+  delete weeklyResults[key];
+  autoSaveWeekly();
+  renderWeekly();
+}
+
+function confirmRemoveWeeklyResult(p1, p2) {
+  const msg = t('confirmRemoveResult').replace('{p1}', p1).replace('{p2}', p2);
+  if (confirm(msg)) removeWeeklyResult(p1, p2);
+}
+
+function formatWeeklyPlayer(name) {
+  const acc = weeklyPlayerAccounts[name];
+  if (acc && acc !== name) {
+    return '<span style="color:' + getColor(name) + '">' + escapeHtml(name) + '</span><span style="color:var(--text2);font-size:11px;margin-left:4px;">(' + escapeHtml(acc) + ')</span>';
+  }
+  return '<span style="color:' + getColor(name) + '">' + escapeHtml(name) + '</span>';
+}
+
+function renderWeekly() {
+  const players = weeklyPlayers;
+  const absent = weeklyAbsent;
+  const results = weeklyResults;
+
+  // 参赛名单
+  const playersEl = document.getElementById('weeklyPlayers');
+  if (players.length === 0) {
+    playersEl.innerHTML = '';
+  } else {
+    playersEl.innerHTML = players.map(p => {
+      const isAbsent = absent.includes(p);
+      return '<span class="player-tag' + (isAbsent ? ' absent' : '') + '">' +
+        formatWeeklyPlayer(p) +
+        '<button class="absent-btn" onclick="toggleWeeklyAbsent(\'' + escapeHtml(p).replace(/'/g, "\\'") + '\')" title="' + (isAbsent ? t('cancelAbsent') : t('markAbsent')) + '">' + (isAbsent ? '✓' : '✕') + '</button>' +
+        '</span>';
+    }).join('');
+  }
+
+  // 赛程
+  const scheduleSection = document.getElementById('weeklyScheduleSection');
+  const scheduleList = document.getElementById('weeklyScheduleList');
+  if (players.length < 2) {
+    scheduleSection.style.display = 'none';
+  } else {
+    scheduleSection.style.display = 'block';
+    if (weeklySchedule.length === 0) {
+      generateWeeklySchedule();
+      return; // generateWeeklySchedule 会调用 renderWeekly
+    }
+    scheduleList.innerHTML = weeklySchedule.map((s, idx) => {
+      const key = [s.p1, s.p2].sort().join('|');
+      const winner = results[key];
+      const done = !!winner;
+      const p1Absent = absent.includes(s.p1);
+      const p2Absent = absent.includes(s.p2);
+      let cardClass = 'pending';
+      let headerRight = '';
+      let p1WinBtn = '';
+      let p2WinBtn = '';
+      let p1NameColor = getColor(s.p1);
+      let p2NameColor = getColor(s.p2);
+      let p1AbsentTag = '';
+      let p2AbsentTag = '';
+      const absentBadge = '<span style="font-size:10px;color:var(--danger);margin-left:4px;font-weight:600;">❌缺席</span>';
+      if (done) {
+        cardClass = 'done';
+        let winLabel = '✓ ' + escapeHtml(winner) + ' ' + t('winBtn');
+        // 临时缺席标记：CoBeChimTO 缺席 vs asula
+        if (key === 'CoBeChimTO|asula' && winner === 'asula') {
+          winLabel += ' <span style="font-size:11px;color:var(--text2);">(CoBeChimTO 缺席)</span>';
+          if (s.p1 === 'CoBeChimTO') p1AbsentTag = absentBadge;
+          if (s.p2 === 'CoBeChimTO') p2AbsentTag = absentBadge;
+        }
+        headerRight = '<span class="schedule-status-win">' + winLabel + '</span>' +
+          '<button class="schedule-del-btn" onclick="removeWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('btnDel') + '</button>';
+        if (winner !== s.p1) p1NameColor = 'var(--text2)';
+        if (winner !== s.p2) p2NameColor = 'var(--text2)';
+      } else if (p1Absent || p2Absent) {
+        cardClass = 'absent';
+        headerRight = '<span class="schedule-status-skip">' + t('absentLabel') + '</span>';
+        p1NameColor = 'var(--text2)';
+        p2NameColor = 'var(--text2)';
+        if (p1Absent) p1AbsentTag = absentBadge;
+        if (p2Absent) p2AbsentTag = absentBadge;
+      } else {
+        p1WinBtn = '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
+        p2WinBtn = '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
+      }
+      const p1Acc = weeklyPlayerAccounts[s.p1];
+      const p2Acc = weeklyPlayerAccounts[s.p2];
+      return '<div class="schedule-card ' + cardClass + '">' +
+        '<div class="schedule-card-header">' +
+          '<div class="schedule-num">' + (idx + 1) + '</div>' +
+          '<div style="display:flex;align-items:center;gap:8px;">' + headerRight + '</div>' +
+        '</div>' +
+        '<div class="schedule-body">' +
+          '<div class="side left">' + p1WinBtn +
+            '<div style="display:flex;flex-direction:column;min-width:0;">' +
+              '<div style="display:flex;align-items:center;min-width:0;">' +
+                '<span class="schedule-name" style="color:' + p1NameColor + '">' + escapeHtml(s.p1) + '</span>' + p1AbsentTag +
+              '</div>' +
+              (p1Acc ? '<span class="schedule-account">' + escapeHtml(p1Acc) + '</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<span class="schedule-vs">VS</span>' +
+          '<div class="side right">' +
+            '<div style="display:flex;flex-direction:column;align-items:flex-end;min-width:0;">' +
+              '<div style="display:flex;align-items:center;min-width:0;">' +
+                '<span class="schedule-name" style="color:' + p2NameColor + '">' + escapeHtml(s.p2) + '</span>' + p2AbsentTag +
+              '</div>' +
+              (p2Acc ? '<span class="schedule-account">' + escapeHtml(p2Acc) + '</span>' : '') +
+            '</div>' + p2WinBtn +
+          '</div>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  // 矩阵
+  const matrixTable = document.getElementById('weeklyMatrix');
+  const emptyEl = document.getElementById('weeklyEmpty');
+  
+  if (players.length < 2) {
+    emptyEl.style.display = 'block';
+    matrixTable.style.display = 'none';
+  } else {
+    emptyEl.style.display = 'none';
+    matrixTable.style.display = 'table';
+    
+    const headRow = document.getElementById('weeklyMatrixHead');
+    const colCount = players.length + 1;
+    const colWidth = 'calc(100% / ' + colCount + ')';
+    headRow.innerHTML = '<th style="width:' + colWidth + '">—</th>' + players.map(p => '<th style="color:' + getColor(p) + ';width:' + colWidth + '">' + escapeHtml(p) + '</th>').join('');
+    
+    const body = document.getElementById('weeklyMatrixBody');
+    body.innerHTML = '';
+    for (let i = 0; i < players.length; i++) {
+      const tr = document.createElement('tr');
+      let html = '<th style="text-align:left;color:' + getColor(players[i]) + '">' + escapeHtml(players[i]) + '</th>';
+      for (let j = 0; j < players.length; j++) {
+        if (i === j) {
+          html += '<td style="opacity:0.3;">—</td>';
+        } else if (i > j) {
+          const key = [players[j], players[i]].sort().join('|');
+          const winner = results[key];
+          let cell = '<td class="matrix-cell">';
+          if (winner) {
+            if (winner === players[i]) cell += '<span class="result-win">' + t('csvWinner') + '</span>';
+            else cell += '<span class="result-loss">' + t('csvLoser') + '</span>';
+          } else {
+            cell += '<span style="opacity:0.3;">—</span>';
+          }
+          cell += '</td>';
+          html += cell;
+        } else {
+          const key = [players[i], players[j]].sort().join('|');
+          const winner = results[key];
+          let cell = '<td class="matrix-cell">';
+          if (winner) {
+            if (winner === players[i]) cell += '<span class="result-win">' + t('csvWinner') + '</span>';
+            else cell += '<span class="result-loss">' + t('csvLoser') + '</span>';
+          } else {
+            const p1Absent = absent.includes(players[i]);
+            const p2Absent = absent.includes(players[j]);
+            if (p1Absent || p2Absent) {
+              cell += '<span style="opacity:0.3;">—</span>';
+            } else {
+              cell += '<span style="opacity:0.3;">—</span>';
+            }
+          }
+          cell += '</td>';
+          html += cell;
+        }
+      }
+      tr.innerHTML = html;
+      body.appendChild(tr);
+    }
+  }
+  
+  // 积分榜
+  const stats = calcWeeklyStats(players, results, absent);
+  const statsBody = document.getElementById('weeklyStatsBody');
+  const sorted = Object.keys(stats).sort((a, b) => {
+    const sa = stats[a], sb = stats[b];
+    if (sb.points !== sa.points) return sb.points - sa.points;
+    const h2hA = sa.h2h[b] || '';
+    const h2hB = sb.h2h[a] || '';
+    if (h2hA === 'W' && h2hB === 'L') return -1;
+    if (h2hA === 'L' && h2hB === 'W') return 1;
+    const weekDate = document.getElementById('weeklyDate').value;
+    const aw = getPlayerWeeklyDayWins(a, weekDate, getCurrentServer());
+    const bw = getPlayerWeeklyDayWins(b, weekDate, getCurrentServer());
+    if (bw !== aw) return bw - aw;
+    return 0;
+  });
+  
+  statsBody.innerHTML = sorted.map((name, i) => {
+    const s = stats[name];
+    return '<tr><td style="text-align:center">' + (i + 1) + '</td><td>' + formatWeeklyPlayer(name) + '</td><td style="text-align:center">' + s.wins + '</td><td style="text-align:center">' + s.losses + '</td><td style="text-align:center">' + s.points + '</td></tr>';
+  }).join('');
+  
+  // 周冠军
+  const champBox = document.getElementById('weeklyChampionBox');
+  if (champBox) champBox.style.display = players.length > 0 ? 'block' : 'none';
+  const champEl = document.getElementById('weeklyChampionName');
+  if (sorted.length === 0 || Object.keys(results).length === 0) {
+    champEl.textContent = '—';
+    champEl.style.color = '';
+  } else {
+    const topPoints = stats[sorted[0]].points;
+    const tied = sorted.filter(n => stats[n].points === topPoints);
+    if (tied.length === 1) {
+      champEl.innerHTML = formatWeeklyPlayer(tied[0]);
+      champEl.style.color = '';
+    } else {
+      const h2hWins = {};
+      tied.forEach(name => {
+        let hw = 0;
+        tied.forEach(opp => {
+          if (opp !== name && stats[name].h2h[opp] === 'W') hw++;
+        });
+        h2hWins[name] = hw;
+      });
+      const maxH2h = Math.max(...Object.values(h2hWins));
+      const h2hLeaders = tied.filter(n => h2hWins[n] === maxH2h);
+      if (h2hLeaders.length === 1) {
+        champEl.innerHTML = formatWeeklyPlayer(h2hLeaders[0]);
+        champEl.style.color = '';
+      } else {
+        const weekDate = document.getElementById('weeklyDate').value;
+        const dayWins = {};
+        h2hLeaders.forEach(name => {
+          dayWins[name] = getPlayerWeeklyDayWins(name, weekDate, getCurrentServer());
+        });
+        const maxDw = Math.max(...Object.values(dayWins));
+        const dwLeaders = h2hLeaders.filter(n => dayWins[n] === maxDw);
+        if (dwLeaders.length === 1) {
+          champEl.textContent = dwLeaders[0];
+          champEl.style.color = getColor(dwLeaders[0]);
+        } else {
+          champEl.textContent = dwLeaders.join('、') + ' ' + t('tie');
+          champEl.style.color = 'var(--gold)';
+        }
+      }
+    }
+  }
+}
+
+function calcWeeklyStats(players, results, absent) {
+  const stats = {};
+  players.forEach(p => stats[p] = { wins: 0, losses: 0, points: 0, h2h: {} });
+  
+  // 2026-05-10 Q 服特殊处理：全局缺席不自动给对手加分
+  const skipAbsentBonus = document.getElementById('weeklyDate').value === '2026-05-10' && getCurrentServer() === 'Q 服';
+  
+  if (!skipAbsentBonus) {
+    absent.forEach(abs => {
+      players.forEach(opp => {
+        if (opp !== abs && !absent.includes(opp)) {
+          stats[opp].wins++;
+          stats[opp].points++;
+          stats[opp].h2h[abs] = 'W';
+          stats[abs].losses++;
+          stats[abs].h2h[opp] = 'L';
+        }
+      });
+    });
+  }
+  
+  for (const key in results) {
+    const winner = results[key];
+    const parts = key.split('|');
+    if (parts.length < 2) continue;
+    const loser = parts[0] === winner ? parts[1] : parts[0];
+    // 防御：跳过 winner/loser 不在选手名单中的脏数据
+    if (!stats[winner] || !stats[loser]) continue;
+    stats[winner].wins++;
+    stats[winner].points++;
+    stats[winner].h2h[loser] = 'W';
+    stats[loser].losses++;
+    stats[loser].h2h[winner] = 'L';
+  }
+  
+  return stats;
+}
+
+function getPlayerWeeklyDayWins(player, weekDate, server) {
+  const sunday = new Date(weekDate);
+  const monday = new Date(sunday);
+  monday.setDate(sunday.getDate() - 6);
+  let totalWins = 0;
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const key = 'pvp_score_' + dateStr + '_' + server;
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      try {
+        const data = JSON.parse(raw);
+        if (data.matches) {
+          data.matches.forEach(m => {
+            if (m.winner === player) totalWins++;
+          });
+        }
+      } catch(e) {}
+    }
+  }
+  return totalWins;
+}
+
+function exportWeeklyData() {
+  const date = document.getElementById('weeklyDate').value;
+  const server = getCurrentServer();
+  const players = weeklyPlayers;
+  const absent = weeklyAbsent;
+  const results = weeklyResults;
+  const stats = calcWeeklyStats(players, results, absent);
+  
+  let csv = t('csvDate') + ',' + t('csvServer') + '\n';
+  csv += date + ',' + server + '\n\n';
+  
+  csv += '参赛名单\n';
+  players.forEach(p => {
+    const acc = weeklyPlayerAccounts[p] || '';
+    csv += p + ',' + acc + (absent.includes(p) ? ',' + t('absentCSV') : '') + '\n';
+  });
+  csv += '\n';
+  
+  csv += '比赛结果\n';
+  csv += '#选手A,选手B,胜者\n';
+  // 导出所有对阵（含未进行的），空白表示无结果
+  if (weeklySchedule.length > 0) {
+    for (const s of weeklySchedule) {
+      const key = [s.p1, s.p2].sort().join('|');
+      const winner = results[key] || '';
+      csv += s.p1 + ',' + s.p2 + ',' + winner + '\n';
+    }
+  } else {
+    for (const key in results) {
+      const [a, b] = key.split('|');
+      csv += a + ',' + b + ',' + results[key] + '\n';
+    }
+  }
+  csv += '\n';
+  
+  csv += '积分榜\n';
+  csv += '#排名,昵称,账号,胜场,败场,积分\n';
+  const sorted = Object.keys(stats).sort((a, b) => stats[b].points - stats[a].points);
+  sorted.forEach((name, i) => {
+    const s = stats[name];
+    csv += (i + 1) + ',' + name + ',' + (weeklyPlayerAccounts[name] || '') + ',' + s.wins + ',' + s.losses + ',' + s.points + '\n';
+  });
+  
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'pvp_weekly_' + date + '_' + server.replace(' ', '') + '.csv';
+  a.click();
+}
+
+function clearWeeklyData() {
+  const key = getWeeklyKey();
+  const raw = localStorage.getItem(key);
+  if (!raw) { alert(t('alertClearEmpty')); return; }
+  if (!confirm(t('alertClearConfirmAll'))) return;
+  weeklyPlayers = []; weeklyAbsent = []; weeklyResults = {}; weeklyPlayerAccounts = {}; weeklySchedule = [];
+  localStorage.removeItem(key);
+  renderWeekly();
+}
+
+function importWeeklyData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result.trim();
+    try {
+      const rows = text.split(/\r?\n/).map(r => r.trim()).filter(r => r);
+      let section = '';
+      const newPlayers = [];
+      const newAccounts = {};
+      const newAbsent = [];
+      const newResults = {};
+      let metaDate = '';
+      let metaServer = '';
+      
+      for (const row of rows) {
+        if (row.startsWith('#')) continue; // 跳过注释行
+        if (row.startsWith('参赛名单') || row.startsWith('Danh sách')) { section = 'players'; continue; }
+        if (row.startsWith('比赛结果') || row.startsWith('Kết quả')) { section = 'results'; continue; }
+        if (row.startsWith('积分榜') || row.startsWith('Bảng xếp hạng')) { section = 'stats'; continue; }
+        if (row.includes(',') && !section && !metaDate) {
+          const parts = row.split(',');
+          const rawDate = (parts[0] || '').trim();
+          // 兼容 ISO 2026-05-10 和 M/D/YYYY 5/10/2026
+          if (parts.length >= 2 && /^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+            metaDate = rawDate;
+            metaServer = parts[1];
+          } else if (parts.length >= 2 && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(rawDate)) {
+            const m = rawDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (m) metaDate = m[3] + '-' + m[1].padStart(2, '0') + '-' + m[2].padStart(2, '0');
+            metaServer = parts[1];
+          }
+          continue;
+        }
+        if (section === 'players') {
+          const parts = row.split(',');
+          const name = parts[0].trim();
+          if (name) {
+            newPlayers.push(name);
+            if (parts[1]) newAccounts[name] = parts[1].trim();
+            const statusIdx = parts[2] || parts[1];
+            if (statusIdx && (statusIdx.includes('缺席') || statusIdx.includes('Vắng'))) {
+              newAbsent.push(name);
+            }
+          }
+        } else if (section === 'results') {
+          const parts = row.split(',');
+          const p1 = (parts[0] || '').trim();
+          const p2 = (parts[1] || '').trim();
+          const winner = (parts[2] || '').trim();
+          // 过滤空行、X/空白标记（表示未进行）
+          if (!p1 || !p2 || !winner || winner === 'X' || winner === 'x') continue;
+          const key = [p1, p2].sort().join('|');
+          newResults[key] = winner;
+        }
+      }
+      
+      if (newPlayers.length === 0) { alert(t('alertCSVError')); return; }
+      
+      if (metaServer && metaServer !== getCurrentServer()) {
+        if (!confirm(t('csvServer') + ': ' + metaServer + ', ' + t('server') + ': ' + getCurrentServer() + '. ' + t('alertSwitchServer'))) { input.value = ''; return; }
+      }
+      if (metaDate) document.getElementById('weeklyDate').value = metaDate;
+      
+      weeklyPlayers = newPlayers;
+      weeklyPlayerAccounts = newAccounts;
+      weeklyAbsent = newAbsent;
+      weeklyResults = newResults;
+      weeklySchedule = [];
+      autoSaveWeekly();
+      renderWeekly();
+      alert(t('alertImportOK', {n: Object.keys(newResults).length}));
+    } catch (err) { alert(t('alertParseFail') + ' (' + err.message + ')'); console.error(err); }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+
+
+/* ========== GitHub 保存 ========== */
+let githubConfig = {};
+function loadGitHubConfig() {
+  const raw = localStorage.getItem('pvp_github_config');
+  if (raw) try { githubConfig = JSON.parse(raw); } catch(e) {}
+}
+function saveGitHubSettings() {
+  githubConfig = {
+    token: document.getElementById('ghToken').value.trim(),
+    owner: document.getElementById('ghOwner').value.trim(),
+    repo: document.getElementById('ghRepo').value.trim(),
+    path: document.getElementById('ghPath').value.trim(),
+    branch: document.getElementById('ghBranch').value.trim()
+  };
+  localStorage.setItem('pvp_github_config', JSON.stringify(githubConfig));
+  closeGitHubSettings();
+  alert('GitHub 设置已保存');
+}
+function showGitHubSettings() {
+  loadGitHubConfig();
+  document.getElementById('ghToken').value = githubConfig.token || '';
+  document.getElementById('ghOwner').value = githubConfig.owner || 'covetworld-png';
+  document.getElementById('ghRepo').value = githubConfig.repo || 'dinoisland';
+  document.getElementById('ghPath').value = githubConfig.path || 'src/campaign/pages/003-02-pvp-battle/pvp_score_all.csv';
+  document.getElementById('ghBranch').value = githubConfig.branch || 'main';
+  document.getElementById('githubModal').classList.add('open');
+}
+function closeGitHubSettings() {
+  document.getElementById('githubModal').classList.remove('open');
+}
+
+function parseAllCSV(text) {
+  const lines = text.trim().split(/\r?\n/).map(l => l.trim()).filter(l => l);
+  const blocks = [];
+  let cur = null;
+  for (const line of lines) {
+    const cols = line.split(',');
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cols[0]?.trim())) {
+      if (cur) blocks.push(cur);
+      cur = { date: cols[0].trim(), server: cols[1]?.trim() || '', championAccount: cols[2]?.trim() || '', matches: [] };
+    } else if (cur && cols.length >= 5 && !isNaN(parseInt(cols[0])) &&
+               ((cols[1] || '').includes('Trận') || (cols[1] || '').includes('场次') || (cols[1] || '').includes('Match'))) {
+      cur.matches.push({
+        winner: cols[2]?.trim() || '',
+        winnerAccount: cols[3]?.trim() || '',
+        loser: cols[4]?.trim() || '',
+        loserAccount: cols[5]?.trim() || '',
+        note: ''
+      });
+    }
+  }
+  if (cur) blocks.push(cur);
+  return blocks;
+}
+
+async function loadFromGitHub() {
+  if (!confirm('确定从 GitHub 恢复所有历史数据到本地？\n这将覆盖本地已有的同名日期数据。')) return;
+
+  let csvText = '';
+  let source = '';
+
+  // 方式1：直接 fetch 公开 CSV（无需 token，适合新设备快速恢复）
+  try {
+    const res = await fetch('./pvp_score_all.csv?_=' + Date.now());
+    if (res.ok) {
+      csvText = await res.text();
+      source = '服务器';
+    }
+  } catch(e) {}
+
+  // 方式2：通过 GitHub API（需要 token，备用）
+  if (!csvText) {
+    loadGitHubConfig();
+    if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) {
+      alert('直接获取失败，且未配置 GitHub 信息，请先配置');
+      showGitHubSettings();
+      return;
+    }
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}?ref=${githubConfig.branch}`,
+        { headers: { 'Authorization': `token ${githubConfig.token}`, 'Accept': 'application/vnd.github.v3+json' } }
+      );
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      csvText = decodeURIComponent(escape(atob(data.content)));
+      source = 'GitHub';
+    } catch (error) {
+      alert('❌ 恢复失败: ' + error.message);
+      return;
+    }
+  }
+
+  const blocks = parseAllCSV(csvText);
+
+  let count = 0;
+  blocks.forEach(block => {
+    const key = 'pvp_score_' + block.date + '_' + block.server;
+    const playerColors = {};
+    let colorIdx = 0;
+    block.matches.forEach(m => {
+      if (m.winner && !playerColors[m.winner]) {
+        playerColors[m.winner] = COLORS[colorIdx % COLORS.length];
+        colorIdx++;
+      }
+      if (m.loser && !playerColors[m.loser]) {
+        playerColors[m.loser] = COLORS[colorIdx % COLORS.length];
+        colorIdx++;
+      }
+    });
+    localStorage.setItem(key, JSON.stringify({
+      date: block.date,
+      server: block.server,
+      matches: block.matches,
+      playerColors: playerColors,
+      colorIdx: colorIdx,
+      championAccount: block.championAccount,
+      championNames: calcChampionNames(block.matches)
+    }));
+    count++;
+  });
+
+  alert(`✅ 已从${source}恢复 ${count} 天的数据到本地！`);
+  loadFromStorage();
+}
+
+function removeDateBlock(csvText, date, server) {
+  const lines = csvText.split(/\r?\n/);
+  let startIdx = -1;
+  let endIdx = lines.length;
+  for (let i = 0; i < lines.length; i++) {
+    const cols = lines[i].split(',');
+    const lineDate = cols[0]?.trim();
+    const lineServer = cols[1]?.trim();
+    if (lineDate === date && lineServer === server) {
+      startIdx = i;
+    } else if (startIdx !== -1 && /^\d{4}-\d{2}-\d{2}$/.test(lineDate)) {
+      endIdx = i;
+      break;
+    }
+  }
+  if (startIdx === -1) return csvText;
+  const result = [...lines.slice(0, startIdx), ...lines.slice(endIdx)];
+  return result.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+async function saveToGitHub() {
+  loadGitHubConfig();
+  if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) {
+    alert('请先配置 GitHub 信息');
+    showGitHubSettings();
+    return;
+  }
+  if (matches.length === 0) {
+    alert('当前无比赛数据，无法保存');
+    return;
+  }
+
+  const date = document.getElementById('matchDate').value;
+  const server = getCurrentServer();
+
+  // 获取现有文件内容
+  let existingCSV = '';
+  let sha = null;
+  try {
+    const getRes = await fetch(
+      `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}?ref=${githubConfig.branch}`,
+      { headers: { 'Authorization': `token ${githubConfig.token}`, 'Accept': 'application/vnd.github.v3+json' } }
+    );
+    if (getRes.ok) {
+      const fileData = await getRes.json();
+      sha = fileData.sha;
+      existingCSV = decodeURIComponent(escape(atob(fileData.content)));
+    } else if (getRes.status !== 404) {
+      const err = await getRes.json();
+      console.error('获取文件失败:', err);
+    }
+  } catch(e) { console.error('获取现有文件出错:', e); }
+
+  // 检查当天数据是否已存在
+  if (existingCSV) {
+    const hasExisting = existingCSV.split(/\r?\n/).some(line => {
+      const cols = line.split(',');
+      return cols[0]?.trim() === date && cols[1]?.trim() === server;
+    });
+    if (hasExisting) {
+      if (!confirm(`⚠️ ${date} ${server} 的数据已存在于 GitHub。\n\n选择"确定"用当前数据覆盖旧数据。\n选择"取消"则保留现有数据。`)) {
+        return;
+      }
+      existingCSV = removeDateBlock(existingCSV, date, server);
+    } else {
+      if (!confirm('确定将当日数据提交到 GitHub？')) return;
+    }
+  } else {
+    if (!confirm('确定将当日数据提交到 GitHub？')) return;
+  }
+
+  // 生成当日 CSV
+  const dailyCSV = buildDailyCSV();
+
+  // 合并
+  let finalCSV = existingCSV;
+  if (finalCSV) {
+    finalCSV = finalCSV.replace(/\n+$/, '') + '\n\n' + dailyCSV;
+  } else {
+    finalCSV = dailyCSV;
+  }
+
+  const contentBase64 = btoa(unescape(encodeURIComponent(finalCSV)));
+  const commitMessage = `data: 更新 PVP 比赛数据 ${date} ${server}`;
+  const body = { message: commitMessage, content: contentBase64, branch: githubConfig.branch };
+  if (sha) body.sha = sha;
+
+  try {
+    const putRes = await fetch(
+      `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${githubConfig.token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      }
+    );
+    if (putRes.ok) {
+      alert('✅ 已成功提交到 GitHub！');
+    } else {
+      const error = await putRes.json();
+      throw new Error(error.message || `HTTP ${putRes.status}`);
+    }
+  } catch (error) {
+    console.error('GitHub API error:', error);
+    alert('❌ 提交失败: ' + error.message);
+    if (error.message.includes('401') || error.message.includes('Bad credentials')) {
+      setTimeout(() => { if (confirm('Token 可能无效，是否重新配置？')) showGitHubSettings(); }, 500);
+    }
+  }
+}
+
+function escapeHtml(t) {
+  const d = document.createElement('div'); d.textContent = t; return d.innerHTML;
+}
+</script>
+
+  <div class="modal-overlay" id="sheetModal">
+    <div class="modal">
+      <h3 data-i18n="modalTitle">选择日期和服务器</h3>
+      <div class="modal-body">
+        <label data-i18n="date">日期</label>
+        <div class="date-picker-wrap" onclick="document.getElementById('modalDate').showPicker?.()">
+          <input type="date" id="modalDate">
+        </div>
+        <label data-i18n="server">服务器</label>
+        <div class="server-toggle">
+          <button class="server-btn" id="modalBtnK" onclick="modalSwitchServer('K 服')">K 服</button>
+          <button class="server-btn active" id="modalBtnQ" onclick="modalSwitchServer('Q 服')">Q 服</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="secondary" onclick="closeSheetModal()" data-i18n="btnCancel">取消</button>
+        <button onclick="confirmSheetModal()" data-i18n="btnConfirm">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="githubModal">
+    <div class="modal" style="width:380px;">
+      <h3>GitHub 设置</h3>
+      <div class="modal-body">
+        <label>GitHub Token <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="font-size:11px;color:var(--gold);">创建 Token ↗</a></label>
+        <input type="text" id="ghToken" placeholder="github_pat_..." style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 12px;color:var(--mist);font-size:13px;outline:none;width:100%;">
+        <label>仓库 Owner</label>
+        <input type="text" id="ghOwner" value="covetworld-png" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 12px;color:var(--mist);font-size:13px;outline:none;width:100%;">
+        <label>仓库名</label>
+        <input type="text" id="ghRepo" value="dinoisland" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 12px;color:var(--mist);font-size:13px;outline:none;width:100%;">
+        <label>文件路径</label>
+        <input type="text" id="ghPath" value="src/campaign/pages/003-02-pvp-battle/pvp_score_all.csv" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 12px;color:var(--mist);font-size:13px;outline:none;width:100%;">
+        <label>分支</label>
+        <input type="text" id="ghBranch" value="main" style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:8px 12px;color:var(--mist);font-size:13px;outline:none;width:100%;">
+      </div>
+      <div class="modal-footer">
+        <button class="secondary" onclick="closeGitHubSettings()">取消</button>
+        <button onclick="saveGitHubSettings()">保存</button>
+      </div>
+    </div>
+  </div>
+<datalist id="playerDatalist"></datalist>
+</body>
+</html>
