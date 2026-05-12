@@ -703,6 +703,87 @@ let seeds = []; // 2.0 种子选手名单
 let finalData = null; // 2.0 复赛数据 {players, accounts, results, schedule}
 let currentSubView = 'preliminary'; // 2.0 日赛子视图: preliminary | final
 
+/* ========== 2.0 Demo 数据 ========== */
+const DEMO_DATA = {
+  date: '2026-05-12',
+  server: 'Q 服',
+  matches: [
+    // nini 连胜3场 → 种子
+    {winner:'nini', winnerAccount:'13219644', loser:'khoai', loserAccount:'', note:''},
+    {winner:'nini', winnerAccount:'13219644', loser:'longthandien', loserAccount:'', note:''},
+    {winner:'nini', winnerAccount:'13219644', loser:'satvuong', loserAccount:'', note:''},
+    // asula 连胜3场 → 种子
+    {winner:'asula', winnerAccount:'13220547', loser:'the7storm', loserAccount:'', note:''},
+    {winner:'asula', winnerAccount:'13220547', loser:'huyetnguyet', loserAccount:'', note:''},
+    {winner:'asula', winnerAccount:'13220547', loser:'bachlong', loserAccount:'', note:''},
+    // CoBeChimTO 连胜3场 → 种子
+    {winner:'CoBeChimTO', winnerAccount:'13219629', loser:'tieubaolong', loserAccount:'', note:''},
+    {winner:'CoBeChimTO', winnerAccount:'13219629', loser:'codoc', loserAccount:'', note:''},
+    {winner:'CoBeChimTO', winnerAccount:'13219629', loser:'gialong', loserAccount:'', note:''},
+    // JUDI45 连胜3场 → 种子
+    {winner:'JUDI45', winnerAccount:'13220110', loser:'anh2', loserAccount:'', note:''},
+    {winner:'JUDI45', winnerAccount:'13220110', loser:'bebe5', loserAccount:'', note:''},
+    {winner:'JUDI45', winnerAccount:'13220110', loser:'hanhan', loserAccount:'', note:''},
+    // chip 连胜3场 → 种子
+    {winner:'chip', winnerAccount:'13219675', loser:'vietden', loserAccount:'', note:''},
+    {winner:'chip', winnerAccount:'13219675', loser:'specter', loserAccount:'', note:''},
+    {winner:'chip', winnerAccount:'13219675', loser:'nguoicodon', loserAccount:'', note:''},
+    // maymay 连胜3场 → 种子
+    {winner:'maymay', winnerAccount:'13226453', loser:'nguyenvan', loserAccount:'', note:''},
+    {winner:'maymay', winnerAccount:'13226453', loser:'tranthi', loserAccount:'', note:''},
+    {winner:'maymay', winnerAccount:'13226453', loser:'lehoang', loserAccount:'', note:''},
+  ],
+  seeds: ['nini','asula','CoBeChimTO','JUDI45','chip','maymay'],
+  finalData: {
+    players: ['nini','asula','CoBeChimTO','JUDI45','chip','maymay'],
+    accounts: {nini:'13219644', asula:'13220547', CoBeChimTO:'13219629', JUDI45:'13220110', chip:'13219675', maymay:'13226453'},
+    results: {
+      'nini|asula':'nini',
+      'nini|CoBeChimTO':'nini',
+      'nini|JUDI45':'nini',
+      'nini|chip':'chip',
+      'nini|maymay':'nini',
+      'asula|CoBeChimTO':'asula',
+      'asula|JUDI45':'JUDI45',
+      'asula|chip':'asula',
+      'asula|maymay':'asula',
+      'CoBeChimTO|JUDI45':'CoBeChimTO',
+      'CoBeChimTO|chip':'CoBeChimTO',
+      'CoBeChimTO|maymay':'CoBeChimTO',
+      'JUDI45|chip':'JUDI45',
+      'JUDI45|maymay':'maymay',
+      'chip|maymay':'maymay',
+    },
+    schedule: [
+      {p1:'nini',p2:'asula'},{p1:'nini',p2:'CoBeChimTO'},{p1:'nini',p2:'JUDI45'},
+      {p1:'nini',p2:'chip'},{p1:'nini',p2:'maymay'},{p1:'asula',p2:'CoBeChimTO'},
+      {p1:'asula',p2:'JUDI45'},{p1:'asula',p2:'chip'},{p1:'asula',p2:'maymay'},
+      {p1:'CoBeChimTO',p2:'JUDI45'},{p1:'CoBeChimTO',p2:'chip'},{p1:'CoBeChimTO',p2:'maymay'},
+      {p1:'JUDI45',p2:'chip'},{p1:'JUDI45',p2:'maymay'},{p1:'chip',p2:'maymay'}
+    ]
+  }
+};
+
+function loadDemoData() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has('demo')) return false;
+  const d = DEMO_DATA;
+  document.getElementById('matchDate').value = d.date;
+  currentServer = d.server;
+  matches = JSON.parse(JSON.stringify(d.matches));
+  seeds = d.seeds.slice();
+  finalData = JSON.parse(JSON.stringify(d.finalData));
+  // 分配选手颜色
+  d.matches.forEach(m => {
+    if (!playerColors[m.winner]) playerColors[m.winner] = COLORS[colorIdx++ % COLORS.length];
+    if (!playerColors[m.loser]) playerColors[m.loser] = COLORS[colorIdx++ % COLORS.length];
+  });
+  autoSave();
+  // 默认展示初赛视图，用户可手动切换至复赛
+  currentSubView = 'preliminary';
+  return true;
+}
+
 /* ========== 周赛状态 ========== */
 let weeklyPlayers = [];
 let weeklyAbsent = [];
@@ -931,7 +1012,7 @@ initDefaultData();
 try {
   document.getElementById('matchDate').value = new Date().toISOString().slice(0, 10);
 } catch(e) {}
-loadFromStorage();
+if (!loadDemoData()) loadFromStorage(); // demo 模式跳过本地读取，避免覆盖
 render();
 updateSheetInfo();
 
@@ -1320,35 +1401,45 @@ function render() {
     sb.appendChild(tr);
   });
 
-  // 判定日冠军
-  const top = finalStats[0];
-  const ties = top ? finalStats.filter(s => s.wins === top.wins && parseFloat(s.rate) === parseFloat(top.rate) && s.total === top.total) : [];
-  const champName = document.getElementById('championName');
-  const tieNotice = document.getElementById('tieNotice');
-  if (top) {
-    if (ties.length > 1) {
-      champName.textContent = ties.map(t => t.name).join('、') + t('tie');
-      tieNotice.textContent = t('tieNotice');
-      currentChampionNames = ties.map(t => t.name);
-    } else {
-      champName.textContent = top.name;
-      tieNotice.textContent = '';
-      currentChampionNames = [top.name];
-      // 自动回填冠军数字账号（从比赛记录中提取）
-      const champAccInput = document.getElementById('championAccount');
-      if (champAccInput && !champAccInput.value.trim()) {
-        for (const m of matches) {
-          if (m.winner === top.name && m.winnerAccount) {
-            champAccInput.value = m.winnerAccount;
-            break;
+  // 2.0 初赛不显示日冠军提示（初赛无日冠军概念，只有复赛排名）
+  const champBox = document.querySelector('.champion-box');
+  const tieNoticeEl = document.getElementById('tieNotice');
+  if (currentSubView === 'preliminary') {
+    if (champBox) champBox.style.display = 'none';
+    if (tieNoticeEl) tieNoticeEl.style.display = 'none';
+    currentChampionNames = [];
+  } else {
+    if (champBox) champBox.style.display = '';
+    if (tieNoticeEl) tieNoticeEl.style.display = '';
+    // 判定日冠军（复赛时保留，或周赛时）
+    const top = finalStats[0];
+    const ties = top ? finalStats.filter(s => s.wins === top.wins && parseFloat(s.rate) === parseFloat(top.rate) && s.total === top.total) : [];
+    const champName = document.getElementById('championName');
+    if (top) {
+      if (ties.length > 1) {
+        champName.textContent = ties.map(t => t.name).join('、') + t('tie');
+        tieNoticeEl.textContent = t('tieNotice');
+        currentChampionNames = ties.map(t => t.name);
+      } else {
+        champName.textContent = top.name;
+        tieNoticeEl.textContent = '';
+        currentChampionNames = [top.name];
+        // 自动回填冠军数字账号（从比赛记录中提取）
+        const champAccInput = document.getElementById('championAccount');
+        if (champAccInput && !champAccInput.value.trim()) {
+          for (const m of matches) {
+            if (m.winner === top.name && m.winnerAccount) {
+              champAccInput.value = m.winnerAccount;
+              break;
+            }
           }
         }
       }
+    } else {
+      champName.textContent = '—';
+      tieNoticeEl.textContent = '';
+      currentChampionNames = [];
     }
-  } else {
-    champName.textContent = '—';
-    tieNotice.textContent = '';
-    currentChampionNames = [];
   }
   updatePlayerDatalist();
 }
