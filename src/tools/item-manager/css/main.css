@@ -688,6 +688,7 @@ body::after {
 .history-item.weather      { border-left-color:var(--blue); }
 .history-item.time         { border-left-color:var(--gold); }
 .history-item.flow         { border-left-color:var(--green); }
+.history-item.dino-grow    { border-left-color:var(--orange); }
 .history-item.announcement { border-left-color:var(--purple); }
 .history-icon { font-size:1.2rem; flex-shrink:0; }
 .history-info { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
@@ -757,6 +758,51 @@ body::after {
   background:linear-gradient(90deg,transparent,var(--gold),transparent);
   opacity:0.3; margin-bottom:20px;
 }
+
+/* ── dino grow stage ── */
+.dino-stage {
+  position:relative;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:40px 20px; margin-bottom:20px;
+  background:var(--surface-2); border:1.5px solid var(--border);
+  border-radius:var(--r-lg); overflow:hidden; min-height:200px;
+}
+.dino-stage::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, var(--green), transparent);
+  opacity:0.5;
+}
+.dino-aura {
+  position:absolute; inset:0;
+  background:radial-gradient(circle at 50% 50%, rgba(34,197,94,0.08), transparent 60%);
+  opacity:0; transition:opacity 0.6s;
+  pointer-events:none;
+}
+.dino-aura.active { opacity:1; animation:auraPulse 2s ease-in-out infinite; }
+@keyframes auraPulse {
+  0%, 100% { opacity:0.4; transform:scale(1); }
+  50% { opacity:1; transform:scale(1.1); }
+}
+.dino-character {
+  font-size:6rem; line-height:1; z-index:1;
+  filter:drop-shadow(0 0 20px rgba(34,197,94,0.2));
+  transition:transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin:center bottom;
+}
+.dino-character.grown {
+  transform:scale(1.5);
+  filter:drop-shadow(0 0 40px rgba(34,197,94,0.5));
+  animation:dinoBreath 2s ease-in-out infinite;
+}
+@keyframes dinoBreath {
+  0%, 100% { transform:scale(1.5) translateY(0); }
+  50% { transform:scale(1.52) translateY(-4px); }
+}
+.dino-status {
+  margin-top:16px; font-size:0.82rem; color:var(--muted);
+  z-index:1; letter-spacing:0.5px;
+}
+.dino-status.grown { color:var(--green); font-weight:600; }
 
 /* ── responsive ── */
 @media (max-width:640px) {

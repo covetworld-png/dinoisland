@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Đạo Cụ</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=21">
+  <link rel="stylesheet" href="css/main.css?v=22">
 </head>
 <body data-lang="vi">
 
@@ -103,7 +103,18 @@
               <span class="lang-cn">使用</span>
             </button>
           </div>
-          <div class="bag-cell empty-slot"></div>
+          <div class="bag-cell" id="inv-dino-grow">
+            <div class="cell-name">
+              <span class="lang-vi">Tăng Trưởng</span>
+              <span class="lang-cn">恐龙变大</span>
+            </div>
+            <div class="cell-icon">🦖</div>
+            <div class="cell-count" id="count-dino-grow">×0</div>
+            <button class="btn-slot-use" id="btn-slot-dino-grow" onclick="quickUseDinoGrow()">
+              <span class="lang-vi">Sử Dụng</span>
+              <span class="lang-cn">使用</span>
+            </button>
+          </div>
           <div class="bag-cell empty-slot"></div>
         </div>
       </div>
@@ -132,6 +143,11 @@
             <span>⏳</span>
             <span class="lang-vi">Dòng Chảy TG</span>
             <span class="lang-cn">时间流动</span>
+          </button>
+          <button class="tab-btn" data-tab="dino-grow" onclick="toggleTab('dino-grow')">
+            <span>🦖</span>
+            <span class="lang-vi">Tăng Trưởng</span>
+            <span class="lang-cn">恐龙变大</span>
           </button>
         </nav>
 
@@ -341,6 +357,70 @@
           </div>
         </div>
 
+        <!-- Dino Grow Panel -->
+        <div class="tab-panel" id="panel-dino-grow">
+          <div class="panel-card">
+            <div class="panel-header row-between">
+              <h3>
+                <span class="lang-vi">Thẻ Tăng Trưởng Khủng Long</span>
+                <span class="lang-cn">恐龙变大卡</span>
+              </h3>
+              <div class="status-indicator" id="status-dino-grow">
+                <span class="status-dot idle"></span>
+                <span class="status-text">
+                  <span class="lang-vi">Sẵn sàng</span>
+                  <span class="lang-cn">就绪</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="conflict-banner" id="conflict-dino-grow" style="display: none;">
+              <span>⚠️</span>
+              <span class="conflict-text" id="conflict-text-dino-grow"></span>
+            </div>
+
+            <div class="countdown-banner" id="countdown-dino-grow" style="display: none;">
+              <span>⏱️</span>
+              <span class="countdown-label">
+                <span class="lang-vi">Còn lại</span>
+                <span class="lang-cn">剩余</span>
+              </span>
+              <span class="countdown-value num" id="countdown-value-dino-grow">05:00</span>
+            </div>
+
+            <div class="dino-stage" id="dino-stage">
+              <div class="dino-aura" id="dino-aura"></div>
+              <div class="dino-character" id="dino-character">🦖</div>
+              <div class="dino-status" id="dino-status">
+                <span class="lang-vi">Kích thước bình thường</span>
+                <span class="lang-cn">正常体型</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-use" id="btn-use-dino-grow" onclick="useDinoGrowCard()">
+              <span class="lang-vi">Sử dụng Thẻ Tăng Trưởng</span>
+              <span class="lang-cn">使用恐龙变大卡</span>
+            </button>
+
+            <div class="instruction-box">
+              <strong>
+                <span class="lang-vi">Hướng dẫn sử dụng</span>
+                <span class="lang-cn">使用说明</span>
+              </strong>
+              <ul>
+                <li>
+                  <span class="lang-vi">Sử dụng thẻ để khủng long của bạn tăng kích thước <strong>50%</strong> trong thờ gian hiệu lực.</span>
+                  <span class="lang-cn">使用卡片让你的恐龙体型增大<strong>50%</strong>，持续有效时间。</span>
+                </li>
+                <li>
+                  <span class="lang-vi">Thẻ có hiệu lực <strong>5 phút</strong>, trong thờ gian này ngườ chơi khác không thể sử dụng.</span>
+                  <span class="lang-cn">卡片有效期<strong>5分钟</strong>，在此期间其他玩家无法使用。</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <!-- Flow Panel -->
         <div class="tab-panel" id="panel-flow">
           <div class="panel-card">
@@ -448,6 +528,6 @@
 
   <div id="toast-container"></div>
 
-  <script src="js/main.js?v=11"></script>
+  <script src="js/main.js?v=12"></script>
 </body>
 </html>

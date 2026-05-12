@@ -28,7 +28,7 @@ function simulateServerPoll(manager) {
     
     // 每轮随机挑选一个其他服务器，模拟该服务器上有玩家使用了道具
     const target = otherServers[Math.floor(Math.random() * otherServers.length)];
-    const types = ['weather','time','flow'];
+    const types = ['weather','time','flow','dinoGrow'];
     const type = types[Math.floor(Math.random() * types.length)];
     const bots = [
         {vi:'Ngườ chơi 7723', cn:'玩家7723'},
@@ -134,6 +134,7 @@ const I18N = {
         busy: 'Đang bận',
         conflictWeather: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Tiết, còn lại ${time}`,
         conflictTime: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Gian, còn lại ${time}`,
+        conflictDinoGrow: (name, time) => `Ngườ chơi ${name} đang sử dụng Thẻ Tăng Trưởng, còn lại ${time}`,
         noItem: 'Không đủ đạo cụ',
         selectOption: 'Vui lòng chọn một tùy chọn',
         useSuccess: (type) => `Sử dụng ${type} thành công!`,
@@ -146,7 +147,8 @@ const I18N = {
         history: {
             weather: 'Thẻ Thời Tiết',
             time: 'Thẻ Thời Gian',
-            announcement: 'Thông Báo'
+            announcement: 'Thông Báo',
+            dinoGrow: 'Thẻ Tăng Trưởng'
         },
         status: {
             pending_review: 'Chờ duyệt',
@@ -182,6 +184,7 @@ const I18N = {
         conflictWeather: (name, time) => `玩家 ${name} 正在使用天气卡，剩余 ${time}`,
         conflictTime: (name, time) => `玩家 ${name} 正在使用时间卡，剩余 ${time}`,
         conflictFlow: (name, time) => `玩家 ${name} 正在使用时间流动卡，剩余 ${time}`,
+        conflictDinoGrow: (name, time) => `玩家 ${name} 正在使用恐龙变大卡，剩余 ${time}`,
         noItem: '道具不足',
         selectOption: '请选择一个选项',
         useSuccess: (type) => `${type} 使用成功！`,
@@ -195,7 +198,8 @@ const I18N = {
             weather: '天气卡',
             time: '时间卡',
             announcement: '全服公告',
-            flow: '时间流动卡'
+            flow: '时间流动卡',
+            dinoGrow: '恐龙变大卡'
         },
         status: {
             pending_review: '待审核',
@@ -252,7 +256,7 @@ class ItemManager {
     constructor() {
         this.user = this.loadUser();
         this.state = this.loadState();
-        this.countdowns = { weather: null, time: null };
+        this.countdowns = { weather: null, time: null, dinoGrow: null };
         this.currentTab = 'weather';
         this.selectedOptions = { weather: null, time: 1200 };
         this.init();
@@ -265,6 +269,7 @@ class ItemManager {
             // Merge new fields for backward compatibility
             if (!user.inventory) user.inventory = {};
             if (user.inventory.flowCard === undefined) user.inventory.flowCard = 3;
+            if (user.inventory.dinoGrowCard === undefined) user.inventory.dinoGrowCard = 3;
             localStorage.setItem(lsKeyUser(), JSON.stringify(user));
             return user;
         }
@@ -278,7 +283,8 @@ class ItemManager {
                 weatherCard: 3,
                 timeCard: 3,
                 announcementCard: 3,
-                flowCard: 3
+                flowCard: 3,
+                dinoGrowCard: 3
             }
         };
         localStorage.setItem(lsKeyUser(), JSON.stringify(user));
@@ -294,7 +300,7 @@ class ItemManager {
             return parsed;
         }
         return {
-            globalLocks: { weather: null, time: null, flow: null },
+            globalLocks: { weather: null, time: null, flow: null, dinoGrow: null },
             announcements: [],
             history: []
         };
@@ -579,6 +585,58 @@ class ItemManager {
         showToast(t.useSuccess(t.history.flow), 'success');
     }
 
+    // Use Dino Grow Card
+    useDinoGrowCard() {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        const t = I18N[lang];
+
+        if (this.user.inventory.dinoGrowCard <= 0) {
+            showToast(t.noItem, 'error');
+            return;
+        }
+
+        const conflict = this.checkConflict('dinoGrow');
+        if (conflict) {
+            const remaining = conflict.endTime - Date.now();
+            const name = lang === 'vi' ? conflict.username : (conflict.usernameCn || conflict.username);
+            showToast(t.conflictDinoGrow(name, formatTime(remaining)), 'warning');
+            return;
+        }
+
+        this.user.inventory.dinoGrowCard--;
+        this.saveUser();
+
+        const now = Date.now();
+        this.state.globalLocks.dinoGrow = {
+            userId: this.user.userId,
+            username: this.user.username,
+            usernameCn: this.user.usernameCn,
+            startTime: now,
+            endTime: now + USE_DURATION,
+            detail: 'grow',
+            detailName: '50%'
+        };
+
+        this.state.history.unshift({
+            id: generateId(),
+            type: 'dinoGrow',
+            userId: this.user.userId,
+            username: this.user.username,
+            usernameCn: this.user.usernameCn,
+            detail: '+50%',
+            startTime: now,
+            endTime: now + USE_DURATION,
+            status: 'active'
+        });
+
+        this.saveState();
+        this.renderInventory();
+        this.renderDinoGrowPanel();
+        this.renderHistory();
+        this.startCountdowns();
+        showToast(t.useSuccess(t.history.dinoGrow), 'success');
+    }
+
     stopFlowCard() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
@@ -706,7 +764,7 @@ class ItemManager {
 
     // Countdown Management
     startCountdowns() {
-        ['weather', 'time', 'flow'].forEach(type => {
+        ['weather', 'time', 'flow', 'dinoGrow'].forEach(type => {
             if (this.countdowns[type]) {
                 clearInterval(this.countdowns[type]);
                 this.countdowns[type] = null;
@@ -714,7 +772,7 @@ class ItemManager {
         });
 
         const tick = () => {
-            ['weather', 'time', 'flow'].forEach(type => {
+            ['weather', 'time', 'flow', 'dinoGrow'].forEach(type => {
                 const lock = this.checkConflict(type);
                 const banner = document.getElementById(`countdown-${type}`);
                 const value = document.getElementById(`countdown-value-${type}`);
@@ -779,6 +837,22 @@ class ItemManager {
                             document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = true);
                         }
 
+                        // Dino grow visual effect during active
+                        if (type === 'dinoGrow') {
+                            const dinoChar = document.getElementById('dino-character');
+                            const dinoAura = document.getElementById('dino-aura');
+                            const dinoStatus = document.getElementById('dino-status');
+                            const lang = document.body.getAttribute('data-lang') || 'vi';
+                            if (dinoChar) dinoChar.classList.add('grown');
+                            if (dinoAura) dinoAura.classList.add('active');
+                            if (dinoStatus) {
+                                dinoStatus.classList.add('grown');
+                                dinoStatus.innerHTML = lang === 'vi'
+                                    ? '<span class="lang-vi">Khủng long đã tăng kích thước 50%!</span><span class="lang-cn">恐龙已增大50%！</span>'
+                                    : '<span class="lang-vi">Khủng long đã tăng kích thước 50%!</span><span class="lang-cn">恐龙已增大50%！</span>';
+                            }
+                        }
+
                         if (conflictBanner) {
                             if (isMine) {
                                 conflictBanner.style.display = 'none';
@@ -800,6 +874,7 @@ class ItemManager {
                                     if (type === 'weather') msg = t.conflictWeather(name, formatTime(remaining));
                                     else if (type === 'time') msg = t.conflictTime(name, formatTime(remaining));
                                     else if (type === 'flow') msg = t.conflictFlow(name, formatTime(remaining));
+                                    else if (type === 'dinoGrow') msg = t.conflictDinoGrow(name, formatTime(remaining));
                                     textEl.textContent = msg + (detail ? ` (${detail})` : '');
                                 }
                             }
@@ -835,7 +910,8 @@ class ItemManager {
                     if (btn) {
                         btn.disabled = (type === 'weather' && this.user.inventory.weatherCard <= 0) ||
                                        (type === 'time' && this.user.inventory.timeCard <= 0) ||
-                                       (type === 'flow' && this.user.inventory.flowCard <= 0);
+                                       (type === 'flow' && this.user.inventory.flowCard <= 0) ||
+                                       (type === 'dinoGrow' && this.user.inventory.dinoGrowCard <= 0);
                     }
 
                     // Time setter controls re-enable when no conflict
@@ -846,6 +922,19 @@ class ItemManager {
                         if (timeInput) timeInput.disabled = !hasCards;
                         if (timeSlider) timeSlider.disabled = !hasCards;
                         document.querySelectorAll('#time-presets .preset-btn').forEach(b => b.disabled = !hasCards);
+                    }
+
+                    // Dino grow reset visual
+                    if (type === 'dinoGrow') {
+                        const dinoChar = document.getElementById('dino-character');
+                        const dinoAura = document.getElementById('dino-aura');
+                        const dinoStatus = document.getElementById('dino-status');
+                        if (dinoChar) dinoChar.classList.remove('grown');
+                        if (dinoAura) dinoAura.classList.remove('active');
+                        if (dinoStatus) {
+                            dinoStatus.classList.remove('grown');
+                            dinoStatus.innerHTML = '<span class="lang-vi">Kích thước bình thường</span><span class="lang-cn">正常体型</span>';
+                        }
                     }
                     if (conflictBanner) conflictBanner.style.display = 'none';
 
@@ -868,7 +957,7 @@ class ItemManager {
 
         tick();
         const interval = setInterval(tick, 1000);
-        ['weather', 'time', 'flow'].forEach(type => {
+        ['weather', 'time', 'flow', 'dinoGrow'].forEach(type => {
             this.countdowns[type] = interval;
         });
     }
@@ -899,8 +988,9 @@ class ItemManager {
         document.getElementById('count-time').textContent = '×' + this.user.inventory.timeCard;
         document.getElementById('count-announcement').textContent = '×' + this.user.inventory.announcementCard;
         document.getElementById('count-flow').textContent = '×' + this.user.inventory.flowCard;
+        document.getElementById('count-dino-grow').textContent = '×' + this.user.inventory.dinoGrowCard;
 
-        ['weather', 'time', 'announcement', 'flow'].forEach(type => {
+        ['weather', 'time', 'announcement', 'flow', 'dino-grow'].forEach(type => {
             const card = document.getElementById(`inv-${type}`);
             const btn = document.getElementById(`btn-slot-${type}`);
             const count = this.user.inventory[type + 'Card'];
@@ -918,6 +1008,7 @@ class ItemManager {
         this.renderTimePanel();
         this.renderAnnouncementPanel();
         this.renderFlowPanel();
+        this.renderDinoGrowPanel();
     }
 
     renderPanel(type) {
@@ -925,6 +1016,7 @@ class ItemManager {
         else if (type === 'time') this.renderTimePanel();
         else if (type === 'announcement') this.renderAnnouncementPanel();
         else if (type === 'flow') this.renderFlowPanel();
+        else if (type === 'dino-grow') this.renderDinoGrowPanel();
     }
 
     renderWeatherPanel() {
@@ -1000,6 +1092,35 @@ class ItemManager {
         }
     }
 
+    renderDinoGrowPanel() {
+        const lock = this.checkConflict('dinoGrow');
+        const btn = document.getElementById('btn-use-dino-grow');
+        const dinoChar = document.getElementById('dino-character');
+        const dinoAura = document.getElementById('dino-aura');
+        const dinoStatus = document.getElementById('dino-status');
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+
+        if (btn) {
+            btn.disabled = this.user.inventory.dinoGrowCard <= 0 || !!lock;
+        }
+
+        if (lock) {
+            if (dinoChar) dinoChar.classList.add('grown');
+            if (dinoAura) dinoAura.classList.add('active');
+            if (dinoStatus) {
+                dinoStatus.classList.add('grown');
+                dinoStatus.innerHTML = '<span class="lang-vi">Khủng long đã tăng kích thước 50%!</span><span class="lang-cn">恐龙已增大50%！</span>';
+            }
+        } else {
+            if (dinoChar) dinoChar.classList.remove('grown');
+            if (dinoAura) dinoAura.classList.remove('active');
+            if (dinoStatus) {
+                dinoStatus.classList.remove('grown');
+                dinoStatus.innerHTML = '<span class="lang-vi">Kích thước bình thường</span><span class="lang-cn">正常体型</span>';
+            }
+        }
+    }
+
     renderAnnouncementPanel() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
@@ -1069,7 +1190,7 @@ class ItemManager {
         empty.style.display = 'none';
         list.style.display = 'flex';
         list.innerHTML = myHistory.slice(0, 20).map(item => {
-            const icon = item.type === 'weather' ? '🌦️' : item.type === 'time' ? '🕐' : item.type === 'flow' ? '⏳' : '📢';
+            const icon = item.type === 'weather' ? '🌦️' : item.type === 'time' ? '🕐' : item.type === 'flow' ? '⏳' : item.type === 'dinoGrow' ? '🦖' : '📢';
             const title = t.history[item.type] || item.type;
             const timeStr = formatDateTime(item.startTime);
             const statusLabel = t.status[item.status] || item.status;
@@ -1228,6 +1349,10 @@ function quickUseFlow() {
     switchTab('flow');
 }
 
+function quickUseDinoGrow() {
+    switchTab('dino-grow');
+}
+
 // Global actions
 function useWeatherCard() {
     if (window.itemManager) window.itemManager.useWeatherCard();
@@ -1235,6 +1360,10 @@ function useWeatherCard() {
 
 function useTimeCard() {
     if (window.itemManager) window.itemManager.useTimeCard();
+}
+
+function useDinoGrowCard() {
+    if (window.itemManager) window.itemManager.useDinoGrowCard();
 }
 
 function adjustTime(delta) {
