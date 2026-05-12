@@ -74,27 +74,27 @@ function switchLang(lang) {
 
 // ===== Mock Data =====
 let players = [
-  { id: '13219635', nickname: 'TOP龙mixuka', server: 'Q', regDate: '2026-04-28', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '14:20:00', offlineTime: null },
-  { id: '13219663', nickname: 'ChiuChiu', server: 'Q', regDate: '2026-04-25', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '14:15:00', offlineTime: null },
-  { id: '13219698', nickname: 'Soul', server: 'K', regDate: '2026-04-30', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '14:10:00', offlineTime: null },
-  { id: '13219754', nickname: 'C007TITI', server: 'Q', regDate: '2026-03-15', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '14:05:00', offlineTime: null },
-  { id: '13219761', nickname: 'CoDoc', server: 'K', regDate: '2026-04-20', tag: 'new', guildStatus: 'has_guild', guildName: 'GOD DINO', onlineStatus: 'online', onlineSince: '13:50:00', offlineTime: null },
-  { id: '13219766', nickname: 'TeThanVuong', server: 'Q', regDate: '2026-02-20', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'offline', onlineSince: '13:30:00', offlineTime: '14:00:00' },
-  { id: '13219794', nickname: 'PAULZ', server: 'K', regDate: '2026-04-15', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '13:55:00', offlineTime: null },
-  { id: '13219808', nickname: 'GKTieuLynh', server: 'Q', regDate: '2026-01-10', tag: 'returning', guildStatus: 'has_guild', guildName: 'Tu Tiên', onlineStatus: 'offline', onlineSince: '12:00:00', offlineTime: '13:45:00' },
-  { id: '13219827', nickname: 'Nolan', server: 'Q', regDate: '2026-04-28', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '13:40:00', offlineTime: null },
-  { id: '13219916', nickname: 'latne', server: 'K', regDate: '2026-04-22', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'offline', onlineSince: '12:30:00', offlineTime: '13:30:00' },
-  { id: '13219922', nickname: 'GK炎3Luffy', server: 'Q', regDate: '2026-04-18', tag: 'new', guildStatus: 'has_guild', guildName: 'TOP.Legend', onlineStatus: 'online', onlineSince: '13:20:00', offlineTime: null },
-  { id: '13220015', nickname: 'Leyla', server: 'Q', regDate: '2026-03-01', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '13:15:00', offlineTime: null },
-  { id: '13220149', nickname: 'AnH2', server: 'K', regDate: '2026-04-27', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'offline', onlineSince: '11:00:00', offlineTime: '12:45:00' },
-  { id: '13220150', nickname: 'Fnasha', server: 'Q', regDate: '2026-04-10', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '12:35:00', offlineTime: null },
-  { id: '13220178', nickname: 'nhoknhok', server: 'K', regDate: '2026-04-29', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '12:20:00', offlineTime: null },
+  { id: '13219635', nickname: 'TOP龙mixuka', server: 'Q', regDate: '2026-04-28', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-04-30 14:00:00', offlineTime: null },
+  { id: '13219663', nickname: 'ChiuChiu', server: 'Q', regDate: '2026-04-25', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-04-30 14:00:00', offlineTime: null },
+  { id: '13219698', nickname: 'Soul', server: 'K', regDate: '2026-04-30', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-04-30 14:00:00', offlineTime: null },
+  { id: '13219754', nickname: 'C007TITI', server: 'Q', regDate: '2026-03-15', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-04-30 14:00:00', offlineTime: null },
+  { id: '13219761', nickname: 'CoDoc', server: 'K', regDate: '2026-04-20', tag: 'new', guildStatus: 'has_guild', guildName: 'GOD DINO', onlineStatus: 'online', onlineSince: '2026-04-30 13:00:00', offlineTime: null },
+  { id: '13219766', nickname: 'TeThanVuong', server: 'Q', regDate: '2026-02-20', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'offline', onlineSince: '2026-04-30 13:00:00', offlineTime: '2026-04-30 14:00:00' },
+  { id: '13219794', nickname: 'PAULZ', server: 'K', regDate: '2026-04-15', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-04-30 13:00:00', offlineTime: null },
+  { id: '13219808', nickname: 'GKTieuLynh', server: 'Q', regDate: '2026-01-10', tag: 'returning', guildStatus: 'has_guild', guildName: 'Tu Tiên', onlineStatus: 'offline', onlineSince: '2026-04-30 12:00:00', offlineTime: '2026-04-30 13:00:00' },
+  { id: '13219827', nickname: 'Nolan', server: 'Q', regDate: '2026-04-28', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-04-30 13:00:00', offlineTime: null },
+  { id: '13219916', nickname: 'latne', server: 'K', regDate: '2026-04-22', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'offline', onlineSince: '2026-04-30 12:00:00', offlineTime: '2026-04-30 13:00:00' },
+  { id: '13219922', nickname: 'GK炎3Luffy', server: 'Q', regDate: '2026-04-18', tag: 'new', guildStatus: 'has_guild', guildName: 'TOP.Legend', onlineStatus: 'online', onlineSince: '2026-04-30 13:00:00', offlineTime: null },
+  { id: '13220015', nickname: 'Leyla', server: 'Q', regDate: '2026-03-01', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-04-30 13:00:00', offlineTime: null },
+  { id: '13220149', nickname: 'AnH2', server: 'K', regDate: '2026-04-27', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'offline', onlineSince: '2026-04-30 11:00:00', offlineTime: '2026-04-30 12:00:00' },
+  { id: '13220150', nickname: 'Fnasha', server: 'Q', regDate: '2026-04-10', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-04-30 12:00:00', offlineTime: null },
+  { id: '13220178', nickname: 'nhoknhok', server: 'K', regDate: '2026-04-29', tag: 'new', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-04-30 12:00:00', offlineTime: null },
   // 多服务器测试数据（双服字段均为 / 分隔成对格式）
-  { id: '13229598', nickname: 'changkho', server: 'K', regDate: '2026-05-08', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '02:00:00', offlineTime: null },
-  { id: '13229549', nickname: 'EmSee/EmSee', server: 'Q/K', regDate: '2026-05-09', tag: 'new', guildStatus: 'no_guild/no_guild', guildName: null, onlineStatus: 'online', onlineSince: '08:00:00', offlineTime: null },
-  { id: '13227200', nickname: 'TaoLaCho/TaoLaCho', server: 'Q/K', regDate: '2026-04-01', tag: 'returning', guildStatus: 'no_guild/no_guild', guildName: null, onlineStatus: 'online', onlineSince: '04:00:00', offlineTime: null },
-  { id: '13225575', nickname: 'cuccucthanbi/chacuatao', server: 'Q/K', regDate: '2026-03-07', tag: 'returning', guildStatus: 'no_guild/no_guild', guildName: null, onlineStatus: 'online', onlineSince: '10:00:00', offlineTime: null },
-  { id: '13229999', nickname: 'PlayerA/PlayerB', server: 'Q/K', regDate: '2026-05-09', tag: 'new', guildStatus: 'has_guild/no_guild', guildName: 'TOP.Legend', onlineStatus: 'online', onlineSince: '11:30:00', offlineTime: null },
+  { id: '13229598', nickname: 'changkho', server: 'K', regDate: '2026-05-08', tag: 'returning', guildStatus: 'no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-05-09 02:00:00', offlineTime: null },
+  { id: '13229549', nickname: 'EmSee/EmSee', server: 'Q/K', regDate: '2026-05-09', tag: 'new', guildStatus: 'no_guild/no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-05-09 08:00:00', offlineTime: null },
+  { id: '13227200', nickname: 'TaoLaCho/TaoLaCho', server: 'Q/K', regDate: '2026-04-01', tag: 'returning', guildStatus: 'no_guild/no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-05-09 04:00:00', offlineTime: null },
+  { id: '13225575', nickname: 'cuccucthanbi/chacuatao', server: 'Q/K', regDate: '2026-03-07', tag: 'returning', guildStatus: 'no_guild/no_guild', guildName: null, onlineStatus: 'online', onlineSince: '2026-05-09 10:00:00', offlineTime: null },
+  { id: '13229999', nickname: 'PlayerA/PlayerB', server: 'Q/K', regDate: '2026-05-09', tag: 'new', guildStatus: 'has_guild/no_guild', guildName: 'TOP.Legend', onlineStatus: 'online', onlineSince: '2026-05-09 11:00:00', offlineTime: null },
 ];
 
 let currentFilter = 'all';
@@ -253,7 +253,7 @@ function renderTable() {
   }
 
   tbody.innerHTML = filtered.map(p => {
-    // 处理多服务器数据（Q/K 拼接）
+    // 处理多服务器数据（兼容 / 前后有空格）
     const servers = String(p.server).split(/\s*\/\s*/);
     const nicknames = String(p.nickname).split(/\s*\/\s*/);
     const guildStatuses = String(p.guildStatus).split(/\s*\/\s*/);
@@ -292,7 +292,6 @@ function renderTable() {
       }
     }
 
-    const isOnline = p.onlineStatus === 'online';
     const tagClass = p.tag === 'new' ? 'tag-new' : 'tag-returning';
     const tagText = p.tag === 'new' ? t('tag_new') : t('tag_returning');
     const loginTimeBadge = `<span style="color:var(--text-secondary);font-size:12px;">${formatDateTime(p.onlineSince)}</span>`;
