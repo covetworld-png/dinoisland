@@ -581,11 +581,33 @@
         <button class="text-btn" onclick="exportFinalData()">📤 <span data-i18n="exportWeeklyShort">导出复赛</span></button>
       </div>
     </div>
-    <div class="schedule-section" style="margin-bottom:16px;">
-      <h3 style="font-size:15px;color:var(--mist);margin-bottom:10px;">📅 <span data-i18n="weeklySchedule">赛程</span></h3>
-      <div id="finalScheduleList"></div>
+
+    <!-- 参赛名单 -->
+    <div class="weekly-players" id="finalPlayers"></div>
+
+    <!-- 复赛冠军 -->
+    <div class="champion-box" id="finalChampionBox" style="margin-top:16px;display:none;">
+      <span data-i18n="finalChampion">🏆 复赛冠军：</span>
+      <span class="name" id="finalChampionName">—</span>
     </div>
-    <div class="standings-section">
+
+    <!-- 赛程 -->
+    <div class="schedule-section" style="margin-top:20px;margin-bottom:16px;">
+      <h3 style="font-size:15px;color:var(--mist);margin-bottom:10px;">📅 <span data-i18n="weeklySchedule">赛程</span></h3>
+      <div class="schedule-list" id="finalScheduleList"></div>
+    </div>
+
+    <!-- 矩阵 -->
+    <div class="matrix-wrap" id="finalMatrixWrap">
+      <div class="empty" id="finalMatrixEmpty" style="padding:30px;" data-i18n="weeklyEmpty">等待开赛</div>
+      <table id="finalMatrix" style="display:none;">
+        <thead><tr id="finalMatrixHead"><th>—</th></tr></thead>
+        <tbody id="finalMatrixBody"></tbody>
+      </table>
+    </div>
+
+    <!-- 排名 -->
+    <div class="standings-section" style="margin-top:20px;">
       <h3 style="font-size:15px;color:var(--mist);margin-bottom:10px;">📊 <span data-i18n="weeklyStandings">排名</span></h3>
       <table style="width:100%;border-collapse:collapse;font-size:13px;">
         <thead>
@@ -760,7 +782,8 @@ const DEMO_DATA = {
       {p1:'asula',p2:'JUDI45'},{p1:'asula',p2:'chip'},{p1:'asula',p2:'maymay'},
       {p1:'CoBeChimTO',p2:'JUDI45'},{p1:'CoBeChimTO',p2:'chip'},{p1:'CoBeChimTO',p2:'maymay'},
       {p1:'JUDI45',p2:'chip'},{p1:'JUDI45',p2:'maymay'},{p1:'chip',p2:'maymay'}
-    ]
+    ],
+    absent: []
   }
 };
 
@@ -1684,6 +1707,17 @@ function importV2Data(rows, input) {
     }
   }
 
+  // 解析缺席选手
+  const importedAbsent = [];
+  const absentSectionNames = ['缺席选手', 'Vắng mặt'];
+  for (const name of absentSectionNames) {
+    const rows = sections[name] || [];
+    if (rows.length > 0) {
+      importedAbsent.push(...rows[0].split(',').map(s => s.trim()).filter(s => s));
+      break;
+    }
+  }
+
   // 确认覆盖
   const raw = localStorage.getItem(getKey());
   const hasStoredData = raw && (() => { try { const d = JSON.parse(raw); return (d.matches && d.matches.length > 0) || !!d.finalData; } catch(e) { return false; } })();
@@ -1718,7 +1752,7 @@ function importV2Data(rows, input) {
         results[key] = fm.winner;
       }
     }
-    finalData = { players: importedSeeds.slice(), accounts, results, schedule };
+    finalData = { players: importedSeeds.slice(), accounts, results, schedule, absent: importedAbsent };
   } else {
     finalData = null;
   }
@@ -2387,7 +2421,8 @@ function generateFinalFromPreliminary() {
     players: currentSeeds.slice(),
     accounts: accounts,
     results: {},
-    schedule: schedule
+    schedule: schedule,
+    absent: []
   };
   autoSave();
   switchSubView('final');
@@ -2420,6 +2455,7 @@ function exportFinalData() {
   if (!finalData) return;
   const date = document.getElementById('matchDate').value;
   const server = getCurrentServer();
+  const absent = finalData.absent || [];
   let csv = t('csvDate') + ',' + t('csvServer') + '\n';
   csv += `${date},${server}\n\n`;
   csv += '=== ' + t('sectionFinal') + ' ===\n';
@@ -2432,7 +2468,7 @@ function exportFinalData() {
   });
   csv += '\n=== ' + t('sectionFinalStandings') + ' ===\n';
   csv += t('csvRank') + ',' + t('csvName') + ',' + t('csvWins') + ',' + t('csvLosses') + ',' + t('weeklyPoints') + '\n';
-  const stats = calcWeeklyStats(finalData.players, finalData.results, []);
+  const stats = calcWeeklyStats(finalData.players, finalData.results, absent);
   const sorted = Object.keys(stats).sort((a, b) => {
     if (stats[b].points !== stats[a].points) return stats[b].points - stats[a].points;
     const h2hA = stats[a].h2h[b];
@@ -2445,6 +2481,10 @@ function exportFinalData() {
     const st = stats[name];
     csv += `${i + 1},${name},${st.wins},${st.losses},${st.points}\n`;
   });
+  if (absent.length > 0) {
+    csv += '\n=== 缺席选手 ===\n';
+    csv += absent.join(',') + '\n';
+  }
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2458,9 +2498,31 @@ function renderFinal() {
   if (!finalData) {
     document.getElementById('finalScheduleList').innerHTML = '<div class="empty">' + t('emptyFinal') + '</div>';
     document.getElementById('finalStandingsBody').innerHTML = '';
+    document.getElementById('finalPlayers').innerHTML = '';
+    document.getElementById('finalChampionBox').style.display = 'none';
+    document.getElementById('finalMatrixEmpty').style.display = 'block';
+    document.getElementById('finalMatrix').style.display = 'none';
     return;
   }
   const { players, results, schedule, accounts } = finalData;
+  const absent = finalData.absent || [];
+
+  // 参赛名单
+  const playersEl = document.getElementById('finalPlayers');
+  playersEl.innerHTML = players.map(p => {
+    const isAbsent = absent.includes(p);
+    const acc = accounts[p];
+    return '<span class="player-tag' + (isAbsent ? ' absent' : '') + '">' +
+      '<span style="color:' + getColor(p) + '">' + escapeHtml(p) + '</span>' +
+      (acc ? '<span style="color:var(--text2);font-size:11px;margin-left:4px;">(' + escapeHtml(acc) + ')</span>' : '') +
+      '<button class="absent-btn" onclick="toggleFinalAbsent(\'' + escapeHtml(p).replace(/'/g, "\\'") + '\')" title="' + (isAbsent ? t('cancelAbsent') : t('markAbsent')) + '">' + (isAbsent ? '✓' : '✕') + '</button>' +
+      '</span>';
+  }).join('');
+
+  // 冠军宣布
+  const champBox = document.getElementById('finalChampionBox');
+  champBox.style.display = players.length > 0 ? 'block' : 'none';
+  const champEl = document.getElementById('finalChampionName');
 
   // 赛程卡片
   const scheduleList = document.getElementById('finalScheduleList');
@@ -2468,18 +2530,30 @@ function renderFinal() {
     const key = [s.p1, s.p2].sort().join('|');
     const winner = results[key];
     const done = !!winner;
+    const p1Absent = absent.includes(s.p1);
+    const p2Absent = absent.includes(s.p2);
     let cardClass = 'pending';
     let headerRight = '';
     let p1WinBtn = '';
     let p2WinBtn = '';
     let p1NameColor = getColor(s.p1);
     let p2NameColor = getColor(s.p2);
+    let p1AbsentTag = '';
+    let p2AbsentTag = '';
+    const absentBadge = '<span style="font-size:10px;color:var(--danger);margin-left:4px;font-weight:600;">❌缺席</span>';
     if (done) {
       cardClass = 'done';
       headerRight = '<span class="schedule-status-win">✓ ' + escapeHtml(winner) + ' ' + t('winBtn') + '</span>' +
         '<button class="schedule-del-btn" onclick="removeFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('btnDel') + '</button>';
       if (winner !== s.p1) p1NameColor = 'var(--text2)';
       if (winner !== s.p2) p2NameColor = 'var(--text2)';
+    } else if (p1Absent || p2Absent) {
+      cardClass = 'absent';
+      headerRight = '<span class="schedule-status-skip">' + t('absentLabel') + '</span>';
+      p1NameColor = 'var(--text2)';
+      p2NameColor = 'var(--text2)';
+      if (p1Absent) p1AbsentTag = absentBadge;
+      if (p2Absent) p2AbsentTag = absentBadge;
     } else {
       p1WinBtn = '<button class="schedule-win-btn" onclick="setFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
       p2WinBtn = '<button class="schedule-win-btn" onclick="setFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
@@ -2495,7 +2569,7 @@ function renderFinal() {
         '<div class="side left">' + p1WinBtn +
           '<div style="display:flex;flex-direction:column;min-width:0;">' +
             '<div style="display:flex;align-items:center;min-width:0;">' +
-              '<span class="schedule-name" style="color:' + p1NameColor + '">' + escapeHtml(s.p1) + '</span>' +
+              '<span class="schedule-name" style="color:' + p1NameColor + '">' + escapeHtml(s.p1) + '</span>' + p1AbsentTag +
             '</div>' +
             (p1Acc ? '<span class="schedule-account">' + escapeHtml(p1Acc) + '</span>' : '') +
           '</div>' +
@@ -2504,7 +2578,7 @@ function renderFinal() {
         '<div class="side right">' +
           '<div style="display:flex;flex-direction:column;align-items:flex-end;min-width:0;">' +
             '<div style="display:flex;align-items:center;min-width:0;">' +
-              '<span class="schedule-name" style="color:' + p2NameColor + '">' + escapeHtml(s.p2) + '</span>' +
+              '<span class="schedule-name" style="color:' + p2NameColor + '">' + escapeHtml(s.p2) + '</span>' + p2AbsentTag +
             '</div>' +
             (p2Acc ? '<span class="schedule-account">' + escapeHtml(p2Acc) + '</span>' : '') +
           '</div>' + p2WinBtn +
@@ -2513,12 +2587,64 @@ function renderFinal() {
       '</div>';
   }).join('');
 
+  // 矩阵
+  const matrixTable = document.getElementById('finalMatrix');
+  const matrixEmpty = document.getElementById('finalMatrixEmpty');
+  if (players.length < 2) {
+    matrixEmpty.style.display = 'block';
+    matrixTable.style.display = 'none';
+  } else {
+    matrixEmpty.style.display = 'none';
+    matrixTable.style.display = 'table';
+    const headRow = document.getElementById('finalMatrixHead');
+    const colCount = players.length + 1;
+    const colWidth = 'calc(100% / ' + colCount + ')';
+    headRow.innerHTML = '<th style="width:' + colWidth + '">—</th>' + players.map(p => '<th style="color:' + getColor(p) + ';width:' + colWidth + '">' + escapeHtml(p) + '</th>').join('');
+    const body = document.getElementById('finalMatrixBody');
+    body.innerHTML = '';
+    for (let i = 0; i < players.length; i++) {
+      const tr = document.createElement('tr');
+      let html = '<th style="text-align:left;color:' + getColor(players[i]) + '">' + escapeHtml(players[i]) + '</th>';
+      for (let j = 0; j < players.length; j++) {
+        if (i === j) {
+          html += '<td style="opacity:0.3;">—</td>';
+        } else if (i > j) {
+          const key = [players[j], players[i]].sort().join('|');
+          const winner = results[key];
+          let cell = '<td class="matrix-cell">';
+          if (winner) {
+            if (winner === players[i]) cell += '<span class="result-win">' + t('csvWinner') + '</span>';
+            else cell += '<span class="result-loss">' + t('csvLoser') + '</span>';
+          } else {
+            cell += '<span style="opacity:0.3;">—</span>';
+          }
+          cell += '</td>';
+          html += cell;
+        } else {
+          const key = [players[i], players[j]].sort().join('|');
+          const winner = results[key];
+          let cell = '<td class="matrix-cell">';
+          if (winner) {
+            if (winner === players[i]) cell += '<span class="result-win">' + t('csvWinner') + '</span>';
+            else cell += '<span class="result-loss">' + t('csvLoser') + '</span>';
+          } else {
+            cell += '<span style="opacity:0.3;">—</span>';
+          }
+          cell += '</td>';
+          html += cell;
+        }
+      }
+      tr.innerHTML = html;
+      body.appendChild(tr);
+    }
+  }
+
   // 排名
-  const stats = calcWeeklyStats(players, results, []);
+  const stats = calcWeeklyStats(players, results, absent);
   const sorted = Object.keys(stats).sort((a, b) => {
     if (stats[b].points !== stats[a].points) return stats[b].points - stats[a].points;
-    const h2hA = stats[a].h2h[b];
-    const h2hB = stats[b].h2h[a];
+    const h2hA = stats[a].h2h[b] || '';
+    const h2hB = stats[b].h2h[a] || '';
     if (h2hA === 'W' && h2hB === 'L') return -1;
     if (h2hA === 'L' && h2hB === 'W') return 1;
     return 0;
@@ -2526,14 +2652,56 @@ function renderFinal() {
   const standingsBody = document.getElementById('finalStandingsBody');
   standingsBody.innerHTML = sorted.map((name, i) => {
     const st = stats[name];
+    const acc = accounts[name];
     return '<tr style="border-bottom:1px solid var(--border);">' +
       '<td style="padding:8px;">' + (i + 1) + '</td>' +
-      '<td style="padding:8px;"><span class="nickname" style="color:' + getColor(name) + '">' + escapeHtml(name) + '</span></td>' +
+      '<td style="padding:8px;"><span class="nickname" style="color:' + getColor(name) + '">' + escapeHtml(name) + '</span>' + (acc ? '<span style="color:var(--text2);font-size:11px;margin-left:4px;">(' + escapeHtml(acc) + ')</span>' : '') + '</td>' +
       '<td style="padding:8px;text-align:center;">' + st.wins + '</td>' +
       '<td style="padding:8px;text-align:center;">' + st.losses + '</td>' +
       '<td style="padding:8px;text-align:center;font-weight:600;color:var(--gold);">' + st.points + '</td>' +
       '</tr>';
   }).join('');
+
+  // 冠军
+  if (sorted.length === 0 || Object.keys(results).length === 0) {
+    champEl.textContent = '—';
+    champEl.style.color = '';
+  } else {
+    const topPoints = stats[sorted[0]].points;
+    const tied = sorted.filter(n => stats[n].points === topPoints);
+    if (tied.length === 1) {
+      champEl.innerHTML = '<span style="color:' + getColor(tied[0]) + '">' + escapeHtml(tied[0]) + '</span>' + (accounts[tied[0]] ? '<span style="color:var(--text2);font-size:12px;margin-left:6px;">(' + escapeHtml(accounts[tied[0]]) + ')</span>' : '');
+      champEl.style.color = '';
+    } else {
+      const h2hWins = {};
+      tied.forEach(name => {
+        let hw = 0;
+        tied.forEach(opp => {
+          if (opp !== name && stats[name].h2h[opp] === 'W') hw++;
+        });
+        h2hWins[name] = hw;
+      });
+      const maxH2h = Math.max(...Object.values(h2hWins));
+      const h2hLeaders = tied.filter(n => h2hWins[n] === maxH2h);
+      if (h2hLeaders.length === 1) {
+        champEl.innerHTML = '<span style="color:' + getColor(h2hLeaders[0]) + '">' + escapeHtml(h2hLeaders[0]) + '</span>' + (accounts[h2hLeaders[0]] ? '<span style="color:var(--text2);font-size:12px;margin-left:6px;">(' + escapeHtml(accounts[h2hLeaders[0]]) + ')</span>' : '');
+        champEl.style.color = '';
+      } else {
+        champEl.textContent = h2hLeaders.join('、') + ' ' + t('tie');
+        champEl.style.color = 'var(--gold)';
+      }
+    }
+  }
+}
+
+function toggleFinalAbsent(name) {
+  if (!finalData) return;
+  if (!finalData.absent) finalData.absent = [];
+  const idx = finalData.absent.indexOf(name);
+  if (idx >= 0) finalData.absent.splice(idx, 1);
+  else finalData.absent.push(name);
+  autoSave();
+  renderFinal();
 }
 
 function toggleWeeklyAbsent(name) {
