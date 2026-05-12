@@ -11,10 +11,23 @@
         <string>/Volumes/TQP4000/Sync/Work/dino_pd/scripts/guild-report-launcher.sh</string>
     </array>
 
+    <!-- 每天 00:30 执行 -->
     <key>StartCalendarInterval</key>
     <dict>
-        <key>Minute</key>
+        <key>Hour</key>
         <integer>0</integer>
+        <key>Minute</key>
+        <integer>30</integer>
     </dict>
+
+    <!-- 网络可达时才执行 -->
+    <key>NetworkState</key>
+    <true/>
+
+    <!-- 标准输出/错误重定向到日志 -->
+    <key>StandardOutPath</key>
+    <string>/Volumes/TQP4000/Sync/Work/dino_pd/logs/launchd-guild-report.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Volumes/TQP4000/Sync/Work/dino_pd/logs/launchd-guild-report-error.log</string>
 </dict>
 </plist>

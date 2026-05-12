@@ -124,18 +124,27 @@ function formatDateTime(value) {
   // 处理完整日期时间：YYYY-MM-DD HH:mm:ss
   const fullMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/);
   if (fullMatch) {
-    const [, y, m, d, hh, mm] = fullMatch;
-    if (currentLang === 'vi') {
-      return `${d}/${m}/${y} ${hh}:${mm}`;
-    }
-    return `${y}-${m}-${d} ${hh}:${mm}`;
+    const [, y, m, d, hh, mm, ss] = fullMatch;
+    const datePart = currentLang === 'vi' ? `${d}/${m}/${y}` : `${y}-${m}-${d}`;
+    const timePart = formatTimeOnly(hh, mm);
+    return `${datePart} ${timePart}`;
   }
   // 处理只有时间：HH:mm:ss
   const timeMatch = value.match(/^(\d{2}):(\d{2}):\d{2}$/);
   if (timeMatch) {
-    return `${timeMatch[1]}:${timeMatch[2]}`;
+    return formatTimeOnly(timeMatch[1], timeMatch[2]);
   }
   return value;
+}
+
+function formatTimeOnly(hh, mm) {
+  const h = parseInt(hh, 10);
+  const m = parseInt(mm, 10);
+  if (m === 0) {
+    // 整点：vi 用 H 后缀，zh 用 时 后缀
+    return currentLang === 'vi' ? `${h}H` : `${h}时`;
+  }
+  return `${hh}:${mm}`;
 }
 
 // ===== Auth Error =====
