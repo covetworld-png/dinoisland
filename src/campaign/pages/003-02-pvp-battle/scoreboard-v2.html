@@ -1633,13 +1633,28 @@ function buildDailyCSV() {
 
     // 复赛排名
     const stats = calcWeeklyStats(finalData.players, finalData.results, absentList);
-    const sorted = Object.keys(stats).sort((a, b) => {
-      if (stats[b].points !== stats[a].points) return stats[b].points - stats[a].points;
-      const h2hA = stats[a].h2h[b];
-      const h2hB = stats[b].h2h[a];
-      if (h2hA === 'W' && h2hB === 'L') return -1;
-      if (h2hA === 'L' && h2hB === 'W') return 1;
-      return 0;
+    const sorted = [];
+    const pointGroups = {};
+    Object.keys(stats).forEach(name => {
+      const p = stats[name].points;
+      if (!pointGroups[p]) pointGroups[p] = [];
+      pointGroups[p].push(name);
+    });
+    Object.keys(pointGroups).map(Number).sort((a, b) => b - a).forEach(points => {
+      const group = pointGroups[points];
+      if (group.length === 1) {
+        sorted.push(group[0]);
+      } else {
+        const h2hWins = {};
+        group.forEach(name => {
+          let hw = 0;
+          group.forEach(opp => {
+            if (opp !== name && stats[name].h2h[opp] === 'W') hw++;
+          });
+          h2hWins[name] = hw;
+        });
+        group.slice().sort((a, b) => h2hWins[b] - h2hWins[a]).forEach(name => sorted.push(name));
+      }
     });
     csv += '\n=== ' + t('sectionFinalStandings') + ' ===\n';
     csv += t('csvRank') + ',' + t('csvName') + ',' + t('csvWins') + ',' + t('csvLosses') + ',' + t('weeklyPoints') + '\n';
@@ -1679,27 +1694,116 @@ function exportAllData() {
     if (k && k.startsWith('pvp_score_v2_')) keys.push(k);
   }
   keys.sort();
+  console.log('[exportAllData] keys found:', keys);
   let totalMatches = 0;
+  let hasAnyData = false;
   keys.forEach(key => {
     const raw = localStorage.getItem(key);
     if (!raw) return;
     try {
       const data = JSON.parse(raw);
-      if (!data.matches || data.matches.length === 0) return;
-      const keyParts = key.replace('pvp_score_', '').split('_');
+      const hasMatches = data.matches && data.matches.length > 0;
+      const hasSeeds = data.seeds && data.seeds.length > 0;
+      const hasFinal = !!data.finalData;
+      console.log('[exportAllData] key:', key, 'hasMatches:', hasMatches, 'hasSeeds:', hasSeeds, 'hasFinal:', hasFinal, 'finalData keys:', data.finalData ? Object.keys(data.finalData) : 'none');
+      if (!hasMatches && !hasSeeds && !hasFinal) return;
+
+      hasAnyData = true;
+      totalMatches += (data.matches || []).length;
+
+      const keyParts = key.replace('pvp_score_v2_', '').split('_');
       const date = data.date || keyParts[0];
       const server = data.server || keyParts.slice(1).join(' ') || '';
       const champion = data.championAccount || '';
+
       csv += '\n' + date + ',' + server + ',' + champion + '\n';
-      csv += t('csvNo') + ',' + t('csvMatch') + ',' + t('csvWinner') + ',胜方账号,' + t('csvLoser') + ',负方账号,' + t('csvNote') + '\n';
-      data.matches.forEach((m, i) => {
-        const note = (m.note || '').replace(/,/g, '，');
-        csv += (i + 1) + ',' + t('csvMatch') + ' ' + (i + 1) + ',' + m.winner + ',' + (m.winnerAccount || '') + ',' + m.loser + ',' + (m.loserAccount || '') + ',' + note + '\n';
-      });
-      totalMatches += data.matches.length;
+
+      // === 初赛 ===
+      if (hasMatches) {
+        csv += '=== ' + t('sectionPreliminary') + ' ===\n';
+        csv += t('csvNo') + ',' + t('csvMatch') + ',' + t('csvWinner') + ',胜方账号,' + t('csvLoser') + ',负方账号,' + t('csvNote') + '\n';
+        data.matches.forEach((m, i) => {
+          const note = (m.note || '').replace(/,/g, '，');
+          csv += (i + 1) + ',' + t('csvMatch') + ' ' + (i + 1) + ',' + m.winner + ',' + (m.winnerAccount || '') + ',' + m.loser + ',' + (m.loserAccount || '') + ',' + note + '\n';
+        });
+      }
+
+      // === 种子选手 ===
+      if (hasSeeds) {
+        csv += '\n=== ' + t('sectionSeeds') + ' ===\n';
+        csv += t('csvNo') + ',' + t('csvName') + ',数字账号\n';
+        data.seeds.forEach((name, i) => {
+          let acc = '';
+          for (const m of data.matches || []) {
+            if (m.winner === name && m.winnerAccount) { acc = m.winnerAccount; break; }
+            if (m.loser === name && m.loserAccount) { acc = m.loserAccount; break; }
+          }
+          csv += (i + 1) + ',' + name + ',' + acc + '\n';
+        });
+      }
+
+      // === 复赛 ===
+      if (hasFinal) {
+        const fd = data.finalData;
+        console.log('[exportAllData] exporting final for', key, 'players:', fd.players, 'schedule:', fd.schedule ? fd.schedule.length : 0, 'results:', fd.results ? Object.keys(fd.results).length : 0);
+        const absentList = fd.absent || [];
+        const matchAbsent = fd.matchAbsent || {};
+        csv += '\n=== ' + t('sectionFinal') + ' ===\n';
+        csv += t('csvNo') + ',' + t('csvMatch') + ',' + t('csvWinner') + ',胜方账号,' + t('csvLoser') + ',负方账号\n';
+        fd.schedule.forEach((s, i) => {
+          const sk = [s.p1, s.p2].sort().join('|');
+          const winner = fd.results[sk] || '';
+          const loser = winner === s.p1 ? s.p2 : (winner === s.p2 ? s.p1 : '');
+          let winnerAcc = winner ? (fd.accounts[winner] || '') : '';
+          let loserAcc = loser ? (fd.accounts[loser] || '') : '';
+          if (winner && absentList.includes(winner)) winnerAcc = t('absentCSV') + (winnerAcc ? ' ' + winnerAcc : '');
+          if (loser && absentList.includes(loser)) loserAcc = t('absentCSV') + (loserAcc ? ' ' + loserAcc : '');
+          if (winner && matchAbsent[sk] === winner) winnerAcc = t('absentCSV') + (winnerAcc ? ' ' + winnerAcc : '');
+          if (loser && matchAbsent[sk] === loser) loserAcc = t('absentCSV') + (loserAcc ? ' ' + loserAcc : '');
+          csv += (i + 1) + ',' + t('csvMatch') + ' ' + (i + 1) + ',' + winner + ',' + winnerAcc + ',' + loser + ',' + loserAcc + '\n';
+        });
+
+        // 复赛排名
+        const stats = calcWeeklyStats(fd.players, fd.results, absentList);
+        const sorted = [];
+        const pointGroups = {};
+        Object.keys(stats).forEach(name => {
+          const p = stats[name].points;
+          if (!pointGroups[p]) pointGroups[p] = [];
+          pointGroups[p].push(name);
+        });
+        Object.keys(pointGroups).map(Number).sort((a, b) => b - a).forEach(points => {
+          const group = pointGroups[points];
+          if (group.length === 1) {
+            sorted.push(group[0]);
+          } else {
+            const h2hWins = {};
+            group.forEach(name => {
+              let hw = 0;
+              group.forEach(opp => {
+                if (opp !== name && stats[name].h2h[opp] === 'W') hw++;
+              });
+              h2hWins[name] = hw;
+            });
+            group.slice().sort((a, b) => h2hWins[b] - h2hWins[a]).forEach(name => sorted.push(name));
+          }
+        });
+        csv += '\n=== ' + t('sectionFinalStandings') + ' ===\n';
+        csv += t('csvRank') + ',' + t('csvName') + ',' + t('csvWins') + ',' + t('csvLosses') + ',' + t('weeklyPoints') + '\n';
+        sorted.forEach((name, i) => {
+          const st = stats[name];
+          csv += (i + 1) + ',' + name + ',' + st.wins + ',' + st.losses + ',' + st.points + '\n';
+        });
+
+        // 缺席名单
+        if (absentList.length > 0) {
+          csv += '\n=== ' + t('sectionAbsent') + ' ===\n';
+          csv += absentList.join(',') + '\n';
+        }
+      }
     } catch (e) {}
   });
-  if (totalMatches === 0) { alert(t('noHistoryData')); return; }
+  if (!hasAnyData) { alert(t('noHistoryData')); return; }
   const blob2 = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
   const url2 = URL.createObjectURL(blob2);
   const a2 = document.createElement('a');
@@ -2620,13 +2724,28 @@ function exportFinalData() {
   csv += '\n=== ' + t('sectionFinalStandings') + ' ===\n';
   csv += t('csvRank') + ',' + t('csvName') + ',' + t('csvWins') + ',' + t('csvLosses') + ',' + t('weeklyPoints') + '\n';
   const stats = calcWeeklyStats(finalData.players, finalData.results, absent);
-  const sorted = Object.keys(stats).sort((a, b) => {
-    if (stats[b].points !== stats[a].points) return stats[b].points - stats[a].points;
-    const h2hA = stats[a].h2h[b];
-    const h2hB = stats[b].h2h[a];
-    if (h2hA === 'W' && h2hB === 'L') return -1;
-    if (h2hA === 'L' && h2hB === 'W') return 1;
-    return 0;
+  const sorted = [];
+  const pointGroups = {};
+  Object.keys(stats).forEach(name => {
+    const p = stats[name].points;
+    if (!pointGroups[p]) pointGroups[p] = [];
+    pointGroups[p].push(name);
+  });
+  Object.keys(pointGroups).map(Number).sort((a, b) => b - a).forEach(points => {
+    const group = pointGroups[points];
+    if (group.length === 1) {
+      sorted.push(group[0]);
+    } else {
+      const h2hWins = {};
+      group.forEach(name => {
+        let hw = 0;
+        group.forEach(opp => {
+          if (opp !== name && stats[name].h2h[opp] === 'W') hw++;
+        });
+        h2hWins[name] = hw;
+      });
+      group.slice().sort((a, b) => h2hWins[b] - h2hWins[a]).forEach(name => sorted.push(name));
+    }
   });
   sorted.forEach((name, i) => {
     const st = stats[name];
@@ -2846,13 +2965,29 @@ function renderFinal() {
 
   // 排名
   const stats = calcWeeklyStats(players, results, absent);
-  const sorted = Object.keys(stats).sort((a, b) => {
-    if (stats[b].points !== stats[a].points) return stats[b].points - stats[a].points;
-    const h2hA = stats[a].h2h[b] || '';
-    const h2hB = stats[b].h2h[a] || '';
-    if (h2hA === 'W' && h2hB === 'L') return -1;
-    if (h2hA === 'L' && h2hB === 'W') return 1;
-    return 0;
+  // 按积分分组，同分者计算 mini-league 胜场数排序
+  const pointGroups = {};
+  Object.keys(stats).forEach(name => {
+    const p = stats[name].points;
+    if (!pointGroups[p]) pointGroups[p] = [];
+    pointGroups[p].push(name);
+  });
+  const sorted = [];
+  Object.keys(pointGroups).map(Number).sort((a, b) => b - a).forEach(points => {
+    const group = pointGroups[points];
+    if (group.length === 1) {
+      sorted.push(group[0]);
+    } else {
+      const h2hWins = {};
+      group.forEach(name => {
+        let hw = 0;
+        group.forEach(opp => {
+          if (opp !== name && stats[name].h2h[opp] === 'W') hw++;
+        });
+        h2hWins[name] = hw;
+      });
+      group.slice().sort((a, b) => h2hWins[b] - h2hWins[a]).forEach(name => sorted.push(name));
+    }
   });
   const standingsBody = document.getElementById('finalStandingsBody');
   standingsBody.innerHTML = sorted.map((name, i) => {
