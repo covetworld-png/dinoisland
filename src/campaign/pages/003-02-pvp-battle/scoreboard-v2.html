@@ -917,7 +917,7 @@ const I18N = {
     rulesDaily: '日赛积分', rulesElim: '日赛淘汰机制', rulesWeekly: '周冠军赛积分（周日）',
     phWinner: '胜', phLoser: '败', phNote: '备注（可选）',
     clearDataShort: '清空全部', exportCSVShort: '导出当日', exportAllShort: '导出全部', importFileShort: '导入', saveToGitHubShort: '存GitHub', loadFromGitHubShort: '恢复',
-    clearFinalShort: '清空复赛', exportWeeklyShort: '导出周赛', importWeeklyShort: '导入周赛',
+    clearFinalShort: '清空复赛', clearWeeklyShort: '清空周赛', exportWeeklyShort: '导出周赛', importWeeklyShort: '导入周赛',
     btnAdd: '添加', btnDel: '删除',
     modalTitle: '选择日期和服务器', btnCancel: '取消', btnConfirm: '确认', alertNeedDate: '请选择日期',
     alertNeedNames: '请输入胜者和败者昵称', alertSameName: '胜者和败者不能相同',
@@ -958,11 +958,12 @@ const I18N = {
     sectionAbsent: '缺席选手',
     sectionMatchAbsent: '单场缺席',
     seedCounter: '种子 {n}/6',
-    alertNeed6Seeds: '种子不足 6 人，无法生成复赛',
+    alertNeed6Seeds: '种子不足 6 人，无法生成复赛', alertNeed2Seeds: '种子不足 2 人，无法生成复赛', confirmGenerateFinal: '当前仅有 {n} 名种子选手（未满6人），是否仍要生成复赛？', prelimEarlyEnd: '当前已有 {n} 名种子，可手动开启复赛',
     emptyFinal: '暂无复赛数据，请先在初赛中产生 6 名种子',
     alertConfirmClearFinal: '确定清空复赛数据？',
     refreshPlayers: '自动导入日赛冠军', weeklyStats: '📊 周赛积分榜',
     weeklyChampion: '🏆 周冠军：', weeklyEmpty: '等待开赛',
+    finalChampion: '🏆 复赛冠军：', weeklySchedule: '赛程', weeklyStandings: '排名', weeklyPoints: '积分',
     colPoints: '积分',
     noHistoryData: '暂无历史数据',
     nameRequired: '昵称不能为空',
@@ -991,6 +992,7 @@ const I18N = {
     phWinner: 'Thắng', phLoser: 'Thua', phNote: 'Ghi Chú (tùy chọn)',
     clearDataShort: 'Xóa tất cả', exportCSVShort: 'Xuất ngày', exportAllShort: 'Xuất tất cả', importFileShort: 'Nhập', saveToGitHubShort: 'Lưu GH', loadFromGitHubShort: 'Khôi phục',
     clearFinalShort: 'Xóa Chung Kết', clearWeeklyShort: 'Xóa Vô Địch Tuần', exportWeeklyShort: 'Xuất Vô Địch Tuần', importWeeklyShort: 'Nhập Vô Địch Tuần',
+    alertConfirmClearFinal: 'Xác nhận xóa dữ liệu chung kết?', alertNeed6Seeds: 'Chưa đủ 6 hạt giống, không thể tạo chung kết', alertNeed2Seeds: 'Chưa đủ 2 hạt giống, không thể tạo chung kết', confirmGenerateFinal: 'Hiện chỉ có {n} hạt giống (chưa đủ 6), có muốn tạo chung kết?', prelimEarlyEnd: 'Hiện có {n} hạt giống, có thể tạo chung kết thủ công', alertPrelimFull: 'Đã có 6 hạt giống, sơ bộ đã kết thúc', alertSeed: '{name} đã là hạt giống, không thể tham gia',
     btnAdd: 'Thêm', btnDel: 'Xóa',
     modalTitle: 'Chọn Ngày và Máy Chủ', btnCancel: 'Hủy', btnConfirm: 'Xác Nhận', alertNeedDate: 'Vui lòng chọn ngày',
     alertNeedNames: 'Vui lòng nhập tên người thắng và thua', alertSameName: 'Người thắng và thua không thể cùng một người',
@@ -1030,9 +1032,11 @@ const I18N = {
     sectionFinalStandings: 'Bảng Xếp Hạng Chung Kết',
     sectionAbsent: 'Vắng mặt',
     sectionMatchAbsent: 'Vắng mặt từng trận',
+    backToV1: 'Quay lại chế độ 1.0', emptyFinal: 'Chưa có dữ liệu chung kết, hãy tạo sơ bộ trước', generateFinal: 'Tạo Chung Kết', prelimEnd: 'Sơ bộ kết thúc, đã có 6 hạt giống', seedCounter: 'Hạt giống {n}/6', seedLabel: 'Hạt giống', tabFinal: 'Chung Kết',
     tabDaily: 'Bảng Điểm Nhật Sai', tabWeekly: 'Bảng Điểm Tuần',
     refreshPlayers: 'Tự động nhập vô địch nhật sai', weeklyStats: '📊 Bảng Xếp Hạng Vô Địch Tuần',
     weeklyChampion: '🏆 Vô Địch Tuần：', weeklyEmpty: 'Đang chờ bắt đầu',
+    finalChampion: '🏆 Vô địch chung kết：', weeklySchedule: 'Lịch thi đấu', weeklyStandings: 'Bảng xếp hạng', weeklyPoints: 'Điểm',
     colPoints: 'Điểm',
     noHistoryData: 'Chưa có dữ liệu lịch sử',
     nameRequired: 'Tên không được để trống',
@@ -1455,10 +1459,11 @@ function render() {
   });
 
   // 初赛结束提示 + 生成复赛按钮
-  if (seedCount >= 6) {
+  if (seedCount >= 2) {
     const endDiv = document.createElement('div');
     endDiv.style.cssText = 'margin-top:12px;padding:10px;background:var(--gold-dim);border:1px solid var(--gold);border-radius:8px;text-align:center;';
-    endDiv.innerHTML = '<div style="color:var(--gold);font-weight:600;margin-bottom:8px;">' + t('prelimEnd') + '</div>' +
+    const msg = seedCount >= 6 ? t('prelimEnd') : t('prelimEarlyEnd', {n: seedCount});
+    endDiv.innerHTML = '<div style="color:var(--gold);font-weight:600;margin-bottom:8px;">' + msg + '</div>' +
       '<button class="btn-add" onclick="generateFinalFromPreliminary()">' + t('generateFinal') + '</button>';
     sp.appendChild(endDiv);
   }
@@ -2707,9 +2712,12 @@ function switchSubView(view) {
 
 function generateFinalFromPreliminary() {
   const currentSeeds = calcSeedsFromMatches();
-  if (currentSeeds.length < 6) {
-    alert(t('alertNeed6Seeds'));
+  if (currentSeeds.length < 2) {
+    alert(t('alertNeed2Seeds'));
     return;
+  }
+  if (currentSeeds.length < 6) {
+    if (!confirm(t('confirmGenerateFinal', {n: currentSeeds.length}))) return;
   }
   // 提取种子选手的账号信息
   const accounts = {};
