@@ -357,11 +357,7 @@ function syncHonorHall() {
     syncSeason4Hall();
     syncSeason5Hall();
     
-    // Auto-scroll to Season 5 in result state
-    // In infinite loop: real cards start at hallOriginalCount (5), S5 is at +4
-    const s5Index = (hallOriginalCount || 5) + 4;
-    hallCarouselIndex = s5Index;
-    updateHallCarousel();
+    // Flat layout: no auto-scroll needed, all cards visible
 }
 
 function resetSeason2Hall() {
@@ -556,135 +552,25 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
-}
-
 // ===========================
-// Honor Hall Carousel (Infinite Loop)
+// Honor Hall (Flat Layout)
 // ===========================
 let hallCarouselIndex = 0;
-let hallOriginalCount = 0;
-
-function setTrackTransition(enabled) {
-    const track = document.querySelector('.hall-carousel-track');
-    if (track) {
-        track.style.transition = enabled ? 'transform 0.6s ease' : 'none';
-    }
-}
 
 function updateHallCarousel() {
-    const track = document.querySelector('.hall-carousel-track');
-    const cards = document.querySelectorAll('.hall-carousel-track .hall-card');
-    if (!track || cards.length === 0) return;
-
-    const cardWidth = cards[0].offsetWidth;
-    const gap = 24;
-    const itemWidth = cardWidth + gap;
-
-    track.style.transform = `translateX(-${hallCarouselIndex * itemWidth}px)`;
-
-    // Update dots based on original card position
-    const dotIndex = hallCarouselIndex % hallOriginalCount;
-    document.querySelectorAll('.hall-carousel-dots .dot').forEach((dot, i) => {
-        dot.classList.toggle('active', i === dotIndex);
-    });
-
-    // Buttons always enabled in infinite mode
-    const prevBtn = document.querySelector('.hall-carousel-prev');
-    const nextBtn = document.querySelector('.hall-carousel-next');
-    if (prevBtn) prevBtn.style.opacity = '1';
-    if (nextBtn) nextBtn.style.opacity = '1';
+    // No-op for flat layout
 }
 
 function initHallCarousel() {
-    const track = document.querySelector('.hall-carousel-track');
+    // Flat layout - no carousel needed
+    // Hide carousel controls
     const prevBtn = document.querySelector('.hall-carousel-prev');
     const nextBtn = document.querySelector('.hall-carousel-next');
-    const dots = document.querySelectorAll('.hall-carousel-dots .dot');
-    const cards = document.querySelectorAll('.hall-carousel-track .hall-card');
-    const carousel = document.querySelector('.hall-carousel');
-
-    if (cards.length === 0 || !track) return;
-
-    // Clone cards for infinite loop (prepend + append), remove IDs from clones
-    cards.forEach(card => {
-        const clone = card.cloneNode(true);
-        clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-        track.appendChild(clone);
-    });
-    for (let i = cards.length - 1; i >= 0; i--) {
-        const clone = cards[i].cloneNode(true);
-        clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-        track.insertBefore(clone, track.firstChild);
-    }
-
-    hallOriginalCount = cards.length;
-    hallCarouselIndex = hallOriginalCount; // Start at real S1
-
-    function goNext() {
-        hallCarouselIndex++;
-        updateHallCarousel();
-
-        // If scrolled into trailing clone zone, reset to real zone
-        if (hallCarouselIndex >= hallOriginalCount * 2) {
-            setTimeout(() => {
-                setTrackTransition(false);
-                hallCarouselIndex = hallOriginalCount;
-                updateHallCarousel();
-                requestAnimationFrame(() => setTrackTransition(true));
-            }, 600);
-        }
-    }
-
-    function goPrev() {
-        hallCarouselIndex--;
-        updateHallCarousel();
-
-        // If scrolled into leading clone zone, reset to real zone
-        if (hallCarouselIndex < hallOriginalCount) {
-            setTimeout(() => {
-                setTrackTransition(false);
-                hallCarouselIndex = hallOriginalCount * 2 - 1;
-                updateHallCarousel();
-                requestAnimationFrame(() => setTrackTransition(true));
-            }, 600);
-        }
-    }
-
-    if (prevBtn) prevBtn.addEventListener('click', goPrev);
-    if (nextBtn) nextBtn.addEventListener('click', goNext);
-
-    dots.forEach((dot, i) => {
-        dot.addEventListener('click', () => {
-            hallCarouselIndex = hallOriginalCount + i;
-            updateHallCarousel();
-            resetAutoplay();
-        });
-    });
-
-    window.addEventListener('resize', updateHallCarousel);
-    updateHallCarousel();
-
-    // Auto-scroll every 3.5s
-    let autoPlayInterval = setInterval(goNext, 3500);
-
-    function resetAutoplay() {
-        clearInterval(autoPlayInterval);
-        autoPlayInterval = setInterval(goNext, 3500);
-    }
-
-    // Pause on hover
-    if (carousel) {
-        carousel.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
-        carousel.addEventListener('mouseleave', () => {
-            autoPlayInterval = setInterval(goNext, 3500);
-        });
-    }
-
-    // Reset autoplay on manual interaction
-    if (prevBtn) prevBtn.addEventListener('click', resetAutoplay);
-    if (nextBtn) nextBtn.addEventListener('click', resetAutoplay);
-
-    // Initial positioning
+    const dots = document.querySelector('.hall-carousel-dots');
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (dots) dots.style.display = 'none';
+}
     updateHallCarousel();
 }
 
