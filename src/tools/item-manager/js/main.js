@@ -3,8 +3,11 @@
 // LocalStorage-based state with cross-tab sync
 // ============================================
 
-const USE_DURATION = 5 * 60 * 1000; // 5 minutes in ms
-const FLOW_DURATION = 60 * 60 * 1000; // 60 minutes in ms
+// 道具时效（毫秒）
+const DURATION_WEATHER = 10 * 60 * 1000;   // 天气卡：10分钟
+const DURATION_TIME    = 10 * 60 * 1000;   // 时间卡：10分钟
+const DURATION_FLOW    = 60 * 60 * 1000;   // 流动时间：60分钟
+// 体型变化：无固定时效（endTime = Infinity，龙死亡/下线时失效）
 
 // Server-scoped localStorage keys
 function getServerId() {
@@ -96,11 +99,11 @@ function simulateServerPoll(manager) {
     const types = ['weather','time','flow'];
     const type = types[Math.floor(Math.random() * types.length)];
     const bots = [
-        {vi:'Ngườ chơi 7723', cn:'玩家7723'},
-        {vi:'Ngườ chơi 8844', cn:'玩家8844'},
-        {vi:'Ngườ chơi 5566', cn:'玩家5566'},
-        {vi:'Ngườ chơi 3399', cn:'玩家3399'},
-        {vi:'Ngườ chơi 1122', cn:'玩家1122'}
+        {vi:'Người chơi 7723', cn:'玩家7723'},
+        {vi:'Người chơi 8844', cn:'玩家8844'},
+        {vi:'Người chơi 5566', cn:'玩家5566'},
+        {vi:'Người chơi 3399', cn:'玩家3399'},
+        {vi:'Người chơi 1122', cn:'玩家1122'}
     ];
     const bot = bots[Math.floor(Math.random() * bots.length)];
     
@@ -185,10 +188,10 @@ const SERVER_POLL_INTERVAL = 8000;
 
 // Fake other-player names for server simulation
 const BOT_NAMES = [
-    { vi: 'Ngườ chơi 7723', cn: '玩家7723' },
-    { vi: 'Ngườ chơi 9142', cn: '玩家9142' },
-    { vi: 'Ngườ chơi 3301', cn: '玩家3301' },
-    { vi: 'Ngườ chơi 5528', cn: '玩家5528' },
+    { vi: 'Người chơi 7723', cn: '玩家7723' },
+    { vi: 'Người chơi 9142', cn: '玩家9142' },
+    { vi: 'Người chơi 3301', cn: '玩家3301' },
+    { vi: 'Người chơi 5528', cn: '玩家5528' },
 ];
 
 // Translations
@@ -199,10 +202,13 @@ const I18N = {
         busy: 'Đang bận',
         conflictWeather: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Tiết, còn lại ${time}`,
         conflictTime: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Gian, còn lại ${time}`,
-        conflictDinoSize: (name, time) => `Ngườ chơi ${name} đang thay đổi kích thước, còn lại ${time}`,
+        conflictDinoSize: (name, time) => `Người chơi ${name} đang thay đổi kích thước, còn lại ${time}`,
+        conflictFlow: (name, time) => `Người chơi ${name} đang sử dụng Dòng Chảy Thờ Gian, còn lại ${time}`,
+        conflictFlowByTime: (time) => `Thẻ Thờ Gian đang sử dụng (${time}), không thể khởi động dòng chảy`,
+        conflictTimeByFlow: (time) => `Dòng Chảy Thờ Gian đang chạy (${time}), không thể sử dụng thẻ thờ gian`,
         noItem: 'Không đủ đạo cụ',
         connectingServer: 'Đang kết nối server...',
-        serverErrorConflict: 'Server: Có ngườ chơi khác đang sử dụng đạo cụ này, vui lòng thử lại sau',
+        serverErrorConflict: 'Server: Có người chơi khác đang sử dụng đạo cụ này, vui lòng thử lại sau',
         serverErrorNoItem: 'Server: Không đủ đạo cụ',
         serverErrorSystem: () => `Lỗi hệ thống, vui lòng liên hệ quản trị viên`,
         selectOption: 'Vui lòng chọn một tùy chọn',
@@ -210,7 +216,7 @@ const I18N = {
         useFailed: 'Sử dụng thất bại, vui lòng thử lại',
         submitSuccess: 'Gửi thông báo thành công, đang chờ duyệt',
         enterContent: 'Vui lòng nhập nội dung thông báo',
-        timeUp: 'Hết thờ gian, đã tự động kết thúc',
+        timeUp: 'Hết thời gian, đã tự động kết thúc',
         approved: 'Thông báo đã đườc duyệt',
         clickToSend: 'Đã duyệt, nhấn để gửi',
         sendAnnouncement: 'Gửi thông báo',
@@ -219,9 +225,9 @@ const I18N = {
             weather: 'Thẻ Thời Tiết',
             time: 'Thẻ Thời Gian',
             announcement: 'Thông báo',
-            dinoGrow50: 'Khủng Long +50%',
-            dinoGrow100: 'Khủng Long +100%',
-            dinoShrink50: 'Khủng Long -50%'
+            dinoGrow50: 'Kích thước +50%',
+            dinoGrow100: 'Kích thước +100%',
+            dinoShrink50: 'Kích thước -50%'
         },
         status: {
             pending_review: 'Chờ duyệt',
@@ -280,9 +286,9 @@ const I18N = {
             time: '时间卡',
             announcement: '全服公告',
             flow: '时间流动卡',
-            dinoGrow50: '仅限恐龙变大 50%',
-            dinoGrow100: '恐龙+100%',
-            dinoShrink50: '恐龙变小 50%'
+            dinoGrow50: '体型+50%',
+            dinoGrow100: '体型+100%',
+            dinoShrink50: '体型-50%'
         },
         status: {
             pending_review: '待审核',
@@ -486,6 +492,8 @@ class ItemManager {
     checkConflict(type) {
         const lock = this.state.globalLocks[type];
         if (!lock) return null;
+        // dinoSize has no fixed expiration (expires on dino death/logout)
+        if (type === 'dinoSize') return lock;
         const now = Date.now();
         if (now >= lock.endTime) {
             // Auto cleanup expired lock
@@ -529,6 +537,39 @@ class ItemManager {
             if (loadingToast.parentNode) loadingToast.remove();
             return { success: false, code: 'SYSTEM_ERROR' };
         }
+    }
+
+    // Simulate server restore (type=0) command with highest priority
+    async simulateServerRestore(type) {
+        await new Promise(r => setTimeout(r, 200 + Math.random() * 300));
+        return { success: true };
+    }
+
+    // Auto-restore when timed item expires: generate type=0 command
+    autoRestore(type) {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        const t = I18N[lang];
+        
+        // 1. Clear local lock immediately (prevent duplicate restore)
+        this.state.globalLocks[type] = null;
+        
+        // 2. Update history
+        const historyItem = this.state.history.find(h => 
+            h.type === type && h.userId === this.user.userId && h.status === 'active'
+        );
+        if (historyItem) {
+            historyItem.status = 'completed';
+            historyItem.endTime = Date.now();
+        }
+        this.saveState();
+        
+        // 3. Update UI
+        this.renderPanel(type);
+        this.renderHistory();
+        showToast(t.timeUp, 'info');
+        
+        // 4. Notify server (type=0, highest priority) — fire and forget
+        this.simulateServerRestore(type);
     }
 
     // Use Weather Card
@@ -580,7 +621,7 @@ class ItemManager {
             username: this.user.username,
             usernameCn: this.user.usernameCn,
             startTime: now,
-            endTime: now + USE_DURATION,
+            endTime: now + DURATION_WEATHER,
             detail: selected,
             detailName: detail
         };
@@ -594,7 +635,7 @@ class ItemManager {
             usernameCn: this.user.usernameCn,
             detail: detail,
             startTime: now,
-            endTime: now + USE_DURATION,
+            endTime: now + DURATION_WEATHER,
             status: 'active'
         });
 
@@ -663,7 +704,7 @@ class ItemManager {
             username: this.user.username,
             usernameCn: this.user.usernameCn,
             startTime: now,
-            endTime: now + USE_DURATION,
+            endTime: now + DURATION_TIME,
             detail: selected,
             detailName: detail
         };
@@ -676,7 +717,7 @@ class ItemManager {
             usernameCn: this.user.usernameCn,
             detail: detail,
             startTime: now,
-            endTime: now + USE_DURATION,
+            endTime: now + DURATION_TIME,
             status: 'active'
         });
 
@@ -800,7 +841,7 @@ class ItemManager {
             username: this.user.username,
             usernameCn: this.user.usernameCn,
             startTime: now,
-            endTime: now + USE_DURATION,
+            endTime: Infinity,
             sizeType: sizeType,
             detail: sizeType,
             detailName: label.cn
@@ -814,7 +855,7 @@ class ItemManager {
             usernameCn: this.user.usernameCn,
             detail: label.cn,
             startTime: now,
-            endTime: now + USE_DURATION,
+            endTime: null,
             status: 'active'
         });
 
@@ -1009,8 +1050,8 @@ class ItemManager {
                     if (remaining > 0 && type === 'dinoSize' && !isMine) {
                         banner.style.display = 'none';
                     } else if (remaining > 0) {
-                        banner.style.display = 'flex';
-                        value.textContent = formatTime(remaining);
+                        banner.style.display = type === 'dinoSize' ? 'none' : 'flex';
+                        value.textContent = type === 'dinoSize' ? '' : formatTime(remaining);
                         banner.className = isMine 
                             ? 'countdown-banner' 
                             : 'countdown-banner';
@@ -1070,9 +1111,9 @@ class ItemManager {
                             const dinoStatus = document.getElementById('dino-status');
                             const sizeType = lock.sizeType || 'grow50';
                             const sizeLabels = {
-                                grow50: { vi: 'Khủng long đã tăng kích thước 50%!', cn: '恐龙已增大50%！' },
-                                grow100: { vi: 'Khủng long đã tăng gấp đôi kích thước!', cn: '恐龙体型已翻倍！' },
-                                shrink50: { vi: 'Khủng long đã giảm 50% kích thước!', cn: '恐龙已缩小50%！' }
+                                grow50: { vi: 'Đã tăng kích thước 50%!', cn: '体型已增大50%！' },
+                                grow100: { vi: 'Đã tăng gấp đôi kích thước!', cn: '体型已翻倍！' },
+                                shrink50: { vi: 'Đã giảm 50% kích thước!', cn: '体型已缩小50%！' }
                             };
                             const label = sizeLabels[sizeType];
                             if (dinoChar) {
@@ -1112,20 +1153,9 @@ class ItemManager {
                                 }
                             }
                         }
-                    } else {
-                        // Time's up - clean up lock and update history
-                        this.checkConflict(type);
-                        // Update history status to completed
-                        const historyItem = this.state.history.find(h => 
-                            h.type === type && h.userId === this.user.userId && h.status === 'active'
-                        );
-                        if (historyItem) {
-                            historyItem.status = 'completed';
-                            historyItem.endTime = Date.now();
-                            this.saveState();
-                            this.renderHistory();
-                        }
-                        this.renderPanel(type);
+                    } else if (type !== 'dinoSize') {
+                        // Time's up - auto restore (generate type=0 command, highest priority)
+                        this.autoRestore(type);
                     }
                 } else {
                     // Cross-type mutual exclusion: time ↔ flow
@@ -1213,7 +1243,7 @@ class ItemManager {
                         if (stopBtn) stopBtn.style.display = 'none';
                         if (useBtn) useBtn.style.display = 'block';
                         if (display) display.classList.remove('active');
-                        if (period) period.innerHTML = '<span class="lang-vi">Thờ gian đang đứng yên tại 12:00</span><span class="lang-cn">时间静止在 12:00</span>';
+                        if (period) period.innerHTML = '<span class="lang-vi">Thời gian đang đứng yên tại 12:00</span><span class="lang-cn">时间静止在 12:00</span>';
                         updateSky(12, 0, 'flow-sky');
                     }
                 }
@@ -1361,7 +1391,7 @@ class ItemManager {
             if (lock) {
                 // Period text is updated by countdown tick via updateSky
             } else {
-                period.innerHTML = '<span class="lang-vi">Thờ gian đang đứng yên tại 12:00</span><span class="lang-cn">时间静止在 12:00</span>';
+                period.innerHTML = '<span class="lang-vi">Thời gian đang đứng yên tại 12:00</span><span class="lang-cn">时间静止在 12:00</span>';
                 updateSky(12, 0, 'flow-sky');
             }
         }
@@ -1385,9 +1415,9 @@ class ItemManager {
         if (lock) {
             const sizeType = lock.sizeType || 'grow50';
             const sizeLabels = {
-                grow50: { vi: 'Khủng long đã tăng kích thước 50%!', cn: '恐龙已增大50%！' },
-                grow100: { vi: 'Khủng long đã tăng gấp đôi kích thước!', cn: '恐龙体型已翻倍！' },
-                shrink50: { vi: 'Khủng long đã giảm 50% kích thước!', cn: '恐龙已缩小50%！' }
+                grow50: { vi: 'Đã tăng kích thước 50%!', cn: '体型已增大50%！' },
+                grow100: { vi: 'Đã tăng gấp đôi kích thước!', cn: '体型已翻倍！' },
+                shrink50: { vi: 'Đã giảm 50% kích thước!', cn: '体型已缩小50%！' }
             };
             const label = sizeLabels[sizeType];
             if (dinoChar) {
