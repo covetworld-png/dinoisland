@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chí Tôn Bạo Long Vương Mùa 3 | 至尊暴龙王 第三届</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css?v=10">
+</head>
+<body class="state-before">
+    <div class="page">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="logo">
+                    <img src="static/images/logo.jpg" alt="Logo" class="logo-img">
+                    <div class="logo-text">
+                        <span class="lang-vi">Chí Tôn Bạo Long Vương Mùa 3</span>
+                        <span class="lang-cn">至尊暴龙王 第三届</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-test-countdown" onclick="toggleCountdownMode()">
+                        <span class="lang-vi">Chuyển đếm ngược</span>
+                        <span class="lang-cn">切换倒计时</span>
+                    </button>
+                    <button class="btn-toggle" onclick="toggleResult()" id="toggle-result-btn">
+                        <span class="lang-vi">Công bố người thắng</span>
+                        <span class="lang-cn">宣布获胜</span>
+                    </button>
+                    <button class="btn-test-winner" onclick="toggleWinnerMode()" id="toggle-winner-btn" title="演示：切换获胜者视角">
+                        <span class="lang-vi">👑 Người thắng</span>
+                        <span class="lang-cn">👑 获胜者视角</span>
+                    </button>
+                    <button class="lang-toggle" onclick="toggleLanguage()">
+                        <span id="current-lang">VI / 中</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container layout-container">
+                <!-- Hero -->
+                <section class="hero">
+                    <div class="hero-king">
+                        <img id="hero-king-img" src="static/images/dragon-king-crow3.jpg" alt="Chí Tôn Bạo Long Vương">
+                    </div>
+                    <h1>
+                        <span class="lang-vi">Chí Tôn Bạo Long Vương</span>
+                        <span class="lang-cn">至尊暴龙王</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        <span class="lang-vi">Ngày duy nhất - Một người đỉnh cao</span>
+                        <span class="lang-cn">一日限定 - 一人独尊</span>
+                    </p>
+                    <p class="hero-desc">
+                        <span class="lang-vi">
+                            Ngày <strong>01/05</strong>, người nạp vàng cao nhất toàn server sẽ đăng quang <strong>Chí Tôn Bạo Long Vương Mùa 3</strong>, 
+                            nhận đặc quyền trong 2 ngày và ghi danh vĩnh viễn.
+                        </span>
+                        <span class="lang-cn">
+                            <strong>5月1日</strong>单日，全服充值最高者将登顶<strong>至尊暴龙王 第三届</strong>，
+                            享受2天特权并永久留名。
+                        </span>
+                    </p>
+                </section>
+
+                <!-- Rank -->
+                <section class="section" id="rank">
+                    <h2 class="section-title">
+                        <span class="lang-vi">Bảng Vàng Chí Tôn</span>
+                        <span class="lang-cn">至尊金榜</span>
+                    </h2>
+                    
+                    <div class="leaderboard">
+                        <!-- Rank 1 -->
+                        <div class="rank-item rank-1">
+                            <div class="rank-medal">🥇</div>
+                            <div class="rank-info">
+                                <div class="rank-title">
+                                    <span class="lang-vi">Chí Tôn Bạo Long Vương</span>
+                                    <span class="lang-cn">至尊暴龙王</span>
+                                </div>
+                                <div class="rank-amount" id="top-amount">0 vàng</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Rank 2 -->
+                        <div class="rank-item rank-others">
+                            <div class="rank-number">2</div>
+                            <div class="rank-info">
+                                <div class="rank-amount" id="rank2-amount">0 vàng</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Rank 3 -->
+                        <div class="rank-item rank-others">
+                            <div class="rank-number">3</div>
+                            <div class="rank-info">
+                                <div class="rank-amount" id="rank3-amount">0 vàng</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Rank 4+ -->
+                        <div class="rank-item rank-others">
+                            <div class="rank-number">4+</div>
+                            <div class="rank-info">
+                                <div class="rank-name-hidden">...</div>
+                            </div>
+                        </div>
+                        
+                        <!-- My Rank -->
+                        <div class="rank-item rank-my" id="my-rank-box">
+                            <div class="rank-number" id="my-rank-num">5</div>
+                            <div class="rank-info">
+                                <div class="rank-name my-name">
+                                    <span class="lang-vi">Bạn</span>
+                                    <span class="lang-cn">您</span>
+                                </div>
+                                <div class="rank-amount" id="my-amount">0 vàng</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Login Prompt -->
+                    <div class="login-box" id="login-box">
+                        <p>
+                            <span class="lang-vi">Đăng nhập để cập nhật số vàng nạp realtime</span>
+                            <span class="lang-cn">登录以实时更新您的充值金额</span>
+                        </p>
+                        <button class="btn btn-large" id="login-btn">
+                            <span class="lang-vi">Đăng nhập</span>
+                            <span class="lang-cn">登录</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Gap Info (show after login) -->
+                    <div class="gap-info" id="gap-info" style="display: none;">
+                        <div class="gap-row">
+                            <span>
+                                <span class="lang-vi">Thứ hạng của bạn</span>
+                                <span class="lang-cn">您的排名</span>
+                            </span>
+                            <strong id="user-rank-display">#5</strong>
+                        </div>
+                        <div class="gap-row">
+                            <span>
+                                <span class="lang-vi">Số vàng đã nạp</span>
+                                <span class="lang-cn">已充值金币</span>
+                            </span>
+                            <strong id="user-amount-display">0 vàng</strong>
+                        </div>
+                        <div class="gap-row gap-highlight" id="gap-row">
+                            <span>
+                                <span class="lang-vi">Cần thêm để vượt lên #1</span>
+                                <span class="lang-cn">还需多少超越第1名</span>
+                            </span>
+                            <strong id="gap-amount-display">0 vàng</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Result View -->
+                <div id="result-view">
+                    <section class="section">
+                        <h2 class="section-title">
+                            <span class="lang-vi">Kết Quả Chung Cuộc</span>
+                            <span class="lang-cn">最终结果</span>
+                        </h2>
+                        <div class="winner-card">
+                            <div class="winner-badge">
+                                <span class="lang-vi">Chí Tôn Bạo Long Vương Mùa 3</span>
+                                <span class="lang-cn">第三届至尊暴龙王</span>
+                            </div>
+
+                            <div class="winner-avatar">
+                                <img src="static/images/dragon-king-crow3.jpg" alt="Winner">
+                            </div>
+                            <div class="winner-name" id="winner-name">3Luffy</div>
+                            <div class="winner-account" id="winner-account">13219922</div>
+                            <div class="winner-amount" id="winner-amount">7,047 vàng</div>
+                            <div class="winner-date" id="winner-date">01/05</div>
+                        </div>
+
+                        <!-- Result Login Prompt (shown when not logged in) -->
+                        <div class="result-login-box" id="result-login-box" style="display: none;">
+                            <p>
+                                <span class="lang-vi">🔒 Đăng nhập để xem và kích hoạt đặc quyền dành riêng cho người thắng</span>
+                                <span class="lang-cn">🔒 请登录以查看并激活获胜者专属权益</span>
+                            </p>
+                            <button class="btn btn-large" onclick="window.handleLogin()">
+                                <span class="lang-vi">Đăng nhập</span>
+                                <span class="lang-cn">登录</span>
+                            </button>
+                        </div>
+
+                        <!-- Auto Script Panel (Season 2) -->
+                        <div class="auto-script-panel" id="auto-script-panel" style="display: none;">
+                            <div class="auto-script-header">
+                                <span class="auto-script-icon">🤖</span>
+                                <h3>
+                                    <span class="lang-vi">Tự Động Hóa Bạo Long Vương</span>
+                                    <span class="lang-cn">暴龙王自动化脚本</span>
+                                </h3>
+                            </div>
+                            <p class="auto-script-desc">
+                                <span class="lang-vi">Đặc quyền dành riêng cho người thắng. Nhấn nút bên dưới để tăng kích thước khủng long +50%.</span>
+                                <span class="lang-cn">获胜者专属权益。点击下方按钮，执行恐龙体型 +50% 自动化脚本。</span>
+                            </p>
+                            <div class="auto-script-status" id="auto-script-status">
+                                <span class="status-dot idle"></span>
+                                <span class="status-text" id="status-text">
+                                    <span class="lang-vi">Chưa kích hoạt</span>
+                                    <span class="lang-cn">未触发</span>
+                                </span>
+                            </div>
+                            <button class="btn btn-auto-script" id="btn-auto-script" onclick="triggerAutoScript()">
+                                <span class="btn-icon">🦕</span>
+                                <span class="btn-text">
+                                    <span class="lang-vi">Phóng to!</span>
+                                    <span class="lang-cn">变大！</span>
+                                </span>
+                            </button>
+                            <div class="auto-script-history" id="auto-script-history" style="display: none;">
+                                <h4>
+                                    <span class="lang-vi">Lịch sử thao tác</span>
+                                    <span class="lang-cn">操作历史</span>
+                                </h4>
+                                <ul class="history-list" id="history-list"></ul>
+                            </div>
+
+                            <div class="auto-script-instruction">
+                                <strong>
+                                    <span class="lang-vi">📋 Hướng dẫn sử dụng</span>
+                                    <span class="lang-cn">📋 使用说明</span>
+                                </strong>
+                                <ul>
+                                    <li>
+                                        <span class="lang-vi">Nhấn nút <strong>"Phóng to!"</strong> để kích hoạt script tự động tăng kích thước khủng long +50%.</span>
+                                        <span class="lang-cn">点击 <strong>"变大！"</strong> 按钮激活自动化脚本，执行恐龙体型 +50%。</span>
+                                    </li>
+                                    <li>
+                                        <span class="lang-vi">Nếu trong game khủng long chưa thay đổi, vui lòng <strong>nhấn lại nút</strong> để kích hoạt lại.</span>
+                                        <span class="lang-cn">如果游戏中恐龙体型没有变化，请<strong>重新点击按钮</strong>再次触发。</span>
+                                    </li>
+                                    <li>
+                                        <span class="lang-vi">Nếu thử nhiều lần vẫn thất bại, vui lòng <strong>liên hệ GM</strong> để được hỗ trợ thủ công.</span>
+                                        <span class="lang-cn">如果多次尝试仍失败，请<strong>直接联系 GM</strong> 进行人工处理。</span>
+                                    </li>
+                                    <li>
+                                        <span class="lang-vi">Mỗi lần đăng nhập lại hoặc quay lại màn hình chọn khủng long cần <strong>kích hoạt lại</strong>.</span>
+                                        <span class="lang-cn">每次重新登录游戏或回到取龙界面后，需要<strong>重新点击按钮</strong>触发。</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Rewards -->
+                <section class="section rewards-section" id="rewards">
+                    <h2 class="section-title">
+                        <span class="lang-vi">Đặc Quyền Chí Tôn</span>
+                        <span class="lang-cn">至尊特权</span>
+                    </h2>
+                    <div class="rewards-grid">
+                        <div class="reward-card">
+                            <img class="reward-img" src="static/images/icon_dinosaur_size.webp" alt="Thể hình khổng lồ">
+                            <div class="reward-title">
+                                <span class="lang-vi">Thể hình khổng lồ</span>
+                                <span class="lang-cn">体型暴涨</span>
+                            </div>
+                            <div class="reward-value">+50%</div>
+                            <div class="reward-desc-small">
+                                <span class="lang-vi">Tất cả khủng long • +50%</span>
+                                <span class="lang-cn">所有恐龙 • 体型 +50%</span>
+                            </div>
+                        </div>
+                        <div class="reward-card">
+                            <img class="reward-img" src="static/images/icon_bite_force.webp" alt="Thẻ cường hóa">
+                            <div class="reward-title">
+                                <span class="lang-vi">Thẻ cường hóa ×30</span>
+                                <span class="lang-cn">强化卡 ×30</span>
+                            </div>
+                            <div class="reward-value">×30</div>
+                            <div class="reward-desc-small">
+                                <span class="lang-vi">gửi qua thư trong game</span>
+                                <span class="lang-cn">游戏内邮件直接发放</span>
+                            </div>
+                        </div>
+                        <div class="reward-card">
+                            <img class="reward-img" src="static/images/icon_gm_announcement.webp" alt="Vinh quang toàn server">
+                            <div class="reward-title">
+                                <span class="lang-vi">Vinh quang toàn server</span>
+                                <span class="lang-cn">全服荣耀播报</span>
+                            </div>
+                            <div class="reward-desc">
+                                <span class="lang-vi">Trong thời gian hiệu lực đặc quyền, GM sẽ gửi thông báo toàn server biết bạn là ai</span>
+                                <span class="lang-cn">权益期间，GM会发送全服公告，让全服玩家知道你的身份</span>
+                            </div>
+                        </div>
+                        <div class="reward-card highlight">
+                            <img class="reward-img" src="static/images/icon_hall_of_fame.webp" alt="Ghi danh tại Đại Sảnh Danh Nhân">
+                            <div class="reward-title">
+                                <span class="lang-vi">Ghi danh tại Đại Sảnh Danh Nhân</span>
+                                <span class="lang-cn">名人殿堂留名</span>
+                            </div>
+                            <div class="reward-desc">
+                                <span class="lang-vi">Tên bạn sẽ được ghi nhận tại Đại Sảnh Danh Nhân Khủng Long Đảoig</span>
+                                <span class="lang-cn">你的名字将在恐龙岛名人殿堂展示，铭记本届荣耀</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rewards-note">
+                        <div class="note-main">
+                            <span class="lang-vi">Thời gian hiệu lực: 5月2-3日 • Duy nhất 1 người</span>
+                            <span class="lang-cn">特权有效期：5月2-3日 • 全服唯一</span>
+                        </div>
+                        <div class="note-sub">
+                            <span class="lang-vi">Sau khi đăng quang, đăng nhập trang để kích hoạt tự động hóa + liên hệ CSKH nhận thẻ cường hóa</span>
+                            <span class="lang-cn">登顶后请登录页面激活自动化脚本，并无需操作，游戏内邮件自动发放</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Honor Hall -->
+                <section class="section" id="honor-hall">
+                    <h2 class="section-title">
+                        <span class="lang-vi">Đại Sảnh Danh Nhân</span>
+                        <span class="lang-cn">名人殿堂</span>
+                    </h2>
+                    <div class="hall-grid">
+                        <div class="hall-card winner has-winner" id="hall-winner-card">
+                            <div class="hall-crown">
+                                <span class="crown-empty">👑</span>
+                                <div class="crown-winner">
+                                    <div class="winner-badge-corner">
+                                        <span class="lang-vi">Mùa 1</span>
+                                        <span class="lang-cn">第一届</span>
+                                    </div>
+                                    <img src="static/images/dragon-king-crown.jpg" alt="Chí Tôn Bạo Long Vương">
+                                </div>
+                            </div>
+                            <div class="hall-name" id="hall-name">HacThienLong1</div>
+                            <div class="hall-account" id="hall-account">13220491</div>
+                            <div class="hall-text" id="hall-placeholder-text" style="display: none;">
+                                <span class="lang-vi">Ngai vàng đang chờ chủ nhân</span>
+                                <span class="lang-cn">王座虚位以待</span>
+                            </div>
+                            <div class="hall-date" id="hall-date" style="display: flex;">
+                                <span class="date-label">
+                                    <span class="lang-vi">Ngày đăng quang</span>
+                                    <span class="lang-cn">加冕日期</span>
+                                </span>
+                                <span class="date-value">17/04</span>
+                            </div>
+                        </div>
+                        <div class="hall-card winner has-winner" id="hall-season2-card">
+                            <div class="hall-crown">
+                                <span class="crown-empty">👑</span>
+                                <div class="crown-winner">
+                                    <div class="winner-badge-corner">
+                                        <span class="lang-vi">Mùa 2</span>
+                                        <span class="lang-cn">第二届</span>
+                                    </div>
+                                    <img src="static/images/dragon-king-crow2.jpg" alt="Winner">
+                                </div>
+                            </div>
+                            <div class="hall-name" id="hall-s2-name">3Luffy</div>
+                            <div class="hall-account" id="hall-s2-account">13219922</div>
+                            <div class="hall-text" id="hall-s2-text" style="display: none;">
+                                <span class="lang-vi">Sắp diễn ra</span>
+                                <span class="lang-cn">敬请期待</span>
+                            </div>
+                            <div class="hall-date" id="hall-s2-date" style="display: flex;">
+                                <span class="date-label">
+                                    <span class="lang-vi">Ngày đăng quang</span>
+                                    <span class="lang-cn">加冕日期</span>
+                                </span>
+                                <span class="date-value" id="hall-s2-date-value">24/04</span>
+                            </div>
+                        </div>
+                        <div class="hall-card winner" id="hall-season3-card">
+                            <div class="hall-crown">
+                                <span class="crown-empty">👑</span>
+                                <div class="crown-winner">
+                                    <div class="winner-badge-corner">
+                                        <span class="lang-vi">Mùa 3</span>
+                                        <span class="lang-cn">第三届</span>
+                                    </div>
+                                    <img src="static/images/dragon-king-crow3.jpg" alt="Winner">
+                                </div>
+                            </div>
+                            <div class="hall-name" id="hall-s3-name" style="display: none;">?</div>
+                            <div class="hall-account" id="hall-s3-account" style="display: none;">?</div>
+                            <div class="hall-text" id="hall-s3-text">
+                                <span class="lang-vi">Sắp diễn ra</span>
+                                <span class="lang-cn">敬请期待</span>
+                            </div>
+                            <div class="hall-date" id="hall-s3-date" style="display: none;">
+                                <span class="date-label">
+                                    <span class="lang-vi">Ngày đăng quang</span>
+                                    <span class="lang-cn">加冕日期</span>
+                                </span>
+                                <span class="date-value" id="hall-s3-date-value">01/05</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Countdown Section -->
+                <section class="section countdown-section">
+                    <!-- Before event starts -->
+                    <div class="countdown-box" id="countdown-start">
+                        <div class="countdown-label">
+                            <span class="lang-vi">Sự kiện bắt đầu sau</span>
+                            <span class="lang-cn">距离活动开始</span>
+                        </div>
+                        <div class="countdown-time">
+                            <span id="start-days">03</span>:
+                            <span id="start-hours">23</span>:
+                            <span id="start-minutes">45</span>:
+                            <span id="start-seconds">12</span>
+                        </div>
+                        <div class="countdown-units">
+                            <span><span class="lang-vi">ngày</span><span class="lang-cn">天</span></span>
+                            <span><span class="lang-vi">giờ</span><span class="lang-cn">时</span></span>
+                            <span><span class="lang-vi">phút</span><span class="lang-cn">分</span></span>
+                            <span><span class="lang-vi">giây</span><span class="lang-cn">秒</span></span>
+                        </div>
+                        <div class="countdown-detail">
+                            <div class="countdown-row">
+                                <span class="lang-vi">Thời gian: 01/05 00:00 - 23:59:59 (GMT+7)</span>
+                                <span class="lang-cn">活动时间：5月1日 00:00 - 23:59:59（东7区时间）</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- During event -->
+                    <div class="countdown-box active" id="countdown-end">
+                        <div class="countdown-label">
+                            <span class="lang-vi">Thời gian còn lại sự kiện nạp tiền</span>
+                            <span class="lang-cn">充值活动剩余时间</span>
+                        </div>
+                        <div class="countdown-time large">
+                            <span id="end-hours">12</span>:
+                            <span id="end-minutes">34</span>:
+                            <span id="end-seconds">56</span>
+                        </div>
+                        <div class="countdown-date">
+                            <span class="lang-vi">Kết thúc: 01/05 23:59:59 (GMT+7)</span>
+                            <span class="lang-cn">结束：5月1日 23:59:59（东7区时间）</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Rules -->
+                <section class="section" id="rules">
+                    <h2 class="section-title">
+                        <span class="lang-vi">Thể Lệ</span>
+                        <span class="lang-cn">活动规则</span>
+                    </h2>
+                    <div class="rules-list">
+                        <div class="rule-item">
+                            <div class="rule-num">01</div>
+                            <div class="rule-content">
+                                <strong>
+                                    <span class="lang-vi">Thời gian nạp tiền</span>
+                                    <span class="lang-cn">充值时间</span>
+                                </strong>
+                                <p>5月1日 00:00 - 23:59:59 (GMT+7)</p>
+                            </div>
+                        </div>
+                        <div class="rule-item">
+                            <div class="rule-num">02</div>
+                            <div class="rule-content">
+                                <strong>
+                                    <span class="lang-vi">Phạm vi</span>
+                                    <span class="lang-cn">活动范围</span>
+                                </strong>
+                                <p>
+                                    <span class="lang-vi">Máy chủ Quân Đoàn Chiến (Q服) + Khủng Long Chi Chiến (K服), tích lũy theo tài khoản</span>
+                                    <span class="lang-cn">Quân Đoàn Chiến（Q服）+ Khủng Long Chi Chiến（K服），同一账号两服充值累计</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="rule-item">
+                            <div class="rule-num">03</div>
+                            <div class="rule-content">
+                                <strong>
+                                    <span class="lang-vi">Kênh nạp</span>
+                                    <span class="lang-cn">充值渠道</span>
+                                </strong>
+                                <p>
+                                    <span class="lang-vi">Chỉ tính nạp qua website chính thức</span>
+                                    <span class="lang-cn">仅统计官网直充（代充不计入内）</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="rule-item">
+                            <div class="rule-num">04</div>
+                            <div class="rule-content">
+                                <strong>
+                                    <span class="lang-vi">Quy tắc xếp hạng</span>
+                                    <span class="lang-cn">排名规则</span>
+                                </strong>
+                                <p>
+                                    <span class="lang-vi">Số vàng cao nhất thắng. Nếu bằng nhau, ưu tiên người đạt trước (theo thời gian thanh toán đơn hàng thành công).</span>
+                                    <span class="lang-cn">累计金额最高者获胜。金额相同时，优先完成该累计金额者获胜（以订单支付成功时间为准）。</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="rule-item">
+                            <div class="rule-num">05</div>
+                            <div class="rule-content">
+                                <strong>
+                                    <span class="lang-vi">Quyền lợi và cách nhận</span>
+                                    <span class="lang-cn">权益说明与领取方式</span>
+                                </strong>
+                                <p>
+                                    <span class="lang-vi">Đặc quyền có hiệu lực ngày 02-03/05. Sau khi đăng quang, chủ động liên hệ CSKH để được hướng dẫn. Chi tiết liên hệ CSKH để biết thêm.</span>
+                                    <span class="lang-cn">特权有效期为5月2-3日。登顶后请主动联系客服获取权益。具体规则请联系客服确认。</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="rule-item">
+                            <div class="rule-num">06</div>
+                            <div class="rule-content">
+                                <strong>
+                                    <span class="lang-vi">Từ bỏ quyền lợi</span>
+                                    <span class="lang-cn">弃权</span>
+                                </strong>
+                                <p>
+                                    <span class="lang-vi">Nếu người thắng giải chủ động từ bỏ, không online trong thời gian hiệu lực đặc quyền, hoặc bị khóa tài khoản do vi phạm, đều bị coi là từ bỏ quyền lợi, không được bồi thường, không bù phát sau cũng không gia hạn.</span>
+                                    <span class="lang-cn">获奖玩家若主动弃权、权益期间未上线、或因违规行为被封号，均视为自动放弃权益，不予补偿，后续不补发、不延期。</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="rule-item">
+                            <div class="rule-num">07</div>
+                            <div class="rule-content">
+                                <strong>
+                                    <span class="lang-vi">Quyền giải thích cuối cùng</span>
+                                    <span class="lang-cn">最终解释权</span>
+                                </strong>
+                                <p>
+                                    <span class="lang-vi">Quyền giải thích cuối cùng của sự kiện này thuộc về bên vận hành trò chơi.</span>
+                                    <span class="lang-cn">本活动最终解释权归游戏运营方所有。</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>
+                    <span class="lang-vi">Chí Tôn Bạo Long Vương | Máy chủ Quân Đoàn Chiến (Q服) + Khủng Long Chi Chiến (K服)</span>
+                    <span class="lang-cn">至尊暴龙王 | Quân Đoàn Chiến（Q服）+ Khủng Long Chi Chiến（K服）</span>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/countdown.js?v=10"></script>
+    <script src="js/main.js?v=10"></script>
+</body>
+</html>

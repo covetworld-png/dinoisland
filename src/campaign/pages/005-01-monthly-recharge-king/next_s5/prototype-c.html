@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方案 C · 融合版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #020814;
+            color: #c0d8e8;
+            min-height: 100vh;
+            padding: 24px 16px;
+        }
+        .container { max-width: 720px; margin: 0 auto; }
+
+        /* Header */
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 {
+            font-size: 22px;
+            color: #5a9ec8;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        .header .subtitle {
+            font-size: 13px;
+            color: #7aafc8;
+        }
+
+        /* Track Label */
+        .track-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .track-label.main {
+            background: rgba(90, 158, 200, 0.15);
+            color: #5a9ec8;
+            border: 1px solid #5a9ec8;
+        }
+        .track-label.side {
+            background: rgba(192, 216, 232, 0.1);
+            color: #c0d8e8;
+            border: 1px solid rgba(192, 216, 232, 0.4);
+        }
+
+        /* Main Track - Leaderboard */
+        .main-track {
+            background: rgba(90, 158, 200, 0.08);
+            border: 2px solid #1a3a4a;
+            border-radius: 20px;
+            padding: 24px 20px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        .main-track::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #5a9ec8, transparent);
+        }
+
+        .lb-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(26, 58, 74, 0.5);
+        }
+        .lb-item:last-child { border-bottom: none; }
+        .lb-rank {
+            width: 44px;
+            text-align: center;
+            font-size: 22px;
+        }
+        .lb-info { flex: 1; }
+        .lb-name {
+            font-size: 15px;
+            color: #e0e8f0;
+            font-weight: 600;
+        }
+        .lb-amount {
+            font-size: 13px;
+            color: #7aafc8;
+            margin-top: 2px;
+        }
+        .lb-badge {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 8px;
+            background: rgba(90, 158, 200, 0.2);
+            border: 1px solid #5a9ec8;
+            border-radius: 10px;
+            font-size: 10px;
+            color: #5a9ec8;
+        }
+
+        /* Connector */
+        .connector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 4px 0 8px;
+        }
+        .connector-line {
+            width: 2px;
+            height: 24px;
+            background: linear-gradient(to bottom, #5a9ec8, rgba(192, 216, 232, 0.3));
+        }
+        .connector-text {
+            font-size: 11px;
+            color: #7aafc8;
+            padding: 4px 12px;
+            background: rgba(192, 216, 232, 0.08);
+            border: 1px dashed rgba(192, 216, 232, 0.3);
+            border-radius: 12px;
+            margin-top: 4px;
+        }
+
+        /* Side Track - Daily Progress */
+        .side-track {
+            background: rgba(192, 216, 232, 0.04);
+            border: 1px solid rgba(192, 216, 232, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 28px;
+        }
+        .side-track-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .side-track-title {
+            font-size: 14px;
+            color: #c0d8e8;
+            font-weight: 600;
+        }
+        .side-track-subtitle {
+            font-size: 11px;
+            color: #7aafc8;
+        }
+
+        /* Timeline inside side track */
+        .mini-timeline {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .mini-day {
+            flex: 1;
+            min-width: 68px;
+            text-align: center;
+            padding: 10px 4px;
+            background: rgba(90, 158, 200, 0.05);
+            border: 1px solid #1a3a4a;
+            border-radius: 10px;
+            position: relative;
+        }
+        .mini-day.leading {
+            background: rgba(90, 158, 200, 0.15);
+            border-color: #5a9ec8;
+        }
+        .mini-day.current {
+            border-style: dashed;
+            border-color: #7aafc8;
+        }
+        .mini-day .day-label {
+            font-size: 10px;
+            color: #5a9ec8;
+            margin-bottom: 4px;
+        }
+        .mini-day .day-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e0e8f0;
+            margin-bottom: 2px;
+        }
+        .mini-day.leading .day-name { color: #5a9ec8; }
+        .mini-day .day-amount {
+            font-size: 10px;
+            color: #7aafc8;
+        }
+        .mini-day .day-status {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #5a9ec8;
+            color: #020814;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Current Leader */
+        .current-leader {
+            background: rgba(90, 158, 200, 0.1);
+            border: 1px solid #5a9ec8;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+        .current-leader-header {
+            font-size: 11px;
+            color: #5a9ec8;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .current-leader-body {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .current-leader-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(90, 158, 200, 0.25);
+            border: 2px solid #5a9ec8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .current-leader-info { flex: 1; }
+        .current-leader-name {
+            font-size: 15px;
+            color: #e0e8f0;
+            font-weight: 600;
+        }
+        .current-leader-detail {
+            font-size: 12px;
+            color: #7aafc8;
+            margin-top: 2px;
+        }
+        .current-leader-status {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(90, 158, 200, 0.2);
+            font-size: 12px;
+            color: #c0d8e8;
+        }
+        .current-leader-status strong { color: #5a9ec8; }
+
+        /* Side Rewards */
+        .side-rewards {
+            padding-top: 12px;
+            border-top: 1px solid rgba(26, 58, 74, 0.5);
+        }
+        .side-reward-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #7aafc8;
+            padding: 3px 0;
+        }
+        .side-reward-item .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #c0d8e8;
+        }
+
+        /* Stacking Note */
+        .stacking-note {
+            text-align: center;
+            padding: 14px;
+            background: rgba(90, 158, 200, 0.08);
+            border: 1px dashed #5a9ec8;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #5a9ec8;
+        }
+        .stacking-note strong { color: #c0d8e8; }
+
+        @media (max-width: 480px) {
+            .mini-day { min-width: 56px; padding: 8px 2px; }
+            .current-leader-body { gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚔️ 至尊暴龙王争夺战</h1>
+            <div class="subtitle">第五届 · 全面升级</div>
+        </div>
+
+        <!-- 主赛道 -->
+        <div class="track-label main">🏆 主赛道</div>
+        <div class="main-track">
+            <div class="lb-item">
+                <div class="lb-rank">🥇</div>
+                <div class="lb-info">
+                    <div class="lb-name">玩家 A</div>
+                    <div class="lb-amount">2,500,000 vàng</div>
+                </div>
+            </div>
+            <div class="lb-item">
+                <div class="lb-rank">🥈</div>
+                <div class="lb-info">
+                    <div class="lb-name">玩家 B</div>
+                    <div class="lb-amount">1,800,000 vàng</div>
+                </div>
+            </div>
+            <div class="lb-item">
+                <div class="lb-rank">🥉</div>
+                <div class="lb-info">
+                    <div class="lb-name">玩家 C</div>
+                    <div class="lb-amount">1,200,000 vàng</div>
+                </div>
+            </div>
+            <div class="lb-item">
+                <div class="lb-rank">4</div>
+                <div class="lb-info">
+                    <div class="lb-name">...</div>
+                </div>
+            </div>
+            <div class="lb-item">
+                <div class="lb-rank">5</div>
+                <div class="lb-info">
+                    <div class="lb-name">您</div>
+                    <div class="lb-amount">500,000 vàng</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 连接箭头 -->
+        <div class="connector">
+            <div class="connector-line"></div>
+            <div class="connector-text">↓ 额外评选</div>
+        </div>
+
+        <!-- 副赛道 -->
+        <div class="track-label side">⚡ 副赛道</div>
+        <div class="side-track">
+            <div class="side-track-header">
+                <div class="side-track-title">单日巅峰追踪</div>
+                <div class="side-track-subtitle">6天中单日最高者获胜</div>
+            </div>
+
+            <!-- 时间线 -->
+            <div class="mini-timeline">
+                <div class="mini-day">
+                    <div class="day-label">Day 1</div>
+                    <div class="day-name">A</div>
+                    <div class="day-amount">300K</div>
+                </div>
+                <div class="mini-day">
+                    <div class="day-label">Day 2</div>
+                    <div class="day-name">B</div>
+                    <div class="day-amount">250K</div>
+                </div>
+                <div class="mini-day leading">
+                    <div class="day-status">👑</div>
+                    <div class="day-label">Day 3</div>
+                    <div class="day-name">A</div>
+                    <div class="day-amount">500K</div>
+                </div>
+                <div class="mini-day">
+                    <div class="day-label">Day 4</div>
+                    <div class="day-name">C</div>
+                    <div class="day-amount">280K</div>
+                </div>
+                <div class="mini-day current">
+                    <div class="day-label">Day 5</div>
+                    <div class="day-name">?</div>
+                    <div class="day-amount">进行中</div>
+                </div>
+                <div class="mini-day">
+                    <div class="day-label">Day 6</div>
+                    <div class="day-name">—</div>
+                    <div class="day-amount">未开始</div>
+                </div>
+            </div>
+
+            <!-- 当前领先者 -->
+            <div class="current-leader">
+                <div class="current-leader-header">当前单日巅峰领先者</div>
+                <div class="current-leader-body">
+                    <div class="current-leader-avatar">⚡</div>
+                    <div class="current-leader-info">
+                        <div class="current-leader-name">玩家 A</div>
+                        <div class="current-leader-detail">Day 3 · 500,000 vàng</div>
+                    </div>
+                </div>
+                <div class="current-leader-status">
+                    <strong>当前状态：</strong>此人暂为单日巅峰奖获得者<br>
+                    若后续无人超越，活动结束即确认获奖
+                </div>
+            </div>
+
+            <!-- 奖励 -->
+            <div class="side-rewards">
+                <div class="side-reward-item">
+                    <div class="dot"></div>
+                    单日巅峰奖：强化卡 ×30
+                </div>
+                <div class="side-reward-item">
+                    <div class="dot"></div>
+                    实时更新 · 可与冠军叠加
+                </div>
+            </div>
+        </div>
+
+        <div class="stacking-note">
+            <strong>🎁 叠加规则：</strong>同一人可获主赛道 + 副赛道双奖<br>
+            冠军 = 体型+50% + 强化卡×50 + 名人殿堂<br>
+            单日巅峰 = 强化卡×30
+        </div>
+    </div>
+</body>
+</html>
