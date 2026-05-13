@@ -813,6 +813,7 @@ const DEMO_DATA = {
     'chip|maymay':'chip',
   },
   weeklyPlayerAccounts: {nini:'13219644',asula:'13220547',CoBeChimTO:'13219629',JUDI45:'13220110',chip:'13219675',maymay:'13226453'},
+  weeklyMatchAbsent: {},
   weeklySchedule: [
     {p1:'nini',p2:'asula'},{p1:'nini',p2:'CoBeChimTO'},{p1:'nini',p2:'JUDI45'},
     {p1:'nini',p2:'chip'},{p1:'nini',p2:'maymay'},{p1:'asula',p2:'CoBeChimTO'},
@@ -845,6 +846,7 @@ function loadDemoData() {
     weeklyAbsent = d.weeklyAbsent.slice();
     weeklyResults = JSON.parse(JSON.stringify(d.weeklyResults));
     weeklyPlayerAccounts = JSON.parse(JSON.stringify(d.weeklyPlayerAccounts));
+    weeklyMatchAbsent = JSON.parse(JSON.stringify(d.weeklyMatchAbsent || {}));
     weeklySchedule = JSON.parse(JSON.stringify(d.weeklySchedule));
     autoSaveWeekly();
   }
@@ -860,6 +862,7 @@ let weeklyResults = {}; // 'P1|P2' -> winner
 let weeklyDate = '';
 let weeklyPlayerAccounts = {}; // name -> account
 let weeklySchedule = []; // [{p1, p2}] 随机赛程
+let weeklyMatchAbsent = {}; // 'P1|P2' -> absentPlayer 单场缺席
 
 /* ========== 周赛默认数据 ========== */
 const DEFAULT_WEEKLY_DATA = {
@@ -2319,8 +2322,9 @@ function loadWeeklyData() {
       weeklyResults = d.results || {};
       weeklyPlayerAccounts = d.accounts || {};
       weeklySchedule = d.schedule || [];
+      weeklyMatchAbsent = d.matchAbsent || {};
     } catch(e) {
-      weeklyPlayers = []; weeklyAbsent = []; weeklyResults = {}; weeklyPlayerAccounts = {}; weeklySchedule = [];
+      weeklyPlayers = []; weeklyAbsent = []; weeklyResults = {}; weeklyPlayerAccounts = {}; weeklySchedule = []; weeklyMatchAbsent = {}; weeklyMatchAbsent = {}; weeklyMatchAbsent = {};
     }
   } else {
     // 若本地无数据，尝试加载默认周赛数据
@@ -2333,6 +2337,7 @@ function loadWeeklyData() {
       weeklyResults = defaults.results || {};
       weeklyPlayerAccounts = defaults.accounts || {};
       weeklySchedule = defaults.schedule || [];
+      weeklyMatchAbsent = defaults.matchAbsent || {};
       autoSaveWeekly();
     } else {
       weeklyPlayers = []; weeklyAbsent = []; weeklyResults = {}; weeklyPlayerAccounts = {}; weeklySchedule = [];
@@ -2349,7 +2354,8 @@ function autoSaveWeekly() {
     absent: weeklyAbsent,
     results: weeklyResults,
     accounts: weeklyPlayerAccounts,
-    schedule: weeklySchedule
+    schedule: weeklySchedule,
+    matchAbsent: weeklyMatchAbsent
   };
   localStorage.setItem(getWeeklyKey(), JSON.stringify(data));
 }
@@ -2863,6 +2869,16 @@ function toggleWeeklyAbsent(name) {
 function setWeeklyResult(p1, p2, winner) {
   const key = [p1, p2].sort().join('|');
   weeklyResults[key] = winner;
+  delete weeklyMatchAbsent[key];
+  autoSaveWeekly();
+  renderWeekly();
+}
+
+function setWeeklyMatchAbsent(p1, p2, absentPlayer) {
+  const key = [p1, p2].sort().join('|');
+  const winner = absentPlayer === p1 ? p2 : p1;
+  weeklyResults[key] = winner;
+  weeklyMatchAbsent[key] = absentPlayer;
   autoSaveWeekly();
   renderWeekly();
 }
@@ -2875,6 +2891,7 @@ function confirmSetWeeklyResult(p1, p2, winner) {
 function removeWeeklyResult(p1, p2) {
   const key = [p1, p2].sort().join('|');
   delete weeklyResults[key];
+  delete weeklyMatchAbsent[key];
   autoSaveWeekly();
   renderWeekly();
 }
@@ -2937,14 +2954,14 @@ function renderWeekly() {
       let p1AbsentTag = '';
       let p2AbsentTag = '';
       const absentBadge = '<span style="font-size:10px;color:var(--danger);margin-left:4px;font-weight:600;">❌缺席</span>';
+      const matchAbsentPlayer = weeklyMatchAbsent[key];
       if (done) {
         cardClass = 'done';
         let winLabel = '✓ ' + escapeHtml(winner) + ' ' + t('winBtn');
-        // 临时缺席标记：CoBeChimTO 缺席 vs asula
-        if (key === 'CoBeChimTO|asula' && winner === 'asula') {
-          winLabel += ' <span style="font-size:11px;color:var(--text2);">(CoBeChimTO 缺席)</span>';
-          if (s.p1 === 'CoBeChimTO') p1AbsentTag = absentBadge;
-          if (s.p2 === 'CoBeChimTO') p2AbsentTag = absentBadge;
+        if (matchAbsentPlayer) {
+          winLabel += ' <span style="font-size:11px;color:var(--danger);">(' + escapeHtml(matchAbsentPlayer) + ' 缺席)</span>';
+          if (matchAbsentPlayer === s.p1) p1AbsentTag = absentBadge;
+          if (matchAbsentPlayer === s.p2) p2AbsentTag = absentBadge;
         }
         headerRight = '<span class="schedule-status-win">' + winLabel + '</span>' +
           '<button class="schedule-del-btn" onclick="removeWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('btnDel') + '</button>';
@@ -2958,8 +2975,15 @@ function renderWeekly() {
         if (p1Absent) p1AbsentTag = absentBadge;
         if (p2Absent) p2AbsentTag = absentBadge;
       } else {
-        p1WinBtn = '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
-        p2WinBtn = '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
+        const absentBtnStyle = 'background:rgba(239,68,68,0.1);border-color:var(--danger);color:var(--danger);';
+        p1WinBtn = '<div style="display:flex;flex-direction:column;gap:4px;">' +
+          '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>' +
+          '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setWeeklyMatchAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">缺席</button>' +
+          '</div>';
+        p2WinBtn = '<div style="display:flex;flex-direction:column;gap:4px;">' +
+          '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setWeeklyMatchAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">缺席</button>' +
+          '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>' +
+          '</div>';
       }
       const p1Acc = weeklyPlayerAccounts[s.p1];
       const p2Acc = weeklyPlayerAccounts[s.p2];
@@ -3227,6 +3251,15 @@ function exportWeeklyData() {
     csv += (i + 1) + ',' + name + ',' + (weeklyPlayerAccounts[name] || '') + ',' + s.wins + ',' + s.losses + ',' + s.points + '\n';
   });
   
+  const maEntries = Object.entries(weeklyMatchAbsent).filter(([k, v]) => v);
+  if (maEntries.length > 0) {
+    csv += '\n单场缺席\n';
+    csv += '#场次,缺席选手\n';
+    maEntries.forEach(([key, player]) => {
+      csv += key + ',' + player + '\n';
+    });
+  }
+  
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -3239,7 +3272,7 @@ function clearWeeklyData() {
   const raw = localStorage.getItem(key);
   if (!raw) { alert(t('alertClearEmpty')); return; }
   if (!confirm(t('alertClearConfirmAll'))) return;
-  weeklyPlayers = []; weeklyAbsent = []; weeklyResults = {}; weeklyPlayerAccounts = {}; weeklySchedule = [];
+  weeklyPlayers = []; weeklyAbsent = []; weeklyResults = {}; weeklyPlayerAccounts = {}; weeklySchedule = []; weeklyMatchAbsent = {};
   localStorage.removeItem(key);
   renderWeekly();
 }
@@ -3257,6 +3290,7 @@ function importWeeklyData(input) {
       const newAccounts = {};
       const newAbsent = [];
       const newResults = {};
+      const newMatchAbsent = {};
       let metaDate = '';
       let metaServer = '';
       
@@ -3264,6 +3298,7 @@ function importWeeklyData(input) {
         if (row.startsWith('#')) continue; // 跳过注释行
         if (row.startsWith('参赛名单') || row.startsWith('Danh sách')) { section = 'players'; continue; }
         if (row.startsWith('比赛结果') || row.startsWith('Kết quả')) { section = 'results'; continue; }
+        if (row.startsWith('单场缺席') || row.startsWith('Vắng mặt từng trận')) { section = 'matchAbsent'; continue; }
         if (row.startsWith('积分榜') || row.startsWith('Bảng xếp hạng')) { section = 'stats'; continue; }
         if (row.includes(',') && !section && !metaDate) {
           const parts = row.split(',');
@@ -3299,6 +3334,11 @@ function importWeeklyData(input) {
           if (!p1 || !p2 || !winner || winner === 'X' || winner === 'x') continue;
           const key = [p1, p2].sort().join('|');
           newResults[key] = winner;
+        } else if (section === 'matchAbsent') {
+          const parts = row.split(',');
+          const key = (parts[0] || '').trim();
+          const player = (parts[1] || '').trim();
+          if (key && player) newMatchAbsent[key] = player;
         }
       }
       
@@ -3313,6 +3353,7 @@ function importWeeklyData(input) {
       weeklyPlayerAccounts = newAccounts;
       weeklyAbsent = newAbsent;
       weeklyResults = newResults;
+      weeklyMatchAbsent = newMatchAbsent;
       weeklySchedule = [];
       autoSaveWeekly();
       renderWeekly();
