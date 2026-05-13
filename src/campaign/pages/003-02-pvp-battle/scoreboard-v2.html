@@ -657,18 +657,18 @@
     <div class="controls" style="margin-top:16px;">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:4px;">
-          <button class="server-btn" style="padding:6px 8px;font-size:12px;" onclick="shiftWeek(-7)" data-i18n-title="prevWeek" title="上周">⬅</button>
+          <button class="server-btn" style="padding:6px 8px;font-size:12px;" onclick="shiftWeek(-7)" title="上周">⬅</button>
           <div class="weekly-date-wrap" style="padding:6px 10px;" onclick="document.getElementById('weeklyDate').showPicker?.()">
             <input type="date" id="weeklyDate" onchange="loadWeeklyData()" style="font-size:13px;">
           </div>
-          <button class="server-btn" style="padding:6px 8px;font-size:12px;" onclick="shiftWeek(7)" data-i18n-title="nextWeek" title="下周">➡</button>
+          <button class="server-btn" style="padding:6px 8px;font-size:12px;" onclick="shiftWeek(7)" title="下周">➡</button>
         </div>
         <select id="weeklyDatePreset" onchange="if(this.value){document.getElementById('weeklyDate').value=this.value;loadWeeklyData();}" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;">
-          <option value="" data-i18n="existingWeekly">📋 已有周赛</option>
+          <option value="">📋 已有周赛</option>
         </select>
         <span id="weeklyServerDisplay" style="font-size:13px;color:var(--text2);"></span>
-        <button class="server-btn" id="weeklyBtnK" onclick="switchServer('K 服')" data-i18n="serverK">K 服</button>
-        <button class="server-btn active" id="weeklyBtnQ" onclick="switchServer('Q 服')" data-i18n="serverQ">Q 服</button>
+        <button class="server-btn" id="weeklyBtnK" onclick="switchServer('K 服')">K 服</button>
+        <button class="server-btn active" id="weeklyBtnQ" onclick="switchServer('Q 服')">Q 服</button>
         <button class="text-btn" onclick="refreshWeeklyPlayers()">🔄 <span data-i18n="refreshPlayers">刷新名单</span></button>
       </div>
     </div>
@@ -707,16 +707,16 @@
     </div>
 
     <div class="rules-section" style="margin-top:24px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;">
-      <h3 style="margin:0 0 12px;font-size:15px;color:var(--mist);" data-i18n="weeklyRulesTitle">📋 周冠军赛规则</h3>
+      <h3 style="margin:0 0 12px;font-size:15px;color:var(--mist);">📋 周冠军赛规则</h3>
       <div style="font-size:13px;color:var(--text2);line-height:1.8;">
-        <p style="margin:0 0 8px;" data-i18n="ruleWeekQualification"><strong style="color:var(--text);">参赛资格</strong>：本周一至周六本服日冠军参加，最多6人，最少2人。</p>
-        <p style="margin:0 0 8px;" data-i18n="ruleWeekFormat"><strong style="color:var(--text);">赛制</strong>：单循环，每两名参赛者交手1场，胜者得1分，败者得0分，无平局。</p>
-        <p style="margin:0 0 8px;" data-i18n="ruleWeekAbsent"><strong style="color:var(--text);">缺席处理</strong>：无法参赛者视为弃赛，其所有对手自动获得本场胜利（积1分）。</p>
-        <p style="margin:0 0 8px;" data-i18n="ruleWeekTiebreak"><strong style="color:var(--text);">同分判定（优先级依次递减）</strong>：</p>
+        <p style="margin:0 0 8px;"><strong style="color:var(--text);">参赛资格</strong>：本周一至周六本服日冠军参加，最多6人，最少2人。</p>
+        <p style="margin:0 0 8px;"><strong style="color:var(--text);">赛制</strong>：单循环，每两名参赛者交手1场，胜者得1分，败者得0分，无平局。</p>
+        <p style="margin:0 0 8px;"><strong style="color:var(--text);">缺席处理</strong>：无法参赛者视为弃赛，其所有对手自动获得本场胜利（积1分）。</p>
+        <p style="margin:0 0 8px;"><strong style="color:var(--text);">同分判定（优先级依次递减）</strong>：</p>
         <ol style="margin:0 0 8px;padding-left:18px;">
-          <li data-i18n="ruleWeekTie1">相互对战胜负关系；</li>
-          <li data-i18n="ruleWeekTie2">若形成循环胜负（连环套），比较本周累计胜场总数；</li>
-          <li data-i18n="ruleWeekTie3">仍相同则并列周冠军。</li>
+          <li>相互对战胜负关系；</li>
+          <li>若形成循环胜负（连环套），比较本周累计胜场总数；</li>
+          <li>仍相同则并列周冠军。</li>
         </ol>
       </div>
     </div>
@@ -905,7 +905,7 @@ const DEFAULT_WEEKLY_DATA = {
 
 const I18N = {
   zh: {
-    title: '⚔ 日赛记分板 2.0', subtitle: 'PVP 巅峰对决 · GM 现场记分工具', titleSuffix: 'PVP 巅峰对决',
+    title: '⚔ 日赛记分板 2.0', subtitle: 'PVP 巅峰对决 · GM 现场记分工具',
     date: '日期', server: '服务器', newSheet: '🔄 新建比赛',
     exportCSV: '📤 导出 CSV', importFile: '📥 导入文件', importJSON: '📥 导入 CSV',
     colMatch: '场次', colWinner: '胜', colLoser: '败', colAlert: '提示',
@@ -915,12 +915,6 @@ const I18N = {
     champion: '🏆 日冠军：', account: '数字账号', accountPlaceholder: '填写获胜者数字账号',
     autoSaved: '✅ 已自动保存到本地', rulesTitle: '📋 积分规则',
     rulesDaily: '日赛积分', rulesElim: '日赛淘汰机制', rulesWeekly: '周冠军赛积分（周日）',
-    dailyPhase: '日赛阶段:', prevWeek: '上周', nextWeek: '下周', existingWeekly: '已有周赛',
-    serverK: 'K 服', serverQ: 'Q 服',
-    weeklyRulesTitle: '📋 周冠军赛规则',
-    ruleWeekQualification: '参赛资格', ruleWeekFormat: '赛制', ruleWeekAbsent: '缺席处理',
-    ruleWeekTiebreak: '同分判定（优先级依次递减）',
-    ruleWeekTie1: '相互对战胜负关系；', ruleWeekTie2: '若形成循环胜负（连环套），比较本周累计胜场总数；', ruleWeekTie3: '仍相同则并列周冠军。',
     phWinner: '胜', phLoser: '败', phNote: '备注（可选）',
     clearDataShort: '清空全部', exportCSVShort: '导出当日', exportAllShort: '导出全部', importFileShort: '导入', saveToGitHubShort: '存GitHub', loadFromGitHubShort: '恢复',
     clearFinalShort: '清空复赛', clearWeeklyShort: '清空周赛', exportWeeklyShort: '导出周赛', importWeeklyShort: '导入周赛',
@@ -989,7 +983,7 @@ const I18N = {
     winBtn: '胜', absentLabel: '缺席', absentCSV: '(缺席)',
   },
   vi: {
-    title: '⚔ Bảng Điểm Nhật Sai 2.0', subtitle: 'PVP Đỉnh Phong Đối Quyết · Công Cụ Ghi Điểm GM', titleSuffix: 'PVP Đỉnh Phong Đối Quyết',
+    title: '⚔ Bảng Điểm Nhật Sai 2.0', subtitle: 'PVP Đỉnh Phong Đối Quyết · Công Cụ Ghi Điểm GM',
     date: 'Ngày', server: 'Máy Chủ', newSheet: '🔄 Tạo Trận Mới',
     exportCSV: '📤 Xuất CSV', importFile: '📥 Nhập File', importJSON: '📥 Nhập JSON',
     colMatch: 'Trận', colWinner: 'Thắng', colLoser: 'Thua', colAlert: 'Cảnh Báo',
@@ -999,12 +993,6 @@ const I18N = {
     champion: '🏆 Vô Địch Ngày：', account: 'ID Số', accountPlaceholder: 'Nhập ID số người thắng',
     autoSaved: '✅ Đã tự động lưu', rulesTitle: '📋 Quy Tắc Tính Điểm',
     rulesDaily: 'Điểm Nhật Sai', rulesElim: 'Cơ Chế Loại Trừ', rulesWeekly: 'Điểm Vô Địch Tuần (Chủ Nhật)',
-    dailyPhase: 'Giai Đoạn Nhật Sai:', prevWeek: 'Tuần Trước', nextWeek: 'Tuần Sau', existingWeekly: 'Vô Địch Tuần Đã Có',
-    serverK: 'K Server', serverQ: 'Q Server',
-    weeklyRulesTitle: '📋 Quy Tắc Vô Địch Tuần',
-    ruleWeekQualification: 'Tư Cách Tham Gia', ruleWeekFormat: 'Thể Thức', ruleWeekAbsent: 'Xử Lý Vắng Mặt',
-    ruleWeekTiebreak: 'Phân Định Đồng Điểm (Ưu Tiên Giảm Dần)',
-    ruleWeekTie1: 'Đối đầu trực tiếp;', ruleWeekTie2: 'Nếu vòng lặp, so sánh tổng trận thắng tuần này;', ruleWeekTie3: 'Vẫn bằng nhau thì đồng hạng vô địch tuần.',
     phWinner: 'Thắng', phLoser: 'Thua', phNote: 'Ghi Chú (tùy chọn)',
     clearDataShort: 'Xóa tất cả', exportCSVShort: 'Xuất ngày', exportAllShort: 'Xuất tất cả', importFileShort: 'Nhập', saveToGitHubShort: 'Lưu GH', loadFromGitHubShort: 'Khôi phục',
     clearFinalShort: 'Xóa Chung Kết', clearWeeklyShort: 'Xóa Vô Địch Tuần', exportWeeklyShort: 'Xuất Vô Địch Tuần', importWeeklyShort: 'Nhập Vô Địch Tuần',
@@ -1106,14 +1094,10 @@ function applyLang() {
     const key = el.getAttribute('data-i18n-placeholder');
     if (I18N[lang] && I18N[lang][key]) el.placeholder = t(key);
   });
-  document.querySelectorAll('[data-i18n-title]').forEach(el => {
-    const key = el.getAttribute('data-i18n-title');
-    if (I18N[lang] && I18N[lang][key]) el.title = t(key);
-  });
   const pageTitle = document.getElementById('pageTitle');
   const mainTitle = document.getElementById('mainTitle');
   const titleText = (document.getElementById('weeklyView').style.display !== 'none' ? '⚔ ' + t('tabWeekly') : t('title'));
-  if (pageTitle) pageTitle.textContent = titleText + ' · ' + t('titleSuffix');
+  if (pageTitle) pageTitle.textContent = titleText + ' · PVP 巅峰对决';
   if (mainTitle) mainTitle.textContent = titleText;
   updateSheetInfo();
   renderSheetDropdown();
@@ -1944,7 +1928,7 @@ function parseV2DayData(rows) {
 
   // 解析缺席选手
   const importedAbsent = [];
-  const absentSectionNames = [t('sectionAbsent')];
+  const absentSectionNames = ['缺席选手', 'Vắng mặt'];
   for (const name of absentSectionNames) {
     const arows = sections[name] || [];
     if (arows.length > 0) {
@@ -1955,12 +1939,12 @@ function parseV2DayData(rows) {
 
   // 解析单场缺席
   const importedMatchAbsent = {};
-  const matchAbsentSectionNames = [t('sectionMatchAbsent')];
+  const matchAbsentSectionNames = ['单场缺席', 'Vắng mặt từng trận'];
   for (const name of matchAbsentSectionNames) {
     const marows = sections[name] || [];
     let headerIdx = -1;
     marows.forEach((r, i) => {
-      if (r.includes(t('csvMatch')) || r.includes('Trận') || r.includes('Match')) headerIdx = i;
+      if (r.includes('场次') || r.includes('Trận') || r.includes('Match')) headerIdx = i;
     });
     if (headerIdx >= 0) {
       for (let i = headerIdx + 1; i < marows.length; i++) {
@@ -2492,7 +2476,7 @@ function switchTab(tab) {
   const pageTitle = document.getElementById('pageTitle');
   const mainTitle = document.getElementById('mainTitle');
   const titleText = (tab === 'weekly' ? '⚔ ' + t('tabWeekly') : t('title'));
-  if (pageTitle) pageTitle.textContent = titleText + ' · ' + t('titleSuffix');
+  if (pageTitle) pageTitle.textContent = titleText + ' · PVP 巅峰对决';
   if (mainTitle) mainTitle.textContent = titleText;
   if (tab === 'weekly') {
     initWeeklyView();
@@ -2511,7 +2495,7 @@ function shiftWeek(days) {
 function initWeeklyDatePreset() {
   const sel = document.getElementById('weeklyDatePreset');
   if (!sel) return;
-  sel.innerHTML = '<option value="" data-i18n="existingWeekly">📋 已有周赛</option>';
+  sel.innerHTML = '<option value="">📋 已有周赛</option>';
   const dates = Object.keys(DEFAULT_WEEKLY_DATA).sort();
   dates.forEach(date => {
     const servers = Object.keys(DEFAULT_WEEKLY_DATA[date]).sort();
@@ -2940,7 +2924,7 @@ function renderFinal() {
     let p2NameColor = getColor(s.p2);
     let p1AbsentTag = '';
     let p2AbsentTag = '';
-    const absentBadge = '<span style="font-size:10px;color:var(--danger);margin-left:4px;font-weight:600;">❌' + t('absentLabel') + '</span>';
+    const absentBadge = '<span style="font-size:10px;color:var(--danger);margin-left:4px;font-weight:600;">❌缺席</span>';
     const absentBtnStyle = 'background:rgba(239,68,68,0.1);border-color:var(--danger);color:var(--danger);';
     if (done) {
       cardClass = 'done';
@@ -2964,10 +2948,10 @@ function renderFinal() {
     } else {
       p1WinBtn = '<div style="display:flex;flex-direction:column;gap:4px;">' +
         '<button class="schedule-win-btn" onclick="setFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>' +
-        '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setFinalAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\'')">' + t('absentLabel') + '</button>'' +
+        '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setFinalAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">缺席</button>' +
         '</div>';
       p2WinBtn = '<div style="display:flex;flex-direction:column;gap:4px;">' +
-        '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setFinalAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\'')">' + t('absentLabel') + '</button>'' +
+        '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setFinalAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">缺席</button>' +
         '<button class="schedule-win-btn" onclick="setFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>' +
         '</div>';
     }
@@ -3265,13 +3249,13 @@ function renderWeekly() {
       let p2NameColor = getColor(s.p2);
       let p1AbsentTag = '';
       let p2AbsentTag = '';
-      const absentBadge = '<span style="font-size:10px;color:var(--danger);margin-left:4px;font-weight:600;">❌' + t('absentLabel') + '</span>';
+      const absentBadge = '<span style="font-size:10px;color:var(--danger);margin-left:4px;font-weight:600;">❌缺席</span>';
       const matchAbsentPlayer = weeklyMatchAbsent[key];
       if (done) {
         cardClass = 'done';
         let winLabel = '✓ ' + escapeHtml(winner) + ' ' + t('winBtn');
         if (matchAbsentPlayer) {
-          winLabel += ' <span style="font-size:11px;color:var(--danger);">(' + escapeHtml(matchAbsentPlayer) + ' ' + t('absentLabel') + ')</span>';
+          winLabel += ' <span style="font-size:11px;color:var(--danger);">(' + escapeHtml(matchAbsentPlayer) + ' 缺席)</span>';
           if (matchAbsentPlayer === s.p1) p1AbsentTag = absentBadge;
           if (matchAbsentPlayer === s.p2) p2AbsentTag = absentBadge;
         }
@@ -3290,10 +3274,10 @@ function renderWeekly() {
         const absentBtnStyle = 'background:rgba(239,68,68,0.1);border-color:var(--danger);color:var(--danger);';
         p1WinBtn = '<div style="display:flex;flex-direction:column;gap:4px;">' +
           '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>' +
-          '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setWeeklyMatchAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\'')">' + t('absentLabel') + '</button>'' +
+          '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setWeeklyMatchAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">缺席</button>' +
           '</div>';
         p2WinBtn = '<div style="display:flex;flex-direction:column;gap:4px;">' +
-          '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setWeeklyMatchAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\'')">' + t('absentLabel') + '</button>'' +
+          '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setWeeklyMatchAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">缺席</button>' +
           '<button class="schedule-win-btn" onclick="setWeeklyResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>' +
           '</div>';
       }
@@ -3648,7 +3632,7 @@ function importWeeklyData(input) {
         if (row.startsWith('#')) continue; // 跳过注释行
         if (row.startsWith('参赛名单') || row.startsWith('Danh sách')) { section = 'players'; continue; }
         if (row.startsWith('比赛结果') || row.startsWith('Kết quả')) { section = 'results'; continue; }
-        if (row.startsWith(t('sectionMatchAbsent')) || row.startsWith('Vắng mặt từng trận')) { section = 'matchAbsent'; continue; }
+        if (row.startsWith('单场缺席') || row.startsWith('Vắng mặt từng trận')) { section = 'matchAbsent'; continue; }
         if (row.startsWith('积分榜') || row.startsWith('Bảng xếp hạng')) { section = 'stats'; continue; }
         if (row.includes(',') && !section && !metaDate) {
           const parts = row.split(',');
@@ -3671,7 +3655,7 @@ function importWeeklyData(input) {
             newPlayers.push(name);
             if (parts[1]) newAccounts[name] = parts[1].trim();
             const statusIdx = parts[2] || parts[1];
-            if (statusIdx && (statusIdx.includes(t('absentLabel')) || statusIdx.includes('Vắng'))) {
+            if (statusIdx && (statusIdx.includes('缺席') || statusIdx.includes('Vắng'))) {
               newAbsent.push(name);
             }
           }
