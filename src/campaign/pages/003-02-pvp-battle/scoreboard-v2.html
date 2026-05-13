@@ -809,7 +809,7 @@ const DEMO_DATA = {
     matchAbsent: {}
   },
   // 周赛演示数据（与复赛独立）
-  weeklyDate: '2026-05-18',
+  weeklyDate: '2026-05-17',
   weeklyPlayers: ['nini','asula','CoBeChimTO','JUDI45','chip','maymay'],
   weeklyAbsent: [],
   weeklyResults: {
@@ -1114,7 +1114,8 @@ applyLang();
 initDefaultData();
 
 try {
-  document.getElementById('matchDate').value = new Date().toISOString().slice(0, 10);
+  const today = new Date();
+  document.getElementById('matchDate').value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 } catch(e) {}
 if (!loadDemoData()) loadFromStorage(); // demo 模式跳过本地读取，避免覆盖
 render();
@@ -2474,7 +2475,7 @@ function shiftWeek(days) {
   if (!el.value) return;
   const d = new Date(el.value + 'T00:00:00');
   d.setDate(d.getDate() + days);
-  el.value = d.toISOString().slice(0, 10);
+  el.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   loadWeeklyData();
 }
 function initWeeklyDatePreset() {
@@ -2501,7 +2502,7 @@ function initWeeklyView() {
     const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
     const sunday = new Date(today);
     sunday.setDate(today.getDate() + daysToSunday);
-    el.value = sunday.toISOString().slice(0, 10);
+    el.value = sunday.getFullYear() + '-' + String(sunday.getMonth() + 1).padStart(2, '0') + '-' + String(sunday.getDate()).padStart(2, '0');
   }
   const srv = getCurrentServer();
   document.getElementById('weeklyServerDisplay').textContent = srv;
@@ -3481,7 +3482,7 @@ function getPlayerWeeklyDayWins(player, weekDate, server) {
   for (let i = 0; i < 6; i++) {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
-    const dateStr = d.toISOString().slice(0, 10);
+    const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     const key = 'pvp_score_' + dateStr + '_' + server;
     const raw = localStorage.getItem(key);
     if (raw) {
