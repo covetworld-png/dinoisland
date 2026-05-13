@@ -2596,32 +2596,62 @@ function refreshWeeklyPlayers() {
   const [y, m, d] = weekDate.split('-').map(Number);
   const champions = new Set();
   const accounts = {};
-  console.log('[refreshWeeklyPlayers] weekDate:', weekDate, 'server:', server);
   for (let i = 0; i < 6; i++) {
     const dateObj = new Date(y, m - 1, d - 6 + i);
     const dateStr = dateObj.getFullYear() + '-' + String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + String(dateObj.getDate()).padStart(2, '0');
     // 优先读取 2.0 数据，回退到 1.0
     let raw = localStorage.getItem('pvp_score_v2_' + dateStr + '_' + server);
-    let keyUsed = 'pvp_score_v2_' + dateStr + '_' + server;
     if (!raw) {
       raw = localStorage.getItem('pvp_score_' + dateStr + '_' + server);
-      keyUsed = 'pvp_score_' + dateStr + '_' + server;
     }
-    console.log('[refreshWeeklyPlayers] day', i, dateStr, 'found:', !!raw, 'key:', keyUsed);
     if (raw) {
       try {
         const data = JSON.parse(raw);
-        // 跳过没有实际比赛记录的日期
-        if (!data.matches || data.matches.length === 0) {
-          console.log('[refreshWeeklyPlayers] day', i, 'matches empty');
+
+        // 2.0 模式：优先从复赛 finalData 中提取日冠军
+        if (data.finalData && data.finalData.players && data.finalData.players.length > 0) {
+          const fd = data.finalData;
+          const stats = calcWeeklyStats(fd.players, fd.results, fd.absent || []);
+          const sorted = [];
+          const pointGroups = {};
+          Object.keys(stats).forEach(name => {
+            const p = stats[name].points;
+            if (!pointGroups[p]) pointGroups[p] = [];
+            pointGroups[p].push(name);
+          });
+          Object.keys(pointGroups).map(Number).sort((a, b) => b - a).forEach(points => {
+            const group = pointGroups[points];
+            if (group.length === 1) {
+              sorted.push(group[0]);
+            } else {
+              const h2hWins = {};
+              group.forEach(name => {
+                let hw = 0;
+                group.forEach(opp => {
+                  if (opp !== name && stats[name].h2h[opp] === 'W') hw++;
+                });
+                h2hWins[name] = hw;
+              });
+              group.slice().sort((a, b) => h2hWins[b] - h2hWins[a]).forEach(name => sorted.push(name));
+            }
+          });
+          if (sorted.length > 0) {
+            const topName = sorted[0];
+            champions.add(topName);
+            if (fd.accounts[topName] && !accounts[topName]) {
+              accounts[topName] = fd.accounts[topName];
+            }
+          }
           continue;
         }
+
+        // 1.0 模式：从 matches 中计算冠军
+        if (!data.matches || data.matches.length === 0) continue;
         const acc = (data.championAccount || '').trim();
         let names = data.championNames;
         if (!names || !Array.isArray(names) || names.length === 0) {
           names = calcChampionNames(data.matches);
         }
-        console.log('[refreshWeeklyPlayers] day', i, 'matches:', data.matches.length, 'championNames:', names, 'championAccount:', acc);
         if (names.length > 0) {
           names.forEach(n => {
             champions.add(n);
@@ -2631,9 +2661,7 @@ function refreshWeeklyPlayers() {
           champions.add(acc);
           if (!accounts[acc]) accounts[acc] = acc;
         }
-      } catch(e) {
-        console.log('[refreshWeeklyPlayers] day', i, 'parse error:', e);
-      }
+      } catch(e) {}
     }
   }
   weeklyPlayers = Array.from(champions);
@@ -2642,7 +2670,6 @@ function refreshWeeklyPlayers() {
   weeklyPlayerAccounts = accounts;
   autoSaveWeekly();
   renderWeekly();
-  console.log('[refreshWeeklyPlayers] total champions:', weeklyPlayers.length, weeklyPlayers);
   if (weeklyPlayers.length === 0) {
     alert(t('noWeeklyChampions'));
   }
