@@ -593,7 +593,10 @@
 
     <!-- 赛程 -->
     <div class="schedule-section" style="margin-top:20px;margin-bottom:16px;">
-      <h3 style="font-size:15px;color:var(--mist);margin-bottom:10px;">📅 <span data-i18n="weeklySchedule">赛程</span></h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <h3 style="font-size:15px;color:var(--mist);margin:0;">📅 <span data-i18n="weeklySchedule">赛程</span></h3>
+        <button class="text-btn" onclick="reshuffleFinalSchedule()">🔀 <span data-i18n="reshuffle">重新随机</span></button>
+      </div>
       <div class="schedule-list" id="finalScheduleList"></div>
     </div>
 
@@ -783,7 +786,8 @@ const DEMO_DATA = {
       {p1:'CoBeChimTO',p2:'JUDI45'},{p1:'CoBeChimTO',p2:'chip'},{p1:'CoBeChimTO',p2:'maymay'},
       {p1:'JUDI45',p2:'chip'},{p1:'JUDI45',p2:'maymay'},{p1:'chip',p2:'maymay'}
     ],
-    absent: []
+    absent: [],
+    matchAbsent: {}
   }
 };
 
@@ -1718,6 +1722,26 @@ function importV2Data(rows, input) {
     }
   }
 
+  // 解析单场缺席
+  const importedMatchAbsent = {};
+  const matchAbsentSectionNames = ['单场缺席', 'Vắng mặt từng trận'];
+  for (const name of matchAbsentSectionNames) {
+    const rows = sections[name] || [];
+    let headerIdx = -1;
+    rows.forEach((r, i) => {
+      if (r.includes('场次') || r.includes('Trận') || r.includes('Match')) headerIdx = i;
+    });
+    if (headerIdx >= 0) {
+      for (let i = headerIdx + 1; i < rows.length; i++) {
+        const cols = rows[i].split(',');
+        if (cols.length >= 2) {
+          importedMatchAbsent[cols[0].trim()] = cols[1].trim();
+        }
+      }
+    }
+    break;
+  }
+
   // 确认覆盖
   const raw = localStorage.getItem(getKey());
   const hasStoredData = raw && (() => { try { const d = JSON.parse(raw); return (d.matches && d.matches.length > 0) || !!d.finalData; } catch(e) { return false; } })();
@@ -1752,7 +1776,7 @@ function importV2Data(rows, input) {
         results[key] = fm.winner;
       }
     }
-    finalData = { players: importedSeeds.slice(), accounts, results, schedule, absent: importedAbsent };
+    finalData = { players: importedSeeds.slice(), accounts, results, schedule, absent: importedAbsent, matchAbsent: importedMatchAbsent };
   } else {
     finalData = null;
   }
@@ -2422,16 +2446,40 @@ function generateFinalFromPreliminary() {
     accounts: accounts,
     results: {},
     schedule: schedule,
-    absent: []
+    absent: [],
+    matchAbsent: {}
   };
   autoSave();
   switchSubView('final');
+}
+
+function reshuffleFinalSchedule() {
+  if (!finalData || !finalData.schedule) return;
+  const s = finalData.schedule;
+  for (let i = s.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [s[i], s[j]] = [s[j], s[i]];
+  }
+  autoSave();
+  renderFinal();
 }
 
 function setFinalResult(p1, p2, winner) {
   if (!finalData) return;
   const key = [p1, p2].sort().join('|');
   finalData.results[key] = winner;
+  if (finalData.matchAbsent) delete finalData.matchAbsent[key];
+  autoSave();
+  renderFinal();
+}
+
+function setFinalAbsent(p1, p2, absentPlayer) {
+  if (!finalData) return;
+  const key = [p1, p2].sort().join('|');
+  const winner = absentPlayer === p1 ? p2 : p1;
+  finalData.results[key] = winner;
+  if (!finalData.matchAbsent) finalData.matchAbsent = {};
+  finalData.matchAbsent[key] = absentPlayer;
   autoSave();
   renderFinal();
 }
@@ -2440,6 +2488,7 @@ function removeFinalResult(p1, p2) {
   if (!finalData) return;
   const key = [p1, p2].sort().join('|');
   delete finalData.results[key];
+  if (finalData.matchAbsent) delete finalData.matchAbsent[key];
   autoSave();
   renderFinal();
 }
@@ -2484,6 +2533,15 @@ function exportFinalData() {
   if (absent.length > 0) {
     csv += '\n=== 缺席选手 ===\n';
     csv += absent.join(',') + '\n';
+  }
+  const matchAbsent = finalData.matchAbsent || {};
+  const matchAbsentEntries = Object.entries(matchAbsent).filter(([k, v]) => v);
+  if (matchAbsentEntries.length > 0) {
+    csv += '\n=== 单场缺席 ===\n';
+    csv += '场次,缺席选手\n';
+    matchAbsentEntries.forEach(([key, player]) => {
+      csv += `${key},${player}\n`;
+    });
   }
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -2530,8 +2588,9 @@ function renderFinal() {
     const key = [s.p1, s.p2].sort().join('|');
     const winner = results[key];
     const done = !!winner;
-    const p1Absent = absent.includes(s.p1);
-    const p2Absent = absent.includes(s.p2);
+    const p1GlobalAbsent = absent.includes(s.p1);
+    const p2GlobalAbsent = absent.includes(s.p2);
+    const matchAbsentPlayer = finalData.matchAbsent ? finalData.matchAbsent[key] : null;
     let cardClass = 'pending';
     let headerRight = '';
     let p1WinBtn = '';
@@ -2541,22 +2600,35 @@ function renderFinal() {
     let p1AbsentTag = '';
     let p2AbsentTag = '';
     const absentBadge = '<span style="font-size:10px;color:var(--danger);margin-left:4px;font-weight:600;">❌缺席</span>';
+    const absentBtnStyle = 'background:rgba(239,68,68,0.1);border-color:var(--danger);color:var(--danger);';
     if (done) {
       cardClass = 'done';
-      headerRight = '<span class="schedule-status-win">✓ ' + escapeHtml(winner) + ' ' + t('winBtn') + '</span>' +
+      let winLabel = '✓ ' + escapeHtml(winner) + ' ' + t('winBtn');
+      if (matchAbsentPlayer) {
+        winLabel += ' <span style="font-size:11px;color:var(--danger);">(' + escapeHtml(matchAbsentPlayer) + ' 缺席)</span>';
+        if (matchAbsentPlayer === s.p1) p1AbsentTag = absentBadge;
+        if (matchAbsentPlayer === s.p2) p2AbsentTag = absentBadge;
+      }
+      headerRight = '<span class="schedule-status-win">' + winLabel + '</span>' +
         '<button class="schedule-del-btn" onclick="removeFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('btnDel') + '</button>';
       if (winner !== s.p1) p1NameColor = 'var(--text2)';
       if (winner !== s.p2) p2NameColor = 'var(--text2)';
-    } else if (p1Absent || p2Absent) {
+    } else if (p1GlobalAbsent || p2GlobalAbsent) {
       cardClass = 'absent';
       headerRight = '<span class="schedule-status-skip">' + t('absentLabel') + '</span>';
       p1NameColor = 'var(--text2)';
       p2NameColor = 'var(--text2)';
-      if (p1Absent) p1AbsentTag = absentBadge;
-      if (p2Absent) p2AbsentTag = absentBadge;
+      if (p1GlobalAbsent) p1AbsentTag = absentBadge;
+      if (p2GlobalAbsent) p2AbsentTag = absentBadge;
     } else {
-      p1WinBtn = '<button class="schedule-win-btn" onclick="setFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
-      p2WinBtn = '<button class="schedule-win-btn" onclick="setFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>';
+      p1WinBtn = '<div style="display:flex;flex-direction:column;gap:4px;">' +
+        '<button class="schedule-win-btn" onclick="setFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>' +
+        '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setFinalAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\')">缺席</button>' +
+        '</div>';
+      p2WinBtn = '<div style="display:flex;flex-direction:column;gap:4px;">' +
+        '<button class="schedule-win-btn" style="' + absentBtnStyle + '" onclick="setFinalAbsent(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">缺席</button>' +
+        '<button class="schedule-win-btn" onclick="setFinalResult(\'' + escapeHtml(s.p1).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\',\'' + escapeHtml(s.p2).replace(/'/g, "\\'") + '\')">' + t('winBtn') + '</button>' +
+        '</div>';
     }
     const p1Acc = accounts[s.p1];
     const p2Acc = accounts[s.p2];
