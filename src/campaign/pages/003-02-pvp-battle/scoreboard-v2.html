@@ -1818,13 +1818,17 @@ function isDateLike(str) {
   return /^\d{4}-\d{2}-\d{2}$/.test(str) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str);
 }
 
-function importV2Data(rows, input) {
+function parseV2DayData(rows) {
   let metaDate = '', metaServer = '', metaChampion = '';
-  if (rows.length >= 2 && (rows[0].includes('日期') || rows[0].includes('Ngày'))) {
-    const metaCols = rows[1].split(',');
-    metaDate = normalizeDate(metaCols[0]?.trim() || '');
-    metaServer = (metaCols[1]?.trim() || getCurrentServer());
-    metaChampion = (metaCols[2]?.trim() || '');
+  // 尝试从第一行或第二行解析日期
+  for (let idx = 0; idx < Math.min(rows.length, 2); idx++) {
+    const cols = rows[idx].split(',');
+    if (isDateLike(cols[0]?.trim())) {
+      metaDate = normalizeDate(cols[0].trim());
+      metaServer = (cols[1] || '').trim();
+      metaChampion = (cols[2] || '').trim();
+      break;
+    }
   }
   if (metaServer === 'K') metaServer = 'K 服';
   if (metaServer === 'Q') metaServer = 'Q 服';
@@ -1911,9 +1915,9 @@ function importV2Data(rows, input) {
   const importedAbsent = [];
   const absentSectionNames = ['缺席选手', 'Vắng mặt'];
   for (const name of absentSectionNames) {
-    const rows = sections[name] || [];
-    if (rows.length > 0) {
-      importedAbsent.push(...rows[0].split(',').map(s => s.trim()).filter(s => s));
+    const arows = sections[name] || [];
+    if (arows.length > 0) {
+      importedAbsent.push(...arows[0].split(',').map(s => s.trim()).filter(s => s));
       break;
     }
   }
@@ -1922,14 +1926,14 @@ function importV2Data(rows, input) {
   const importedMatchAbsent = {};
   const matchAbsentSectionNames = ['单场缺席', 'Vắng mặt từng trận'];
   for (const name of matchAbsentSectionNames) {
-    const rows = sections[name] || [];
+    const marows = sections[name] || [];
     let headerIdx = -1;
-    rows.forEach((r, i) => {
+    marows.forEach((r, i) => {
       if (r.includes('场次') || r.includes('Trận') || r.includes('Match')) headerIdx = i;
     });
     if (headerIdx >= 0) {
-      for (let i = headerIdx + 1; i < rows.length; i++) {
-        const cols = rows[i].split(',');
+      for (let i = headerIdx + 1; i < marows.length; i++) {
+        const cols = marows[i].split(',');
         if (cols.length >= 2) {
           importedMatchAbsent[cols[0].trim()] = cols[1].trim();
         }
@@ -1938,21 +1942,8 @@ function importV2Data(rows, input) {
     break;
   }
 
-  // 确认覆盖
-  const raw = localStorage.getItem(getKey());
-  const hasStoredData = raw && (() => { try { const d = JSON.parse(raw); return (d.matches && d.matches.length > 0) || !!d.finalData; } catch(e) { return false; } })();
-  if (hasStoredData && !confirm(t('alertConfirmImport'))) { input.value = ''; return; }
-  if (metaServer && metaServer !== getCurrentServer()) {
-    if (!confirm(t('csvServer') + ': ' + metaServer + ', ' + t('server') + ': ' + getCurrentServer() + '. ' + t('alertSwitchServer'))) { input.value = ''; return; }
-    switchServer(metaServer);
-  }
-
-  if (metaDate) document.getElementById('matchDate').value = metaDate;
-  if (metaChampion) document.getElementById('championAccount').value = metaChampion;
-  matches = prelimMatches;
-  seeds = importedSeeds;
-
   // 重建复赛数据
+  let finalData = null;
   if (importedSeeds.length >= 2) {
     const accounts = {};
     for (const m of prelimMatches) {
@@ -1973,13 +1964,32 @@ function importV2Data(rows, input) {
       }
     }
     finalData = { players: importedSeeds.slice(), accounts, results, schedule, absent: importedAbsent, matchAbsent: importedMatchAbsent };
-  } else {
-    finalData = null;
   }
+
+  return { date: metaDate, server: metaServer, champion: metaChampion, matches: prelimMatches, seeds: importedSeeds, finalData };
+}
+
+function importV2Data(rows, input) {
+  const parsed = parseV2DayData(rows);
+
+  // 确认覆盖
+  const raw = localStorage.getItem(getKey());
+  const hasStoredData = raw && (() => { try { const d = JSON.parse(raw); return (d.matches && d.matches.length > 0) || !!d.finalData; } catch(e) { return false; } })();
+  if (hasStoredData && !confirm(t('alertConfirmImport'))) { input.value = ''; return; }
+  if (parsed.server && parsed.server !== getCurrentServer()) {
+    if (!confirm(t('csvServer') + ': ' + parsed.server + ', ' + t('server') + ': ' + getCurrentServer() + '. ' + t('alertSwitchServer'))) { input.value = ''; return; }
+    switchServer(parsed.server);
+  }
+
+  if (parsed.date) document.getElementById('matchDate').value = parsed.date;
+  if (parsed.champion) document.getElementById('championAccount').value = parsed.champion;
+  matches = parsed.matches;
+  seeds = parsed.seeds;
+  finalData = parsed.finalData;
 
   render(); autoSave();
   updateSheetInfo();
-  alert(t('alertImportOK', {n: prelimMatches.length}));
+  alert(t('alertImportOK', {n: parsed.matches.length}));
   input.value = '';
 }
 
@@ -1993,7 +2003,51 @@ function importData(input) {
 
     // 2.0 多区块格式检测
     if (rows.some(r => r.startsWith('==='))) {
-      importV2Data(rows, input);
+      // 检测是否为多天数据（多个日期行）
+      const dateRowIndices = [];
+      rows.forEach((r, i) => {
+        const cols = r.split(',');
+        if (isDateLike(cols[0]?.trim())) dateRowIndices.push(i);
+      });
+
+      if (dateRowIndices.length <= 1) {
+        importV2Data(rows, input);
+        return;
+      }
+
+      // 多天数据：逐天解析并导入
+      const days = [];
+      for (let d = 0; d < dateRowIndices.length; d++) {
+        const start = dateRowIndices[d];
+        const end = d < dateRowIndices.length - 1 ? dateRowIndices[d + 1] : rows.length;
+        days.push(rows.slice(start, end));
+      }
+
+      let totalMatches = 0;
+      let importedDays = 0;
+      days.forEach(dayRows => {
+        const parsed = parseV2DayData(dayRows);
+        if (!parsed.date || !parsed.server) return;
+        const key = 'pvp_score_v2_' + parsed.date + '_' + parsed.server;
+        const existing = localStorage.getItem(key);
+        const existingData = existing ? JSON.parse(existing) : {};
+        localStorage.setItem(key, JSON.stringify({
+          date: parsed.date,
+          server: parsed.server,
+          championAccount: parsed.champion,
+          matches: parsed.matches,
+          seeds: parsed.seeds,
+          finalData: parsed.finalData,
+          playerColors: existingData.playerColors || {},
+          colorIdx: existingData.colorIdx || 0
+        }));
+        totalMatches += parsed.matches.length;
+        importedDays++;
+      });
+
+      if (totalMatches === 0) { alert(t('alertCSVError')); input.value = ''; return; }
+      alert('导入成功！共 ' + importedDays + ' 天数据，' + totalMatches + ' 场比赛。');
+      input.value = '';
       return;
     }
 
@@ -2276,7 +2330,7 @@ function getAllDataKeys() {
       try {
         const data = JSON.parse(localStorage.getItem(key));
         if (!data.matches || data.matches.length === 0) continue;
-        const parts = key.replace('pvp_score_', '').split('_');
+        const parts = key.replace('pvp_score_v2_', '').replace('pvp_score_', '').split('_');
         if (parts.length >= 2 && parts[0] && /^\d{4}-\d{2}-\d{2}$/.test(parts[0])) {
           if (!map[parts[0]]) map[parts[0]] = new Set();
           map[parts[0]].add(parts.slice(1).join(' '));
