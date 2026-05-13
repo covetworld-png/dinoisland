@@ -411,6 +411,8 @@
   .schedule-card.done { border-left:4px solid var(--success); }
   .schedule-card.pending { border-left:4px solid var(--gold); }
   .schedule-card.absent { opacity:0.4; border-left:4px solid var(--text2); }
+  .schedule-card.dragging { opacity:0.5; transform:scale(0.98); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+  .schedule-card.drag-over { border:2px dashed var(--mist); transform:scale(1.02); }
   .schedule-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
   .schedule-num {
     min-width:24px; height:24px; display:flex; align-items:center; justify-content:center;
@@ -727,6 +729,7 @@ let editingPlayerName = ''; // 当前正在编辑的玩家昵称
 let seeds = []; // 2.0 种子选手名单
 let finalData = null; // 2.0 复赛数据 {players, accounts, results, schedule}
 let currentSubView = 'preliminary'; // 2.0 日赛子视图: preliminary | final
+let finalDragIdx = -1; // 复赛赛程拖拽源索引
 
 /* ========== 2.0 Demo 数据 ========== */
 const DEMO_DATA = {
@@ -2632,7 +2635,7 @@ function renderFinal() {
     }
     const p1Acc = accounts[s.p1];
     const p2Acc = accounts[s.p2];
-    return '<div class="schedule-card ' + cardClass + '">' +
+    return '<div class="schedule-card ' + cardClass + '" draggable="true" data-final-idx="' + idx + '">' +
       '<div class="schedule-card-header">' +
         '<div class="schedule-num">' + (idx + 1) + '</div>' +
         '<div style="display:flex;align-items:center;gap:8px;">' + headerRight + '</div>' +
@@ -2658,6 +2661,43 @@ function renderFinal() {
       '</div>' +
       '</div>';
   }).join('');
+
+  // 绑定复赛赛程拖拽事件
+  scheduleList.querySelectorAll('.schedule-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      finalDragIdx = parseInt(card.dataset.finalIdx, 10);
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      finalDragIdx = -1;
+    });
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const targetIdx = parseInt(card.dataset.finalIdx, 10);
+      if (targetIdx !== finalDragIdx && finalDragIdx >= 0) {
+        card.classList.add('drag-over');
+      }
+    });
+    card.addEventListener('dragleave', () => {
+      card.classList.remove('drag-over');
+    });
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      const targetIdx = parseInt(card.dataset.finalIdx, 10);
+      if (targetIdx !== finalDragIdx && finalDragIdx >= 0 && finalData) {
+        const s = finalData.schedule;
+        const temp = s[finalDragIdx];
+        s[finalDragIdx] = s[targetIdx];
+        s[targetIdx] = temp;
+        autoSave();
+        renderFinal();
+      }
+    });
+  });
 
   // 矩阵
   const matrixTable = document.getElementById('finalMatrix');
