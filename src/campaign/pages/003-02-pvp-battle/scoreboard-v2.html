@@ -320,6 +320,11 @@
   .player-chip .streak { color:var(--warn); font-weight:600; }
   [data-theme="light"] .player-chip .streak { color:#4f46e5; }
   .player-chip .elim { color:var(--danger); font-weight:600; }
+  .player-chip.seed { border-color:var(--gold); background:var(--gold-dim); }
+  tr.seed-row td { background:rgba(255,215,0,0.06); }
+  tr.seed-row td:first-child { border-left:3px solid var(--gold); padding-left:9px; }
+  [data-theme="light"] .player-chip.seed { border-color:var(--gold); background:rgba(180,83,9,0.08); }
+  [data-theme="light"] tr.seed-row td { background:rgba(180,83,9,0.04); }
 
   /* Daily Stats */
   .stats-section {
@@ -579,7 +584,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <h2 style="font-size:18px;color:var(--gold);margin:0;">🏆 <span data-i18n="tabFinal">复赛</span></h2>
       <div style="display:flex;gap:8px;">
-        <button class="text-btn" onclick="clearFinalData()">🗑️ <span data-i18n="clearWeeklyShort">清空</span></button>
+        <button class="text-btn" onclick="clearFinalData()">🗑️ <span data-i18n="clearFinalShort">清空复赛</span></button>
       </div>
     </div>
 
@@ -729,6 +734,7 @@ let seeds = []; // 2.0 种子选手名单
 let finalData = null; // 2.0 复赛数据 {players, accounts, results, schedule}
 let currentSubView = 'preliminary'; // 2.0 日赛子视图: preliminary | final
 let finalDragIdx = -1; // 复赛赛程拖拽源索引
+let weeklyDragIdx = -1; // 周赛赛程拖拽源索引
 
 /* ========== 2.0 Demo 数据 ========== */
 const DEMO_DATA = {
@@ -766,7 +772,7 @@ const DEMO_DATA = {
     accounts: {nini:'13219644', asula:'13220547', CoBeChimTO:'13219629', JUDI45:'13220110', chip:'13219675', maymay:'13226453'},
     results: {
       'nini|asula':'nini',
-      'nini|CoBeChimTO':'nini',
+      // 'nini|CoBeChimTO':'nini', // pending
       'nini|JUDI45':'nini',
       'nini|chip':'chip',
       'nini|maymay':'nini',
@@ -779,7 +785,7 @@ const DEMO_DATA = {
       'CoBeChimTO|maymay':'CoBeChimTO',
       'JUDI45|chip':'JUDI45',
       'JUDI45|maymay':'maymay',
-      'chip|maymay':'maymay',
+      // 'chip|maymay':'maymay', // pending
     },
     schedule: [
       {p1:'nini',p2:'asula'},{p1:'nini',p2:'CoBeChimTO'},{p1:'nini',p2:'JUDI45'},
@@ -797,7 +803,7 @@ const DEMO_DATA = {
   weeklyAbsent: [],
   weeklyResults: {
     'asula|nini':'asula',
-    'CoBeChimTO|nini':'nini',
+    // 'CoBeChimTO|nini':'nini', // 场次2 pending
     'JUDI45|nini':'JUDI45',
     'chip|nini':'nini',
     'maymay|nini':'maymay',
@@ -810,7 +816,7 @@ const DEMO_DATA = {
     'CoBeChimTO|maymay':'CoBeChimTO',
     'chip|JUDI45':'JUDI45',
     'JUDI45|maymay':'maymay',
-    'chip|maymay':'chip',
+    // 'chip|maymay':'chip', // 场次15 pending
   },
   weeklyPlayerAccounts: {nini:'13219644',asula:'13220547',CoBeChimTO:'13219629',JUDI45:'13220110',chip:'13219675',maymay:'13226453'},
   weeklyMatchAbsent: {},
@@ -900,7 +906,7 @@ const I18N = {
     rulesDaily: '日赛积分', rulesElim: '日赛淘汰机制', rulesWeekly: '周冠军赛积分（周日）',
     phWinner: '胜', phLoser: '败', phNote: '备注（可选）',
     clearDataShort: '清空全部', exportCSVShort: '导出当日', exportAllShort: '导出全部', importFileShort: '导入', saveToGitHubShort: '存GitHub', loadFromGitHubShort: '恢复',
-    clearWeeklyShort: '清空周赛', exportWeeklyShort: '导出周赛', importWeeklyShort: '导入周赛',
+    clearFinalShort: '清空复赛', exportWeeklyShort: '导出周赛', importWeeklyShort: '导入周赛',
     btnAdd: '添加', btnDel: '删除',
     modalTitle: '选择日期和服务器', btnCancel: '取消', btnConfirm: '确认', alertNeedDate: '请选择日期',
     alertNeedNames: '请输入胜者和败者昵称', alertSameName: '胜者和败者不能相同',
@@ -937,6 +943,8 @@ const I18N = {
     sectionSeeds: '种子选手',
     sectionFinal: '复赛',
     sectionFinalStandings: '复赛排名',
+    sectionAbsent: '缺席选手',
+    sectionMatchAbsent: '单场缺席',
     seedCounter: '种子 {n}/6',
     alertNeed6Seeds: '种子不足 6 人，无法生成复赛',
     emptyFinal: '暂无复赛数据，请先在初赛中产生 6 名种子',
@@ -970,7 +978,7 @@ const I18N = {
     rulesDaily: 'Điểm Nhật Sai', rulesElim: 'Cơ Chế Loại Trừ', rulesWeekly: 'Điểm Vô Địch Tuần (Chủ Nhật)',
     phWinner: 'Thắng', phLoser: 'Thua', phNote: 'Ghi Chú (tùy chọn)',
     clearDataShort: 'Xóa tất cả', exportCSVShort: 'Xuất ngày', exportAllShort: 'Xuất tất cả', importFileShort: 'Nhập', saveToGitHubShort: 'Lưu GH', loadFromGitHubShort: 'Khôi phục',
-    clearWeeklyShort: 'Xóa Vô Địch Tuần', exportWeeklyShort: 'Xuất Vô Địch Tuần', importWeeklyShort: 'Nhập Vô Địch Tuần',
+    clearFinalShort: 'Xóa Chung Kết', clearWeeklyShort: 'Xóa Vô Địch Tuần', exportWeeklyShort: 'Xuất Vô Địch Tuần', importWeeklyShort: 'Nhập Vô Địch Tuần',
     btnAdd: 'Thêm', btnDel: 'Xóa',
     modalTitle: 'Chọn Ngày và Máy Chủ', btnCancel: 'Hủy', btnConfirm: 'Xác Nhận', alertNeedDate: 'Vui lòng chọn ngày',
     alertNeedNames: 'Vui lòng nhập tên người thắng và thua', alertSameName: 'Người thắng và thua không thể cùng một người',
@@ -995,6 +1003,12 @@ const I18N = {
     ruleWeek1: 'Chỉ dành cho vô địch ngày trong tuần, thi đấu vòng tròn',
     ruleWeek2: 'Thắng +1 điểm, thua 0, không hòa',
     ruleWeek3: 'Phân định đồng điểm: ① Đối đầu trực tiếp → ② Tổng số trận thắng tuần này → ③ Đồng hạng',
+    sectionPreliminary: 'Sơ Bộ',
+    sectionSeeds: 'Hạt Giống',
+    sectionFinal: 'Chung Kết',
+    sectionFinalStandings: 'Bảng Xếp Hạng Chung Kết',
+    sectionAbsent: 'Vắng mặt',
+    sectionMatchAbsent: 'Vắng mặt từng trận',
     tabDaily: 'Bảng Điểm Nhật Sai', tabWeekly: 'Bảng Điểm Tuần',
     refreshPlayers: 'Tự động nhập vô địch nhật sai', weeklyStats: '📊 Bảng Xếp Hạng Vô Địch Tuần',
     weeklyChampion: '🏆 Vô Địch Tuần：', weeklyEmpty: 'Đang chờ bắt đầu',
@@ -1409,7 +1423,7 @@ function render() {
   Object.keys(stats).sort().forEach(name => {
     const st = stats[name];
     const chip = document.createElement('div');
-    chip.className = 'player-chip';
+    chip.className = 'player-chip' + (seeds.includes(name) ? ' seed' : '');
     let statusHtml = '';
     if (seeds.includes(name)) statusHtml = '<span class="streak">🌱 ' + t('seedLabel') + '</span>';
     else if (st.consecutiveWins > 0) statusHtml = '<span class="streak">' + t('statusStreak', {n: st.consecutiveWins}) + '</span>';
@@ -1446,6 +1460,7 @@ function render() {
   finalStats.forEach((s, i) => {
     const acc = getPlayerAccount(s.name);
     const tr = document.createElement('tr');
+    if (seeds.includes(s.name)) tr.classList.add('seed-row');
     if (editingPlayerName === s.name) {
       tr.innerHTML = `
         <td>${i + 1}</td>
@@ -1580,15 +1595,23 @@ function buildDailyCSV() {
   if (finalData) {
     csv += '\n=== ' + t('sectionFinal') + ' ===\n';
     csv += t('csvNo') + ',' + t('csvMatch') + ',' + t('csvWinner') + ',胜方账号,' + t('csvLoser') + ',负方账号\n';
+    const absentList = finalData.absent || [];
+    const matchAbsent = finalData.matchAbsent || {};
     finalData.schedule.forEach((s, i) => {
       const key = [s.p1, s.p2].sort().join('|');
       const winner = finalData.results[key] || '';
       const loser = winner === s.p1 ? s.p2 : (winner === s.p2 ? s.p1 : '');
-      csv += `${i + 1},` + t('csvMatch') + ' ' + (i + 1) + `,${winner},${winner ? (finalData.accounts[winner] || '') : ''},${loser},${loser ? (finalData.accounts[loser] || '') : ''}\n`;
+      let winnerAcc = winner ? (finalData.accounts[winner] || '') : '';
+      let loserAcc = loser ? (finalData.accounts[loser] || '') : '';
+      if (winner && absentList.includes(winner)) winnerAcc = t('absentCSV') + (winnerAcc ? ' ' + winnerAcc : '');
+      if (loser && absentList.includes(loser)) loserAcc = t('absentCSV') + (loserAcc ? ' ' + loserAcc : '');
+      if (winner && matchAbsent[key] === winner) winnerAcc = t('absentCSV') + (winnerAcc ? ' ' + winnerAcc : '');
+      if (loser && matchAbsent[key] === loser) loserAcc = t('absentCSV') + (loserAcc ? ' ' + loserAcc : '');
+      csv += `${i + 1},` + t('csvMatch') + ' ' + (i + 1) + `,${winner},${winnerAcc},${loser},${loserAcc}\n`;
     });
 
     // 复赛排名
-    const stats = calcWeeklyStats(finalData.players, finalData.results, []);
+    const stats = calcWeeklyStats(finalData.players, finalData.results, absentList);
     const sorted = Object.keys(stats).sort((a, b) => {
       if (stats[b].points !== stats[a].points) return stats[b].points - stats[a].points;
       const h2hA = stats[a].h2h[b];
@@ -1603,6 +1626,12 @@ function buildDailyCSV() {
       const st = stats[name];
       csv += `${i + 1},${name},${st.wins},${st.losses},${st.points}\n`;
     });
+
+    // 缺席名单
+    if (absentList.length > 0) {
+      csv += '\n=== ' + t('sectionAbsent') + ' ===\n';
+      csv += absentList.join(',') + '\n';
+    }
   }
 
   return csv;
@@ -2554,11 +2583,18 @@ function exportFinalData() {
   csv += `${date},${server}\n\n`;
   csv += '=== ' + t('sectionFinal') + ' ===\n';
   csv += t('csvNo') + ',' + t('csvMatch') + ',' + t('csvWinner') + ',胜方账号,' + t('csvLoser') + ',负方账号\n';
+  const matchAbsent = finalData.matchAbsent || {};
   finalData.schedule.forEach((s, i) => {
     const key = [s.p1, s.p2].sort().join('|');
     const winner = finalData.results[key] || '';
     const loser = winner === s.p1 ? s.p2 : (winner === s.p2 ? s.p1 : '');
-    csv += `${i + 1},` + t('csvMatch') + ' ' + (i + 1) + `,${winner},${winner ? (finalData.accounts[winner] || '') : ''},${loser},${loser ? (finalData.accounts[loser] || '') : ''}\n`;
+    let winnerAcc = winner ? (finalData.accounts[winner] || '') : '';
+    let loserAcc = loser ? (finalData.accounts[loser] || '') : '';
+    if (winner && absent.includes(winner)) winnerAcc = t('absentCSV') + (winnerAcc ? ' ' + winnerAcc : '');
+    if (loser && absent.includes(loser)) loserAcc = t('absentCSV') + (loserAcc ? ' ' + loserAcc : '');
+    if (winner && matchAbsent[key] === winner) winnerAcc = t('absentCSV') + (winnerAcc ? ' ' + winnerAcc : '');
+    if (loser && matchAbsent[key] === loser) loserAcc = t('absentCSV') + (loserAcc ? ' ' + loserAcc : '');
+    csv += `${i + 1},` + t('csvMatch') + ' ' + (i + 1) + `,${winner},${winnerAcc},${loser},${loserAcc}\n`;
   });
   csv += '\n=== ' + t('sectionFinalStandings') + ' ===\n';
   csv += t('csvRank') + ',' + t('csvName') + ',' + t('csvWins') + ',' + t('csvLosses') + ',' + t('weeklyPoints') + '\n';
@@ -2576,17 +2612,8 @@ function exportFinalData() {
     csv += `${i + 1},${name},${st.wins},${st.losses},${st.points}\n`;
   });
   if (absent.length > 0) {
-    csv += '\n=== 缺席选手 ===\n';
+    csv += '\n=== ' + t('sectionAbsent') + ' ===\n';
     csv += absent.join(',') + '\n';
-  }
-  const matchAbsent = finalData.matchAbsent || {};
-  const matchAbsentEntries = Object.entries(matchAbsent).filter(([k, v]) => v);
-  if (matchAbsentEntries.length > 0) {
-    csv += '\n=== 单场缺席 ===\n';
-    csv += '场次,缺席选手\n';
-    matchAbsentEntries.forEach(([key, player]) => {
-      csv += `${key},${player}\n`;
-    });
   }
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -2622,9 +2649,12 @@ function renderFinal() {
       '</span>';
   }).join('');
 
+  // 检查所有场次是否都有结果（含缺席自动判负）
+  const allFinalMatchesDone = schedule.length > 0 && Object.keys(results).length === schedule.length;
+
   // 冠军宣布
   const champBox = document.getElementById('finalChampionBox');
-  champBox.style.display = players.length > 0 ? 'block' : 'none';
+  champBox.style.display = (players.length > 0 && allFinalMatchesDone) ? 'block' : 'none';
   const champEl = document.getElementById('finalChampionName');
 
   // 赛程卡片
@@ -2817,7 +2847,7 @@ function renderFinal() {
   }).join('');
 
   // 冠军
-  if (sorted.length === 0 || Object.keys(results).length === 0) {
+  if (!allFinalMatchesDone || sorted.length === 0 || Object.keys(results).length === 0) {
     champEl.textContent = '—';
     champEl.style.color = '';
   } else {
@@ -2987,7 +3017,7 @@ function renderWeekly() {
       }
       const p1Acc = weeklyPlayerAccounts[s.p1];
       const p2Acc = weeklyPlayerAccounts[s.p2];
-      return '<div class="schedule-card ' + cardClass + '">' +
+      return '<div class="schedule-card ' + cardClass + '" draggable="true" data-weekly-idx="' + idx + '">' +
         '<div class="schedule-card-header">' +
           '<div class="schedule-num">' + (idx + 1) + '</div>' +
           '<div style="display:flex;align-items:center;gap:8px;">' + headerRight + '</div>' +
@@ -3013,6 +3043,42 @@ function renderWeekly() {
         '</div>' +
         '</div>';
     }).join('');
+
+    // 绑定周赛赛程拖拽事件
+    scheduleList.querySelectorAll('.schedule-card').forEach(card => {
+      card.addEventListener('dragstart', e => {
+        weeklyDragIdx = parseInt(card.dataset.weeklyIdx, 10);
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        weeklyDragIdx = -1;
+      });
+      card.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const targetIdx = parseInt(card.dataset.weeklyIdx, 10);
+        if (targetIdx !== weeklyDragIdx && weeklyDragIdx >= 0) {
+          card.classList.add('drag-over');
+        }
+      });
+      card.addEventListener('dragleave', () => {
+        card.classList.remove('drag-over');
+      });
+      card.addEventListener('drop', e => {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        const targetIdx = parseInt(card.dataset.weeklyIdx, 10);
+        if (targetIdx !== weeklyDragIdx && weeklyDragIdx >= 0) {
+          const temp = weeklySchedule[weeklyDragIdx];
+          weeklySchedule[weeklyDragIdx] = weeklySchedule[targetIdx];
+          weeklySchedule[targetIdx] = temp;
+          autoSave();
+          renderWeekly();
+        }
+      });
+    });
   }
 
   // 矩阵
@@ -3098,11 +3164,14 @@ function renderWeekly() {
     return '<tr><td style="text-align:center">' + (i + 1) + '</td><td>' + formatWeeklyPlayer(name) + '</td><td style="text-align:center">' + s.wins + '</td><td style="text-align:center">' + s.losses + '</td><td style="text-align:center">' + s.points + '</td></tr>';
   }).join('');
   
+  // 检查所有场次是否都有结果（含缺席自动判负）
+  const allWeeklyMatchesDone = weeklySchedule.length > 0 && Object.keys(weeklyResults).length === weeklySchedule.length;
+
   // 周冠军
   const champBox = document.getElementById('weeklyChampionBox');
-  if (champBox) champBox.style.display = players.length > 0 ? 'block' : 'none';
+  if (champBox) champBox.style.display = (players.length > 0 && allWeeklyMatchesDone) ? 'block' : 'none';
   const champEl = document.getElementById('weeklyChampionName');
-  if (sorted.length === 0 || Object.keys(results).length === 0) {
+  if (!allWeeklyMatchesDone || sorted.length === 0 || Object.keys(results).length === 0) {
     champEl.textContent = '—';
     champEl.style.color = '';
   } else {
@@ -3229,16 +3298,22 @@ function exportWeeklyData() {
   csv += '比赛结果\n';
   csv += '#选手A,选手B,胜者\n';
   // 导出所有对阵（含未进行的），空白表示无结果
+  const wkAbsent = weeklyAbsent || [];
+  const wkMatchAbsent = weeklyMatchAbsent || {};
   if (weeklySchedule.length > 0) {
     for (const s of weeklySchedule) {
       const key = [s.p1, s.p2].sort().join('|');
       const winner = results[key] || '';
-      csv += s.p1 + ',' + s.p2 + ',' + winner + '\n';
+      let p1Mark = wkAbsent.includes(s.p1) ? t('absentCSV') : (wkMatchAbsent[key] === s.p1 ? t('absentCSV') : '');
+      let p2Mark = wkAbsent.includes(s.p2) ? t('absentCSV') : (wkMatchAbsent[key] === s.p2 ? t('absentCSV') : '');
+      csv += s.p1 + (p1Mark ? ' ' + p1Mark : '') + ',' + s.p2 + (p2Mark ? ' ' + p2Mark : '') + ',' + winner + '\n';
     }
   } else {
     for (const key in results) {
       const [a, b] = key.split('|');
-      csv += a + ',' + b + ',' + results[key] + '\n';
+      let aMark = wkAbsent.includes(a) ? t('absentCSV') : (wkMatchAbsent[key] === a ? t('absentCSV') : '');
+      let bMark = wkAbsent.includes(b) ? t('absentCSV') : (wkMatchAbsent[key] === b ? t('absentCSV') : '');
+      csv += a + (aMark ? ' ' + aMark : '') + ',' + b + (bMark ? ' ' + bMark : '') + ',' + results[key] + '\n';
     }
   }
   csv += '\n';
@@ -3251,14 +3326,7 @@ function exportWeeklyData() {
     csv += (i + 1) + ',' + name + ',' + (weeklyPlayerAccounts[name] || '') + ',' + s.wins + ',' + s.losses + ',' + s.points + '\n';
   });
   
-  const maEntries = Object.entries(weeklyMatchAbsent).filter(([k, v]) => v);
-  if (maEntries.length > 0) {
-    csv += '\n单场缺席\n';
-    csv += '#场次,缺席选手\n';
-    maEntries.forEach(([key, player]) => {
-      csv += key + ',' + player + '\n';
-    });
-  }
+  // 单场缺席已内嵌在比赛结果中标记，不再单独列出
   
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
