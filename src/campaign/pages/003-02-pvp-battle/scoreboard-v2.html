@@ -631,6 +631,17 @@
         <tbody id="finalStandingsBody"></tbody>
       </table>
     </div>
+
+    <!-- 复赛规则 -->
+    <div class="rules-section" style="margin-top:24px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;">
+      <h3 style="margin:0 0 12px;font-size:15px;color:var(--mist);" data-i18n="rulesFinal">📋 复赛规则</h3>
+      <ul style="font-size:13px;color:var(--text2);line-height:1.8;padding-left:18px;margin:0;">
+        <li data-i18n="ruleFinal1">6 名种子选手进行单循环赛（15 场）</li>
+        <li data-i18n="ruleFinal2">每胜一场积 1 分，败 0 分，无平局</li>
+        <li data-i18n="ruleFinal3">日冠军 = 复赛积分最高者</li>
+        <li data-i18n="ruleFinal4">同分判定：① 相互对战胜负 → ② 并列</li>
+      </ul>
+    </div>
   </div><!-- /finalContainer -->
   </div><!-- /dailyView -->
 
@@ -929,6 +940,7 @@ const I18N = {
     ruleFinal1: '6 名种子选手进行单循环赛（15 场）',
     ruleFinal2: '每胜一场积 1 分，败 0 分，无平局',
     ruleFinal3: '日冠军 = 复赛积分最高者',
+    ruleFinal4: '同分判定：① 相互对战胜负 → ② 并列',
     ruleWeek1: '仅限本周日冠军参加，单循环赛制',
     ruleWeek2: '每胜一场积 1 分，败 0 分，无平局',
     ruleWeek3: '同分判定：① 相互对战胜负 → ② 本周累计胜场总数 → ③ 并列',
@@ -1000,6 +1012,15 @@ const I18N = {
     ruleElim1: 'Thua 3 trận trong ngày → bị loại, không thể tham gia lại',
     ruleElim2: 'Thắng 3 trận liên tiếp → bắt buộc xuống sân, về cuối hàng chờ',
     ruleElim3: 'Đã vô địch nhật sai trong tuần → không tham gia lại nhật sai tuần này',
+    rulesPreliminary: 'Quy Tắc Sơ Bộ',
+    rulesFinal: 'Quy Tắc Chung Kết',
+    rulePre1: 'Ngưới thua không bị loại, có thể tiếp tục tham gia',
+    rulePre2: 'Thắng 3 trận liên tiếp → trở thành hạt giống, sau khi đánh dấu không thể tham gia sơ bộ nữa',
+    rulePre3: 'Sau khi có 6 hạt giống, sơ bộ kết thúc, vào chung kết',
+    ruleFinal1: '6 hạt giống thi đấu vòng tròn (15 trận)',
+    ruleFinal2: 'Thắng +1 điểm, thua 0, không hòa',
+    ruleFinal3: 'Vô địch ngày = ngưới có điểm cao nhất',
+    ruleFinal4: 'Phân định đồng điểm: ① Đối đầu trực tiếp → ② Đồng hạng',
     ruleWeek1: 'Chỉ dành cho vô địch ngày trong tuần, thi đấu vòng tròn',
     ruleWeek2: 'Thắng +1 điểm, thua 0, không hòa',
     ruleWeek3: 'Phân định đồng điểm: ① Đối đầu trực tiếp → ② Tổng số trận thắng tuần này → ③ Đồng hạng',
