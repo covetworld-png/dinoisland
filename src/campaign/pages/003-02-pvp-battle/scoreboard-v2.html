@@ -2882,7 +2882,10 @@ function renderFinal() {
   }).join('');
 
   // 检查所有场次是否都有结果（含缺席自动判负）
-  const allFinalMatchesDone = schedule.length > 0 && Object.keys(results).length === schedule.length;
+  const allFinalMatchesDone = schedule.length > 0 && schedule.every(s => {
+    const key = [s.p1, s.p2].sort().join('|');
+    return results[key] || absent.includes(s.p1) || absent.includes(s.p2);
+  });
 
   // 冠军宣布
   const champBox = document.getElementById('finalChampionBox');
@@ -3413,7 +3416,10 @@ function renderWeekly() {
   }).join('');
   
   // 检查所有场次是否都有结果（含缺席自动判负）
-  const allWeeklyMatchesDone = weeklySchedule.length > 0 && Object.keys(weeklyResults).length === weeklySchedule.length;
+  const allWeeklyMatchesDone = weeklySchedule.length > 0 && weeklySchedule.every(s => {
+    const key = [s.p1, s.p2].sort().join('|');
+    return weeklyResults[key] || weeklyAbsent.includes(s.p1) || weeklyAbsent.includes(s.p2);
+  });
 
   // 周冠军
   const champBox = document.getElementById('weeklyChampionBox');
