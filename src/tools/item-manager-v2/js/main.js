@@ -2120,12 +2120,14 @@ function setupDebugMock() {
     const mockExpiredControl = document.getElementById('mock-expired-control');
     const apiControls = document.getElementById('api-controls');
     const apiDivider = document.getElementById('api-divider');
+    const apiClearControls = document.getElementById('api-clear-controls');
     const btnResetMock = document.getElementById('btn-reset-mock');
     const hint = document.getElementById('debug-hint');
     if (mockControls) mockControls.style.display = isApi ? 'none' : 'flex';
     if (mockExpiredControl) mockExpiredControl.style.display = isApi ? 'none' : 'flex';
     if (apiControls) apiControls.style.display = isApi ? 'flex' : 'none';
     if (apiDivider) apiDivider.style.display = isApi ? 'block' : 'none';
+    if (apiClearControls) apiClearControls.style.display = isApi ? 'flex' : 'none';
     if (btnResetMock) btnResetMock.style.display = isApi ? 'none' : 'inline-flex';
     if (hint) hint.textContent = isApi ? 'API模式：使用真实服务端接口' : '模拟模式：下一次使用道具时生效';
 }
@@ -2231,6 +2233,44 @@ async function refreshApiData() {
         window.itemManager.startCountdowns();
         showToast('数据已刷新', 'success');
     }
+}
+
+async function forceClearRecords() {
+    if (!APP_MODE.isApi() || !window.itemManager) return;
+    const api = window.itemManager.api;
+    const res = await api.getRecords();
+    if (res.code !== 0 || !res.extra || !res.extra.records) {
+        showToast('获取记录失败: ' + (res.message || '未知错误'), 'error');
+        return;
+    }
+    const records = res.extra.records;
+    const activeRecords = records.filter(r => {
+        const status = String(r.status || '');
+        return status === 'doing' || status === '1' || status === 'todo';
+    });
+    if (activeRecords.length === 0) {
+        showToast('没有进行中的记录需要清除', 'info');
+        return;
+    }
+    let success = 0;
+    let fail = 0;
+    for (const r of activeRecords) {
+        const result = await api.gmSuccess(r.record_id);
+        if (result.code === 0) {
+            success++;
+            console.log('[forceClear] ✅', r.record_id, 'skill_id=' + r.skill_id);
+        } else {
+            fail++;
+            console.log('[forceClear] ❌', r.record_id, result.message || result.code);
+        }
+    }
+    showToast('清除完成：成功 ' + success + '，失败 ' + fail, fail > 0 ? 'warning' : 'success');
+    // 重新同步
+    await window.itemManager.syncFromApi();
+    window.itemManager.renderInventory();
+    window.itemManager.renderAllPanels();
+    window.itemManager.renderHistory();
+    window.itemManager.startCountdowns();
 }
 
 // 调试用：在控制台输出当前API库存
