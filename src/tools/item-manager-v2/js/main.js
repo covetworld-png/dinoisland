@@ -1502,7 +1502,6 @@ class ItemManager {
                             const dinoStatus = document.getElementById('dino-status');
                             if (dinoChar) {
                                 dinoChar.classList.add('grown');
-                                dinoChar.style.transform = 'scale(1.5)';
                             }
                             if (dinoAura) dinoAura.classList.add('active');
                             if (dinoStatus) {
@@ -1814,7 +1813,7 @@ class ItemManager {
         if (lock) {
             if (dinoChar) {
                 dinoChar.classList.add('grown');
-                dinoChar.style.transform = 'scale(1.5)';
+                dinoChar.style.transform = '';
             }
             if (dinoAura) dinoAura.classList.add('active');
             if (dinoStatus) {
