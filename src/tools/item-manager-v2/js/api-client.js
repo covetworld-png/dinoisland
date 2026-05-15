@@ -76,7 +76,12 @@ class ApiClient {
             const data = await res.json();
             if (data.code === 0 && data.extra && data.extra.token) {
                 this.token = data.extra.token;
+                this.gameUid = data.extra.gameid || '';
+                this.username = username || '';
                 localStorage.setItem('itemManager_api_token', this.token);
+                localStorage.setItem('itemManager_api_gameuid', this.gameUid);
+                localStorage.setItem('itemManager_api_username', this.username);
+                console.log('[API login] success, gameid:', this.gameUid, 'username:', this.username, 'token:', this.token.substring(0,8));
                 return { success: true, token: this.token, user: data.extra };
             }
             return { success: false, code: data.code, message: data.message || '登录失败' };
