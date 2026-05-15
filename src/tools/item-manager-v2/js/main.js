@@ -216,6 +216,8 @@ const I18N = {
         useFailed: 'Sử dụng thất bại, vui lòng thử lại',
         submitSuccess: 'Gửi thông báo thành công, đang chờ duyệt',
         enterContent: 'Vui lòng nhập nội dung thông báo',
+        contentTooShort: 'Nội dung quá ngắn, tối thiểu 2 ký tự',
+        contentTooLong: 'Nội dung quá dài, tối đa 100 ký tự',
         timeUp: 'Hết thời gian, đã tự động kết thúc',
         approved: 'Thông báo đã đườc duyệt',
         clickToSend: 'Đã duyệt, nhấn để gửi',
@@ -274,6 +276,8 @@ const I18N = {
         useFailed: '使用失败，请重试',
         submitSuccess: '公告提交成功，等待审核',
         enterContent: '请输入公告内容',
+        contentTooShort: '内容过短，至少输入 2 个字符',
+        contentTooLong: '内容过长，最多 100 个字符',
         timeUp: '时间结束，已自动重置',
         approved: '公告已通过审核',
         clickToSend: '审核已通过，点击发送',
@@ -1320,8 +1324,17 @@ class ItemManager {
             return;
         }
 
-        if (!content || !content.trim()) {
+        const trimmed = content.trim();
+        if (!trimmed) {
             showToast(t.enterContent, 'warning');
+            return;
+        }
+        if (trimmed.length < 2) {
+            showToast(t.contentTooShort, 'warning');
+            return;
+        }
+        if (trimmed.length > 100) {
+            showToast(t.contentTooLong, 'warning');
             return;
         }
 
@@ -1915,9 +1928,15 @@ class ItemManager {
         // Textarea char count
         const textarea = document.getElementById('announcement-content');
         const charCount = document.getElementById('char-count');
+        const charCountWrap = document.getElementById('char-count-wrap');
         if (textarea && charCount) {
             textarea.addEventListener('input', () => {
-                charCount.textContent = textarea.value.length;
+                const len = textarea.value.length;
+                charCount.textContent = len;
+                if (charCountWrap) {
+                    const valid = len >= 2 && len <= 100;
+                    charCountWrap.style.color = valid ? '' : 'var(--red)';
+                }
             });
         }
 
