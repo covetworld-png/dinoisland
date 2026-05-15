@@ -1638,12 +1638,15 @@ class ItemManager {
         if (elCountAnnouncement) elCountAnnouncement.textContent = '×' + (inv.announcementCard || 0);
         const elCountFlow = document.getElementById('count-flow');
         if (elCountFlow) elCountFlow.textContent = '×' + (inv.flowCard || 0);
+        const elCountDino = document.getElementById('count-dino-grow');
+        if (elCountDino) elCountDino.textContent = '×' + (inv.dinoGrow50 || 0);
 
         const invMap = [
             { type: 'weather', key: 'weatherCard' },
             { type: 'time', key: 'timeCard' },
             { type: 'announcement', key: 'announcementCard' },
-            { type: 'flow', key: 'flowCard' }
+            { type: 'flow', key: 'flowCard' },
+            { type: 'dino-grow', key: 'dinoGrow50' }
         ];
         invMap.forEach(({ type, key }) => {
             const card = document.getElementById(`inv-${type}`);
