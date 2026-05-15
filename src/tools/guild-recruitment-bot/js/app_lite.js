@@ -109,6 +109,16 @@ function calcOnlineMinutes(since) {
   return Math.max(0, current - start);
 }
 
+function formatDate(dateStr) {
+  if (!dateStr || dateStr === '-') return '-';
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  // vi: DD/MM/YYYY, zh: YYYY-MM-DD
+  return currentLang === 'vi'
+    ? `${parts[2]}/${parts[1]}/${parts[0]}`
+    : dateStr;
+}
+
 // ===== Auth Error =====
 function renderAuthError() {
   const tbody = document.getElementById('player-table');
@@ -268,7 +278,7 @@ function renderTable() {
         <td data-label="${t('th_player_id')}"><span class="id-with-copy"><span class="player-id">${p.id}</span>${copyBtn}</span></td>
         <td data-label="${t('th_nickname')}">${nicknameDisplay}</td>
         <td data-label="${t('th_server')}">${serverBadges}</td>
-        <td data-label="${t('th_reg_date')}" style="color:var(--text-secondary);font-size:12px;">${p.regDate}</td>
+        <td data-label="${t('th_reg_date')}" style="color:var(--text-secondary);font-size:12px;">${formatDate(p.regDate)}</td>
         <td data-label="${t('th_tag')}"><span class="tag ${tagClass}">${tagText}</span></td>
         <td data-label="${t('th_guild_status')}">${guildBadge}</td>
         <td data-label="${t('th_online_status')}">${loginTimeBadge}</td>
