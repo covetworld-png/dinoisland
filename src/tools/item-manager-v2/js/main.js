@@ -344,6 +344,7 @@ class ItemManager {
         this.user = this.loadUser();
         this.state = this.loadState();
         this.countdowns = { weather: null, time: null, flow: null };
+        this.cooldowns = {};
         this.currentTab = 'weather';
         this.selectedOptions = { weather: null, time: 1200 };
         this.init();
@@ -1168,6 +1169,14 @@ class ItemManager {
         const t = I18N[lang];
         const inventoryKey = 'dinoGrow50';
 
+        // 防连点：1分钟冷却
+        const cd = this.cooldowns.dino;
+        if (cd && Date.now() < cd) {
+            const remaining = Math.ceil((cd - Date.now()) / 1000);
+            showToast(lang === 'vi' ? `Vui lòng chờ ${remaining} giây` : `请等待 ${remaining} 秒后重试`, 'warning');
+            return;
+        }
+
         if (this.user.inventory[inventoryKey] <= 0) {
             showToast(t.noItem, 'error');
             return;
@@ -1179,8 +1188,8 @@ class ItemManager {
             const res = await this.api.apply(1, serverId);
             if (res.code === 0) {
                 showToast('已提交，等待生效中...', 'info');
-                // 乐观设置临时锁（体型变化无固定过期）
                 const now = Date.now();
+                // 乐观设置临时锁（体型变化无固定过期）
                 this.state.globalLocks.dinoSize = {
                     userId: this.user.userId,
                     username: this.user.username,
@@ -1192,6 +1201,19 @@ class ItemManager {
                     sizeType: 'grow50',
                     optimistic: true
                 };
+                // 历史记录
+                this.state.history.unshift({
+                    id: generateId(),
+                    type: 'dinoGrow50',
+                    userId: this.user.userId,
+                    username: this.user.username,
+                    usernameCn: this.user.usernameCn,
+                    detail: t.history.dinoGrow50,
+                    startTime: now,
+                    endTime: null,
+                    status: 'active'
+                });
+                if (this.state.history.length > 50) this.state.history.pop();
                 this.saveState();
                 this.startCountdowns();
                 this.renderAllPanels();
@@ -1246,7 +1268,7 @@ class ItemManager {
             endTime: null,
             status: 'active'
         });
-
+        this.cooldowns.dino = Date.now() + 60000;
         this.saveState();
         this.renderInventory();
         this.renderDinoSizePanel();
@@ -1608,6 +1630,15 @@ class ItemManager {
                     }
                 }
             });
+
+            // Dino size 冷却倒计时
+            const cd = this.cooldowns.dino;
+            if (cd && Date.now() < cd) {
+                const btn50 = document.getElementById('btn-use-dino-grow-50');
+                if (btn50 && !btn50.disabled) {
+                    this.renderDinoSizePanel();
+                }
+            }
         };
 
         tick();
@@ -1765,7 +1796,20 @@ class ItemManager {
         const dinoStatus = document.getElementById('dino-status');
         const lang = document.body.getAttribute('data-lang') || 'vi';
 
-        if (btn50) btn50.disabled = this.user.inventory.dinoGrow50 <= 0 || !!myLock;
+        // 防连点冷却
+        const cd = this.cooldowns.dino;
+        if (cd && Date.now() < cd) {
+            const remaining = Math.ceil((cd - Date.now()) / 1000);
+            if (btn50) {
+                btn50.disabled = true;
+                btn50.textContent = lang === 'vi' ? `Chờ ${remaining}s` : `冷却 ${remaining}s`;
+            }
+        } else {
+            if (btn50) {
+                btn50.disabled = this.user.inventory.dinoGrow50 <= 0 || !!myLock;
+                btn50.innerHTML = '<span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span><span class="lang-cn">使用体型变大卡</span>';
+            }
+        }
 
         if (lock) {
             if (dinoChar) {
