@@ -1219,6 +1219,7 @@ class ItemManager {
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
+                this.cooldowns.dino = Date.now() + 60000;
                 this.startCountdowns();
                 this.renderAllPanels();
                 await this.syncFromApi();

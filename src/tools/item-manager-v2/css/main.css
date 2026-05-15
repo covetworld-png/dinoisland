@@ -86,8 +86,7 @@ body::before {
   z-index:-2;
 }
 body::after {
-  content:'';
-  position:fixed; inset:0;
+  content:''; position:fixed; inset:0;
   background:
     radial-gradient(ellipse 50% 40% at 30% 20%, rgba(106,128,152,0.08) 0%, transparent 60%),
     radial-gradient(ellipse 40% 40% at 70% 80%, rgba(200,160,64,0.06) 0%, transparent 50%),
