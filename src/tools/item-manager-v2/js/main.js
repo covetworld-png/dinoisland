@@ -1224,6 +1224,7 @@ class ItemManager {
                 await this.syncFromApi();
                 this.renderInventory();
                 this.renderHistory();
+                this.startDinoCooldown();
             } else if (res.code === 118) {
                 showToast(t.serverErrorConflict, 'warning');
             } else if (res.code === 119) {
@@ -1278,27 +1279,45 @@ class ItemManager {
         this.renderDinoSizePanel();
         this.renderHistory();
         this.startCountdowns();
+        this.startDinoCooldown();
+    }
 
-        // 启动专用冷却倒计时
+    startDinoCooldown() {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
         if (this.dinoCdInterval) clearInterval(this.dinoCdInterval);
-        const updateBtn = () => {
-            const btn = document.getElementById('btn-use-dino-grow-50');
-            if (!btn) return;
-            const cdLeft = this.cooldowns.dino - Date.now();
-            if (cdLeft > 0) {
-                const sec = Math.ceil(cdLeft / 1000);
-                const l = document.body.getAttribute('data-lang') || 'vi';
-                btn.disabled = true;
-                btn.textContent = l === 'vi' ? `Chờ ${sec}s` : `冷却 ${sec}s`;
-            } else {
-                btn.disabled = this.user.inventory.dinoGrow50 <= 0 || !!this.checkConflict('dinoSize');
-                btn.innerHTML = '<span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span><span class="lang-cn">使用体型变大卡</span>';
+        const update = () => {
+            const left = this.cooldowns.dino - Date.now();
+            const sec = Math.ceil(left / 1000);
+            const label = lang === 'vi' ? `Chờ ${sec}s` : `冷却 ${sec}s`;
+            // 面板按钮
+            const btnPanel = document.getElementById('btn-use-dino-grow-50');
+            if (btnPanel) {
+                if (left > 0) {
+                    btnPanel.disabled = true;
+                    btnPanel.textContent = label;
+                } else {
+                    btnPanel.disabled = this.user.inventory.dinoGrow50 <= 0 || !!this.checkConflict('dinoSize');
+                    btnPanel.innerHTML = '<span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span><span class="lang-cn">使用体型变大卡</span>';
+                }
+            }
+            // 库存栏按钮
+            const btnSlot = document.getElementById('btn-slot-dino-grow');
+            if (btnSlot) {
+                if (left > 0) {
+                    btnSlot.disabled = true;
+                    btnSlot.textContent = label;
+                } else {
+                    btnSlot.disabled = this.user.inventory.dinoGrow50 <= 0;
+                    btnSlot.innerHTML = '<span class="lang-vi">Sử dụng</span><span class="lang-cn">使用</span>';
+                }
+            }
+            if (left <= 0) {
                 clearInterval(this.dinoCdInterval);
                 this.dinoCdInterval = null;
             }
         };
-        updateBtn();
-        this.dinoCdInterval = setInterval(updateBtn, 1000);
+        update();
+        this.dinoCdInterval = setInterval(update, 1000);
     }
 
     stopFlowCard() {
