@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Thần Tích</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=70">
+  <link rel="stylesheet" href="css/main.css?v=71">
 </head>
 <body data-lang="vi">
 
@@ -26,8 +26,7 @@
           <span id="auth-status" style="font-size:0.72rem;color:var(--green);display:none;">✓ 已登录</span>
           <button id="auth-logout" class="btn btn-sm" onclick="doApiLogout()" style="width:auto;padding:4px 10px;font-size:0.7rem;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--red);display:none;">退出</button>
         </div>
-        <button class="debug-toggle" onclick="toggleDebugPanel()" title="模拟测试">🧪</button>
-        <button class="settings-toggle" onclick="toggleSettingsPanel()" title="设置">⚙️</button>
+        <button class="debug-toggle" onclick="toggleDebugPanel()" title="设置">🧪</button>
         <button class="lang-toggle" onclick="toggleLanguage()">
           <span id="current-lang">VI / 中</span>
         </button>
@@ -73,19 +72,12 @@
           </button>
         </div>
         <small id="debug-hint">下一次使用道具时生效 / Có hiệu lực khi sử dụng đạo cụ tiếp theo</small>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings Panel -->
-  <div id="settings-panel" class="settings-panel" style="display:none;">
-    <div class="container">
-      <div class="settings-inner">
+        <div class="debug-divider"></div>
         <strong>
-          <span class="lang-vi">⚙️ Cài đặt hiển thị</span>
-          <span class="lang-cn">⚙️ 显示设置</span>
+          <span class="lang-vi">⚙️ Cài đặt hiển thị đạo cụ</span>
+          <span class="lang-cn">⚙️ 道具显示设置</span>
         </strong>
-        <div class="settings-options">
+        <div class="debug-options">
           <label class="toggle-switch">
             <input type="checkbox" id="toggle-weather" checked onchange="toggleInvVisibility('weather', this.checked)">
             <span class="toggle-slider"></span>
@@ -731,6 +723,6 @@
   </div>
 
   <script src="js/api-client.js?v=78"></script>
-  <script src="js/main.js?v=85"></script>
+  <script src="js/main.js?v=86"></script>
 </body>
 </html>
