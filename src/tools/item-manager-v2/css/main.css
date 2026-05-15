@@ -188,6 +188,25 @@ body::after {
   background:rgba(240,160,48,0.12);
 }
 
+.settings-toggle {
+  display:flex; align-items:center; justify-content:center;
+  width:36px; height:36px; border-radius:6px;
+  background:rgba(17,24,32,0.9);
+  border:1px solid rgba(240,160,48,0.2);
+  font-size:1rem; cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.03), 0 2px 12px rgba(0,0,0,0.4);
+  transition:all 0.25s;
+}
+.settings-toggle:hover {
+  border-color:var(--gold);
+  background:rgba(240,160,48,0.06);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05), 0 0 20px rgba(240,160,48,0.1);
+}
+.settings-toggle.active {
+  border-color:var(--gold);
+  background:rgba(240,160,48,0.12);
+}
+
 .debug-panel {
   background:var(--surface);
   border-bottom:1px solid var(--border);
@@ -228,6 +247,22 @@ body::after {
 .btn-reset-inv:hover {
   background:rgba(34,197,94,0.15);
   border-color:rgba(34,197,94,0.4);
+}
+
+.settings-panel {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:12px 0;
+}
+.settings-inner {
+  display:flex; flex-direction:column; gap:10px;
+  font-size:0.8rem; color:var(--fg-2);
+}
+.settings-inner strong {
+  color:var(--gold); font-size:0.85rem;
+}
+.settings-options {
+  display:flex; flex-wrap:wrap; gap:16px;
 }
 
 /* ── main ── */

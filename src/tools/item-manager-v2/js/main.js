@@ -2316,6 +2316,15 @@ function toggleDebugPanel() {
     if (btn) btn.classList.toggle('active', !isVisible);
 }
 
+function toggleSettingsPanel() {
+    const panel = document.getElementById('settings-panel');
+    const btn = document.querySelector('.settings-toggle');
+    if (!panel) return;
+    const isVisible = panel.style.display !== 'none';
+    panel.style.display = isVisible ? 'none' : 'block';
+    if (btn) btn.classList.toggle('active', !isVisible);
+}
+
 function setupDebugMock() {
     const radios = document.querySelectorAll('input[name="mock-error"]');
     radios.forEach(radio => {
