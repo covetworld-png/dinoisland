@@ -760,13 +760,12 @@ body::after {
 /* ── history ── */
 .history-section { margin-bottom:32px; }
 .history-card {
-  background:var(--surface); border:1.5px solid var(--border);
+  background:transparent; border:1.5px solid rgba(255,255,255,0.06);
   border-radius:var(--r-lg); padding:20px;
-  box-shadow:0 4px 24px rgba(0,0,0,0.3);
   min-height:120px;
 }
 .history-empty { text-align:center; color:var(--muted); padding:40px 0; font-size:0.9rem; }
-.history-list { display:flex; flex-direction:column; gap:8px; }
+.history-list { display:flex; flex-direction:column; gap:12px; }
 .history-item {
   display:flex; align-items:center; gap:12px;
   padding:12px 14px;
