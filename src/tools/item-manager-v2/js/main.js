@@ -1956,27 +1956,11 @@ function toggleLanguage() {
 
 // Tab Switch
 function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tab);
-    });
     document.querySelectorAll('.tab-panel').forEach(panel => {
         panel.classList.toggle('active', panel.id === `panel-${tab}`);
     });
     if (window.itemManager) {
         window.itemManager.currentTab = tab;
-    }
-}
-
-function toggleTab(tab) {
-    const isActive = document.querySelector(`.tab-btn[data-tab="${tab}"]`)?.classList.contains('active');
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', !isActive && btn.dataset.tab === tab);
-    });
-    document.querySelectorAll('.tab-panel').forEach(panel => {
-        panel.classList.toggle('active', !isActive && panel.id === `panel-${tab}`);
-    });
-    if (window.itemManager) {
-        window.itemManager.currentTab = isActive ? null : tab;
     }
 }
 
