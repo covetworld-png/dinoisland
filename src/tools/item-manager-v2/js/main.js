@@ -225,7 +225,7 @@ const I18N = {
             weather: 'Thẻ Thời Tiết',
             time: 'Thẻ Thời Gian',
             announcement: 'Thông báo',
-            dinoGrow50: 'Tăng kích thước 50%'
+            dinoGrow50: 'Thay đổi kích thước khủng long'
         },
         status: {
             pending_review: 'Chờ duyệt',
@@ -284,7 +284,7 @@ const I18N = {
             time: '时间卡',
             announcement: '全服公告',
             flow: '时间流动卡',
-            dinoGrow50: '体型增大50%'
+            dinoGrow50: '恐龙体型变化'
         },
         status: {
             pending_review: '待审核',
@@ -1208,7 +1208,7 @@ class ItemManager {
                     userId: this.user.userId,
                     username: this.user.username,
                     usernameCn: this.user.usernameCn,
-                    detail: t.history.dinoGrow50,
+                    detail: lang === 'vi' ? 'Thay đổi kích thước khủng long - Tăng 50%' : '恐龙体型变化 - 增大 50%',
                     startTime: now,
                     endTime: null,
                     status: 'active'
@@ -1263,7 +1263,7 @@ class ItemManager {
             userId: this.user.userId,
             username: this.user.username,
             usernameCn: this.user.usernameCn,
-            detail: '体型增大50%',
+            detail: lang === 'vi' ? 'Tăng 50%' : '增大 50%',
             startTime: now,
             endTime: null,
             status: 'active'
