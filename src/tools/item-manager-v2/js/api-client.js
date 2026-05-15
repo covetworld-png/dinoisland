@@ -224,7 +224,7 @@ function mapApiRecordsToLocks(records, userId) {
             const timeHm = parseInt(r.time_hm, 10);
             defaultDuration = (timeHm > 0) ? DURATION_TIME : DURATION_FLOW;
         }
-        else if (sid === 1) defaultDuration = Infinity;         // 体型变化无固定时效
+        else if (sid === 1) defaultDuration = 60 * 1000;         // 体型变化60秒防连点
         const end = r.end_time ? new Date(r.end_time.replace(' ', 'T')).getTime() : (start + defaultDuration);
         const recordUserId = r.user_id || r.game_uid || userId;
         const isMine = String(recordUserId) === String(userId);

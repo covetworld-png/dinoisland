@@ -7,6 +7,7 @@
 const DURATION_WEATHER = 10 * 1000;      // 调试：10秒（正式版：10 * 60 * 1000 = 10分钟）
 const DURATION_TIME    = 10 * 1000;      // 调试：10秒（正式版：10 * 60 * 1000 = 10分钟）
 const DURATION_FLOW    = 60 * 1000;    // 调试：1分钟（正式版：60 * 60 * 1000 = 60分钟）
+const DURATION_DINO    = 60 * 1000;      // 恐龙变大防连点：60秒
 // 体型变化：无固定时效（endTime = Infinity，龙死亡/下线时失效）
 
 // Server-scoped localStorage keys
@@ -349,6 +350,7 @@ class ItemManager {
         this.state = this.loadState();
         this.countdowns = { weather: null, time: null, flow: null };
         this.cooldowns = {};
+        this.dinoCdInterval = null;
         this.currentTab = 'weather';
         this.selectedOptions = { weather: null, time: 1200 };
         this.init();
@@ -665,8 +667,6 @@ class ItemManager {
     checkConflict(type) {
         const lock = this.state.globalLocks[type];
         if (!lock) return null;
-        // dinoSize has no fixed expiration (expires on dino death/logout)
-        if (type === 'dinoSize') return lock;
         const now = Date.now();
         if (now >= lock.endTime) {
             // Auto cleanup expired lock
@@ -1204,7 +1204,7 @@ class ItemManager {
                     username: this.user.username,
                     usernameCn: this.user.usernameCn,
                     startTime: now,
-                    endTime: Infinity,
+                    endTime: now + DURATION_DINO,
                     detail: 'grow50',
                     detailName: t.history.dinoGrow50,
                     sizeType: 'grow50',
@@ -1260,7 +1260,7 @@ class ItemManager {
             username: this.user.username,
             usernameCn: this.user.usernameCn,
             startTime: now,
-            endTime: Infinity,
+            endTime: now + DURATION_DINO,
             sizeType: 'grow50',
             detail: 'grow50',
             detailName: '体型增大50%'
@@ -1829,9 +1829,35 @@ class ItemManager {
         const dinoStatus = document.getElementById('dino-status');
         const lang = document.body.getAttribute('data-lang') || 'vi';
 
+        // 清除旧倒计时
+        if (this.dinoCdInterval) {
+            clearInterval(this.dinoCdInterval);
+            this.dinoCdInterval = null;
+        }
+
         if (btn50) {
-            btn50.disabled = this.user.inventory.dinoGrow50 <= 0 || !!myLock;
-            btn50.innerHTML = '<span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span><span class="lang-cn">使用体型变大卡</span>';
+            const hasLock = !!myLock;
+            btn50.disabled = this.user.inventory.dinoGrow50 <= 0 || hasLock;
+            if (hasLock && lock) {
+                const updateBtn = () => {
+                    const left = lock.endTime - Date.now();
+                    if (left > 0) {
+                        const sec = Math.ceil(left / 1000);
+                        btn50.textContent = lang === 'vi' ? `Chờ ${sec}s` : `冷却 ${sec}s`;
+                    } else {
+                        btn50.disabled = this.user.inventory.dinoGrow50 <= 0;
+                        btn50.innerHTML = '<span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span><span class="lang-cn">使用体型变大卡</span>';
+                        if (this.dinoCdInterval) {
+                            clearInterval(this.dinoCdInterval);
+                            this.dinoCdInterval = null;
+                        }
+                    }
+                };
+                updateBtn();
+                this.dinoCdInterval = setInterval(updateBtn, 1000);
+            } else {
+                btn50.innerHTML = '<span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span><span class="lang-cn">使用体型变大卡</span>';
+            }
         }
 
         if (lock) {
