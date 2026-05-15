@@ -250,6 +250,8 @@ python build/packager.py <package-key>
 |------|------|------|
 | 恐龙岛日报数据 | https://monsteraccount.yuemei.info/dailyReport/a3a6e45d778a40f084aa18a296fc57b6 | 注册量、新增、日活、留存率等核心指标 |
 
+> **DBSQL 分析任务触发规则**：涉及 `data/DBSQL/` 下的 SQL 分析、小号识别、击杀关系、昵称查询等任务，自动查阅 `[引用:data/DBSQL/README.md#分析场景触发规则]` 和 `[引用:data/DBSQL/SQL_KNOWLEDGE.md]`。
+
 ## 10. 记忆系统 (Memory System)
 
 ### 10.1 快速启动
