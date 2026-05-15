@@ -4,25 +4,25 @@
    ============================================ */
 
 :root {
-  --bg:        #070a0f;
-  --bg-2:      #0d1219;
-  --surface:   #111820;
-  --surface-2: #0a0f16;
+  --bg:        #0c0a0a;
+  --bg-2:      #121010;
+  --surface:   #1a1618;
+  --surface-2: #100e10;
 
-  --fg:        #e2e8f0;
-  --fg-2:      #94a3b8;
-  --muted:     #475569;
+  --fg:        #e8e4e0;
+  --fg-2:      #a09890;
+  --muted:     #5a5048;
 
-  --border:    rgba(148, 163, 184, 0.12);
-  --border-2:  rgba(148, 163, 184, 0.22);
+  --border:    rgba(180, 160, 130, 0.12);
+  --border-2:  rgba(180, 160, 130, 0.22);
 
-  --gold:      #f0a030;
-  --gold-bright: #ffc14d;
-  --gold-dim:  rgba(240, 160, 48, 0.1);
-  --gold-glow: rgba(240, 160, 48, 0.3);
+  --gold:      #c8a040;
+  --gold-bright: #e0c060;
+  --gold-dim:  rgba(200, 160, 64, 0.1);
+  --gold-glow: rgba(200, 160, 64, 0.3);
 
-  --blue:      #3b82f6;
-  --blue-glow: rgba(59, 130, 246, 0.25);
+  --blue:      #6a8098;
+  --blue-glow: rgba(106, 128, 152, 0.25);
 
   --green:     #22c55e;
   --red:       #ef4444;
@@ -80,7 +80,7 @@ body[data-lang="vi"] .lang-cn { display:none; }
 body::before {
   content:'';
   position:fixed; inset:0;
-  background-image: url('../static/bg_new.jpg?v=76');
+  background-image: url('../static/bg_new.jpg?v=77');
   background-size: cover;
   background-position: center;
   z-index:-2;
