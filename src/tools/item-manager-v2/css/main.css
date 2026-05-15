@@ -770,13 +770,13 @@ body::after {
 .history-item {
   display:flex; align-items:center; gap:12px;
   padding:12px 14px;
-  background:rgba(10,15,22,0.35);
+  background:rgba(10,15,22,0.15);
   border-radius:var(--r);
   border-left:3px solid var(--border);
   font-size:0.88rem;
   transition:0.25s;
 }
-.history-item:hover { transform:translateX(4px); background:rgba(17,24,32,0.55); }
+.history-item:hover { transform:translateX(4px); background:rgba(17,24,32,0.25); }
 .history-item.weather      { border-left-color:var(--blue); }
 .history-item.time         { border-left-color:var(--gold); }
 .history-item.flow         { border-left-color:var(--green); }
