@@ -1212,7 +1212,7 @@ class ItemManager {
                     userId: this.user.userId,
                     username: this.user.username,
                     usernameCn: this.user.usernameCn,
-                    detail: lang === 'vi' ? 'Thay đổi kích thước khủng long - Tăng 50%' : '恐龙体型变化 - 增大 50%',
+                    detail: lang === 'vi' ? 'Tăng 50%' : '增大 50%',
                     startTime: now,
                     endTime: null,
                     status: 'active'
