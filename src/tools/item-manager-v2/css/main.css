@@ -780,7 +780,7 @@ body::after {
 .history-item.weather      { border-left-color:var(--blue); }
 .history-item.time         { border-left-color:var(--gold); }
 .history-item.flow         { border-left-color:var(--green); }
-.history-item.dinoGrow50      { border-left-color:var(--orange); }
+.history-item.dino-grow    { border-left-color:var(--orange); }
 .history-item.announcement { border-left-color:var(--purple); }
 .history-icon { font-size:1.2rem; flex-shrink:0; }
 .history-info { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }

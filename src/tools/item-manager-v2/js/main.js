@@ -1697,7 +1697,6 @@ class ItemManager {
         this.renderTimePanel();
         this.renderAnnouncementPanel();
         this.renderFlowPanel();
-        this.renderDinoSizePanel();
     }
 
     renderPanel(type) {
