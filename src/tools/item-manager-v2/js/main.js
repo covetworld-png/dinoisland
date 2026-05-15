@@ -1186,14 +1186,6 @@ class ItemManager {
         const t = I18N[lang];
         const inventoryKey = 'dinoGrow50';
 
-        // 防连点：1分钟冷却
-        const cd = this.cooldowns.dino;
-        if (cd && Date.now() < cd) {
-            const remaining = Math.ceil((cd - Date.now()) / 1000);
-            showToast(lang === 'vi' ? `Vui lòng chờ ${remaining} giây` : `请等待 ${remaining} 秒后重试`, 'warning');
-            return;
-        }
-
         if (this.user.inventory[inventoryKey] <= 0) {
             showToast(t.noItem, 'error');
             return;
@@ -1232,13 +1224,11 @@ class ItemManager {
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
-                this.cooldowns.dino = Date.now() + 60000;
                 this.startCountdowns();
                 this.renderAllPanels();
                 await this.syncFromApi();
                 this.renderInventory();
                 this.renderHistory();
-                this.startDinoCooldown();
             } else if (res.code === 118) {
                 showToast(t.serverErrorConflict, 'warning');
             } else if (res.code === 119) {
@@ -1287,51 +1277,11 @@ class ItemManager {
             endTime: null,
             status: 'active'
         });
-        this.cooldowns.dino = Date.now() + 60000;
         this.saveState();
         this.renderInventory();
         this.renderDinoSizePanel();
         this.renderHistory();
         this.startCountdowns();
-        this.startDinoCooldown();
-    }
-
-    startDinoCooldown() {
-        const lang = document.body.getAttribute('data-lang') || 'vi';
-        if (this.dinoCdInterval) clearInterval(this.dinoCdInterval);
-        const update = () => {
-            const left = this.cooldowns.dino - Date.now();
-            const sec = Math.ceil(left / 1000);
-            const label = lang === 'vi' ? `Chờ ${sec}s` : `冷却 ${sec}s`;
-            // 面板按钮
-            const btnPanel = document.getElementById('btn-use-dino-grow-50');
-            if (btnPanel) {
-                if (left > 0) {
-                    btnPanel.disabled = true;
-                    btnPanel.textContent = label;
-                } else {
-                    btnPanel.disabled = this.user.inventory.dinoGrow50 <= 0 || !!this.checkConflict('dinoSize');
-                    btnPanel.innerHTML = '<span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span><span class="lang-cn">使用体型变大卡</span>';
-                }
-            }
-            // 库存栏按钮
-            const btnSlot = document.getElementById('btn-slot-dino-grow');
-            if (btnSlot) {
-                if (left > 0) {
-                    btnSlot.disabled = true;
-                    btnSlot.textContent = label;
-                } else {
-                    btnSlot.disabled = this.user.inventory.dinoGrow50 <= 0;
-                    btnSlot.innerHTML = '<span class="lang-vi">Sử dụng</span><span class="lang-cn">使用</span>';
-                }
-            }
-            if (left <= 0) {
-                clearInterval(this.dinoCdInterval);
-                this.dinoCdInterval = null;
-            }
-        };
-        update();
-        this.dinoCdInterval = setInterval(update, 1000);
     }
 
     stopFlowCard() {
@@ -1879,19 +1829,9 @@ class ItemManager {
         const dinoStatus = document.getElementById('dino-status');
         const lang = document.body.getAttribute('data-lang') || 'vi';
 
-        // 防连点冷却
-        const cd = this.cooldowns.dino;
-        if (cd && Date.now() < cd) {
-            const remaining = Math.ceil((cd - Date.now()) / 1000);
-            if (btn50) {
-                btn50.disabled = true;
-                btn50.textContent = lang === 'vi' ? `Chờ ${remaining}s` : `冷却 ${remaining}s`;
-            }
-        } else {
-            if (btn50) {
-                btn50.disabled = this.user.inventory.dinoGrow50 <= 0 || !!myLock;
-                btn50.innerHTML = '<span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span><span class="lang-cn">使用体型变大卡</span>';
-            }
+        if (btn50) {
+            btn50.disabled = this.user.inventory.dinoGrow50 <= 0 || !!myLock;
+            btn50.innerHTML = '<span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span><span class="lang-cn">使用体型变大卡</span>';
         }
 
         if (lock) {
