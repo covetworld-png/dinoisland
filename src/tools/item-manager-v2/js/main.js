@@ -777,7 +777,7 @@ class ItemManager {
             
             const res = await this.api.apply(2, serverId, { weather_id: weatherId });
             if (res.code === 0) {
-                showToast('已提交，等待生效中...', 'info');
+                showToast(lang === 'vi' ? 'Đã gửi, đang chờ kích hoạt... (hiệu lực đến khi khủng long chết hoặc đăng xuất)' : '已提交，等待生效...（有效期至恐龙死亡或退出游戏）', 'info');
                 const now = Date.now();
                 // 1. 乐观锁
                 this.state.globalLocks.weather = {
@@ -1252,7 +1252,7 @@ class ItemManager {
         this.renderDinoSizePanel();
         this.renderHistory();
         this.startCountdowns();
-        showToast(t.useSuccess(t.history[sizeType]), 'success');
+        showToast(t.useSuccess(lang === 'vi' ? 'Tăng kích thước (hiệu lực đến khi chết/đăng xuất)' : '体型增大（有效期至死亡/退出游戏）'), 'success');
     }
 
     stopFlowCard() {

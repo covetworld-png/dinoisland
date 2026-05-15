@@ -174,7 +174,7 @@
             </div>
             <div class="cell-icon">🦖</div>
             <div class="cell-count" id="count-dino-grow">×0</div>
-            <button class="btn-slot-use" id="btn-slot-dino-grow" onclick="useDinoSizeCard()">
+            <button class="btn-slot-use" id="btn-slot-dino-grow" onclick="quickUseDinoGrow()">
               <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
             </button>
@@ -209,6 +209,11 @@
             <span>⏳</span>
             <span class="lang-vi">Dòng Chảy TG</span>
             <span class="lang-cn">时间流动</span>
+          </button>
+          <button class="tab-btn" data-tab="dino-grow" onclick="toggleTab('dino-grow')">
+            <span>🦖</span>
+            <span class="lang-vi">Kích Thước</span>
+            <span class="lang-cn">体型变大</span>
           </button>
 
         </nav>
@@ -490,6 +495,77 @@
                 <li>
                   <span class="lang-vi">Thẻ có hiệu lực <strong>60 phút</strong>, trong thờ gian này ngườ chơi khác không thể sử dụng.</span>
                   <span class="lang-cn">卡片有效期<strong>60分钟</strong>，在此期间其他玩家无法使用。</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dino Size Panel -->
+        <div class="tab-panel" id="panel-dino-grow">
+          <div class="panel-card">
+            <div class="panel-header row-between">
+              <h3>
+                <span class="lang-vi">Thẻ Tăng Kích Thước</span>
+                <span class="lang-cn">体型变大卡</span>
+              </h3>
+              <div class="status-indicator" id="status-dinoSize">
+                <span class="status-dot idle"></span>
+                <span class="status-text">
+                  <span class="lang-vi">Sẵn sàng</span>
+                  <span class="lang-cn">就绪</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="conflict-banner" id="conflict-dinoSize" style="display: none;">
+              <span>⚠️</span>
+              <span class="conflict-text" id="conflict-text-dinoSize"></span>
+            </div>
+
+            <div class="countdown-banner" id="countdown-dinoSize" style="display: none;">
+              <span>🦖</span>
+              <span class="countdown-label">
+                <span class="lang-vi">Trạng thái</span>
+                <span class="lang-cn">状态</span>
+              </span>
+              <span class="countdown-value" id="countdown-value-dinoSize">
+                <span class="lang-vi">Đã kích hoạt</span>
+                <span class="lang-cn">已生效</span>
+              </span>
+            </div>
+
+            <div id="dino-size-preview" style="text-align:center;padding:20px 0;">
+              <div id="dino-character" style="font-size:3rem;display:inline-block;">🦕</div>
+              <div id="dino-aura" style="display:none;"></div>
+              <div id="dino-status" style="margin-top:8px;">
+                <span class="lang-vi">Kích thước bình thường</span>
+                <span class="lang-cn">正常体型</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-use" id="btn-use-dino-grow-50" onclick="useDinoSizeCard()">
+              <span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span>
+              <span class="lang-cn">使用体型变大卡</span>
+            </button>
+
+            <div class="instruction-box">
+              <strong>
+                <span class="lang-vi">Hướng dẫn sử dụng</span>
+                <span class="lang-cn">使用说明</span>
+              </strong>
+              <ul>
+                <li>
+                  <span class="lang-vi">Sử dụng thẻ để tăng kích thước khủng long <strong>50%</strong>.</span>
+                  <span class="lang-cn">使用卡片使恐龙体型增大<strong>50%</strong>。</span>
+                </li>
+                <li>
+                  <span class="lang-vi">Hiệu lực đến khi khủng long <strong>chết</strong> hoặc <strong>đăng xuất</strong> khỏi game.</span>
+                  <span class="lang-cn">有效期直至恐龙<strong>死亡</strong>或<strong>退出游戏</strong>后失效。</span>
+                </li>
+                <li>
+                  <span class="lang-vi">Thẻ sẽ bị tiêu hao khi sử dụng, không hoàn lại.</span>
+                  <span class="lang-cn">卡片使用后消耗，不予返还。</span>
                 </li>
               </ul>
             </div>
