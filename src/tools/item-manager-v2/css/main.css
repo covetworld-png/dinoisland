@@ -267,12 +267,11 @@ body::after {
   transition:all 0.3s;
   box-shadow:inset 0 2px 8px rgba(0,0,0,0.4);
 }
-.bag-cell.empty,
 .bag-cell.empty-slot {
   opacity:0.45;
   filter:grayscale(0.7);
 }
-.bag-cell:not(.empty):hover {
+.bag-cell:hover {
   border-color:rgba(240,160,48,0.35);
   box-shadow:inset 0 2px 8px rgba(0,0,0,0.4), 0 0 20px rgba(240,160,48,0.1);
 }

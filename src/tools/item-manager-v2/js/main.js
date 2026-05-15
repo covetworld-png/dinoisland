@@ -1738,7 +1738,6 @@ class ItemManager {
             if (card) {
                 card.style.display = visible ? '' : 'none';
                 if (visible) {
-                    card.classList.toggle('empty', count <= 0);
                     const countEl = document.getElementById(`count-${type}`);
                     if (countEl) countEl.textContent = '×' + count;
                     const btn = document.getElementById(`btn-slot-${type}`);
