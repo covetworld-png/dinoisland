@@ -20,10 +20,6 @@ public/
 !versions/
 !versions/**
 
-# Except docs (project documentation)
-!docs/
-!docs/**
-
 # Except root index.html
 !index.html
 
