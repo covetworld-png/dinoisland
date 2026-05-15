@@ -1695,6 +1695,8 @@ class ItemManager {
                 }
             }
         });
+        const bar = document.querySelector('.inventory-bar');
+        if (bar) bar.classList.add('loaded');
     }
 
     renderAllPanels() {

@@ -255,6 +255,11 @@ body::after {
 .inventory-bar {
   display:grid; grid-template-columns:repeat(4,1fr);
   gap:14px; max-width:640px; margin:0 auto 28px;
+  opacity:0;
+  transition:opacity 0.15s ease;
+}
+.inventory-bar.loaded {
+  opacity:1;
 }
 .bag-cell {
   width:100%;
