@@ -2113,7 +2113,7 @@ const PURCHASE_CONFIG = {
         inventoryKey: 'time'
     },
     announcement: {
-        price: 130,
+        price: 130000,
         icon: '../static/icons/announcement.png',
         nameVi: 'Thẻ Thông Báo',
         nameCn: '公告卡',
@@ -2122,7 +2122,7 @@ const PURCHASE_CONFIG = {
         inventoryKey: 'announcement'
     },
     flow: {
-        price: 250,
+        price: 250000,
         icon: '../static/icons/flow.png',
         nameVi: 'Thẻ Dòng Chảy',
         nameCn: '时间流动卡',
