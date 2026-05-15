@@ -22,7 +22,7 @@
     },
     "item-manager": {
       "source": "projects/003-运营/003-xx-道具管理",
-      "src": "src/tools/item-manager",
+      "src": "src/tools/item-manager-v2",
       "type": "tool-page",
       "status": "ready",
       "confirmed": true,

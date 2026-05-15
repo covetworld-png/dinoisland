@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统一登录 - 道具管理（临时调试）</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #0a0f1a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .login-box {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 40px 36px;
+            width: 360px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .login-title {
+            color: #f3f4f6;
+            font-size: 1.4rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .login-subtitle {
+            color: #6b7280;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-label {
+            display: block;
+            color: #9ca3af;
+            font-size: 0.75rem;
+            margin-bottom: 6px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #374151;
+            background: #1a2236;
+            color: #f3f4f6;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus {
+            border-color: #3b82f6;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 11px;
+            margin-top: 8px;
+            border-radius: 8px;
+            border: none;
+            background: #3b82f6;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .login-btn:hover { background: #2563eb; }
+        .login-btn:disabled { background: #374151; cursor: not-allowed; }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: #6b7280;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+        .back-link:hover { color: #9ca3af; }
+        .msg {
+            margin-top: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            text-align: center;
+            display: none;
+        }
+        .msg.error { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); display: block; }
+        .msg.success { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); display: block; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="login-title">🔌 统一登录</div>
+        <div class="login-subtitle">道具管理系统 · 临时调试入口</div>
+        <div class="form-group">
+            <label class="form-label">用户名</label>
+            <input type="text" id="username" class="form-input" placeholder="请输入用户名" value="robo111">
+        </div>
+        <div class="form-group">
+            <label class="form-label">密码</label>
+            <input type="password" id="password" class="form-input" placeholder="请输入密码" value="111111">
+        </div>
+        <button class="login-btn" id="loginBtn" onclick="doLogin()">登录</button>
+        <div class="msg" id="msg"></div>
+        <a href="index.html" class="back-link">← 返回道具管理页</a>
+    </div>
+
+    <script src="js/api-client.js"></script>
+    <script>
+        async function doLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('loginBtn');
+            const msg = document.getElementById('msg');
+
+            if (!username || !password) {
+                msg.className = 'msg error';
+                msg.textContent = '请输入用户名和密码';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '登录中...';
+            msg.className = 'msg';
+            msg.textContent = '';
+
+            const client = new ApiClient();
+            const res = await client.login(username, password);
+
+            if (res.success) {
+                if (res.user && res.user.gameid) {
+                    localStorage.setItem('itemManager_api_gameuid', res.user.gameid);
+                }
+                msg.className = 'msg success';
+                msg.textContent = '登录成功，正在跳转...';
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 500);
+            } else {
+                btn.disabled = false;
+                btn.textContent = '登录';
+                msg.className = 'msg error';
+                msg.textContent = res.message || '登录失败';
+            }
+        }
+
+        // 支持回车提交
+        document.getElementById('password').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doLogin();
+        });
+    </script>
+</body>
+</html>
