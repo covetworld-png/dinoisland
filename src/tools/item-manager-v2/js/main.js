@@ -368,6 +368,12 @@ class ItemManager {
             if (!user.inventory) user.inventory = {};
             if (user.inventory.flowCard === undefined) user.inventory.flowCard = 3;
             if (user.inventory.dinoGrow50 === undefined) user.inventory.dinoGrow50 = 3;
+            if (!user.inventoryVisibility) {
+                user.inventoryVisibility = {
+                    weather: true, time: true, announcement: true,
+                    flow: true, dinoGrow50: true
+                };
+            }
             // Update nickname per server
             user.username = nick.vi;
             user.usernameCn = nick.cn;
@@ -384,6 +390,10 @@ class ItemManager {
                 announcementCard: 3,
                 flowCard: 3,
                 dinoGrow50: 3
+            },
+            inventoryVisibility: {
+                weather: true, time: true, announcement: true,
+                flow: true, dinoGrow50: true
             }
         };
         localStorage.setItem(lsKeyUser(), JSON.stringify(user));
@@ -430,6 +440,7 @@ class ItemManager {
                 this.cleanupHistory();
                 updatePlayerIdentityDisplay();
                 this.renderInventory();
+                this.syncInvVisibilityUI();
                 this.renderAllPanels();
                 this.renderHistory();
                 this.startCountdowns();
@@ -445,6 +456,7 @@ class ItemManager {
                 this.cleanupHistory();
                 updatePlayerIdentityDisplay();
                 this.renderInventory();
+                this.syncInvVisibilityUI();
                 this.renderAllPanels();
                 this.renderHistory();
                 this.startCountdowns();
@@ -463,6 +475,7 @@ class ItemManager {
         this.cleanupHistory();
         updatePlayerIdentityDisplay();
         this.renderInventory();
+        this.syncInvVisibilityUI();
         this.renderAllPanels();
         this.renderHistory();
         this.startCountdowns();
@@ -1708,34 +1721,29 @@ class ItemManager {
     renderInventory() {
         const isApiNotLoggedIn = APP_MODE.isApi() && (!this.api || !this.api.isLoggedIn());
         const inv = isApiNotLoggedIn ? {} : (this.user.inventory || {});
+        const visibility = this.user.inventoryVisibility || {};
         console.log('[renderInventory]', isApiNotLoggedIn ? 'API未登录，显示空' : inv);
-        const elCountWeather = document.getElementById('count-weather');
-        if (elCountWeather) elCountWeather.textContent = '×' + (inv.weatherCard || 0);
-        const elCountTime = document.getElementById('count-time');
-        if (elCountTime) elCountTime.textContent = '×' + (inv.timeCard || 0);
-        const elCountAnnouncement = document.getElementById('count-announcement');
-        if (elCountAnnouncement) elCountAnnouncement.textContent = '×' + (inv.announcementCard || 0);
-        const elCountFlow = document.getElementById('count-flow');
-        if (elCountFlow) elCountFlow.textContent = '×' + (inv.flowCard || 0);
-        const elCountDino = document.getElementById('count-dino-grow');
-        if (elCountDino) elCountDino.textContent = '×' + (inv.dinoGrow50 || 0);
 
         const invMap = [
-            { type: 'weather', key: 'weatherCard' },
-            { type: 'time', key: 'timeCard' },
-            { type: 'announcement', key: 'announcementCard' },
-            { type: 'flow', key: 'flowCard' },
-            { type: 'dino-grow', key: 'dinoGrow50' }
+            { type: 'weather', key: 'weatherCard', cfg: 'weather' },
+            { type: 'time', key: 'timeCard', cfg: 'time' },
+            { type: 'announcement', key: 'announcementCard', cfg: 'announcement' },
+            { type: 'flow', key: 'flowCard', cfg: 'flow' },
+            { type: 'dino-grow', key: 'dinoGrow50', cfg: 'dinoGrow50' }
         ];
-        invMap.forEach(({ type, key }) => {
+        invMap.forEach(({ type, key, cfg }) => {
             const card = document.getElementById(`inv-${type}`);
-            const btn = document.getElementById(`btn-slot-${type}`);
             const count = isApiNotLoggedIn ? 0 : (this.user.inventory[key] || 0);
+            const visible = visibility[cfg] !== false;
             if (card) {
-                card.classList.toggle('empty', count <= 0);
-            }
-            if (btn) {
-                btn.disabled = count <= 0;
+                card.style.display = visible ? '' : 'none';
+                if (visible) {
+                    card.classList.toggle('empty', count <= 0);
+                    const countEl = document.getElementById(`count-${type}`);
+                    if (countEl) countEl.textContent = '×' + count;
+                    const btn = document.getElementById(`btn-slot-${type}`);
+                    if (btn) btn.disabled = count <= 0;
+                }
             }
         });
     }
@@ -1746,6 +1754,33 @@ class ItemManager {
         this.renderAnnouncementPanel();
         this.renderFlowPanel();
         this.renderDinoSizePanel();
+    }
+
+    toggleInvVisibility(itemKey, visible) {
+        if (!this.user.inventoryVisibility) {
+            this.user.inventoryVisibility = {
+                weather: true, time: true, announcement: true,
+                flow: true, dinoGrow50: true
+            };
+        }
+        this.user.inventoryVisibility[itemKey] = visible;
+        this.saveUser();
+        this.renderInventory();
+    }
+
+    syncInvVisibilityUI() {
+        const v = this.user.inventoryVisibility || {};
+        const map = {
+            weather: 'toggle-weather',
+            time: 'toggle-time',
+            announcement: 'toggle-announcement',
+            flow: 'toggle-flow',
+            dinoGrow50: 'toggle-dino-grow'
+        };
+        for (const [key, id] of Object.entries(map)) {
+            const el = document.getElementById(id);
+            if (el) el.checked = v[key] !== false;
+        }
     }
 
     renderPanel(type) {
@@ -2122,6 +2157,10 @@ function changePurchaseQty(delta) {
     const qtyEl = document.getElementById('purchase-qty');
     if (qtyEl) qtyEl.textContent = window.currentPurchaseQty;
     if (window.itemManager) window.itemManager.updatePurchaseTotal();
+}
+
+function toggleInvVisibility(itemKey, visible) {
+    if (window.itemManager) window.itemManager.toggleInvVisibility(itemKey, visible);
 }
 
 // Escape HTML

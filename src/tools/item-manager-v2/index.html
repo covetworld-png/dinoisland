@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Thần Tích</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=64">
+  <link rel="stylesheet" href="css/main.css?v=65">
 </head>
 <body data-lang="vi">
 
@@ -124,6 +124,52 @@
     <!-- Inventory Stats -->
     <section class="section" data-od-id="inventory">
       <div class="container">
+        <div class="inv-config-bar" id="inv-config-bar">
+          <span class="inv-config-label">
+            <span class="lang-vi">Hiển thị đạo cụ</span>
+            <span class="lang-cn">显示道具</span>
+          </span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-weather" checked onchange="toggleInvVisibility('weather', this.checked)">
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">
+              <span class="lang-vi">Thờ Tiết</span>
+              <span class="lang-cn">天气</span>
+            </span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-time" checked onchange="toggleInvVisibility('time', this.checked)">
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">
+              <span class="lang-vi">Thờ Gian</span>
+              <span class="lang-cn">时间</span>
+            </span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-announcement" checked onchange="toggleInvVisibility('announcement', this.checked)">
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">
+              <span class="lang-vi">Thông Báo</span>
+              <span class="lang-cn">公告</span>
+            </span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-flow" checked onchange="toggleInvVisibility('flow', this.checked)">
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">
+              <span class="lang-vi">Dòng Chảy</span>
+              <span class="lang-cn">流动</span>
+            </span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-dino-grow" checked onchange="toggleInvVisibility('dinoGrow50', this.checked)">
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">
+              <span class="lang-vi">Tăng KT</span>
+              <span class="lang-cn">变大</span>
+            </span>
+          </label>
+        </div>
         <div class="inventory-bar">
           <div class="bag-cell" id="inv-weather">
             <div class="cell-name">
@@ -656,6 +702,6 @@
   </div>
 
   <script src="js/api-client.js?v=78"></script>
-  <script src="js/main.js?v=82"></script>
+  <script src="js/main.js?v=83"></script>
 </body>
 </html>

@@ -115,7 +115,7 @@ body::after {
 .cell-icon { display:flex; align-items:center; justify-content:center; margin-bottom:8px; }
 .cell-icon img { width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 0 8px rgba(200,160,64,0.25)); }
 .cell-name { font-size:0.65rem; color:var(--muted); margin-bottom:6px; }
-.cell-qty { font-size:0.9rem; font-weight:700; color:var(--gold); font-family:var(--font-mono); }
+.cell-count { font-size:0.9rem; font-weight:700; color:var(--gold); font-family:var(--font-mono); }
 .btn-slot-use {
   margin-top:8px; padding:5px 12px; border:none; border-radius:6px;
   font-size:0.7rem; font-weight:600; cursor:pointer; transition:all 0.2s;
@@ -124,6 +124,44 @@ body::after {
 .btn-slot-use:hover:not(:disabled) { background:rgba(200,160,64,0.2); }
 .btn-slot-use:disabled { opacity:0.35; cursor:not-allowed; }
 .bag-cell.empty, .bag-cell.empty-slot { opacity:0.45; filter:grayscale(0.7); background:transparent; border:none; }
+
+/* ── inventory visibility config ── */
+.inv-config-bar {
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  margin-bottom:16px; padding:12px 16px;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+}
+.inv-config-label {
+  font-size:0.78rem; color:var(--muted); font-weight:600;
+  white-space:nowrap;
+}
+.toggle-switch {
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  position:relative;
+}
+.toggle-switch input {
+  position:absolute; opacity:0; width:0; height:0;
+}
+.toggle-slider {
+  position:relative; width:36px; height:20px;
+  background:var(--bg-2); border:1px solid var(--border); border-radius:10px;
+  transition:all 0.25s; flex-shrink:0;
+}
+.toggle-slider::after {
+  content:''; position:absolute; top:2px; left:2px;
+  width:14px; height:14px; border-radius:50%;
+  background:var(--muted); transition:all 0.25s;
+}
+.toggle-switch input:checked + .toggle-slider {
+  background:var(--gold-dim); border-color:var(--gold);
+}
+.toggle-switch input:checked + .toggle-slider::after {
+  transform:translateX(16px); background:var(--gold);
+  box-shadow:0 0 8px var(--gold-glow);
+}
+.toggle-label {
+  font-size:0.72rem; color:var(--fg-2); white-space:nowrap;
+}
 
 /* ── tabs ── */
 .tabs { display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; padding-bottom:4px; }
@@ -490,6 +528,7 @@ body::after {
   .purchase-body { padding:16px 20px; }
   .purchase-hint { padding:0 20px 12px; }
   .purchase-pay-btn { width:calc(100% - 40px); margin:0 20px 20px; }
+  .inv-config-bar { gap:12px; }
 }
 @media (max-width:480px) {
   .container { padding:0 16px; }
