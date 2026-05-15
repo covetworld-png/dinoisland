@@ -1644,14 +1644,8 @@ class ItemManager {
                 }
             });
 
-            // Dino size 冷却倒计时
-            const cd = this.cooldowns.dino;
-            if (cd && Date.now() < cd) {
-                const btn50 = document.getElementById('btn-use-dino-grow-50');
-                if (btn50 && !btn50.disabled) {
-                    this.renderDinoSizePanel();
-                }
-            }
+            // Dino size 冷却倒计时更新
+            this.renderDinoSizePanel();
         };
 
         tick();
