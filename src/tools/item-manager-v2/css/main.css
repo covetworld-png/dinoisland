@@ -760,7 +760,7 @@ body::after {
 /* ── history ── */
 .history-section { margin-bottom:32px; }
 .history-card {
-  background:transparent; border:1.5px solid rgba(255,255,255,0.06);
+  background:rgba(10,15,22,0.08); border:1.5px solid rgba(255,255,255,0.06);
   border-radius:var(--r-lg); padding:20px;
   min-height:120px;
 }
