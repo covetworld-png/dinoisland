@@ -1278,6 +1278,27 @@ class ItemManager {
         this.renderDinoSizePanel();
         this.renderHistory();
         this.startCountdowns();
+
+        // 启动专用冷却倒计时
+        if (this.dinoCdInterval) clearInterval(this.dinoCdInterval);
+        const updateBtn = () => {
+            const btn = document.getElementById('btn-use-dino-grow-50');
+            if (!btn) return;
+            const cdLeft = this.cooldowns.dino - Date.now();
+            if (cdLeft > 0) {
+                const sec = Math.ceil(cdLeft / 1000);
+                const l = document.body.getAttribute('data-lang') || 'vi';
+                btn.disabled = true;
+                btn.textContent = l === 'vi' ? `Chờ ${sec}s` : `冷却 ${sec}s`;
+            } else {
+                btn.disabled = this.user.inventory.dinoGrow50 <= 0 || !!this.checkConflict('dinoSize');
+                btn.innerHTML = '<span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span><span class="lang-cn">使用体型变大卡</span>';
+                clearInterval(this.dinoCdInterval);
+                this.dinoCdInterval = null;
+            }
+        };
+        updateBtn();
+        this.dinoCdInterval = setInterval(updateBtn, 1000);
     }
 
     stopFlowCard() {
