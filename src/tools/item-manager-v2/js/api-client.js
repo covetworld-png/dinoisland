@@ -189,7 +189,7 @@ const APP_MODE = {
 function mapApiBenefitsToInventory(benefits) {
     const inv = {
         weatherCard: 0, timeCard: 0, announcementCard: 0,
-        flowCard: 0, dinoGrow50: 0, dinoGrow100: 0, dinoShrink50: 0
+        flowCard: 0, dinoGrow50: 0
     };
     if (!Array.isArray(benefits)) return inv;
     benefits.forEach(function(b) {
@@ -200,9 +200,7 @@ function mapApiBenefitsToInventory(benefits) {
         else if (sid === 5) inv.timeCard += left;
         else if (sid === 4) inv.announcementCard += left;
         else if (sid === 1) {
-            inv.dinoGrow50 += Math.ceil(left / 3);
-            inv.dinoGrow100 += Math.floor(left / 3);
-            inv.dinoShrink50 += Math.floor(left / 3);
+            inv.dinoGrow50 += left;
         }
     });
     console.log('[mapApiBenefitsToInventory] mapped:', inv);
