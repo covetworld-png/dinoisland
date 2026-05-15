@@ -80,7 +80,7 @@ body[data-lang="vi"] .lang-cn { display:none; }
 body::before {
   content:'';
   position:fixed; inset:0;
-  background-image: url('../static/bg_new.jpg?v=75');
+  background-image: url('../static/bg_new.jpg?v=76');
   background-size: cover;
   background-position: center;
   z-index:-2;

@@ -136,7 +136,7 @@ function simulateServerPoll(manager) {
             type, item: type, username: bot.vi, usernameCn: bot.cn,
             server: target, timestamp: now
         });
-        if (state.history.length > 50) state.history.pop();
+        if (state.history.length > 30) state.history.pop();
         
         localStorage.setItem(stateKey, JSON.stringify(state));
         
@@ -778,7 +778,7 @@ class ItemManager {
             
             const res = await this.api.apply(2, serverId, { weather_id: weatherId });
             if (res.code === 0) {
-                showToast(lang === 'vi' ? 'Đã gửi, đang chờ kích hoạt... (hiệu lực đến khi khủng long chết hoặc đăng xuất)' : '已提交，等待生效...（有效期至恐龙死亡或退出游戏）', 'info');
+                showToast(lang === 'vi' ? 'Đã gửi, đang chờ kích hoạt...' : '已提交，等待生效中...', 'info');
                 const now = Date.now();
                 // 1. 乐观锁
                 this.state.globalLocks.weather = {
@@ -803,7 +803,7 @@ class ItemManager {
                     endTime: now + DURATION_WEATHER,
                     status: 'active'
                 });
-                if (this.state.history.length > 50) this.state.history.pop();
+                if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
                 // 3. UI 更新
                 this.startCountdowns();
@@ -958,7 +958,7 @@ class ItemManager {
                     endTime: now + DURATION_TIME,
                     status: 'active'
                 });
-                if (this.state.history.length > 50) this.state.history.pop();
+                if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
                 // 3. UI 更新
                 this.startCountdowns();
@@ -1098,7 +1098,7 @@ class ItemManager {
                     endTime: now + DURATION_FLOW,
                     status: 'active'
                 });
-                if (this.state.history.length > 50) this.state.history.pop();
+                if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
                 // 3. UI 更新
                 this.startCountdowns();
@@ -1213,7 +1213,7 @@ class ItemManager {
                     endTime: null,
                     status: 'active'
                 });
-                if (this.state.history.length > 50) this.state.history.pop();
+                if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
                 this.startCountdowns();
                 this.renderAllPanels();
@@ -1344,7 +1344,7 @@ class ItemManager {
                     endTime: now,
                     status: 'completed'
                 });
-                if (this.state.history.length > 50) this.state.history.pop();
+                if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
                 await this.syncFromApi();
                 this.renderInventory();
@@ -1891,7 +1891,7 @@ class ItemManager {
 
         empty.style.display = 'none';
         list.style.display = 'flex';
-        list.innerHTML = myHistory.slice(0, 20).map(item => {
+        list.innerHTML = myHistory.slice(0, 30).map(item => {
             const icon = item.type === 'weather' ? '🌦️' : item.type === 'time' ? '🕐' : item.type === 'flow' ? '⏳' : item.type.startsWith('dino') ? '🦖' : '📢';
             const title = t.history[item.type] || item.type;
             const timeStr = formatDateTime(item.startTime);
