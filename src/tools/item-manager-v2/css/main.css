@@ -344,6 +344,17 @@ body::after {
 .btn-slot-use:disabled {
   opacity:0.2; cursor:not-allowed;
 }
+.btn-slot-buy {
+  width:100%; padding:4px 0; margin-bottom:4px;
+  background:rgba(200,160,64,0.08); border:1px solid rgba(200,160,64,0.25);
+  color:var(--gold); font-size:0.65rem; font-weight:500;
+  border-radius:5px; cursor:pointer; transition:0.2s;
+  font-family:inherit; letter-spacing:0.5px;
+}
+.btn-slot-buy:hover {
+  border-color:rgba(240,160,48,0.5);
+  background:rgba(200,160,64,0.15);
+}
 
 /* ── tabs ── */
 /* ── panels ── */

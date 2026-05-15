@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Thần Tích</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=69">
+  <link rel="stylesheet" href="css/main.css?v=70">
 </head>
 <body data-lang="vi">
 
@@ -187,6 +187,10 @@
             </div>
             <div class="cell-icon"><img src="../static/icons/weather.png" alt="天气"></div>
             <div class="cell-count" id="count-weather">×0</div>
+            <button class="btn-slot-buy" id="btn-slot-buy-weather" onclick="openPurchaseModal('weather')">
+              <span class="lang-vi">Mua</span>
+              <span class="lang-cn">购买</span>
+            </button>
             <button class="btn-slot-use" id="btn-slot-weather" onclick="quickUseWeather()">
               <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
@@ -199,6 +203,10 @@
             </div>
             <div class="cell-icon"><img src="../static/icons/time.png" alt="时间"></div>
             <div class="cell-count" id="count-time">×0</div>
+            <button class="btn-slot-buy" id="btn-slot-buy-time" onclick="openPurchaseModal('time')">
+              <span class="lang-vi">Mua</span>
+              <span class="lang-cn">购买</span>
+            </button>
             <button class="btn-slot-use" id="btn-slot-time" onclick="quickUseTime()">
               <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
@@ -211,6 +219,10 @@
             </div>
             <div class="cell-icon"><img src="../static/icons/announcement.png" alt="公告"></div>
             <div class="cell-count" id="count-announcement">×0</div>
+            <button class="btn-slot-buy" id="btn-slot-buy-announcement" onclick="openPurchaseModal('announcement')">
+              <span class="lang-vi">Mua</span>
+              <span class="lang-cn">购买</span>
+            </button>
             <button class="btn-slot-use" id="btn-slot-announcement" onclick="quickUseAnnouncement()">
               <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
@@ -223,6 +235,10 @@
             </div>
             <div class="cell-icon"><img src="../static/icons/flow.png" alt="流动"></div>
             <div class="cell-count" id="count-flow">×0</div>
+            <button class="btn-slot-buy" id="btn-slot-buy-flow" onclick="openPurchaseModal('flow')">
+              <span class="lang-vi">Mua</span>
+              <span class="lang-cn">购买</span>
+            </button>
             <button class="btn-slot-use" id="btn-slot-flow" onclick="quickUseFlow()">
               <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
@@ -235,6 +251,10 @@
             </div>
             <div class="cell-icon"><img src="../static/icons/dino.png" alt="恐龙"></div>
             <div class="cell-count" id="count-dino-grow">×0</div>
+            <button class="btn-slot-buy" id="btn-slot-buy-dino-grow" onclick="openPurchaseModal('dinoGrow50')">
+              <span class="lang-vi">Mua</span>
+              <span class="lang-cn">购买</span>
+            </button>
             <button class="btn-slot-use" id="btn-slot-dino-grow" onclick="quickUseDinoGrow()">
               <span class="lang-vi">Sử dụng</span>
               <span class="lang-cn">使用</span>
@@ -295,9 +315,9 @@
               <button class="option-btn" data-value="sandstorm"><span class="option-emoji">🌪️</span><span class="lang-vi">Bão cát</span><span class="lang-cn">沙尘</span></button>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-use-weather" onclick="openPurchaseModal('weather')">
+            <button class="btn btn-primary btn-use" id="btn-use-weather" onclick="useWeatherCard()">
               <span class="lang-vi">Mua Thẻ Thời Tiết</span>
-              <span class="lang-cn">购买天气卡</span>
+              <span class="lang-cn">使用天气卡</span>
             </button>
 
             <div class="instruction-box">
@@ -376,9 +396,9 @@
               </div>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-use-time" onclick="openPurchaseModal('time')">
+            <button class="btn btn-primary btn-use" id="btn-use-time" onclick="useTimeCard()">
               <span class="lang-vi">Mua Thẻ Thời Gian</span>
-              <span class="lang-cn">购买时间卡</span>
+              <span class="lang-cn">使用时间卡</span>
             </button>
 
             <div class="instruction-box">
@@ -426,9 +446,9 @@
               <div class="char-count" id="char-count-wrap"><span class="num" id="char-count">0</span> / 100</div>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-submit-announcement" onclick="openPurchaseModal('announcement')">
-              <span class="lang-vi">Mua Thẻ Thông Báo</span>
-              <span class="lang-cn">购买公告卡</span>
+            <button class="btn btn-primary btn-use" id="btn-submit-announcement" onclick="submitAnnouncement()">
+              <span class="lang-vi">Gửi thông báo</span>
+              <span class="lang-cn">发送公告</span>
             </button>
 
             <div class="instruction-box">
@@ -498,9 +518,9 @@
               </div>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-use-flow" onclick="openPurchaseModal('flow')">
-              <span class="lang-vi">Mua Thẻ Dòng Chảy</span>
-              <span class="lang-cn">购买时间流动卡</span>
+            <button class="btn btn-primary btn-use" id="btn-use-flow" onclick="useFlowCard()">
+              <span class="lang-vi">Khởi động dòng chảy</span>
+              <span class="lang-cn">启动时间流动</span>
             </button>
             <button class="btn btn-secondary btn-stop" id="btn-stop-flow" onclick="stopFlowCard()" style="display:none; margin-top:12px;">
               <span class="lang-vi">Dừng dòng chảy</span>
@@ -589,9 +609,9 @@
               </div>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-use-dino-grow-50" onclick="openPurchaseModal('dinoGrow50')">
-              <span class="lang-vi">Mua Thẻ Tăng Kích Thước</span>
-              <span class="lang-cn">购买体型变大卡</span>
+            <button class="btn btn-primary btn-use" id="btn-use-dino-grow-50" onclick="useDinoSizeCard()">
+              <span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span>
+              <span class="lang-cn">使用体型变大卡</span>
             </button>
 
             <div class="instruction-box">
@@ -711,6 +731,6 @@
   </div>
 
   <script src="js/api-client.js?v=78"></script>
-  <script src="js/main.js?v=84"></script>
+  <script src="js/main.js?v=85"></script>
 </body>
 </html>
