@@ -1970,7 +1970,7 @@ function applyLangUI(lang) {
     document.getElementById('current-lang').textContent = lang === 'vi' ? 'VI / 中' : '中 / VI';
 
     // Update title
-    document.title = lang === 'vi' ? 'Trung Tâm Đạo Cụ' : '道具管理中心';
+    document.title = lang === 'vi' ? 'Trung Tâm Thần Tích' : '神迹中心';
 
     // Update textarea placeholder
     const textarea = document.getElementById('announcement-content');
