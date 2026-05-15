@@ -1274,7 +1274,6 @@ class ItemManager {
         this.renderDinoSizePanel();
         this.renderHistory();
         this.startCountdowns();
-        showToast(t.useSuccess(lang === 'vi' ? 'Tăng kích thước (hiệu lực đến khi chết/đăng xuất)' : '体型增大（有效期至死亡/退出游戏）'), 'success');
     }
 
     stopFlowCard() {
