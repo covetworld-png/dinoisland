@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trung Tâm Thần Tích</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=63">
+  <link rel="stylesheet" href="css/main.css?v=64">
 </head>
 <body data-lang="vi">
 
@@ -240,8 +240,8 @@
               <button class="option-btn" data-value="sandstorm"><span class="option-emoji">🌪️</span><span class="lang-vi">Bão cát</span><span class="lang-cn">沙尘</span></button>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-use-weather" onclick="useWeatherCard()">
-              <span class="lang-vi">Sử dụng Thẻ Thời Tiết</span>
+            <button class="btn btn-primary btn-use" id="btn-use-weather" onclick="openPurchaseModal('weather')">
+              <span class="lang-vi">Mua Thẻ Thời Tiết</span>
               <span class="lang-cn">使用天气卡</span>
             </button>
 
@@ -321,8 +321,8 @@
               </div>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-use-time" onclick="useTimeCard()">
-              <span class="lang-vi">Sử dụng Thẻ Thời Gian</span>
+            <button class="btn btn-primary btn-use" id="btn-use-time" onclick="openPurchaseModal('time')">
+              <span class="lang-vi">Mua Thẻ Thời Gian</span>
               <span class="lang-cn">使用时间卡</span>
             </button>
 
@@ -371,9 +371,9 @@
               <div class="char-count" id="char-count-wrap"><span class="num" id="char-count">0</span> / 100</div>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-submit-announcement" onclick="submitAnnouncement()">
-              <span class="lang-vi">Gửi thông báo</span>
-              <span class="lang-cn">发送公告</span>
+            <button class="btn btn-primary btn-use" id="btn-submit-announcement" onclick="openPurchaseModal('announcement')">
+              <span class="lang-vi">Mua Thẻ Thông Báo</span>
+              <span class="lang-cn">购买公告卡</span>
             </button>
 
             <div class="instruction-box">
@@ -443,9 +443,9 @@
               </div>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-use-flow" onclick="useFlowCard()">
-              <span class="lang-vi">Khởi động dòng chảy</span>
-              <span class="lang-cn">启动时间流动</span>
+            <button class="btn btn-primary btn-use" id="btn-use-flow" onclick="openPurchaseModal('flow')">
+              <span class="lang-vi">Mua Thẻ Dòng Chảy</span>
+              <span class="lang-cn">购买时间流动卡</span>
             </button>
             <button class="btn btn-secondary btn-stop" id="btn-stop-flow" onclick="stopFlowCard()" style="display:none; margin-top:12px;">
               <span class="lang-vi">Dừng dòng chảy</span>
@@ -534,9 +534,9 @@
               </div>
             </div>
 
-            <button class="btn btn-primary btn-use" id="btn-use-dino-grow-50" onclick="useDinoSizeCard()">
-              <span class="lang-vi">Sử dụng Thẻ Tăng Kích Thước</span>
-              <span class="lang-cn">使用体型变大卡</span>
+            <button class="btn btn-primary btn-use" id="btn-use-dino-grow-50" onclick="openPurchaseModal('dinoGrow50')">
+              <span class="lang-vi">Mua Thẻ Tăng Kích Thước</span>
+              <span class="lang-cn">购买体型变大卡</span>
             </button>
 
             <div class="instruction-box">
@@ -602,7 +602,60 @@
 
   <div id="toast-container"></div>
 
+  <!-- Purchase Modal -->
+  <div class="purchase-overlay" id="purchase-overlay" style="display:none;" onclick="if(event.target===this)closePurchaseModal()">
+    <div class="purchase-modal">
+      <button class="purchase-close" onclick="closePurchaseModal()">&#10005;</button>
+
+      <div class="purchase-header">
+        <img src="" id="purchase-icon" class="purchase-icon-img" alt="">
+        <h3 class="purchase-title" id="purchase-title"></h3>
+        <p class="purchase-desc" id="purchase-desc"></p>
+      </div>
+
+      <div class="purchase-body">
+        <div class="purchase-row">
+          <span class="purchase-label">
+            <span class="lang-vi">&#272;&#417;n gi&#225;</span>
+            <span class="lang-cn">&#21333;&#20215;</span>
+          </span>
+          <span class="purchase-value" id="purchase-unit-price"></span>
+        </div>
+
+        <div class="purchase-row">
+          <span class="purchase-label">
+            <span class="lang-vi">S&#7889; l&#432;&#7907;ng</span>
+            <span class="lang-cn">&#25968;&#37327;</span>
+          </span>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="changePurchaseQty(-1)">&#8722;</button>
+            <span class="qty-num" id="purchase-qty">1</span>
+            <button class="qty-btn" onclick="changePurchaseQty(1)">+</button>
+          </div>
+        </div>
+
+        <div class="purchase-row purchase-total">
+          <span class="purchase-label">
+            <span class="lang-vi">T&#7893;ng c&#7897;ng</span>
+            <span class="lang-cn">&#24635;&#35745;</span>
+          </span>
+          <span class="purchase-value" id="purchase-total"></span>
+        </div>
+      </div>
+
+      <p class="purchase-hint">
+        <span class="lang-vi">&#9888; M&#7895;i &#273;&#417;n h&#224;ng ch&#7881; thanh to&#225;n QR m&#7897;t l&#7847;n</span>
+        <span class="lang-cn">&#9888; &#27599;&#20010;&#35746;&#21333;&#21482;&#33021;&#25195;&#30721;&#25903;&#20184;&#19968;&#27425;</span>
+      </p>
+
+      <button class="btn btn-primary purchase-pay-btn" onclick="confirmPurchase()">
+        <span class="lang-vi">Thanh to&#225;n ngay</span>
+        <span class="lang-cn">&#31435;&#21363;&#25903;&#20184;</span>
+      </button>
+    </div>
+  </div>
+
   <script src="js/api-client.js?v=78"></script>
-  <script src="js/main.js?v=81"></script>
+  <script src="js/main.js?v=82"></script>
 </body>
 </html>

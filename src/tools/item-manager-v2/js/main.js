@@ -1999,6 +1999,129 @@ class ItemManager {
             }
         });
     }
+
+    // ========== Purchase Modal ==========
+    openPurchaseModal(itemType) {
+        const cfg = PURCHASE_CONFIG[itemType];
+        if (!cfg) return;
+        window.currentPurchaseItem = itemType;
+        window.currentPurchaseQty = 1;
+
+        const icon = document.getElementById('purchase-icon');
+        const title = document.getElementById('purchase-title');
+        const desc = document.getElementById('purchase-desc');
+        const unitPrice = document.getElementById('purchase-unit-price');
+        const qty = document.getElementById('purchase-qty');
+
+        if (icon) icon.src = cfg.icon;
+        if (title) title.innerHTML = '<span class="lang-vi">' + cfg.nameVi + '</span><span class="lang-cn">' + cfg.nameCn + '</span>';
+        if (desc) desc.innerHTML = '<span class="lang-vi">' + cfg.descVi + '</span><span class="lang-cn">' + cfg.descCn + '</span>';
+        if (unitPrice) unitPrice.textContent = this.formatVND(cfg.price);
+        if (qty) qty.textContent = '1';
+        this.updatePurchaseTotal();
+
+        const overlay = document.getElementById('purchase-overlay');
+        if (overlay) overlay.style.display = 'flex';
+    }
+
+    updatePurchaseTotal() {
+        const itemType = window.currentPurchaseItem;
+        if (!itemType) return;
+        const cfg = PURCHASE_CONFIG[itemType];
+        const qty = window.currentPurchaseQty || 1;
+        const total = cfg.price * qty;
+        const el = document.getElementById('purchase-total');
+        if (el) el.textContent = this.formatVND(total);
+    }
+
+    formatVND(amount) {
+        return amount.toLocaleString('vi-VN') + ' VND';
+    }
+
+    confirmPurchase() {
+        const itemType = window.currentPurchaseItem;
+        if (!itemType) return;
+        const cfg = PURCHASE_CONFIG[itemType];
+        const qty = window.currentPurchaseQty || 1;
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+
+        showToast(lang === 'vi'
+            ? 'Thanh toan thanh cong! Da mua ' + cfg.nameVi + ' x' + qty
+            : '支付成功！已购买 ' + cfg.nameCn + ' x' + qty, 'success');
+
+        this.user.inventory[cfg.inventoryKey] = (this.user.inventory[cfg.inventoryKey] || 0) + qty;
+        this.saveUser();
+        this.renderInventory();
+
+        closePurchaseModal();
+    }
+}
+
+// Purchase config
+const PURCHASE_CONFIG = {
+    weather: {
+        price: 130000,
+        icon: '../static/icons/weather.png',
+        nameVi: 'Thẻ Thời Tiết',
+        nameCn: '天气卡',
+        descVi: 'Thay đổi thời tiết trong game trong 10 phút.',
+        descCn: '改变游戏内天气，持续10分钟。',
+        inventoryKey: 'weather'
+    },
+    time: {
+        price: 130000,
+        icon: '../static/icons/time.png',
+        nameVi: 'Thẻ Thời Gian',
+        nameCn: '时间卡',
+        descVi: 'Đặt thời gian game theo ý muốn, hiệu lực 10 phút.',
+        descCn: '按意愿设定游戏时间，有效期10分钟。',
+        inventoryKey: 'time'
+    },
+    announcement: {
+        price: 130,
+        icon: '../static/icons/announcement.png',
+        nameVi: 'Thẻ Thông Báo',
+        nameCn: '公告卡',
+        descVi: 'Gửi thông báo toàn server, cần qua kiểm duyệt.',
+        descCn: '发送全服公告，需经过审核。',
+        inventoryKey: 'announcement'
+    },
+    flow: {
+        price: 250,
+        icon: '../static/icons/flow.png',
+        nameVi: 'Thẻ Dòng Chảy',
+        nameCn: '时间流动卡',
+        descVi: 'Tăng tốc thời gian game, 1 giờ thực = 1 ngày game.',
+        descCn: '加速游戏时间流逝，现实1小时=游戏1整天。',
+        inventoryKey: 'flow'
+    },
+    dinoGrow50: {
+        price: 100000,
+        icon: '../static/icons/dino.png',
+        nameVi: 'Thẻ Tăng Kích Thước',
+        nameCn: '体型变大卡',
+        descVi: 'Tăng kích thước khủng long 50%.',
+        descCn: '使恐龙体型增大50%。',
+        inventoryKey: 'dinoGrow50'
+    }
+};
+
+function openPurchaseModal(itemType) {
+    if (window.itemManager) window.itemManager.openPurchaseModal(itemType);
+}
+
+function closePurchaseModal() {
+    const overlay = document.getElementById('purchase-overlay');
+    if (overlay) overlay.style.display = 'none';
+    window.currentPurchaseItem = null;
+    window.currentPurchaseQty = 1;
+}
+
+function changePurchaseQty(delta) {
+    window.currentPurchaseQty = Math.max(1, Math.min(99, (window.currentPurchaseQty || 1) + delta));
+    const qtyEl = document.getElementById('purchase-qty');
+    if (qtyEl) qtyEl.textContent = window.currentPurchaseQty;
+    if (window.itemManager) window.itemManager.updatePurchaseTotal();
 }
 
 // Escape HTML
