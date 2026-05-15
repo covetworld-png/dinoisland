@@ -511,8 +511,8 @@ class ItemManager {
                 if (this.api.gameUid && this.user.userId !== 'player_' + this.api.gameUid) {
                     this.user.userId = 'player_' + this.api.gameUid;
                 }
-                this.user.username = '';
-                this.user.usernameCn = '';
+                this.user.username = this.user.username || '神秘人';
+                this.user.usernameCn = this.user.usernameCn || '神秘人';
                 this.saveUser();
                 updatePlayerIdentityDisplay();
                 if (benefits.length === 0) {
@@ -1926,7 +1926,9 @@ class ItemManager {
         const serverSelect = document.getElementById('server-select');
         const sid = getServerId();
         if (playerNameEl) {
-            playerNameEl.textContent = this.user.username;
+            const lang = document.body.getAttribute('data-lang') || 'vi';
+            const fallback = lang === 'vi' ? 'Người Bí Ẩn' : '神秘人';
+            playerNameEl.textContent = this.user.username || this.user.usernameCn || fallback;
         }
         if (serverSelect) {
             serverSelect.value = sid;
@@ -1982,7 +1984,9 @@ function applyLangUI(lang) {
     const playerNameEl = document.getElementById('player-id-name');
     const manager = window.itemManager;
     if (playerNameEl && manager) {
-        playerNameEl.textContent = manager.user.username;
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        const fallback = lang === 'vi' ? 'Người Bí Ẩn' : '神秘人';
+        playerNameEl.textContent = manager.user.username || manager.user.usernameCn || fallback;
     }
 }
 
@@ -2189,9 +2193,12 @@ function updatePlayerIdentityDisplay() {
         const isLoggedIn = manager && manager.api && manager.api.isLoggedIn();
         if (isLoggedIn) {
             const gameUid = manager.api.gameUid || '';
+            const lang = document.body.getAttribute('data-lang') || 'vi';
+            const fallbackName = lang === 'vi' ? 'Người Bí Ẩn' : '神秘人';
+            const displayName = manager.user.username || manager.user.usernameCn || fallbackName;
             if (accountEl) accountEl.textContent = gameUid;
             if (nameEl) {
-                nameEl.textContent = '';
+                nameEl.textContent = displayName;
                 nameEl.style.color = '';
                 nameEl.style.fontSize = '';
             }
@@ -2211,7 +2218,9 @@ function updatePlayerIdentityDisplay() {
         const uid = manager.user.userId || '';
         if (accountEl) accountEl.textContent = uid.replace('player_', '');
         if (nameEl) {
-            nameEl.textContent = manager.user.username || 'Player';
+            const lang = document.body.getAttribute('data-lang') || 'vi';
+            const fallback = lang === 'vi' ? 'Người Bí Ẩn' : '神秘人';
+            nameEl.textContent = manager.user.username || manager.user.usernameCn || fallback;
             nameEl.style.color = '';
             nameEl.style.fontSize = '';
         }
