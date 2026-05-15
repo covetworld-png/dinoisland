@@ -1501,6 +1501,7 @@ class ItemManager {
                             const dinoStatus = document.getElementById('dino-status');
                             if (dinoChar) {
                                 dinoChar.classList.add('grown');
+                                setTimeout(() => dinoChar.classList.add('breathing'), 700);
                             }
                             if (dinoAura) dinoAura.classList.add('active');
                             if (dinoStatus) {
@@ -1603,6 +1604,7 @@ class ItemManager {
                         const dinoStatus = document.getElementById('dino-status');
                         if (dinoChar) {
                             dinoChar.classList.remove('grown');
+                            dinoChar.classList.remove('breathing');
                             dinoChar.style.transform = '';
                         }
                         if (dinoAura) dinoAura.classList.remove('active');
@@ -1822,6 +1824,7 @@ class ItemManager {
         } else {
             if (dinoChar) {
                 dinoChar.classList.remove('grown');
+                dinoChar.classList.remove('breathing');
                 dinoChar.style.transform = '';
             }
             if (dinoAura) dinoAura.classList.remove('active');
