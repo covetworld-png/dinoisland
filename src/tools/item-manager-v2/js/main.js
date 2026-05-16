@@ -2553,8 +2553,8 @@ const PURCHASE_CONFIG = {
         icon: './static/icons/flow.png',
         nameVi: 'Thẻ Dòng Chảy',
         nameCn: '时间流动卡',
-        descVi: 'Tăng tốc thời gian game, 1 giờ thực = 1 ngày game.',
-        descCn: '加速游戏时间流逝，现实1小时=游戏1整天。',
+        descVi: 'Làm thờigian đứng yên bắt đầu chảy, 1 giờ thực = 1 ngày/đêm game.',
+        descCn: '让静止的时间开始流动，现实1小时=游戏1个日夜。',
         inventoryKey: 'flow'
     },
     dinoGrow50: {
