@@ -195,190 +195,6 @@ const BOT_NAMES = [
     { vi: 'Người chơi 5528', cn: '玩家5528' },
 ];
 
-// Translations
-const I18N = {
-    vi: {
-        ready: 'Sẵn sàng',
-        inUse: 'Đang sử dụng',
-        busy: 'Đang bận',
-        conflictWeather: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Tiết, còn lại ${time}`,
-        conflictTime: (name, time) => `Người chơi ${name} đang sử dụng Thẻ Thời Gian, còn lại ${time}`,
-        conflictDinoSize: (name, time) => `Người chơi ${name} đang thay đổi kích thước, còn lại ${time}`,
-        conflictFlow: (name, time) => `Người chơi ${name} đang sử dụng Dòng Chảy Thờ Gian, còn lại ${time}`,
-        conflictFlowByTime: (time) => `Thẻ Thờ Gian đang sử dụng (${time}), không thể khởi động dòng chảy`,
-        conflictTimeByFlow: (time) => `Dòng Chảy Thờ Gian đang chạy (${time}), không thể sử dụng thẻ thờ gian`,
-        noItem: 'Không đủ đạo cụ',
-        loginExpired: 'Đăng nhập đã hết hạn, vui lòng đăng nhập lại',
-        apiSyncFailed: 'Đồng bộ API thất bại: ',
-        submittedWaiting: 'Đã gửi, đang chờ hiệu lực...',
-        inventoryEmpty: 'Tài khoản hiện tại không có đạo cụ, vui lòng sử dụng simAddBenefit để bổ sung',
-        inventoryReset: 'Đạo cụ đã được đặt lại!',
-        switchedToApi: 'Đã chuyển sang chế độ API thực',
-        switchedToMock: 'Đã chuyển sang chế độ mô phỏng',
-        dataRefreshed: 'Dữ liệu đã được làm mới',
-        getRecordsFailed: 'Lấy bản ghi thất bại: ',
-        unknownError: 'Lỗi không xác định',
-        noRecordsToClear: 'Không có bản ghi đang thực hiện cần xóa',
-        clearComplete: 'Xóa hoàn tất: thành công ',
-        clearFailSuffix: '，thất bại ',
-        loggedOut: 'Đã đăng xuất',
-        supplemented: 'Đã bổ sung ',
-        supplementedSuffix: ' loại đạo cụ',
-        supplementFailed: ' bổ sung thất bại code=',
-        invalidWeather: 'Lựa chọn thờ tiết không hợp lệ',
-        invalidTime: 'Lựa chọn thờ gian không hợp lệ',
-        confirmStopFlow: 'Bạn có chắc muốn dừng dòng chảy? Thẻ sẽ bị tiêu hao và không hoàn lại.',
-        enterContentPlaceholder: 'Nhập nội dung...',
-        loginExpiredOrNoAuth: 'Phiên đăng nhập của bạn đã hết hạn hoặc không có quyền truy cập, vui lòng đăng nhập lại',
-        paySuccess: 'Thanh toán thành công! Đã mua ',
-        apiConnected: '✓ API đã kết nối',
-        mockModeActive: '🧪 Chế độ mô phỏng',
-        sizeIncrease50: 'Tăng 50%',
-        sizeIncrease50Title: 'Tăng kích thước 50%',
-        activeStatus: 'Đang hiệu lực ',
-        flowCardTitle: 'Dòng chảy thờ gian',
-        apiNotLoggedIn: 'API chưa đăng nhập, hiển thị trống',
-        sentStatus: 'Đã gửi',
-        defaultUsername: 'Ngườ bí ẩn',
-        langToggleVi: I18N[lang].langToggleVi,
-        langToggleCn: I18N[lang].langToggleCn,
-        appTitle: 'Trung Tâm Thần Tích',
-        apiModeLabel: 'API: Sử dụng interface server thực',
-        mockModeLabel: 'Mô phỏng: Hiệu lực lần sử dụng đạo cụ tiếp theo',
-        connectingServer: 'Đang kết nối server...',
-        serverErrorConflict: 'Server: Có người chơi khác đang sử dụng đạo cụ này, vui lòng thử lại sau',
-        serverErrorNoItem: 'Server: Không đủ đạo cụ',
-        serverErrorSystem: () => `Lỗi hệ thống, vui lòng liên hệ quản trị viên`,
-        selectOption: 'Vui lòng chọn một tùy chọn',
-        useSuccess: (type) => `Sử dụng ${type} thành công!`,
-        useFailed: 'Sử dụng thất bại, vui lòng thử lại',
-        submitSuccess: 'Gửi thông báo thành công, đang chờ duyệt',
-        enterContent: 'Vui lòng nhập nội dung thông báo',
-        contentTooShort: 'Nội dung quá ngắn, tối thiểu 2 ký tự',
-        contentTooLong: 'Nội dung quá dài, tối đa 100 ký tự',
-        timeUp: 'Hết thời gian, đã tự động kết thúc',
-        approved: 'Thông báo đã đườc duyệt',
-        clickToSend: 'Đã duyệt, nhấn để gửi',
-        sendAnnouncement: 'Gửi thông báo',
-        sent: 'Thông báo đã đườc gửi toàn server',
-        history: {
-            weather: 'Thẻ Thời Tiết',
-            time: 'Thẻ Thời Gian',
-            announcement: 'Thông báo',
-            dinoGrow50: 'Thay đổi kích thước khủng long'
-        },
-        status: {
-            pending_review: 'Chờ duyệt',
-            approved: 'Đã duyệt',
-            queued: 'Chờ gửi',
-            sent: 'Đã gửi',
-            active: 'Đang hoạt động',
-            completed: 'Hoàn thành'
-        },
-        weatherNames: {
-            sunshine: 'Nắng',
-            cloudy_fog: 'Âm u có sương',
-            light_rain: 'Mưa nhỏ',
-            snowfall: 'Tuyết',
-            thunderstorm: 'Mưa bão',
-            heavy_rain: 'Mưa lớn',
-            blizzard: 'Sương mù',
-            sandstorm: 'Bão cát',
-            aurora: 'Nửa mây',
-            meteor_shower: 'Mưa + Nắng'
-        },
-        timeNames: {
-            dawn: 'Bình minh',
-            day: 'Ban ngày',
-            dusk: 'Hoàng hôn',
-            night: 'Đêm khuya'
-        }
-    },
-    cn: {
-        ready: '就绪',
-        inUse: '使用中',
-        busy: '占用中',
-        conflictWeather: (name, time) => `玩家 ${name} 正在使用天气卡，剩余 ${time}`,
-        conflictTime: (name, time) => `玩家 ${name} 正在使用时间卡，剩余 ${time}`,
-        conflictFlow: (name, time) => `玩家 ${name} 正在使用时间流动卡，剩余 ${time}`,
-        conflictFlowByTime: (time) => `时间卡正在使用中 (${time})，无法启动时间流动`,
-        conflictTimeByFlow: (time) => `时间流动正在运行中 (${time})，无法使用时间卡`,
-        conflictDinoSize: (name, time) => `玩家 ${name} 正在改变体型，剩余 ${time}`,
-        noItem: '道具不足',
-        loginExpired: '登录已过期，请重新登录',
-        apiSyncFailed: 'API 同步失败: ',
-        submittedWaiting: '已提交，等待生效中...',
-        inventoryEmpty: '当前账号库存为空，请使用 simAddBenefit 补充',
-        inventoryReset: '道具已重置！',
-        switchedToApi: '已切换到真实API模式',
-        switchedToMock: '已切换到模拟模式',
-        dataRefreshed: '数据已刷新',
-        getRecordsFailed: '获取记录失败: ',
-        unknownError: I18N[lang].unknownError,
-        noRecordsToClear: I18N[lang].noRecordsToClear,
-        clearComplete: I18N[lang].clearComplete,
-        clearFailSuffix: I18N[lang].clearFailSuffix,
-        loggedOut: I18N[lang].loggedOut,
-        supplemented: I18N[lang].supplemented,
-        supplementedSuffix: I18N[lang].supplementedSuffix,
-        supplementFailed: I18N[lang].supplementFailed,
-        invalidWeather: I18N[lang].invalidWeather,
-        invalidTime: I18N[lang].invalidTime,
-        confirmStopFlow: I18N[lang].confirmStopFlow,
-        enterContentPlaceholder: I18N[lang].enterContentPlaceholder,
-        loginExpiredOrNoAuth: I18N[lang].loginExpiredOrNoAuth,
-        paySuccess: I18N[lang].paySuccess,
-        connectingServer: '正在连接服务端...',
-        serverErrorConflict: '服务端返回：有其他玩家正在使用该道具，请稍后再试',
-        serverErrorNoItem: '服务端返回：道具数量不足',
-        serverErrorSystem: () => `系统错误，请联系管理员`,
-        selectOption: '请选择一个选项',
-        useSuccess: (type) => `${type} 使用成功！`,
-        useFailed: '使用失败，请重试',
-        submitSuccess: '公告提交成功，等待审核',
-        enterContent: '请输入公告内容',
-        contentTooShort: '内容过短，至少输入 2 个字符',
-        contentTooLong: '内容过长，最多 100 个字符',
-        timeUp: '时间结束，已自动重置',
-        approved: '公告已通过审核',
-        clickToSend: '审核已通过，点击发送',
-        sendAnnouncement: '发送公告',
-        sent: '公告已发送至全服',
-        history: {
-            weather: '天气卡',
-            time: '时间卡',
-            announcement: '全服公告',
-            flow: '时间流动卡',
-            dinoGrow50: '恐龙体型变化'
-        },
-        status: {
-            pending_review: '待审核',
-            approved: '已通过',
-            queued: '待发送',
-            sent: I18N[lang].sentStatus,
-            active: '进行中',
-            completed: '已完成'
-        },
-        weatherNames: {
-            sunshine: '阳光',
-            cloudy_fog: '阴天起雾',
-            light_rain: '小雨',
-            snowfall: '下雪',
-            thunderstorm: '暴雨',
-            heavy_rain: '大雨',
-            blizzard: '雾',
-            sandstorm: '沙尘',
-            aurora: '半云',
-            meteor_shower: '雨_阳光'
-        },
-        timeNames: {
-            dawn: '清晨',
-            day: '白天',
-            dusk: '黄昏',
-            night: '深夜'
-        }
-    }
-};
 
 // Utility
 function generateId() {
@@ -446,17 +262,20 @@ class ItemManager {
             userId: 'player_13225799',
             username: nick.vi,
             usernameCn: nick.cn,
-            inventory: {
-                weatherCard: 3,
-                timeCard: 3,
-                announcementCard: 3,
-                flowCard: 3,
-                dinoGrow50: 3
-            },
-            inventoryVisibility: {
-                weather: true, time: true, announcement: true,
-                flow: true, dinoGrow50: true
-            }
+            inventory: (() => {
+                const inv = {};
+                Object.keys(ITEM_CONFIG).forEach(type => {
+                    inv[ITEM_CONFIG[type].inventoryKey] = 3;
+                });
+                return inv;
+            })(),
+            inventoryVisibility: (() => {
+                const vis = {};
+                Object.keys(ITEM_CONFIG).forEach(type => {
+                    vis[type] = true;
+                });
+                return vis;
+            })()
         };
         localStorage.setItem(lsKeyUser(), JSON.stringify(user));
         return user;
@@ -492,10 +311,13 @@ class ItemManager {
         if (APP_MODE.isApi()) {
             if (!this.api.isLoggedIn()) {
                 // 未登录：清空状态，渲染空面板
-                this.user.inventory = {
-                    weatherCard: 0, timeCard: 0, announcementCard: 0,
-                    flowCard: 0, dinoGrow50: 0
-                };
+                this.user.inventory = (() => {
+                    const inv = {};
+                    Object.keys(ITEM_CONFIG).forEach(type => {
+                        inv[ITEM_CONFIG[type].inventoryKey] = 0;
+                    });
+                    return inv;
+                })();
                 this.state.globalLocks = { weather: null, time: null, flow: null, dinoSize: null };
                 this.saveUser();
                 this.saveState();
@@ -567,6 +389,7 @@ class ItemManager {
     }
 
     async syncFromApi() {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
         try {
             // 先清除所有非乐观锁（避免模拟模式旧数据残留）
             Object.keys(this.state.globalLocks).forEach(key => {
@@ -641,6 +464,7 @@ class ItemManager {
     }
 
     updateAuthUI() {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
         const panel = document.getElementById('auth-panel-inline');
         const status = document.getElementById('auth-status');
         const logoutBtn = document.getElementById('auth-logout');
@@ -875,7 +699,7 @@ class ItemManager {
                     userId: this.user.userId,
                     username: this.user.username,
                     usernameCn: this.user.usernameCn,
-                    detail: t.weatherNames[selected] || selected,
+                    detail: selected,
                     startTime: now,
                     endTime: now + DURATION_WEATHER,
                     status: 'active'
@@ -1344,7 +1168,7 @@ class ItemManager {
         this.startCountdowns();
     }
 
-    stopFlowCard() {
+    async stopFlowCard() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
         const lock = this.state.globalLocks.flow;
@@ -1358,6 +1182,21 @@ class ItemManager {
             ? 'Bạn có chắc muốn dừng dòng chảy thờ gian? Thẻ sẽ bị tiêu hao và không hoàn lại.'
             : I18N[lang].confirmStopFlow;
         if (!confirm(confirmMsg)) return;
+
+        // API模式：调用 skill_id=3, time_hm=1200 停止时间流动
+        if (APP_MODE.isApi()) {
+            const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
+            try {
+                const res = await this.api.apply(3, serverId, { time_hm: 1200 });
+                if (res.code !== 0) {
+                    showToast((res.message || t.useFailed), 'error');
+                    return;
+                }
+            } catch (e) {
+                showToast(t.useFailed, 'error');
+                return;
+            }
+        }
 
         // Clear lock
         this.state.globalLocks.flow = null;
@@ -1466,11 +1305,10 @@ class ItemManager {
 
     resetInventory() {
         this.user.inventory = {
-            weatherCard: 3,
-            timeCard: 3,
-            announcementCard: 3,
-            flowCard: 3,
-            dinoGrow50: 3
+            ...(Object.keys(ITEM_CONFIG).reduce((acc, type) => {
+                acc[ITEM_CONFIG[type].inventoryKey] = 3;
+                return acc;
+            }, {}))
         };
         this.saveUser();
         this.renderInventory();
@@ -1544,7 +1382,7 @@ class ItemManager {
                             const useBtn = document.getElementById('btn-use-flow');
                             const display = document.getElementById('flow-sky');
                             if (timeDisplay) timeDisplay.textContent = timeStr;
-                            if (stopBtn) stopBtn.style.display = (isMine && !lock.optimistic) ? 'block' : 'none';
+                            if (stopBtn) stopBtn.style.display = isMine ? 'block' : 'none';
                             if (useBtn) useBtn.style.display = 'none';
                             if (display) display.classList.add('active');
                             updateSky(hh, mm, 'flow-sky');
@@ -1734,13 +1572,12 @@ class ItemManager {
         const visibility = this.user.inventoryVisibility || {};
         console.log('[renderInventory]', isApiNotLoggedIn ? I18N[lang].apiNotLoggedIn : inv);
 
-        const invMap = [
-            { type: 'weather', key: 'weatherCard', cfg: 'weather' },
-            { type: 'time', key: 'timeCard', cfg: 'time' },
-            { type: 'announcement', key: 'announcementCard', cfg: 'announcement' },
-            { type: 'flow', key: 'flowCard', cfg: 'flow' },
-            { type: 'dino-grow', key: 'dinoGrow50', cfg: 'dinoGrow50' }
-        ];
+        // 根据 ITEM_CONFIG 动态生成库存映射
+        const invMap = Object.keys(ITEM_CONFIG).map(type => ({
+            type: ITEM_CONFIG[type].tabId,
+            key: ITEM_CONFIG[type].inventoryKey,
+            cfg: type
+        }));
         invMap.forEach(({ type, key, cfg }) => {
             const card = document.getElementById(`inv-${type}`);
             const count = isApiNotLoggedIn ? 0 : (this.user.inventory[key] || 0);
@@ -1769,10 +1606,11 @@ class ItemManager {
 
     toggleInvVisibility(itemKey, visible) {
         if (!this.user.inventoryVisibility) {
-            this.user.inventoryVisibility = {
-                weather: true, time: true, announcement: true,
-                flow: true, dinoGrow50: true
-            };
+            // 根据 ITEM_CONFIG 动态初始化可见性
+            this.user.inventoryVisibility = {};
+            Object.keys(ITEM_CONFIG).forEach(type => {
+                this.user.inventoryVisibility[type] = true;
+            });
         }
         this.user.inventoryVisibility[itemKey] = visible;
         this.saveUser();
@@ -2007,12 +1845,34 @@ class ItemManager {
             const timeStr = formatDateTime(item.startTime);
             const statusLabel = t.status[item.status] || item.status;
             const statusClass = item.status === 'active' ? 'pending' : item.status === 'completed' ? 'success' : 'info';
+            // 根据类型生成更易读的 detail 描述
+            let detailText = escapeHtml(item.detail);
+            if (item.type === 'flow') {
+                detailText = lang === 'vi' ? '1 giờ thực = 1 ngày game' : '现实1小时 = 游戏1天';
+            } else if (item.type === 'time' && /^\d{3,4}$/.test(item.detail)) {
+                const hm = parseInt(item.detail, 10);
+                const hh = Math.floor(hm / 100);
+                const mm = Math.round((hm % 100) * 0.6);
+                detailText = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+            } else if (item.type === 'dinoSize' || item.type === 'dinoGrow50') {
+                detailText = lang === 'vi' ? 'Tăng kích thước 50%' : '体型增大50%';
+            } else if (item.type === 'weather') {
+                const key = item.detail;
+                if (I18N[lang].weatherNames[key]) {
+                    detailText = I18N[lang].weatherNames[key];
+                } else {
+                    // 旧记录存储的是名称，反向查找 key
+                    const foundKey = Object.keys(I18N.vi.weatherNames).find(k => I18N.vi.weatherNames[k] === key)
+                        || Object.keys(I18N.cn.weatherNames).find(k => I18N.cn.weatherNames[k] === key);
+                    detailText = foundKey ? I18N[lang].weatherNames[foundKey] : escapeHtml(key);
+                }
+            }
 
             return `
                 <div class="history-item ${item.type}">
                     <span class="history-icon">${icon}</span>
                     <div class="history-info">
-                        <span class="history-title">${title} — ${escapeHtml(item.detail)}</span>
+                        <span class="history-title">${title} — ${detailText}</span>
                     </div>
                     <span class="history-time">${timeStr}</span>
                     <span class="history-status status-badge ${statusClass}">${statusLabel}</span>
@@ -2123,7 +1983,7 @@ class ItemManager {
 const PURCHASE_CONFIG = {
     weather: {
         price: 130000,
-        icon: '../static/icons/weather.png',
+        icon: './static/icons/weather.png',
         nameVi: 'Thẻ Thời Tiết',
         nameCn: '天气卡',
         descVi: 'Thay đổi thời tiết trong game trong 10 phút.',
@@ -2132,7 +1992,7 @@ const PURCHASE_CONFIG = {
     },
     time: {
         price: 130000,
-        icon: '../static/icons/time.png',
+        icon: './static/icons/time.png',
         nameVi: 'Thẻ Thời Gian',
         nameCn: '时间卡',
         descVi: 'Đặt thời gian game theo ý muốn, hiệu lực 10 phút.',
@@ -2141,7 +2001,7 @@ const PURCHASE_CONFIG = {
     },
     announcement: {
         price: 130000,
-        icon: '../static/icons/announcement.png',
+        icon: './static/icons/announcement.png',
         nameVi: 'Thẻ Thông Báo',
         nameCn: '公告卡',
         descVi: 'Gửi thông báo toàn server, cần qua kiểm duyệt.',
@@ -2150,7 +2010,7 @@ const PURCHASE_CONFIG = {
     },
     flow: {
         price: 250000,
-        icon: '../static/icons/flow.png',
+        icon: './static/icons/flow.png',
         nameVi: 'Thẻ Dòng Chảy',
         nameCn: '时间流动卡',
         descVi: 'Tăng tốc thời gian game, 1 giờ thực = 1 ngày game.',
@@ -2159,7 +2019,7 @@ const PURCHASE_CONFIG = {
     },
     dinoGrow50: {
         price: 100000,
-        icon: '../static/icons/dino.png',
+        icon: './static/icons/dino.png',
         nameVi: 'Thẻ Tăng Kích Thước',
         nameCn: '体型变大卡',
         descVi: 'Tăng kích thước khủng long 50%.',
@@ -2212,8 +2072,6 @@ function showToast(message, type = 'info') {
 // Language Toggle
 function applyLangUI(lang) {
     document.body.setAttribute('data-lang', lang);
-    document.getElementById('current-lang').textContent = lang === 'vi' ? I18N[lang].langToggleVi : I18N[lang].langToggleCn;
-
     // Update title
     document.title = lang === 'vi' ? 'Trung Tâm Thần Tích' : I18N[lang].appTitle;
 
@@ -2344,6 +2202,7 @@ function toggleDebugPanel() {
 }
 
 function setupDebugMock() {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
     const radios = document.querySelectorAll('input[name="mock-error"]');
     radios.forEach(radio => {
         radio.addEventListener('change', () => {
@@ -2472,12 +2331,14 @@ function updatePlayerIdentityDisplay() {
 }
 
 function switchMode(mode) {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
     APP_MODE.mode = mode;
     showToast(mode === 'api' ? I18N[lang].switchedToApi : I18N[lang].switchedToMock, 'info');
     setTimeout(() => location.reload(), 800);
 }
 
 async function refreshApiData() {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
     if (!APP_MODE.isApi() || !window.itemManager) return;
     const ok = await window.itemManager.syncFromApi();
     if (ok) {
@@ -2490,6 +2351,7 @@ async function refreshApiData() {
 }
 
 async function forceClearRecords() {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
     if (!APP_MODE.isApi() || !window.itemManager) return;
     const api = window.itemManager.api;
     const res = await api.getRecords();
@@ -2541,8 +2403,10 @@ function doApiLogout() {
         window.itemManager.api.logout();
         // 清空本地状态，确保面板显示为空
         window.itemManager.user.inventory = {
-            weatherCard: 0, timeCard: 0, announcementCard: 0,
-            flowCard: 0, dinoGrow50: 0
+            ...(Object.keys(ITEM_CONFIG).reduce((acc, type) => {
+                acc[ITEM_CONFIG[type].inventoryKey] = 0;
+                return acc;
+            }, {}))
         };
         window.itemManager.state.globalLocks = { weather: null, time: null, flow: null, dinoSize: null };
         window.itemManager.saveUser();

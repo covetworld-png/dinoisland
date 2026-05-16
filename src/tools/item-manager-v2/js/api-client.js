@@ -1,4 +1,82 @@
 // DURATION_* 由 main.js 定义，此处不重复声明
+// ============================================
+// 道具配置表（ITEM_CONFIG）— 新增道具仅需在此添加一行配置
+// ============================================
+const ITEM_CONFIG = {
+    weather: {
+        skillId: 2,
+        inventoryKey: 'weatherCard',
+        lockKey: 'weather',
+        duration: DURATION_WEATHER,
+        hasCountdown: true,
+        hasOptions: true,
+        mutuallyExclusive: [],
+        historyKey: 'weather',
+        icon: '🌦️',
+        tabId: 'weather',
+    },
+    time: {
+        skillId: 5,
+        inventoryKey: 'timeCard',
+        lockKey: 'time',
+        duration: DURATION_TIME,
+        hasCountdown: true,
+        hasOptions: true,
+        mutuallyExclusive: ['flow'],
+        historyKey: 'time',
+        icon: '🕐',
+        tabId: 'time',
+    },
+    announcement: {
+        skillId: 4,
+        inventoryKey: 'announcementCard',
+        lockKey: null,
+        duration: 0,
+        hasCountdown: false,
+        hasOptions: false,
+        mutuallyExclusive: [],
+        historyKey: 'announcement',
+        icon: '📢',
+        tabId: 'announcement',
+    },
+    flow: {
+        skillId: 3,
+        inventoryKey: 'flowCard',
+        lockKey: 'flow',
+        duration: DURATION_FLOW,
+        hasCountdown: true,
+        hasOptions: false,
+        hasStopButton: true,
+        mutuallyExclusive: ['time'],
+        historyKey: 'flow',
+        icon: '⏳',
+        tabId: 'flow',
+        stopParams: { time_hm: 1200 },
+    },
+    dinoGrow50: {
+        skillId: 1,
+        inventoryKey: 'dinoGrow50',
+        lockKey: 'dinoSize',
+        duration: DURATION_DINO,
+        hasCountdown: true,
+        hasOptions: false,
+        mutuallyExclusive: [],
+        historyKey: 'dinoGrow50',
+        icon: '🦖',
+        tabId: 'dino-grow',
+    },
+};
+
+// 辅助：根据 skillId 查找道具类型
+const SKILL_ID_TO_TYPE = {};
+Object.keys(ITEM_CONFIG).forEach(type => {
+    const cfg = ITEM_CONFIG[type];
+    if (cfg.skillId != null) {
+        SKILL_ID_TO_TYPE[cfg.skillId] = type;
+    }
+});
+
+
 const API_CONFIG = {
     baseUrl: 'https://monsteraccounttest.yuemei.info/activity/gmSkill',
     loginUrl: 'https://monsteraccounttest.yuemei.info/api/login'
@@ -176,7 +254,7 @@ class ApiClient {
 }
 
 const APP_MODE = {
-    get mode() { return localStorage.getItem('itemManager_app_mode') || 'mock'; },
+    get mode() { return localStorage.getItem('itemManager_app_mode') || 'api'; },
     set mode(v) { localStorage.setItem('itemManager_app_mode', v); },
     isMock() { return this.mode === 'mock'; },
     isApi() { return this.mode === 'api'; },
@@ -187,20 +265,18 @@ const APP_MODE = {
 };
 
 function mapApiBenefitsToInventory(benefits) {
-    const inv = {
-        weatherCard: 0, timeCard: 0, announcementCard: 0,
-        flowCard: 0, dinoGrow50: 0
-    };
+    // 根据 ITEM_CONFIG 动态初始化库存对象
+    const inv = {};
+    Object.keys(ITEM_CONFIG).forEach(type => {
+        inv[ITEM_CONFIG[type].inventoryKey] = 0;
+    });
     if (!Array.isArray(benefits)) return inv;
     benefits.forEach(function(b) {
         const sid = parseInt(b.skill_id, 10);
         const left = parseInt(b.left_times, 10) || 0;
-        if (sid === 2) inv.weatherCard += left;
-        else if (sid === 3) inv.flowCard += left;
-        else if (sid === 5) inv.timeCard += left;
-        else if (sid === 4) inv.announcementCard += left;
-        else if (sid === 1) {
-            inv.dinoGrow50 += left;
+        const type = SKILL_ID_TO_TYPE[sid];
+        if (type && ITEM_CONFIG[type]) {
+            inv[ITEM_CONFIG[type].inventoryKey] += left;
         }
     });
     console.log('[mapApiBenefitsToInventory] mapped:', inv);
@@ -208,23 +284,29 @@ function mapApiBenefitsToInventory(benefits) {
 }
 
 function mapApiRecordsToLocks(records, userId) {
-    const locks = { weather: null, time: null, flow: null, dinoSize: null };
+    // 根据 ITEM_CONFIG 动态初始化 locks 对象
+    const locks = {};
+    Object.keys(ITEM_CONFIG).forEach(type => {
+        const lockKey = ITEM_CONFIG[type].lockKey;
+        if (lockKey) locks[lockKey] = null;
+    });
     if (!Array.isArray(records)) return locks;
     records.forEach(function(r) {
         // 兼容 status: 'doing' | 1 | '1'
         const status = String(r.status || '');
         if (status !== 'doing' && status !== '1') return;
         const sid = parseInt(r.skill_id, 10);
+        const type = SKILL_ID_TO_TYPE[sid];
+        if (!type || !ITEM_CONFIG[type]) return;
+        const cfg = ITEM_CONFIG[type];
         const start = r.start_time ? new Date(r.start_time.replace(' ', 'T')).getTime() : Date.now();
-        // 根据 skill_id 设置正确的默认过期时间
-        let defaultDuration = 5 * 60 * 1000;
-        if (sid === 2) defaultDuration = DURATION_WEATHER;      // 天气卡 10分钟
-        else if (sid === 3) {
-            // time_hm > 0 是时间卡(10分钟)，time_hm = 0 是流动(60分钟)
+        // 计算默认过期时间
+        let defaultDuration = cfg.duration || (5 * 60 * 1000);
+        // flow 特殊处理：time_hm > 0 是时间卡，time_hm = 0 是流动
+        if (type === 'flow') {
             const timeHm = parseInt(r.time_hm, 10);
             defaultDuration = (timeHm > 0) ? DURATION_TIME : DURATION_FLOW;
         }
-        else if (sid === 1) defaultDuration = 60 * 1000;         // 体型变化60秒防连点
         const end = r.end_time ? new Date(r.end_time.replace(' ', 'T')).getTime() : (start + defaultDuration);
         const recordUserId = r.user_id || r.game_uid || userId;
         const isMine = String(recordUserId) === String(userId);
@@ -237,12 +319,16 @@ function mapApiRecordsToLocks(records, userId) {
             detail: r.weather_id || r.time_hm || '',
             detailName: r.content || ''
         };
-        if (sid === 2) locks.weather = base;
-        else if (sid === 3) {
-            if (r.time_hm && parseInt(r.time_hm, 10) > 0) locks.time = base;
-            else locks.flow = base;
+        // 体型变化特殊：无固定过期时间
+        if (type === 'dinoGrow50') {
+            locks[cfg.lockKey] = Object.assign({}, base, { endTime: Infinity, sizeType: 'grow50' });
+        } else if (type === 'flow') {
+            const timeHm = parseInt(r.time_hm, 10);
+            if (timeHm > 0) locks.time = base;  // time_hm > 0 表示时间卡
+            else locks[cfg.lockKey] = base;
+        } else if (cfg.lockKey) {
+            locks[cfg.lockKey] = base;
         }
-        else if (sid === 1) locks.dinoSize = Object.assign({}, base, { endTime: Infinity, sizeType: 'grow50' });
     });
     return locks;
 }

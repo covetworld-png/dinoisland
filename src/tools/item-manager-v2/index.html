@@ -18,8 +18,8 @@
       <div class="row" style="gap: 12px; align-items: center;">
         <!-- Mode Switch -->
         <select class="server-select" id="mode-select" onchange="switchMode(this.value)" style="font-size:0.72rem;padding:6px 10px;">
+          <option value="api" selected>🔌 <span class="lang-vi">API thực</span><span class="lang-cn">真实API</span></option>
           <option value="mock">🧪 <span class="lang-vi">Mô phỏng</span><span class="lang-cn">模拟模式</span></option>
-          <option value="api">🔌 <span class="lang-vi">API thực</span><span class="lang-cn">真实API</span></option>
         </select>
         <!-- Auth Panel -->
         <div id="auth-panel-inline" class="row" style="gap:6px;">
@@ -82,7 +82,7 @@
             <input type="checkbox" id="toggle-weather" checked onchange="toggleInvVisibility('weather', this.checked)">
             <span class="toggle-slider"></span>
             <span class="toggle-label">
-              <span class="lang-vi">Thờ Tiết</span>
+              <span class="lang-vi">Thời Tiết</span>
               <span class="lang-cn">天气</span>
             </span>
           </label>
@@ -90,7 +90,7 @@
             <input type="checkbox" id="toggle-time" checked onchange="toggleInvVisibility('time', this.checked)">
             <span class="toggle-slider"></span>
             <span class="toggle-label">
-              <span class="lang-vi">Thờ Gian</span>
+              <span class="lang-vi">Thời Gian</span>
               <span class="lang-cn">时间</span>
             </span>
           </label>
@@ -177,7 +177,7 @@
               <span class="lang-vi">Thời Tiết</span>
               <span class="lang-cn">天气卡</span>
             </div>
-            <div class="cell-icon"><img src="../static/icons/weather.png" alt="天气"></div>
+            <div class="cell-icon"><img src="./static/icons/weather.png" alt="天气"></div>
             <div class="cell-count" id="count-weather">×0</div>
             <button class="btn-slot-buy" id="btn-slot-buy-weather" onclick="openPurchaseModal('weather')">130K VND</button>
             <button class="btn-slot-use" id="btn-slot-weather" onclick="quickUseWeather()">
@@ -190,7 +190,7 @@
               <span class="lang-vi">Thời Gian</span>
               <span class="lang-cn">时间卡</span>
             </div>
-            <div class="cell-icon"><img src="../static/icons/time.png" alt="时间"></div>
+            <div class="cell-icon"><img src="./static/icons/time.png" alt="时间"></div>
             <div class="cell-count" id="count-time">×0</div>
             <button class="btn-slot-buy" id="btn-slot-buy-time" onclick="openPurchaseModal('time')">130K VND</button>
             <button class="btn-slot-use" id="btn-slot-time" onclick="quickUseTime()">
@@ -203,7 +203,7 @@
               <span class="lang-vi">Thông Báo</span>
               <span class="lang-cn">公告卡</span>
             </div>
-            <div class="cell-icon"><img src="../static/icons/announcement.png" alt="公告"></div>
+            <div class="cell-icon"><img src="./static/icons/announcement.png" alt="公告"></div>
             <div class="cell-count" id="count-announcement">×0</div>
             <button class="btn-slot-buy" id="btn-slot-buy-announcement" onclick="openPurchaseModal('announcement')">130K VND</button>
             <button class="btn-slot-use" id="btn-slot-announcement" onclick="quickUseAnnouncement()">
@@ -216,7 +216,7 @@
               <span class="lang-vi">Dòng Chảy TG</span>
               <span class="lang-cn">时间流动</span>
             </div>
-            <div class="cell-icon"><img src="../static/icons/flow.png" alt="流动"></div>
+            <div class="cell-icon"><img src="./static/icons/flow.png" alt="流动"></div>
             <div class="cell-count" id="count-flow">×0</div>
             <button class="btn-slot-buy" id="btn-slot-buy-flow" onclick="openPurchaseModal('flow')">250K VND</button>
             <button class="btn-slot-use" id="btn-slot-flow" onclick="quickUseFlow()">
@@ -229,7 +229,7 @@
               <span class="lang-vi">Tăng Kích Thước</span>
               <span class="lang-cn">变大卡</span>
             </div>
-            <div class="cell-icon"><img src="../static/icons/dino.png" alt="恐龙"></div>
+            <div class="cell-icon"><img src="./static/icons/dino.png" alt="恐龙"></div>
             <div class="cell-count" id="count-dino-grow">×0</div>
             <button class="btn-slot-buy" id="btn-slot-buy-dino-grow" onclick="openPurchaseModal('dinoGrow50')">100K VND</button>
             <button class="btn-slot-use" id="btn-slot-dino-grow" onclick="quickUseDinoGrow()">
@@ -304,11 +304,11 @@
               </strong>
               <ul>
                 <li>
-                  <span class="lang-vi">Chọn loại thờ tiết mong muốn, sau đó nhấn nút sử dụng.</span>
+                  <span class="lang-vi">Chọn loại thời tiết mong muốn, sau đó nhấn nút sử dụng.</span>
                   <span class="lang-cn">选择想要的天气类型，然后点击使用按钮。</span>
                 </li>
                 <li>
-                  <span class="lang-vi">Thẻ có hiệu lực <strong>10 phút</strong>, trong thờ gian này ngườ chơi khác không thể sử dụng, khi hết hạn sẽ tự động khôi phục trạng thái ban đầu.</span>
+                  <span class="lang-vi">Thẻ có hiệu lực <strong>10 phút</strong>, trong thời gian này người chơi khác không thể sử dụng, khi hết hạn sẽ tự động khôi phục trạng thái ban đầu.</span>
                   <span class="lang-cn">卡片有效期<strong>10分钟</strong>，在此期间其他玩家无法使用，有效期结束后将自动恢复初始状态。</span>
                 </li>
               </ul>
@@ -385,11 +385,11 @@
               </strong>
               <ul>
                 <li>
-                  <span class="lang-vi">Kéo chọn thờ gian mong muốn hoặc chọn một preset.</span>
+                  <span class="lang-vi">Kéo chọn thời gian mong muốn hoặc chọn một preset.</span>
                   <span class="lang-cn">拖动选择指定的时间或者选择一个预设。</span>
                 </li>
                 <li>
-                  <span class="lang-vi">Thẻ có hiệu lực <strong>10 phút</strong>, trong thờ gian này ngườ chơi khác không thể sử dụng, khi hết hạn sẽ tự động khôi phục trạng thái ban đầu.</span>
+                  <span class="lang-vi">Thẻ có hiệu lực <strong>10 phút</strong>, trong thời gian này người chơi khác không thể sử dụng, khi hết hạn sẽ tự động khôi phục trạng thái ban đầu.</span>
                   <span class="lang-cn">卡片有效期<strong>10分钟</strong>，在此期间其他玩家无法使用，有效期结束后将自动恢复初始状态。</span>
                 </li>
               </ul>
@@ -515,11 +515,11 @@
                   <span class="lang-cn">游戏时间加速流逝：<strong>现实 1 小时 = 游戏 1 整天</strong>（从正午 <strong>12:00</strong> 开始，60 分钟走完 24 小时）。</span>
                 </li>
                 <li>
-                  <span class="lang-vi">Trong thờ gian dòng chảy, bạn có thể nhấn <strong>Dừng</strong> để kết thúc sớm. Thẻ sẽ bị tiêu hao, không hoàn lại.</span>
+                  <span class="lang-vi">Trong thời gian dòng chảy, bạn có thể nhấn <strong>Dừng</strong> để kết thúc sớm. Thẻ sẽ bị tiêu hao, không hoàn lại.</span>
                   <span class="lang-cn">流动期间可随时点击<strong>停止</strong>提前结束。卡片消耗后不予返还。</span>
                 </li>
                 <li>
-                  <span class="lang-vi">Thẻ có hiệu lực <strong>60 phút</strong>, trong thờ gian này ngườ chơi khác không thể sử dụng.</span>
+                  <span class="lang-vi">Thẻ có hiệu lực <strong>60 phút</strong>, trong thời gian này người chơi khác không thể sử dụng.</span>
                   <span class="lang-cn">卡片有效期<strong>60分钟</strong>，在此期间其他玩家无法使用。</span>
                 </li>
               </ul>
@@ -645,7 +645,7 @@
   <footer class="pagefoot" data-od-id="footer">
     <div class="container row-between">
       <span>
-        <span class="lang-vi">Trung Tâm Thần Tích | Khủng Long Đảo</span>
+        <span class="lang-vi">Trung Tâm Thần Tích | Đảo Khủng Long</span>
         <span class="lang-cn">神迹中心 | 恐龙岛</span>
       </span>
       <span class="meta">2026</span>
@@ -711,7 +711,8 @@
     </div>
   </div>
 
-  <script src="js/api-client.js?v=79"></script>
+  <script src="js/api-client.js?v=80"></script>
+  <script src="js/i18n.js?v=1"></script>
   <script src="js/main.js?v=91"></script>
 </body>
 </html>
