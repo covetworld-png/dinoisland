@@ -2191,6 +2191,7 @@ function renderOrderList() {
 async function renderRealOrderList(listEl, emptyEl, t, lang) {
     if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">' + t.loading + '</div>';
     const res = await window.apiClient.userOrderQueryAll();
+    console.log('[renderRealOrderList] userOrderQueryAll res:', res);
     if (res.code !== 0 || !res.extra || !res.extra.orders) {
         if (listEl) listEl.style.display = 'none';
         if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.textContent = t.orderQueryEmpty; }
