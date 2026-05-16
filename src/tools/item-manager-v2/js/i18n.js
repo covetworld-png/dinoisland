@@ -70,7 +70,7 @@ const I18N = {
         payQuerying: 'Đang tra cứu đơn hàng...',
         payCreatingOrder: 'Đang tạo đơn hàng...',
         payCreateFailed: 'Tạo đơn hàng thất bại',
-        payPollingTimeout: 'Tra cứu thanh toán quá thờ gian, vui lòng làm mới trang để kiểm tra lại',
+        payPollingTimeout: 'Tra cứu thanh toán quá thờigian, vui lòng làm mới trang để kiểm tra lại',
         loading: 'Đang tải...',
         paySuccessTitle: 'Thanh toán thành công',
         payQueryFail: 'Thanh toán chưa thành công',
@@ -86,7 +86,7 @@ const I18N = {
         orderColAmount: 'Số tiền',
         orderColOrderId: 'Mã đơn hàng',
         orderColProduct: 'Sản phẩm',
-        orderColCreated: 'Thởi gian tạo',
+        orderColCreated: 'Thờigian tạo',
         orderColStatus: 'Trạng thái',
         orderColAction: 'Thao tác',
         orderStatusPaid: 'Đã thanh toán',
@@ -97,13 +97,14 @@ const I18N = {
             weather: 'Thẻ Thời Tiết',
             time: 'Thẻ Thời Gian',
             announcement: 'Thông báo',
+            flow: 'Thẻ Dòng Chảy Thờigian',
             dinoGrow50: 'Thay đổi kích thước khủng long'
         },
         status: {
             pending_review: 'Chờ duyệt',
             approved: 'Đã duyệt',
             queued: 'Chờ gửi',
-            sent: 'Đã gửi',
+            sent: '已发送',
             active: 'Đang hoạt động',
             completed: 'Hoàn thành'
         },
@@ -117,7 +118,7 @@ const I18N = {
             blizzard: 'Sương mù',
             sandstorm: 'Bão cát',
             aurora: 'Nửa mây',
-            meteor_shower: 'Mưa + Nắng'
+            meteor_shower: 'Mưa chuyển nắng'
         },
         timeNames: {
             dawn: 'Bình minh',
@@ -219,13 +220,13 @@ const I18N = {
             time: '时间卡',
             announcement: '全服公告',
             flow: '时间流动卡',
-            dinoGrow50: '恐龙体型变化'
+            dinoGrow50: '恐龙变大'
         },
         status: {
             pending_review: '待审核',
             approved: '已通过',
             queued: '待发送',
-            sent: 'Đã gửi',
+            sent: '已发送',
             active: '进行中',
             completed: '已完成'
         },
@@ -239,7 +240,7 @@ const I18N = {
             blizzard: '雾',
             sandstorm: '沙尘',
             aurora: '半云',
-            meteor_shower: '雨_阳光'
+            meteor_shower: '雨夹阳光'
         },
         timeNames: {
             dawn: '清晨',
