@@ -344,10 +344,6 @@ class ItemManager {
                 this.setupTimeSetter();
                 setupDebugMock();
                 this.updateAuthUI();
-                // 真实昵称模式下获取服务端昵称
-                if (NICKNAME_MODE.isReal() && this.api.isLoggedIn()) {
-                    this.fetchNickname();
-                }
             });
             // API模式：定时轮询同步状态（5秒一次）
             this._startApiPolling();
@@ -458,27 +454,6 @@ class ItemManager {
             console.error('API sync failed:', e);
             showToast(t.apiSyncFailed + e.message, 'error');
             return false;
-        }
-    }
-
-    async fetchNickname() {
-        const lang = document.body.getAttribute('data-lang') || 'vi';
-        const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
-        const res = await this.api.getNickname(serverId);
-        console.log('[fetchNickname] res:', res);
-        if (res.code === 0 && res.extra && res.extra.nickname) {
-            this.user.username = res.extra.nickname;
-            this.user.usernameCn = res.extra.nickname;
-            if (res.extra.game_uid) {
-                this.user.userId = 'player_' + res.extra.game_uid;
-            }
-            this.saveUser();
-            updatePlayerIdentityDisplay();
-            showToast(res.extra.nickname, 'success');
-        } else if (res.code === 122 || res.code === 123) {
-            showToast(getApiErrorMessage(res.code, lang) || res.message, 'warning');
-        } else if (res.code !== 0) {
-            showToast(res.message || I18N[lang].apiSyncFailed, 'warning');
         }
     }
 
@@ -655,8 +630,6 @@ class ItemManager {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
 
-        if (!checkNicknameRequired()) return;
-
         if (this.user.inventory.weatherCard <= 0) {
             showToast(t.noItem, 'error');
             return;
@@ -785,8 +758,6 @@ class ItemManager {
     async useTimeCard() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
-
-        if (!checkNicknameRequired()) return;
 
         if (this.user.inventory.timeCard <= 0) {
             showToast(t.noItem, 'error');
@@ -925,8 +896,6 @@ class ItemManager {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
 
-        if (!checkNicknameRequired()) return;
-
         if (this.user.inventory.flowCard <= 0) {
             showToast(t.noItem, 'error');
             return;
@@ -1047,8 +1016,6 @@ class ItemManager {
     async useDinoSizeCard() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
-
-        if (!checkNicknameRequired()) return;
         const inventoryKey = 'dinoGrow50';
 
         if (this.user.inventory[inventoryKey] <= 0) {
@@ -1202,8 +1169,6 @@ class ItemManager {
     async submitAnnouncement(content) {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
-
-        if (!checkNicknameRequired()) return;
 
         if (this.user.inventory.announcementCard <= 0) {
             showToast(t.noItem, 'error');
@@ -1551,7 +1516,6 @@ class ItemManager {
     // Render Methods
     renderInventory() {
         const isApiNotLoggedIn = APP_MODE.isApi() && (!this.api || !this.api.isLoggedIn());
-        const hasNicknameError = this.user && this.user.nicknameError;
         const inv = isApiNotLoggedIn ? {} : (this.user.inventory || {});
         const visibility = this.user.inventoryVisibility || {};
         console.log('[renderInventory]', isApiNotLoggedIn ? I18N[lang].apiNotLoggedIn : inv);
@@ -1572,24 +1536,12 @@ class ItemManager {
                     const countEl = document.getElementById(`count-${type}`);
                     if (countEl) countEl.textContent = '×' + count;
                     const btn = document.getElementById(`btn-slot-${type}`);
-                    if (btn) btn.disabled = count <= 0 || hasNicknameError;
+                    if (btn) btn.disabled = count <= 0;
                 }
             }
         });
         const bar = document.querySelector('.inventory-bar');
-        if (bar) {
-            bar.classList.add('loaded');
-            if (hasNicknameError) {
-                bar.classList.add('nickname-locked');
-                const lockMsg = (document.body.getAttribute('data-lang') || 'vi') === 'vi'
-                    ? 'Vui lòng đăng nhập máy chủ'
-                    : '请先登录该服务器';
-                bar.setAttribute('data-lock-msg', lockMsg);
-            } else {
-                bar.classList.remove('nickname-locked');
-                bar.removeAttribute('data-lock-msg');
-            }
-        }
+        if (bar) bar.classList.add('loaded');
     }
 
     renderAllPanels() {
@@ -2489,18 +2441,6 @@ const PAYMENT_MODE = {
     }
 };
 
-// 昵称来源管理
-const NICKNAME_MODE = {
-    get mode() { return localStorage.getItem('itemManager_nickname_mode') || 'mock'; },
-    set mode(v) { localStorage.setItem('itemManager_nickname_mode', v); },
-    isMock() { return this.mode === 'mock'; },
-    isReal() { return this.mode === 'real'; },
-    toggle() {
-        this.mode = this.isMock() ? 'real' : 'mock';
-        return this.mode;
-    }
-};
-
 function openPurchaseModal(itemType) {
     if (window.itemManager) window.itemManager.openPurchaseModal(itemType);
 }
@@ -2533,17 +2473,6 @@ function togglePaymentMode(mode) {
     if (mockControls) {
         mockControls.style.opacity = (mode === 'real') ? '0.4' : '1';
         mockControls.style.pointerEvents = (mode === 'real') ? 'none' : 'auto';
-    }
-}
-
-function toggleNicknameMode(mode) {
-    NICKNAME_MODE.mode = mode;
-    console.log('[toggleNicknameMode] mode:', mode, 'itemManager:', !!window.itemManager, 'isLoggedIn:', window.itemManager && window.itemManager.api.isLoggedIn());
-    if (mode === 'real' && window.itemManager && window.itemManager.api.isLoggedIn()) {
-        window.itemManager.fetchNickname();
-    } else if (mode === 'real') {
-        const lang = document.body.getAttribute('data-lang') || 'vi';
-        showToast(I18N[lang].loginRequiredForRealNickname || 'Vui lòng đăng nhập trước / 请先登录', 'warning');
     }
 }
 
@@ -2726,12 +2655,6 @@ function setupDebugMock() {
         if (r.value === savedPaymentMode) r.checked = true;
     });
     togglePaymentMode(savedPaymentMode);
-    // Restore nickname mode
-    const nicknameRadios = document.querySelectorAll('input[name="nickname-mode"]');
-    const savedNicknameMode = NICKNAME_MODE.mode;
-    nicknameRadios.forEach(function(r) {
-        if (r.value === savedNicknameMode) r.checked = true;
-    });
     // Toggle debug panel controls based on mode
     const isApi = APP_MODE.isApi();
     const mockControls = document.getElementById('mock-controls');
@@ -2799,32 +2722,20 @@ function updatePlayerIdentityDisplay() {
     const accountEl = document.getElementById('player-id-account');
     const nameEl = document.getElementById('player-id-name');
     const loginBtn = document.getElementById('player-id-login-btn');
-    const lang = document.body.getAttribute('data-lang') || 'vi';
-
-    // 昵称错误状态（真实昵称模式下查询不到昵称）
-    const hasNicknameError = manager && manager.user && manager.user.nicknameError;
 
     if (APP_MODE.isApi()) {
         // API 模式：根据登录状态显示
         const isLoggedIn = manager && manager.api && manager.api.isLoggedIn();
         if (isLoggedIn) {
             const gameUid = manager.api.gameUid || '';
+            const lang = document.body.getAttribute('data-lang') || 'vi';
+            const fallbackName = lang === 'vi' ? 'Người Bí Ẩn' : I18N[lang].defaultUsername;
+            const displayName = manager.user.username || manager.user.usernameCn || fallbackName;
             if (accountEl) accountEl.textContent = gameUid;
             if (nameEl) {
-                if (hasNicknameError) {
-                    const errMsg = lang === 'vi'
-                        ? '⚠️ Chưa đăng nhập máy chủ này'
-                        : '⚠️ 未登录该服务器';
-                    nameEl.textContent = errMsg;
-                    nameEl.style.color = 'var(--red)';
-                    nameEl.style.fontSize = '0.85rem';
-                } else {
-                    const fallbackName = lang === 'vi' ? 'Ngườ Bí Ẩn' : I18N[lang].defaultUsername;
-                    const displayName = manager.user.username || manager.user.usernameCn || fallbackName;
-                    nameEl.textContent = displayName;
-                    nameEl.style.color = '';
-                    nameEl.style.fontSize = '';
-                }
+                nameEl.textContent = displayName;
+                nameEl.style.color = '';
+                nameEl.style.fontSize = '';
             }
             if (loginBtn) loginBtn.style.display = 'none';
         } else {
@@ -2842,44 +2753,15 @@ function updatePlayerIdentityDisplay() {
         const uid = manager.user.userId || '';
         if (accountEl) accountEl.textContent = uid.replace('player_', '');
         if (nameEl) {
-            if (hasNicknameError) {
-                const errMsg = lang === 'vi'
-                    ? '⚠️ Chưa đăng nhập máy chủ này'
-                    : '⚠️ 未登录该服务器';
-                nameEl.textContent = errMsg;
-                nameEl.style.color = 'var(--red)';
-                nameEl.style.fontSize = '0.85rem';
-            } else {
-                const fallback = lang === 'vi' ? 'Ngườ Bí Ẩn' : I18N[lang].defaultUsername;
-                nameEl.textContent = manager.user.username || manager.user.usernameCn || fallback;
-                nameEl.style.color = '';
-                nameEl.style.fontSize = '';
-            }
+            const lang = document.body.getAttribute('data-lang') || 'vi';
+            const fallback = lang === 'vi' ? 'Người Bí Ẩn' : I18N[lang].defaultUsername;
+            nameEl.textContent = manager.user.username || manager.user.usernameCn || fallback;
+            nameEl.style.color = '';
+            nameEl.style.fontSize = '';
         }
         if (loginBtn) loginBtn.style.display = 'none';
     }
-
-    // 根据昵称错误状态给玩家身份卡片添加/移除锁定样式
-    const identityCard = document.querySelector('.player-identity');
-    if (identityCard) {
-        if (hasNicknameError) identityCard.classList.add('nickname-error');
-        else identityCard.classList.remove('nickname-error');
-    }
 }
-// 检查昵称是否可用（真实昵称模式下未查询到昵称时阻止使用道具）
-function checkNicknameRequired() {
-    const manager = window.itemManager;
-    const lang = document.body.getAttribute('data-lang') || 'vi';
-    if (manager && manager.user && manager.user.nicknameError) {
-        const msg = lang === 'vi'
-            ? 'Vui lòng đăng nhập máy chủ trước khi sử dụng đạo cụ'
-            : '请先登录该服务器再使用道具';
-        showToast(msg, 'warning');
-        return false;
-    }
-    return true;
-}
-
 
 function switchMode(mode) {
     const lang = document.body.getAttribute('data-lang') || 'vi';
