@@ -3,12 +3,6 @@
 // LocalStorage-based state with cross-tab sync
 // ============================================
 
-// 道具时效（毫秒）
-const DURATION_WEATHER = 10 * 1000;      // 调试：10秒（正式版：10 * 60 * 1000 = 10分钟）
-const DURATION_TIME    = 10 * 1000;      // 调试：10秒（正式版：10 * 60 * 1000 = 10分钟）
-const DURATION_FLOW    = 60 * 1000;    // 调试：1分钟（正式版：60 * 60 * 1000 = 60分钟）
-const DURATION_DINO    = 60 * 1000;      // 恐龙变大防连点：60秒
-// 体型变化：无固定时效（endTime = Infinity，龙死亡/下线时失效）
 
 // Server-scoped localStorage keys
 function getServerId() {
