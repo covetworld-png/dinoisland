@@ -133,7 +133,9 @@ const API_ERROR_MAP = {
     118: { zh: '已有同类特效正在执行', vn: 'Đã có hiệu ứng cùng loại đang được thực hiện.' },
     119: { zh: '用户权益点数不足，或已过期', vn: 'Điểm quyền lợi của ngườ dùng không đủ hoặc đã hết hạn.' },
     120: { zh: '用户输入内容违规，申请被拒绝', vn: 'Nội dung nhập vào không hợp lệ, yêu cầu bị từ chối' },
-    121: { zh: '用户输入参数不符合规范，请确认后重试', vn: 'Tham số nhập không hợp lệ, vui lòng kiểm tra lại và thử lại' }
+    121: { zh: '用户输入参数不符合规范，请确认后重试', vn: 'Tham số nhập không hợp lệ, vui lòng kiểm tra lại và thử lại' },
+    122: { zh: '查询昵称失败，可能未登录该服务器', vn: 'Tra cứu biệt danh thất bại, có thể chưa đăng nhập máy chủ này' },
+    123: { zh: '查询昵称失败，可能未登录该服务器', vn: 'Tra cứu biệt danh thất bại, có thể chưa đăng nhập máy chủ này' }
 };
 
 class ApiClient {

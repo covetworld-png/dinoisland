@@ -462,6 +462,7 @@ class ItemManager {
     }
 
     async fetchNickname() {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
         const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
         const res = await this.api.getNickname(serverId);
         console.log('[fetchNickname] res:', res);
@@ -473,6 +474,11 @@ class ItemManager {
             }
             this.saveUser();
             updatePlayerIdentityDisplay();
+            showToast(res.extra.nickname, 'success');
+        } else if (res.code === 122 || res.code === 123) {
+            showToast(getApiErrorMessage(res.code, lang) || res.message, 'warning');
+        } else if (res.code !== 0) {
+            showToast(res.message || I18N[lang].apiSyncFailed, 'warning');
         }
     }
 
