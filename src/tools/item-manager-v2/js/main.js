@@ -1615,6 +1615,7 @@ class ItemManager {
 
     // Render Methods
     renderInventory() {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
         const isApiNotLoggedIn = APP_MODE.isApi() && (!this.api || !this.api.isLoggedIn());
         const nicknameOk = this.user && this.user.nicknameStatus === 'ok';
         const inv = isApiNotLoggedIn ? {} : (this.user.inventory || {});
@@ -2839,6 +2840,7 @@ function updatePlayerIdentityDisplay() {
 
     if (APP_MODE.isApi()) {
         const isLoggedIn = manager && manager.api && manager.api.isLoggedIn();
+        const serverRow = document.querySelector('.player-id-server-row');
         if (!isLoggedIn) {
             if (accountEl) accountEl.textContent = '';
             if (nameEl) {
@@ -2847,8 +2849,10 @@ function updatePlayerIdentityDisplay() {
                 nameEl.style.fontSize = '0.82rem';
             }
             if (loginBtn) loginBtn.style.display = 'inline-flex';
+            if (serverRow) serverRow.style.display = 'none';
             return;
         }
+        if (serverRow) serverRow.style.display = 'flex';
 
         // 已登录
         const gameUid = manager.api.gameUid || '';
