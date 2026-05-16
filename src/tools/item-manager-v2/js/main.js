@@ -788,6 +788,7 @@ class ItemManager {
                     startTime: now,
                     endTime: now + DURATION_WEATHER,
                     status: 'active'
+                    server: getServerId(),
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
@@ -849,6 +850,7 @@ class ItemManager {
             startTime: now,
             endTime: now + DURATION_WEATHER,
             status: 'active'
+            server: getServerId(),
         });
 
         this.saveState();
@@ -929,6 +931,7 @@ class ItemManager {
                     startTime: now,
                     endTime: now + DURATION_TIME,
                     status: 'active'
+                    server: getServerId(),
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
@@ -988,6 +991,7 @@ class ItemManager {
             startTime: now,
             endTime: now + DURATION_TIME,
             status: 'active'
+            server: getServerId(),
         });
 
         this.saveState();
@@ -1055,6 +1059,7 @@ class ItemManager {
                     startTime: now,
                     endTime: now + DURATION_FLOW,
                     status: 'active'
+                    server: getServerId(),
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
@@ -1111,6 +1116,7 @@ class ItemManager {
             startTime: now,
             endTime: now + DURATION_FLOW,
             status: 'active'
+            server: getServerId(),
         });
 
         this.saveState();
@@ -1164,6 +1170,7 @@ class ItemManager {
                     startTime: now,
                     endTime: null,
                     status: 'active'
+                    server: getServerId(),
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
@@ -1219,6 +1226,7 @@ class ItemManager {
             startTime: now,
             endTime: null,
             status: 'active'
+            server: getServerId(),
         });
         this.saveState();
         this.renderInventory();
@@ -1320,6 +1328,7 @@ class ItemManager {
                     startTime: now,
                     endTime: now,
                     status: 'completed'
+                    server: getServerId(),
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
                 this.saveState();
@@ -1943,11 +1952,12 @@ class ItemManager {
                 }
             }
 
+            const serverLabel = item.server ? `[${item.server}] ` : '';
             return `
                 <div class="history-item ${item.type}">
                     <span class="history-icon">${icon}</span>
                     <div class="history-info">
-                        <span class="history-title">${title} — ${detailText}</span>
+                        <span class="history-title">${serverLabel}${title} — ${detailText}</span>
                     </div>
                     <span class="history-time">${timeStr}</span>
                     <span class="history-status status-badge ${statusClass}">${statusLabel}</span>
