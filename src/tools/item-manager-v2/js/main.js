@@ -344,6 +344,10 @@ class ItemManager {
                 this.setupTimeSetter();
                 setupDebugMock();
                 this.updateAuthUI();
+                // 真实昵称模式下获取服务端昵称
+                if (NICKNAME_MODE.isReal() && this.api.isLoggedIn()) {
+                    this.fetchNickname();
+                }
             });
             // API模式：定时轮询同步状态（5秒一次）
             this._startApiPolling();
@@ -454,6 +458,21 @@ class ItemManager {
             console.error('API sync failed:', e);
             showToast(t.apiSyncFailed + e.message, 'error');
             return false;
+        }
+    }
+
+    async fetchNickname() {
+        const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
+        const res = await this.api.getNickname(serverId);
+        console.log('[fetchNickname] res:', res);
+        if (res.code === 0 && res.extra && res.extra.nickname) {
+            this.user.username = res.extra.nickname;
+            this.user.usernameCn = res.extra.nickname;
+            if (res.extra.game_uid) {
+                this.user.userId = 'player_' + res.extra.game_uid;
+            }
+            this.saveUser();
+            updatePlayerIdentityDisplay();
         }
     }
 
@@ -2441,6 +2460,18 @@ const PAYMENT_MODE = {
     }
 };
 
+// 昵称来源管理
+const NICKNAME_MODE = {
+    get mode() { return localStorage.getItem('itemManager_nickname_mode') || 'mock'; },
+    set mode(v) { localStorage.setItem('itemManager_nickname_mode', v); },
+    isMock() { return this.mode === 'mock'; },
+    isReal() { return this.mode === 'real'; },
+    toggle() {
+        this.mode = this.isMock() ? 'real' : 'mock';
+        return this.mode;
+    }
+};
+
 function openPurchaseModal(itemType) {
     if (window.itemManager) window.itemManager.openPurchaseModal(itemType);
 }
@@ -2473,6 +2504,13 @@ function togglePaymentMode(mode) {
     if (mockControls) {
         mockControls.style.opacity = (mode === 'real') ? '0.4' : '1';
         mockControls.style.pointerEvents = (mode === 'real') ? 'none' : 'auto';
+    }
+}
+
+function toggleNicknameMode(mode) {
+    NICKNAME_MODE.mode = mode;
+    if (mode === 'real' && window.itemManager && window.itemManager.api.isLoggedIn()) {
+        window.itemManager.fetchNickname();
     }
 }
 
@@ -2655,6 +2693,12 @@ function setupDebugMock() {
         if (r.value === savedPaymentMode) r.checked = true;
     });
     togglePaymentMode(savedPaymentMode);
+    // Restore nickname mode
+    const nicknameRadios = document.querySelectorAll('input[name="nickname-mode"]');
+    const savedNicknameMode = NICKNAME_MODE.mode;
+    nicknameRadios.forEach(function(r) {
+        if (r.value === savedNicknameMode) r.checked = true;
+    });
     // Toggle debug panel controls based on mode
     const isApi = APP_MODE.isApi();
     const mockControls = document.getElementById('mock-controls');
