@@ -2601,6 +2601,12 @@ function applyLangUI(lang) {
     }
 
     updatePlayerIdentityDisplay();
+
+    // Update server select placeholder
+    const serverSelect = document.getElementById('server-select');
+    if (serverSelect && serverSelect.options[0]) {
+        serverSelect.options[0].textContent = lang === 'vi' ? '-- Vui lòng chọn máy chủ --' : '-- 请选择服务器 --';
+    }
 }
 
 function toggleLanguage() {
