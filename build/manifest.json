@@ -230,6 +230,12 @@
         "../../assets/anchor/": "./assets/anchor/"
       },
       "versioning": "auto"
+    },
+    "item-manager": {
+      "srcPage": "src/tools/item-manager-v2",
+      "includeAssets": [],
+      "pathRewrite": {},
+      "versioning": "auto"
     }
   }
 }

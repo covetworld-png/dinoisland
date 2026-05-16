@@ -213,12 +213,43 @@ python build/packager.py <package-key>
 □ 是否未使用 alert() 或 console.log()？
 ```
 
+### 7.7 Git 提交保护规则
+
+**触发条件**: 任何已同步到 `src/` 目录的项目文件发生修改时
+
+**强制动作**:
+1. 每次修改并同步到 `src/` 后，**必须**执行 `git add` + `git commit` 到本地仓库
+2. Commit message 格式: `<type>(<scope>): <描述>`
+3. **`git push` 必须等待显式指令**，禁止自主 push
+4. 提交前检查清单：
+   - `git status` 确认只包含预期文件
+   - 确认未包含受 `.gitignore` 保护的源文件目录
+
+**违规红线**:
+- ❌ 修改 `src/` 后未 commit，导致后续回滚操作丢失全部工作
+- ❌ 未经确认自主 `git push`
+- ❌ 使用 `git add -f` 强制添加 `.gitignore` 目录内的文件
+
+**操作示例**:
+```bash
+# 1. 修改源文件 + 同步到 src/
+cp projects/003-运营/003-xx-道具管理/js/main.js src/tools/item-manager-v2/js/main.js
+
+# 2. 本地提交（必须）
+git add src/tools/item-manager-v2/js/main.js
+git commit -m "fix(item-manager-v2): xxx"
+
+# 3. 等待用户指令后再 push（禁止自主执行）
+# git push origin main   ← 必须等待用户说 "push"
+```
+
 ---
 
 ## 8. 专项规范索引
 
 | 规范 | 文档路径 | 一句话摘要 |
 |------|----------|------------|
+| **API 互斥测试** | [引用:docs/api-testing-methodology.md] | 双层验证模型：批量脚本筛查 + 浏览器控制台根因确认 |
 | **会议纪要生成** | [引用:docs/meeting-minutes-spec.md] | 命名规范、四模块结构、人员映射、质量检查 |
 | **图片描述** | [引用:docs/image-description-spec.md] | 图片特征提取 YAML 字段定义 |
 | **前端资源管理** | [引用:docs/frontend-guidelines.md] | 目录结构、页面类型、版本管理、Git 规则 |
