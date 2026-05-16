@@ -2029,7 +2029,6 @@ class ItemManager {
         if (!itemType) return;
         const cfg = PURCHASE_CONFIG[itemType];
         const qty = window.currentPurchaseQty || 1;
-        const lang = document.body.getAttribute('data-lang') || 'vi';
         const traceId = window.currentPurchaseTraceId;
         const itemCfg = ITEM_CONFIG[itemType];
         const skillId = itemCfg ? itemCfg.skillId : null;
