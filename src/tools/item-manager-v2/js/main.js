@@ -2549,7 +2549,7 @@ const PURCHASE_CONFIG = {
     },
     flow: {
         productId: 103,
-        price: 250000,
+        price: 650000,
         icon: './static/icons/flow.png',
         nameVi: 'Thẻ Dòng Chảy',
         nameCn: '时间流动卡',
