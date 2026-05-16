@@ -1045,6 +1045,58 @@ body::after {
   font-size:0.72rem; color:var(--fg-2); white-space:nowrap;
 }
 
+/* ── payment result modal ── */
+.result-overlay {
+  position:fixed; inset:0; z-index:200;
+  background:rgba(0,0,0,0.75);
+  backdrop-filter:blur(8px);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+}
+.result-modal {
+  background:var(--surface); border:1px solid var(--border-2); border-radius:var(--r-lg);
+  width:100%; max-width:400px; position:relative;
+  box-shadow:0 24px 64px rgba(0,0,0,0.5);
+  animation:purchaseIn 0.3s ease;
+  text-align:center;
+  padding:32px 28px 28px;
+}
+.result-icon { font-size:48px; margin-bottom:12px; }
+.result-title { font-family:var(--font-display); font-size:1.1rem; color:var(--gold); letter-spacing:0.5px; margin-bottom:8px; }
+.result-content {
+  display:flex; align-items:center; justify-content:center;
+  gap:8px; margin:12px 0; font-size:1rem;
+}
+.result-content img { width:32px; height:32px; }
+.result-desc { font-size:0.82rem; color:var(--muted); margin-bottom:16px; line-height:1.5; }
+.result-actions { display:flex; gap:10px; justify-content:center; margin-bottom:16px; }
+.result-actions .btn { flex:1; }
+.result-btn { width:100%; margin-top:8px; padding:14px; font-size:0.95rem; }
+.result-footer { border-top:1px solid var(--border); padding-top:12px; }
+.result-footer small { display:block; color:var(--muted); font-size:0.72rem; line-height:1.6; }
+
+/* ── order query modal ── */
+.order-query-modal { max-width:560px; text-align:left; padding-top:48px; }
+.order-query-modal .result-title { text-align:center; margin-bottom:16px; }
+.order-list { max-height:360px; overflow-y:auto; margin:12px 0; }
+.order-item {
+  display:grid; grid-template-columns:1fr 1fr 80px 70px;
+  gap:8px; align-items:center; padding:10px 12px;
+  background:rgba(255,255,255,0.03); border-radius:8px;
+  margin-bottom:8px; font-size:0.78rem;
+}
+.order-item.paid { border-left:3px solid var(--green); }
+.order-item.unpaid { border-left:3px solid var(--red); }
+.order-item .col-product { color:var(--fg); font-weight:500; }
+.order-item .col-amount { color:var(--gold); font-weight:600; font-family:var(--font-mono); }
+.order-item .col-status { text-align:center; font-size:0.72rem; }
+.order-item .col-action { text-align:right; }
+.order-item .col-action .btn { padding:4px 8px; font-size:0.68rem; width:auto; }
+.order-meta {
+  font-size:0.68rem; color:var(--muted); padding:0 12px 8px;
+}
+.order-empty { text-align:center; color:var(--muted); padding:32px 0; font-size:0.85rem; }
+
 /* ── purchase modal responsive ── */
 @media (max-width:640px) {
   .purchase-modal { max-width:100%; }

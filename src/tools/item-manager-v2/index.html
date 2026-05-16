@@ -27,6 +27,10 @@
           <button id="auth-logout" class="btn btn-sm" onclick="doApiLogout()" style="width:auto;padding:4px 10px;font-size:0.7rem;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--red);display:none;"><span class="lang-vi">Thoát</span><span class="lang-cn">退出</span></button>
         </div>
         <button class="debug-toggle" onclick="toggleDebugPanel()" title="设置">🧪</button>
+        <button class="nav-btn" onclick="openOrderQueryModal()" style="font-size:0.72rem;padding:6px 10px;background:transparent;border:1px solid var(--border-2);color:var(--fg-2);border-radius:6px;cursor:pointer;transition:all 0.2s;">
+          <span class="lang-cn">📋 订单查询</span>
+          <span class="lang-vi">📋 Tra cứu đơn hàng</span>
+        </button>
         <button class="lang-toggle" onclick="toggleLanguage()">
           <span id="current-lang"><span class="lang-vi">VI</span><span class="lang-cn">中</span></span>
         </button>
@@ -44,6 +48,12 @@
           <label><input type="radio" name="mock-error" value="CONFLICT"> 被占用 / Đang bận</label>
           <label><input type="radio" name="mock-error" value="NO_ITEM"> 数量不足 / Không đủ</label>
           <label><input type="radio" name="mock-error" value="SYSTEM_ERROR"> 系统异常 / Lỗi hệ thống</label>
+        </div>
+        <div class="debug-divider"></div>
+        <div class="debug-options" id="mock-payment-controls">
+          <strong>模拟支付状态 / Trạng thái thanh toán</strong>
+          <label><input type="radio" name="mock-payment" value="success" checked onchange="localStorage.setItem('mockPaymentStatus', this.value)"> 成功 / Thành công</label>
+          <label><input type="radio" name="mock-payment" value="no_record" onchange="localStorage.setItem('mockPaymentStatus', this.value)"> 无记录 / Không có bản ghi</label>
         </div>
         <div class="debug-divider"></div>
         <div class="debug-options" id="mock-expired-control">
@@ -711,8 +721,47 @@
     </div>
   </div>
 
-  <script src="js/api-client.js?v=80"></script>
-  <script src="js/i18n.js?v=1"></script>
-  <script src="js/main.js?v=91"></script>
+  <!-- Payment Result: Success -->
+  <div class="result-overlay" id="pay-success-overlay" style="display:none;" onclick="if(event.target===this)closePaySuccessModal()">
+    <div class="result-modal result-success">
+      <button class="purchase-close" onclick="closePaySuccessModal()">&#10005;</button>
+      <div class="result-icon"><svg viewBox="0 0 64 64" width="56" height="56"><circle cx="32" cy="32" r="28" fill="none" stroke="#22c55e" stroke-width="3"/><path d="M20 32l8 8 16-16" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3 class="result-title" id="pay-success-title"></h3>
+      <div class="result-content" id="pay-success-content"></div>
+      <button class="btn btn-primary result-btn" id="pay-success-btn" onclick="closePaySuccessModal()">确认</button>
+    </div>
+  </div>
+
+  <!-- Payment Result: No Record -->
+  <div class="result-overlay" id="pay-fail-overlay" style="display:none;" onclick="if(event.target===this)closePayFailModal()">
+    <div class="result-modal result-fail">
+      <div class="result-icon"><svg viewBox="0 0 64 64" width="56" height="56"><circle cx="32" cy="32" r="28" fill="none" stroke="#f59e0b" stroke-width="3"/><path d="M32 20v16M32 44" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/></svg></div>
+      <h3 class="result-title" id="pay-fail-title"></h3>
+      <p class="result-desc" id="pay-fail-desc"></p>
+      <div class="result-actions">
+        <button class="btn btn-primary" onclick="location.reload()">刷新页面</button>
+      </div>
+      <div class="result-footer" id="pay-fail-footer">
+        <small>客服联系方式</small>
+        <small>Zalo: 8618717777125</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Query Modal -->
+  <div class="result-overlay" id="order-query-overlay" style="display:none;" onclick="if(event.target===this)closeOrderQueryModal()">
+    <div class="result-modal order-query-modal">
+      <button class="purchase-close" onclick="closeOrderQueryModal()">&#10005;</button>
+      <h3 class="result-title" id="order-query-title">订单查询</h3>
+      <div class="order-list" id="order-list"></div>
+      <div class="order-empty" id="order-empty" style="display:none;">暂无订单记录</div>
+      <button class="btn btn-secondary result-btn" id="order-query-close-btn" onclick="closeOrderQueryModal()">关闭</button>
+    </div>
+  </div>
+
+  <script src="js/api-client.js?v=85"></script>
+  <script src="js/analytics.js?v=1"></script>
+  <script src="js/i18n.js?v=7"></script>
+  <script src="js/main.js?v=110"></script>
 </body>
 </html>

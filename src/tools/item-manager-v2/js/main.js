@@ -657,20 +657,6 @@ class ItemManager {
                 return;
             }
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
-            
-            // 先结束自己旧的 weather 记录，避免 118
-            const recordsRes = await this.api.getRecords();
-            if (recordsRes.code === 0 && recordsRes.extra && recordsRes.extra.records) {
-                const oldRecord = recordsRes.extra.records.find(r => {
-                    const status = String(r.status || '');
-                    return parseInt(r.skill_id, 10) === 2 && (status === 'doing' || status === '1' || status === 'todo');
-                });
-                if (oldRecord && oldRecord.record_id) {
-                    console.log('[gmSuccess] ending old weather record', oldRecord.record_id);
-                    await this.api.gmSuccess(oldRecord.record_id);
-                }
-            }
-            
             const res = await this.api.apply(2, serverId, { weather_id: weatherId });
             if (res.code === 0) {
                 showToast(t.submittedWaiting, 'info');
@@ -807,22 +793,6 @@ class ItemManager {
                 return;
             }
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
-            
-            // 先结束自己旧的 time 记录（skill_id=5, time_hm>0），避免 118
-            const recordsRes = await this.api.getRecords();
-            if (recordsRes.code === 0 && recordsRes.extra && recordsRes.extra.records) {
-                const oldRecord = recordsRes.extra.records.find(r => {
-                    const status = String(r.status || '');
-                    const sid = parseInt(r.skill_id, 10);
-                    const timeHm = parseInt(r.time_hm, 10);
-                    return sid === 5 && timeHm > 0 && (status === 'doing' || status === '1' || status === 'todo');
-                });
-                if (oldRecord && oldRecord.record_id) {
-                    console.log('[gmSuccess] ending old time record', oldRecord.record_id);
-                    await this.api.gmSuccess(oldRecord.record_id);
-                }
-            }
-            
             const res = await this.api.apply(5, serverId, { time_hm: selected });
             if (res.code === 0) {
                 const hh = Math.floor(selected / 100);
@@ -950,22 +920,6 @@ class ItemManager {
         // API模式：flow 使用 skill_id=3，time_hm=0 表示流动
         if (APP_MODE.isApi()) {
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
-            
-            // 先结束自己旧的 flow 记录（skill_id=3, time_hm=0），避免 118
-            const recordsRes = await this.api.getRecords();
-            if (recordsRes.code === 0 && recordsRes.extra && recordsRes.extra.records) {
-                const oldRecord = recordsRes.extra.records.find(r => {
-                    const status = String(r.status || '');
-                    const sid = parseInt(r.skill_id, 10);
-                    const timeHm = parseInt(r.time_hm, 10);
-                    return sid === 3 && (timeHm === 0 || isNaN(timeHm)) && (status === 'doing' || status === '1' || status === 'todo');
-                });
-                if (oldRecord && oldRecord.record_id) {
-                    console.log('[gmSuccess] ending old flow record', oldRecord.record_id);
-                    await this.api.gmSuccess(oldRecord.record_id);
-                }
-            }
-            
             const res = await this.api.apply(3, serverId, { time_hm: 0 });
             if (res.code === 0) {
                 showToast(t.submittedWaiting, 'info');
@@ -1954,22 +1908,273 @@ class ItemManager {
         return amount.toLocaleString('vi-VN') + ' VND';
     }
 
-    confirmPurchase() {
+    async confirmPurchase() {
         const itemType = window.currentPurchaseItem;
         if (!itemType) return;
         const cfg = PURCHASE_CONFIG[itemType];
         const qty = window.currentPurchaseQty || 1;
         const lang = document.body.getAttribute('data-lang') || 'vi';
+        const traceId = window.currentPurchaseTraceId;
+        const itemCfg = ITEM_CONFIG[itemType];
+        const skillId = itemCfg ? itemCfg.skillId : null;
 
-        showToast(lang === 'vi'
-            ? 'Thanh toan thanh cong! Da mua ' + cfg.nameVi + ' x' + qty
-            : I18N[lang].paySuccess + cfg.nameCn + ' x' + qty, 'success');
-
-        this.user.inventory[cfg.inventoryKey] = (this.user.inventory[cfg.inventoryKey] || 0) + qty;
-        this.saveUser();
-        this.renderInventory();
+        if (typeof Analytics !== 'undefined' && traceId) {
+            Analytics.traceStep(traceId, 'purchase_confirm', {
+                item_type: itemType,
+                item_skill_id: skillId,
+                qty: qty,
+                total_price: cfg.price * qty
+            });
+        }
 
         closePurchaseModal();
+
+        // 生成订单号 + 本地记录
+        const orderId = generateOrderId();
+        const order = {
+            orderId, itemType,
+            nameVi: cfg.nameVi, nameCn: cfg.nameCn,
+            qty, amount: this.formatVND(cfg.price * qty),
+            createdAt: Date.now(), status: 'unpaid'
+        };
+        addMockOrder(order);
+
+        // 保存待支付信息，供回调使用
+        window.pendingPayment = {
+            orderId, itemType, qty, cfg, traceId, skillId,
+            manager: this
+        };
+
+        // 保存模拟支付状态，供页面跳转回来后读取
+        const mockStatus = getMockPaymentStatus();
+        localStorage.setItem('mockPaymentStatus', mockStatus);
+
+        // 跳转至支付网关（当前模拟：页面重定向带回调参数）
+        const callbackUrl = location.pathname + '?paySuc=1&orderId=' + encodeURIComponent(orderId);
+        window.location.href = callbackUrl;
+    }
+}
+
+// ========== 支付结果弹窗 & 订单查询 ==========
+
+window.mockOrderHistory = window.mockOrderHistory || JSON.parse(localStorage.getItem('mockOrderHistory') || '[]');
+function addMockOrder(order) {
+    window.mockOrderHistory.unshift(order);
+    if (window.mockOrderHistory.length > 50) window.mockOrderHistory.pop();
+    localStorage.setItem('mockOrderHistory', JSON.stringify(window.mockOrderHistory));
+}
+
+function generateOrderId() {
+    return 'ORD' + Date.now() + Math.random().toString(36).substr(2, 4).toUpperCase();
+}
+
+function getMockPaymentStatus() {
+    const el = document.querySelector('input[name="mock-payment"]:checked');
+    if (el) return el.value;
+    const saved = localStorage.getItem('mockPaymentStatus');
+    return saved || 'success';
+}
+
+async function mockQueryOrder(orderId) {
+    await new Promise(r => setTimeout(r, 800));
+    const mockStatus = getMockPaymentStatus();
+    if (mockStatus === 'success') {
+        return { success: true, orderId, status: 'paid' };
+    } else {
+        return { success: false, orderId, status: 'not_found', message: 'no_record' };
+    }
+}
+
+function formatOrderTime(ts) {
+    const d = new Date(ts);
+    return d.toLocaleString('vi-VN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+// 支付成功弹窗
+function openPaySuccessModal(itemType, qty) {
+    const cfg = PURCHASE_CONFIG[itemType];
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    const t = I18N[lang];
+    document.getElementById('pay-success-title').textContent = t.paySuccessTitle;
+    document.getElementById('pay-success-content').innerHTML =
+        '<img src="' + cfg.icon + '" alt=""><span>' + (lang === 'vi' ? cfg.nameVi : cfg.nameCn) + ' x' + qty + '</span>';
+    const successBtn = document.getElementById('pay-success-btn');
+    if (successBtn) successBtn.textContent = t.payConfirm;
+    document.getElementById('pay-success-overlay').style.display = 'flex';
+}
+function closePaySuccessModal() {
+    document.getElementById('pay-success-overlay').style.display = 'none';
+}
+
+// 无记录弹窗
+function openPayFailModal() {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    const t = I18N[lang];
+    document.getElementById('pay-fail-title').textContent = t.payNoRecordTitle;
+    document.getElementById('pay-fail-desc').textContent = t.payNoRecordDesc;
+    const btns = document.querySelectorAll('#pay-fail-overlay .result-actions button');
+    if (btns[0]) btns[0].textContent = t.payRefresh;
+    const footer = document.getElementById('pay-fail-footer');
+    if (footer) {
+        const smalls = footer.querySelectorAll('small');
+        if (smalls[0]) smalls[0].textContent = t.csContact;
+        if (smalls[1]) smalls[1].textContent = t.csZalo;
+    }
+    document.getElementById('pay-fail-overlay').style.display = 'flex';
+}
+function closePayFailModal() {
+    document.getElementById('pay-fail-overlay').style.display = 'none';
+}
+
+function openCsContact() {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    showToast(I18N[lang].csContact + ': Zalo 8618717777125', 'info');
+}
+
+// 订单查询弹窗
+function openOrderQueryModal() {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    const t = I18N[lang];
+    document.getElementById('order-query-title').textContent = t.orderQueryTitle;
+    const closeBtn = document.getElementById('order-query-close-btn');
+    if (closeBtn) closeBtn.textContent = t.orderClose;
+    renderOrderList();
+    document.getElementById('order-query-overlay').style.display = 'flex';
+}
+function closeOrderQueryModal() {
+    document.getElementById('order-query-overlay').style.display = 'none';
+}
+
+function renderOrderList() {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    const t = I18N[lang];
+    const listEl = document.getElementById('order-list');
+    const emptyEl = document.getElementById('order-empty');
+    const orders = window.mockOrderHistory || [];
+
+    if (orders.length === 0) {
+        if (listEl) listEl.style.display = 'none';
+        if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.textContent = t.orderQueryEmpty; }
+        return;
+    }
+    if (listEl) listEl.style.display = 'block';
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    listEl.innerHTML = orders.map(function(o) {
+        const isPaid = o.status === 'paid';
+        const statusText = isPaid ? t.orderStatusPaid : t.orderStatusUnpaid;
+        const productName = lang === 'vi' ? o.nameVi : o.nameCn;
+        const actionBtn = !isPaid
+            ? '<button class="btn btn-sm" onclick="requeryOrder(\'' + o.orderId + '\')">' + t.orderRequery + '</button>'
+            : '';
+        return '<div class="order-item ' + (isPaid ? 'paid' : 'unpaid') + '">' +
+            '<div class="col-product">' + productName + '</div>' +
+            '<div class="col-amount">' + o.amount + '</div>' +
+            '<div class="col-status">' + statusText + '</div>' +
+            '<div class="col-action">' + actionBtn + '</div>' +
+            '</div>' +
+            '<div class="order-meta">' + o.orderId + ' · ' + formatOrderTime(o.createdAt) + '</div>';
+    }).join('');
+}
+
+async function requeryOrder(orderId) {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    showToast(I18N[lang].payQuerying, 'info');
+
+    // 查找订单，确定上次查询结果，交替切换
+    var order = window.mockOrderHistory.find(function(o) { return o.orderId === orderId; });
+    var lastStatus = order ? order.lastRequeryStatus : null;
+    var thisResult = (lastStatus === 'success') ? false : true;
+
+    // 模拟网络延迟
+    await new Promise(r => setTimeout(r, 800));
+
+    if (order) {
+        order.status = thisResult ? 'paid' : 'not_found';
+        order.lastRequeryStatus = thisResult ? 'success' : 'fail';
+    }
+    // 同步 localStorage
+    localStorage.setItem('mockOrderHistory', JSON.stringify(window.mockOrderHistory));
+
+    renderOrderList();
+    if (thisResult) {
+        showToast(I18N[lang].paySuccessTitle, 'success');
+    } else {
+        showToast(I18N[lang].payQueryFail, 'warning');
+    }
+}
+
+// 支付回调处理
+function handlePaymentCallback(orderId) {
+    var lang = document.body.getAttribute('data-lang') || 'vi';
+    var pending = window.pendingPayment;
+
+    // 尝试从 pending 或订单历史中恢复信息
+    var order = (pending && pending.orderId === orderId) ? pending : null;
+    if (!order) {
+        var stored = window.mockOrderHistory.find(function(o) { return o.orderId === orderId; });
+        if (stored) {
+            order = {
+                orderId: stored.orderId,
+                itemType: stored.itemType,
+                qty: stored.qty,
+                cfg: PURCHASE_CONFIG[stored.itemType],
+                traceId: null,
+                skillId: null,
+                manager: window.itemManager
+            };
+        }
+    }
+    if (!order || !order.manager) {
+        showToast(I18N[lang].payNoRecordTitle, 'warning');
+        return;
+    }
+
+    showToast(I18N[lang].payQuerying, 'info');
+    mockQueryOrder(orderId).then(function(result) {
+        // 更新订单状态
+        var storedOrder = window.mockOrderHistory.find(function(o) { return o.orderId === orderId; });
+        if (storedOrder) {
+            storedOrder.status = result.success ? 'paid' : 'not_found';
+            localStorage.setItem('mockOrderHistory', JSON.stringify(window.mockOrderHistory));
+        }
+
+        if (result.success) {
+            order.manager.user.inventory[order.cfg.inventoryKey] = (order.manager.user.inventory[order.cfg.inventoryKey] || 0) + order.qty;
+            order.manager.saveUser();
+            order.manager.renderInventory();
+            openPaySuccessModal(order.itemType, order.qty);
+            if (typeof Analytics !== 'undefined') {
+                Analytics.track('purchase_result', { item_type: order.itemType, result: 'success', qty: order.qty, total_price: order.cfg.price * order.qty });
+                if (order.traceId) Analytics.endTrace(order.traceId, 'success', { qty: order.qty, total_price: order.cfg.price * order.qty });
+            }
+        } else {
+            openPayFailModal();
+            if (typeof Analytics !== 'undefined') {
+                Analytics.track('purchase_result', { item_type: order.itemType, result: 'fail', reason: 'no_record' });
+                if (order.traceId) Analytics.endTrace(order.traceId, 'fail', { reason: 'no_record' });
+            }
+        }
+        window.pendingPayment = null;
+        window.currentPurchaseTraceId = null;
+    });
+}
+
+// 页面加载时检测 URL 回调参数
+function checkPaymentUrlCallback() {
+    var params = new URLSearchParams(location.search);
+    var paySuc = params.get('paySuc');
+    var orderId = params.get('orderId');
+    if (paySuc === '1' && orderId) {
+        // 清除 URL 参数，避免刷新重复触发
+        var url = new URL(location.href);
+        url.searchParams.delete('paySuc');
+        url.searchParams.delete('orderId');
+        history.replaceState(null, '', url.toString());
+        // 延迟处理，等待页面初始化完成
+        setTimeout(function() {
+            handlePaymentCallback(orderId);
+        }, 500);
     }
 }
 
@@ -2024,6 +2229,10 @@ const PURCHASE_CONFIG = {
 
 function openPurchaseModal(itemType) {
     if (window.itemManager) window.itemManager.openPurchaseModal(itemType);
+}
+
+function confirmPurchase() {
+    if (window.itemManager) window.itemManager.confirmPurchase();
 }
 
 function closePurchaseModal() {
@@ -2456,16 +2665,21 @@ resetInventory = async function() {
 
 // Initialize
 let itemManager;
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedLang = localStorage.getItem('lang') || 'vi';
-        applyLangUI(savedLang);
-        itemManager = new ItemManager();
-        window.itemManager = itemManager;
-    });
-} else {
+function initApp() {
     const savedLang = localStorage.getItem('lang') || 'vi';
     applyLangUI(savedLang);
+    // 恢复模拟支付状态 radio 按钮
+    const savedMockStatus = localStorage.getItem('mockPaymentStatus');
+    if (savedMockStatus) {
+        const radio = document.querySelector('input[name="mock-payment"][value="' + savedMockStatus + '"]');
+        if (radio) radio.checked = true;
+    }
     itemManager = new ItemManager();
     window.itemManager = itemManager;
+    checkPaymentUrlCallback();
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
 }
