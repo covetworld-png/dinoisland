@@ -299,6 +299,23 @@ class ApiClient {
         }
     }
 
+    async getNickname(serverId) {
+        const url = 'https://monsteraccounttest.yuemei.info/api/getNickname';
+        try {
+            console.log('[API] POST', url, { server_id: serverId });
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: this.getHeaders(),
+                body: JSON.stringify({ server_id: serverId })
+            });
+            console.log('[API] POST', url, 'status:', res.status, 'ok:', res.ok);
+            return await res.json();
+        } catch (e) {
+            console.error('[API] POST error:', url, e.message);
+            return { code: -1, message: e.message };
+        }
+    }
+
     isLoggedIn() {
         return !!this.token;
     }

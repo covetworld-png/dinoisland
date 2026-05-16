@@ -1106,3 +1106,25 @@ body::after {
   .purchase-pay-btn { width:calc(100% - 40px); margin:0 20px 20px; }
   .inv-config-bar { gap:12px; }
 }
+
+/* 昵称未就绪时锁定道具背包 */
+.inventory-bar.nickname-locked {
+    opacity: 0.5;
+    pointer-events: none;
+    position: relative;
+}
+
+.inventory-bar.nickname-locked::after {
+    content: attr(data-lock-msg);
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--red);
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: var(--r-lg);
+    backdrop-filter: blur(2px);
+}

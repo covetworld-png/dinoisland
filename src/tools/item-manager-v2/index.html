@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><span class="lang-vi">Trung Tâm Thần Tích</span><span class="lang-cn">神迹中心</span></title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=76">
+  <link rel="stylesheet" href="css/main.css?v=78">
 </head>
 <body data-lang="vi">
 
@@ -175,7 +175,8 @@
               <span class="lang-vi">Máy chủ</span>
               <span class="lang-cn">服务器</span>
             </span>
-            <select class="server-select" id="server-select" onchange="switchServer(this.value)">
+            <select class="server-select" id="server-select" onchange="onServerSelect(this.value)">
+              <option value="">-- 请选择服务器 --</option>
               <option value="Q">Q服 — Quân Đoàn Chiến</option>
               <option value="K">K服 — Khủng Long Chiến</option>
             </select>
@@ -765,9 +766,9 @@
     </div>
   </div>
 
-  <script src="js/api-client.js?v=85"></script>
+  <script src="js/api-client.js?v=86"></script>
   <script src="js/analytics.js?v=1"></script>
   <script src="js/i18n.js?v=7"></script>
-  <script src="js/main.js?v=110"></script>
+  <script src="js/main.js?v=112"></script>
 </body>
 </html>

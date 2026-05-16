@@ -6,7 +6,7 @@
 
 // Server-scoped localStorage keys
 function getServerId() {
-    return localStorage.getItem('itemManager_serverId') || 'Q';
+    return localStorage.getItem('itemManager_serverId') || '';
 }
 function lsKeyState() { return `itemManager_state_v1_${getServerId()}`; }
 function lsKeyUser()  { return `itemManager_user_v1_${getServerId()}`; }
@@ -16,6 +16,17 @@ function lsKeyLogs()   { return `itemManager_logs_v1_${getServerId()}`; }
 function switchServer(sid) {
     localStorage.setItem('itemManager_serverId', sid);
     location.reload();
+}
+
+// 用户手动选择服务器后触发
+function onServerSelect(sid) {
+    if (!sid) return;
+    localStorage.setItem('itemManager_serverId', sid);
+    const serverSelect = document.getElementById('server-select');
+    if (serverSelect) serverSelect.value = sid;
+    if (window.itemManager) {
+        window.itemManager.fetchNickname();
+    }
 }
 
 // 时间天空效果：根据 HH:MM 渲染太阳/月亮位置和天空颜色
@@ -227,12 +238,6 @@ class ItemManager {
     }
 
     loadUser() {
-        const sid = getServerId();
-        const serverNicknames = {
-            Q: { vi: 'robo', cn: 'robo' },
-            K: { vi: '东皇没大', cn: '东皇没大' }
-        };
-        const nick = serverNicknames[sid] || { vi: 'robo', cn: 'robo' };
         let user = localStorage.getItem(lsKeyUser());
         if (user) {
             user = JSON.parse(user);
@@ -246,23 +251,16 @@ class ItemManager {
                     flow: true, dinoGrow50: true
                 };
             }
-            // Update nickname per server
-            user.username = nick.vi;
-            user.usernameCn = nick.cn;
+            // 用户名由 fetchNickname 设置，此处不再覆盖
             localStorage.setItem(lsKeyUser(), JSON.stringify(user));
             return user;
         }
         user = {
-            userId: 'player_13225799',
-            username: nick.vi,
-            usernameCn: nick.cn,
-            inventory: (() => {
-                const inv = {};
-                Object.keys(ITEM_CONFIG).forEach(type => {
-                    inv[ITEM_CONFIG[type].inventoryKey] = 3;
-                });
-                return inv;
-            })(),
+            userId: '',
+            username: '',
+            usernameCn: '',
+            nicknameStatus: 'pending',
+            inventory: {},
             inventoryVisibility: (() => {
                 const vis = {};
                 Object.keys(ITEM_CONFIG).forEach(type => {
@@ -330,8 +328,12 @@ class ItemManager {
                 this.updateAuthUI();
                 return;
             }
-            this.syncFromApi().then(() => {
-                this.cleanupHistory();
+
+            // 已登录但未选择服务器：等待用户选择
+            const currentServer = getServerId();
+            if (!currentServer) {
+                this.user.nicknameStatus = 'pending_server';
+                this.saveUser();
                 updatePlayerIdentityDisplay();
                 this.renderInventory();
                 this.syncInvVisibilityUI();
@@ -344,9 +346,44 @@ class ItemManager {
                 this.setupTimeSetter();
                 setupDebugMock();
                 this.updateAuthUI();
+                return;
+            }
+
+            // 已登录且已选择服务器：查询昵称
+            this.fetchNickname().then(() => {
+                if (this.user.nicknameStatus === 'ok') {
+                    this.syncFromApi().then(() => {
+                        this.cleanupHistory();
+                        updatePlayerIdentityDisplay();
+                        this.renderInventory();
+                        this.syncInvVisibilityUI();
+                        this.renderAllPanels();
+                        this.renderHistory();
+                        this.startCountdowns();
+                        this.processAnnouncements();
+                        this.setupEventListeners();
+                        this.setupStorageSync();
+                        this.setupTimeSetter();
+                        setupDebugMock();
+                        this.updateAuthUI();
+                    });
+                    this._startApiPolling();
+                } else {
+                    // 昵称查询失败：显示错误，锁定道具
+                    updatePlayerIdentityDisplay();
+                    this.renderInventory();
+                    this.syncInvVisibilityUI();
+                    this.renderAllPanels();
+                    this.renderHistory();
+                    this.startCountdowns();
+                    this.processAnnouncements();
+                    this.setupEventListeners();
+                    this.setupStorageSync();
+                    this.setupTimeSetter();
+                    setupDebugMock();
+                    this.updateAuthUI();
+                }
             });
-            // API模式：定时轮询同步状态（5秒一次）
-            this._startApiPolling();
             return;
         }
 
@@ -454,6 +491,45 @@ class ItemManager {
             console.error('API sync failed:', e);
             showToast(t.apiSyncFailed + e.message, 'error');
             return false;
+        }
+    }
+
+    async fetchNickname() {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        const serverId = SERVER_ID_MAP[getServerId()] || '';
+        if (!serverId) {
+            this.user.nicknameStatus = 'pending_server';
+            this.saveUser();
+            return;
+        }
+        this.user.nicknameStatus = 'loading';
+        this.saveUser();
+        updatePlayerIdentityDisplay();
+
+        const res = await this.api.getNickname(serverId);
+        console.log('[fetchNickname] res:', res);
+        if (res.code === 0 && res.extra && res.extra.nickname) {
+            this.user.nicknameStatus = 'ok';
+            this.user.username = res.extra.nickname;
+            this.user.usernameCn = res.extra.nickname;
+            if (res.extra.game_uid) {
+                this.user.userId = 'player_' + res.extra.game_uid;
+            }
+            this.saveUser();
+            updatePlayerIdentityDisplay();
+            this.renderInventory();
+        } else if (res.code === 122 || res.code === 123) {
+            this.user.nicknameStatus = 'not_found';
+            this.saveUser();
+            updatePlayerIdentityDisplay();
+            this.renderInventory();
+            showToast(getApiErrorMessage(res.code, lang) || res.message, 'warning');
+        } else {
+            this.user.nicknameStatus = 'error';
+            this.saveUser();
+            updatePlayerIdentityDisplay();
+            this.renderInventory();
+            showToast(res.message || I18N[lang].apiSyncFailed, 'warning');
         }
     }
 
@@ -630,6 +706,8 @@ class ItemManager {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
 
+        if (!checkNicknameReady()) return;
+
         if (this.user.inventory.weatherCard <= 0) {
             showToast(t.noItem, 'error');
             return;
@@ -758,6 +836,8 @@ class ItemManager {
     async useTimeCard() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
+
+        if (!checkNicknameReady()) return;
 
         if (this.user.inventory.timeCard <= 0) {
             showToast(t.noItem, 'error');
@@ -896,6 +976,8 @@ class ItemManager {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
 
+        if (!checkNicknameReady()) return;
+
         if (this.user.inventory.flowCard <= 0) {
             showToast(t.noItem, 'error');
             return;
@@ -1016,6 +1098,8 @@ class ItemManager {
     async useDinoSizeCard() {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
+
+        if (!checkNicknameReady()) return;
         const inventoryKey = 'dinoGrow50';
 
         if (this.user.inventory[inventoryKey] <= 0) {
@@ -1169,6 +1253,8 @@ class ItemManager {
     async submitAnnouncement(content) {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
+
+        if (!checkNicknameReady()) return;
 
         if (this.user.inventory.announcementCard <= 0) {
             showToast(t.noItem, 'error');
@@ -1516,6 +1602,7 @@ class ItemManager {
     // Render Methods
     renderInventory() {
         const isApiNotLoggedIn = APP_MODE.isApi() && (!this.api || !this.api.isLoggedIn());
+        const nicknameOk = this.user && this.user.nicknameStatus === 'ok';
         const inv = isApiNotLoggedIn ? {} : (this.user.inventory || {});
         const visibility = this.user.inventoryVisibility || {};
         console.log('[renderInventory]', isApiNotLoggedIn ? I18N[lang].apiNotLoggedIn : inv);
@@ -1536,12 +1623,24 @@ class ItemManager {
                     const countEl = document.getElementById(`count-${type}`);
                     if (countEl) countEl.textContent = '×' + count;
                     const btn = document.getElementById(`btn-slot-${type}`);
-                    if (btn) btn.disabled = count <= 0;
+                    if (btn) btn.disabled = count <= 0 || !nicknameOk;
                 }
             }
         });
         const bar = document.querySelector('.inventory-bar');
-        if (bar) bar.classList.add('loaded');
+        if (bar) {
+            bar.classList.add('loaded');
+            if (!nicknameOk && APP_MODE.isApi() && this.api.isLoggedIn()) {
+                bar.classList.add('nickname-locked');
+                const lockMsg = (document.body.getAttribute('data-lang') || 'vi') === 'vi'
+                    ? 'Vui lòng chọn máy chủ và tra cứu biệt danh'
+                    : '请选择服务器并查询昵称';
+                bar.setAttribute('data-lock-msg', lockMsg);
+            } else {
+                bar.classList.remove('nickname-locked');
+                bar.removeAttribute('data-lock-msg');
+            }
+        }
     }
 
     renderAllPanels() {
@@ -2722,23 +2821,11 @@ function updatePlayerIdentityDisplay() {
     const accountEl = document.getElementById('player-id-account');
     const nameEl = document.getElementById('player-id-name');
     const loginBtn = document.getElementById('player-id-login-btn');
+    const lang = document.body.getAttribute('data-lang') || 'vi';
 
     if (APP_MODE.isApi()) {
-        // API 模式：根据登录状态显示
         const isLoggedIn = manager && manager.api && manager.api.isLoggedIn();
-        if (isLoggedIn) {
-            const gameUid = manager.api.gameUid || '';
-            const lang = document.body.getAttribute('data-lang') || 'vi';
-            const fallbackName = lang === 'vi' ? 'Người Bí Ẩn' : I18N[lang].defaultUsername;
-            const displayName = manager.user.username || manager.user.usernameCn || fallbackName;
-            if (accountEl) accountEl.textContent = gameUid;
-            if (nameEl) {
-                nameEl.textContent = displayName;
-                nameEl.style.color = '';
-                nameEl.style.fontSize = '';
-            }
-            if (loginBtn) loginBtn.style.display = 'none';
-        } else {
+        if (!isLoggedIn) {
             if (accountEl) accountEl.textContent = '';
             if (nameEl) {
                 nameEl.innerHTML = '<span class="lang-cn">您的登录已过期或无访问权限，请重新登录</span>';
@@ -2746,15 +2833,55 @@ function updatePlayerIdentityDisplay() {
                 nameEl.style.fontSize = '0.82rem';
             }
             if (loginBtn) loginBtn.style.display = 'inline-flex';
+            return;
         }
+
+        // 已登录
+        const gameUid = manager.api.gameUid || '';
+        if (accountEl) accountEl.textContent = gameUid;
+
+        const status = manager && manager.user ? manager.user.nicknameStatus : 'pending';
+        if (nameEl) {
+            if (status === 'pending_server' || status === 'pending') {
+                const msg = lang === 'vi'
+                    ? 'Vui lòng chọn máy chủ'
+                    : '请选择服务器';
+                nameEl.textContent = msg;
+                nameEl.style.color = 'var(--gold)';
+                nameEl.style.fontSize = '0.85rem';
+            } else if (status === 'loading') {
+                const msg = lang === 'vi'
+                    ? 'Đang tra cứu biệt danh...'
+                    : '正在查询昵称...';
+                nameEl.textContent = msg;
+                nameEl.style.color = 'var(--gold)';
+                nameEl.style.fontSize = '0.85rem';
+            } else if (status === 'not_found' || status === 'error') {
+                const msg = lang === 'vi'
+                    ? '⚠️ Không tìm thấy biệt danh trên máy chủ này'
+                    : '⚠️ 该服务器下未查询到 nickname';
+                nameEl.textContent = msg;
+                nameEl.style.color = 'var(--red)';
+                nameEl.style.fontSize = '0.85rem';
+            } else if (status === 'ok') {
+                const displayName = manager.user.username || manager.user.usernameCn || '';
+                nameEl.textContent = displayName;
+                nameEl.style.color = '';
+                nameEl.style.fontSize = '';
+            } else {
+                nameEl.textContent = '';
+                nameEl.style.color = '';
+                nameEl.style.fontSize = '';
+            }
+        }
+        if (loginBtn) loginBtn.style.display = 'none';
     } else {
-        // 模拟模式：显示本地用户信息
+        // 模拟模式
         if (!manager) return;
         const uid = manager.user.userId || '';
         if (accountEl) accountEl.textContent = uid.replace('player_', '');
         if (nameEl) {
-            const lang = document.body.getAttribute('data-lang') || 'vi';
-            const fallback = lang === 'vi' ? 'Người Bí Ẩn' : I18N[lang].defaultUsername;
+            const fallback = lang === 'vi' ? 'Ngườ Bí Ẩn' : I18N[lang].defaultUsername;
             nameEl.textContent = manager.user.username || manager.user.usernameCn || fallback;
             nameEl.style.color = '';
             nameEl.style.fontSize = '';
@@ -2762,6 +2889,22 @@ function updatePlayerIdentityDisplay() {
         if (loginBtn) loginBtn.style.display = 'none';
     }
 }
+function checkNicknameReady() {
+    const manager = window.itemManager;
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    if (APP_MODE.isApi() && manager && manager.api && manager.api.isLoggedIn()) {
+        const status = manager.user ? manager.user.nicknameStatus : 'pending';
+        if (status !== 'ok') {
+            const msg = lang === 'vi'
+                ? 'Vui lòng chọn máy chủ và tra cứu biệt danh trước'
+                : '请先选择服务器并查询昵称';
+            showToast(msg, 'warning');
+            return false;
+        }
+    }
+    return true;
+}
+
 
 function switchMode(mode) {
     const lang = document.body.getAttribute('data-lang') || 'vi';
