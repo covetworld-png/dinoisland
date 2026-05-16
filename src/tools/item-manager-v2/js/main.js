@@ -1978,6 +1978,11 @@ class ItemManager {
 
     // ========== Purchase Modal ==========
     openPurchaseModal(itemType) {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        if (APP_MODE.isApi() && !this.api.isLoggedIn()) {
+            showToast(lang === 'vi' ? 'Vui lòng đăng nhập trước' : '请先登录', 'warning');
+            return;
+        }
         const cfg = PURCHASE_CONFIG[itemType];
         if (!cfg) return;
         window.currentPurchaseItem = itemType;
@@ -2015,6 +2020,11 @@ class ItemManager {
     }
 
     async confirmPurchase() {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        if (APP_MODE.isApi() && !this.api.isLoggedIn()) {
+            showToast(lang === 'vi' ? 'Vui lòng đăng nhập trước' : '请先登录', 'warning');
+            return;
+        }
         const itemType = window.currentPurchaseItem;
         if (!itemType) return;
         const cfg = PURCHASE_CONFIG[itemType];
