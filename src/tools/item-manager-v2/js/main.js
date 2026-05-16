@@ -1944,15 +1944,9 @@ class ItemManager {
             });
         }
 
-        // Update player identity display
-        const playerNameEl = document.getElementById('player-id-name');
+        // Sync server select value
         const serverSelect = document.getElementById('server-select');
         const sid = getServerId();
-        if (playerNameEl) {
-            const lang = document.body.getAttribute('data-lang') || 'vi';
-            const fallback = lang === 'vi' ? 'Người Bí Ẩn' : I18N[lang].defaultUsername;
-            playerNameEl.textContent = this.user.username || this.user.usernameCn || fallback;
-        }
         if (serverSelect) {
             serverSelect.value = sid;
         }
