@@ -3015,9 +3015,10 @@ async function debugApiInventory() {
 }
 
 function doApiLogout() {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
     if (window.itemManager && window.itemManager.api) {
         window.itemManager.api.logout();
-        // 清空本地状态，确保面板显示为空
+        // 清空本地状态，隐藏道具/面板/历史
         window.itemManager.user.inventory = {
             ...(Object.keys(ITEM_CONFIG).reduce((acc, type) => {
                 acc[ITEM_CONFIG[type].inventoryKey] = 0;
@@ -3027,9 +3028,11 @@ function doApiLogout() {
         window.itemManager.state.globalLocks = { weather: null, time: null, flow: null, dinoSize: null };
         window.itemManager.saveUser();
         window.itemManager.saveState();
-        window.itemManager.renderInventory();
-        window.itemManager.renderAllPanels();
-        window.itemManager.startCountdowns();
+        updatePlayerIdentityDisplay();
+        ['inventory', 'tools', 'history'].forEach(id => {
+            const el = document.querySelector(`[data-od-id="${id}"]`);
+            if (el) el.style.display = 'none';
+        });
         window.itemManager.updateAuthUI();
         showToast(I18N[lang].loggedOut, 'info');
     }
