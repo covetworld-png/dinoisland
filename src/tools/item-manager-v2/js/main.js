@@ -2747,6 +2747,12 @@ function setupDebugMock() {
     if (expiredCb) {
         expiredCb.checked = localStorage.getItem('itemManager_mockExpired') === '1';
     }
+    // Restore app mode
+    const appModeRadios = document.querySelectorAll('input[name="app-mode"]');
+    const savedAppMode = APP_MODE.mode;
+    appModeRadios.forEach(function(r) {
+        if (r.value === savedAppMode) r.checked = true;
+    });
     // Restore payment mode
     const paymentRadios = document.querySelectorAll('input[name="payment-mode"]');
     const savedPaymentMode = PAYMENT_MODE.mode;
