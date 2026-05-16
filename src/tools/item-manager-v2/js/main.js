@@ -2509,8 +2509,12 @@ function togglePaymentMode(mode) {
 
 function toggleNicknameMode(mode) {
     NICKNAME_MODE.mode = mode;
+    console.log('[toggleNicknameMode] mode:', mode, 'itemManager:', !!window.itemManager, 'isLoggedIn:', window.itemManager && window.itemManager.api.isLoggedIn());
     if (mode === 'real' && window.itemManager && window.itemManager.api.isLoggedIn()) {
         window.itemManager.fetchNickname();
+    } else if (mode === 'real') {
+        const lang = document.body.getAttribute('data-lang') || 'vi';
+        showToast(I18N[lang].loginRequiredForRealNickname || 'Vui lòng đăng nhập trước / 请先登录', 'warning');
     }
 }
 
