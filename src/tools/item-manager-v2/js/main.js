@@ -1633,8 +1633,8 @@ class ItemManager {
             if (!nicknameOk && APP_MODE.isApi() && this.api.isLoggedIn()) {
                 bar.classList.add('nickname-locked');
                 const lockMsg = (document.body.getAttribute('data-lang') || 'vi') === 'vi'
-                    ? 'Vui lòng chọn máy chủ và tra cứu biệt danh'
-                    : '请选择服务器并查询昵称';
+                    ? 'Kho đạo cụ không khả dụng, vui lòng chọn máy chủ'
+                    : '背包不可用，请先选择服务器';
                 bar.setAttribute('data-lock-msg', lockMsg);
             } else {
                 bar.classList.remove('nickname-locked');
@@ -2606,14 +2606,7 @@ function applyLangUI(lang) {
         textarea.placeholder = lang === 'vi' ? 'Nhập nội dung...' : I18N[lang].enterContentPlaceholder;
     }
 
-    // Update player identity
-    const playerNameEl = document.getElementById('player-id-name');
-    const manager = window.itemManager;
-    if (playerNameEl && manager) {
-        const lang = document.body.getAttribute('data-lang') || 'vi';
-        const fallback = lang === 'vi' ? 'Người Bí Ẩn' : I18N[lang].defaultUsername;
-        playerNameEl.textContent = manager.user.username || manager.user.usernameCn || fallback;
-    }
+    updatePlayerIdentityDisplay();
 }
 
 function toggleLanguage() {
@@ -2624,6 +2617,7 @@ function toggleLanguage() {
 
     // Re-render
     if (window.itemManager) {
+        window.itemManager.renderInventory();
         window.itemManager.renderAllPanels();
         window.itemManager.renderHistory();
         window.itemManager.startCountdowns();
@@ -2747,12 +2741,6 @@ function setupDebugMock() {
     if (expiredCb) {
         expiredCb.checked = localStorage.getItem('itemManager_mockExpired') === '1';
     }
-    // Restore app mode
-    const appModeRadios = document.querySelectorAll('input[name="app-mode"]');
-    const savedAppMode = APP_MODE.mode;
-    appModeRadios.forEach(function(r) {
-        if (r.value === savedAppMode) r.checked = true;
-    });
     // Restore payment mode
     const paymentRadios = document.querySelectorAll('input[name="payment-mode"]');
     const savedPaymentMode = PAYMENT_MODE.mode;
@@ -2902,8 +2890,8 @@ function checkNicknameReady() {
         const status = manager.user ? manager.user.nicknameStatus : 'pending';
         if (status !== 'ok') {
             const msg = lang === 'vi'
-                ? 'Vui lòng chọn máy chủ và tra cứu biệt danh trước'
-                : '请先选择服务器并查询昵称';
+                ? 'Kho đạo cụ không khả dụng, vui lòng chọn máy chủ'
+                : '背包不可用，请先选择服务器';
             showToast(msg, 'warning');
             return false;
         }
