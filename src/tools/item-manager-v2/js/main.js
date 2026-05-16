@@ -327,6 +327,21 @@ class ItemManager {
                 return;
             }
 
+            // 已登录：同步当前账号 userId，清理其他账号历史
+            if (this.api.gameUid) {
+                const currentUserId = 'player_' + this.api.gameUid;
+                if (this.user.userId !== currentUserId) {
+                    this.user.userId = currentUserId;
+                    this.saveUser();
+                }
+                // 清理 state 中不属于当前账号的历史记录
+                const foreignHistory = this.state.history.filter(h => h.userId && h.userId !== currentUserId);
+                if (foreignHistory.length > 0) {
+                    this.state.history = this.state.history.filter(h => !h.userId || h.userId === currentUserId);
+                    this.saveState();
+                }
+            }
+
             // 已登录但未选择服务器：等待用户选择
             const currentServer = getServerId();
             if (!currentServer) {
@@ -1889,7 +1904,7 @@ class ItemManager {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const t = I18N[lang];
 
-        const myHistory = this.state.history.filter(h => h.userId === this.user.userId);
+        const myHistory = this.state.history.filter(h => h.userId && h.userId === this.user.userId);
 
         if (myHistory.length === 0) {
             empty.style.display = 'block';
