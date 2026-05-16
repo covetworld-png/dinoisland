@@ -506,7 +506,21 @@ class ItemManager {
         this.saveUser();
         updatePlayerIdentityDisplay();
 
-        const res = await this.api.getNickname(serverId);
+        const mockNickname = localStorage.getItem('itemManager_mockNickname') || '';
+        let res;
+        if (mockNickname && APP_MODE.isApi()) {
+            // 模拟昵称查询
+            await new Promise(r => setTimeout(r, 300));
+            if (mockNickname === 'success') {
+                res = { code: 0, extra: { nickname: 'TestPlayer', game_uid: this.api.gameUid || '13222545' } };
+            } else if (mockNickname === 'not_found') {
+                res = { code: 122, message: 'No character found on this server' };
+            } else {
+                res = { code: -1, message: 'Mock error' };
+            }
+        } else {
+            res = await this.api.getNickname(serverId);
+        }
         console.log('[fetchNickname] res:', res);
         if (res.code === 0 && res.extra && res.extra.nickname) {
             this.user.nicknameStatus = 'ok';
@@ -2741,6 +2755,12 @@ function setupDebugMock() {
     if (expiredCb) {
         expiredCb.checked = localStorage.getItem('itemManager_mockExpired') === '1';
     }
+    // Restore mock-nickname mode
+    const nicknameRadios = document.querySelectorAll('input[name="mock-nickname"]');
+    const savedMockNickname = localStorage.getItem('itemManager_mockNickname') || '';
+    nicknameRadios.forEach(function(r) {
+        if (r.value === savedMockNickname) r.checked = true;
+    });
     // Restore payment mode
     const paymentRadios = document.querySelectorAll('input[name="payment-mode"]');
     const savedPaymentMode = PAYMENT_MODE.mode;
