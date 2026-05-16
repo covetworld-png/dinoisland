@@ -1929,7 +1929,45 @@ class ItemManager {
 
         closePurchaseModal();
 
-        // 生成订单号 + 本地记录
+        // ========== 真实支付模式 ==========
+        if (PAYMENT_MODE.isReal() && this.api.isLoggedIn()) {
+            showToast(I18N[lang].payCreatingOrder, 'info');
+            const res = await this.api.userOrderApply(cfg.productId, qty);
+            if (res.code === 0 && res.extra && res.extra.order_id && res.extra.pay_url) {
+                const orderId = res.extra.order_id;
+                const payUrl = res.extra.pay_url;
+
+                // 保存待支付信息
+                const pending = {
+                    orderId, itemType, qty, cfg, traceId, skillId,
+                    manager: this, payUrl, isReal: true
+                };
+                window.pendingPayment = pending;
+                localStorage.setItem('itemManager_pending_payment', JSON.stringify({
+                    orderId, itemType, qty, traceId, skillId, payUrl, isReal: true,
+                    createdAt: Date.now()
+                }));
+
+                // 打开支付页（新标签页）
+                window.open(payUrl, '_blank');
+
+                // 启动轮询
+                startRealPaymentPolling(orderId, pending);
+
+                if (typeof Analytics !== 'undefined') {
+                    Analytics.track('purchase_init', { item_type: itemType, order_id: orderId, qty: qty, total_price: cfg.price * qty });
+                }
+            } else {
+                const errMsg = (res.message || I18N[lang].payCreateFailed);
+                showToast(errMsg, 'error');
+                if (typeof Analytics !== 'undefined') {
+                    Analytics.track('purchase_init_fail', { item_type: itemType, reason: errMsg });
+                }
+            }
+            return;
+        }
+
+        // ========== 模拟支付模式 ==========
         const orderId = generateOrderId();
         const order = {
             orderId, itemType,
@@ -1939,17 +1977,14 @@ class ItemManager {
         };
         addMockOrder(order);
 
-        // 保存待支付信息，供回调使用
         window.pendingPayment = {
             orderId, itemType, qty, cfg, traceId, skillId,
             manager: this
         };
 
-        // 保存模拟支付状态，供页面跳转回来后读取
         const mockStatus = getMockPaymentStatus();
         localStorage.setItem('mockPaymentStatus', mockStatus);
 
-        // 跳转至支付网关（当前模拟：页面重定向带回调参数）
         const callbackUrl = location.pathname + '?paySuc=1&orderId=' + encodeURIComponent(orderId);
         window.location.href = callbackUrl;
     }
@@ -1983,6 +2018,65 @@ async function mockQueryOrder(orderId) {
     } else {
         return { success: false, orderId, status: 'not_found', message: 'no_record' };
     }
+}
+
+// 真实支付轮询
+function startRealPaymentPolling(orderId, pending) {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    const maxAttempts = 30;
+    const interval = 3000;
+    let attempts = 0;
+    let stopped = false;
+
+    function stop() { stopped = true; }
+    window._stopPaymentPoll = stop;
+
+    async function poll() {
+        if (stopped) return;
+        attempts++;
+        if (attempts > maxAttempts) {
+            showToast(I18N[lang].payPollingTimeout, 'warning');
+            window.pendingPayment = null;
+            localStorage.removeItem('itemManager_pending_payment');
+            return;
+        }
+
+        const res = await window.apiClient.userOrderCheck(orderId);
+        if (res.code === 0 && res.extra) {
+            const status = res.extra.status;
+            if (status === 'shipped') {
+                stop();
+                finishRealPaymentSuccess(pending);
+                return;
+            }
+        }
+        setTimeout(poll, interval);
+    }
+
+    poll();
+}
+
+function finishRealPaymentSuccess(pending) {
+    const lang = document.body.getAttribute('data-lang') || 'vi';
+    const order = pending;
+    if (!order || !order.manager) {
+        showToast(I18N[lang].payNoRecordTitle, 'warning');
+        return;
+    }
+
+    order.manager.user.inventory[order.cfg.inventoryKey] = (order.manager.user.inventory[order.cfg.inventoryKey] || 0) + order.qty;
+    order.manager.saveUser();
+    order.manager.renderInventory();
+    openPaySuccessModal(order.itemType, order.qty);
+
+    if (typeof Analytics !== 'undefined') {
+        Analytics.track('purchase_result', { item_type: order.itemType, result: 'success', qty: order.qty, total_price: order.cfg.price * order.qty });
+        if (order.traceId) Analytics.endTrace(order.traceId, 'success', { qty: order.qty, total_price: order.cfg.price * order.qty });
+    }
+
+    window.pendingPayment = null;
+    window.currentPurchaseTraceId = null;
+    localStorage.removeItem('itemManager_pending_payment');
 }
 
 function formatOrderTime(ts) {
@@ -2045,13 +2139,30 @@ function closeOrderQueryModal() {
     document.getElementById('order-query-overlay').style.display = 'none';
 }
 
+// 根据 product_id 查找道具配置
+function findProductById(productId) {
+    for (var key in PURCHASE_CONFIG) {
+        if (PURCHASE_CONFIG[key].productId === productId) {
+            return { type: key, cfg: PURCHASE_CONFIG[key] };
+        }
+    }
+    return null;
+}
+
 function renderOrderList() {
     const lang = document.body.getAttribute('data-lang') || 'vi';
     const t = I18N[lang];
     const listEl = document.getElementById('order-list');
     const emptyEl = document.getElementById('order-empty');
-    const orders = window.mockOrderHistory || [];
 
+    // 真实模式：调用服务端接口
+    if (PAYMENT_MODE.isReal() && window.apiClient && window.apiClient.isLoggedIn()) {
+        renderRealOrderList(listEl, emptyEl, t, lang);
+        return;
+    }
+
+    // 模拟模式：读取本地记录
+    const orders = window.mockOrderHistory || [];
     if (orders.length === 0) {
         if (listEl) listEl.style.display = 'none';
         if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.textContent = t.orderQueryEmpty; }
@@ -2077,23 +2188,71 @@ function renderOrderList() {
     }).join('');
 }
 
+async function renderRealOrderList(listEl, emptyEl, t, lang) {
+    if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">' + t.loading + '</div>';
+    const res = await window.apiClient.userOrderQueryAll();
+    if (res.code !== 0 || !res.extra || !res.extra.orders) {
+        if (listEl) listEl.style.display = 'none';
+        if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.textContent = t.orderQueryEmpty; }
+        return;
+    }
+    const orders = res.extra.orders;
+    if (orders.length === 0) {
+        if (listEl) listEl.style.display = 'none';
+        if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.textContent = t.orderQueryEmpty; }
+        return;
+    }
+    if (listEl) listEl.style.display = 'block';
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    listEl.innerHTML = orders.map(function(o) {
+        const isPaid = o.status === 'shipped';
+        const statusText = isPaid ? t.orderStatusPaid : t.orderStatusUnpaid;
+        const prod = findProductById(o.product_id);
+        const productName = prod ? (lang === 'vi' ? prod.cfg.nameVi : prod.cfg.nameCn) : ('ID:' + o.product_id);
+        const price = prod ? prod.cfg.price : 0;
+        const amount = (price * o.count).toLocaleString('vi-VN') + ' VND';
+        const actionBtn = !isPaid
+            ? '<button class="btn btn-sm" onclick="requeryOrder(\'' + o.order_id + '\')">' + t.orderRequery + '</button>'
+            : '';
+        return '<div class="order-item ' + (isPaid ? 'paid' : 'unpaid') + '">' +
+            '<div class="col-product">' + productName + ' x' + o.count + '</div>' +
+            '<div class="col-amount">' + amount + '</div>' +
+            '<div class="col-status">' + statusText + '</div>' +
+            '<div class="col-action">' + actionBtn + '</div>' +
+            '</div>' +
+            '<div class="order-meta">' + o.order_id + ' · ' + formatOrderTime(new Date(o.create_time).getTime()) + '</div>';
+    }).join('');
+}
+
 async function requeryOrder(orderId) {
     const lang = document.body.getAttribute('data-lang') || 'vi';
     showToast(I18N[lang].payQuerying, 'info');
 
-    // 查找订单，确定上次查询结果，交替切换
+    // 真实模式：调用服务端接口
+    if (PAYMENT_MODE.isReal() && window.apiClient && window.apiClient.isLoggedIn()) {
+        const res = await window.apiClient.userOrderCheck(orderId);
+        if (res.code === 0 && res.extra && res.extra.status === 'shipped') {
+            renderOrderList();
+            showToast(I18N[lang].paySuccessTitle, 'success');
+        } else {
+            renderOrderList();
+            showToast(I18N[lang].payQueryFail, 'warning');
+        }
+        return;
+    }
+
+    // 模拟模式：交替切换
     var order = window.mockOrderHistory.find(function(o) { return o.orderId === orderId; });
     var lastStatus = order ? order.lastRequeryStatus : null;
     var thisResult = (lastStatus === 'success') ? false : true;
 
-    // 模拟网络延迟
     await new Promise(r => setTimeout(r, 800));
 
     if (order) {
         order.status = thisResult ? 'paid' : 'not_found';
         order.lastRequeryStatus = thisResult ? 'success' : 'fail';
     }
-    // 同步 localStorage
     localStorage.setItem('mockOrderHistory', JSON.stringify(window.mockOrderHistory));
 
     renderOrderList();
@@ -2104,12 +2263,11 @@ async function requeryOrder(orderId) {
     }
 }
 
-// 支付回调处理
-function handlePaymentCallback(orderId) {
+// 支付回调处理（模拟模式）
+function handleMockPaymentCallback(orderId) {
     var lang = document.body.getAttribute('data-lang') || 'vi';
     var pending = window.pendingPayment;
 
-    // 尝试从 pending 或订单历史中恢复信息
     var order = (pending && pending.orderId === orderId) ? pending : null;
     if (!order) {
         var stored = window.mockOrderHistory.find(function(o) { return o.orderId === orderId; });
@@ -2132,7 +2290,6 @@ function handlePaymentCallback(orderId) {
 
     showToast(I18N[lang].payQuerying, 'info');
     mockQueryOrder(orderId).then(function(result) {
-        // 更新订单状态
         var storedOrder = window.mockOrderHistory.find(function(o) { return o.orderId === orderId; });
         if (storedOrder) {
             storedOrder.status = result.success ? 'paid' : 'not_found';
@@ -2160,27 +2317,67 @@ function handlePaymentCallback(orderId) {
     });
 }
 
-// 页面加载时检测 URL 回调参数
+// 恢复真实支付 pending（页面加载时从 localStorage 读取）
+function restoreRealPendingPayment() {
+    var raw = localStorage.getItem('itemManager_pending_payment');
+    if (!raw) return null;
+    try {
+        var saved = JSON.parse(raw);
+        if (!saved || !saved.isReal || !saved.orderId) return null;
+        // 超过 30 分钟视为过期
+        if (Date.now() - saved.createdAt > 30 * 60 * 1000) {
+            localStorage.removeItem('itemManager_pending_payment');
+            return null;
+        }
+        var cfg = PURCHASE_CONFIG[saved.itemType];
+        if (!cfg) return null;
+        return {
+            orderId: saved.orderId,
+            itemType: saved.itemType,
+            qty: saved.qty,
+            cfg: cfg,
+            traceId: saved.traceId,
+            skillId: saved.skillId,
+            manager: window.itemManager,
+            payUrl: saved.payUrl,
+            isReal: true
+        };
+    } catch (e) {
+        localStorage.removeItem('itemManager_pending_payment');
+        return null;
+    }
+}
+
+// 页面加载时检测支付回调
 function checkPaymentUrlCallback() {
+    // 1. 模拟模式：检测 URL 参数
     var params = new URLSearchParams(location.search);
     var paySuc = params.get('paySuc');
     var orderId = params.get('orderId');
     if (paySuc === '1' && orderId) {
-        // 清除 URL 参数，避免刷新重复触发
         var url = new URL(location.href);
         url.searchParams.delete('paySuc');
         url.searchParams.delete('orderId');
         history.replaceState(null, '', url.toString());
-        // 延迟处理，等待页面初始化完成
         setTimeout(function() {
-            handlePaymentCallback(orderId);
+            handleMockPaymentCallback(orderId);
         }, 500);
+        return;
+    }
+
+    // 2. 真实模式：检测 localStorage 中的 pendingPayment
+    var pending = restoreRealPendingPayment();
+    if (pending && window.itemManager) {
+        window.pendingPayment = pending;
+        showToast(I18N[document.body.getAttribute('data-lang') || 'vi'].payQuerying, 'info');
+        startRealPaymentPolling(pending.orderId, pending);
     }
 }
 
 // Purchase config
 const PURCHASE_CONFIG = {
     weather: {
+        productId: 102,
         price: 130000,
         icon: './static/icons/weather.png',
         nameVi: 'Thẻ Thời Tiết',
@@ -2190,6 +2387,7 @@ const PURCHASE_CONFIG = {
         inventoryKey: 'weather'
     },
     time: {
+        productId: 105,
         price: 130000,
         icon: './static/icons/time.png',
         nameVi: 'Thẻ Thời Gian',
@@ -2199,6 +2397,7 @@ const PURCHASE_CONFIG = {
         inventoryKey: 'time'
     },
     announcement: {
+        productId: 104,
         price: 130000,
         icon: './static/icons/announcement.png',
         nameVi: 'Thẻ Thông Báo',
@@ -2208,6 +2407,7 @@ const PURCHASE_CONFIG = {
         inventoryKey: 'announcement'
     },
     flow: {
+        productId: 103,
         price: 250000,
         icon: './static/icons/flow.png',
         nameVi: 'Thẻ Dòng Chảy',
@@ -2217,6 +2417,7 @@ const PURCHASE_CONFIG = {
         inventoryKey: 'flow'
     },
     dinoGrow50: {
+        productId: 101,
         price: 100000,
         icon: './static/icons/dino.png',
         nameVi: 'Thẻ Tăng Kích Thước',
@@ -2224,6 +2425,18 @@ const PURCHASE_CONFIG = {
         descVi: 'Tăng kích thước khủng long 50%.',
         descCn: '使恐龙体型增大50%。',
         inventoryKey: 'dinoGrow50'
+    }
+};
+
+// 支付模式管理
+const PAYMENT_MODE = {
+    get mode() { return localStorage.getItem('itemManager_payment_mode') || 'mock'; },
+    set mode(v) { localStorage.setItem('itemManager_payment_mode', v); },
+    isMock() { return this.mode === 'mock'; },
+    isReal() { return this.mode === 'real'; },
+    toggle() {
+        this.mode = this.isMock() ? 'real' : 'mock';
+        return this.mode;
     }
 };
 
@@ -2251,6 +2464,15 @@ function changePurchaseQty(delta) {
 
 function toggleInvVisibility(itemKey, visible) {
     if (window.itemManager) window.itemManager.toggleInvVisibility(itemKey, visible);
+}
+
+function togglePaymentMode(mode) {
+    PAYMENT_MODE.mode = mode;
+    const mockControls = document.getElementById('mock-payment-controls');
+    if (mockControls) {
+        mockControls.style.opacity = (mode === 'real') ? '0.4' : '1';
+        mockControls.style.pointerEvents = (mode === 'real') ? 'none' : 'auto';
+    }
 }
 
 // Escape HTML
@@ -2425,6 +2647,13 @@ function setupDebugMock() {
     if (expiredCb) {
         expiredCb.checked = localStorage.getItem('itemManager_mockExpired') === '1';
     }
+    // Restore payment mode
+    const paymentRadios = document.querySelectorAll('input[name="payment-mode"]');
+    const savedPaymentMode = PAYMENT_MODE.mode;
+    paymentRadios.forEach(function(r) {
+        if (r.value === savedPaymentMode) r.checked = true;
+    });
+    togglePaymentMode(savedPaymentMode);
     // Toggle debug panel controls based on mode
     const isApi = APP_MODE.isApi();
     const mockControls = document.getElementById('mock-controls');

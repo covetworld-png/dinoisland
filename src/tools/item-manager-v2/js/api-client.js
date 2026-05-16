@@ -248,6 +248,57 @@ class ApiClient {
         }
     }
 
+    // ========== 支付接口 ==========
+    async userOrderApply(productId, count) {
+        const url = API_CONFIG.baseUrl + '/userOrderApply';
+        try {
+            console.log('[API] POST', url, { product_id: productId, count: count });
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: this.getHeaders(),
+                body: JSON.stringify({ product_id: productId, count: count })
+            });
+            console.log('[API] POST', url, 'status:', res.status, 'ok:', res.ok);
+            return await res.json();
+        } catch (e) {
+            console.error('[API] POST error:', url, e.message);
+            return { code: -1, message: e.message };
+        }
+    }
+
+    async userOrderCheck(orderId) {
+        const url = API_CONFIG.baseUrl + '/userOrderCheck';
+        try {
+            console.log('[API] POST', url, { order_id: orderId });
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: this.getHeaders(),
+                body: JSON.stringify({ order_id: orderId })
+            });
+            console.log('[API] POST', url, 'status:', res.status, 'ok:', res.ok);
+            return await res.json();
+        } catch (e) {
+            console.error('[API] POST error:', url, e.message);
+            return { code: -1, message: e.message };
+        }
+    }
+
+    async userOrderQueryAll() {
+        const url = API_CONFIG.baseUrl + '/userOrderQueryAll';
+        try {
+            console.log('[API] POST', url);
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: this.getHeaders()
+            });
+            console.log('[API] POST', url, 'status:', res.status, 'ok:', res.ok);
+            return await res.json();
+        } catch (e) {
+            console.error('[API] POST error:', url, e.message);
+            return { code: -1, message: e.message };
+        }
+    }
+
     isLoggedIn() {
         return !!this.token;
     }

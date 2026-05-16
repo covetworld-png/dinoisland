@@ -50,6 +50,12 @@
           <label><input type="radio" name="mock-error" value="SYSTEM_ERROR"> 系统异常 / Lỗi hệ thống</label>
         </div>
         <div class="debug-divider"></div>
+        <div class="debug-options" id="payment-mode-controls">
+          <strong>支付模式 / Chế độ thanh toán</strong>
+          <label><input type="radio" name="payment-mode" value="mock" checked onchange="togglePaymentMode(this.value)"> 模拟支付 / Mô phỏng</label>
+          <label><input type="radio" name="payment-mode" value="real" onchange="togglePaymentMode(this.value)"> 真实接口 / API thực</label>
+        </div>
+        <div class="debug-divider"></div>
         <div class="debug-options" id="mock-payment-controls">
           <strong>模拟支付状态 / Trạng thái thanh toán</strong>
           <label><input type="radio" name="mock-payment" value="success" checked onchange="localStorage.setItem('mockPaymentStatus', this.value)"> 成功 / Thành công</label>
