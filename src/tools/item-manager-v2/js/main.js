@@ -208,6 +208,43 @@ const I18N = {
         conflictFlowByTime: (time) => `Thẻ Thờ Gian đang sử dụng (${time}), không thể khởi động dòng chảy`,
         conflictTimeByFlow: (time) => `Dòng Chảy Thờ Gian đang chạy (${time}), không thể sử dụng thẻ thờ gian`,
         noItem: 'Không đủ đạo cụ',
+        loginExpired: 'Đăng nhập đã hết hạn, vui lòng đăng nhập lại',
+        apiSyncFailed: 'Đồng bộ API thất bại: ',
+        submittedWaiting: 'Đã gửi, đang chờ hiệu lực...',
+        inventoryEmpty: 'Tài khoản hiện tại không có đạo cụ, vui lòng sử dụng simAddBenefit để bổ sung',
+        inventoryReset: 'Đạo cụ đã được đặt lại!',
+        switchedToApi: 'Đã chuyển sang chế độ API thực',
+        switchedToMock: 'Đã chuyển sang chế độ mô phỏng',
+        dataRefreshed: 'Dữ liệu đã được làm mới',
+        getRecordsFailed: 'Lấy bản ghi thất bại: ',
+        unknownError: 'Lỗi không xác định',
+        noRecordsToClear: 'Không có bản ghi đang thực hiện cần xóa',
+        clearComplete: 'Xóa hoàn tất: thành công ',
+        clearFailSuffix: '，thất bại ',
+        loggedOut: 'Đã đăng xuất',
+        supplemented: 'Đã bổ sung ',
+        supplementedSuffix: ' loại đạo cụ',
+        supplementFailed: ' bổ sung thất bại code=',
+        invalidWeather: 'Lựa chọn thờ tiết không hợp lệ',
+        invalidTime: 'Lựa chọn thờ gian không hợp lệ',
+        confirmStopFlow: 'Bạn có chắc muốn dừng dòng chảy? Thẻ sẽ bị tiêu hao và không hoàn lại.',
+        enterContentPlaceholder: 'Nhập nội dung...',
+        loginExpiredOrNoAuth: 'Phiên đăng nhập của bạn đã hết hạn hoặc không có quyền truy cập, vui lòng đăng nhập lại',
+        paySuccess: 'Thanh toán thành công! Đã mua ',
+        apiConnected: '✓ API đã kết nối',
+        mockModeActive: '🧪 Chế độ mô phỏng',
+        sizeIncrease50: 'Tăng 50%',
+        sizeIncrease50Title: 'Tăng kích thước 50%',
+        activeStatus: 'Đang hiệu lực ',
+        flowCardTitle: 'Dòng chảy thờ gian',
+        apiNotLoggedIn: 'API chưa đăng nhập, hiển thị trống',
+        sentStatus: 'Đã gửi',
+        defaultUsername: 'Ngườ bí ẩn',
+        langToggleVi: I18N[lang].langToggleVi,
+        langToggleCn: I18N[lang].langToggleCn,
+        appTitle: 'Trung Tâm Thần Tích',
+        apiModeLabel: 'API: Sử dụng interface server thực',
+        mockModeLabel: 'Mô phỏng: Hiệu lực lần sử dụng đạo cụ tiếp theo',
         connectingServer: 'Đang kết nối server...',
         serverErrorConflict: 'Server: Có người chơi khác đang sử dụng đạo cụ này, vui lòng thử lại sau',
         serverErrorNoItem: 'Server: Không đủ đạo cụ',
@@ -268,6 +305,29 @@ const I18N = {
         conflictTimeByFlow: (time) => `时间流动正在运行中 (${time})，无法使用时间卡`,
         conflictDinoSize: (name, time) => `玩家 ${name} 正在改变体型，剩余 ${time}`,
         noItem: '道具不足',
+        loginExpired: '登录已过期，请重新登录',
+        apiSyncFailed: 'API 同步失败: ',
+        submittedWaiting: '已提交，等待生效中...',
+        inventoryEmpty: '当前账号库存为空，请使用 simAddBenefit 补充',
+        inventoryReset: '道具已重置！',
+        switchedToApi: '已切换到真实API模式',
+        switchedToMock: '已切换到模拟模式',
+        dataRefreshed: '数据已刷新',
+        getRecordsFailed: '获取记录失败: ',
+        unknownError: I18N[lang].unknownError,
+        noRecordsToClear: I18N[lang].noRecordsToClear,
+        clearComplete: I18N[lang].clearComplete,
+        clearFailSuffix: I18N[lang].clearFailSuffix,
+        loggedOut: I18N[lang].loggedOut,
+        supplemented: I18N[lang].supplemented,
+        supplementedSuffix: I18N[lang].supplementedSuffix,
+        supplementFailed: I18N[lang].supplementFailed,
+        invalidWeather: I18N[lang].invalidWeather,
+        invalidTime: I18N[lang].invalidTime,
+        confirmStopFlow: I18N[lang].confirmStopFlow,
+        enterContentPlaceholder: I18N[lang].enterContentPlaceholder,
+        loginExpiredOrNoAuth: I18N[lang].loginExpiredOrNoAuth,
+        paySuccess: I18N[lang].paySuccess,
         connectingServer: '正在连接服务端...',
         serverErrorConflict: '服务端返回：有其他玩家正在使用该道具，请稍后再试',
         serverErrorNoItem: '服务端返回：道具数量不足',
@@ -295,7 +355,7 @@ const I18N = {
             pending_review: '待审核',
             approved: '已通过',
             queued: '待发送',
-            sent: '已发送',
+            sent: I18N[lang].sentStatus,
             active: '进行中',
             completed: '已完成'
         },
@@ -520,7 +580,7 @@ class ItemManager {
             if (benefitsRes.code === 91) {
                 this.api.logout();
                 this.updateAuthUI();
-                showToast('登录已过期，请重新登录', 'warning');
+                showToast(t.loginExpired, 'warning');
                 return false;
             }
             if (benefitsRes.code === 0 && benefitsRes.extra) {
@@ -530,12 +590,12 @@ class ItemManager {
                 if (this.api.gameUid && this.user.userId !== 'player_' + this.api.gameUid) {
                     this.user.userId = 'player_' + this.api.gameUid;
                 }
-                this.user.username = this.user.username || '神秘人';
-                this.user.usernameCn = this.user.usernameCn || '神秘人';
+                this.user.username = this.user.username || I18N[lang].defaultUsername;
+                this.user.usernameCn = this.user.usernameCn || I18N[lang].defaultUsername;
                 this.saveUser();
                 updatePlayerIdentityDisplay();
                 if (benefits.length === 0) {
-                    showToast('当前账号库存为空，请使用 simAddBenefit 补充', 'info');
+                    showToast(I18N[lang].inventoryEmpty, 'info');
                 }
             }
             const recordsRes = await this.api.getRecords();
@@ -575,7 +635,7 @@ class ItemManager {
             return true;
         } catch (e) {
             console.error('API sync failed:', e);
-            showToast('API 同步失败: ' + e.message, 'error');
+            showToast(t.apiSyncFailed + e.message, 'error');
             return false;
         }
     }
@@ -589,7 +649,7 @@ class ItemManager {
         if (APP_MODE.isApi()) {
             if (this.api.isLoggedIn()) {
                 if (panel) panel.style.display = 'flex';
-                if (status) { status.style.display = 'inline'; status.textContent = '✓ API已连接'; status.style.color = 'var(--green)'; }
+                if (status) { status.style.display = 'inline'; status.textContent = I18N[lang].apiConnected; status.style.color = 'var(--green)'; }
                 if (logoutBtn) logoutBtn.style.display = 'inline-flex';
             } else {
                 if (panel) panel.style.display = 'none';
@@ -598,7 +658,7 @@ class ItemManager {
             }
         } else {
             if (panel) panel.style.display = 'none';
-            if (status) { status.style.display = 'inline'; status.textContent = '🧪 模拟模式'; status.style.color = 'var(--gold)'; }
+            if (status) { status.style.display = 'inline'; status.textContent = I18N[lang].mockModeActive; status.style.color = 'var(--gold)'; }
             if (logoutBtn) logoutBtn.style.display = 'none';
         }
         updatePlayerIdentityDisplay();
@@ -775,7 +835,7 @@ class ItemManager {
         if (APP_MODE.isApi()) {
             const weatherId = WEATHER_ID_MAP[selected];
             if (!weatherId || weatherId < 1 || weatherId > 10) {
-                showToast(t.invalidOption || '无效的天气选择', 'error');
+                showToast(t.invalidOption || I18N[lang].invalidWeather, 'error');
                 return;
             }
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
@@ -795,7 +855,7 @@ class ItemManager {
             
             const res = await this.api.apply(2, serverId, { weather_id: weatherId });
             if (res.code === 0) {
-                showToast(lang === 'vi' ? 'Đã gửi, đang chờ kích hoạt...' : '已提交，等待生效中...', 'info');
+                showToast(t.submittedWaiting, 'info');
                 const now = Date.now();
                 // 1. 乐观锁
                 this.state.globalLocks.weather = {
@@ -925,7 +985,7 @@ class ItemManager {
         // API模式
         if (APP_MODE.isApi()) {
             if (typeof selected !== 'number' || selected < 0 || selected > 2400) {
-                showToast(t.invalidOption || '无效的时间选择', 'error');
+                showToast(t.invalidOption || I18N[lang].invalidTime, 'error');
                 return;
             }
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
@@ -950,7 +1010,7 @@ class ItemManager {
                 const hh = Math.floor(selected / 100);
                 const mm = Math.round((selected % 100) * 0.6);
                 const detail = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
-                showToast('已提交，等待生效中...', 'info');
+                showToast(t.submittedWaiting, 'info');
                 const now = Date.now();
                 // 1. 乐观锁
                 this.state.globalLocks.time = {
@@ -1090,7 +1150,7 @@ class ItemManager {
             
             const res = await this.api.apply(3, serverId, { time_hm: 0 });
             if (res.code === 0) {
-                showToast('已提交，等待生效中...', 'info');
+                showToast(t.submittedWaiting, 'info');
                 const now = Date.now();
                 // 1. 乐观锁
                 this.state.globalLocks.flow = {
@@ -1196,7 +1256,7 @@ class ItemManager {
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
             const res = await this.api.apply(1, serverId);
             if (res.code === 0) {
-                showToast('已提交，等待生效中...', 'info');
+                showToast(t.submittedWaiting, 'info');
                 const now = Date.now();
                 // 乐观设置临时锁（体型变化无固定过期）
                 this.state.globalLocks.dinoSize = {
@@ -1217,7 +1277,7 @@ class ItemManager {
                     userId: this.user.userId,
                     username: this.user.username,
                     usernameCn: this.user.usernameCn,
-                    detail: lang === 'vi' ? 'Tăng 50%' : '增大 50%',
+                    detail: lang === 'vi' ? 'Tăng 50%' : I18N[lang].sizeIncrease50,
                     startTime: now,
                     endTime: null,
                     status: 'active'
@@ -1263,7 +1323,7 @@ class ItemManager {
             endTime: now + DURATION_DINO,
             sizeType: 'grow50',
             detail: 'grow50',
-            detailName: '体型增大50%'
+            detailName: I18N[lang].sizeIncrease50Title
         };
 
         this.state.history.unshift({
@@ -1272,7 +1332,7 @@ class ItemManager {
             userId: this.user.userId,
             username: this.user.username,
             usernameCn: this.user.usernameCn,
-            detail: lang === 'vi' ? 'Tăng 50%' : '增大 50%',
+            detail: lang === 'vi' ? 'Tăng 50%' : I18N[lang].sizeIncrease50,
             startTime: now,
             endTime: null,
             status: 'active'
@@ -1296,7 +1356,7 @@ class ItemManager {
 
         const confirmMsg = lang === 'vi'
             ? 'Bạn có chắc muốn dừng dòng chảy thờ gian? Thẻ sẽ bị tiêu hao và không hoàn lại.'
-            : '确定要停止时间流动吗？卡片将被消耗且不予返还。';
+            : I18N[lang].confirmStopFlow;
         if (!confirm(confirmMsg)) return;
 
         // Clear lock
@@ -1347,7 +1407,7 @@ class ItemManager {
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
             const res = await this.api.apply(4, serverId, { content: content.trim() });
             if (res.code === 0) {
-                showToast(t.sent || '已发送', 'success');
+                showToast(t.sent || I18N[lang].sentStatus, 'success');
                 const now = Date.now();
                 // 添加历史记录
                 this.state.history.unshift({
@@ -1401,7 +1461,7 @@ class ItemManager {
         this.renderInventory();
         this.renderAnnouncementPanel();
         this.renderHistory();
-        showToast(t.sent || '已发送', 'success');
+        showToast(t.sent || I18N[lang].sentStatus, 'success');
     }
 
     resetInventory() {
@@ -1416,7 +1476,7 @@ class ItemManager {
         this.renderInventory();
         this.renderAllPanels();
         const lang = document.body.getAttribute('data-lang') || 'vi';
-        showToast(lang === 'vi' ? 'Đã khôi phục đạo cụ!' : '道具已重置！', 'success');
+        showToast(lang === 'vi' ? 'Đã khôi phục đạo cụ!' : I18N[lang].inventoryReset, 'success');
     }
 
     // Countdown Management
@@ -1453,7 +1513,7 @@ class ItemManager {
                     } else if (remaining > 0) {
                         banner.style.display = type === 'dinoSize' ? 'none' : 'flex';
                         if (lock.optimistic) {
-                            value.textContent = '生效中 ' + formatTime(remaining);
+                            value.textContent = I18N[lang].activeStatus + formatTime(remaining);
                         } else {
                             value.textContent = type === 'dinoSize' ? '' : formatTime(remaining);
                         }
@@ -1536,7 +1596,7 @@ class ItemManager {
                                 const name = lang === 'vi' ? lock.username : (lock.usernameCn || lock.username);
                                 let detail = '';
                                 if (type === 'flow') {
-                                    detail = 'Dòng chảy thờ gian / 时间流动';
+                                    detail = I18N[lang].flowCardTitle;
                                 } else {
                                     const namesMap = type === 'weather' 
                                         ? (lang === 'vi' ? I18N.vi.weatherNames : I18N.cn.weatherNames)
@@ -1672,7 +1732,7 @@ class ItemManager {
         const isApiNotLoggedIn = APP_MODE.isApi() && (!this.api || !this.api.isLoggedIn());
         const inv = isApiNotLoggedIn ? {} : (this.user.inventory || {});
         const visibility = this.user.inventoryVisibility || {};
-        console.log('[renderInventory]', isApiNotLoggedIn ? 'API未登录，显示空' : inv);
+        console.log('[renderInventory]', isApiNotLoggedIn ? I18N[lang].apiNotLoggedIn : inv);
 
         const invMap = [
             { type: 'weather', key: 'weatherCard', cfg: 'weather' },
@@ -1915,7 +1975,7 @@ class ItemManager {
                 <div class="announcement-item">
                     <div class="announcement-content">${escapeHtml(ann.content)}</div>
                     <div class="announcement-meta">
-                        <span class="status-badge sent">${t.status.sent || '已发送'}</span>
+                        <span class="status-badge sent">${t.status.sent || I18N[lang].sentStatus}</span>
                         <span class="announcement-time">${timeStr}</span>
                     </div>
                 </div>
@@ -1983,7 +2043,7 @@ class ItemManager {
         const sid = getServerId();
         if (playerNameEl) {
             const lang = document.body.getAttribute('data-lang') || 'vi';
-            const fallback = lang === 'vi' ? 'Người Bí Ẩn' : '神秘人';
+            const fallback = lang === 'vi' ? 'Người Bí Ẩn' : I18N[lang].defaultUsername;
             playerNameEl.textContent = this.user.username || this.user.usernameCn || fallback;
         }
         if (serverSelect) {
@@ -2049,7 +2109,7 @@ class ItemManager {
 
         showToast(lang === 'vi'
             ? 'Thanh toan thanh cong! Da mua ' + cfg.nameVi + ' x' + qty
-            : '支付成功！已购买 ' + cfg.nameCn + ' x' + qty, 'success');
+            : I18N[lang].paySuccess + cfg.nameCn + ' x' + qty, 'success');
 
         this.user.inventory[cfg.inventoryKey] = (this.user.inventory[cfg.inventoryKey] || 0) + qty;
         this.saveUser();
@@ -2152,15 +2212,15 @@ function showToast(message, type = 'info') {
 // Language Toggle
 function applyLangUI(lang) {
     document.body.setAttribute('data-lang', lang);
-    document.getElementById('current-lang').textContent = lang === 'vi' ? 'VI / 中' : '中 / VI';
+    document.getElementById('current-lang').textContent = lang === 'vi' ? I18N[lang].langToggleVi : I18N[lang].langToggleCn;
 
     // Update title
-    document.title = lang === 'vi' ? 'Trung Tâm Thần Tích' : '神迹中心';
+    document.title = lang === 'vi' ? 'Trung Tâm Thần Tích' : I18N[lang].appTitle;
 
     // Update textarea placeholder
     const textarea = document.getElementById('announcement-content');
     if (textarea) {
-        textarea.placeholder = lang === 'vi' ? 'Nhập nội dung...' : '输入内容...';
+        textarea.placeholder = lang === 'vi' ? 'Nhập nội dung...' : I18N[lang].enterContentPlaceholder;
     }
 
     // Update player identity
@@ -2168,7 +2228,7 @@ function applyLangUI(lang) {
     const manager = window.itemManager;
     if (playerNameEl && manager) {
         const lang = document.body.getAttribute('data-lang') || 'vi';
-        const fallback = lang === 'vi' ? 'Người Bí Ẩn' : '神秘人';
+        const fallback = lang === 'vi' ? 'Người Bí Ẩn' : I18N[lang].defaultUsername;
         playerNameEl.textContent = manager.user.username || manager.user.usernameCn || fallback;
     }
 }
@@ -2318,7 +2378,7 @@ function setupDebugMock() {
     if (apiDivider) apiDivider.style.display = isApi ? 'block' : 'none';
     if (apiClearControls) apiClearControls.style.display = isApi ? 'flex' : 'none';
     if (btnResetMock) btnResetMock.style.display = isApi ? 'none' : 'inline-flex';
-    if (hint) hint.textContent = isApi ? 'API模式：使用真实服务端接口' : '模拟模式：下一次使用道具时生效';
+    if (hint) hint.textContent = isApi ? I18N[lang].apiModeLabel : I18N[lang].mockModeLabel;
 }
 
 /* ── auth check ── */
@@ -2377,7 +2437,7 @@ function updatePlayerIdentityDisplay() {
         if (isLoggedIn) {
             const gameUid = manager.api.gameUid || '';
             const lang = document.body.getAttribute('data-lang') || 'vi';
-            const fallbackName = lang === 'vi' ? 'Người Bí Ẩn' : '神秘人';
+            const fallbackName = lang === 'vi' ? 'Người Bí Ẩn' : I18N[lang].defaultUsername;
             const displayName = manager.user.username || manager.user.usernameCn || fallbackName;
             if (accountEl) accountEl.textContent = gameUid;
             if (nameEl) {
@@ -2402,7 +2462,7 @@ function updatePlayerIdentityDisplay() {
         if (accountEl) accountEl.textContent = uid.replace('player_', '');
         if (nameEl) {
             const lang = document.body.getAttribute('data-lang') || 'vi';
-            const fallback = lang === 'vi' ? 'Người Bí Ẩn' : '神秘人';
+            const fallback = lang === 'vi' ? 'Người Bí Ẩn' : I18N[lang].defaultUsername;
             nameEl.textContent = manager.user.username || manager.user.usernameCn || fallback;
             nameEl.style.color = '';
             nameEl.style.fontSize = '';
@@ -2413,7 +2473,7 @@ function updatePlayerIdentityDisplay() {
 
 function switchMode(mode) {
     APP_MODE.mode = mode;
-    showToast(mode === 'api' ? '已切换到真实API模式' : '已切换到模拟模式', 'info');
+    showToast(mode === 'api' ? I18N[lang].switchedToApi : I18N[lang].switchedToMock, 'info');
     setTimeout(() => location.reload(), 800);
 }
 
@@ -2425,7 +2485,7 @@ async function refreshApiData() {
         window.itemManager.renderAllPanels();
         window.itemManager.renderHistory();
         window.itemManager.startCountdowns();
-        showToast('数据已刷新', 'success');
+        showToast(I18N[lang].dataRefreshed, 'success');
     }
 }
 
@@ -2434,7 +2494,7 @@ async function forceClearRecords() {
     const api = window.itemManager.api;
     const res = await api.getRecords();
     if (res.code !== 0 || !res.extra || !res.extra.records) {
-        showToast('获取记录失败: ' + (res.message || '未知错误'), 'error');
+        showToast(I18N[lang].getRecordsFailed + (res.message || I18N[lang].unknownError), 'error');
         return;
     }
     const records = res.extra.records;
@@ -2443,7 +2503,7 @@ async function forceClearRecords() {
         return status === 'doing' || status === '1' || status === 'todo';
     });
     if (activeRecords.length === 0) {
-        showToast('没有进行中的记录需要清除', 'info');
+        showToast(I18N[lang].noRecordsToClear, 'info');
         return;
     }
     let success = 0;
@@ -2458,7 +2518,7 @@ async function forceClearRecords() {
             console.log('[forceClear] ❌', r.record_id, result.message || result.code);
         }
     }
-    showToast('清除完成：成功 ' + success + '，失败 ' + fail, fail > 0 ? 'warning' : 'success');
+    showToast(I18N[lang].clearComplete + success + I18N[lang].clearFailSuffix + fail, fail > 0 ? 'warning' : 'success');
     // 重新同步
     await window.itemManager.syncFromApi();
     window.itemManager.renderInventory();
@@ -2491,7 +2551,7 @@ function doApiLogout() {
         window.itemManager.renderAllPanels();
         window.itemManager.startCountdowns();
         window.itemManager.updateAuthUI();
-        showToast('已退出登录', 'info');
+        showToast(I18N[lang].loggedOut, 'info');
     }
 }
 
@@ -2510,12 +2570,12 @@ resetInventory = async function() {
             if (res.code === 0) {
                 successCount++;
             } else if (res.code === 91) {
-                failMsg = '登录已过期，请重新登录';
+                failMsg = I18N[lang].loginExpired;
                 client.logout();
                 window.itemManager.updateAuthUI();
                 break;
             } else {
-                failMsg = res.message || ('skill_id=' + sid + ' 补充失败 code=' + res.code);
+                failMsg = res.message || ('skill_id=' + sid + I18N[lang].supplementFailed + res.code);
             }
         }
         if (failMsg) {
@@ -2528,7 +2588,7 @@ resetInventory = async function() {
             if (ok) {
                 window.itemManager.renderInventory();
                 window.itemManager.renderAllPanels();
-                showToast('已补充 ' + successCount + ' 种道具库存', 'success');
+                showToast(I18N[lang].supplemented + successCount + I18N[lang].supplementedSuffix, 'success');
             }
         }, 500);
         return;
