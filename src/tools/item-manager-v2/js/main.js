@@ -302,7 +302,7 @@ class ItemManager {
         // API模式：优先从服务端同步数据
         if (APP_MODE.isApi()) {
             if (!this.api.isLoggedIn()) {
-                // 未登录：清空状态，渲染空面板
+                // 未登录：清空状态，隐藏道具/面板/历史
                 this.user.inventory = (() => {
                     const inv = {};
                     Object.keys(ITEM_CONFIG).forEach(type => {
@@ -315,12 +315,10 @@ class ItemManager {
                 this.saveState();
                 this.cleanupHistory();
                 updatePlayerIdentityDisplay();
-                this.renderInventory();
-                this.syncInvVisibilityUI();
-                this.renderAllPanels();
-                this.renderHistory();
-                this.startCountdowns();
-                this.processAnnouncements();
+                ['inventory', 'tools', 'history'].forEach(id => {
+                    const el = document.querySelector(`[data-od-id="${id}"]`);
+                    if (el) el.style.display = 'none';
+                });
                 this.setupEventListeners();
                 this.setupStorageSync();
                 this.setupTimeSetter();
