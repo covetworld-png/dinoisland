@@ -787,7 +787,7 @@ class ItemManager {
                     detail: selected,
                     startTime: now,
                     endTime: now + DURATION_WEATHER,
-                    status: 'active'
+                    status: 'active',
                     server: getServerId(),
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
@@ -849,7 +849,7 @@ class ItemManager {
             detail: detail,
             startTime: now,
             endTime: now + DURATION_WEATHER,
-            status: 'active'
+            status: 'active',
             server: getServerId(),
         });
 
@@ -930,7 +930,7 @@ class ItemManager {
                     detail: detail,
                     startTime: now,
                     endTime: now + DURATION_TIME,
-                    status: 'active'
+                    status: 'active',
                     server: getServerId(),
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
@@ -990,7 +990,7 @@ class ItemManager {
             detail: detail,
             startTime: now,
             endTime: now + DURATION_TIME,
-            status: 'active'
+            status: 'active',
             server: getServerId(),
         });
 
@@ -1058,7 +1058,7 @@ class ItemManager {
                     detail: '12:00 → 24h',
                     startTime: now,
                     endTime: now + DURATION_FLOW,
-                    status: 'active'
+                    status: 'active',
                     server: getServerId(),
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
@@ -1115,7 +1115,7 @@ class ItemManager {
             detail: '12:00 → 24h',
             startTime: now,
             endTime: now + DURATION_FLOW,
-            status: 'active'
+            status: 'active',
             server: getServerId(),
         });
 
@@ -1169,7 +1169,7 @@ class ItemManager {
                     detail: lang === 'vi' ? 'Tăng 50%' : I18N[lang].sizeIncrease50,
                     startTime: now,
                     endTime: null,
-                    status: 'active'
+                    status: 'active',
                     server: getServerId(),
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
@@ -1225,7 +1225,7 @@ class ItemManager {
             detail: lang === 'vi' ? 'Tăng 50%' : I18N[lang].sizeIncrease50,
             startTime: now,
             endTime: null,
-            status: 'active'
+            status: 'active',
             server: getServerId(),
         });
         this.saveState();
@@ -1327,7 +1327,7 @@ class ItemManager {
                     detail: content.trim().substring(0, 30) + (content.trim().length > 30 ? '...' : ''),
                     startTime: now,
                     endTime: now,
-                    status: 'completed'
+                    status: 'completed',
                     server: getServerId(),
                 });
                 if (this.state.history.length > 30) this.state.history.pop();
