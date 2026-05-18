@@ -95,6 +95,31 @@
       };
     },
 
+    _getUrlParam(name) {
+      if (typeof window === 'undefined' || !window.location) return '';
+      try {
+        if (typeof URLSearchParams !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          return params.get(name) || '';
+        }
+      } catch (e) {
+        /* ignore */
+      }
+      // fallback: 简单 query 解析
+      const search = window.location.search || '';
+      const match = search.match(new RegExp('[?&]' + name + '=([^&]*)'));
+      return match ? decodeURIComponent(match[1]) : '';
+    },
+
+    _getAccessId() {
+      let aid = getSessionStorage('accessid');
+      if (!aid) {
+        aid = generate16DigitId();
+        setSessionStorage('accessid', aid);
+      }
+      return aid;
+    },
+
     getSessionId() {
       // 优先读 localStorage
       let sid = localStorage.getItem(SESSION_KEY);
@@ -119,19 +144,25 @@
     _buildPayload(event, params, traceId) {
       const ctx = this._context || {};
       return {
+        page: 'item-manager-v2',
+        accessid: this._getAccessId(),
+        source: this._getUrlParam('source'),
+        anchor: this._getUrlParam('anchor'),
+        channel: this._getUrlParam('channel'),
         event: event,
         session_id: this._sessionId,
         trace_id: traceId || null,
-        page: 'item-manager-v2',
-        lang: ctx.lang || (document.body ? (document.body.getAttribute('data-lang') || 'vi') : 'vi'),
-        mode: ctx.mode || 'api',
         game_uid: ctx.game_uid || localStorage.getItem('game') || null,
-        server_id: ctx.server_id  || null,
-        timestamp: Date.now(),
-        ua: (typeof navigator !== 'undefined' ? navigator.userAgent : '').slice(0, 120),
-        screen: (typeof window !== 'undefined' && window.screen ? (window.screen.width + 'x' + window.screen.height) : ''),
-        referrer: (typeof document !== 'undefined' ? (document.referrer || '') : ''),
-        ...params
+        server_id: ctx.server_id || null,
+        create_time: Date.now(),
+        ext: {
+          lang: ctx.lang || (document.body ? (document.body.getAttribute('data-lang') || 'vi') : 'vi'),
+          mode: ctx.mode || 'api',
+          screen: (typeof window !== 'undefined' && window.screen ? (window.screen.width + 'x' + window.screen.height) : ''),
+          ua: (typeof navigator !== 'undefined' ? navigator.userAgent : '').slice(0, 120),
+          referer: (typeof document !== 'undefined' ? (document.referrer || '') : ''),
+          ...params
+        }
       };
     },
 
@@ -182,15 +213,7 @@
     send(payload) {
       // 始终输出到控制台，便于调试
       console.log('send [Analytics]', payload.event, payload);
-
-  
-      window.accessid = getSessionStorage('accessid');
-      if (!window.accessid) {
-        window.accessid = generate16DigitId();
-        setSessionStorage('accessid', window.accessid);
-      }
-      payload['accessid'] = window.accessid;
-        console.log("payload", payload)
+      console.log("payload", payload);
       if (!this._endpoint) {
         return;
       }
