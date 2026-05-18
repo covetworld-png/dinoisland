@@ -310,8 +310,8 @@ class ItemManager {
         const ctx = {
             user_id: this.user.userId || null,
             game_uid: this.api.gameUid || null,
-            server_id: getServerId() || null,
-            server_code: getServerId() || null,
+            server_id: SERVER_ID_MAP[getServerId()] || getServerId() || null,
+            server_code: SERVER_ID_MAP[getServerId()] || getServerId() || null,
             lang: document.body.getAttribute('data-lang') || 'vi',
             mode: APP_MODE.mode
         };
