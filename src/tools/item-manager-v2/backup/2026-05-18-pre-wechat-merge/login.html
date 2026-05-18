@@ -93,31 +93,6 @@
         .msg.error { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); display: block; }
         .msg.success { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); display: block; }
     </style>
-    <script>
-    window.env = "development";
-    window.apiUrl = "https://monsteraccounttest.yuemei.info";
-    window.loginUrl = "https://test.daokhunglong.vn/#/login?redirectFrom=" + encodeURIComponent(window.location
-      .href);
-    if ((window.location.href.indexOf("daokhunglong.vn") >= 0 && window.location.href.indexOf("test.daokhunglong.vn") < 0) || window.location.href.indexOf("account.monster-lair.vn") >= 0) {
-      window.env = "prod";
-    }
-    if (window.env == "prod") {
-      window.apiUrl = "https://monsteraccount.yuemei.info";
-
-      window.loginUrl = "https://daokhunglong.vn/#/login?redirectFrom=" + encodeURIComponent(window.location
-        .href);
-      if (window.location.href.indexOf("account.monster-lair.vn") >= 0) {
-        window.loginUrl = "https://account.monster-lair.vn/#/login?redirectFrom=" + encodeURIComponent(window.location
-          .href);
-      }
-    } else {
-      if (window.location.href.indexOf("accounttest.yuemei.info") >= 0) {
-        window.loginUrl = "https://accounttest.yuemei.info/#/login?redirectFrom=" + encodeURIComponent(window.location
-          .href);
-      }
-    }
-    // window.apiUrl = "https://monsteraccount.yuemei.info";
-  </script>
 </head>
 <body>
     <div class="login-box">
@@ -160,10 +135,7 @@
 
             if (res.success) {
                 if (res.user && res.user.gameid) {
-                    localStorage.setItem('game', res.user.gameid);
-                }
-                if (window.Analytics && window.Analytics.track) {
-                    window.Analytics.track('login_success', { user_id: username, game_uid: res.user ? res.user.gameid : null });
+                    localStorage.setItem('itemManager_api_gameuid', res.user.gameid);
                 }
                 msg.className = 'msg success';
                 msg.textContent = '登录成功，正在跳转...';

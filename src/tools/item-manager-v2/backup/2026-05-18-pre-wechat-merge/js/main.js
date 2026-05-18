@@ -24,10 +24,6 @@ function onServerSelect(sid) {
     localStorage.setItem('itemManager_serverId', sid);
     const serverSelect = document.getElementById('server-select');
     if (serverSelect) serverSelect.value = sid;
-    if (window.Analytics && window.Analytics.track) {
-        window.Analytics.track('select_server', { server_id: sid, server_code: sid });
-        if (window.itemManager) window.itemManager._updateAnalyticsContext();
-    }
     if (window.itemManager) {
         window.itemManager.fetchNickname();
     }
@@ -300,24 +296,8 @@ class ItemManager {
         localStorage.setItem(lsKeyUser(), JSON.stringify(this.user));
     }
 
-    _updateAnalyticsContext() {
-        if (!window.Analytics || !window.Analytics.setContext) return;
-        const ctx = {
-            user_id: this.user.userId || null,
-            game_uid: this.api.gameUid || null,
-            server_id: getServerId() || null,
-            server_code: getServerId() || null,
-            lang: document.body.getAttribute('data-lang') || 'vi',
-            mode: APP_MODE.mode
-        };
-        window.Analytics.setContext(ctx);
-    }
-
     init() {
-        // if (typeof checkAuth === 'function' && !checkAuth()) return;
-        
-        window.Analytics.init(window.apiUrl + '/api/trackLandingPage')
-        this._updateAnalyticsContext();
+        if (typeof checkAuth === 'function' && !checkAuth()) return;
 
         // API模式：优先从服务端同步数据
         if (APP_MODE.isApi()) {
@@ -571,8 +551,6 @@ class ItemManager {
             updatePlayerIdentityDisplay();
             this.renderInventory();
             showToast(getApiErrorMessage(res.code, lang) || res.message, 'warning');
-        } else if(res.code === 91) {
-            doApiLogout();
         } else {
             this.user.nicknameStatus = 'error';
             this.saveUser();
@@ -784,9 +762,7 @@ class ItemManager {
                 return;
             }
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
-            const traceId = window.Analytics ? window.Analytics.startTrace('use_item', { item_type: 'weather_card', server_id: serverId, weather_id: weatherId }) : null;
             const res = await this.api.apply(2, serverId, { weather_id: weatherId });
-            if (traceId) window.Analytics.traceStep(traceId, 'apply_response', { code: res.code, message: res.message });
             if (res.code === 0) {
                 showToast(t.submittedWaiting, 'info');
                 const now = Date.now();
@@ -822,17 +798,13 @@ class ItemManager {
                 await this.syncFromApi();
                 this.renderInventory();
                 this.renderHistory();
-                if (traceId) window.Analytics.endTrace(traceId, 'success', { item_type: 'weather_card', weather_id: weatherId });
             } else if (res.code === 118) {
                 showToast(t.serverErrorConflict, 'warning');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'conflict', code: res.code });
                 // syncFromApi 拿不到其他玩家的全局状态，不执行无意义的刷新
             } else if (res.code === 119) {
                 showToast(t.serverErrorNoItem, 'error');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'no_item', code: res.code });
             } else {
                 showToast(res.message || t.useFailed, 'error');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'other', code: res.code, message: res.message });
             }
             return;
         }
@@ -930,9 +902,7 @@ class ItemManager {
                 return;
             }
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
-            const traceId = window.Analytics ? window.Analytics.startTrace('use_item', { item_type: 'time_card', server_id: serverId, time_hm: selected }) : null;
             const res = await this.api.apply(5, serverId, { time_hm: selected });
-            if (traceId) window.Analytics.traceStep(traceId, 'apply_response', { code: res.code, message: res.message });
             if (res.code === 0) {
                 const hh = Math.floor(selected / 100);
                 const mm = Math.round((selected % 100) * 0.6);
@@ -971,16 +941,12 @@ class ItemManager {
                 await this.syncFromApi();
                 this.renderInventory();
                 this.renderHistory();
-                if (traceId) window.Analytics.endTrace(traceId, 'success', { item_type: 'time_card', time_hm: selected });
             } else if (res.code === 118) {
                 showToast(t.serverErrorConflict, 'warning');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'conflict', code: res.code });
             } else if (res.code === 119) {
                 showToast(t.serverErrorNoItem, 'error');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'no_item', code: res.code });
             } else {
                 showToast(res.message || t.useFailed, 'error');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'other', code: res.code, message: res.message });
             }
             return;
         }
@@ -1067,9 +1033,7 @@ class ItemManager {
         // API模式：flow 使用 skill_id=3，time_hm=0 表示流动
         if (APP_MODE.isApi()) {
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
-            const traceId = window.Analytics ? window.Analytics.startTrace('use_item', { item_type: 'flow_card', server_id: serverId }) : null;
             const res = await this.api.apply(3, serverId, { time_hm: 0 });
-            if (traceId) window.Analytics.traceStep(traceId, 'apply_response', { code: res.code, message: res.message });
             if (res.code === 0) {
                 showToast(t.submittedWaiting, 'info');
                 const now = Date.now();
@@ -1105,16 +1069,12 @@ class ItemManager {
                 await this.syncFromApi();
                 this.renderInventory();
                 this.renderHistory();
-                if (traceId) window.Analytics.endTrace(traceId, 'success', { item_type: 'flow_card' });
             } else if (res.code === 118) {
                 showToast(t.serverErrorConflict, 'warning');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'conflict', code: res.code });
             } else if (res.code === 119) {
                 showToast(t.serverErrorNoItem, 'error');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'no_item', code: res.code });
             } else {
                 showToast(res.message || t.useFailed, 'error');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'other', code: res.code, message: res.message });
             }
             return;
         }
@@ -1183,9 +1143,7 @@ class ItemManager {
         // API模式
         if (APP_MODE.isApi()) {
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
-            const traceId = window.Analytics ? window.Analytics.startTrace('use_item', { item_type: 'dino_grow_50', server_id: serverId }) : null;
             const res = await this.api.apply(1, serverId);
-            if (traceId) window.Analytics.traceStep(traceId, 'apply_response', { code: res.code, message: res.message });
             if (res.code === 0) {
                 showToast(t.submittedWaiting, 'info');
                 const now = Date.now();
@@ -1221,16 +1179,12 @@ class ItemManager {
                 await this.syncFromApi();
                 this.renderInventory();
                 this.renderHistory();
-                if (traceId) window.Analytics.endTrace(traceId, 'success', { item_type: 'dino_grow_50' });
             } else if (res.code === 118) {
                 showToast(t.serverErrorConflict, 'warning');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'conflict', code: res.code });
             } else if (res.code === 119) {
                 showToast(t.serverErrorNoItem, 'error');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'no_item', code: res.code });
             } else {
                 showToast(res.message || t.useFailed, 'error');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'other', code: res.code, message: res.message });
             }
             return;
         }
@@ -1359,9 +1313,7 @@ class ItemManager {
         // API模式
         if (APP_MODE.isApi()) {
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
-            const traceId = window.Analytics ? window.Analytics.startTrace('use_item', { item_type: 'announcement', server_id: serverId, content_length: content.trim().length }) : null;
             const res = await this.api.apply(4, serverId, { content: content.trim() });
-            if (traceId) window.Analytics.traceStep(traceId, 'apply_response', { code: res.code, message: res.message });
             if (res.code === 0) {
                 showToast(t.sent || I18N[lang].sentStatus, 'success');
                 const now = Date.now();
@@ -1385,17 +1337,13 @@ class ItemManager {
                 this.renderAllPanels();
                 this.renderHistory();
                 this.startCountdowns();
-                if (traceId) window.Analytics.endTrace(traceId, 'success', { item_type: 'announcement', content_length: content.trim().length });
             } else if (res.code === 118) {
                 showToast(t.serverErrorConflict, 'warning');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'conflict', code: res.code });
             } else if (res.code === 119) {
                 showToast(t.serverErrorNoItem, 'error');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'no_item', code: res.code });
             } else {
                 // 大模型审核失败或参数不规范：直接显示服务端返回的 message
                 showToast(res.message || t.useFailed, 'error');
-                if (traceId) window.Analytics.endTrace(traceId, 'fail', { reason: 'other', code: res.code, message: res.message });
             }
             return;
         }
@@ -2120,8 +2068,7 @@ class ItemManager {
         }
 
         closePurchaseModal();
-        console.log("PAYMENT_MODE.isReal()",PAYMENT_MODE.isReal(),this.api.isLoggedIn())
-        // return;
+
         // ========== 真实支付模式 ==========
         if (PAYMENT_MODE.isReal() && this.api.isLoggedIn()) {
             showToast(I18N[lang].payCreatingOrder, 'info');
@@ -2249,14 +2196,14 @@ function startRealPaymentPolling(orderId, pending) {
     poll();
 }
 
-async function finishRealPaymentSuccess(pending) {
+function finishRealPaymentSuccess(pending) {
     const lang = document.body.getAttribute('data-lang') || 'vi';
     const order = pending;
     if (!order || !order.manager) {
         showToast(I18N[lang].payNoRecordTitle, 'warning');
         return;
     }
-    await window.itemManager.syncFromApi();
+
     order.manager.user.inventory[order.cfg.inventoryKey] = (order.manager.user.inventory[order.cfg.inventoryKey] || 0) + order.qty;
     order.manager.saveUser();
     order.manager.renderInventory();
@@ -2322,9 +2269,6 @@ function openCsContact() {
 function openOrderQueryModal() {
     const lang = document.body.getAttribute('data-lang') || 'vi';
     const t = I18N[lang];
-    if (window.Analytics && window.Analytics.track) {
-        window.Analytics.track('open_order_query', {});
-    }
     document.getElementById('order-query-title').textContent = t.orderQueryTitle;
     const closeBtn = document.getElementById('order-query-close-btn');
     if (closeBtn) closeBtn.textContent = t.orderClose;
@@ -2631,7 +2575,7 @@ const PURCHASE_CONFIG = {
 
 // 支付模式管理
 const PAYMENT_MODE = {
-    get mode() { return localStorage.getItem('itemManager_payment_mode') || 'real'; },
+    get mode() { return localStorage.getItem('itemManager_payment_mode') || 'mock'; },
     set mode(v) { localStorage.setItem('itemManager_payment_mode', v); },
     isMock() { return this.mode === 'mock'; },
     isReal() { return this.mode === 'real'; },
@@ -2642,10 +2586,6 @@ const PAYMENT_MODE = {
 };
 
 function openPurchaseModal(itemType) {
-    if (window.Analytics && window.Analytics.track) {
-        const cfg = ITEM_CONFIG[itemType];
-        window.Analytics.track('click_pay', { item_type: itemType, price: cfg ? cfg.price : 0 });
-    }
     if (window.itemManager) window.itemManager.openPurchaseModal(itemType);
 }
 
@@ -2725,10 +2665,6 @@ function toggleLanguage() {
     const newLang = currentLang === 'vi' ? 'cn' : 'vi';
     localStorage.setItem('lang', newLang);
     applyLangUI(newLang);
-    if (window.Analytics && window.Analytics.track) {
-        window.Analytics.track('switch_language', { from: currentLang, to: newLang });
-        if (window.itemManager) window.itemManager._updateAnalyticsContext();
-    }
 
     // Re-render
     if (window.itemManager) {
@@ -2912,9 +2848,8 @@ function showAuthBanner() {
 }
 
 function handleRelogin() {
-    // localStorage.removeItem('itemManager_mockExpired');
-    // window.location.reload();
-    window.location.href = window.loginUrl;
+    localStorage.removeItem('itemManager_mockExpired');
+    window.location.reload();
 }
 
 function toggleMockExpired(checked) {
@@ -2929,8 +2864,7 @@ function toggleMockExpired(checked) {
 
 function doApiLogin() {
     // 跳转到临时统一登录页，登录完成后自动返回
-    // window.location.href = 'login.html';
-    window.location.href = window.loginUrl;
+    window.location.href = 'login.html';
 }
 
 function updatePlayerIdentityDisplay() {
@@ -2940,7 +2874,7 @@ function updatePlayerIdentityDisplay() {
     const nameEl = document.getElementById('player-id-name');
     const loginBtn = document.getElementById('player-id-login-btn');
     const lang = document.body.getAttribute('data-lang') || 'vi';
-    console.log("manager.api.isLoggedIn()",manager.api.isLoggedIn())
+
     if (APP_MODE.isApi()) {
         const isLoggedIn = manager && manager.api && manager.api.isLoggedIn();
         const serverRow = document.querySelector('.player-id-server-row');
@@ -3029,9 +2963,6 @@ function checkNicknameReady() {
 
 function switchMode(mode) {
     const lang = document.body.getAttribute('data-lang') || 'vi';
-    if (window.Analytics && window.Analytics.track) {
-        window.Analytics.track('switch_mode', { mode });
-    }
     APP_MODE.mode = mode;
     showToast(mode === 'api' ? I18N[lang].switchedToApi : I18N[lang].switchedToMock, 'info');
     setTimeout(() => location.reload(), 800);
@@ -3100,9 +3031,6 @@ async function debugApiInventory() {
 
 function doApiLogout() {
     const lang = document.body.getAttribute('data-lang') || 'vi';
-    if (window.Analytics && window.Analytics.track && window.itemManager) {
-        window.Analytics.track('logout', { user_id: window.itemManager.user.userId });
-    }
     if (window.itemManager && window.itemManager.api) {
         window.itemManager.api.logout();
         // 清空本地状态，隐藏道具/面板/历史

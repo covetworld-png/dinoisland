@@ -85,10 +85,8 @@ Object.keys(ITEM_CONFIG).forEach(type => {
 
 
 const API_CONFIG = {
-    // baseUrl: 'https://monsteraccounttest.yuemei.info/activity/gmSkill',
-    // loginUrl: 'https://monsteraccounttest.yuemei.info/api/login'
-    baseUrl: window.apiUrl + '/activity/gmSkill',
-    loginUrl: window.apiUrl + '/activity/login'
+    baseUrl: 'https://monsteraccounttest.yuemei.info/activity/gmSkill',
+    loginUrl: 'https://monsteraccounttest.yuemei.info/api/login'
 };
 
 const SERVER_ID_MAP = {
@@ -140,8 +138,8 @@ const API_ERROR_MAP = {
 
 class ApiClient {
     constructor() {
-        this.token = localStorage.getItem('Admin-Token') || null;
-        this.gameUid = localStorage.getItem('game') || null;
+        this.token = localStorage.getItem('itemManager_api_token') || null;
+        this.gameUid = localStorage.getItem('itemManager_api_gameuid') || null;
     }
 
     getHeaders() {
@@ -163,7 +161,7 @@ class ApiClient {
             const data = await res.json();
             if (data.code === 0 && data.extra && data.extra.token) {
                 this.token = data.extra.token;
-                localStorage.setItem('Admin-Token', this.token);
+                localStorage.setItem('itemManager_api_token', this.token);
                 return { success: true, token: this.token, user: data.extra };
             }
             return { success: false, code: data.code, message: data.message || '登录失败' };
@@ -325,8 +323,8 @@ class ApiClient {
     logout() {
         this.token = null;
         this.gameUid = null;
-        localStorage.removeItem('Admin-Token');
-        localStorage.removeItem('game');
+        localStorage.removeItem('itemManager_api_token');
+        localStorage.removeItem('itemManager_api_gameuid');
     }
 }
 

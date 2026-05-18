@@ -5,32 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><span class="lang-vi">Trung Tâm Thần Tích</span><span class="lang-cn">神迹中心</span></title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=79">
-  <script>
-    window.env = "development";
-    window.apiUrl = "https://monsteraccounttest.yuemei.info";
-    window.loginUrl = "https://test.daokhunglong.vn/#/login?redirectFrom=" + encodeURIComponent(window.location
-      .href);
-    if ((window.location.href.indexOf("daokhunglong.vn") >= 0 && window.location.href.indexOf("test.daokhunglong.vn") < 0) || window.location.href.indexOf("account.monster-lair.vn") >= 0) {
-      window.env = "prod";
-    }
-    if (window.env == "prod") {
-      window.apiUrl = "https://monsteraccount.yuemei.info";
-
-      window.loginUrl = "https://daokhunglong.vn/#/login?redirectFrom=" + encodeURIComponent(window.location
-        .href);
-      if (window.location.href.indexOf("account.monster-lair.vn") >= 0) {
-        window.loginUrl = "https://account.monster-lair.vn/#/login?redirectFrom=" + encodeURIComponent(window.location
-          .href);
-      }
-    } else {
-      if (window.location.href.indexOf("accounttest.yuemei.info") >= 0) {
-        window.loginUrl = "https://accounttest.yuemei.info/#/login?redirectFrom=" + encodeURIComponent(window.location
-          .href);
-      }
-    }
-    // window.apiUrl = "https://monsteraccount.yuemei.info";
-  </script>
+  <link rel="stylesheet" href="css/main.css?v=78">
 </head>
 <body data-lang="vi">
 
@@ -729,12 +704,9 @@
             <span class="lang-cn">&#25968;&#37327;</span>
           </span>
           <div class="qty-control">
-            <!-- <button class="qty-btn" onclick="changePurchaseQty(-1)">&#8722;</button>
+            <button class="qty-btn" onclick="changePurchaseQty(-1)">&#8722;</button>
             <span class="qty-num" id="purchase-qty">1</span>
-            <button class="qty-btn" onclick="changePurchaseQty(1)">+</button> -->
-            <button class="qty-btn">&#8722;</button>
-            <span class="qty-num" id="purchase-qty">1</span>
-            <button class="qty-btn">+</button>
+            <button class="qty-btn" onclick="changePurchaseQty(1)">+</button>
           </div>
         </div>
 
@@ -803,9 +775,9 @@
 
 
 
-  <script src="js/api-client.js?v=88"></script>
-  <script src="js/analytics.js?v=2"></script>
-  <script src="js/i18n.js?v=9"></script>
-  <script src="js/main.js?v=130"></script>
+  <script src="js/api-client.js?v=87"></script>
+  <script src="js/analytics.js?v=1"></script>
+  <script src="js/i18n.js?v=8"></script>
+  <script src="js/main.js?v=128"></script>
 </body>
 </html>

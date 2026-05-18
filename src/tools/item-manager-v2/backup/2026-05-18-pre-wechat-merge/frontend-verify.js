@@ -15,8 +15,8 @@
     const OTHER_SERVER = '750748016054340';   // 跨服测试用（需确认存在）
 
     // 从页面获取 token
-    const token = localStorage.getItem('Admin-Token') || '';
-    const gameUid = localStorage.getItem('game') || '';
+    const token = localStorage.getItem('itemManager_api_token') || '';
+    const gameUid = localStorage.getItem('itemManager_api_gameuid') || '';
     if (!token) {
         console.error('❌ 未检测到登录 token，请先登录 API 模式');
         return;
