@@ -259,6 +259,7 @@ git commit -m "fix(item-manager-v2): xxx"
 | **飞书 Mermaid** | [引用:docs/飞书Mermaid语法指南.md] | 飞书文档中 Mermaid 图表的标准语法与限制 |
 | **飞书表格** | [引用:docs/飞书表格Markdown语法指南.md] | 飞书文档中表格的 Markdown 语法标准 |
 | **LLM 编码行为** | [引用:docs/llm-coding-behavior.md] | LLM 编码行为准则：思考、简洁、精准、目标驱动 |
+| **飞书 CLI 调用** | [引用:docs/feishu-cli-guide.md] | 飞书 CLI 跨项目快速调用速查：Skill 列表、命令模板、权限清单 |
 
 ## 8. 文档索引
 
@@ -276,6 +277,7 @@ git commit -m "fix(item-manager-v2): xxx"
 | `docs/飞书Mermaid语法指南.md` | 飞书 Mermaid 语法标准指南：图表类型、语法限制、最佳实践 |
 | `docs/飞书表格Markdown语法指南.md` | 飞书表格 Markdown 语法标准指南：表格规范、最佳实践、模板 |
 | `docs/llm-coding-behavior.md` | LLM 编码行为准则：降低常见 LLM 编码错误 |
+| `docs/feishu-cli-guide.md` | 飞书 CLI 调用速查：Skill 列表、命令模板、权限清单 |
 
 ## 9. 数据源
 

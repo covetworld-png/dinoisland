@@ -14,7 +14,8 @@ ROOT = Path(__file__).parent.parent
 MANIFEST_PATH = ROOT / "build" / "manifest.json"
 SKIP_FILES = {".DS_Store"}
 SKIP_EXTS = {".log"}
-SKIP_DIRS = {"交付物"}
+SKIP_DIRS = {"交付物", "backup", "test", "docs", "memory", "screenshots", "node_modules", "__pycache__"}
+SKIP_PREFIXES = ("verify-", "api-test-", "frontend-verify", "TEST-REPORT")
 
 
 def load_manifest():
@@ -29,6 +30,8 @@ def skip_file(name: str) -> bool:
     if name.endswith(tuple(SKIP_EXTS)):
         return True
     if name.startswith(".") and name != ".gitignore":
+        return True
+    if name.startswith(SKIP_PREFIXES):
         return True
     return False
 
