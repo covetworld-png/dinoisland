@@ -436,12 +436,10 @@ function mapApiRecordsToLocks(records, userId) {
             defaultDuration = (timeHm > 0) ? DURATION_TIME : DURATION_FLOW;
         }
         const end = r.end_time ? new Date(r.end_time.replace(' ', 'T')).getTime() : (start + defaultDuration);
-        const recordUserId = r.game_uid || userId;
-        const isMine = String(recordUserId) === String(userId);
         const base = {
-            userId: isMine ? userId : ('player_' + recordUserId),
-            username: isMine ? 'You' : ('Player ' + String(recordUserId).slice(-4)),
-            usernameCn: isMine ? '你' : ('玩家' + String(recordUserId).slice(-4)),
+            userId: userId,
+            username: 'You',
+            usernameCn: '你',
             startTime: start,
             endTime: end,
             detail: r.weather_id || r.time_hm || '',
