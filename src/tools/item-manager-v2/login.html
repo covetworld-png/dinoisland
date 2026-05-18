@@ -155,8 +155,9 @@
             msg.className = 'msg';
             msg.textContent = '';
 
+            const traceId = window.Analytics ? window.Analytics.startTrace('login', { user_id: username }) : null;
             const client = new ApiClient();
-            const res = await client.login(username, password);
+            const res = await client.login(username, password, traceId);
 
             if (res.success) {
                 if (res.user && res.user.gameid) {
@@ -165,12 +166,14 @@
                 if (window.Analytics && window.Analytics.track) {
                     window.Analytics.track('login_success', { user_id: username, game_uid: res.user ? res.user.gameid : null });
                 }
+                if (traceId) window.Analytics.endTrace(traceId, 'success', { game_uid: res.user ? res.user.gameid : null });
                 msg.className = 'msg success';
                 msg.textContent = '登录成功，正在跳转...';
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 500);
             } else {
+                if (traceId) window.Analytics.endTrace(traceId, 'fail', { code: res.code, message: res.message });
                 btn.disabled = false;
                 btn.textContent = '登录';
                 msg.className = 'msg error';

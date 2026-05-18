@@ -151,16 +151,30 @@ class ApiClient {
         };
     }
 
-    async login(username, password) {
+    _appendTraceId(url, traceId) {
+        if (!traceId) return url;
+        const sep = url.indexOf('?') >= 0 ? '&' : '?';
+        return url + sep + 'trace_id=' + encodeURIComponent(traceId);
+    }
+
+    _traceStep(traceId, step, data) {
+        if (!traceId || !window.Analytics || !window.Analytics.traceStep) return;
+        window.Analytics.traceStep(traceId, step, data);
+    }
+
+    async login(username, password, traceId = null) {
+        const url = this._appendTraceId(API_CONFIG.loginUrl, traceId);
         try {
-            console.log('[API] POST', API_CONFIG.loginUrl);
-            const res = await fetch(API_CONFIG.loginUrl, {
+            console.log('[API] POST', url);
+            this._traceStep(traceId, 'api_request', { api: 'login', method: 'POST', url, params: { username } });
+            const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             });
             console.log('[API] POST login status:', res.status);
             const data = await res.json();
+            this._traceStep(traceId, 'api_response', { code: data.code, message: data.message });
             if (data.code === 0 && data.extra && data.extra.token) {
                 this.token = data.extra.token;
                 localStorage.setItem('Admin-Token', this.token);
@@ -169,37 +183,46 @@ class ApiClient {
             return { success: false, code: data.code, message: data.message || '登录失败' };
         } catch (e) {
             console.error('[API] login error:', e.message);
+            this._traceStep(traceId, 'api_error', { message: e.message });
             return { success: false, message: '网络错误: ' + e.message };
         }
     }
 
-    async getBenefits() {
-        const url = API_CONFIG.baseUrl + '/userListBenefits';
+    async getBenefits(traceId) {
+        const url = this._appendTraceId(API_CONFIG.baseUrl + '/userListBenefits', traceId);
         try {
             console.log('[API] GET', url);
+            this._traceStep(traceId, 'api_request', { api: 'getBenefits', method: 'GET', url });
             const res = await fetch(url, { headers: this.getHeaders() });
             console.log('[API] GET', url, 'status:', res.status, 'ok:', res.ok);
-            return await res.json();
+            const data = await res.json();
+            this._traceStep(traceId, 'api_response', { code: data.code, message: data.message });
+            return data;
         } catch (e) {
             console.error('[API] GET error:', url, e.message);
+            this._traceStep(traceId, 'api_error', { message: e.message });
             return { code: -1, message: e.message };
         }
     }
 
-    async getRecords() {
-        const url = API_CONFIG.baseUrl + '/userListRecords';
+    async getRecords(traceId) {
+        const url = this._appendTraceId(API_CONFIG.baseUrl + '/userListRecords', traceId);
         try {
             console.log('[API] GET', url);
+            this._traceStep(traceId, 'api_request', { api: 'getRecords', method: 'GET', url });
             const res = await fetch(url, { headers: this.getHeaders() });
             console.log('[API] GET', url, 'status:', res.status, 'ok:', res.ok);
-            return await res.json();
+            const data = await res.json();
+            this._traceStep(traceId, 'api_response', { code: data.code, message: data.message });
+            return data;
         } catch (e) {
             console.error('[API] GET error:', url, e.message);
+            this._traceStep(traceId, 'api_error', { message: e.message });
             return { code: -1, message: e.message };
         }
     }
 
-    async apply(skillId, serverId, params) {
+    async apply(skillId, serverId, params, traceId) {
         params = params || {};
         const body = {
             skill_id: skillId,
@@ -208,112 +231,140 @@ class ApiClient {
             time_hm: params.time_hm || 0,
             content: params.content || ''
         };
-        const url = API_CONFIG.baseUrl + '/userApply';
+        const url = this._appendTraceId(API_CONFIG.baseUrl + '/userApply', traceId);
         try {
             console.log('[API] POST', url, JSON.stringify(body));
+            this._traceStep(traceId, 'api_request', { api: 'apply', method: 'POST', url, params: body });
             const res = await fetch(url, {
                 method: 'POST',
                 headers: this.getHeaders(),
                 body: JSON.stringify(body)
             });
             console.log('[API] POST', url, 'status:', res.status, 'ok:', res.ok);
-            return await res.json();
+            const data = await res.json();
+            this._traceStep(traceId, 'api_response', { code: data.code, message: data.message });
+            return data;
         } catch (e) {
             console.error('[API] POST error:', url, e.message);
+            this._traceStep(traceId, 'api_error', { message: e.message });
             return { code: -1, message: e.message };
         }
     }
 
-    async gmSuccess(recordId) {
-        const url = API_CONFIG.baseUrl + '/gmSuccess/' + recordId;
+    async gmSuccess(recordId, traceId) {
+        const url = this._appendTraceId(API_CONFIG.baseUrl + '/gmSuccess/' + recordId, traceId);
         try {
             console.log('[API] GET', url);
+            this._traceStep(traceId, 'api_request', { api: 'gmSuccess', method: 'GET', url, params: { record_id: recordId } });
             const res = await fetch(url, { headers: this.getHeaders() });
             console.log('[API] GET', url, 'status:', res.status, 'ok:', res.ok);
-            return await res.json();
+            const data = await res.json();
+            this._traceStep(traceId, 'api_response', { code: data.code, message: data.message });
+            return data;
         } catch (e) {
             console.error('[API] GET error:', url, e.message);
+            this._traceStep(traceId, 'api_error', { message: e.message });
             return { code: -1, message: e.message };
         }
     }
 
-    async simAddBenefit(gameUid, skillId, num) {
-        const url = API_CONFIG.baseUrl + '/simAddBenefit?' + new URLSearchParams({game_uid: gameUid, skill_id: skillId, num: num});
+    async simAddBenefit(gameUid, skillId, num, traceId) {
+        const url = this._appendTraceId(API_CONFIG.baseUrl + '/simAddBenefit?' + new URLSearchParams({game_uid: gameUid, skill_id: skillId, num: num}), traceId);
         try {
             console.log('[API] GET', url);
+            this._traceStep(traceId, 'api_request', { api: 'simAddBenefit', method: 'GET', url, params: { game_uid: gameUid, skill_id: skillId, num } });
             const res = await fetch(url, { headers: { 'AuthToken': this.token || '', 'Content-Type': 'application/json' } });
             console.log('[API] GET', url, 'status:', res.status, 'ok:', res.ok);
-            return await res.json();
+            const data = await res.json();
+            this._traceStep(traceId, 'api_response', { code: data.code, message: data.message });
+            return data;
         } catch (e) {
             console.error('[API] GET error:', url, e.message);
+            this._traceStep(traceId, 'api_error', { message: e.message });
             return { code: -1, message: e.message };
         }
     }
 
     // ========== 支付接口 ==========
-    async userOrderApply(productId, count) {
-        const url = API_CONFIG.baseUrl + '/userOrderApply';
+    async userOrderApply(productId, count, traceId) {
+        const url = this._appendTraceId(API_CONFIG.baseUrl + '/userOrderApply', traceId);
         try {
             console.log('[API] POST', url, { product_id: productId, count: count });
+            this._traceStep(traceId, 'api_request', { api: 'userOrderApply', method: 'POST', url, params: { product_id: productId, count } });
             const res = await fetch(url, {
                 method: 'POST',
                 headers: this.getHeaders(),
                 body: JSON.stringify({ product_id: productId, count: count })
             });
             console.log('[API] POST', url, 'status:', res.status, 'ok:', res.ok);
-            return await res.json();
+            const data = await res.json();
+            this._traceStep(traceId, 'api_response', { code: data.code, message: data.message });
+            return data;
         } catch (e) {
             console.error('[API] POST error:', url, e.message);
+            this._traceStep(traceId, 'api_error', { message: e.message });
             return { code: -1, message: e.message };
         }
     }
 
-    async userOrderCheck(orderId) {
-        const url = API_CONFIG.baseUrl + '/userOrderCheck';
+    async userOrderCheck(orderId, traceId) {
+        const url = this._appendTraceId(API_CONFIG.baseUrl + '/userOrderCheck', traceId);
         try {
             console.log('[API] POST', url, { order_id: orderId });
+            this._traceStep(traceId, 'api_request', { api: 'userOrderCheck', method: 'POST', url, params: { order_id: orderId } });
             const res = await fetch(url, {
                 method: 'POST',
                 headers: this.getHeaders(),
                 body: JSON.stringify({ order_id: orderId })
             });
             console.log('[API] POST', url, 'status:', res.status, 'ok:', res.ok);
-            return await res.json();
+            const data = await res.json();
+            this._traceStep(traceId, 'api_response', { code: data.code, message: data.message });
+            return data;
         } catch (e) {
             console.error('[API] POST error:', url, e.message);
+            this._traceStep(traceId, 'api_error', { message: e.message });
             return { code: -1, message: e.message };
         }
     }
 
-    async userOrderQueryAll() {
-        const url = API_CONFIG.baseUrl + '/userOrderQueryAll';
+    async userOrderQueryAll(traceId) {
+        const url = this._appendTraceId(API_CONFIG.baseUrl + '/userOrderQueryAll', traceId);
         try {
             console.log('[API] GET', url);
+            this._traceStep(traceId, 'api_request', { api: 'userOrderQueryAll', method: 'GET', url });
             const res = await fetch(url, {
                 method: 'GET',
                 headers: this.getHeaders()
             });
             console.log('[API] GET', url, 'status:', res.status, 'ok:', res.ok);
-            return await res.json();
+            const data = await res.json();
+            this._traceStep(traceId, 'api_response', { code: data.code, message: data.message });
+            return data;
         } catch (e) {
             console.error('[API] GET error:', url, e.message);
+            this._traceStep(traceId, 'api_error', { message: e.message });
             return { code: -1, message: e.message };
         }
     }
 
-    async getNickname(serverId) {
-        const url = 'https://monsteraccounttest.yuemei.info/api/getNickname';
+    async getNickname(serverId, traceId) {
+        const url = this._appendTraceId('https://monsteraccounttest.yuemei.info/api/getNickname', traceId);
         try {
             console.log('[API] POST', url, { server_id: serverId });
+            this._traceStep(traceId, 'api_request', { api: 'getNickname', method: 'POST', url, params: { server_id: serverId } });
             const res = await fetch(url, {
                 method: 'POST',
                 headers: this.getHeaders(),
                 body: JSON.stringify({ server_id: serverId })
             });
             console.log('[API] POST', url, 'status:', res.status, 'ok:', res.ok);
-            return await res.json();
+            const data = await res.json();
+            this._traceStep(traceId, 'api_response', { code: data.code, message: data.message });
+            return data;
         } catch (e) {
             console.error('[API] POST error:', url, e.message);
+            this._traceStep(traceId, 'api_error', { message: e.message });
             return { code: -1, message: e.message };
         }
     }

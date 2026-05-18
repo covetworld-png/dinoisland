@@ -24,12 +24,17 @@ function onServerSelect(sid) {
     localStorage.setItem('itemManager_serverId', sid);
     const serverSelect = document.getElementById('server-select');
     if (serverSelect) serverSelect.value = sid;
+    const traceId = window.Analytics ? window.Analytics.startTrace('select_server', { server_id: sid, server_code: sid }) : null;
     if (window.Analytics && window.Analytics.track) {
         window.Analytics.track('select_server', { server_id: sid, server_code: sid });
         if (window.itemManager) window.itemManager._updateAnalyticsContext();
     }
     if (window.itemManager) {
-        window.itemManager.fetchNickname();
+        window.itemManager.fetchNickname(traceId).then(() => {
+            if (traceId) window.Analytics.endTrace(traceId, window.itemManager.user.nicknameStatus === 'ok' ? 'success' : 'fail', { nickname_status: window.itemManager.user.nicknameStatus });
+        }).catch(() => {
+            if (traceId) window.Analytics.endTrace(traceId, 'error');
+        });
     }
 }
 
@@ -315,9 +320,15 @@ class ItemManager {
 
     init() {
         // if (typeof checkAuth === 'function' && !checkAuth()) return;
-        
+
+        // 清理过期 purchase trace
+        this._cleanupExpiredTraces();
+
         window.Analytics.init(window.apiUrl + '/api/trackLandingPage')
         this._updateAnalyticsContext();
+
+        // 创建 page_enter trace（覆盖整个初始化流程）
+        const pageTraceId = window.Analytics ? window.Analytics.startTrace('page_enter', { mode: APP_MODE.mode, logged_in: this.api.isLoggedIn(), server: getServerId() || null }) : null;
 
         // API模式：优先从服务端同步数据
         if (APP_MODE.isApi()) {
@@ -344,6 +355,7 @@ class ItemManager {
                 this.setupTimeSetter();
                 setupDebugMock();
                 this.updateAuthUI();
+                if (pageTraceId) window.Analytics.endTrace(pageTraceId, 'unauthenticated');
                 return;
             }
 
@@ -379,13 +391,14 @@ class ItemManager {
                 this.setupTimeSetter();
                 setupDebugMock();
                 this.updateAuthUI();
+                if (pageTraceId) window.Analytics.endTrace(pageTraceId, 'pending_server');
                 return;
             }
 
             // 已登录且已选择服务器：查询昵称
-            this.fetchNickname().then(() => {
+            this.fetchNickname(pageTraceId).then(() => {
                 if (this.user.nicknameStatus === 'ok') {
-                    this.syncFromApi().then(() => {
+                    this.syncFromApi(pageTraceId).then(() => {
                         this.cleanupHistory();
                         updatePlayerIdentityDisplay();
                         this.renderInventory();
@@ -399,6 +412,7 @@ class ItemManager {
                         this.setupTimeSetter();
                         setupDebugMock();
                         this.updateAuthUI();
+                        if (pageTraceId) window.Analytics.endTrace(pageTraceId, 'ready');
                     });
                     this._startApiPolling();
                 } else {
@@ -415,6 +429,7 @@ class ItemManager {
                     this.setupTimeSetter();
                     setupDebugMock();
                     this.updateAuthUI();
+                    if (pageTraceId) window.Analytics.endTrace(pageTraceId, 'nickname_failed');
                 }
             });
             return;
@@ -434,6 +449,29 @@ class ItemManager {
         this.startServerPolling();
         setupDebugMock();
         this.updateAuthUI();
+        if (pageTraceId) window.Analytics.endTrace(pageTraceId, 'mock_ready');
+    }
+
+    _cleanupExpiredTraces() {
+        // 清理过期的 pending purchase trace（30分钟）
+        try {
+            const pending = localStorage.getItem('itemManager_pending_payment');
+            if (pending) {
+                const data = JSON.parse(pending);
+                if (data.createdAt && (Date.now() - data.createdAt > 30 * 60 * 1000)) {
+                    localStorage.removeItem('itemManager_pending_payment');
+                    window.currentPurchaseTraceId = null;
+                }
+            }
+            const pendingTrace = localStorage.getItem('itemManager_pending_purchase_trace');
+            if (pendingTrace) {
+                const data = JSON.parse(pendingTrace);
+                if (data.createdAt && (Date.now() - data.createdAt > 30 * 60 * 1000)) {
+                    localStorage.removeItem('itemManager_pending_purchase_trace');
+                    window.currentPurchaseTraceId = null;
+                }
+            }
+        } catch (e) {}
     }
 
     _startApiPolling() {
@@ -452,7 +490,7 @@ class ItemManager {
         }
     }
 
-    async syncFromApi() {
+    async syncFromApi(traceId = null) {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         try {
             // 先清除所有非乐观锁（避免模拟模式旧数据残留）
@@ -462,7 +500,7 @@ class ItemManager {
                     this.state.globalLocks[key] = null;
                 }
             });
-            const benefitsRes = await this.api.getBenefits();
+            const benefitsRes = await this.api.getBenefits(traceId);
             console.log('[syncFromApi] benefitsRes:', benefitsRes);
             if (benefitsRes.code === 91) {
                 this.api.logout();
@@ -485,7 +523,7 @@ class ItemManager {
                     showToast(I18N[lang].inventoryEmpty, 'info');
                 }
             }
-            const recordsRes = await this.api.getRecords();
+            const recordsRes = await this.api.getRecords(traceId);
             console.log('[syncFromApi] recordsRes:', recordsRes);
             if (recordsRes.code === 0 && recordsRes.extra) {
                 const rawRecords = recordsRes.extra.records || [];
@@ -527,7 +565,7 @@ class ItemManager {
         }
     }
 
-    async fetchNickname() {
+    async fetchNickname(traceId = null) {
         const lang = document.body.getAttribute('data-lang') || 'vi';
         const serverId = SERVER_ID_MAP[getServerId()] || '';
         if (!serverId) {
@@ -552,7 +590,7 @@ class ItemManager {
                 res = { code: -1, message: 'Mock error' };
             }
         } else {
-            res = await this.api.getNickname(serverId);
+            res = await this.api.getNickname(serverId, traceId);
         }
         console.log('[fetchNickname] res:', res);
         if (res.code === 0 && res.extra && res.extra.nickname) {
@@ -785,7 +823,7 @@ class ItemManager {
             }
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
             const traceId = window.Analytics ? window.Analytics.startTrace('use_item', { item_type: 'weather_card', server_id: serverId, weather_id: weatherId }) : null;
-            const res = await this.api.apply(2, serverId, { weather_id: weatherId });
+            const res = await this.api.apply(2, serverId, { weather_id: weatherId }, traceId);
             if (traceId) window.Analytics.traceStep(traceId, 'apply_response', { code: res.code, message: res.message });
             if (res.code === 0) {
                 showToast(t.submittedWaiting, 'info');
@@ -931,7 +969,7 @@ class ItemManager {
             }
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
             const traceId = window.Analytics ? window.Analytics.startTrace('use_item', { item_type: 'time_card', server_id: serverId, time_hm: selected }) : null;
-            const res = await this.api.apply(5, serverId, { time_hm: selected });
+            const res = await this.api.apply(5, serverId, { time_hm: selected }, traceId);
             if (traceId) window.Analytics.traceStep(traceId, 'apply_response', { code: res.code, message: res.message });
             if (res.code === 0) {
                 const hh = Math.floor(selected / 100);
@@ -1068,7 +1106,7 @@ class ItemManager {
         if (APP_MODE.isApi()) {
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
             const traceId = window.Analytics ? window.Analytics.startTrace('use_item', { item_type: 'flow_card', server_id: serverId }) : null;
-            const res = await this.api.apply(3, serverId, { time_hm: 0 });
+            const res = await this.api.apply(3, serverId, { time_hm: 0 }, traceId);
             if (traceId) window.Analytics.traceStep(traceId, 'apply_response', { code: res.code, message: res.message });
             if (res.code === 0) {
                 showToast(t.submittedWaiting, 'info');
@@ -1184,7 +1222,7 @@ class ItemManager {
         if (APP_MODE.isApi()) {
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
             const traceId = window.Analytics ? window.Analytics.startTrace('use_item', { item_type: 'dino_grow_50', server_id: serverId }) : null;
-            const res = await this.api.apply(1, serverId);
+            const res = await this.api.apply(1, serverId, {}, traceId);
             if (traceId) window.Analytics.traceStep(traceId, 'apply_response', { code: res.code, message: res.message });
             if (res.code === 0) {
                 showToast(t.submittedWaiting, 'info');
@@ -1296,16 +1334,20 @@ class ItemManager {
             : I18N[lang].confirmStopFlow;
         if (!confirm(confirmMsg)) return;
 
+        let stopTraceId = null;
         // API模式：调用 skill_id=3, time_hm=1200 停止时间流动
         if (APP_MODE.isApi()) {
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
+            stopTraceId = window.Analytics ? window.Analytics.startTrace('stop_flow', { server_id: serverId }) : null;
             try {
-                const res = await this.api.apply(3, serverId, { time_hm: 1200 });
+                const res = await this.api.apply(3, serverId, { time_hm: 1200 }, stopTraceId);
                 if (res.code !== 0) {
+                    if (stopTraceId) window.Analytics.endTrace(stopTraceId, 'fail', { code: res.code, message: res.message });
                     showToast((res.message || t.useFailed), 'error');
                     return;
                 }
             } catch (e) {
+                if (stopTraceId) window.Analytics.endTrace(stopTraceId, 'error', { message: e.message });
                 showToast(t.useFailed, 'error');
                 return;
             }
@@ -1328,6 +1370,7 @@ class ItemManager {
         this.startCountdowns();
         updateSky(12, 0, 'flow-sky');
         showToast(I18N[lang].timeUp, 'info');
+        if (stopTraceId) window.Analytics.endTrace(stopTraceId, 'success');
     }
 
     // Submit Announcement
@@ -1360,7 +1403,7 @@ class ItemManager {
         if (APP_MODE.isApi()) {
             const serverId = SERVER_ID_MAP[getServerId()] || '750748016054341';
             const traceId = window.Analytics ? window.Analytics.startTrace('use_item', { item_type: 'announcement', server_id: serverId, content_length: content.trim().length }) : null;
-            const res = await this.api.apply(4, serverId, { content: content.trim() });
+            const res = await this.api.apply(4, serverId, { content: content.trim() }, traceId);
             if (traceId) window.Analytics.traceStep(traceId, 'apply_response', { code: res.code, message: res.message });
             if (res.code === 0) {
                 showToast(t.sent || I18N[lang].sentStatus, 'success');
@@ -2125,7 +2168,7 @@ class ItemManager {
         // ========== 真实支付模式 ==========
         if (PAYMENT_MODE.isReal() && this.api.isLoggedIn()) {
             showToast(I18N[lang].payCreatingOrder, 'info');
-            const res = await this.api.userOrderApply(cfg.productId, qty);
+            const res = await this.api.userOrderApply(cfg.productId, qty, traceId);
             if (res.code === 0 && res.extra && res.extra.order_id && res.extra.pay_url) {
                 const orderId = res.extra.order_id;
                 const payUrl = res.extra.pay_url;
@@ -2234,7 +2277,7 @@ function startRealPaymentPolling(orderId, pending) {
             return;
         }
 
-        const res = await window.apiClient.userOrderCheck(orderId);
+        const res = await window.apiClient.userOrderCheck(orderId, pending.traceId);
         if (res.code === 0 && res.extra) {
             const status = res.extra.status;
             if (status === 'shipped') {
@@ -2270,6 +2313,7 @@ async function finishRealPaymentSuccess(pending) {
     window.pendingPayment = null;
     window.currentPurchaseTraceId = null;
     localStorage.removeItem('itemManager_pending_payment');
+    localStorage.removeItem('itemManager_pending_purchase_trace');
 }
 
 function formatOrderTime(ts) {
@@ -2429,16 +2473,19 @@ async function renderRealOrderList(listEl, emptyEl, t, lang) {
 async function requeryOrder(orderId) {
     const lang = document.body.getAttribute('data-lang') || 'vi';
     showToast(I18N[lang].payQuerying, 'info');
+    const traceId = window.Analytics ? window.Analytics.startTrace('requery_order', { order_id: orderId }) : null;
 
     // 真实模式：调用服务端接口
     if (PAYMENT_MODE.isReal() && window.apiClient && window.apiClient.isLoggedIn()) {
-        const res = await window.apiClient.userOrderCheck(orderId);
+        const res = await window.apiClient.userOrderCheck(orderId, traceId);
         if (res.code === 0 && res.extra && res.extra.status === 'shipped') {
             renderOrderList();
             showToast(I18N[lang].paySuccessTitle, 'success');
+            if (traceId) window.Analytics.endTrace(traceId, 'success');
         } else {
             renderOrderList();
             showToast(I18N[lang].payQueryFail, 'warning');
+            if (traceId) window.Analytics.endTrace(traceId, 'fail', { code: res.code, status: res.extra ? res.extra.status : null });
         }
         return;
     }
@@ -2646,6 +2693,11 @@ function openPurchaseModal(itemType) {
         const cfg = ITEM_CONFIG[itemType];
         window.Analytics.track('click_pay', { item_type: itemType, price: cfg ? cfg.price : 0 });
     }
+    const purchaseTraceId = window.Analytics ? window.Analytics.startTrace('purchase', { item_type: itemType }) : null;
+    window.currentPurchaseTraceId = purchaseTraceId;
+    if (purchaseTraceId) {
+        localStorage.setItem('itemManager_pending_purchase_trace', JSON.stringify({ traceId: purchaseTraceId, itemType, createdAt: Date.now() }));
+    }
     if (window.itemManager) window.itemManager.openPurchaseModal(itemType);
 }
 
@@ -2656,6 +2708,12 @@ function confirmPurchase() {
 function closePurchaseModal() {
     const overlay = document.getElementById('purchase-overlay');
     if (overlay) overlay.style.display = 'none';
+    // 如果弹窗关闭时 purchase trace 仍在进行中，标记为 cancelled
+    if (window.currentPurchaseTraceId && window.Analytics && window.Analytics.endTrace) {
+        window.Analytics.endTrace(window.currentPurchaseTraceId, 'cancelled');
+        window.currentPurchaseTraceId = null;
+        localStorage.removeItem('itemManager_pending_purchase_trace');
+    }
     window.currentPurchaseItem = null;
     window.currentPurchaseQty = 1;
 }
@@ -2759,14 +2817,17 @@ function stopFlowCard() {
 
 // Quick use from inventory bar — opens detail panel only
 function quickUseWeather() {
+    if (window.Analytics && window.Analytics.track) window.Analytics.track('quick_use', { item_type: 'weather_card', source: 'inventory_bar' });
     switchTab('weather');
 }
 
 function quickUseTime() {
+    if (window.Analytics && window.Analytics.track) window.Analytics.track('quick_use', { item_type: 'time_card', source: 'inventory_bar' });
     switchTab('time');
 }
 
 function quickUseAnnouncement() {
+    if (window.Analytics && window.Analytics.track) window.Analytics.track('quick_use', { item_type: 'announcement_card', source: 'inventory_bar' });
     switchTab('announcement');
     setTimeout(() => {
         document.getElementById('announcement-content')?.focus();
@@ -2774,10 +2835,12 @@ function quickUseAnnouncement() {
 }
 
 function quickUseFlow() {
+    if (window.Analytics && window.Analytics.track) window.Analytics.track('quick_use', { item_type: 'flow_card', source: 'inventory_bar' });
     switchTab('flow');
 }
 
 function quickUseDinoGrow() {
+    if (window.Analytics && window.Analytics.track) window.Analytics.track('quick_use', { item_type: 'dino_grow_50', source: 'inventory_bar' });
     switchTab('dino-grow');
 }
 

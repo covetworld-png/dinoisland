@@ -96,10 +96,18 @@
     },
 
     getSessionId() {
-      let sid = sessionStorage.getItem(SESSION_KEY);
+      // 优先读 localStorage
+      let sid = localStorage.getItem(SESSION_KEY);
+      // 兼容迁移：没有则读 sessionStorage 并迁移
+      if (!sid) {
+        sid = sessionStorage.getItem(SESSION_KEY);
+        if (sid) {
+          localStorage.setItem(SESSION_KEY, sid);
+        }
+      }
       if (!sid) {
         sid = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        sessionStorage.setItem(SESSION_KEY, sid);
+        localStorage.setItem(SESSION_KEY, sid);
       }
       return sid;
     },

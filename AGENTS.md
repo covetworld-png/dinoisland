@@ -258,6 +258,7 @@ git commit -m "fix(item-manager-v2): xxx"
 | **文档规范** | [引用:docs/documentation-standards.md] | Mermaid 流程图、PRD 结构、禁止代码片段 |
 | **飞书 Mermaid** | [引用:docs/飞书Mermaid语法指南.md] | 飞书文档中 Mermaid 图表的标准语法与限制 |
 | **飞书表格** | [引用:docs/飞书表格Markdown语法指南.md] | 飞书文档中表格的 Markdown 语法标准 |
+| **LLM 编码行为** | [引用:docs/llm-coding-behavior.md] | LLM 编码行为准则：思考、简洁、精准、目标驱动 |
 
 ## 8. 文档索引
 
@@ -274,6 +275,7 @@ git commit -m "fix(item-manager-v2): xxx"
 | `docs/documentation-standards.md` | 项目文档规范：流程图、PRD 结构 |
 | `docs/飞书Mermaid语法指南.md` | 飞书 Mermaid 语法标准指南：图表类型、语法限制、最佳实践 |
 | `docs/飞书表格Markdown语法指南.md` | 飞书表格 Markdown 语法标准指南：表格规范、最佳实践、模板 |
+| `docs/llm-coding-behavior.md` | LLM 编码行为准则：降低常见 LLM 编码错误 |
 
 ## 9. 数据源
 
