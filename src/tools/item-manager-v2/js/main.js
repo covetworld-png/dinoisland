@@ -24,9 +24,10 @@ function onServerSelect(sid) {
     localStorage.setItem('itemManager_serverId', sid);
     const serverSelect = document.getElementById('server-select');
     if (serverSelect) serverSelect.value = sid;
-    const traceId = window.Analytics ? window.Analytics.startTrace('select_server', { server_id: sid, server_code: sid }) : null;
+    const mappedSid = SERVER_ID_MAP[sid] || sid;
+    const traceId = window.Analytics ? window.Analytics.startTrace('select_server', { server_id: mappedSid }) : null;
     if (window.Analytics && window.Analytics.track) {
-        window.Analytics.track('select_server', { server_id: sid, server_code: sid });
+        window.Analytics.track('select_server', { server_id: mappedSid });
         if (window.itemManager) window.itemManager._updateAnalyticsContext();
     }
     if (window.itemManager) {
@@ -308,10 +309,8 @@ class ItemManager {
     _updateAnalyticsContext() {
         if (!window.Analytics || !window.Analytics.setContext) return;
         const ctx = {
-            user_id: this.user.userId || null,
             game_uid: this.api.gameUid || null,
             server_id: SERVER_ID_MAP[getServerId()] || getServerId() || null,
-            server_code: SERVER_ID_MAP[getServerId()] || getServerId() || null,
             lang: document.body.getAttribute('data-lang') || 'vi',
             mode: APP_MODE.mode
         };
@@ -3164,7 +3163,7 @@ async function debugApiInventory() {
 function doApiLogout() {
     const lang = document.body.getAttribute('data-lang') || 'vi';
     if (window.Analytics && window.Analytics.track && window.itemManager) {
-        window.Analytics.track('logout', { user_id: window.itemManager.user.userId });
+        window.Analytics.track('logout', { game_uid: window.itemManager.api.gameUid });
     }
     if (window.itemManager && window.itemManager.api) {
         window.itemManager.api.logout();

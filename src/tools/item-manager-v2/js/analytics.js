@@ -87,7 +87,7 @@
       });
     },
 
-    // 设置公共上下文（userId, gameUid, serverId, serverCode, lang, mode）
+    // 设置公共上下文（gameUid, serverId, lang, mode）
     setContext(ctx) {
       this._context = {
         ...this._context,
@@ -125,10 +125,8 @@
         page: 'item-manager-v2',
         lang: ctx.lang || (document.body ? (document.body.getAttribute('data-lang') || 'vi') : 'vi'),
         mode: ctx.mode || 'api',
-        user_id: ctx.user_id || null,
         game_uid: ctx.game_uid || localStorage.getItem('game') || null,
         server_id: ctx.server_id  || null,
-        server_code: ctx.server_code || localStorage.getItem('itemManager_serverId') || null,
         timestamp: Date.now(),
         ua: (typeof navigator !== 'undefined' ? navigator.userAgent : '').slice(0, 120),
         screen: (typeof window !== 'undefined' && window.screen ? (window.screen.width + 'x' + window.screen.height) : ''),
