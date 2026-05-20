@@ -91,37 +91,9 @@
 
 ## 7. 工作流规则 (Workflow Rules)
 
-### 7.1 主播数据报告同步规则
+> 业务特定的工作流（主播报告、飞书文档、客服工具、登录权限）详见 [引用:docs/workflow-rules.md]。本节只保留通用规则。
 
-**触发条件**: 更新主播数据分析报告时
-
-**强制动作**:
-1. 生成新的 HTML 报告后，同步复制到 `src/report/streamer-data.html`
-2. 提交到 git，确保访问地址固定可访问
-3. 访问地址: `/src/report/streamer-data.html`
-
-**操作示例**:
-```bash
-python build/pipeline.py streamer-data-report
-git add src/report/streamer-data.html
-git commit -m "update: 更新主播数据报告至 YYYYMMDD"
-```
-
-### 7.2 飞书文档生成规则
-
-**触发条件**: 生成面向飞书的 Markdown 文档时
-
-**强制动作**:
-1. 所有 Mermaid 图表必须遵循 [引用:docs/飞书Mermaid语法指南.md]
-2. 使用文本绘图小组件语法（`/文本绘图`），而非 Markdown 代码块
-3. 避免使用飞书不支持的语法：`%%{init}%%`、`linkStyle`、`click` 事件等
-4. 图表先在 Mermaid Live Editor 验证后再写入文档
-5. 所有表格必须遵循 [引用:docs/飞书表格Markdown语法指南.md]
-6. 表格控制在合理宽度（建议不超过 7 列）
-7. 避免表格嵌套、表格内代码块等复杂结构
-8. 粘贴到飞书后需检查表格格式，必要时手动调整
-
-### 7.3 静态页面打包发布规则
+### 7.1 静态页面打包发布规则
 
 **触发条件**: 用户说"打包"时
 
@@ -141,39 +113,7 @@ git commit -m "update: 更新主播数据报告至 YYYYMMDD"
 python build/packager.py landing-official
 ```
 
-### 7.4 客服工具页面发布规则
-
-**触发条件**: 更新 `cs-tool.html` 客服工具页面时
-
-**路径映射**:
-
-| 类型 | 路径 | 说明 |
-|------|------|------|
-| **源文件** | `projects/001-增长/001-03-landing-page/docs/cs-tool.html` | 开发/编辑工作区 |
-| **发布文件** | `src/tools/cs-tool/index.html` | **唯一提交到 git 的文件** |
-| **访问地址** | `https://covetworld-png.github.io/dinoisland/src/tools/cs-tool/index.html` | GitHub Pages |
-
-**强制动作**:
-1. 仅在源文件位置进行编辑开发
-2. 完成后复制到发布位置：`python build/pipeline.py cs-tool`
-3. 提交发布位置的文件到 git
-4. 源文件目录受 `.gitignore` 保护，**禁止**使用 `git add -f` 强制提交
-
-**操作示例**:
-```bash
-# 1. 编辑源文件（在忽略目录内，不提交）
-# vim projects/001-增长/001-03-landing-page/docs/cs-tool.html
-
-# 2. 复制到发布位置
-python build/pipeline.py cs-tool
-
-# 3. 提交发布文件
-git add src/tools/cs-tool/index.html
-git commit -m "fix(cs-tool): xxx"
-git push origin main
-```
-
-### 7.5 发布管道使用规则
+### 7.2 发布管道使用规则
 
 所有涉及 `projects/` → `src/` 同步或 `src/` → `dist/` 打包的操作，优先通过 `build/` 脚本执行，具体映射关系参见 `build/manifest.json`。
 
@@ -185,35 +125,7 @@ python build/pipeline.py <page-key>
 python build/packager.py <package-key>
 ```
 
-### 7.6 登录权限页面开发规范
-
-**触发条件**: 开发任何需要登录或权限控制才能查看数据的页面时
-
-**强制动作**:
-1. **统一不区分场景**：页面不区分「未登录」还是「权限不足」，统一使用同一套文案和 UI
-2. **必须显示引导覆盖层**：包含 🔒 图标 + 统一文案 + 「重新登录」按钮（调用 `location.reload()`）
-3. **文案要求**：覆盖页面支持的所有语言，统一为「您的登录已过期或无访问权限，请重新登录后刷新页面」
-4. **兜底错误处理**：服务端返回 500/网络错误/其他异常时，显示「系统错误，请联系管理员」，同样以覆盖层形式呈现
-5. **样式要求**：居中卡片，与当前页面主题一致，不得使用浏览器默认 alert
-6. **检查时机**：在数据加载回调的第一行检查状态码/响应体，失败时中断后续渲染
-
-**违规红线**:
-- ❌ 未处理权限错误导致页面空白
-- ❌ 使用 `alert()` 或 `console.log()` 代替引导界面
-- ❌ 权限提示文案缺失或未覆盖所有支持语言
-- ❌ 服务端 500/网络错误无兜底提示
-
-**检查清单（自审）**:
-```
-□ 页面是否需要登录/权限？
-□ 401/403/空数据时是否显示统一权限引导覆盖层？
-□ 提示是否包含重新登录按钮？
-□ 提示是否覆盖所有支持语言？
-□ 500/网络错误时是否显示「系统错误，请联系管理员」兜底提示？
-□ 是否未使用 alert() 或 console.log()？
-```
-
-### 7.7 Git 提交保护规则
+### 7.3 Git 提交保护规则
 
 **触发条件**: 任何已同步到 `src/` 目录的项目文件发生修改时
 
@@ -243,43 +155,98 @@ git commit -m "fix(item-manager-v2): xxx"
 # git push origin main   ← 必须等待用户说 "push"
 ```
 
+### 7.4 游戏数据更新工作流
+
+**触发条件**: 用户要求在 `docs/` 下新增或修改游戏数据（恐龙、道具、礼包、皮肤等）
+
+**数据定义**: 游戏数据包括 `docs/game-data-summary.md` 中记录的：恐龙属性、商城价格、礼包内容、皮肤数据、权益系统、任务奖励等。
+
+**强制动作**:
+1. **更新 docs 源文档**: 修改 `docs/game-data-summary.md`（新增/修正数据）
+2. **运行构建脚本**: 执行 `python build/update-game-data.py`
+   - 该脚本会自动调用 `src/tools/game-data-search/build.py` 生成搜索页面
+   - 然后调用 `build/pipeline.py game-data-search` 同步到 `src/tools/game-data-search/`
+3. **提交到 git**:
+   - 脚本完成构建后必须执行 `git add` + `git commit`
+   - Commit message: `update(game-data): <描述>`
+4. **推送规则**:
+   - 用户明确说"自动 push"或"推上去"时，执行 `git push`
+   - 用户未明确说 push，则只 commit 到本地，等待用户指令
+
+**数据验证清单（执行前自查）**:
+- [ ] 新增 prop_id 是否已在数据库 `game_prop_names` 中确认名称？
+- [ ] 价格数据是否已在数据库 `game_shop_prices` 或 `game_guild_shop_prices` 中验证？
+- [ ] 兽币/积分/贡献值三列是否完整？（无价格写"无"）
+- [ ] 恐龙属性（食性、性别、HP、攻击力等）是否与游戏内一致？
+- [ ] 构建后刷新 `src/tools/game-data-search/index.html` 确认搜索正常？
+
+**操作示例**:
+```bash
+# 1. 修改 docs/game-data-summary.md（新增南手龙数据）
+# vim docs/game-data-summary.md
+
+# 2. 一键构建+同步
+python build/update-game-data.py
+
+# 3. 提交（如用户要求 push 则追加 --push）
+python build/update-game-data.py --push -m "update(game-data): 新增南手龙及新年限定超级暴龙"
+```
+
 ---
 
-## 8. 专项规范索引
+## 8. 数据库查询信息
 
-| 规范 | 文档路径 | 一句话摘要 |
-|------|----------|------------|
-| **API 互斥测试** | [引用:docs/api-testing-methodology.md] | 双层验证模型：批量脚本筛查 + 浏览器控制台根因确认 |
-| **会议纪要生成** | [引用:docs/meeting-minutes-spec.md] | 命名规范、四模块结构、人员映射、质量检查 |
-| **图片描述** | [引用:docs/image-description-spec.md] | 图片特征提取 YAML 字段定义 |
-| **前端资源管理** | [引用:docs/frontend-guidelines.md] | 目录结构、页面类型、版本管理、Git 规则 |
-| **claude.md 生成** | [引用:docs/claude-md-spec.md] | 强制标识规则、格式标准、响应话术 |
-| **记忆系统** | [引用:docs/memory-system.md] | 跨会话上下文持久化方案 |
-| **文档规范** | [引用:docs/documentation-standards.md] | Mermaid 流程图、PRD 结构、禁止代码片段 |
-| **飞书 Mermaid** | [引用:docs/飞书Mermaid语法指南.md] | 飞书文档中 Mermaid 图表的标准语法与限制 |
-| **飞书表格** | [引用:docs/飞书表格Markdown语法指南.md] | 飞书文档中表格的 Markdown 语法标准 |
-| **LLM 编码行为** | [引用:docs/llm-coding-behavior.md] | LLM 编码行为准则：思考、简洁、精准、目标驱动 |
-| **飞书 CLI 调用** | [引用:docs/feishu-cli-guide.md] | 飞书 CLI 跨项目快速调用速查：Skill 列表、命令模板、权限清单 |
+> **⚠️ 密码位置**：`memory/secrets.md`（`.gitignore` 保护，禁止提交）
 
-## 8. 文档索引
+### 8.1 连接信息
 
-| 文档路径 | 内容描述 |
-|---------|---------|
-| `docs/core-game.md` | 核心游戏设定：世界观、系统、操作、数值 |
-| `docs/guild-leader.md` | 团长运营手册：PVP 运营、宣战流程、GM 活动 |
-| `docs/design-system.yaml` | 设计系统规范：配色、字体、组件、动效 |
-| `docs/memory-system.md` | 记忆系统使用手册 |
-| `docs/memory-system-quickref.md` | 记忆系统速查卡 |
-| `docs/image-description-spec.md` | 图片描述规范 |
-| `docs/frontend-guidelines.md` | 前端资源管理规范 |
-| `docs/claude-md-spec.md` | claude.md 生成规范 |
-| `docs/documentation-standards.md` | 项目文档规范：流程图、PRD 结构 |
-| `docs/飞书Mermaid语法指南.md` | 飞书 Mermaid 语法标准指南：图表类型、语法限制、最佳实践 |
-| `docs/飞书表格Markdown语法指南.md` | 飞书表格 Markdown 语法标准指南：表格规范、最佳实践、模板 |
-| `docs/llm-coding-behavior.md` | LLM 编码行为准则：降低常见 LLM 编码错误 |
-| `docs/feishu-cli-guide.md` | 飞书 CLI 调用速查：Skill 列表、命令模板、权限清单 |
+| 字段 | 值 |
+|------|-----|
+| Host | `106.75.213.178` |
+| Port | `13307` |
+| 数据库 | `monster_test` |
+| 用户名 | `robo` |
+| 权限 | 只读（SELECT, REFERENCES, SHOW VIEW） |
 
-## 9. 数据源
+### 8.2 表结构与字典
+
+| 位置 | 说明 |
+|------|------|
+| `data/DBSQL/schemas/monster_test.md` | 自动采集的表结构文档 |
+| `data/DBSQL/dicts/` | ID 字典表（道具、服务器、渠道、公会等） |
+| `data/DBSQL/RULES.md` | SQL 编写规范、权限边界、大表 LIMIT 规则 |
+| `data/DBSQL/SQL_KNOWLEDGE.md` | 小号判定、击杀因果链、用户身份查询等分析规则 |
+
+### 8.3 分析任务触发规则
+
+涉及 `data/DBSQL/` 下的 SQL 分析任务，自动查阅：
+- `[引用:data/DBSQL/README.md#分析场景触发规则]`
+- `[引用:data/DBSQL/SQL_KNOWLEDGE.md]`
+
+---
+
+## 9. 文档与规范索引
+
+| 文档路径 | 类型 | 内容描述 |
+|---------|------|---------|
+| `docs/api-testing-methodology.md` | 规范 | 双层验证模型：批量脚本筛查 + 浏览器控制台根因确认 |
+| `docs/meeting-minutes-spec.md` | 规范 | 命名规范、四模块结构、人员映射、质量检查 |
+| `docs/image-description-spec.md` | 规范 | 图片特征提取 YAML 字段定义 |
+| `docs/frontend-guidelines.md` | 规范 | 目录结构、页面类型、版本管理、Git 规则 |
+| `docs/claude-md-spec.md` | 规范 | 强制标识规则、格式标准、响应话术 |
+| `docs/memory-system.md` | 规范 | 跨会话上下文持久化方案 |
+| `docs/memory-system-quickref.md` | 规范 | 记忆系统速查卡 |
+| `docs/documentation-standards.md` | 规范 | Mermaid 流程图、PRD 结构、禁止代码片段 |
+| `docs/飞书Mermaid语法指南.md` | 规范 | 飞书文档中 Mermaid 图表的标准语法与限制 |
+| `docs/飞书表格Markdown语法指南.md` | 规范 | 飞书文档中表格的 Markdown 语法标准 |
+| `docs/llm-coding-behavior.md` | 规范 | LLM 编码行为准则：思考、简洁、精准、目标驱动 |
+| `docs/feishu-cli-guide.md` | 规范 | 飞书 CLI 跨项目快速调用速查：Skill 列表、命令模板、权限清单 |
+| `docs/analytics-sdk-spec.md` | 规范 | 前端打点 SDK 接入规范：字段精简、ext 长度控制、事件类型定义 |
+| `docs/core-game.md` | 参考 | 核心游戏设定：世界观、系统、操作、数值 |
+| `docs/guild-leader.md` | 参考 | 团长运营手册：PVP 运营、宣战流程、GM 活动 |
+| `docs/design-system.yaml` | 参考 | 设计系统规范：配色、字体、组件、动效 |
+
+## 10. 数据源
 
 | 名称 | 地址 | 说明 |
 |------|------|------|
@@ -287,7 +254,7 @@ git commit -m "fix(item-manager-v2): xxx"
 
 > **DBSQL 分析任务触发规则**：涉及 `data/DBSQL/` 下的 SQL 分析、小号识别、击杀关系、昵称查询等任务，自动查阅 `[引用:data/DBSQL/README.md#分析场景触发规则]` 和 `[引用:data/DBSQL/SQL_KNOWLEDGE.md]`。
 
-## 10. 记忆系统 (Memory System)
+## 11. 记忆系统 (Memory System)
 
 ### 10.1 快速启动
 
