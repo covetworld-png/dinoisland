@@ -157,40 +157,11 @@ git commit -m "fix(item-manager-v2): xxx"
 
 ### 7.4 游戏数据更新工作流
 
-**触发条件**: 用户要求在 `docs/` 下新增或修改游戏数据（恐龙、道具、礼包、皮肤等）
+**触发条件**: 用户要求在 `docs/` 下新增或修改游戏数据
 
-**数据定义**: 游戏数据包括 `docs/game-data-summary.md` 中记录的：恐龙属性、商城价格、礼包内容、皮肤数据、权益系统、任务奖励等。
+**动作**: 修改 `docs/game-data-summary.md` → 执行 `python build/update-game-data.py` → `git commit`（push 需用户显式确认）
 
-**强制动作**:
-1. **更新 docs 源文档**: 修改 `docs/game-data-summary.md`（新增/修正数据）
-2. **运行构建脚本**: 执行 `python build/update-game-data.py`
-   - 该脚本会自动调用 `src/tools/game-data-search/build.py` 生成搜索页面
-   - 然后调用 `build/pipeline.py game-data-search` 同步到 `src/tools/game-data-search/`
-3. **提交到 git**:
-   - 脚本完成构建后必须执行 `git add` + `git commit`
-   - Commit message: `update(game-data): <描述>`
-4. **推送规则**:
-   - 用户明确说"自动 push"或"推上去"时，执行 `git push`
-   - 用户未明确说 push，则只 commit 到本地，等待用户指令
-
-**数据验证清单（执行前自查）**:
-- [ ] 新增 prop_id 是否已在数据库 `game_prop_names` 中确认名称？
-- [ ] 价格数据是否已在数据库 `game_shop_prices` 或 `game_guild_shop_prices` 中验证？
-- [ ] 兽币/积分/贡献值三列是否完整？（无价格写"无"）
-- [ ] 恐龙属性（食性、性别、HP、攻击力等）是否与游戏内一致？
-- [ ] 构建后刷新 `src/tools/game-data-search/index.html` 确认搜索正常？
-
-**操作示例**:
-```bash
-# 1. 修改 docs/game-data-summary.md（新增南手龙数据）
-# vim docs/game-data-summary.md
-
-# 2. 一键构建+同步
-python build/update-game-data.py
-
-# 3. 提交（如用户要求 push 则追加 --push）
-python build/update-game-data.py --push -m "update(game-data): 新增南手龙及新年限定超级暴龙"
-```
+**详情**: 参见 [docs/game-data-update-workflow.md](docs/game-data-update-workflow.md)
 
 ---
 
