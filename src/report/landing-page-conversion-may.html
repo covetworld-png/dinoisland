@@ -129,55 +129,51 @@
         }
         .rate-bar.low { background: linear-gradient(90deg, #f87171, #ef4444); }
         .rate-bar.mid { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
-        .scroll-hint {
-            font-size: 11px; color: var(--text-secondary);
-            text-align: right; margin-bottom: 6px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📊 5月整月落地页转化漏斗分析</h1>
-        <p class="subtitle">数据周期：2026-05-01 ~ 2026-05-22（数据库截至5/22） | 口径：prod_users 注册 + game_dau_hour 首次活跃</p>
+        <p class="subtitle">数据周期：2026-05-01 ~ 2026-05-24 | 口径：prod_users 注册 + game_dau_hour 首次活跃</p>
 
         <!-- 核心指标 -->
         <div class="summary-grid">
             <div class="summary-card">
                 <div class="label">总注册</div>
-                <div class="value" style="color:#60a5fa">901</div>
-                <div class="delta up">日均 41 人</div>
+                <div class="value" style="color:#60a5fa">995</div>
+                <div class="delta up">日均 41.5 人</div>
             </div>
             <div class="summary-card">
                 <div class="label">总激活</div>
                 <div class="value" style="color:#34d399">312</div>
-                <div class="delta up">日均 14 人</div>
+                <div class="delta up">日均 13 人</div>
             </div>
             <div class="summary-card">
                 <div class="label">整体激活率</div>
-                <div class="value" style="color:#fbbf24">34.6%</div>
+                <div class="value" style="color:#fbbf24">31.4%</div>
                 <div class="delta warn">含老用户回流拉高</div>
             </div>
             <div class="summary-card">
                 <div class="label">o6 小手柄注册</div>
-                <div class="value" style="color:#f87171">350</div>
-                <div class="delta down">占 38.8%，激活率 7.7%</div>
+                <div class="value" style="color:#f87171">402</div>
+                <div class="delta down">占 40.4%，激活率 4.7%</div>
             </div>
             <div class="summary-card">
                 <div class="label">h1 Heni 注册</div>
-                <div class="value" style="color:#3498db">245</div>
-                <div class="delta up">占 27.2%，激活率 28.2%</div>
+                <div class="value" style="color:#3498db">259</div>
+                <div class="delta up">占 26.0%，激活率 23.6%</div>
             </div>
             <div class="summary-card">
                 <div class="label">自然流量注册</div>
-                <div class="value" style="color:#95a5a6">178</div>
-                <div class="delta up">激活 174，激活率 97.8%*</div>
+                <div class="value" style="color:#95a5a6">189</div>
+                <div class="delta up">激活 119，激活率 63.0%*</div>
             </div>
         </div>
 
         <!-- 堆积图：注册 + 激活 -->
         <div class="two-col">
             <div class="chart-card">
-                <h2><span class="dot" style="background:#60a5fa"></span>每日注册堆积（5/1-5/22）</h2>
+                <h2><span class="dot" style="background:#60a5fa"></span>每日注册堆积（5/1-5/24）</h2>
                 <div class="channel-legend">
                     <span><span class="color" style="background:#e74c3c"></span>o6 小手柄</span>
                     <span><span class="color" style="background:#3498db"></span>h1 Heni</span>
@@ -189,7 +185,7 @@
                 <div id="chartReg" class="chart"></div>
             </div>
             <div class="chart-card">
-                <h2><span class="dot" style="background:#34d399"></span>每日激活堆积（5/1-5/22）</h2>
+                <h2><span class="dot" style="background:#34d399"></span>每日激活堆积（5/1-5/24）</h2>
                 <div class="channel-legend">
                     <span><span class="color" style="background:#e74c3c"></span>o6 小手柄</span>
                     <span><span class="color" style="background:#3498db"></span>h1 Heni</span>
@@ -204,14 +200,15 @@
 
         <!-- 注册 vs 激活 对比 -->
         <div class="chart-card">
-            <h2><span class="dot" style="background:#fbbf24"></span>各渠道注册 vs 激活对比（5月累计）</h2>
+            <h2><span class="dot" style="background:#fbbf24"></span>各渠道注册 vs 激活对比（5/1-5/24 累计）</h2>
             <div id="chartCompare" class="chart"></div>
             <div class="insight-box">
                 <strong>⚠️ 核心发现：</strong><br>
-                • o6 小手柄注册 350 占 38.8%，但激活仅 27（8.7%）—— 大量无效注册<br>
-                • r1 Ricon 激活率 43.8% 最高，但注册量仅 73，规模受限<br>
-                • 自然流量激活率 97.8% 异常，因包含大量历史注册用户首次活跃（激活 174 > 注册 178 中的新用户）<br>
-                • <strong>5/10-5/13 是 o6 小手柄高峰</strong>：4 天注册 179 人，但激活仅 9 人，激活率 5.0%
+                • o6 小手柄注册 402 占 40.4%，但激活仅 19（4.7%）—— 大量无效注册<br>
+                • r1 Ricon 激活率 32.9% 最高，但注册量仅 79，规模受限<br>
+                • 自然流量激活率 63.0% 异常，因包含历史注册用户首次活跃<br>
+                • <strong>5/10-5/13 是 o6 小手柄高峰</strong>：4 天注册 179 人，但激活仅 9 人，激活率 5.0%<br>
+                • <strong>5/24 o6 反弹至 36 注册</strong>，需关注后续激活质量
             </div>
         </div>
 
@@ -229,14 +226,14 @@
                 <strong>o6 小手柄质量极不稳定：</strong><br>
                 • 5/1-5/9（上线前）：注册 49，激活 14，激活率 28.6% —— 质量尚可<br>
                 • 5/10-5/13（高峰）：注册 179，激活 5，激活率 2.8% —— <strong>质量崩塌</strong><br>
-                • 5/14-5/22（重新上线后）：注册 122，激活 7，激活率 5.7% —— 略有回升但仍极低<br>
+                • 5/14-5/24（重新上线后）：注册 174，激活 11，激活率 6.3% —— 略有回升但仍极低<br>
                 • 结论：小手柄放量时质量断崖下跌，存在大量误触/非目标用户
             </div>
         </div>
 
         <!-- 数据明细表 -->
         <div class="chart-card">
-            <h2><span class="dot" style="background:#94a3b8"></span>渠道明细（5/1-5/22 累计）</h2>
+            <h2><span class="dot" style="background:#94a3b8"></span>渠道明细（5/1-5/24 累计）</h2>
             <table>
                 <thead>
                     <tr>
@@ -247,39 +244,50 @@
                         <th>激活率</th>
                         <th>5/1-5/9<br>激活率</th>
                         <th>5/10-5/13<br>激活率</th>
-                        <th>5/14-5/22<br>激活率</th>
+                        <th>5/14-5/24<br>激活率</th>
                         <th>质量评级</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>🎮 o6 小手柄</td>
-                        <td>350</td>
-                        <td>38.8%</td>
-                        <td>27</td>
-                        <td><span class="rate-bar low" style="width:16px"></span>7.7%</td>
+                        <td>402</td>
+                        <td>40.4%</td>
+                        <td>19</td>
+                        <td><span class="rate-bar low" style="width:10px"></span>4.7%</td>
                         <td>28.6%</td>
                         <td><span class="rate-bar low" style="width:6px"></span>2.8%</td>
-                        <td>5.7%</td>
+                        <td>6.3%</td>
                         <td style="color:#f87171">极差</td>
                     </tr>
                     <tr>
                         <td>👤 h1 Heni Profile</td>
-                        <td>245</td>
-                        <td>27.2%</td>
-                        <td>69</td>
-                        <td><span class="rate-bar mid" style="width:58px"></span>28.2%</td>
+                        <td>259</td>
+                        <td>26.0%</td>
+                        <td>61</td>
+                        <td><span class="rate-bar mid" style="width:48px"></span>23.6%</td>
                         <td>28.0%</td>
                         <td>15.2%</td>
-                        <td>23.2%</td>
+                        <td>23.6%</td>
                         <td style="color:#fbbf24">良好</td>
                     </tr>
                     <tr>
+                        <td>🌐 自然流量</td>
+                        <td>189</td>
+                        <td>19.0%</td>
+                        <td>119</td>
+                        <td><span class="rate-bar" style="width:100px"></span>63.0%*</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td style="color:#94a3b8">异常*</td>
+                    </tr>
+                    <tr>
                         <td>👤 r1 Ricon Profile</td>
-                        <td>73</td>
-                        <td>8.1%</td>
-                        <td>32</td>
-                        <td><span class="rate-bar" style="width:90px"></span>43.8%</td>
+                        <td>79</td>
+                        <td>7.9%</td>
+                        <td>26</td>
+                        <td><span class="rate-bar" style="width:66px"></span>32.9%</td>
                         <td>45.0%</td>
                         <td>0.0%</td>
                         <td>18.5%</td>
@@ -287,32 +295,21 @@
                     </tr>
                     <tr>
                         <td>👤 m1 Miumiu Profile</td>
-                        <td>38</td>
-                        <td>4.2%</td>
-                        <td>9</td>
-                        <td><span class="rate-bar mid" style="width:48px"></span>23.7%</td>
+                        <td>40</td>
+                        <td>4.0%</td>
+                        <td>8</td>
+                        <td><span class="rate-bar mid" style="width:40px"></span>20.0%</td>
                         <td>23.5%</td>
                         <td>20.0%</td>
-                        <td>22.2%</td>
+                        <td>17.4%</td>
                         <td style="color:#fbbf24">良好</td>
                     </tr>
                     <tr>
-                        <td>🌐 自然流量</td>
-                        <td>178</td>
-                        <td>19.8%</td>
-                        <td>174</td>
-                        <td><span class="rate-bar" style="width:100px"></span>97.8%*</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td style="color:#94a3b8">异常*</td>
-                    </tr>
-                    <tr>
                         <td>📦 其他</td>
-                        <td>17</td>
-                        <td>1.9%</td>
+                        <td>26</td>
+                        <td>2.6%</td>
                         <td>1</td>
-                        <td><span class="rate-bar low" style="width:12px"></span>5.9%</td>
+                        <td><span class="rate-bar low" style="width:8px"></span>3.8%</td>
                         <td>-</td>
                         <td>-</td>
                         <td>-</td>
@@ -321,14 +318,13 @@
                 </tbody>
             </table>
             <p style="font-size:11px;color:var(--text-secondary);margin-top:10px;">
-                *自然流量 97.8% 激活率异常偏高，因 game_dau_hour 首次活跃口径包含大量历史注册用户（注册时间早于 5/1），并非全部为本月新注册用户。
-                若仅统计 5 月注册且 5 月首次活跃的用户，自然流量实际激活率约为 61.2%（5/14-5/22 数据）。
+                *自然流量 63.0% 激活率异常偏高，因 game_dau_hour 首次活跃口径包含大量历史注册用户（注册时间早于 5/1），并非全部为本月新注册用户。
             </p>
         </div>
     </div>
 
     <script>
-        const dates = ["5/1","5/2","5/3","5/4","5/5","5/6","5/7","5/8","5/9","5/10","5/11","5/12","5/13","5/14","5/15","5/16","5/17","5/18","5/19","5/20","5/21","5/22"];
+        const dates = ["5/1","5/2","5/3","5/4","5/5","5/6","5/7","5/8","5/9","5/10","5/11","5/12","5/13","5/14","5/15","5/16","5/17","5/18","5/19","5/20","5/21","5/22","5/23","5/24"];
         const colors = {
             o6: '#e74c3c', h1: '#3498db', r1: '#2ecc71',
             m1: '#9b59b6', org: '#95a5a6', other: '#e67e22'
@@ -336,31 +332,31 @@
 
         // 注册数据
         const regData = {
-            o6: [3,4,2,0,3,16,10,8,3,64,31,48,36,7,26,13,11,13,6,2,16,28],
-            h1: [22,13,25,15,8,17,12,11,16,20,7,12,11,11,8,8,8,2,8,7,3,1],
-            r1: [6,4,10,3,5,3,4,3,1,4,2,0,1,4,3,3,7,5,1,0,2,2],
-            m1: [3,2,6,2,3,2,0,3,2,3,1,2,0,2,0,3,3,0,0,1,0,0],
-            org: [12,8,6,16,3,9,17,19,8,10,4,6,11,4,6,5,7,8,5,9,2,3],
-            other: [1,1,0,1,1,0,1,0,1,3,1,1,1,0,1,1,0,1,1,0,1,0]
+            o6: [3,4,2,0,3,16,10,8,3,64,31,48,36,7,26,13,11,13,6,2,16,28,16,36],
+            h1: [22,13,25,15,8,17,12,11,16,20,7,12,11,11,8,8,8,2,8,7,3,1,8,6],
+            r1: [6,4,10,3,5,3,4,3,1,4,2,0,1,4,3,3,7,5,1,0,2,2,1,5],
+            m1: [3,2,6,2,3,2,0,3,2,3,1,2,0,2,0,3,3,0,0,1,0,0,1,1],
+            org: [12,8,6,16,3,9,17,19,8,10,4,6,11,4,6,5,7,8,5,9,2,3,1,10],
+            other: [1,1,0,1,1,0,1,0,1,3,1,1,1,0,1,1,0,1,1,0,1,0,0,0]
         };
 
-        // 激活数据（首次活跃日期口径）
+        // 激活数据
         const actData = {
-            o6: [3,2,1,1,3,3,1,0,0,0,2,1,2,1,0,1,2,2,0,0,1,1],
-            h1: [9,2,5,6,5,3,4,4,3,6,2,2,3,2,2,1,1,3,3,2,1,0],
-            r1: [2,2,3,5,3,4,2,1,0,0,0,0,0,1,3,1,2,2,0,0,1,0],
-            m1: [1,0,1,0,0,1,0,1,2,0,0,1,0,1,0,0,1,0,0,0,0,0],
-            org: [25,13,7,13,12,12,14,14,8,8,4,3,5,6,5,2,5,3,5,4,3,3],
-            other: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0]
+            o6: [3,2,1,1,3,3,1,0,0,0,2,1,2,1,0,1,2,2,0,0,1,1,1,2],
+            h1: [9,2,5,6,5,3,4,4,3,6,2,2,3,2,2,1,1,3,3,2,1,0,4,2],
+            r1: [2,2,3,5,3,4,2,1,0,0,0,0,0,1,3,1,2,2,0,0,1,0,1,2],
+            m1: [1,0,1,0,0,1,0,1,2,0,0,1,0,1,0,0,1,0,0,0,0,0,1,0],
+            org: [25,13,7,13,12,12,14,14,8,8,4,3,5,6,5,2,5,3,5,4,3,3,5,5],
+            other: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0]
         };
 
-        const makeSeries = (data, isReg) => [
-            { name: 'o6 小手柄', type: 'bar', stack: 'total', data: data.o6, itemStyle: { color: colors.o6 }, barMaxWidth: 22 },
-            { name: 'h1 Heni', type: 'bar', stack: 'total', data: data.h1, itemStyle: { color: colors.h1 }, barMaxWidth: 22 },
-            { name: 'r1 Ricon', type: 'bar', stack: 'total', data: data.r1, itemStyle: { color: colors.r1 }, barMaxWidth: 22 },
-            { name: 'm1 Miumiu', type: 'bar', stack: 'total', data: data.m1, itemStyle: { color: colors.m1 }, barMaxWidth: 22 },
-            { name: '自然流量', type: 'bar', stack: 'total', data: data.org, itemStyle: { color: colors.org }, barMaxWidth: 22 },
-            { name: '其他', type: 'bar', stack: 'total', data: data.other, itemStyle: { color: colors.other, borderRadius: isReg ? [3,3,0,0] : [3,3,0,0] }, barMaxWidth: 22 },
+        const makeSeries = (data) => [
+            { name: 'o6 小手柄', type: 'bar', stack: 'total', data: data.o6, itemStyle: { color: colors.o6 }, barMaxWidth: 20 },
+            { name: 'h1 Heni', type: 'bar', stack: 'total', data: data.h1, itemStyle: { color: colors.h1 }, barMaxWidth: 20 },
+            { name: 'r1 Ricon', type: 'bar', stack: 'total', data: data.r1, itemStyle: { color: colors.r1 }, barMaxWidth: 20 },
+            { name: 'm1 Miumiu', type: 'bar', stack: 'total', data: data.m1, itemStyle: { color: colors.m1 }, barMaxWidth: 20 },
+            { name: '自然流量', type: 'bar', stack: 'total', data: data.org, itemStyle: { color: colors.org }, barMaxWidth: 20 },
+            { name: '其他', type: 'bar', stack: 'total', data: data.other, itemStyle: { color: colors.other, borderRadius: [3,3,0,0] }, barMaxWidth: 20 },
         ];
 
         const baseOption = {
@@ -374,7 +370,7 @@
             xAxis: {
                 type: 'category', data: dates,
                 axisLine: { lineStyle: { color: 'rgba(148,163,184,0.2)' } },
-                axisLabel: { color: '#94a3b8', fontSize: 11, rotate: 0 }
+                axisLabel: { color: '#94a3b8', fontSize: 11 }
             },
             yAxis: {
                 type: 'value', splitLine: { lineStyle: { color: 'rgba(148,163,184,0.08)' } },
@@ -383,19 +379,9 @@
             dataZoom: [{ type: 'inside', start: 0, end: 100 }, { type: 'slider', start: 0, end: 100, height: 16, bottom: 4, borderColor: 'transparent', fillerColor: 'rgba(96,165,250,0.15)', handleStyle: { color: '#60a5fa' }, textStyle: { color: '#94a3b8' } }]
         };
 
-        // 注册堆积图
-        echarts.init(document.getElementById('chartReg')).setOption({
-            ...baseOption,
-            series: makeSeries(regData, true)
-        });
+        echarts.init(document.getElementById('chartReg')).setOption({ ...baseOption, series: makeSeries(regData) });
+        echarts.init(document.getElementById('chartAct')).setOption({ ...baseOption, series: makeSeries(actData) });
 
-        // 激活堆积图
-        echarts.init(document.getElementById('chartAct')).setOption({
-            ...baseOption,
-            series: makeSeries(actData, false)
-        });
-
-        // 注册 vs 激活对比
         echarts.init(document.getElementById('chartCompare')).setOption({
             ...baseOption,
             grid: { left: 90, right: 60, top: 20, bottom: 30 },
@@ -406,12 +392,11 @@
                 axisLabel: { color: '#e2e8f0', fontSize: 12 }
             },
             series: [
-                { name: '注册', type: 'bar', data: [17,38,73,178,245,350], itemStyle: { color: '#60a5fa', borderRadius: [0,4,4,0] }, barWidth: 18 },
-                { name: '激活', type: 'bar', data: [1,9,32,174,69,27], itemStyle: { color: '#34d399', borderRadius: [0,4,4,0] }, barWidth: 18 }
+                { name: '注册', type: 'bar', data: [26,40,79,189,259,402], itemStyle: { color: '#60a5fa', borderRadius: [0,4,4,0] }, barWidth: 18 },
+                { name: '激活', type: 'bar', data: [1,8,26,119,61,19], itemStyle: { color: '#34d399', borderRadius: [0,4,4,0] }, barWidth: 18 }
             ]
         });
 
-        // 每日激活率趋势
         const dailyReg = dates.map((_,i) => regData.o6[i]+regData.h1[i]+regData.r1[i]+regData.m1[i]+regData.org[i]+regData.other[i]);
         const dailyAct = dates.map((_,i) => actData.o6[i]+actData.h1[i]+actData.r1[i]+actData.m1[i]+actData.org[i]+actData.other[i]);
         const dailyRate = dates.map((_,i) => dailyReg[i] ? (dailyAct[i]/dailyReg[i]*100).toFixed(1) : 0);
@@ -424,7 +409,7 @@
                 { name: '激活率%', type: 'line', data: dailyRate, smooth: true, symbol: 'circle', symbolSize: 7,
                   lineStyle: { color: '#fbbf24', width: 3 }, itemStyle: { color: '#fbbf24', borderWidth: 2, borderColor: '#0f172a' },
                   areaStyle: { color: { type: 'linear', x:0,y:0,x2:0,y2:1, colorStops:[{offset:0,color:'rgba(251,191,36,0.2)'},{offset:1,color:'rgba(251,191,36,0)'}] } },
-                  markLine: { silent: true, data: [{ yAxis: 34.6, lineStyle: { color: 'rgba(148,163,184,0.4)', type: 'dashed' }, label: { formatter: '月平均 34.6%', color: '#94a3b8', fontSize: 11 } }] }
+                  markLine: { silent: true, data: [{ yAxis: 31.4, lineStyle: { color: 'rgba(148,163,184,0.4)', type: 'dashed' }, label: { formatter: '月平均 31.4%', color: '#94a3b8', fontSize: 11 } }] }
                 },
                 { name: '注册数', type: 'bar', data: dailyReg, barWidth: 12, itemStyle: { color: 'rgba(96,165,250,0.2)', borderRadius: [3,3,0,0] }, yAxisIndex: 1 }
             ],
@@ -435,7 +420,6 @@
             dataZoom: [{ type: 'inside', start: 0, end: 100 }, { type: 'slider', start: 0, end: 100, height: 16, bottom: 4, borderColor: 'transparent', fillerColor: 'rgba(96,165,250,0.15)', handleStyle: { color: '#60a5fa' }, textStyle: { color: '#94a3b8' } }]
         });
 
-        // o6 专题
         const o6Reg = regData.o6;
         const o6Act = actData.o6;
         const o6Rate = o6Reg.map((v,i) => v ? (o6Act[i]/v*100).toFixed(1) : 0);
