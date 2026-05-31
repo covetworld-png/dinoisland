@@ -113,13 +113,13 @@ def fetch_all_monthly_recharge(conn, guilds: list[dict]) -> dict[int, dict[str, 
     return results
 
 
-def fetch_all_weekly_new_users(conn, guilds: list[dict]) -> dict[int, list[dict]]:
-    """批量查询所有团近 8 周新增用户"""
+def fetch_all_weekly_new_users(conn, guilds: list[dict]) -> tuple[dict[int, list[dict]], dict[int, dict]]:
+    """批量查询所有团近 8 周 + 近 7 天新增用户"""
     today = datetime.now()
     week_start = today - timedelta(weeks=8)
+    day7_start = today - timedelta(days=7)
     
     gid_list = ','.join(str(g['guild_id']) for g in guilds)
-    sid_list = list(set(SERVER_ID_MAP.get(g['server_name'], g.get('server_id', '')) for g in guilds))
     
     # 一次性查询所有团近 8 周的入团记录
     with conn.cursor() as cur:
@@ -142,25 +142,31 @@ def fetch_all_weekly_new_users(conn, guilds: list[dict]) -> dict[int, list[dict]
         
         rows = cur.fetchall()
     
-    # 按 guild_id 和 周分组
     from collections import defaultdict
     weekly_data = defaultdict(lambda: defaultdict(lambda: {'new_fresh': 0, 'transferred_in': 0}))
+    recent_7d = defaultdict(lambda: {'new_fresh': 0, 'transferred_in': 0})
     
     for row in rows:
         gid = row['guild_id']
         joined = row['joined_at']
-        # 计算属于哪一周 (以今天为基准，倒推)
         days_ago = (today - joined).days
         week_idx = days_ago // 7
-        if week_idx > 7:
-            continue
         
-        if row['had_prior_guild']:
-            weekly_data[gid][week_idx]['transferred_in'] += 1
-        else:
-            weekly_data[gid][week_idx]['new_fresh'] += 1
+        # 近7天统计
+        if days_ago < 7:
+            if row['had_prior_guild']:
+                recent_7d[gid]['transferred_in'] += 1
+            else:
+                recent_7d[gid]['new_fresh'] += 1
+        
+        # 8周统计
+        if week_idx <= 7:
+            if row['had_prior_guild']:
+                weekly_data[gid][week_idx]['transferred_in'] += 1
+            else:
+                weekly_data[gid][week_idx]['new_fresh'] += 1
     
-    results = {}
+    weekly_results = {}
     for g in guilds:
         gid = g['guild_id']
         week_list = []
@@ -174,9 +180,9 @@ def fetch_all_weekly_new_users(conn, guilds: list[dict]) -> dict[int, list[dict]
                 'new_fresh': d['new_fresh'],
                 'transferred_in': d['transferred_in'],
             })
-        results[gid] = week_list
+        weekly_results[gid] = week_list
     
-    return results
+    return weekly_results, dict(recent_7d)
 
 
 def update_all_data():
@@ -232,17 +238,19 @@ def update_all_data():
                 guild_stats[str(g['guild_id'])]['leader_last_login'] = login_data[key]
                 print(f"  {g['guild_name']:16} | {login_data[key]}")
         
-        # 3. 批量拉取近 8 周新增
-        print("\n👥 拉取近 8 周新增用户...")
-        weekly_data = fetch_all_weekly_new_users(conn, guilds)
+        # 3. 批量拉取近 8 周 + 近 7 天新增
+        print("\n👥 拉取近 8 周 / 近 7 天新增用户...")
+        weekly_data, recent_7d_data = fetch_all_weekly_new_users(conn, guilds)
         for g in guilds:
             gid = g['guild_id']
             gsid = str(gid)
             guild_stats[gsid]['weekly_new_users'] = weekly_data[gid]
+            guild_stats[gsid]['recent_7d'] = recent_7d_data.get(gid, {'new_fresh': 0, 'transferred_in': 0})
             weeks = weekly_data[gid]
             total_new = sum(w['new_fresh'] for w in weeks)
             total_trans = sum(w['transferred_in'] for w in weeks)
-            print(f"  {g['guild_name']:16} | 新+{total_new} 转+{total_trans}")
+            d7 = recent_7d_data.get(gid, {'new_fresh': 0, 'transferred_in': 0})
+            print(f"  {g['guild_name']:16} | 8周:新+{total_new}转+{total_trans} | 7天:新+{d7['new_fresh']}转+{d7['transferred_in']}")
         
         data['guild_stats'] = guild_stats
         data['meta']['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
