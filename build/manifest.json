@@ -139,6 +139,15 @@
       "private": true,
       "description": "游戏数据搜索查询工具"
     },
+    "guild-leader-dashboard": {
+      "source": "projects/004-工具/004-04-guild-leader-dashboard",
+      "src": "src/tools/guild-leader-dashboard",
+      "type": "tool-page",
+      "status": "ready",
+      "confirmed": true,
+      "private": true,
+      "description": "自营团长管理仪表盘"
+    },
     "revenue-event-analysis": {
       "source": "projects/004-工具/004-02-revenue-event-analysis/frontend/revenue-event-analysis.html",
       "src": "src/report/revenue-event-analysis.html",
