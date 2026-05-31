@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
 scripts/update_guild_leader_data.py
-从 monster_test 数据库拉取数据并更新 guild-leader-data.json
+从 monster_test 数据库拉取动态数据并更新 guild-leader-data.json
 
 拉取内容:
-  1. 每个团长最后登录时间
-  2. 每个团 1-5 月每月充值数据 (VND)
+  1. 每个团 4-5 月每月充值数据 (VND)
+  2. 每个团团长最后登录时间
   3. 每个团近 8 周新增用户分析 (新用户 vs 老用户换团)
 
 用法:
@@ -15,28 +15,30 @@ scripts/update_guild_leader_data.py
 import json
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pymysql
 
 ROOT = Path(__file__).parent.parent
-DATA_PATH = ROOT / "src/tools/guild-leader-dashboard/data/guild-leader-data.json"
+DATA_PATH = ROOT / "projects/004-工具/004-04-guild-leader-dashboard/data/guild-leader-data.json"
 
-# 数据库配置 (从 secrets 读取或硬编码只读账号)
 DB_HOST = "106.75.213.178"
 DB_PORT = 13307
 DB_USER = "robo"
 DB_NAME = "monster_test"
 
+SERVER_ID_MAP = {
+    'Q服': '750748016054341',
+    'K服': '768538488131653',
+}
+
 
 def get_db_password() -> str:
-    """从 secrets 文件读取密码"""
     secrets_path = ROOT / "memory/secrets.md"
     if secrets_path.exists():
         text = secrets_path.read_text()
         for line in text.split('\n'):
             if "password='" in line:
-                # 匹配 password='xxx',
                 m = line.strip().split("password='")[-1].split("'")[0]
                 return m
     return None
@@ -54,70 +56,127 @@ def connect():
     )
 
 
-def fetch_leader_last_login(conn, game_uid: int, server_id: str) -> str:
-    """查询团长最后登录时间"""
+def fetch_all_leader_logins(conn, leader_uids: list[tuple[int, str]]) -> dict[tuple[int, str], str]:
+    """批量查询团长最后登录时间"""
+    if not leader_uids:
+        return {}
+    
+    results = {}
     with conn.cursor() as cur:
-        cur.execute("""
-            SELECT MAX(createtime) as last_login
-            FROM dino_game_logs
-            WHERE game_uid = %s AND server_id = %s
-        """, (game_uid, server_id))
-        row = cur.fetchone()
-        if row and row['last_login']:
-            return row['last_login'].strftime('%Y-%m-%d %H:%M')
-    return ''
+        for uid, sid in leader_uids:
+            cur.execute("""
+                SELECT createtime FROM dino_game_logs
+                WHERE game_uid = %s AND server_id = %s
+                ORDER BY createtime DESC LIMIT 1
+            """, (uid, sid))
+            row = cur.fetchone()
+            if row:
+                results[(uid, sid)] = row['createtime'].strftime('%Y-%m-%d %H:%M')
+    return results
 
 
-def fetch_monthly_recharge(conn, guild_id: int, server_id: str, year: int, month: int) -> int:
-    """查询某团某月充值金额 (VND)"""
+def fetch_all_monthly_recharge(conn, guilds: list[dict]) -> dict[int, dict[str, int]]:
+    """批量查询所有团 4-5 月充值"""
+    # 构建 (guild_id, server_id) 列表
+    gs_pairs = []
+    for g in guilds:
+        sid = SERVER_ID_MAP.get(g['server_name'], g.get('server_id', ''))
+        gs_pairs.append((g['guild_id'], sid))
+    
+    gid_list = ','.join(str(g['guild_id']) for g in guilds)
+    sid_list = ','.join(f"'{SERVER_ID_MAP.get(g['server_name'], g.get('server_id', ''))}'" for g in guilds)
+    
+    results = {g['guild_id']: {} for g in guilds}
+    
     with conn.cursor() as cur:
-        cur.execute("""
-            SELECT IFNULL(SUM(p.amount), 0) as total
-            FROM prod_orders p
-            JOIN game_user_guilds g ON p.game_uid = g.game_uid
-                AND p.server_id = g.server_id
-            WHERE g.guild_id = %s
-              AND g.server_id = %s
-              AND p.status IN ('paid', 'shipped')
-              AND YEAR(p.created_at) = %s
-              AND MONTH(p.created_at) = %s
-              AND p.created_at >= g.joined_at
-        """, (guild_id, server_id, year, month))
-        row = cur.fetchone()
-        return int(row['total']) if row else 0
-
-
-def fetch_weekly_new_users(conn, guild_id: int, server_id: str, year: int, week: int):
-    """查询某团某周新增用户 (新用户 vs 换团)"""
-    with conn.cursor() as cur:
-        # 获取该周加入该团的所有用户
-        cur.execute("""
+        # 一次性查询所有团 4-5 月充值
+        cur.execute(f"""
             SELECT 
+                g.guild_id,
+                YEAR(p.created_at) as y,
+                MONTH(p.created_at) as m,
+                SUM(p.amount) as total
+            FROM prod_orders p
+            JOIN game_user_guilds g ON p.game_uid = g.game_uid AND p.server_id = g.server_id
+            WHERE p.status IN ('paid', 'shipped')
+              AND p.created_at >= '2026-04-01' AND p.created_at < '2026-06-01'
+              AND p.created_at >= g.joined_at
+              AND g.guild_id IN ({gid_list})
+            GROUP BY g.guild_id, y, m
+        """)
+        
+        for row in cur.fetchall():
+            gid = row['guild_id']
+            key = f"{row['y']}-{row['m']:02d}"
+            results[gid][key] = int(row['total'])
+    
+    return results
+
+
+def fetch_all_weekly_new_users(conn, guilds: list[dict]) -> dict[int, list[dict]]:
+    """批量查询所有团近 8 周新增用户"""
+    today = datetime.now()
+    week_start = today - timedelta(weeks=8)
+    
+    gid_list = ','.join(str(g['guild_id']) for g in guilds)
+    sid_list = list(set(SERVER_ID_MAP.get(g['server_name'], g.get('server_id', '')) for g in guilds))
+    
+    # 一次性查询所有团近 8 周的入团记录
+    with conn.cursor() as cur:
+        cur.execute(f"""
+            SELECT 
+                g.guild_id,
                 g.game_uid,
-                g.joined_at as join_time,
+                g.server_id,
+                g.joined_at,
                 EXISTS(
                     SELECT 1 FROM game_user_guilds g2
                     WHERE g2.game_uid = g.game_uid
                       AND g2.server_id = g.server_id
                       AND g2.joined_at < g.joined_at
-                      AND g2.joined_at >= DATE_SUB(g.joined_at, INTERVAL 30 DAY)
-                ) as had_recent_guild
+                ) as had_prior_guild
             FROM game_user_guilds g
-            WHERE g.guild_id = %s
-              AND g.server_id = %s
-              AND YEAR(g.joined_at) = %s
-              AND WEEK(g.joined_at, 1) = %s
-        """, (guild_id, server_id, year, week))
+            WHERE g.guild_id IN ({gid_list})
+              AND g.joined_at >= %s
+        """, (week_start,))
         
         rows = cur.fetchall()
-        fresh = 0
-        transferred = 0
-        for row in rows:
-            if row['had_recent_guild']:
-                transferred += 1
-            else:
-                fresh += 1
-        return {'new_fresh': fresh, 'transferred_in': transferred}
+    
+    # 按 guild_id 和 周分组
+    from collections import defaultdict
+    weekly_data = defaultdict(lambda: defaultdict(lambda: {'new_fresh': 0, 'transferred_in': 0}))
+    
+    for row in rows:
+        gid = row['guild_id']
+        joined = row['joined_at']
+        # 计算属于哪一周 (以今天为基准，倒推)
+        days_ago = (today - joined).days
+        week_idx = days_ago // 7
+        if week_idx > 7:
+            continue
+        
+        if row['had_prior_guild']:
+            weekly_data[gid][week_idx]['transferred_in'] += 1
+        else:
+            weekly_data[gid][week_idx]['new_fresh'] += 1
+    
+    results = {}
+    for g in guilds:
+        gid = g['guild_id']
+        week_list = []
+        for i in range(7, -1, -1):
+            ws = today - timedelta(weeks=i+1)
+            we = today - timedelta(weeks=i)
+            label = ws.strftime('%m/%d') + '~' + we.strftime('%m/%d')
+            d = weekly_data[gid].get(i, {'new_fresh': 0, 'transferred_in': 0})
+            week_list.append({
+                'week': label,
+                'new_fresh': d['new_fresh'],
+                'transferred_in': d['transferred_in'],
+            })
+        results[gid] = week_list
+    
+    return results
 
 
 def update_all_data():
@@ -131,49 +190,65 @@ def update_all_data():
     conn = connect()
     
     try:
-        # 1. 更新团长最后登录时间
-        print("📅 更新团长最后登录时间...")
-        for acc in data['accounts']:
-            if acc.get('role') == 'leader' and acc.get('server_id'):
-                last_login = fetch_leader_last_login(conn, acc['game_uid'], acc['server_id'])
-                if last_login:
-                    acc['last_login'] = last_login
+        guild_stats = data.get('guild_stats', {})
+        guilds = data['guilds']
         
-        # 2. 更新军团充值数据 (1-5月)
-        print("💰 拉取 1-5 月充值数据...")
-        for g in data['guilds']:
+        # 初始化 guild_stats
+        for g in guilds:
+            gsid = str(g['guild_id'])
+            if gsid not in guild_stats:
+                guild_stats[gsid] = {
+                    'monthly_recharge': {},
+                    'weekly_new_users': [],
+                    'active_count': {'7d': 0, '30d': 0},
+                    'leader_last_login': '',
+                }
+        
+        # 1. 批量拉取 4-5 月充值
+        print("💰 拉取 4-5 月充值数据...")
+        recharge_data = fetch_all_monthly_recharge(conn, guilds)
+        for g in guilds:
             gid = g['guild_id']
-            sid = g['server_id']
-            for month in range(1, 6):
-                key = f"2026-{month:02d}"
-                amount = fetch_monthly_recharge(conn, gid, sid, 2026, month)
-                g['monthly_recharge'][key] = amount
+            gsid = str(gid)
+            for key, amount in recharge_data.get(gid, {}).items():
+                guild_stats[gsid]['monthly_recharge'][key] = amount
                 print(f"  {g['guild_name']:16} | {key} | {amount:>12,} VND")
         
-        # 3. 更新每周新增 (近 8 周)
-        print("👥 拉取近 8 周新增用户...")
-        from datetime import timedelta
-        today = datetime.now()
-        for g in data['guilds']:
-            gid = g['guild_id']
-            sid = g['server_id']
-            g['weekly_new_users'] = []
-            for i in range(7, -1, -1):
-                week_date = today - timedelta(weeks=i)
-                year = week_date.year
-                week = int(week_date.strftime('%W'))
-                result = fetch_weekly_new_users(conn, gid, sid, year, week)
-                g['weekly_new_users'].append({
-                    'week': f"{year}-W{week:02d}",
-                    'new_fresh': result['new_fresh'],
-                    'transferred_in': result['transferred_in'],
-                })
+        # 2. 批量拉取团长最后登录
+        print("\n📅 拉取团长最后登录时间...")
+        leader_uids = []
+        for g in guilds:
+            luid = g.get('leader_uid')
+            sid = SERVER_ID_MAP.get(g['server_name'], g.get('server_id', ''))
+            if luid and sid:
+                leader_uids.append((luid, sid))
         
-        # 更新 meta
+        login_data = fetch_all_leader_logins(conn, leader_uids)
+        for g in guilds:
+            luid = g.get('leader_uid')
+            sid = SERVER_ID_MAP.get(g['server_name'], g.get('server_id', ''))
+            key = (luid, sid)
+            if key in login_data:
+                guild_stats[str(g['guild_id'])]['leader_last_login'] = login_data[key]
+                print(f"  {g['guild_name']:16} | {login_data[key]}")
+        
+        # 3. 批量拉取近 8 周新增
+        print("\n👥 拉取近 8 周新增用户...")
+        weekly_data = fetch_all_weekly_new_users(conn, guilds)
+        for g in guilds:
+            gid = g['guild_id']
+            gsid = str(gid)
+            guild_stats[gsid]['weekly_new_users'] = weekly_data[gid]
+            weeks = weekly_data[gid]
+            total_new = sum(w['new_fresh'] for w in weeks)
+            total_trans = sum(w['transferred_in'] for w in weeks)
+            print(f"  {g['guild_name']:16} | 新+{total_new} 转+{total_trans}")
+        
+        data['guild_stats'] = guild_stats
         data['meta']['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
         
         DATA_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
-        print(f"✅ 已更新: {DATA_PATH}")
+        print(f"\n✅ 已更新: {DATA_PATH}")
         
     finally:
         conn.close()
