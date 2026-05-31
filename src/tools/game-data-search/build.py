@@ -34,7 +34,7 @@ def parse_markdown(md_text: str) -> tuple[str, list]:
         "三、公会商城": "#d97706",
         "四、皮肤数据": "#8b5cf6",
         "五、权益系统": "#f97316",
-        "六、每日任务奖励": "#ef4444",
+        "六、战斗机制": "#ef4444",
     }
 
     # 为每个 h2/h3/h4 添加锚点 id 和 section 颜色
