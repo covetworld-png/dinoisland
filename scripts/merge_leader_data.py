@@ -17,7 +17,7 @@ from datetime import datetime
 
 ROOT = Path(__file__).parent.parent
 DATA_DIR = ROOT / "projects/003-运营/003-04-团长管理体系建设/data"
-OUTPUT = ROOT / "src/tools/guild-leader-dashboard/data/guild-leader-data.json"
+OUTPUT = ROOT / "projects/004-工具/004-04-guild-leader-dashboard/data/guild-leader-data.json"
 
 # 团名中文翻译
 GUILD_NAME_TRANSLATIONS = {
@@ -409,9 +409,15 @@ def build_accounts(accounts_md: dict, accounts_extra: dict, leader_names: dict, 
                     'content': note,
                 })
         
+        # 账号类型：有团长自然人信息 → 团长账号，否则 → 福利账号
+        account_type = 'leader' if uid in leader_names else 'welfare'
+        leader_name = leader_names.get(uid, '')
+        
         result.append({
             'game_uid': uid,
             'status': account_status,
+            'account_type': account_type,
+            'leader_name': leader_name,
             'profiles': profiles,
             'notes': notes_history,
         })
