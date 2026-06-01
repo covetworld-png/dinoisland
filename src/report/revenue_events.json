@@ -109,13 +109,57 @@
       "category": "其他",
       "name": "K 服 3 人充 5000 金币",
       "color": "#5470c6"
+    },
+    {
+      "date": "2026-04-28",
+      "type": "markLine",
+      "category": "其他",
+      "name": "小手柄换成了商单",
+      "color": "#3ba272"
+    },
+    {
+      "date": "2026-05-01",
+      "type": "markPoint",
+      "category": "活动",
+      "name": "充值排行 s4",
+      "color": "#9a60b4"
+    },
+    {
+      "date": "2026-05-04",
+      "type": "markArea",
+      "category": "活动",
+      "name": "首届 PVP 活动",
+      "color": "#fc8452",
+      "endDate": "2026-05-10"
+    },
+    {
+      "date": "2026-05-05",
+      "type": "markArea",
+      "category": "活动",
+      "name": "充值排行 s5",
+      "color": "#9a60b4",
+      "endDate": "2026-05-10"
+    },
+    {
+      "date": "2026-05-28",
+      "type": "markPoint",
+      "category": "其他",
+      "name": "版本更新（签到卡，镰刀龙，抽奖）",
+      "color": "#5470c6"
+    },
+    {
+      "date": "2026-06-01",
+      "type": "markLine",
+      "category": "其他",
+      "name": "GM 权限回收，越南仅保留红山一个",
+      "color": "#91cc75"
     }
   ],
   "format": {
     "date": "YYYY-MM-DD，必须与 daily_metrics.csv 的日期一致",
     "endDate": "markArea 专用，结束日期",
     "type": "markLine(垂直标线) | markPoint(标注点) | markArea(区间高亮)",
-    "category": "事件类型：主播 | 活动 | 其他",
+    "category": "事件分类：主播 | 活动 | 其他",
     "name": "事件名称，显示在图表上",
     "color": "十六进制颜色码，可选",
     "value": "markPoint 专用，对应纵轴收入值；若省略则自动取当日收入"
