@@ -422,7 +422,19 @@ def update_all_data():
                 sid = profile.get('server_id', '')
                 info = info_map.get(sid)
                 if info:
-                    profile['nick_name'] = info['nick_name']
+                    old_nick = profile.get('nick_name', '')
+                    new_nick = info['nick_name']
+                    # 昵称变更追踪
+                    if old_nick and old_nick != new_nick:
+                        history = profile.get('nick_name_history', [])
+                        history.append({
+                            'time': datetime.now().strftime('%Y-%m-%d %H:%M'),
+                            'old': old_nick,
+                            'new': new_nick,
+                        })
+                        profile['nick_name_history'] = history
+                        print(f"  📝 UID {uid} {profile.get('server_name', '')}: '{old_nick}' → '{new_nick}'")
+                    profile['nick_name'] = new_nick
                     profile['guild_id'] = info['guild_id']
                     profile['guild_name'] = guild_name_map.get(info['guild_id'], '')
                     profile['is_self_operated'] = info['guild_id'] in self_operated_gids
