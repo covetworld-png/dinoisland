@@ -76,39 +76,40 @@ def fetch_all_leader_logins(conn, leader_uids: list[tuple[int, str]]) -> dict[tu
 
 
 def fetch_all_monthly_recharge(conn, guilds: list[dict]) -> dict[int, dict[str, int]]:
-    """批量查询所有团 4-5 月充值"""
-    # 构建 (guild_id, server_id) 列表
-    gs_pairs = []
-    for g in guilds:
-        sid = SERVER_ID_MAP.get(g['server_name'], g.get('server_id', ''))
-        gs_pairs.append((g['guild_id'], sid))
+    """批量查询所有团 4-5 月充值（时点归属口径）
     
-    gid_list = ','.join(str(g['guild_id']) for g in guilds)
+    口径: 订单发生时用户所在的团（created_at > joined_at ORDER BY joined_at DESC LIMIT 1）
+    来源: data/DBSQL/SQL_KNOWLEDGE.md #时点归属SQL（推荐）
+    """
     sid_list = ','.join(f"'{SERVER_ID_MAP.get(g['server_name'], g.get('server_id', ''))}'" for g in guilds)
     
     results = {g['guild_id']: {} for g in guilds}
     
     with conn.cursor() as cur:
-        # 一次性查询所有团 4-5 月充值
+        # 时点归属: 每笔订单归属到订单发生时用户所在的团
         cur.execute(f"""
             SELECT 
-                g.guild_id,
-                YEAR(p.created_at) as y,
-                MONTH(p.created_at) as m,
-                SUM(p.amount) as total
+                p.amount,
+                p.created_at,
+                (SELECT guild_id FROM game_user_guilds g
+                 WHERE g.game_uid = p.game_uid
+                   AND g.server_id = p.server_id
+                   AND p.created_at > g.joined_at
+                 ORDER BY g.joined_at DESC LIMIT 1) as guild_id
             FROM prod_orders p
-            JOIN game_user_guilds g ON p.game_uid = g.game_uid AND p.server_id = g.server_id
             WHERE p.status IN ('paid', 'shipped')
               AND p.created_at >= '2026-04-01' AND p.created_at < '2026-06-01'
-              AND p.created_at >= g.joined_at
-              AND g.guild_id IN ({gid_list})
-            GROUP BY g.guild_id, y, m
+              AND p.server_id IN ({sid_list})
         """)
         
         for row in cur.fetchall():
             gid = row['guild_id']
-            key = f"{row['y']}-{row['m']:02d}"
-            results[gid][key] = int(row['total'])
+            if gid is None:
+                continue
+            month_key = row['created_at'].strftime('%Y-%m')
+            if gid not in results:
+                results[gid] = {}
+            results[gid][month_key] = results[gid].get(month_key, 0) + int(row['amount'])
     
     return results
 
