@@ -194,6 +194,23 @@ git commit -m "fix(item-manager-v2): xxx"
 - `[引用:data/DBSQL/README.md#分析场景触发规则]`
 - `[引用:data/DBSQL/SQL_KNOWLEDGE.md]`
 
+### 8.4 充值归属口径自动触发规则
+
+**触发关键词组合**（命中任一即激活）：
+
+| 关键词组合 | 示例 |
+|---|---|
+| `充值` + `团`/`军团`/`guild` | "统计各团5月充值" |
+| `充值` + `统计`/`汇总`/`计算`/`排行` | "汇总4月充值数据" |
+| `归属`/`口径` + `充值` | "充值归属到哪个团" |
+| `月份`/`月度`/`月` + `充值` | "月度充值排行榜" |
+| `recharge` + `guild`/`团` | 英文查询 |
+
+**强制动作**：
+1. 自动旁注 `[引用:data/DBSQL/SQL_KNOWLEDGE.md#时点归属SQL]`
+2. 确认 SQL 是否使用时点归属口径（`created_at > joined_at ORDER BY joined_at DESC LIMIT 1`）
+3. **禁止**直接使用 `JOIN game_user_guilds ON created_at >= joined_at` 无 `LIMIT 1` 的写法
+
 ---
 
 ## 9. 文档与规范索引
