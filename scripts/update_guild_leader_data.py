@@ -187,6 +187,118 @@ def fetch_all_weekly_new_users(conn, guilds: list[dict]) -> tuple[dict[int, list
     return weekly_results, dict(recent_7d)
 
 
+def fetch_user_game_info(conn, uids: list[int]) -> dict[int, list[dict]]:
+    """查询用户游戏信息：昵称、所属团"""
+    if not uids:
+        return {}
+    
+    uid_str = ','.join(str(u) for u in uids)
+    results = {}
+    
+    with conn.cursor() as cur:
+        cur.execute(f"""
+            SELECT game_uid, server_id, nick_name, guild_id
+            FROM user_game_info
+            WHERE game_uid IN ({uid_str})
+        """)
+        for row in cur.fetchall():
+            uid = row['game_uid']
+            if uid not in results:
+                results[uid] = []
+            results[uid].append({
+                'server_id': row['server_id'],
+                'nick_name': row['nick_name'] or '',
+                'guild_id': row['guild_id'] or 0,
+            })
+    
+    return results
+
+
+def fetch_user_ban_status(conn, uids: list[int]) -> dict[int, int]:
+    """查询用户封禁状态：0=封禁, 1=正常"""
+    if not uids:
+        return {}
+    
+    uid_str = ','.join(str(u) for u in uids)
+    results = {}
+    
+    with conn.cursor() as cur:
+        cur.execute(f"""
+            SELECT game_uid, status
+            FROM users
+            WHERE game_uid IN ({uid_str})
+        """)
+        for row in cur.fetchall():
+            # status=0 封禁, status=1 正常
+            results[row['game_uid']] = row['status']
+    
+    return results
+
+
+def fetch_prop_names(conn) -> dict[int, str]:
+    """查询道具名称映射"""
+    results = {}
+    with conn.cursor() as cur:
+        cur.execute("SELECT prop_id, prop_name FROM game_prop_names")
+        for row in cur.fetchall():
+            results[row['prop_id']] = row['prop_name']
+    return results
+
+
+def fetch_mail_rewards(conn, uids: list[int], prop_names: dict[int, str]) -> dict[int, dict]:
+    """查询邮件领取的福利：兽币、恐龙、皮肤（强化卡等道具不计入）"""
+    if not uids:
+        return {}
+    
+    uid_str = ','.join(str(u) for u in uids)
+    results = {}
+    
+    with conn.cursor() as cur:
+        cur.execute(f"""
+            SELECT game_uid, data_id, data_type, SUM(data_num) as total
+            FROM dino_op_logs
+            WHERE source = 2
+              AND game_uid IN ({uid_str})
+            GROUP BY game_uid, data_id, data_type
+        """)
+        
+        for row in cur.fetchall():
+            uid = row['game_uid']
+            if uid not in results:
+                results[uid] = {'gold': 0, 'dinosaurs': [], 'skins': []}
+            
+            data_id = row['data_id']
+            data_type = row['data_type']
+            total = int(row['total'])
+            name = prop_names.get(data_id, f'ID:{data_id}')
+            
+            if data_type == 4 and data_id == 9001:
+                # 兽币
+                results[uid]['gold'] += total
+            elif data_type == 1 and 1000 <= data_id < 2000:
+                # 恐龙
+                results[uid]['dinosaurs'].append({
+                    'prop_id': data_id,
+                    'name': name,
+                    'count': total,
+                })
+            elif data_type == 2 and 2000 <= data_id < 3000:
+                # 皮肤
+                results[uid]['skins'].append({
+                    'prop_id': data_id,
+                    'name': name,
+                    'count': total,
+                })
+            # data_type=2 且 data_id>=4000 的是道具（强化卡等），不计入
+    
+    # 按数量排序
+    for uid in results:
+        results[uid]['dinosaurs'].sort(key=lambda x: x['count'], reverse=True)
+        results[uid]['skins'].sort(key=lambda x: x['count'], reverse=True)
+    
+    return results
+
+
 def sync_html_data(data: dict):
     """将 JSON 数据同步到 index.html 的 <script id='guild-data'> 标签"""
     if not HTML_PATH.exists():
@@ -282,6 +394,56 @@ def update_all_data():
             print(f"  {g['guild_name']:16} | 8周:新+{total_new}转+{total_trans} | 7天:新+{d7['new_fresh']}转+{d7['transferred_in']}")
         
         data['guild_stats'] = guild_stats
+        
+        # 4. 拉取账号游戏信息、封禁状态、邮件福利
+        print("\n👤 拉取账号详细信息...")
+        all_uids = [a['game_uid'] for a in data['accounts']]
+        
+        game_info = fetch_user_game_info(conn, all_uids)
+        ban_status = fetch_user_ban_status(conn, all_uids)
+        prop_names = fetch_prop_names(conn)
+        mail_rewards = fetch_mail_rewards(conn, all_uids, prop_names)
+        
+        # 构建 guild_id -> guild_name 映射（用于显示所属团名）
+        guild_name_map = {g['guild_id']: g['guild_name'] for g in guilds}
+        self_operated_gids = set(g['guild_id'] for g in guilds)
+        
+        for account in data['accounts']:
+            uid = account['game_uid']
+            
+            # 封禁状态
+            account['ban_status'] = ban_status.get(uid, 1)
+            
+            # 邮件福利
+            account['mail_rewards'] = mail_rewards.get(uid, {'gold': 0, 'dinosaurs': [], 'skins': []})
+            
+            # 补充 profiles 的昵称和所属团
+            profiles = account.get('profiles', [])
+            info_list = game_info.get(uid, [])
+            info_map = {info['server_id']: info for info in info_list}
+            
+            for profile in profiles:
+                sid = profile.get('server_id', '')
+                info = info_map.get(sid)
+                if info:
+                    profile['nick_name'] = info['nick_name']
+                    profile['guild_id'] = info['guild_id']
+                    profile['guild_name'] = guild_name_map.get(info['guild_id'], '')
+                    profile['is_self_operated'] = info['guild_id'] in self_operated_gids
+                else:
+                    profile['nick_name'] = ''
+                    profile['guild_id'] = 0
+                    profile['guild_name'] = ''
+                    profile['is_self_operated'] = False
+            
+            # 统计有福利的账号
+            rewards = account['mail_rewards']
+            has_rewards = rewards['gold'] > 0 or rewards['dinosaurs'] or rewards['skins']
+            if has_rewards:
+                dino_count = sum(d['count'] for d in rewards['dinosaurs'])
+                skin_count = sum(s['count'] for s in rewards['skins'])
+                print(f"  UID {uid:>10} | 兽币 {rewards['gold']:>10,} | 恐龙 {dino_count:>4} | 皮肤 {skin_count:>3}")
+        
         data['meta']['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
         
         json_text = json.dumps(data, ensure_ascii=False, indent=2)
