@@ -214,25 +214,22 @@ def fetch_user_game_info(conn, uids: list[int]) -> dict[int, list[dict]]:
     return results
 
 
-def fetch_user_ban_status(conn, uids: list[int]) -> dict[int, int]:
-    """查询用户封禁状态：0=封禁, 1=正常"""
-    if not uids:
-        return {}
+def fetch_user_ban_status_from_notes(account: dict) -> int:
+    """从 account.notes 中解析封禁状态：0=封禁, 1=正常
     
-    uid_str = ','.join(str(u) for u in uids)
-    results = {}
-    
-    with conn.cursor() as cur:
-        cur.execute(f"""
-            SELECT game_uid, status
-            FROM users
-            WHERE game_uid IN ({uid_str})
-        """)
-        for row in cur.fetchall():
-            # status=0 封禁, status=1 正常
-            results[row['game_uid']] = row['status']
-    
-    return results
+    规则:
+      - notes 中包含'已封禁'/'已经封禁' → 封禁
+      - notes 中包含'已经解禁' → 正常
+      - 无相关备注 → 默认正常
+    """
+    notes = account.get('notes', [])
+    for n in notes:
+        content = n.get('content', '')
+        if '已经解禁' in content or '已解禁' in content:
+            return 1
+        if '已封禁' in content or '已经封禁' in content or '暂时封禁' in content:
+            return 0
+    return 1
 
 
 def fetch_prop_names(conn) -> dict[int, str]:
@@ -400,7 +397,6 @@ def update_all_data():
         all_uids = [a['game_uid'] for a in data['accounts']]
         
         game_info = fetch_user_game_info(conn, all_uids)
-        ban_status = fetch_user_ban_status(conn, all_uids)
         prop_names = fetch_prop_names(conn)
         mail_rewards = fetch_mail_rewards(conn, all_uids, prop_names)
         
@@ -411,8 +407,8 @@ def update_all_data():
         for account in data['accounts']:
             uid = account['game_uid']
             
-            # 封禁状态
-            account['ban_status'] = ban_status.get(uid, 1)
+            # 封禁状态：从 notes 中解析（而非数据库 users.status）
+            account['ban_status'] = fetch_user_ban_status_from_notes(account)
             
             # 邮件福利
             account['mail_rewards'] = mail_rewards.get(uid, {'gold': 0, 'dinosaurs': [], 'skins': []})
