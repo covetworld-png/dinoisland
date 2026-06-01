@@ -21,6 +21,7 @@ import pymysql
 
 ROOT = Path(__file__).parent.parent
 DATA_PATH = ROOT / "projects/004-工具/004-04-guild-leader-dashboard/data/guild-leader-data.json"
+HTML_PATH = ROOT / "projects/004-工具/004-04-guild-leader-dashboard/index.html"
 
 DB_HOST = "106.75.213.178"
 DB_PORT = 13307
@@ -186,6 +187,33 @@ def fetch_all_weekly_new_users(conn, guilds: list[dict]) -> tuple[dict[int, list
     return weekly_results, dict(recent_7d)
 
 
+def sync_html_data(data: dict):
+    """将 JSON 数据同步到 index.html 的 <script id='guild-data'> 标签"""
+    if not HTML_PATH.exists():
+        print(f"⚠️  HTML 文件不存在: {HTML_PATH}")
+        return
+    
+    html = HTML_PATH.read_text(encoding='utf-8')
+    start_marker = '<script type="application/json" id="guild-data">'
+    end_marker = '</script>'
+    
+    start = html.find(start_marker)
+    if start == -1:
+        print("⚠️  找不到 <script id='guild-data'> 标签，跳过 HTML 同步")
+        return
+    
+    content_start = start + len(start_marker)
+    end = html.find(end_marker, content_start)
+    if end == -1:
+        print("⚠️  找不到 </script> 结束标签，跳过 HTML 同步")
+        return
+    
+    json_text = json.dumps(data, ensure_ascii=False, indent=2)
+    new_html = html[:content_start] + '\n' + json_text + '\n' + html[end:]
+    HTML_PATH.write_text(new_html, encoding='utf-8')
+    print(f"✅ 已同步 HTML: {HTML_PATH}")
+
+
 def update_all_data():
     if not DATA_PATH.exists():
         print(f"❌ 数据文件不存在: {DATA_PATH}")
@@ -256,8 +284,12 @@ def update_all_data():
         data['guild_stats'] = guild_stats
         data['meta']['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
         
-        DATA_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+        json_text = json.dumps(data, ensure_ascii=False, indent=2)
+        DATA_PATH.write_text(json_text, encoding='utf-8')
         print(f"\n✅ 已更新: {DATA_PATH}")
+        
+        # 同步到 index.html 内嵌标签
+        sync_html_data(data)
         
     finally:
         conn.close()
