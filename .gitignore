@@ -1,6 +1,10 @@
 # Ignore everything by default
 *
 
+# Except docs (project documentation)
+!docs/
+!docs/**
+
 # Except src (frontend source code)
 !src/
 !src/**
