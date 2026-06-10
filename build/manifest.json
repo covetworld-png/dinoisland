@@ -121,6 +121,15 @@
       "private": false,
       "description": "官网首页"
     },
+    "game-intro": {
+      "source": "projects/002-内容/002-04-游戏介绍/web",
+      "src": "src/official/pages/game-intro",
+      "type": "official-page",
+      "status": "ready",
+      "confirmed": true,
+      "private": false,
+      "description": "游戏介绍页（官网）"
+    },
     "004-01-video-downloader": {
       "source": "projects/004-工具/004-01-video-downloader",
       "src": "src/tools/video-downloader",
