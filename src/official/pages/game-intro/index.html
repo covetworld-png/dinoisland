@@ -741,7 +741,7 @@
     .video-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(20,24,36,0.9) 0%, rgba(8,10,15,0.95) 100%);
+      background: linear-gradient(135deg, rgba(20,24,36,0.45) 0%, rgba(8,10,15,0.65) 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -826,7 +826,7 @@
     .video-thumb-front {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(20,24,36,0.88) 0%, rgba(8,10,15,0.92) 100%);
+      background: linear-gradient(135deg, rgba(20,24,36,0.4) 0%, rgba(8,10,15,0.6) 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1449,6 +1449,24 @@
       } else if (['ArrowUp', 'PageUp'].includes(e.key)) {
         e.preventDefault();
         snapToSection(currentSnapIndex - 1);
+      }
+    });
+
+    // ESC 关闭弹窗
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const lb = document.getElementById('lightbox');
+        const modal = document.getElementById('trailerModal');
+        if (lb && lb.classList.contains('active')) {
+          lb.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+        if (modal && modal.classList.contains('active')) {
+          modal.classList.remove('active');
+          document.body.style.overflow = '';
+          const video = document.getElementById('trailerVideo');
+          if (video) { video.pause(); video.currentTime = 0; }
+        }
       }
     });
 
