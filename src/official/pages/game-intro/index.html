@@ -990,17 +990,17 @@
     <nav class="nav" id="mainNav">
       <div class="nav-logo">Đảo Khủng Long</div>
       <div class="nav-links">
-        <a href="#evolution">进化</a>
-        <a href="#battle">战斗</a>
-        <a href="#social">社交</a>
-        <a href="#gallery">场景</a>
-        <a href="#dinos">恐龙</a>
-        <a href="#videos">视频</a>
+        <a href="#evolution" data-i18n="nav.evolution">进化</a>
+        <a href="#battle" data-i18n="nav.battle">战斗</a>
+        <a href="#social" data-i18n="nav.social">社交</a>
+        <a href="#gallery" data-i18n="nav.gallery">场景</a>
+        <a href="#dinos" data-i18n="nav.dinos">恐龙</a>
+        <a href="#videos" data-i18n="nav.videos">视频</a>
       </div>
       <div class="lang-switcher">
-        <button onclick="switchLang('zh')" class="active">中</button>
-        <button onclick="switchLang('en')">EN</button>
-        <button onclick="switchLang('vi')">VI</button>
+        <button data-lang="zh" class="active" onclick="switchLang('zh')">中</button>
+        <button data-lang="en" onclick="switchLang('en')">EN</button>
+        <button data-lang="vi" onclick="switchLang('vi')">VI</button>
       </div>
     </nav>
 
@@ -1018,19 +1018,19 @@
           <div class="hero-right">
             <div class="quote-box reveal">
               <div class="section-label" style="text-align:left; margin-bottom:12px;">01  THE WORLD</div>
-              <div class="quote-text">"人类曾在此建立秘密实验室，试图掌控进化的权柄。灾难骤至，文明崩塌，只留下废墟与恐龙的低吼。如今，这片土地有了新的主人。"</div>
+              <div class="quote-text" data-i18n="hero.quote">人类曾在此建立秘密实验室，试图掌控进化的权柄。灾难骤至，文明崩塌，只留下废墟与恐龙的低吼。如今，这片土地有了新的主人。</div>
             </div>
           </div>
         </div>
         <div class="hero-tags">
-          <span>恐龙生存进化</span>
-          <span>开放世界猎杀</span>
-          <span>实时多人对战</span>
-          <span>领地公会战争</span>
+          <span data-i18n="hero.tag1">恐龙生存进化</span>
+          <span data-i18n="hero.tag2">开放世界猎杀</span>
+          <span data-i18n="hero.tag3">实时多人对战</span>
+          <span data-i18n="hero.tag4">领地公会战争</span>
         </div>
         <div class="hero-buttons">
-          <a href="https://daokhunglong.vn/" target="_blank" class="btn btn-primary">下载游戏</a>
-          <button class="btn btn-secondary" onclick="openVideoModal('assets/trailer.mp4')">观看预告</button>
+          <a href="https://daokhunglong.vn/" target="_blank" class="btn btn-primary" data-i18n="hero.download">下载游戏</a>
+          <button class="btn btn-secondary" onclick="openVideoModal('assets/trailer.mp4')" data-i18n="hero.watchTrailer">观看预告</button>
         </div>
         <div class="hero-scroll">↓</div>
       </div>
@@ -1041,17 +1041,17 @@
       <div class="container">
         <div class="asymmetric reverse">
           <div class="asymmetric-text reveal">
-            <div class="section-label">02  EVOLUTION</div>
-            <div class="section-title">弱肉强食，适者进化</div>
-            <div class="section-desc">每一只巨兽都曾是从蛋壳中探出头颅的幼龙。觅食、饮水、在厮杀中磨砺，直至进化值满溢，蜕变为成年体。这里没有怜悯，只有自然法则的残酷与壮丽。</div>
+            <div class="section-label" data-i18n="section.evolution.label">02  EVOLUTION</div>
+            <div class="section-title" data-i18n="section.evolution.title">弱肉强食，适者进化</div>
+            <div class="section-desc" data-i18n="section.evolution.desc">每一只巨兽都曾是从蛋壳中探出头颅的幼龙。觅食、饮水、在厮杀中磨砺，直至进化值满溢，蜕变为成年体。这里没有怜悯，只有自然法则的残酷与壮丽。</div>
             <ul>
-              <li>从幼龙起步，亲历完整的成长历程</li>
-              <li>饥饿、口渴与体力限制真实的生存体验</li>
-              <li>成年后可筑巢定居，建立属于自己的据点</li>
+              <li data-i18n="section.evolution.li1">从幼龙起步，亲历完整的成长历程</li>
+              <li data-i18n="section.evolution.li2">饥饿、口渴与体力限制真实的生存体验</li>
+              <li data-i18n="section.evolution.li3">成年后可筑巢定居，建立属于自己的据点</li>
             </ul>
           </div>
           <div class="reveal reveal-delay-1">
-            <img src="assets/evolution.jpg" alt="弱肉强食，适者进化" style="width:100%; border-radius:var(--radius-lg); border:1px solid var(--border); display:block;">
+            <img src="assets/evolution.jpg" data-i18n-alt="section.evolution.title" alt="弱肉强食，适者进化" style="width:100%; border-radius:var(--radius-lg); border:1px solid var(--border); display:block;">
           </div>
         </div>
       </div>
@@ -1063,16 +1063,16 @@
       <div class="container">
         <div class="asymmetric">
           <div class="reveal">
-            <img src="assets/combat.jpg" alt="狭路相逢，勇者生存" style="width:100%; border-radius:var(--radius-lg); border:1px solid var(--border); display:block;">
+            <img src="assets/combat.jpg" data-i18n-alt="section.battle.title" alt="狭路相逢，勇者生存" style="width:100%; border-radius:var(--radius-lg); border:1px solid var(--border); display:block;">
           </div>
           <div class="asymmetric-text reveal reveal-delay-1">
-            <div class="section-label">03  COMBAT</div>
-            <div class="section-title">狭路相逢，勇者生存</div>
-            <div class="section-desc">废墟深处的工厂是勇者的试炼场。每一次遭遇都是技术与本能的较量，走位、侧翼攻击、骨折机制——只有最敏锐的猎手才能活着离开。</div>
+            <div class="section-label" data-i18n="section.battle.label">03  COMBAT</div>
+            <div class="section-title" data-i18n="section.battle.title">狭路相逢，勇者生存</div>
+            <div class="section-desc" data-i18n="section.battle.desc">废墟深处的工厂是勇者的试炼场。每一次遭遇都是技术与本能的较量，走位、侧翼攻击、骨折机制——只有最敏锐的猎手才能活着离开。</div>
             <ul>
-              <li>废墟工厂中的即时遭遇战</li>
-              <li>走位与时机决定生死</li>
-              <li>侧翼攻击可造成骨折重创</li>
+              <li data-i18n="section.battle.li1">废墟工厂中的即时遭遇战</li>
+              <li data-i18n="section.battle.li2">走位与时机决定生死</li>
+              <li data-i18n="section.battle.li3">侧翼攻击可造成骨折重创</li>
             </ul>
           </div>
         </div>
@@ -1085,13 +1085,13 @@
       <div class="fullwidth-img reveal">
         <img src="assets/territory.jpg" alt="领地即尊严" onclick="openLightbox(this.src)" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:var(--radius-lg); z-index:0; display:block; filter:brightness(0.35);">
         <div class="overlay-content">
-          <div class="section-label">04  TERRITORY</div>
-          <div class="section-title" style="font-size:32px; margin-bottom:12px;">领地即尊严</div>
-          <div class="section-desc" style="margin:0 auto;">公会之间的宣战不是儿戏，每一次领地攻防都关乎整个团队的尊严与存亡。胜负之间，资源与荣耀重新分配。</div>
+          <div class="section-label" data-i18n="section.territory.label">04  TERRITORY</div>
+          <div class="section-title" style="font-size:32px; margin-bottom:12px;" data-i18n="section.territory.title">领地即尊严</div>
+          <div class="section-desc" style="margin:0 auto;" data-i18n="section.territory.desc">公会之间的宣战不是儿戏，每一次领地攻防都关乎整个团队的尊严与存亡。胜负之间，资源与荣耀重新分配。</div>
           <ul style="list-style:none; margin-top:20px; display:flex; gap:24px; justify-content:center; flex-wrap:wrap;">
-            <li style="border:none; padding-left:0;">公会宣战，全面战争一触即发</li>
-            <li style="border:none; padding-left:0;">领地保护机制，策略与实力的博弈</li>
-            <li style="border:none; padding-left:0;">胜者为王，败者失去庇护</li>
+            <li style="border:none; padding-left:0;" data-i18n="section.territory.li1">公会宣战，全面战争一触即发</li>
+            <li style="border:none; padding-left:0;" data-i18n="section.territory.li2">领地保护机制，策略与实力的博弈</li>
+            <li style="border:none; padding-left:0;" data-i18n="section.territory.li3">胜者为王，败者失去庇护</li>
           </ul>
         </div>
       </div>
@@ -1103,18 +1103,18 @@
       <div class="container">
         <div class="asymmetric reverse">
           <div class="asymmetric-text reveal">
-            <div class="section-label">05  COMMUNITY</div>
-            <div class="section-title">世界很大，你不必独自前行</div>
-            <div class="section-desc">战斗之外，这片大陆藏着令人屏息的风景。雪山、森林、火山……每一处地貌都是史前世界的馈赠。而当你加入公会，建立巢穴，与团长和战友们并肩作战、分享见闻时，你会发现——最珍贵的战利品，是这群陪你出生入死的人。</div>
+            <div class="section-label" data-i18n="section.social.label">05  COMMUNITY</div>
+            <div class="section-title" data-i18n="section.social.title">世界很大，你不必独自前行</div>
+            <div class="section-desc" data-i18n="section.social.desc">战斗之外，这片大陆藏着令人屏息的风景。雪山、森林、火山……每一处地貌都是史前世界的馈赠。而当你加入公会，建立巢穴，与团长和战友们并肩作战、分享见闻时，你会发现——最珍贵的战利品，是这群陪你出生入死的人。</div>
             <ul>
-              <li>雪山、森林、火山，多样的史前地貌等待探索</li>
-              <li>公会巢穴作为据点，好友集结共赴战场</li>
-              <li>团长带玩体系，新人从不会迷失方向</li>
-              <li>活跃的跨平台玩家社群，战友遍布线上线下</li>
+              <li data-i18n="section.social.li1">雪山、森林、火山，多样的史前地貌等待探索</li>
+              <li data-i18n="section.social.li2">公会巢穴作为据点，好友集结共赴战场</li>
+              <li data-i18n="section.social.li3">团长带玩体系，新人从不会迷失方向</li>
+              <li data-i18n="section.social.li4">活跃的跨平台玩家社群，战友遍布线上线下</li>
             </ul>
           </div>
           <div class="reveal reveal-delay-1">
-            <img src="assets/landscape.jpg" alt="世界很大，你不必独自前行" style="width:100%; border-radius:var(--radius-lg); border:1px solid var(--border); display:block;">
+            <img src="assets/landscape.jpg" data-i18n-alt="section.social.title" alt="世界很大，你不必独自前行" style="width:100%; border-radius:var(--radius-lg); border:1px solid var(--border); display:block;">
           </div>
         </div>
       </div>
@@ -1126,9 +1126,9 @@
     <section class="section" id="gallery">
       <div class="container">
         <div class="reveal">
-          <div class="section-label">06  GALLERY</div>
-          <div class="section-title">游戏世界</div>
-          <div class="section-desc" style="margin-bottom:12px;">从硝烟弥漫的废墟到静谧苍茫的雪山，这个世界比你想象的更广阔。</div>
+          <div class="section-label" data-i18n="section.gallery.label">06  GALLERY</div>
+          <div class="section-title" data-i18n="section.gallery.title">游戏世界</div>
+          <div class="section-desc" style="margin-bottom:12px;" data-i18n="section.gallery.desc">从硝烟弥漫的废墟到静谧苍茫的雪山，这个世界比你想象的更广阔。</div>
         </div>
         <div class="masonry">
           <div class="masonry-item tall reveal">
@@ -1158,52 +1158,52 @@
     <section class="section section-alt" id="dinos">
       <div class="container" style="margin-bottom:24px;">
         <div class="reveal">
-          <div class="section-label">07  BESTIARY</div>
-          <div class="section-title">恐龙图鉴</div>
-          <div class="section-desc" style="max-width:none;">二十余种恐龙，每一条进化路线都是一段独特的生存史诗。选择你的身份，书写属于你的传奇。</div>
+          <div class="section-label" data-i18n="section.bestiary.label">07  BESTIARY</div>
+          <div class="section-title" data-i18n="section.bestiary.title">恐龙图鉴</div>
+          <div class="section-desc" style="max-width:none;" data-i18n="section.bestiary.desc">二十余种恐龙，每一条进化路线都是一段独特的生存史诗。选择你的身份，书写属于你的传奇。</div>
         </div>
       </div>
       <div class="dino-scroll-wrapper">
         <button class="dino-arrow dino-arrow-left" onclick="scrollDino(-1)" aria-label="向左滑动">&#8249;</button>
         <div class="dino-scroll reveal">
           <div class="dino-card">
-            <div class="dino-card-img"><img src="assets/霸王龙.png" alt="霸王龙" style="width:100%;height:100%;object-fit:contain;"></div>
-            <div class="dino-card-name">霸王龙</div>
-            <div class="dino-card-desc">陆地霸主</div>
+            <div class="dino-card-img"><img src="assets/霸王龙.png" data-i18n-alt="dino.tyrannosaurus" alt="霸王龙" style="width:100%;height:100%;object-fit:contain;"></div>
+            <div class="dino-card-name" data-i18n="dino.tyrannosaurus">霸王龙</div>
+            <div class="dino-card-desc" data-i18n="dino.tyrannosaurus.desc">陆地霸主</div>
           </div>
           <div class="dino-card">
-            <div class="dino-card-img"><img src="assets/棘龙.png" alt="棘龙" style="width:100%;height:100%;object-fit:contain;"></div>
-            <div class="dino-card-name">棘龙</div>
-            <div class="dino-card-desc">水中霸主</div>
+            <div class="dino-card-img"><img src="assets/棘龙.png" data-i18n-alt="dino.spinosaurus" alt="棘龙" style="width:100%;height:100%;object-fit:contain;"></div>
+            <div class="dino-card-name" data-i18n="dino.spinosaurus">棘龙</div>
+            <div class="dino-card-desc" data-i18n="dino.spinosaurus.desc">水中霸主</div>
           </div>
           <div class="dino-card">
-            <div class="dino-card-img"><img src="assets/雷龙.png" alt="雷龙" style="width:100%;height:100%;object-fit:contain;"></div>
-            <div class="dino-card-name">雷龙</div>
-            <div class="dino-card-desc">巨型食草恐龙</div>
+            <div class="dino-card-img"><img src="assets/雷龙.png" data-i18n-alt="dino.brachiosaurus" alt="雷龙" style="width:100%;height:100%;object-fit:contain;"></div>
+            <div class="dino-card-name" data-i18n="dino.brachiosaurus">雷龙</div>
+            <div class="dino-card-desc" data-i18n="dino.brachiosaurus.desc">巨型食草恐龙</div>
           </div>
           <div class="dino-card">
-            <div class="dino-card-img"><img src="assets/三角龙.png" alt="三角龙" style="width:100%;height:100%;object-fit:contain;"></div>
-            <div class="dino-card-name">三角龙</div>
-            <div class="dino-card-desc">防御型战士</div>
+            <div class="dino-card-img"><img src="assets/三角龙.png" data-i18n-alt="dino.triceratops" alt="三角龙" style="width:100%;height:100%;object-fit:contain;"></div>
+            <div class="dino-card-name" data-i18n="dino.triceratops">三角龙</div>
+            <div class="dino-card-desc" data-i18n="dino.triceratops.desc">防御型战士</div>
           </div>
           <div class="dino-card">
-            <div class="dino-card-img"><img src="assets/南手龙.png" alt="南手龙" style="width:100%;height:100%;object-fit:contain;"></div>
-            <div class="dino-card-name">南手龙</div>
-            <div class="dino-card-desc">敏捷猎手</div>
+            <div class="dino-card-img"><img src="assets/南手龙.png" data-i18n-alt="dino.nanotyrannus" alt="南手龙" style="width:100%;height:100%;object-fit:contain;"></div>
+            <div class="dino-card-name" data-i18n="dino.nanotyrannus">南手龙</div>
+            <div class="dino-card-desc" data-i18n="dino.nanotyrannus.desc">敏捷猎手</div>
           </div>
           <div class="dino-card">
-            <div class="dino-card-img"><img src="assets/甲龙.png" alt="甲龙" style="width:100%;height:100%;object-fit:contain;"></div>
-            <div class="dino-card-name">甲龙</div>
-            <div class="dino-card-desc">重装坦克</div>
+            <div class="dino-card-img"><img src="assets/甲龙.png" data-i18n-alt="dino.ankylosaurus" alt="甲龙" style="width:100%;height:100%;object-fit:contain;"></div>
+            <div class="dino-card-name" data-i18n="dino.ankylosaurus">甲龙</div>
+            <div class="dino-card-desc" data-i18n="dino.ankylosaurus.desc">重装坦克</div>
           </div>
           <div class="dino-card">
-            <div class="dino-card-img"><img src="assets/风神翼龙.png" alt="风神翼龙" style="width:100%;height:100%;object-fit:contain;"></div>
-            <div class="dino-card-name">风神翼龙</div>
-            <div class="dino-card-desc">天空统治者</div>
+            <div class="dino-card-img"><img src="assets/风神翼龙.png" data-i18n-alt="dino.quetzalcoatlus" alt="风神翼龙" style="width:100%;height:100%;object-fit:contain;"></div>
+            <div class="dino-card-name" data-i18n="dino.quetzalcoatlus">风神翼龙</div>
+            <div class="dino-card-desc" data-i18n="dino.quetzalcoatlus.desc">天空统治者</div>
           </div>
         </div>
         <button class="dino-arrow dino-arrow-right" onclick="scrollDino(1)" aria-label="向右滑动">&#8250;</button>
-        <div class="dino-scroll-hint">左右滑动或点击箭头浏览更多</div>
+        <div class="dino-scroll-hint" data-i18n="dino.scrollHint">左右滑动或点击箭头浏览更多</div>
       </div>
     
         <div class="section-scroll-hint">↓</div></section>
@@ -1212,9 +1212,9 @@
     <section class="section" id="videos" style="justify-content:flex-start; padding-top:60px;">
       <div class="container">
         <div class="reveal">
-          <div class="section-label">08  CINEMA</div>
-          <div class="section-title">精彩视频</div>
-          <div class="section-desc" style="margin-bottom:16px;">官方预告、主播实况、玩家投稿——这片大陆每天都在发生值得被记录的故事。</div>
+          <div class="section-label" data-i18n="section.videos.label">08  CINEMA</div>
+          <div class="section-title" data-i18n="section.videos.title">精彩视频</div>
+          <div class="section-desc" style="margin-bottom:16px;" data-i18n="section.videos.desc">官方预告、主播实况、玩家投稿——这片大陆每天都在发生值得被记录的故事。</div>
         </div>
         <div class="video-main reveal reveal-delay-1">
           <div class="video-card" onclick="openVideoModal('assets/trailer.mp4')">
@@ -1223,11 +1223,11 @@
             </video>
             <div class="video-overlay">
               <div class="video-overlay-sub">Official Trailer</div>
-              <div class="video-overlay-title">官方预告片</div>
+              <div class="video-overlay-title" data-i18n="video.trailer">官方预告片</div>
               <div class="video-play-icon">▶</div>
             </div>
           </div>
-          <div class="video-caption">官方预告片</div>
+          <div class="video-caption" data-i18n="video.trailer">官方预告片</div>
         </div>
         <div class="video-thumbs">
           <div class="video-thumb reveal reveal-delay-1" onclick="openVideoModal('assets/highlight-0611.mp4')">
@@ -1236,7 +1236,7 @@
             </video>
             <div class="video-thumb-front">
               <div class="video-overlay-sub">Stream Highlight</div>
-              <div class="video-overlay-title">主播实况</div>
+              <div class="video-overlay-title" data-i18n="video.highlight1">主播实况</div>
               <div class="video-play-icon">▶</div>
             </div>
           </div>
@@ -1246,7 +1246,7 @@
             </video>
             <div class="video-thumb-front">
               <div class="video-overlay-sub">Player Submission</div>
-              <div class="video-overlay-title">玩家投稿</div>
+              <div class="video-overlay-title" data-i18n="video.highlight2">玩家投稿</div>
               <div class="video-play-icon">▶</div>
             </div>
           </div>
@@ -1256,7 +1256,7 @@
             </video>
             <div class="video-thumb-front">
               <div class="video-overlay-sub">Highlight Reel</div>
-              <div class="video-overlay-title">精彩集锦</div>
+              <div class="video-overlay-title" data-i18n="video.highlight3">精彩集锦</div>
               <div class="video-play-icon">▶</div>
             </div>
           </div>
@@ -1268,15 +1268,15 @@
     <footer class="footer">
       <div class="footer-logo reveal">Đảo Khủng Long</div>
       <div class="footer-qr reveal reveal-delay-1" onclick="openLightbox('assets/cs-zalo.png')">
-        <img src="assets/cs-zalo.png" alt="客服二维码">
+        <img src="assets/cs-zalo.png" data-i18n-alt="footer.contact" alt="客服二维码">
       </div>
       <div class="footer-links reveal reveal-delay-2">
-        <a href="https://daokhunglong.vn/" target="_blank">下载游戏</a>
-        <a href="#">联系客服</a>
-        <a href="#">TikTok</a>
-        <a href="#">Facebook</a>
+        <a href="https://daokhunglong.vn/" target="_blank" data-i18n="footer.download">下载游戏</a>
+        <a href="#" data-i18n="footer.contact">联系客服</a>
+        <a href="#" data-i18n="footer.tiktok">TikTok</a>
+        <a href="#" data-i18n="footer.facebook">Facebook</a>
       </div>
-      <div style="font-size:12px; color:var(--fg-muted);">© 2026 Đảo Khủng Long. All rights reserved.</div>
+      <div style="font-size:12px; color:var(--fg-muted);" data-i18n="footer.copyright">© 2026 Đảo Khủng Long. All rights reserved.</div>
     </footer>
 
 
@@ -1349,12 +1349,7 @@
     const nav = document.getElementById('mainNav');
 
     function switchLang(lang) {
-      const current = window.location.pathname.split('/').pop() || 'index.html';
-      const base = current.replace(/-en\.html$|-vi\.html$/, '.html');
-      let target;
-      if (lang === 'zh') target = base;
-      else target = base.replace('.html', '-' + lang + '.html');
-      if (target !== current) window.location.href = target;
+      if (window.i18n) window.i18n.setLang(lang);
     }
 
     // 检测是否为移动端
@@ -1524,5 +1519,6 @@
       });
     }
   </script>
+  <script src="assets/i18n.js"></script>
 </body>
 </html>
