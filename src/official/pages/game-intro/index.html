@@ -49,7 +49,7 @@
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-    /* ========== 电影感 Reveal 动画 ========== */
+    /* ========== Reveal 动画 ========== */
     .reveal {
       opacity: 0;
       transform: translateY(60px);
@@ -57,105 +57,86 @@
                   transform 1s cubic-bezier(0.16, 1, 0.3, 1);
       transition-delay: var(--reveal-delay, 0s);
     }
+
+    /* 桌面端：电影感入场 */
+    @media (min-width: 769px) {
+      .section.is-active .reveal,
+      .hero.is-active .reveal,
+      .footer.is-active .reveal {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .section-title, .hero .quote-text {
+        opacity: 0;
+        transform: scale(1.08);
+        letter-spacing: 0.04em;
+        transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+                    letter-spacing 1s cubic-bezier(0.16, 1, 0.3, 1);
+        transition-delay: var(--reveal-delay, 0s);
+      }
+      .section.is-active .section-title,
+      .hero.is-active .quote-text {
+        opacity: 1;
+        transform: scale(1);
+        letter-spacing: 0;
+      }
+      .section-desc {
+        opacity: 0;
+        transform: translateY(50px);
+        transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+        transition-delay: var(--reveal-delay, 0s);
+      }
+      .section.is-active .section-desc,
+      .hero.is-active .section-desc {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      ul li.reveal {
+        opacity: 0;
+        transform: translateX(-40px);
+        transition: opacity 0.7s ease,
+                    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        transition-delay: var(--reveal-delay, 0s);
+      }
+      .section.is-active ul li.reveal,
+      .hero.is-active ul li.reveal {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .section.is-active ul li.reveal:nth-of-type(1),
+      .hero.is-active ul li.reveal:nth-of-type(1) { --reveal-delay: 0.30s; }
+      .section.is-active ul li.reveal:nth-of-type(2),
+      .hero.is-active ul li.reveal:nth-of-type(2) { --reveal-delay: 0.40s; }
+      .section.is-active ul li.reveal:nth-of-type(3),
+      .hero.is-active ul li.reveal:nth-of-type(3) { --reveal-delay: 0.50s; }
+      .section.is-active ul li.reveal:nth-of-type(4),
+      .hero.is-active ul li.reveal:nth-of-type(4) { --reveal-delay: 0.60s; }
+      .section.is-active ul li.reveal:nth-of-type(5),
+      .hero.is-active ul li.reveal:nth-of-type(5) { --reveal-delay: 0.70s; }
+      .reveal img { transform: scale(1.1) translateY(20px); transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+      .section.is-active .reveal img,
+      .hero.is-active .reveal img { transform: scale(1) translateY(0); }
+      .section-label {
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+        transition-delay: var(--reveal-delay, 0s);
+      }
+      .section.is-active .section-label,
+      .hero.is-active .section-label {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     /* 移动端：进入视口即显示 */
     @media (max-width: 768px) {
       .reveal.visible {
         opacity: 1;
         transform: translateY(0);
       }
-      .section-title, .hero .quote-text {
-        opacity: 1;
-        transform: scale(1);
-        letter-spacing: 0;
-      }
-      .section-desc { opacity: 1; transform: translateY(0); }
-      .section-label { opacity: 1; transform: translateY(0); }
-      ul li.reveal { opacity: 1; transform: translateX(0); }
-    }
-    /* 桌面端：当前激活 section 触发入场 */
-    .section.is-active .reveal,
-    .hero.is-active .reveal,
-    .footer.is-active .reveal {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* 标题电影式缩放淡入 */
-    .section-title, .hero .quote-text {
-      opacity: 0;
-      transform: scale(1.08);
-      letter-spacing: 0.04em;
-      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 1s cubic-bezier(0.16, 1, 0.3, 1),
-                  letter-spacing 1s cubic-bezier(0.16, 1, 0.3, 1);
-      transition-delay: var(--reveal-delay, 0s);
-    }
-    .section.is-active .section-title,
-    .hero.is-active .quote-text {
-      opacity: 1;
-      transform: scale(1);
-      letter-spacing: 0;
-    }
-
-    /* 描述大幅上移 */
-    .section-desc {
-      opacity: 0;
-      transform: translateY(50px);
-      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-      transition-delay: var(--reveal-delay, 0s);
-    }
-    .section.is-active .section-desc,
-    .hero.is-active .section-desc {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* 列表项从左侧滑入 */
-    ul li.reveal {
-      opacity: 0;
-      transform: translateX(-40px);
-      transition: opacity 0.7s ease,
-                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-      transition-delay: var(--reveal-delay, 0s);
-    }
-    .section.is-active ul li.reveal,
-    .hero.is-active ul li.reveal {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    .section.is-active ul li.reveal:nth-of-type(1),
-    .hero.is-active ul li.reveal:nth-of-type(1) { --reveal-delay: 0.30s; }
-    .section.is-active ul li.reveal:nth-of-type(2),
-    .hero.is-active ul li.reveal:nth-of-type(2) { --reveal-delay: 0.40s; }
-    .section.is-active ul li.reveal:nth-of-type(3),
-    .hero.is-active ul li.reveal:nth-of-type(3) { --reveal-delay: 0.50s; }
-    .section.is-active ul li.reveal:nth-of-type(4),
-    .hero.is-active ul li.reveal:nth-of-type(4) { --reveal-delay: 0.60s; }
-    .section.is-active ul li.reveal:nth-of-type(5),
-    .hero.is-active ul li.reveal:nth-of-type(5) { --reveal-delay: 0.70s; }
-
-    /* 图片电影式缩放 */
-    .reveal img,
-    .section.is-active img,
-    .hero.is-active img {
-      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .reveal img { transform: scale(1.1) translateY(20px); }
-    .section.is-active .reveal img,
-    .hero.is-active .reveal img { transform: scale(1) translateY(0); }
-
-    /* section label 淡入 */
-    .section-label {
-      opacity: 0;
-      transform: translateY(-10px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-      transition-delay: var(--reveal-delay, 0s);
-    }
-    .section.is-active .section-label,
-    .hero.is-active .section-label {
-      opacity: 1;
-      transform: translateY(0);
     }
 
     .reveal-delay-1 { --reveal-delay: 0.15s; }
