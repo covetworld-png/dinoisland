@@ -72,7 +72,8 @@
     "footer.tiktok": "TikTok",
     "footer.facebook": "Facebook",
     "footer.copyright": "© 2026 Đảo Khủng Long. All rights reserved.",
-    "footer.qrTitle": "扫码联系客服"
+    "footer.qrTitle": "扫码联系客服",
+    "brand.name": "恐龙岛"
   },
   "en": {
     "meta.title": "Dinosaur Island - Survival Evolution Game",
@@ -147,7 +148,8 @@
     "footer.tiktok": "TikTok",
     "footer.facebook": "Facebook",
     "footer.copyright": "© 2026 Dinosaur Island. All rights reserved.",
-    "footer.qrTitle": "Scan to Contact Support"
+    "footer.qrTitle": "Scan to Contact Support",
+    "brand.name": "Dinosaur Island"
   },
   "vi": {
     "meta.title": "Đảo Khủng Long - Game Sinh Tồn Tiến Hóa",
@@ -222,6 +224,7 @@
     "footer.tiktok": "TikTok",
     "footer.facebook": "Facebook",
     "footer.copyright": "© 2026 Đảo Khủng Long. All rights reserved.",
-    "footer.qrTitle": "Quét để liên hệ CSKH"
+    "footer.qrTitle": "Quét để liên hệ CSKH",
+    "brand.name": "Đảo Khủng Long"
   }
 }

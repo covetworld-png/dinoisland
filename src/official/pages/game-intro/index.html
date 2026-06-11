@@ -995,7 +995,7 @@
 
     <!-- 导航 -->
     <nav class="nav" id="mainNav">
-      <div class="nav-logo">Đảo Khủng Long</div>
+      <div class="nav-logo" data-i18n="brand.name">Đảo Khủng Long</div>
       <div class="nav-links">
         <a href="#evolution" data-i18n="nav.evolution">进化</a>
         <a href="#battle" data-i18n="nav.battle">战斗</a>
@@ -1273,7 +1273,7 @@
 
     <!-- 9. Footer -->
     <footer class="footer">
-      <div class="footer-logo reveal">Đảo Khủng Long</div>
+      <div class="footer-logo reveal" data-i18n="brand.name">Đảo Khủng Long</div>
       <div class="footer-qr-title reveal" data-i18n="footer.qrTitle">扫码联系客服</div>
       <div class="footer-qr reveal reveal-delay-1 zoomable" onclick="openLightbox('assets/cs-zalo.png')">
         <img src="assets/cs-zalo.png" data-i18n-alt="footer.contact" alt="客服二维码">
@@ -1333,17 +1333,20 @@
     }
 
     /* ========== 图片 Lightbox ========== */
+    function openLightbox(src) {
+      const lb = document.getElementById('lightbox');
+      const lbImg = document.getElementById('lightboxImg');
+      if (!lb || !lbImg) return;
+      lbImg.src = src;
+      lb.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
     document.querySelectorAll('.section img, .hero img').forEach(img => {
       if (img.closest('.hero-logo') || img.closest('.video-modal') || img.closest('.lightbox')) return;
       img.classList.add('zoomable');
       img.addEventListener('click', (e) => {
         e.stopPropagation();
-        const lb = document.getElementById('lightbox');
-        const lbImg = document.getElementById('lightboxImg');
-        lbImg.src = img.src;
-        lbImg.alt = img.alt;
-        lb.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        openLightbox(img.src);
       });
     });
     function closeLightbox(e) {
