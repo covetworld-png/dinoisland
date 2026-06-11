@@ -81,7 +81,11 @@
     "footer.col.legal": "法律",
     "footer.link.privacy": "隐私政策",
     "footer.link.terms": "用户协议",
-    "footer.link.faq": "常见问题"
+    "footer.link.faq": "常见问题",
+    "footer.req.title": "系统配置",
+    "footer.req.min": "最低配置",
+    "footer.req.rec": "推荐配置",
+    "footer.req.network": "网络：宽带互联网连接"
   },
   "en": {
     "meta.title": "Dinosaur Island - Survival Evolution Game",
@@ -165,7 +169,11 @@
     "footer.col.legal": "Legal",
     "footer.link.privacy": "Privacy Policy",
     "footer.link.terms": "Terms of Service",
-    "footer.link.faq": "FAQ"
+    "footer.link.faq": "FAQ",
+    "footer.req.title": "System Requirements",
+    "footer.req.min": "Minimum",
+    "footer.req.rec": "Recommended",
+    "footer.req.network": "Network: Broadband Internet"
   },
   "vi": {
     "meta.title": "Đảo Khủng Long - Game Sinh Tồn Tiến Hóa",
@@ -249,6 +257,10 @@
     "footer.col.legal": "Pháp lý",
     "footer.link.privacy": "Chính sách riêng tư",
     "footer.link.terms": "Điều khoản dịch vụ",
-    "footer.link.faq": "Câu hỏi thường gặp"
+    "footer.link.faq": "Câu hỏi thường gặp",
+    "footer.req.title": "Yêu cầu hệ thống",
+    "footer.req.min": "Tối thiểu",
+    "footer.req.rec": "Đề xuất",
+    "footer.req.network": "Mạng: Internet băng thông rộng"
   }
 }

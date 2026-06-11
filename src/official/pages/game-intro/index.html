@@ -9,7 +9,7 @@
     /* ========== 变量定义 ========== */
     :root {
       --bg:           #080a0f;
-      --bg-alt:       #0d1117;
+      --bg-alt:       #111621;
       --surface:      rgba(13, 17, 23, 0.85);
       --fg:           #f0eee9;
       --fg-secondary: #8b949e;
@@ -229,6 +229,35 @@
       scroll-snap-align: start;
     }
     .section-alt { background: var(--bg-alt); }
+    .section + .section { border-top: 1px solid rgba(255,255,255,0.06); }
+
+    /* 大胆色彩区分各屏 */
+    #evolution.section-alt { background: linear-gradient(180deg, #081410 0%, #0a1512 100%); }
+    #battle { background: linear-gradient(180deg, #140a0a 0%, #180c0c 100%); }
+    #social.section-alt { background: linear-gradient(180deg, #0a0e18 0%, #0c1220 100%); }
+    #videos.section-alt { background: linear-gradient(180deg, #141008 0%, #18140c 100%); }
+    #dinos { background: linear-gradient(180deg, #0a0814 0%, #0e0c18 100%); }
+
+    /* 每屏顶部主题色光条 */
+    #evolution::before,
+    #battle::before,
+    #social::before,
+    #gallery::before,
+    #dinos::before,
+    #videos::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      z-index: 2;
+      opacity: 0.4;
+    }
+    #evolution::before { background: linear-gradient(90deg, transparent, #4a9a8a, transparent); }
+    #battle::before { background: linear-gradient(90deg, transparent, #c94b4b, transparent); }
+    #social::before { background: linear-gradient(90deg, transparent, #5a8fc9, transparent); }
+    #gallery::before { background: linear-gradient(90deg, transparent, #8b7aa8, transparent); }
+    #dinos::before { background: linear-gradient(90deg, transparent, #a89a5a, transparent); }
+    #videos::before { background: linear-gradient(90deg, transparent, #d4a843, transparent); }
     #gallery { padding: 28px 48px; }
     .container {
       width: 100%;
@@ -1013,6 +1042,66 @@
     .footer-bottom {
       text-align: center;
     }
+    .footer-requirements {
+      max-width: 800px;
+      margin: 0 auto 48px;
+      padding: 32px;
+      background: linear-gradient(135deg, rgba(30,32,48,0.5) 0%, rgba(13,17,23,0.7) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      text-align: left;
+    }
+    .footer-req-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .footer-req-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 16px;
+    }
+    .footer-req-subtitle {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+    .footer-req-subtitle.recommended { color: var(--mist); }
+    .footer-req-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .footer-req-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-req-item:last-child { border-bottom: none; }
+    .footer-req-label { color: var(--fg-muted); }
+    .footer-req-value { color: var(--fg-secondary); text-align: right; }
+    .footer-req-network {
+      text-align: center;
+      font-size: 12px;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    @media (max-width: 768px) {
+      .footer-req-columns { grid-template-columns: 1fr; gap: 24px; }
+      .footer-requirements { padding: 24px; }
+    }
+
     .footer-links {
       display: flex;
       justify-content: center;
@@ -1029,6 +1118,34 @@
     .footer-copyright {
       font-size: 12px;
       color: var(--fg-muted);
+    }
+    .footer-qr-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      cursor: zoom-in;
+      transition: transform 0.2s;
+    }
+    .footer-qr-wrap:hover { transform: scale(1.03); }
+    .footer-qr-small {
+      width: 100px;
+      height: 123px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .footer-qr-small img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .footer-qr-label {
+      font-size: 12px;
+      color: var(--fg-secondary);
+      font-family: var(--font-mono);
     }
 
     /* ========== 移动端 ========== */
@@ -1203,6 +1320,18 @@
       grid-column: span 1;
       grid-row: span 1;
     }
+    /* 5 张图 */
+    .bento.count-5 .bento-item:nth-child(1) {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+    .bento.count-5 .bento-item:nth-child(2),
+    .bento.count-5 .bento-item:nth-child(3),
+    .bento.count-5 .bento-item:nth-child(4),
+    .bento.count-5 .bento-item:nth-child(5) {
+      grid-column: span 1;
+      grid-row: span 1;
+    }
     /* 4 张图 */
     .bento.count-4 .bento-item:nth-child(1) {
       grid-column: span 2;
@@ -1312,10 +1441,11 @@
               <li class="reveal" data-i18n="section.evolution.li3">成年后可筑巢定居，建立属于自己的据点</li>
             </ul>
           </div>
-          <div class="bento count-3 reveal reveal-delay-1">
-            <div class="bento-item" onclick="openLightbox('assets/evolution-1.jpg')"><img src="assets/evolution-1.jpg" data-i18n-alt="section.evolution.title" alt="弱肉强食，适者进化"></div>
-            <div class="bento-item" onclick="openLightbox('assets/evolution-2.jpg')"><img src="assets/evolution-2.jpg" alt="进化场景 1"></div>
-            <div class="bento-item" onclick="openLightbox('assets/evolution-3.jpg')"><img src="assets/evolution-3.jpg" alt="进化场景 2"></div>
+          <div class="bento count-4 reveal reveal-delay-1">
+            <div class="bento-item" onclick="openLightbox('assets/evolution-3.jpg')"><img src="assets/evolution-3.jpg" data-i18n-alt="section.evolution.title" alt="弱肉强食，适者进化"></div>
+            <div class="bento-item" onclick="openLightbox('assets/evolution-1.jpg')"><img src="assets/evolution-1.jpg" alt="进化场景 1"></div>
+            <div class="bento-item" onclick="openLightbox('assets/evolution-2.jpg')"><img src="assets/evolution-2.jpg" alt="进化场景 2"></div>
+            <div class="bento-item" onclick="openLightbox('assets/evolution-4.jpg')"><img src="assets/evolution-4.jpg" alt="进化场景 4"></div>
           </div>
         </div>
       </div>
@@ -1326,10 +1456,9 @@
     <section class="section" id="battle">
       <div class="container">
         <div class="asymmetric">
-          <div class="bento count-3 reveal">
-            <div class="bento-item" onclick="openLightbox('assets/combat.jpg')"><img src="assets/combat.jpg" data-i18n-alt="section.battle.title" alt="狭路相逢，勇者生存"></div>
-            <div class="bento-item" onclick="openLightbox('assets/scene-3.jpg')"><img src="assets/scene-3.jpg" alt="场景 3"></div>
-            <div class="bento-item" onclick="openLightbox('assets/scene-4.jpg')"><img src="assets/scene-4.jpg" alt="场景 4"></div>
+          <div class="bento count-2 reveal">
+            <div class="bento-item" onclick="openLightbox('assets/battle-2.jpg')"><img src="assets/battle-2.jpg" data-i18n-alt="section.battle.title" alt="狭路相逢，勇者生存"></div>
+            <div class="bento-item" onclick="openLightbox('assets/combat.jpg')"><img src="assets/combat.jpg" alt="战斗场景 1"></div>
           </div>
           <div class="asymmetric-text reveal reveal-delay-1">
             <div class="section-label" data-i18n="section.battle.label">03  COMBAT</div>
@@ -1383,11 +1512,12 @@
               <li class="reveal" data-i18n="section.social.li4">活跃的跨平台玩家社群，战友遍布线上线下</li>
             </ul>
           </div>
-          <div class="bento count-4 reveal reveal-delay-1">
+          <div class="bento count-5 reveal reveal-delay-1">
             <div class="bento-item" onclick="openLightbox('assets/social-1.jpg')"><img src="assets/social-1.jpg" data-i18n-alt="section.social.title" alt="世界很大，你不必独自前行"></div>
             <div class="bento-item" onclick="openLightbox('assets/social-2.jpg')"><img src="assets/social-2.jpg" alt="社交场景 1"></div>
             <div class="bento-item" onclick="openLightbox('assets/social-3.jpg')"><img src="assets/social-3.jpg" alt="社交场景 2"></div>
             <div class="bento-item" onclick="openLightbox('assets/social-4.jpg')"><img src="assets/social-4.jpg" alt="社交场景 3"></div>
+            <div class="bento-item" onclick="openLightbox('assets/social-5.jpg')"><img src="assets/social-5.jpg" alt="社交场景 4"></div>
           </div>
         </div>
       </div>
@@ -1544,40 +1674,39 @@
         <div class="footer-tagline" data-i18n="footer.tagline">加入恐龙岛，开启史前生存之旅</div>
       </div>
 
-      <div class="footer-grid reveal reveal-delay-1">
-        <div class="footer-col">
-          <div class="footer-col-title" data-i18n="footer.col.game">游戏</div>
-          <a href="https://daokhunglong.vn/" target="_blank" data-i18n="footer.download">下载游戏</a>
-          <a href="#evolution" data-i18n="nav.evolution">进化</a>
-          <a href="#battle" data-i18n="nav.battle">战斗</a>
-          <a href="#dinos" data-i18n="nav.dinos">恐龙</a>
-        </div>
-        <div class="footer-col">
-          <div class="footer-col-title" data-i18n="footer.col.support">支持</div>
-          <a href="#" data-i18n="footer.contact">联系客服</a>
-          <div class="footer-qr-small" onclick="openLightbox('assets/cs-zalo.png')">
-            <img src="assets/cs-zalo.png" data-i18n-alt="footer.contact" alt="客服二维码">
+      <div class="footer-requirements reveal reveal-delay-1">
+        <div class="footer-req-title" data-i18n="footer.req.title">系统配置</div>
+        <div class="footer-req-columns">
+          <div class="footer-req-column">
+            <div class="footer-req-subtitle" data-i18n="footer.req.min">最低配置</div>
+            <div class="footer-req-grid">
+              <div class="footer-req-item"><span class="footer-req-label">OS:</span><span class="footer-req-value">Win 10/11 64-bit</span></div>
+              <div class="footer-req-item"><span class="footer-req-label">CPU:</span><span class="footer-req-value">i3 / Ryzen 3</span></div>
+              <div class="footer-req-item"><span class="footer-req-label">RAM:</span><span class="footer-req-value">8 GB</span></div>
+              <div class="footer-req-item"><span class="footer-req-label">GPU:</span><span class="footer-req-value">GTX 750 / RX 560</span></div>
+              <div class="footer-req-item"><span class="footer-req-label">Storage:</span><span class="footer-req-value">20 GB</span></div>
+            </div>
+          </div>
+          <div class="footer-req-column">
+            <div class="footer-req-subtitle recommended" data-i18n="footer.req.rec">推荐配置</div>
+            <div class="footer-req-grid">
+              <div class="footer-req-item"><span class="footer-req-label">OS:</span><span class="footer-req-value">Win 10/11 64-bit</span></div>
+              <div class="footer-req-item"><span class="footer-req-label">CPU:</span><span class="footer-req-value">i7-8700K / R7 3700X</span></div>
+              <div class="footer-req-item"><span class="footer-req-label">RAM:</span><span class="footer-req-value">16 GB</span></div>
+              <div class="footer-req-item"><span class="footer-req-label">GPU:</span><span class="footer-req-value">RTX 3070 / RX 6800</span></div>
+              <div class="footer-req-item"><span class="footer-req-label">Storage:</span><span class="footer-req-value">60 GB SSD</span></div>
+            </div>
           </div>
         </div>
-        <div class="footer-col">
-          <div class="footer-col-title" data-i18n="footer.col.community">社区</div>
-          <a href="#" data-i18n="footer.tiktok">TikTok</a>
-          <a href="#" data-i18n="footer.facebook">Facebook</a>
-        </div>
-        <div class="footer-col">
-          <div class="footer-col-title" data-i18n="footer.col.legal">法律</div>
-          <a href="#" data-i18n="footer.link.privacy">隐私政策</a>
-          <a href="#" data-i18n="footer.link.terms">用户协议</a>
-          <a href="#" data-i18n="footer.link.faq">常见问题</a>
-        </div>
+        <div class="footer-req-network" data-i18n="footer.req.network">网络：宽带互联网连接</div>
       </div>
 
       <div class="footer-bottom reveal reveal-delay-2">
         <div class="footer-links">
           <a href="https://daokhunglong.vn/" target="_blank" data-i18n="footer.download">下载游戏</a>
-          <a href="#" data-i18n="footer.contact">联系客服</a>
-          <a href="#" data-i18n="footer.tiktok">TikTok</a>
-          <a href="#" data-i18n="footer.facebook">Facebook</a>
+          <a href="#" onclick="openLightbox('assets/cs-zalo.png'); return false;" data-i18n="footer.contact">联系客服</a>
+          <a href="http://tiktok.com/search/user?q=daokhunglong" target="_blank" data-i18n="footer.tiktok">TikTok</a>
+          <a href="https://www.facebook.com/search/top?q=daokhunglong" target="_blank" data-i18n="footer.facebook">Facebook</a>
         </div>
         <div class="footer-copyright" data-i18n="footer.copyright">© 2026 Đảo Khủng Long. All rights reserved.</div>
       </div>
