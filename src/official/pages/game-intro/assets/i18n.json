@@ -73,7 +73,15 @@
     "footer.facebook": "Facebook",
     "footer.copyright": "© 2026 Đảo Khủng Long. All rights reserved.",
     "footer.qrTitle": "扫码联系客服",
-    "brand.name": "恐龙岛"
+    "brand.name": "恐龙岛",
+    "footer.tagline": "加入恐龙岛，开启史前生存之旅",
+    "footer.col.game": "游戏",
+    "footer.col.support": "支持",
+    "footer.col.community": "社区",
+    "footer.col.legal": "法律",
+    "footer.link.privacy": "隐私政策",
+    "footer.link.terms": "用户协议",
+    "footer.link.faq": "常见问题"
   },
   "en": {
     "meta.title": "Dinosaur Island - Survival Evolution Game",
@@ -149,7 +157,15 @@
     "footer.facebook": "Facebook",
     "footer.copyright": "© 2026 Dinosaur Island. All rights reserved.",
     "footer.qrTitle": "Scan to Contact Support",
-    "brand.name": "Dinosaur Island"
+    "brand.name": "Dinosaur Island",
+    "footer.tagline": "Join Dinosaur Island. Survive the prehistoric world.",
+    "footer.col.game": "Game",
+    "footer.col.support": "Support",
+    "footer.col.community": "Community",
+    "footer.col.legal": "Legal",
+    "footer.link.privacy": "Privacy Policy",
+    "footer.link.terms": "Terms of Service",
+    "footer.link.faq": "FAQ"
   },
   "vi": {
     "meta.title": "Đảo Khủng Long - Game Sinh Tồn Tiến Hóa",
@@ -225,6 +241,14 @@
     "footer.facebook": "Facebook",
     "footer.copyright": "© 2026 Đảo Khủng Long. All rights reserved.",
     "footer.qrTitle": "Quét để liên hệ CSKH",
-    "brand.name": "Đảo Khủng Long"
+    "brand.name": "Đảo Khủng Long",
+    "footer.tagline": "Tham gia Đảo Khủng Long. Sinh tồn trong thế giới tiền sử.",
+    "footer.col.game": "Trò chơi",
+    "footer.col.support": "Hỗ trợ",
+    "footer.col.community": "Cộng đồng",
+    "footer.col.legal": "Pháp lý",
+    "footer.link.privacy": "Chính sách riêng tư",
+    "footer.link.terms": "Điều khoản dịch vụ",
+    "footer.link.faq": "Câu hỏi thường gặp"
   }
 }
