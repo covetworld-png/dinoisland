@@ -1410,10 +1410,7 @@
       snapTimeout = setTimeout(() => { isSnapping = false; }, 900);
     }
 
-    // 检测是否为移动端模式
-    function isMobileMode() {
-      return frame.classList.contains('mobile');
-    }
+
 
     // 鼠标滚轮（累积阈值模式，仅桌面端）
     let wheelAccumulator = 0;
