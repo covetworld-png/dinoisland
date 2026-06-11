@@ -888,7 +888,14 @@
       object-fit: cover;
       display: block;
     }
-    .footer-qr:hover { border-color: var(--border-hover); }
+    .footer-qr:hover { border-color: var(--border-hover); transform: scale(1.03); }
+    .footer-qr-title {
+      font-size: 13px;
+      color: var(--fg-secondary);
+      margin-bottom: 10px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.04em;
+    }
     .footer-links {
       display: flex;
       justify-content: center;
@@ -1267,7 +1274,8 @@
     <!-- 9. Footer -->
     <footer class="footer">
       <div class="footer-logo reveal">Đảo Khủng Long</div>
-      <div class="footer-qr reveal reveal-delay-1" onclick="openLightbox('assets/cs-zalo.png')">
+      <div class="footer-qr-title reveal" data-i18n="footer.qrTitle">扫码联系客服</div>
+      <div class="footer-qr reveal reveal-delay-1 zoomable" onclick="openLightbox('assets/cs-zalo.png')">
         <img src="assets/cs-zalo.png" data-i18n-alt="footer.contact" alt="客服二维码">
       </div>
       <div class="footer-links reveal reveal-delay-2">
