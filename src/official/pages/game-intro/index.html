@@ -52,17 +52,45 @@
     /* ========== Reveal 动画 ========== */
     .reveal {
       opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: var(--reveal-delay, 0s);
     }
-    .reveal.visible {
+    /* 移动端：进入视口即显示 */
+    @media (max-width: 768px) {
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* 桌面端：当前激活 section 触发入场 */
+    .section.is-active .reveal,
+    .hero.is-active .reveal,
+    .footer.is-active .reveal {
       opacity: 1;
       transform: translateY(0);
     }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-1 { --reveal-delay: 0.12s; }
+    .reveal-delay-2 { --reveal-delay: 0.22s; }
+    .reveal-delay-3 { --reveal-delay: 0.32s; }
+
+    /* 列表项依次入场 */
+    .section.is-active ul li.reveal:nth-of-type(1),
+    .hero.is-active ul li.reveal:nth-of-type(1) { --reveal-delay: 0.24s; }
+    .section.is-active ul li.reveal:nth-of-type(2),
+    .hero.is-active ul li.reveal:nth-of-type(2) { --reveal-delay: 0.32s; }
+    .section.is-active ul li.reveal:nth-of-type(3),
+    .hero.is-active ul li.reveal:nth-of-type(3) { --reveal-delay: 0.40s; }
+    .section.is-active ul li.reveal:nth-of-type(4),
+    .hero.is-active ul li.reveal:nth-of-type(4) { --reveal-delay: 0.48s; }
+    .section.is-active ul li.reveal:nth-of-type(5),
+    .hero.is-active ul li.reveal:nth-of-type(5) { --reveal-delay: 0.56s; }
+
+    /* 图片轻微缩放入场 */
+    .reveal img { transform: scale(0.98); transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+    .section.is-active .reveal img,
+    .hero.is-active .reveal img { transform: scale(1); }
 
 /* ========== 导航栏 ========== */
     .nav {
@@ -228,12 +256,17 @@
       scroll-snap-align: start;
     }
     .hero-video-bg {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100vw;
+      min-height: 100vh;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
       object-fit: cover;
-      width: 100%;
-      height: 100%;
+      z-index: -1;
+      background: var(--bg);
     }
     .hero-video-bg::before {
       content: '';
@@ -241,6 +274,7 @@
       inset: 0;
       background: radial-gradient(ellipse at 50% 80%, rgba(212,168,67,0.08) 0%, transparent 60%);
       z-index: 1;
+      pointer-events: none;
     }
     .hero-overlay {
       position: absolute;
@@ -1052,9 +1086,9 @@
             <div class="section-title" data-i18n="section.evolution.title">弱肉强食，适者进化</div>
             <div class="section-desc" data-i18n="section.evolution.desc">每一只巨兽都曾是从蛋壳中探出头颅的幼龙。觅食、饮水、在厮杀中磨砺，直至进化值满溢，蜕变为成年体。这里没有怜悯，只有自然法则的残酷与壮丽。</div>
             <ul>
-              <li data-i18n="section.evolution.li1">从幼龙起步，亲历完整的成长历程</li>
-              <li data-i18n="section.evolution.li2">饥饿、口渴与体力限制真实的生存体验</li>
-              <li data-i18n="section.evolution.li3">成年后可筑巢定居，建立属于自己的据点</li>
+              <li class="reveal" data-i18n="section.evolution.li1">从幼龙起步，亲历完整的成长历程</li>
+              <li class="reveal" data-i18n="section.evolution.li2">饥饿、口渴与体力限制真实的生存体验</li>
+              <li class="reveal" data-i18n="section.evolution.li3">成年后可筑巢定居，建立属于自己的据点</li>
             </ul>
           </div>
           <div class="reveal reveal-delay-1">
@@ -1077,9 +1111,9 @@
             <div class="section-title" data-i18n="section.battle.title">狭路相逢，勇者生存</div>
             <div class="section-desc" data-i18n="section.battle.desc">废墟深处的工厂是勇者的试炼场。每一次遭遇都是技术与本能的较量，走位、侧翼攻击、骨折机制——只有最敏锐的猎手才能活着离开。</div>
             <ul>
-              <li data-i18n="section.battle.li1">废墟工厂中的即时遭遇战</li>
-              <li data-i18n="section.battle.li2">走位与时机决定生死</li>
-              <li data-i18n="section.battle.li3">侧翼攻击可造成骨折重创</li>
+              <li class="reveal" data-i18n="section.battle.li1">废墟工厂中的即时遭遇战</li>
+              <li class="reveal" data-i18n="section.battle.li2">走位与时机决定生死</li>
+              <li class="reveal" data-i18n="section.battle.li3">侧翼攻击可造成骨折重创</li>
             </ul>
           </div>
         </div>
@@ -1096,9 +1130,9 @@
           <div class="section-title" style="font-size:32px; margin-bottom:12px;" data-i18n="section.territory.title">领地即尊严</div>
           <div class="section-desc" style="margin:0 auto;" data-i18n="section.territory.desc">公会之间的宣战不是儿戏，每一次领地攻防都关乎整个团队的尊严与存亡。胜负之间，资源与荣耀重新分配。</div>
           <ul style="list-style:none; margin-top:20px; display:flex; gap:24px; justify-content:center; flex-wrap:wrap;">
-            <li style="border:none; padding-left:0;" data-i18n="section.territory.li1">公会宣战，全面战争一触即发</li>
-            <li style="border:none; padding-left:0;" data-i18n="section.territory.li2">领地保护机制，策略与实力的博弈</li>
-            <li style="border:none; padding-left:0;" data-i18n="section.territory.li3">胜者为王，败者失去庇护</li>
+            <li class="reveal" style="border:none; padding-left:0;" data-i18n="section.territory.li1">公会宣战，全面战争一触即发</li>
+            <li class="reveal" style="border:none; padding-left:0;" data-i18n="section.territory.li2">领地保护机制，策略与实力的博弈</li>
+            <li class="reveal" style="border:none; padding-left:0;" data-i18n="section.territory.li3">胜者为王，败者失去庇护</li>
           </ul>
         </div>
       </div>
@@ -1114,10 +1148,10 @@
             <div class="section-title" data-i18n="section.social.title">世界很大，你不必独自前行</div>
             <div class="section-desc" data-i18n="section.social.desc">战斗之外，这片大陆藏着令人屏息的风景。雪山、森林、火山……每一处地貌都是史前世界的馈赠。而当你加入公会，建立巢穴，与团长和战友们并肩作战、分享见闻时，你会发现——最珍贵的战利品，是这群陪你出生入死的人。</div>
             <ul>
-              <li data-i18n="section.social.li1">雪山、森林、火山，多样的史前地貌等待探索</li>
-              <li data-i18n="section.social.li2">公会巢穴作为据点，好友集结共赴战场</li>
-              <li data-i18n="section.social.li3">团长带玩体系，新人从不会迷失方向</li>
-              <li data-i18n="section.social.li4">活跃的跨平台玩家社群，战友遍布线上线下</li>
+              <li class="reveal" data-i18n="section.social.li1">雪山、森林、火山，多样的史前地貌等待探索</li>
+              <li class="reveal" data-i18n="section.social.li2">公会巢穴作为据点，好友集结共赴战场</li>
+              <li class="reveal" data-i18n="section.social.li3">团长带玩体系，新人从不会迷失方向</li>
+              <li class="reveal" data-i18n="section.social.li4">活跃的跨平台玩家社群，战友遍布线上线下</li>
             </ul>
           </div>
           <div class="reveal reveal-delay-1">
@@ -1377,26 +1411,6 @@
       }
     });
 
-    /* ========== 滚动揭示动画 ========== */
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.15
-    };
-
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-
-    document.querySelectorAll('.reveal').forEach(el => {
-      revealObserver.observe(el);
-    });
-
     /* ========== 分屏滚动 ========== */
     const snapSections = document.querySelectorAll('.hero, .quote-section, .section, .footer');
     let currentSnapIndex = 0;
@@ -1410,12 +1424,56 @@
 
       isSnapping = true;
       currentSnapIndex = index;
+      updateActiveSection();
       snapSections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       clearTimeout(snapTimeout);
       snapTimeout = setTimeout(() => { isSnapping = false; }, 900);
     }
 
+
+    /* ========== 滚动揭示动画 ========== */
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15
+    };
+
+    // 桌面端：通过 section active 状态统一触发动画
+    function updateActiveSection() {
+      if (isMobileMode()) return;
+      snapSections.forEach((section, i) => {
+        section.classList.toggle('is-active', i === currentSnapIndex);
+      });
+    }
+
+    // 移动端：进入视口即显示
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    if (isMobileMode()) {
+      document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    } else {
+      updateActiveSection();
+    }
+
+    window.addEventListener('resize', () => {
+      if (isMobileMode()) {
+        document.querySelectorAll('.reveal').forEach(el => {
+          if (!el.classList.contains('visible')) revealObserver.observe(el);
+        });
+        snapSections.forEach(s => s.classList.remove('is-active'));
+      } else {
+        revealObserver.disconnect();
+        updateActiveSection();
+      }
+    });
 
 
     // 鼠标滚轮（累积阈值模式，仅桌面端）
@@ -1480,13 +1538,18 @@
     window.addEventListener('scroll', () => {
       if (isSnapping || isMobileMode()) return;
       const scrollTop = window.scrollY + window.innerHeight / 3;
+      let newIndex = currentSnapIndex;
       snapSections.forEach((section, i) => {
         const top = section.offsetTop;
         const bottom = top + section.offsetHeight;
         if (scrollTop >= top && scrollTop < bottom) {
-          currentSnapIndex = i;
+          newIndex = i;
         }
       });
+      if (newIndex !== currentSnapIndex) {
+        currentSnapIndex = newIndex;
+        updateActiveSection();
+      }
     });
 
     /* ========== 恐龙卡片箭头滚动 ========== */
