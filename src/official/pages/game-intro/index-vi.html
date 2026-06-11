@@ -714,9 +714,10 @@
 
     /* 主视频封面 */
     .video-card {
+      position: relative;
+      width: 100%;
       aspect-ratio: 16/9;
       max-height: 30vh;
-      position: relative;
       border-radius: var(--radius-lg);
       overflow: hidden;
       border: 1px solid var(--border);
@@ -798,8 +799,8 @@
       overflow: hidden;
       border: 1px solid var(--border);
       cursor: pointer;
-      aspect-ratio: 16/9;
-      max-height: 140px;
+      width: 100%;
+      height: 140px;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
     .video-thumb:hover {
@@ -908,7 +909,7 @@
       .masonry { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 130px; }
       .video-thumbs { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .video-embed { max-height: 24vh; }
-      .video-thumb { max-height: 100px; }
+      .video-thumb { height: 100px; }
       .video-overlay-title { font-size: 16px; }
       .video-play-icon { width: 48px; height: 48px; font-size: 18px; }
       .video-thumb .video-overlay-title { font-size: 11px; }
