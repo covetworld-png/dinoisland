@@ -692,16 +692,16 @@
     .video-embed {
       width: 100%;
       aspect-ratio: 16/9;
-      max-height: 55vh;
+      max-height: 30vh;
       border-radius: var(--radius-lg);
       border: 1px solid var(--border);
       background: #000;
     }
     .video-caption {
       text-align: center;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--fg-muted);
-      margin-top: 12px;
+      margin-top: 8px;
       font-family: var(--font-mono);
     }
     .video-thumbs {
@@ -710,6 +710,144 @@
       gap: 12px;
       max-width: 100%;
       margin: 0 auto;
+    }
+
+    /* 主视频封面 */
+    .video-card {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+    .video-card:hover {
+      transform: scale(1.01);
+      box-shadow: 0 0 40px rgba(212,168,67,0.12);
+      border-color: var(--accent);
+    }
+    .video-card .video-embed {
+      display: block;
+    }
+    .video-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(20,24,36,0.9) 0%, rgba(8,10,15,0.95) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 2;
+      transition: opacity 0.4s ease;
+    }
+    .video-overlay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 40%, rgba(212,168,67,0.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .video-overlay-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--fg);
+      position: relative;
+      z-index: 1;
+    }
+    .video-overlay-sub {
+      font-size: 10px;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1;
+    }
+    .video-play-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(212,168,67,0.12);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+      padding-left: 5px;
+    }
+    .video-card:hover .video-play-icon {
+      background: var(--accent);
+      color: var(--bg);
+      transform: scale(1.1);
+      box-shadow: 0 0 30px var(--accent-glow);
+    }
+
+    /* 小视频（向上滑出） */
+    .video-thumb {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      aspect-ratio: 16/9;
+      max-height: 140px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .video-thumb:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .video-thumb-front {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(20,24,36,0.95) 0%, rgba(8,10,15,0.98) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      z-index: 2;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .video-thumb:hover .video-thumb-front {
+      transform: translateY(-100%);
+    }
+    .video-thumb-back {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #141824 0%, #0d1117 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    .video-thumb-back::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(212,168,67,0.05) 0%, transparent 70%);
+    }
+    .video-thumb .video-play-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 14px;
+      padding-left: 3px;
+    }
+    .video-thumb:hover .video-play-icon {
+      transform: scale(1.15);
+    }
+    .video-thumb .video-overlay-title {
+      font-size: 14px;
+    }
+    .video-thumb .video-overlay-sub {
+      font-size: 9px;
     }
 
     /* ========== Footer ========== */
@@ -766,7 +904,13 @@
       .nav-links { display: none; }
       .asymmetric, .asymmetric.reverse { grid-template-columns: 1fr; gap: 32px; }
       .masonry { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 130px; }
-      .video-thumbs { grid-template-columns: 1fr; }
+      .video-thumbs { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .video-embed { max-height: 24vh; }
+      .video-thumb { max-height: 100px; }
+      .video-overlay-title { font-size: 16px; }
+      .video-play-icon { width: 48px; height: 48px; font-size: 18px; }
+      .video-thumb .video-overlay-title { font-size: 11px; }
+      .video-thumb .video-play-icon { width: 32px; height: 32px; font-size: 12px; }
       .hero-merged { flex-direction: column; gap: 32px; padding: 0 24px; }
       .hero-left { flex: 0 0 auto; max-width: 260px; }
       .hero-right { flex: 0 0 auto; max-width: 100%; text-align: center; }
@@ -882,7 +1026,7 @@
         </div>
         <div class="hero-buttons">
           <a href="https://daokhunglong.vn/" target="_blank" class="btn btn-primary">下载游戏</a>
-          <button class="btn btn-secondary" onclick="openTrailer()">观看预告</button>
+          <button class="btn btn-secondary" onclick="openVideoModal('assets/trailer.mp4')">观看预告</button>
         </div>
         <div class="hero-scroll">↓</div>
       </div>
@@ -1069,23 +1213,45 @@
           <div class="section-desc" style="margin-bottom:16px;">官方预告、主播实况、玩家投稿——这片大陆每天都在发生值得被记录的故事。</div>
         </div>
         <div class="video-main reveal reveal-delay-1">
-          <video class="video-embed" controls preload="metadata">
-            <source src="assets/trailer.mp4" type="video/mp4">
-          </video>
+          <div class="video-card" onclick="openVideoModal('assets/trailer.mp4')">
+            <div class="video-overlay">
+              <div class="video-overlay-sub">Official Trailer</div>
+              <div class="video-overlay-title">官方预告片</div>
+              <div class="video-play-icon">▶</div>
+            </div>
+          </div>
           <div class="video-caption">官方预告片</div>
         </div>
         <div class="video-thumbs">
-          <div class="placeholder placeholder-sm reveal reveal-delay-1">
-            <div class="placeholder-label">[SKIN PREVIEW]</div>
-            <div class="placeholder-source">SKIN PREVIEW SOURCE</div>
+          <div class="video-thumb reveal reveal-delay-1" onclick="openVideoModal('assets/highlight-0611.mp4')">
+            <div class="video-thumb-back">
+              <div class="video-play-icon">▶</div>
+            </div>
+            <div class="video-thumb-front">
+              <div class="video-overlay-sub">Stream Highlight</div>
+              <div class="video-overlay-title">主播实况</div>
+              <div class="video-play-icon">▶</div>
+            </div>
           </div>
-          <div class="placeholder placeholder-sm reveal reveal-delay-2">
-            <div class="placeholder-label">[STREAM HIGHLIGHT]</div>
-            <div class="placeholder-source">STREAM SOURCE</div>
+          <div class="video-thumb reveal reveal-delay-2" onclick="openVideoModal('assets/highlight-0611-2.mp4')">
+            <div class="video-thumb-back">
+              <div class="video-play-icon">▶</div>
+            </div>
+            <div class="video-thumb-front">
+              <div class="video-overlay-sub">Player Submission</div>
+              <div class="video-overlay-title">玩家投稿</div>
+              <div class="video-play-icon">▶</div>
+            </div>
           </div>
-          <div class="placeholder placeholder-sm reveal reveal-delay-3">
-            <div class="placeholder-label">[BG ANIMATION]</div>
-            <div class="placeholder-source">BG SOURCE</div>
+          <div class="video-thumb reveal reveal-delay-3" onclick="openVideoModal('assets/highlight-0611-3.mp4')">
+            <div class="video-thumb-back">
+              <div class="video-play-icon">▶</div>
+            </div>
+            <div class="video-thumb-front">
+              <div class="video-overlay-sub">Highlight Reel</div>
+              <div class="video-overlay-title">精彩集锦</div>
+              <div class="video-play-icon">▶</div>
+            </div>
           </div>
         </div>
       </div>
