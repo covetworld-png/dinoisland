@@ -1228,7 +1228,10 @@
         <div class="video-thumbs">
           <div class="video-thumb reveal reveal-delay-1" onclick="openVideoModal('assets/highlight-0611.mp4')">
             <div class="video-thumb-back">
-              <div class="video-play-icon">▶</div>
+              <div style="text-align:center; position:relative; z-index:1;">
+                <div style="font-family:var(--font-display); font-size:16px; color:var(--fg); margin-bottom:8px;">主播实况</div>
+                <div class="video-play-icon">▶</div>
+              </div>
             </div>
             <div class="video-thumb-front">
               <div class="video-overlay-sub">Stream Highlight</div>
@@ -1238,7 +1241,10 @@
           </div>
           <div class="video-thumb reveal reveal-delay-2" onclick="openVideoModal('assets/highlight-0611-2.mp4')">
             <div class="video-thumb-back">
-              <div class="video-play-icon">▶</div>
+              <div style="text-align:center; position:relative; z-index:1;">
+                <div style="font-family:var(--font-display); font-size:16px; color:var(--fg); margin-bottom:8px;">玩家投稿</div>
+                <div class="video-play-icon">▶</div>
+              </div>
             </div>
             <div class="video-thumb-front">
               <div class="video-overlay-sub">Player Submission</div>
@@ -1248,7 +1254,10 @@
           </div>
           <div class="video-thumb reveal reveal-delay-3" onclick="openVideoModal('assets/highlight-0611-3.mp4')">
             <div class="video-thumb-back">
-              <div class="video-play-icon">▶</div>
+              <div style="text-align:center; position:relative; z-index:1;">
+                <div style="font-family:var(--font-display); font-size:16px; color:var(--fg); margin-bottom:8px;">精彩集锦</div>
+                <div class="video-play-icon">▶</div>
+              </div>
             </div>
             <div class="video-thumb-front">
               <div class="video-overlay-sub">Highlight Reel</div>
@@ -1300,13 +1309,16 @@
       window.scrollTo(0, 0);
     });
 
-    /* ========== 预告片弹窗 ========== */
-    function openTrailer() {
+    /* ========== 视频弹窗 ========== */
+    function openVideoModal(src) {
       const modal = document.getElementById('trailerModal');
       const video = document.getElementById('trailerVideo');
+      const source = video.querySelector('source');
+      source.src = src;
+      video.load();
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
-      if (video) video.play();
+      video.play();
     }
     function closeTrailer(e) {
       if (e) e.stopPropagation();
