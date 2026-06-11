@@ -1143,6 +1143,106 @@
       80% { opacity: 1; }
       100% { opacity: 0; transform: scaleX(0); transform-origin: right; }
     }
+
+    /* ========== Bento 相册拼图 ========== */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 160px;
+      gap: 12px;
+      width: 100%;
+    }
+    .bento-item {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: zoom-in;
+      background: linear-gradient(135deg, rgba(30,32,48,0.6) 0%, rgba(13,17,23,0.8) 100%);
+      border: 1px solid var(--border);
+    }
+    .bento-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bento-item:hover img { transform: scale(1.06); }
+    .bento-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212,168,67,0) 0%, rgba(212,168,67,0.04) 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .bento-item:hover::after { opacity: 1; }
+
+    /* 1 张图 */
+    .bento.count-1 .bento-item:nth-child(1) {
+      grid-column: span 3;
+      grid-row: span 2;
+    }
+    /* 2 张图 */
+    .bento.count-2 .bento-item:nth-child(1) {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+    .bento.count-2 .bento-item:nth-child(2) {
+      grid-column: span 1;
+      grid-row: span 2;
+    }
+    /* 3 张图 */
+    .bento.count-3 .bento-item:nth-child(1) {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+    .bento.count-3 .bento-item:nth-child(2),
+    .bento.count-3 .bento-item:nth-child(3) {
+      grid-column: span 1;
+      grid-row: span 1;
+    }
+    /* 4 张图 */
+    .bento.count-4 .bento-item:nth-child(1) {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+    .bento.count-4 .bento-item:nth-child(2) {
+      grid-column: span 1;
+      grid-row: span 2;
+    }
+    .bento.count-4 .bento-item:nth-child(3),
+    .bento.count-4 .bento-item:nth-child(4) {
+      grid-column: span 1;
+      grid-row: span 1;
+    }
+
+    @media (max-width: 768px) {
+      .bento {
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: 130px;
+        gap: 8px;
+      }
+      .bento.count-1 .bento-item:nth-child(1),
+      .bento.count-2 .bento-item:nth-child(1),
+      .bento.count-2 .bento-item:nth-child(2),
+      .bento.count-3 .bento-item:nth-child(1),
+      .bento.count-4 .bento-item:nth-child(1),
+      .bento.count-4 .bento-item:nth-child(2) {
+        grid-column: span 1;
+        grid-row: span 1;
+      }
+      .bento.count-3 .bento-item:nth-child(1) {
+        grid-column: span 2;
+        grid-row: span 2;
+      }
+      .bento.count-3 .bento-item:nth-child(2),
+      .bento.count-3 .bento-item:nth-child(3) {
+        grid-column: span 1;
+        grid-row: span 1;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1212,8 +1312,10 @@
               <li class="reveal" data-i18n="section.evolution.li3">成年后可筑巢定居，建立属于自己的据点</li>
             </ul>
           </div>
-          <div class="reveal reveal-delay-1">
-            <img src="assets/evolution.jpg" data-i18n-alt="section.evolution.title" alt="弱肉强食，适者进化" style="width:100%; border-radius:var(--radius-lg); border:1px solid var(--border); display:block;">
+          <div class="bento count-3 reveal reveal-delay-1">
+            <div class="bento-item" onclick="openLightbox('assets/evolution.jpg')"><img src="assets/evolution.jpg" data-i18n-alt="section.evolution.title" alt="弱肉强食，适者进化"></div>
+            <div class="bento-item" onclick="openLightbox('assets/scene-1.jpg')"><img src="assets/scene-1.jpg" alt="场景 1"></div>
+            <div class="bento-item" onclick="openLightbox('assets/scene-2.jpg')"><img src="assets/scene-2.jpg" alt="场景 2"></div>
           </div>
         </div>
       </div>
@@ -1224,8 +1326,10 @@
     <section class="section" id="battle">
       <div class="container">
         <div class="asymmetric">
-          <div class="reveal">
-            <img src="assets/combat.jpg" data-i18n-alt="section.battle.title" alt="狭路相逢，勇者生存" style="width:100%; border-radius:var(--radius-lg); border:1px solid var(--border); display:block;">
+          <div class="bento count-3 reveal">
+            <div class="bento-item" onclick="openLightbox('assets/combat.jpg')"><img src="assets/combat.jpg" data-i18n-alt="section.battle.title" alt="狭路相逢，勇者生存"></div>
+            <div class="bento-item" onclick="openLightbox('assets/scene-3.jpg')"><img src="assets/scene-3.jpg" alt="场景 3"></div>
+            <div class="bento-item" onclick="openLightbox('assets/scene-4.jpg')"><img src="assets/scene-4.jpg" alt="场景 4"></div>
           </div>
           <div class="asymmetric-text reveal reveal-delay-1">
             <div class="section-label" data-i18n="section.battle.label">03  COMBAT</div>
@@ -1279,8 +1383,10 @@
               <li class="reveal" data-i18n="section.social.li4">活跃的跨平台玩家社群，战友遍布线上线下</li>
             </ul>
           </div>
-          <div class="reveal reveal-delay-1">
-            <img src="assets/landscape.jpg" data-i18n-alt="section.social.title" alt="世界很大，你不必独自前行" style="width:100%; border-radius:var(--radius-lg); border:1px solid var(--border); display:block;">
+          <div class="bento count-3 reveal reveal-delay-1">
+            <div class="bento-item" onclick="openLightbox('assets/landscape.jpg')"><img src="assets/landscape.jpg" data-i18n-alt="section.social.title" alt="世界很大，你不必独自前行"></div>
+            <div class="bento-item" onclick="openLightbox('assets/scene-5.jpg')"><img src="assets/scene-5.jpg" alt="场景 5"></div>
+            <div class="bento-item" onclick="openLightbox('assets/scene-6.jpg')"><img src="assets/scene-6.jpg" alt="场景 6"></div>
           </div>
         </div>
       </div>
