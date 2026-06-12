@@ -254,6 +254,12 @@
       "includeAssets": [],
       "pathRewrite": {},
       "versioning": "auto"
+    },
+    "game-intro": {
+      "srcPage": "src/official/pages/game-intro",
+      "includeAssets": [],
+      "pathRewrite": {},
+      "versioning": "auto"
     }
   }
 }
