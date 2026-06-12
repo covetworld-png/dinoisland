@@ -551,7 +551,7 @@
           </select>
         </div>
         <div class="meta">
-          生成时间：2026-06-12 15:01:05<br>
+          生成时间：2026-06-12 20:21:16<br>
           数据源：<a href="https://monsterlair.feishu.cn/wiki/JV8AwsscdiqyTzknkwecK4qdnKc" target="_blank" rel="noopener">飞书表格</a>
         </div>
       </div>
@@ -4028,7 +4028,7 @@
 
       function updateCurrentTime() {
         const now = new Date();
-        const todayStr = now.toISOString().slice(0, 10);
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         wrappers.forEach(wrapper => {
           const line = wrapper.querySelector('.current-time-line');
           const start = line.dataset.weekStart;
