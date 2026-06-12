@@ -551,7 +551,7 @@
           </select>
         </div>
         <div class="meta">
-          生成时间：2026-06-12 20:44:28<br>
+          生成时间：2026-06-12 21:01:17<br>
           数据源：<a href="https://monsterlair.feishu.cn/wiki/JV8AwsscdiqyTzknkwecK4qdnKc" target="_blank" rel="noopener">飞书表格</a>
         </div>
       </div>
@@ -4029,8 +4029,14 @@
         });
       });
 
-      function updateCurrentTime() {
+      function getVietnamTime() {
         const now = new Date();
+        const str = now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' });
+        return new Date(str);
+      }
+
+      function updateCurrentTime() {
+        const now = getVietnamTime();
         const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         wrappers.forEach(wrapper => {
           const line = wrapper.querySelector('.current-time-line');
