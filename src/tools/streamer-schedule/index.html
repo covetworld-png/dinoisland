@@ -551,7 +551,7 @@
           </select>
         </div>
         <div class="meta">
-          生成时间：2026-06-12 20:21:16<br>
+          生成时间：2026-06-12 20:43:14<br>
           数据源：<a href="https://monsterlair.feishu.cn/wiki/JV8AwsscdiqyTzknkwecK4qdnKc" target="_blank" rel="noopener">飞书表格</a>
         </div>
       </div>
@@ -3988,6 +3988,9 @@
         const buttons = wrapper.querySelectorAll('.filter-bar button[data-streamer]');
         const allBtn = wrapper.querySelector('.filter-bar button[data-filter="all"]');
         const blocks = wrapper.querySelectorAll('.schedule-block');
+
+        // 空周（未来占位）无班次和筛选按钮，跳过
+        if (!allBtn) return;
 
         function updateVisibility() {
           const activeStreamers = new Set();
