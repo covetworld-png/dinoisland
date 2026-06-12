@@ -1373,6 +1373,10 @@
       }
     }
   </style>
+  <script>
+    window.apiUrl = "https://monsteraccount.yuemei.info";
+  </script>
+  <script src="js/analytics.js"></script>
 </head>
 <body>
 
@@ -1739,6 +1743,7 @@
 
     /* ========== 视频弹窗 ========== */
     function openVideoModal(src) {
+      if (window.Analytics) window.Analytics.track('click_video', { video: src });
       const modal = document.getElementById('trailerModal');
       const video = document.getElementById('trailerVideo');
       const source = video.querySelector('source');
@@ -1759,6 +1764,7 @@
 
     /* ========== 图片 Lightbox ========== */
     function openLightbox(src) {
+      if (window.Analytics) window.Analytics.track('click_image', { image: src });
       const lb = document.getElementById('lightbox');
       const lbImg = document.getElementById('lightboxImg');
       if (!lb || !lbImg) return;
@@ -1785,6 +1791,7 @@
     const nav = document.getElementById('mainNav');
 
     function switchLang(lang) {
+      if (window.Analytics) window.Analytics.track('lang_switch', { lang });
       if (window.i18n) window.i18n.setLang(lang);
     }
 
@@ -2005,6 +2012,46 @@
         dinoScroll.scrollLeft = scrollLeft - walk;
       });
     }
+  </script>
+  <script>
+    /* ========== Analytics 初始化 ========== */
+    (function () {
+      if (!window.Analytics) return;
+      window.Analytics.init(window.apiUrl + '/api/trackLandingPage', 'game-intro');
+
+      // section_view：各章节首屏曝光
+      const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id || entry.target.className.split(' ')[0];
+            window.Analytics.track('section_view', { section: id });
+            sectionObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+
+      document.querySelectorAll('.section, .hero').forEach(section => {
+        sectionObserver.observe(section);
+      });
+
+      // 事件委托：下载 / 社交 / 客服 / 导航
+      document.addEventListener('click', (e) => {
+        const a = e.target.closest('a');
+        if (!a) return;
+        const href = a.getAttribute('href') || '';
+        if (href.indexOf('daokhunglong.vn') !== -1) {
+          window.Analytics.track('click_download', { position: a.closest('.hero') ? 'hero' : 'footer' });
+        } else if (href.indexOf('tiktok.com') !== -1) {
+          window.Analytics.track('click_social', { platform: 'tiktok' });
+        } else if (href.indexOf('facebook.com') !== -1) {
+          window.Analytics.track('click_social', { platform: 'facebook' });
+        } else if (a.getAttribute('data-i18n') === 'footer.contact' || a.getAttribute('onclick') && a.getAttribute('onclick').indexOf('openLightbox') !== -1) {
+          window.Analytics.track('click_contact', { channel: 'zalo' });
+        } else if (a.getAttribute('href') && a.getAttribute('href').startsWith('#')) {
+          window.Analytics.track('click_nav', { section: a.getAttribute('href').replace('#', '') });
+        }
+      });
+    })();
   </script>
   <script src="assets/i18n.js"></script>
 </body>
