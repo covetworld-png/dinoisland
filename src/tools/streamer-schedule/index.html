@@ -67,19 +67,18 @@
     }
     .header-tools {
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 20px;
     }
     .skin-selector {
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
+      align-items: center;
+      gap: 8px;
     }
     .skin-selector label {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
-      letter-spacing: 0.04em;
+      white-space: nowrap;
     }
     .skin-selector select {
       padding: 7px 14px;
@@ -439,16 +438,77 @@
     .tooltip .tooltip-meta { color: var(--muted); font-size: 11px; }
 
     @media (max-width: 768px) {
-      .container { padding: 28px 16px; }
-      header { margin-bottom: 28px; }
-      .brand h1 { font-size: 22px; }
-      .header-tools { flex-direction: column; align-items: flex-start; gap: 12px; }
-      .skin-selector { align-items: flex-start; }
-      .week-selector select { min-width: 200px; font-size: 13px; }
-      :root { --hour-height: 56px; --time-axis-width: 46px; }
-      .schedule-block { font-size: 9px; }
-      .toolbar { flex-direction: column; align-items: flex-start; }
+      .container { padding: 20px 12px; }
+      header {
+        margin-bottom: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+      .brand h1 { font-size: 20px; }
+      .brand::before { height: 36px; }
+      .header-tools {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .skin-selector { align-items: center; }
+      .meta { text-align: left; font-size: 10px; }
+
+      .week-selector { margin-bottom: 24px; }
+      .week-selector select { min-width: 170px; font-size: 12px; padding: 9px 14px; }
+      .week-selector button { width: 30px; height: 30px; font-size: 13px; }
+
+      .toolbar { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
       .kpi-group { gap: 16px; }
+      .kpi-value { font-size: 22px; }
+
+      .filter-bar {
+        width: 100%;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .filter-bar button { flex-shrink: 0; }
+
+      :root { --hour-height: 64px; --time-axis-width: 50px; }
+
+      .schedule-header .day-header { padding: 10px 2px; }
+      .day-header .day-name { font-size: 11px; }
+      .day-header .date { font-size: 10px; }
+      .time-axis-rest-label { font-size: 10px; }
+      .time-label { font-size: 10px; right: 5px; }
+
+      .rest-day { min-height: 36px; padding: 6px; gap: 4px; }
+      .rest-block { padding: 3px 5px; font-size: 9px; gap: 3px; }
+      .rest-block .rest-dot { width: 4px; height: 4px; }
+
+      .schedule-block {
+        font-size: 10px;
+        padding: 2px 2px;
+        border-radius: 5px;
+        margin: 0 1px;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        letter-spacing: 0.04em;
+      }
+      .block-streamer {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+      }
+    }
+
+    @media (max-width: 480px) {
+      :root { --hour-height: 54px; --time-axis-width: 44px; }
+      .schedule-block { font-size: 9px; padding: 1px; }
+      .day-header .day-name { font-size: 10px; }
+      .day-header .date { display: none; }
+      .week-title { font-size: 14px; }
     }
   </style>
 </head>
@@ -485,7 +545,7 @@
           </select>
         </div>
         <div class="meta">
-          生成时间：2026-06-12 14:52:28<br>
+          生成时间：2026-06-12 14:57:12<br>
           数据源：飞书表格
         </div>
       </div>
@@ -533,8 +593,6 @@
     <section class="schedule-wrapper " data-week-index="0" data-has-data="true">
       
         
-        <div class="week-title">2026年 第24周（2026-06-08 ~ 2026-06-14）</div>
-
         <div class="toolbar">
           <div class="kpi-group">
             <div class="kpi">
