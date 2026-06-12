@@ -470,10 +470,12 @@
             
             <option value="nippon" >日本传统色</option>
             
+            <option value="vibrant" >高饱和填充</option>
+            
           </select>
         </div>
         <div class="meta">
-          生成时间：2026-06-12 14:45:56<br>
+          生成时间：2026-06-12 14:49:19<br>
           数据源：飞书表格
         </div>
       </div>
@@ -3744,7 +3746,7 @@
 
   <script>
     (function() {
-      const SKINS = {"morandi": {"accent": "#8B5A5A", "description": "\u4f4e\u9971\u548c\u7070\u8c03\uff0c\u67d4\u548c\u6c89\u9759", "name": "\u83ab\u5170\u8fea", "streamer_colors": {"Dory": "#C8A67E", "peo": "#9A8FB3", "pink": "#C9A0B2", "ven": "#8BAE9C", "\u5fd7\u9752": "#7A91B0", "\u963f\u56ed": "#A3B38C", "\u963f\u7f8e": "#C08A8A", "\u963f\u8d24": "#7A9CA6"}}, "nippon": {"accent": "#B7282E", "description": "Nippon Colors \u548c\u98a8\u914d\u8272", "name": "\u65e5\u672c\u4f20\u7edf\u8272", "streamer_colors": {"Dory": "#F8B500", "peo": "#867BA9", "pink": "#F09199", "ven": "#5CACAD", "\u5fd7\u9752": "#4A7A8C", "\u963f\u56ed": "#A7D28D", "\u963f\u7f8e": "#B7282E", "\u963f\u8d24": "#0F2540"}}};
+      const SKINS = {"morandi": {"accent": "#8B5A5A", "description": "\u4f4e\u9971\u548c\u7070\u8c03\uff0c\u67d4\u548c\u6c89\u9759", "name": "\u83ab\u5170\u8fea", "streamer_colors": {"Dory": "#C8A67E", "peo": "#9A8FB3", "pink": "#C9A0B2", "ven": "#8BAE9C", "\u5fd7\u9752": "#7A91B0", "\u963f\u56ed": "#A3B38C", "\u963f\u7f8e": "#C08A8A", "\u963f\u8d24": "#7A9CA6"}}, "nippon": {"accent": "#B7282E", "description": "Nippon Colors \u548c\u98a8\u914d\u8272", "name": "\u65e5\u672c\u4f20\u7edf\u8272", "streamer_colors": {"Dory": "#F8B500", "peo": "#867BA9", "pink": "#F09199", "ven": "#5CACAD", "\u5fd7\u9752": "#4A7A8C", "\u963f\u56ed": "#A7D28D", "\u963f\u7f8e": "#B7282E", "\u963f\u8d24": "#0F2540"}}, "vibrant": {"accent": "#E84A5F", "description": "\u660e\u5feb\u9971\u548c\u8272\u5757\uff0c\u767d\u5b57/\u6df1\u8272\u5b57\u586b\u5145", "mode": "fill", "name": "\u9ad8\u9971\u548c\u586b\u5145", "streamer_colors": {"Dory": "#F59E0B", "peo": "#8B5CF6", "pink": "#FF6B9D", "ven": "#10B981", "\u5fd7\u9752": "#0EA5E9", "\u963f\u56ed": "#84CC16", "\u963f\u7f8e": "#E84A5F", "\u963f\u8d24": "#2563EB"}}};
       const ACTIVE_SKIN = "morandi";
 
       function hexToRgb(hex) {
@@ -3819,6 +3821,7 @@
         const skin = SKINS[skinKey];
         if (!skin) return;
         const colorMap = skin.streamer_colors || {};
+        const isFill = skin.mode === 'fill';
 
         if (skin.accent) {
           document.documentElement.style.setProperty('--accent', skin.accent);
@@ -3834,18 +3837,31 @@
         document.querySelectorAll('.rest-block[data-streamer]').forEach(el => {
           const streamer = el.dataset.streamer;
           const base = colorMap[streamer] || '#999999';
-          el.style.setProperty('--rest-bg', paletteColor(base, 'light'));
-          el.style.setProperty('--rest-text', paletteColor(base, 'dark'));
-          el.style.setProperty('--rest-border', paletteColor(base, 'dark'));
-          el.style.setProperty('--rest-dot', base);
+          if (isFill) {
+            el.style.setProperty('--rest-bg', base);
+            el.style.setProperty('--rest-text', paletteColor(base, 'on'));
+            el.style.setProperty('--rest-border', base);
+            el.style.setProperty('--rest-dot', paletteColor(base, 'on'));
+          } else {
+            el.style.setProperty('--rest-bg', paletteColor(base, 'light'));
+            el.style.setProperty('--rest-text', paletteColor(base, 'dark'));
+            el.style.setProperty('--rest-border', paletteColor(base, 'dark'));
+            el.style.setProperty('--rest-dot', base);
+          }
         });
 
         document.querySelectorAll('.schedule-block[data-streamer]').forEach(el => {
           const streamer = el.dataset.streamer;
           const base = colorMap[streamer] || '#999999';
-          el.style.setProperty('--block-bg', paletteColor(base, 'light'));
-          el.style.setProperty('--block-text', paletteColor(base, 'dark'));
-          el.style.setProperty('--block-border', paletteColor(base, 'dark'));
+          if (isFill) {
+            el.style.setProperty('--block-bg', base);
+            el.style.setProperty('--block-text', paletteColor(base, 'on'));
+            el.style.setProperty('--block-border', base);
+          } else {
+            el.style.setProperty('--block-bg', paletteColor(base, 'light'));
+            el.style.setProperty('--block-text', paletteColor(base, 'dark'));
+            el.style.setProperty('--block-border', paletteColor(base, 'dark'));
+          }
         });
       }
 
