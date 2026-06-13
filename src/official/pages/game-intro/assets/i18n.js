@@ -9,13 +9,13 @@
  *   1. URL ?lang=vi or ?lang=en
  *   2. localStorage.getItem('lang')
  *   3. Browser language detection
- *   4. Fallback: zh
+ *   4. Fallback: en
  */
 (function () {
   const I18N_PATH = 'assets/i18n.json';
   const STORAGE_KEY = 'dino-lang';
   let _translations = null;
-  let _currentLang = 'zh';
+  let _currentLang = 'en';
 
   function detectLang() {
     const params = new URLSearchParams(window.location.search);
@@ -25,10 +25,10 @@
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && ['zh', 'en', 'vi'].includes(stored)) return stored;
 
-    const nav = navigator.language || navigator.userLanguage || 'zh';
+    const nav = navigator.language || navigator.userLanguage || 'en';
     if (nav.toLowerCase().startsWith('vi')) return 'vi';
-    if (nav.toLowerCase().startsWith('en')) return 'en';
-    return 'zh';
+    if (nav.toLowerCase().startsWith('zh')) return 'zh';
+    return 'en';
   }
 
   function loadTranslations() {
