@@ -153,6 +153,20 @@
       "category": "其他",
       "name": "GM 权限回收，越南仅保留红山一个",
       "color": "#91cc75"
+    },
+    {
+      "date": "2026-06-12",
+      "type": "markPoint",
+      "category": "活动",
+      "name": "火龙 1 团 2 团宣战充值",
+      "color": "#ea7ccc"
+    },
+    {
+      "date": "2026-06-14",
+      "type": "markPoint",
+      "category": "活动",
+      "name": "K 服四团大战",
+      "color": "#73c0de"
     }
   ],
   "format": {
