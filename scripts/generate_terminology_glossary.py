@@ -364,6 +364,23 @@ def build_html(categories: list[dict]) -> str:
       color: var(--muted);
       font-size: 0.875rem;
     }}
+    .header-links {{
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      font-size: 0.875rem;
+    }}
+    .header-links a {{
+      color: var(--primary);
+      text-decoration: none;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      background: var(--primary-light);
+    }}
+    .header-links a:hover {{
+      text-decoration: underline;
+    }}
     .search-wrap {{
       margin-top: 1rem;
       display: flex;
@@ -534,6 +551,9 @@ def build_html(categories: list[dict]) -> str:
     <div class="container">
       <h1>恐龙岛道具名称对照表</h1>
       <p class="subtitle">海外团长申请资源发放对照 · CN / EN / VN</p>
+      <div class="header-links">
+        <a href="../game-data-search/index.html">游戏数据搜索 →</a>
+      </div>
       <div class="search-wrap">
         <div class="search-box">
           <input type="text" id="search" placeholder="搜索中文 / English / Tiếng Việt…" autocomplete="off">

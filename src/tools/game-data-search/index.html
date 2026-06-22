@@ -85,6 +85,19 @@ html, body {
   white-space: nowrap;
 }
 .stats b { color: var(--accent); }
+.header-link {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--highlight);
+  white-space: nowrap;
+}
+.header-link:hover {
+  text-decoration: underline;
+}
 
 /* Layout */
 .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
@@ -212,6 +225,7 @@ mark {
   <div class="search-wrap">
     <input type="text" id="searchInput" placeholder="输入关键词搜索，如：牛龙、咬合力、128888、积分..." autocomplete="off">
   </div>
+  <a href="../terminology-glossary/index.html" class="header-link">术语对照表 →</a>
   <div class="stats">共 <b id="totalRows">0</b> 条数据 · 匹配 <b id="matchRows">0</b> 条</div>
 </div>
 
