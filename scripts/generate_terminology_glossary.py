@@ -347,7 +347,7 @@ def build_html(categories: list[dict]) -> str:
 
     function highlight(text, query) {{
       if (!query) return escapeHtml(text);
-      const q = query.replace(/[.*+?^${{}}()|[\]\\]/g, '\\$&');
+      const q = query.replace(/[\\^$.*+?()[\]{{}}|]/g, '\\$&');
       const re = new RegExp(`(${{q}})`, 'gi');
       return escapeHtml(text).replace(re, '<span class="highlight">$1</span>');
     }}
