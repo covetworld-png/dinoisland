@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>恐龙岛术语对照表 · Glossary Lookup</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+    .search-wrap {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    #search {
+      flex: 1 1 260px;
+      padding: 0.6rem 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      outline: none;
+    }
+    #search:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+    .stats {
+      font-size: 0.875rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    main {
+      padding: 1.25rem 0 3rem;
+    }
+    .category {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .cat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.875rem 1rem;
+      cursor: pointer;
+      user-select: none;
+      background: #fafafa;
+      border-bottom: 1px solid var(--border);
+    }
+    .cat-header:hover { background: #f3f4f6; }
+    .cat-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 0;
+    }
+    .cat-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: var(--bg);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      margin-left: 0.5rem;
+    }
+    .cat-toggle {
+      color: var(--muted);
+      font-size: 0.875rem;
+      transition: transform 0.2s;
+    }
+    .category.collapsed .cat-toggle { transform: rotate(-90deg); }
+    .cat-body {
+      padding: 0.5rem 0;
+      display: block;
+    }
+    .category.collapsed .cat-body { display: none; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9375rem;
+    }
+    th, td {
+      padding: 0.625rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th {
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      background: #fafafa;
+      position: sticky;
+      top: 0;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+    .lang {
+      display: block;
+      font-weight: 500;
+    }
+    .lang-vn {
+      color: #b45309;
+      font-size: 0.95em;
+    }
+    .lang-en {
+      color: #1d4ed8;
+      font-size: 0.95em;
+    }
+    .note {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+    .status {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      background: var(--success-bg);
+      color: var(--success);
+      white-space: nowrap;
+    }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .no-result {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+    }
+    .highlight {
+      background: #fef08a;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+    @media (max-width: 640px) {
+      th, td { padding: 0.5rem; font-size: 0.875rem; }
+      .note { display: none; }
+      th:nth-child(4), td:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>恐龙岛术语对照表</h1>
+      <p class="subtitle">海外团长申请资源发放对照 · CN / EN / VN</p>
+      <div class="search-wrap">
+        <input type="text" id="search" placeholder="搜索中文 / English / Tiếng Việt…" autocomplete="off">
+        <span class="stats" id="stats">共 135 条</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="glossary"></div>
+    <div class="no-result" id="no-result" style="display:none;">未找到匹配的术语</div>
+  </main>
+
+  <script>
+    const glossaryData = [
+  {
+    "category": "1. 恐龙名称 (Dinosaur Names)",
+    "entries": [
+      {
+        "zh": "南手龙",
+        "en": "Austro",
+        "vn": "Austro",
+        "note": "弃用学名 Shunosaurus，VN 同步统一为简称",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "霸王龙",
+        "en": "T-Rex",
+        "vn": "Bạo Chúa",
+        "note": "弃用学名 Tyrannosaurus",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "远古霸王龙",
+        "en": "Ancient T-Rex",
+        "vn": "Bạo chúa cổ đại",
+        "note": "2026-05-11 从 Tyrannosaurus_Huge 改回",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "超级暴龙",
+        "en": "Mega Rex",
+        "vn": "Viễn Cổ",
+        "note": "弃用学名 Magnatyrannus",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "新年超级暴龙",
+        "en": "Mega Rex_2026New Year Limited",
+        "vn": "Viễn Cổ Tết 2026",
+        "note": "限定版保留年份标识",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "巨人牛龙 / 远古牛龙",
+        "en": "Carno_Hypo",
+        "vn": "Carno cổ đại",
+        "note": "代码标识，同远古牛龙",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "巨人南巨 / 远古南巨",
+        "en": "Giga_Hypo",
+        "vn": "Phương Nam Cổ Đại",
+        "note": "代码标识，同远古南巨",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "雷龙",
+        "en": "Puerta",
+        "vn": "Cổ Dài",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "翼龙",
+        "en": "Quetza",
+        "vn": "Khủng long bay",
+        "note": "统一为 Quetza",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "脊背龙",
+        "en": "Spino_Hypo",
+        "vn": "Thằn Lằn Gai",
+        "note": "代码标识复用",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "机械霸王龙 / 机械暴龙",
+        "en": "Mecha T-Rex",
+        "vn": "Khủng Long Máy",
+        "note": "统一为一个条目，弃用 MachineryRex",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "镰刀龙",
+        "en": "Theri",
+        "vn": "Theri",
+        "note": "弃用学名 Therizinosaurus，VN 同步统一为简称",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "甲龙",
+        "en": "Anky",
+        "vn": "Giáp Long",
+        "note": "弃用学名 Ankylosaurus",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "牛龙",
+        "en": "Carno",
+        "vn": "Carno",
+        "note": "弃用学名 Carnotaurus，VN 同步统一为简称",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "剑龙",
+        "en": "Stego",
+        "vn": "Kiếm Long",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "三角龙",
+        "en": "Trike",
+        "vn": "Khủng long ba sừng",
+        "note": "弃用学名 Triceratops",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "犹他龙",
+        "en": "Utah",
+        "vn": "Raptor",
+        "note": "弃用学名 Utahraptor",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "高脊龙",
+        "en": "Acro",
+        "vn": "Acro",
+        "note": "弃用学名 Acrocanthosaurus，VN 同步统一为简称",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "异特龙",
+        "en": "Allo",
+        "vn": "Allo",
+        "note": "弃用学名 Allosaurus，VN 同步统一为简称",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "重爪龙",
+        "en": "Bary",
+        "vn": "Bary",
+        "note": "弃用学名 Baryonyx，VN 同步统一为简称",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "角鼻龙",
+        "en": "Cerato",
+        "vn": "Giác Long",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "双脊龙",
+        "en": "Dilo",
+        "vn": "Dilo",
+        "note": "弃用学名 Dilophosaurus，VN 同步统一为简称",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "艾雷拉龙",
+        "en": "Herrera",
+        "vn": "Herrera",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "阿尔伯托龙",
+        "en": "Alberto",
+        "vn": "Alberto",
+        "note": "修正 VN 译名（去掉下划线）",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "恶魔双角龙",
+        "en": "Diablo",
+        "vn": "Khủng Long Ác Quỷ",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "巨型脊背龙",
+        "en": "Spino_Hypo",
+        "vn": "Thằn Lằn Gai",
+        "note": "同脊背龙，代码标识复用",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "熔岩恐龙",
+        "en": "Lava Dinosaur",
+        "vn": "Khủng long dung nham",
+        "note": "2026-04-22 补充，2026-05-11 修正 VN 译名",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "踢脚鸡",
+        "en": "Galli",
+        "vn": "Galli",
+        "note": "弃用学名 Gallimimus，VN 同步统一为简称",
+        "status": "✅ 已定"
+      }
+    ]
+  },
+  {
+    "category": "2. 恐龙形态 (Dinosaur Life Stages)",
+    "entries": [
+      {
+        "zh": "_幼年",
+        "en": "_Hatching",
+        "vn": "_Con",
+        "note": "孵化期",
+        "status": ""
+      },
+      {
+        "zh": "_成年",
+        "en": "_Adult",
+        "vn": "_Trưởng Thành",
+        "note": "成年期",
+        "status": ""
+      },
+      {
+        "zh": "_少年",
+        "en": "_Juvenile",
+        "vn": "_Nhỏ",
+        "note": "亚成年期",
+        "status": ""
+      },
+      {
+        "zh": "_公",
+        "en": "_Male",
+        "vn": "_Đực",
+        "note": "雄性",
+        "status": ""
+      },
+      {
+        "zh": "_母",
+        "en": "_Female",
+        "vn": "_Cái",
+        "note": "雌性",
+        "status": ""
+      },
+      {
+        "zh": "_2026新年限定",
+        "en": "_2026New Year Limited",
+        "vn": "_Tết 2026",
+        "note": "新年限定版",
+        "status": ""
+      },
+      {
+        "zh": "_变异",
+        "en": "_Variation",
+        "vn": "_Biến Dị",
+        "note": "变异形态（作为恐龙名称组成部分）",
+        "status": ""
+      }
+    ]
+  },
+  {
+    "category": "3. 游戏系统与机制 (Game Systems)",
+    "entries": [
+      {
+        "zh": "公会",
+        "en": "Guild",
+        "vn": "Bang Hội",
+        "note": "2026-06-17 从 Công Hội 调整为 Bang Hội，更符合游戏公会语境",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "公会战",
+        "en": "Guild War",
+        "vn": "Chiến Tranh Bang Hội",
+        "note": "随 公会 术语同步调整",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "会长",
+        "en": "Guild Leader",
+        "vn": "Hội Trưởng",
+        "note": "2026-04-19 从 Leader 统一",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "领地",
+        "en": "Territory",
+        "vn": "Lãnh Thổ",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "大保护",
+        "en": "Grand Shield",
+        "vn": "Bảo Vệ Cao",
+        "note": "弃用 High Protection",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "团队令",
+        "en": "Team Tokens",
+        "vn": "Lệnh Đội",
+        "note": "旧译 Squad Command，已废弃",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "进化值",
+        "en": "Evolution Points",
+        "vn": "Điểm Tiến Hóa",
+        "note": "明确为数值属性，2026-05-11 补全 EN/VN",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "巢穴",
+        "en": "Nest",
+        "vn": "Tổ",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "传送点",
+        "en": "Teleport Point",
+        "vn": "Điểm Dịch Chuyển",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "私人传送点",
+        "en": "Private Teleport Point",
+        "vn": "Điểm Dịch Chuyển Riêng",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "定点",
+        "en": "Waypoint",
+        "vn": "Điểm Đánh Dấu",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "强化",
+        "en": "Enhance",
+        "vn": "Cường Hóa",
+        "note": "弃用 Upgrade，与「强化卡」口径一致",
+        "status": "✅ 已定"
+      }
+    ]
+  },
+  {
+    "category": "4. 道具与资源 (Items & Currency)",
+    "entries": [
+      {
+        "zh": "兽币",
+        "en": "Beast Coins",
+        "vn": "Xu Thú",
+        "note": "禁止 BeastCoin / Beast Coin（单数无空格）",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "传送卡",
+        "en": "Teleport Token",
+        "vn": "Thẻ Dịch Chuyển",
+        "note": "2026-04-19 从 Teleport Card 统一",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "礼包",
+        "en": "Bundle",
+        "vn": "Gói Quà",
+        "note": "禁止 Gift package / Gift Pack / Gift package",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "强化卡",
+        "en": "Enhancement Card",
+        "vn": "Thẻ Cường Hóa",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "签到卡",
+        "en": "Check-in Card",
+        "vn": "Thẻ Điểm Danh",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "喷漆",
+        "en": "Spray",
+        "vn": "Sơn Phun",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "绿帽子喷漆",
+        "en": "Green Cap Spray",
+        "vn": "Sơn Phun Nón Xanh",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "弱鸡喷漆",
+        "en": "Chicken Spray / \"Weakling\" Spray",
+        "vn": "Sơn Phun \"Gà Mờ\"",
+        "note": "越南俚语适配，\"Gà Mờ\" = 菜鸟/弱鸡",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "道具卡",
+        "en": "Item Card",
+        "vn": "Thẻ Đạo Cụ",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "进化卡",
+        "en": "Evolution Card",
+        "vn": "Thẻ Tiến Hóa",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "定点卡",
+        "en": "Waypoint Card",
+        "vn": "Thẻ Đánh Dấu",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "恢复卡",
+        "en": "Recovery Card",
+        "vn": "Thẻ Hồi Phục",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "基因强化卡",
+        "en": "Gene Enhancement Card",
+        "vn": "Thẻ Tăng Cường Gene",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "龙晶",
+        "en": "Dino Crystal",
+        "vn": "Đá Khủng Long",
+        "note": "2026-06-17 确认；指恐龙相关的晶石/货币",
+        "status": "✅ 已定"
+      }
+    ]
+  },
+  {
+    "category": "4.1 抽卡/活动系统术语 (Gacha/Event System)",
+    "entries": [
+      {
+        "zh": "幸运点",
+        "en": "Lucky Points",
+        "vn": "Điểm May Mắn",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "幸运点商城",
+        "en": "Lucky Points Shop",
+        "vn": "Cửa Hàng Điểm May Mắn",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "权益点",
+        "en": "Privilege Points",
+        "vn": "Điểm Đặc Quyền",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "权益商城",
+        "en": "Privilege Shop",
+        "vn": "Cửa Hàng Đặc Quyền",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "权益卡",
+        "en": "Privilege Card",
+        "vn": "Thẻ Đặc Quyền",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "召唤 / 抽奖",
+        "en": "Summon",
+        "vn": "Triệu Hồi",
+        "note": "系统机制名；玩家口语中常称「抽奖」，越南语统一为 `Triệu Hồi`，禁止译为 `Sự kiện` 或另造 `Quay Thưởng`",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "保底",
+        "en": "Pity",
+        "vn": "Bảo Đảm",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "青铜",
+        "en": "Bronze",
+        "vn": "Đồng",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "白银",
+        "en": "Silver",
+        "vn": "Bạc",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "黄金",
+        "en": "Gold",
+        "vn": "Vàng",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "钻石",
+        "en": "Diamond",
+        "vn": "Kim Cương",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "王者",
+        "en": "King",
+        "vn": "Vua",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "基础出率",
+        "en": "Base Rate",
+        "vn": "Tỷ Lệ Cơ Bản",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "综合出率",
+        "en": "Combined Rate",
+        "vn": "Tỷ Lệ Tổng Hợp",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      }
+    ]
+  },
+  {
+    "category": "4.2 活动道具术语 (Event Items)",
+    "entries": [
+      {
+        "zh": "礼盒烟花",
+        "en": "Gift Box Firework",
+        "vn": "Pháo Hoa Hộp Quà",
+        "note": "本次新增",
+        "status": "✅ 已定"
+      }
+    ]
+  },
+  {
+    "category": "5. 地点名称 (Locations)",
+    "entries": [
+      {
+        "zh": "花岛",
+        "en": "Flower Island",
+        "vn": "Đảo Hoa",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "月牙湖",
+        "en": "Crescent Lake",
+        "vn": "Hồ Trăng Khuyết",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "桃花岛",
+        "en": "Peach Blossom Island",
+        "vn": "Đảo Hoa Đào",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "管理山",
+        "en": "Admin Peak",
+        "vn": "Đỉnh Quản Lý",
+        "note": "旧译 Manage Shan / Admin Mountain，已废弃",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "管理岛",
+        "en": "Admin Island",
+        "vn": "Đảo Quản Lý",
+        "note": "与管理山（Admin Peak）为不同地点",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "灯塔岛",
+        "en": "Lighthouse Island",
+        "vn": "Đảo Hải Đăng",
+        "note": "旧译 Beacon Isle，已废弃",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "双龙汇坝口",
+        "en": "Twin-Dinosaur Confluence Pass",
+        "vn": "Cửa Đập Song Long Hội",
+        "note": "旧译 Twin-Dragon，统一为 Dinosaur",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "沙滩传送点",
+        "en": "Beach Teleport Point",
+        "vn": "Điểm Dịch Chuyển Bãi Biển",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "山顶传送点",
+        "en": "Peak Teleport Point",
+        "vn": "Điểm Dịch Chuyển Đỉnh Núi",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "龙爪潭",
+        "en": "Dinosaur Claw Pool",
+        "vn": "Hồ Móng Rồng",
+        "note": "2026-04-22 补充",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "龙心泉",
+        "en": "Dinosaur Heart Spring",
+        "vn": "Suối Tim Rồng",
+        "note": "2026-04-22 补充",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "龙心湖",
+        "en": "Dinosaur Heart Lake",
+        "vn": "Hồ Tim Rồng",
+        "note": "2026-04-22 补充",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "龙岛雪山",
+        "en": "Snow Mountain",
+        "vn": "Núi Tuyết Đảo Rồng",
+        "note": "2026-04-22 补充",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "龙岛湖瀑布",
+        "en": "Dinosaur Isle Lake Falls",
+        "vn": "Thác Hồ Đảo Rồng",
+        "note": "2026-04-22 补充",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "龙岛活火山",
+        "en": "Dinosaur Isle Volcano",
+        "vn": "Núi Lửa Đảo Rồng",
+        "note": "2026-04-22 补充",
+        "status": "✅ 已定"
+      }
+    ]
+  },
+  {
+    "category": "6. UI 通用文本 (UI Common)",
+    "entries": [
+      {
+        "zh": "确认",
+        "en": "Confirm",
+        "vn": "Xác Nhận",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "取消",
+        "en": "Cancel",
+        "vn": "Hủy",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "前往",
+        "en": "Go To",
+        "vn": "Đi Đến",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "领取",
+        "en": "Claim",
+        "vn": "Nhận",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "已领取",
+        "en": "Claimed",
+        "vn": "Đã Nhận",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "购买",
+        "en": "Purchase",
+        "vn": "Mua",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "已购买",
+        "en": "Purchased",
+        "vn": "Đã Mua",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "充值",
+        "en": "Top-up",
+        "vn": "Nạp Thẻ",
+        "note": "游戏行业统一规范，弃用 Recharge / Nạp Tiền",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "登录",
+        "en": "Login",
+        "vn": "Đăng Nhập",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "注册",
+        "en": "Register",
+        "vn": "Đăng Ký",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "签到",
+        "en": "Check-in",
+        "vn": "Điểm Danh",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "补签",
+        "en": "Catch-up",
+        "vn": "Bù Điểm Danh",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "一键领取",
+        "en": "Claim All",
+        "vn": "Nhận Tất Cả",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "一键删除",
+        "en": "Delete All",
+        "vn": "Xóa Tất Cả",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "空",
+        "en": "Empty",
+        "vn": "Trống",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "描述",
+        "en": "Description",
+        "vn": "Mô Tả",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "有效期",
+        "en": "Duration",
+        "vn": "Thờì Hạn",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "已过期",
+        "en": "Expired",
+        "vn": "Đã Hết Hạn",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "已读",
+        "en": "Read",
+        "vn": "Đã Đọc",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "脚印特效",
+        "en": "Footprint Effect",
+        "vn": "Hiệu Ứng Dấu Chân",
+        "note": "2026-06-17 新增，取代原字面/未术语化译法",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "世界",
+        "en": "World",
+        "vn": "Thế Giới",
+        "note": "2026-06-17 新增，频道/聊天频道专用",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "公会",
+        "en": "Guild",
+        "vn": "Bang Hội",
+        "note": "2026-06-17 新增至 UI 章节，与 §3 游戏系统口径一致；VN 从 Công Hội 调整为 Bang Hội",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "私聊",
+        "en": "PM",
+        "vn": "Chat Riêng",
+        "note": "2026-06-17 新增，频道名专用；PM = Private Message，EN 从 Whisper 调整为 PM，Whisper 更适合作为动作指令而非频道名",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "好友",
+        "en": "Friend",
+        "vn": "Bạn Bè",
+        "note": "2026-06-17 新增，社交系统统一",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "渡劫",
+        "en": "Heavenly Tribulation",
+        "vn": "Độ Kiếp",
+        "note": "2026-06-17 新增，修仙/养成进度系统专用；保留 \"Heavenly\" 以准确对应「天劫」概念",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "饰品",
+        "en": "Accessory",
+        "vn": "Phụ Kiện",
+        "note": "2026-06-17 新增，装备/装扮类饰品统一；语义覆盖更广，从 Trang Sức 调整为 Phụ Kiện",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "战场",
+        "en": "Battlefield",
+        "vn": "Chiến Trường",
+        "note": "2026-06-17 新增，PVP/跨服对战场景专用",
+        "status": "✅ 已定"
+      }
+    ]
+  },
+  {
+    "category": "7. 皮肤名称 (Skins)",
+    "entries": [
+      {
+        "zh": "团皮",
+        "en": "Team Skin",
+        "vn": "Skin Quân Đoàn",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "专属皮肤",
+        "en": "Exclusive Skin",
+        "vn": "Skin Độc Quyền",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "豹纹",
+        "en": "Leopard Print",
+        "vn": "Da Báo",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "动物乐园",
+        "en": "Animal Park",
+        "vn": "Công Viên Thú",
+        "note": "-",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "魅影",
+        "en": "Phantom",
+        "vn": "Bóng Ma",
+        "note": "机械龙皮肤",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "疾风",
+        "en": "Gale",
+        "vn": "Cuồng Phong",
+        "note": "机械龙皮肤",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "赤炼",
+        "en": "Crimson",
+        "vn": "Xích Luyện",
+        "note": "机械龙皮肤",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "大白鹅",
+        "en": "Big White Goose",
+        "vn": "Ngỗng Trắng Lớn",
+        "note": "皮肤",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "卡通兔子",
+        "en": "Cartoon Rabbit",
+        "vn": "Thỏ Hoạt Hình",
+        "note": "皮肤",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "卡通小猫",
+        "en": "Cartoon Kitten",
+        "vn": "Mèo Con Hoạt Hình",
+        "note": "皮肤",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "软萌暴暴",
+        "en": "Baby Rex",
+        "vn": "Baby Rex",
+        "note": "皮肤",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "{恐龙名}专属皮肤{编号}",
+        "en": "{恐龙英文名} Exclusive Skin {编号}",
+        "vn": "Skin Độc Quyền {恐龙越南语} {编号}",
+        "note": "",
+        "status": "✅ 已定"
+      },
+      {
+        "zh": "机械暴龙专属皮肤-{皮肤名}{编号}",
+        "en": "Mecha Tyrant Exclusive Skin – {SkinName} {编号}",
+        "vn": "Skin Độc Quyền Khủng Long Máy – {SkinName} {编号}",
+        "note": "",
+        "status": "✅ 已定"
+      }
+    ]
+  },
+  {
+    "category": "8. 恐龙礼包与道具 (Dinosaur Bundles & Items)",
+    "entries": [
+      {
+        "zh": "{恐龙名}礼包",
+        "en": "{恐龙英文名} Bundle",
+        "vn": "Gói Quà {恐龙越南语}",
+        "note": "",
+        "status": ""
+      },
+      {
+        "zh": "幼年{恐龙名}礼包",
+        "en": "{恐龙英文名}_Hatching Bundle",
+        "vn": "Gói Quà {恐龙越南语} (Non)",
+        "note": "",
+        "status": ""
+      },
+      {
+        "zh": "成年{恐龙名}礼包",
+        "en": "{恐龙英文名}_Adult Bundle",
+        "vn": "Gói Quà {恐龙越南语} (Trưởng Thành)",
+        "note": "",
+        "status": ""
+      },
+      {
+        "zh": "大号成年{恐龙名}礼包",
+        "en": "Large {恐龙英文名}_Adult Bundle",
+        "vn": "Gói Quà Lớn {恐龙越南语} (Trưởng Thành)",
+        "note": "",
+        "status": ""
+      }
+    ]
+  }
+];
+
+    const glossaryEl = document.getElementById('glossary');
+    const searchEl = document.getElementById('search');
+    const statsEl = document.getElementById('stats');
+    const noResultEl = document.getElementById('no-result');
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, c =>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function highlight(text, query) {
+      if (!query) return escapeHtml(text);
+      const q = query.replace(/[.*+?^${}()|[\]\]/g, '\$&');
+      const re = new RegExp(`(${q})`, 'gi');
+      return escapeHtml(text).replace(re, '<span class="highlight">$1</span>');
+    }
+
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const old = btn.textContent;
+        btn.textContent = '已复制';
+        setTimeout(() => btn.textContent = old, 1200);
+      }).catch(() => {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      });
+    }
+
+    function render(query = '') {
+      glossaryEl.innerHTML = '';
+      const q = query.trim().toLowerCase();
+      let totalVisible = 0;
+
+      glossaryData.forEach((cat, catIdx) => {
+        const filtered = cat.entries.filter(e => {
+          if (!q) return true;
+          return [e.zh, e.en, e.vn, e.note].some(s => s && s.toLowerCase().includes(q));
+        });
+        if (!filtered.length) return;
+        totalVisible += filtered.length;
+
+        const section = document.createElement('section');
+        section.className = 'category';
+        section.innerHTML = `
+          <div class="cat-header" data-idx="${catIdx}">
+            <h2 class="cat-title">${escapeHtml(cat.category)}<span class="cat-count">${filtered.length}</span></h2>
+            <span class="cat-toggle">▼</span>
+          </div>
+          <div class="cat-body">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:26%">中文</th>
+                  <th style="width:28%">English</th>
+                  <th style="width:28%">Tiếng Việt</th>
+                  <th style="width:18%">备注 / 操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filtered.map((e, i) => `
+                  <tr>
+                    <td>${highlight(e.zh, q)}</td>
+                    <td><span class="lang lang-en">${highlight(e.en, q)}</span></td>
+                    <td><span class="lang lang-vn">${highlight(e.vn, q)}</span></td>
+                    <td>
+                      ${e.note ? `<div class="note">${highlight(e.note, q)}</div>` : ''}
+                      <div style="margin-top:0.35rem;display:flex;gap:0.35rem;flex-wrap:wrap;">
+                        <button class="copy-btn" data-copy="${escapeHtml(e.zh)}" title="复制中文">CN</button>
+                        <button class="copy-btn" data-copy="${escapeHtml(e.en)}" title="复制英文">EN</button>
+                        <button class="copy-btn" data-copy="${escapeHtml(e.vn)}" title="复制越南语">VN</button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        glossaryEl.appendChild(section);
+      });
+
+      statsEl.textContent = q ? `匹配 ${totalVisible} 条` : `共 ${totalVisible} 条`;
+      noResultEl.style.display = totalVisible ? 'none' : 'block';
+
+      // Attach copy handlers
+      glossaryEl.querySelectorAll('button[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => copyText(btn.dataset.copy, btn));
+      });
+
+      // Attach collapse handlers
+      glossaryEl.querySelectorAll('.cat-header').forEach(header => {
+        header.addEventListener('click', () => {
+          header.parentElement.classList.toggle('collapsed');
+        });
+      });
+    }
+
+    searchEl.addEventListener('input', () => render(searchEl.value));
+    render();
+  </script>
+</body>
+</html>
