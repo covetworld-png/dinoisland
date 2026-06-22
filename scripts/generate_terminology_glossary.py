@@ -17,12 +17,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 
-# Categories to keep (item/prop related)
-KEEP_CATEGORIES = {
-    "4. 道具与资源 (Items & Currency)",
-    "4.1 抽卡/活动系统术语 (Gacha/Event System)",
-    "4.2 活动道具术语 (Event Items)",
-    "7. 皮肤名称 (Skins)",
+# UI-only sections to drop
+SKIP_CATEGORIES = {
+    "6. UI 通用文本 (UI Common)",
 }
 
 # In 4.1, keep only rows whose Chinese name contains 点/卡/商城 (currency/shop/card)
@@ -201,7 +198,7 @@ def parse_glossary(md_path: Path) -> tuple[list[dict], dict[str, dict[str, str]]
         if not title_match:
             continue
         title = title_match.group(1).strip()
-        if title not in KEEP_CATEGORIES:
+        if title in SKIP_CATEGORIES:
             continue
 
         tables = extract_tables(sec)
