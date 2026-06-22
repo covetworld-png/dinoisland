@@ -632,14 +632,22 @@ def build_html(categories: list[dict]) -> str:
                   <tr>
                     <td>
                       ${{highlight(e.zh, q)}}
-                      <div style="margin-top:0.35rem;display:flex;gap:0.35rem;flex-wrap:wrap;">
-                        <button class="copy-btn" data-copy="${{escapeHtml(e.zh)}}" title="复制中文">CN</button>
-                        <button class="copy-btn" data-copy="${{escapeHtml(e.en)}}" title="复制英文">EN</button>
-                        <button class="copy-btn" data-copy="${{escapeHtml(e.vn)}}" title="复制越南语">VN</button>
+                      <div style="margin-top:0.35rem;">
+                        <button class="copy-btn" data-copy="${{escapeHtml(e.zh)}}" title="复制中文">复制</button>
                       </div>
                     </td>
-                    <td><span class="lang lang-en">${{highlight(e.en, q)}}</span></td>
-                    <td><span class="lang lang-vn">${{highlight(e.vn, q)}}</span></td>
+                    <td>
+                      <span class="lang lang-en">${{highlight(e.en, q)}}</span>
+                      <div style="margin-top:0.35rem;">
+                        <button class="copy-btn" data-copy="${{escapeHtml(e.en)}}" title="复制英文">Copy</button>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="lang lang-vn">${{highlight(e.vn, q)}}</span>
+                      <div style="margin-top:0.35rem;">
+                        <button class="copy-btn" data-copy="${{escapeHtml(e.vn)}}" title="复制越南语">Sao chép</button>
+                      </div>
+                    </td>
                   </tr>
                 `).join('')}}
               </tbody>
