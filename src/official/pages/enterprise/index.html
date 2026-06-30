@@ -13,6 +13,11 @@
     <link rel="stylesheet" crossorigin href="./assets/index-BwbgYxBR.css">
   </head>
   <body>
+    <script>
+      if (location.pathname.endsWith('/index.html')) {
+        history.replaceState(null, '', location.pathname.slice(0, -10) + location.search + location.hash);
+      }
+    </script>
     <div id="root"></div>
   </body>
 </html>
