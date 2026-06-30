@@ -287,6 +287,12 @@
       "includeAssets": [],
       "pathRewrite": {},
       "versioning": "auto"
+    },
+    "enterprise-official": {
+      "srcPage": "src/official/pages/enterprise",
+      "includeAssets": [],
+      "pathRewrite": {},
+      "versioning": "auto"
     }
   }
 }
