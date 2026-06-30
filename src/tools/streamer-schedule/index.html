@@ -8551,6 +8551,19 @@
         weekSelect.value = index;
       }
 
+      function getCurrentWeekIndex() {
+        const now = getVietnamTime();
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        for (let i = 0; i < wrappers.length; i++) {
+          const headers = wrappers[i].querySelectorAll('.day-header');
+          if (headers.length === 0) continue;
+          const start = headers[0].dataset.fullDate;
+          const end = headers[headers.length - 1].dataset.fullDate;
+          if (todayStr >= start && todayStr <= end) return i;
+        }
+        return parseInt(weekSelect.value);
+      }
+
       weekSelect.addEventListener('change', () => showWeek(parseInt(weekSelect.value)));
       prevBtn.addEventListener('click', () => {
         const current = parseInt(weekSelect.value);
@@ -8650,6 +8663,7 @@
         });
       }
 
+      showWeek(getCurrentWeekIndex());
       updateTodayAndTime();
       setInterval(updateTodayAndTime, 60000);
     })();
