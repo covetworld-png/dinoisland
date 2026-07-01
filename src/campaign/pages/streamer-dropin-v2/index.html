@@ -229,53 +229,28 @@
                     </div>
                     <div>
                         <h2 class="font-display text-xl lg:text-2xl font-bold text-white" data-i18n="vote.title">Bình Chọn Streamer</h2>
-                        <p class="text-gray-400 text-sm" data-i18n="vote.subtitle">Chọn streamer yêu thích để dẫn dắt server của bạn</p>
+                        <p class="text-gray-400 text-sm" data-i18n="vote.subtitle">Top 2 streamer tổng phiếu cao nhất sẽ dẫn dắt K Server và Q Server</p>
                     </div>
                 </div>
 
-                <div class="grid lg:grid-cols-2 gap-6">
-                    <!-- K Server -->
-                    <div class="card-glass rounded-xl p-5 border border-mist/10">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="px-3 py-1 rounded-full bg-mist/10 text-mist-light text-xs font-semibold">K Server</span>
-                            <span class="text-gray-400 text-sm" data-i18n="vote.kServerTitle">Streamer dẫn dắt K Server</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3" id="k-server-candidates">
-                            <div class="streamer-card card-glass rounded-xl p-4 border border-mist/10 text-center" onclick="vote('k', 0)">
-                                <img src="assets/suachua.jpeg" alt="Sữa Chua" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-mist/30">
-                                <p class="font-semibold text-white text-sm">Sữa Chua</p>
-                                <p class="text-xs text-gray-400 mt-1 vote-count" data-count="1284">1,284 phiếu</p>
-                                <button class="mt-3 px-4 py-1.5 bg-gold/10 border border-gold/30 text-gold rounded-full text-xs font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
-                            </div>
-                            <div class="streamer-card card-glass rounded-xl p-4 border border-mist/10 text-center" onclick="vote('k', 1)">
-                                <img src="assets/miumiu.jpeg" alt="MiuMiu" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-mist/30">
-                                <p class="font-semibold text-white text-sm">MiuMiu</p>
-                                <p class="text-xs text-gray-400 mt-1 vote-count" data-count="2156">2,156 phiếu</p>
-                                <button class="mt-3 px-4 py-1.5 bg-gold/10 border border-gold/30 text-gold rounded-full text-xs font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
-                            </div>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="candidates">
+                    <div class="streamer-card card-glass rounded-xl p-5 border border-mist/10 text-center" onclick="vote(0)">
+                        <img src="assets/heni.jpeg" alt="Heni" class="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-2 border-mist/30">
+                        <p class="font-semibold text-white text-base">Heni</p>
+                        <p class="text-xs text-gray-400 mt-1 vote-count" data-count="3421">3,421 phiếu</p>
+                        <button class="mt-4 px-5 py-2 bg-gold/10 border border-gold/30 text-gold rounded-full text-sm font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
                     </div>
-
-                    <!-- Q Server -->
-                    <div class="card-glass rounded-xl p-5 border border-mist/10">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="px-3 py-1 rounded-full bg-mist/10 text-mist-light text-xs font-semibold">Q Server</span>
-                            <span class="text-gray-400 text-sm" data-i18n="vote.qServerTitle">Streamer dẫn dắt Q Server</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3" id="q-server-candidates">
-                            <div class="streamer-card card-glass rounded-xl p-4 border border-mist/10 text-center" onclick="vote('q', 0)">
-                                <img src="assets/heni.jpeg" alt="Heni" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-mist/30">
-                                <p class="font-semibold text-white text-sm">Heni</p>
-                                <p class="text-xs text-gray-400 mt-1 vote-count" data-count="3421">3,421 phiếu</p>
-                                <button class="mt-3 px-4 py-1.5 bg-gold/10 border border-gold/30 text-gold rounded-full text-xs font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
-                            </div>
-                            <div class="streamer-card card-glass rounded-xl p-4 border border-mist/10 text-center" onclick="vote('q', 1)">
-                                <img src="assets/ricon.jpeg" alt="Ricon" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-mist/30">
-                                <p class="font-semibold text-white text-sm">Ricon</p>
-                                <p class="text-xs text-gray-400 mt-1 vote-count" data-count="1890">1,890 phiếu</p>
-                                <button class="mt-3 px-4 py-1.5 bg-gold/10 border border-gold/30 text-gold rounded-full text-xs font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
-                            </div>
-                        </div>
+                    <div class="streamer-card card-glass rounded-xl p-5 border border-mist/10 text-center" onclick="vote(1)">
+                        <img src="assets/ricon.jpeg" alt="Ricon" class="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-2 border-mist/30">
+                        <p class="font-semibold text-white text-base">Ricon</p>
+                        <p class="text-xs text-gray-400 mt-1 vote-count" data-count="1890">1,890 phiếu</p>
+                        <button class="mt-4 px-5 py-2 bg-gold/10 border border-gold/30 text-gold rounded-full text-sm font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
+                    </div>
+                    <div class="streamer-card card-glass rounded-xl p-5 border border-mist/10 text-center" onclick="vote(2)">
+                        <img src="assets/miumiu.jpeg" alt="MiuMiu" class="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-2 border-mist/30">
+                        <p class="font-semibold text-white text-base">MiuMiu</p>
+                        <p class="text-xs text-gray-400 mt-1 vote-count" data-count="2156">2,156 phiếu</p>
+                        <button class="mt-4 px-5 py-2 bg-gold/10 border border-gold/30 text-gold rounded-full text-sm font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
                     </div>
                 </div>
 
@@ -283,7 +258,7 @@
                     <div class="flex items-start gap-3">
                         <i class="fas fa-info-circle text-amber-400 mt-0.5"></i>
                         <p class="text-amber-200/80 text-sm" data-i18n="vote.note">
-                            Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Kết quả sẽ được công bố 2 ngày trước sự kiện.
+                            Mỗi tài khoản chỉ được bỏ phiếu 1 lần. 2 streamer đứng đầu sẽ lần lượt dẫn dắt K Server và Q Server (thời gian diễn ra sự kiện sẽ được thông báo riêng).
                         </p>
                     </div>
                 </div>
@@ -504,12 +479,11 @@
                 "hero.ctaDiscord": "Tham Gia Discord",
                 "hero.eventTime": "20:30 - 21:30 · K Server + Q Server",
                 "vote.title": "Bình Chọn Streamer",
-                "vote.subtitle": "Chọn streamer yêu thích để dẫn dắt server của bạn",
-                "vote.kServerTitle": "Streamer dẫn dắt K Server",
-                "vote.qServerTitle": "Streamer dẫn dắt Q Server",
+                "vote.subtitle": "Top 2 streamer tổng phiếu cao nhất sẽ dẫn dắt K Server và Q Server",
                 "vote.voteBtn": "Bỏ phiếu",
                 "vote.voted": "Đã bỏ phiếu",
-                "vote.note": "Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Kết quả sẽ được công bố 2 ngày trước sự kiện.",
+                "vote.note": "Mỗi tài khoản chỉ được bỏ phiếu 1 lần. 2 streamer đứng đầu sẽ lần lượt dẫn dắt K Server và Q Server (thờ i gian diễn ra sự kiện sẽ được thông báo riêng).",
+                "toast.voted": "Đã bỏ phiếu thành công!",
                 "rules.title": "Thể Lệ Sự Kiện",
                 "rules.monsterCount": "Cổ Dài Đột Biến",
                 "rules.size": "Kích thước",
@@ -540,8 +514,7 @@
                 "discord.joinNow": "Tham gia ngay",
                 "discord.copied": "Đã sao chép link Discord!",
                 "footer.note": "*Thời gian và nội dung có thể điều chỉnh, vui lòng theo dõi thông báo trong game.",
-                "toast.votedK": "Đã bỏ phiếu cho K Server!",
-                "toast.votedQ": "Đã bỏ phiếu cho Q Server!"
+                "toast.voted": "Đã bỏ phiếu thành công!"
             },
             zh: {
                 "page.title": "主播空降第二季 - 变异雷龙全服猎杀夜",
@@ -561,12 +534,11 @@
                 "hero.ctaDiscord": "加入 Discord",
                 "hero.eventTime": "20:30 - 21:30 · K服 + Q服",
                 "vote.title": "主播投票",
-                "vote.subtitle": "选出你喜欢的主播来带队你的服务器",
-                "vote.kServerTitle": "K服带队主播",
-                "vote.qServerTitle": "Q服带队主播",
+                "vote.subtitle": "总票数前 2 名的主播将分别带领 K服 和 Q服",
                 "vote.voteBtn": "投票",
                 "vote.voted": "已投票",
-                "vote.note": "每个账号每服限投 1 票。投票结果将在活动前 2 天公布。",
+                "vote.note": "每个账号限投 1 票。票数前 2 名的主播将分别带领 K服 和 Q服（两服活动时间错开，具体安排另行通知）。",
+                "toast.voted": "投票成功！"
                 "rules.title": "活动规则",
                 "rules.monsterCount": "变异雷龙",
                 "rules.size": "体型",
@@ -597,8 +569,7 @@
                 "discord.joinNow": "立即加入",
                 "discord.copied": "已复制 Discord 链接！",
                 "footer.note": "*活动时间和内容可能调整，请以游戏内公告为准。",
-                "toast.votedK": "已为 K服 投票！",
-                "toast.votedQ": "已为 Q服 投票！"
+                "toast.voted": "投票成功！"
             }
         };
 
@@ -651,32 +622,30 @@
         updateCountdown();
 
         // Voting
-        const votes = { k: null, q: null };
+        let votedIndex = null;
 
-        function vote(server, index) {
-            if (votes[server] !== null) return;
-            votes[server] = index;
+        function vote(index) {
+            if (votedIndex !== null) return;
+            votedIndex = index;
             updateVotedUI();
-            showToast(currentLang === 'vi' ? i18n.vi['toast.voted' + server.toUpperCase()] : i18n.zh['toast.voted' + server.toUpperCase()]);
+            showToast(currentLang === 'vi' ? i18n.vi['toast.voted'] : i18n.zh['toast.voted']);
         }
 
         function updateVotedUI() {
-            ['k', 'q'].forEach(server => {
-                const container = document.getElementById(server + '-server-candidates');
-                const cards = container.querySelectorAll('.streamer-card');
-                cards.forEach((card, index) => {
-                    const btn = card.querySelector('.vote-btn');
-                    if (votes[server] === index) {
-                        card.classList.add('selected', 'voted');
-                        btn.textContent = currentLang === 'vi' ? i18n.vi['vote.voted'] : i18n.zh['vote.voted'];
-                        btn.classList.remove('bg-gold/10', 'text-gold', 'border-gold/30');
-                        btn.classList.add('bg-green-500/20', 'text-green-400', 'border-green-500/30');
-                    } else if (votes[server] !== null) {
-                        card.classList.add('disabled');
-                        card.style.opacity = '0.5';
-                        card.style.pointerEvents = 'none';
-                    }
-                });
+            const container = document.getElementById('candidates');
+            const cards = container.querySelectorAll('.streamer-card');
+            cards.forEach((card, index) => {
+                const btn = card.querySelector('.vote-btn');
+                if (votedIndex === index) {
+                    card.classList.add('selected', 'voted');
+                    btn.textContent = currentLang === 'vi' ? i18n.vi['vote.voted'] : i18n.zh['vote.voted'];
+                    btn.classList.remove('bg-gold/10', 'text-gold', 'border-gold/30');
+                    btn.classList.add('bg-green-500/20', 'text-green-400', 'border-green-500/30');
+                } else if (votedIndex !== null) {
+                    card.classList.add('disabled');
+                    card.style.opacity = '0.5';
+                    card.style.pointerEvents = 'none';
+                }
             });
         }
 
