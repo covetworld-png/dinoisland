@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="page.title">Streamer Đột Kích Mùa 2 - Săn Rồng Sấm Đột Biến</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'jungle': {
+                            900: '#0a1a15',
+                            800: 'rgba(10, 30, 25, 0.6)',
+                            700: 'rgba(15, 45, 38, 0.7)',
+                            600: '#1a4a3a',
+                        },
+                        'mist': {
+                            DEFAULT: '#4a9a8a',
+                            light: '#6abaaa',
+                            dark: '#2a6a5a',
+                        },
+                        'gold': {
+                            DEFAULT: '#FFD700',
+                            dark: '#B8860B',
+                            light: '#FFE55C',
+                        },
+                    },
+                    fontFamily: {
+                        'display': ['Cinzel', 'serif'],
+                        'body': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a1a15;
+            min-height: 100vh;
+        }
+        .bg-dino {
+            background-image: url('assets/banner-BSZ_6Ncr.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .font-display {
+            font-family: 'Cinzel', serif;
+        }
+        .gold-glow {
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.3);
+        }
+        .gold-button-glow {
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+        }
+        .card-glass {
+            background: rgba(10, 30, 25, 0.65);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(74, 154, 138, 0.15);
+        }
+        .card-hover {
+            transition: all 0.25s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border-color: rgba(74, 154, 138, 0.3);
+            background: rgba(10, 30, 25, 0.75);
+        }
+        .section-title-shadow {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .countdown-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 6px;
+            padding: 6px 10px;
+            min-width: 48px;
+            text-align: center;
+        }
+        .streamer-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .streamer-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(10, 30, 25, 0.75);
+        }
+        .streamer-card.selected {
+            border-color: #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            background: rgba(10, 30, 25, 0.8);
+        }
+        .streamer-card.voted {
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+        .timeline-line {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #FFD700, #4a9a8a);
+        }
+        @media (max-width: 768px) {
+            .timeline-line {
+                left: 16px;
+            }
+        }
+        .rule-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .rule-content.expanded {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="text-gray-100 bg-dino">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-jungle-800/90 backdrop-blur-md border-b border-mist/20">
+        <div class="max-w-7xl mx-auto px-4 lg:px-6 h-14 lg:h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="https://account.monster-lair.vn/#/index" class="w-9 h-9 lg:w-10 lg:h-10 rounded-lg bg-jungle-700 flex items-center justify-center text-mist-light hover:bg-jungle-600 transition-colors border border-mist/30" title="Trang chủ">
+                    <i class="fas fa-home text-sm lg:text-base"></i>
+                </a>
+                <img src="assets/logo.png" alt="Logo" class="h-8 lg:h-10 w-auto object-contain">
+            </div>
+            <div class="flex items-center gap-2 lg:gap-3">
+                <nav class="hidden lg:flex items-center gap-6 mr-4">
+                    <a href="#rules" class="text-gray-400 hover:text-mist-light transition-colors" data-i18n="nav.rules">Thể Lệ</a>
+                    <a href="#vote" class="text-gray-400 hover:text-mist-light transition-colors" data-i18n="nav.vote">Bỏ Phiếu</a>
+                    <a href="#timeline" class="text-gray-400 hover:text-mist-light transition-colors" data-i18n="nav.timeline">Lịch Trình</a>
+                    <a href="#discord" class="text-gray-400 hover:text-mist-light transition-colors" data-i18n="nav.discord">Discord</a>
+                </nav>
+                <button onclick="toggleLanguage()" class="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-jungle-700 flex items-center justify-center text-mist-light text-xs lg:text-sm font-bold hover:bg-jungle-600 transition-colors cursor-pointer border border-mist/30">
+                    <span id="lang-btn">CN</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 lg:px-6 py-6 lg:py-8">
+
+        <!-- Hero Section -->
+        <section class="mb-8">
+            <div class="card-glass rounded-2xl p-6 lg:p-10 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-gold/10 to-transparent rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-mist/10 to-transparent rounded-full blur-2xl"></div>
+
+                <div class="relative z-10 text-center">
+                    <div class="inline-block px-4 py-1.5 mb-4 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs lg:text-sm font-semibold" data-i18n="hero.tag">MÙA 2 · SỰ KIỆN TOÀN SERVER</div>
+                    
+                    <h1 class="font-display text-3xl lg:text-5xl font-bold text-white mb-3 section-title-shadow gold-glow" data-i18n="hero.title">
+                        Săn Rồng Sấm Đột Biến
+                    </h1>
+                    <p class="text-mist-light text-base lg:text-lg mb-6" data-i18n="hero.subtitle">
+                        Streamer Đột Kích Mùa 2 · 6 Rồng Sấm Khổng Lồ · Phần Thưởng Hấp Dẫn
+                    </p>
+
+                    <!-- Countdown -->
+                    <div class="mb-6">
+                        <p class="text-gray-400 text-sm mb-3" data-i18n="hero.countdownLabel">Đếm ngược đến sự kiện</p>
+                        <div class="flex items-center justify-center gap-2 text-sm">
+                            <div class="countdown-box">
+                                <span class="text-gold font-display text-lg" id="countdown-days">00</span>
+                                <span class="text-xs text-gray-500 block" data-i18n="common.days">ngày</span>
+                            </div>
+                            <span class="text-gold text-xl">:</span>
+                            <div class="countdown-box">
+                                <span class="text-gold font-display text-lg" id="countdown-hours">00</span>
+                                <span class="text-xs text-gray-500 block" data-i18n="common.hours">giờ</span>
+                            </div>
+                            <span class="text-gold text-xl">:</span>
+                            <div class="countdown-box">
+                                <span class="text-gold font-display text-lg" id="countdown-minutes">00</span>
+                                <span class="text-xs text-gray-500 block" data-i18n="common.minutes">phút</span>
+                            </div>
+                            <span class="text-gold text-xl">:</span>
+                            <div class="countdown-box">
+                                <span class="text-gold font-display text-lg" id="countdown-seconds">00</span>
+                                <span class="text-xs text-gray-500 block" data-i18n="common.seconds">giây</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <a href="#vote" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all text-center" data-i18n="hero.ctaVote">
+                            Bỏ Phiếu Ngay
+                        </a>
+                        <a href="#discord" class="w-full sm:w-auto px-8 py-3 bg-jungle-700 border border-mist/30 text-mist-light font-semibold rounded-full hover:bg-jungle-600 transition-all text-center" data-i18n="hero.ctaDiscord">
+                            Tham Gia Discord
+                        </a>
+                    </div>
+
+                    <p class="text-gray-400 text-xs mt-4" data-i18n="hero.eventTime">
+                        20:30 - 21:30 · K Server + Q Server
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vote Section -->
+        <section id="vote" class="mb-8">
+            <div class="card-glass rounded-2xl p-6 lg:p-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center text-gold">
+                        <i class="fas fa-vote-yea text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-display text-xl lg:text-2xl font-bold text-white" data-i18n="vote.title">Bình Chọn Streamer</h2>
+                        <p class="text-gray-400 text-sm" data-i18n="vote.subtitle">Chọn streamer yêu thích để dẫn dắt server của bạn</p>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <!-- K Server -->
+                    <div class="card-glass rounded-xl p-5 border border-mist/10">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="px-3 py-1 rounded-full bg-mist/10 text-mist-light text-xs font-semibold">K Server</span>
+                            <span class="text-gray-400 text-sm" data-i18n="vote.kServerTitle">Streamer dẫn dắt K Server</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3" id="k-server-candidates">
+                            <div class="streamer-card card-glass rounded-xl p-4 border border-mist/10 text-center" onclick="vote('k', 0)">
+                                <img src="assets/suachua.jpeg" alt="Sữa Chua" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-mist/30">
+                                <p class="font-semibold text-white text-sm">Sữa Chua</p>
+                                <p class="text-xs text-gray-400 mt-1 vote-count" data-count="1284">1,284 phiếu</p>
+                                <button class="mt-3 px-4 py-1.5 bg-gold/10 border border-gold/30 text-gold rounded-full text-xs font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
+                            </div>
+                            <div class="streamer-card card-glass rounded-xl p-4 border border-mist/10 text-center" onclick="vote('k', 1)">
+                                <img src="assets/miumiu.jpeg" alt="MiuMiu" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-mist/30">
+                                <p class="font-semibold text-white text-sm">MiuMiu</p>
+                                <p class="text-xs text-gray-400 mt-1 vote-count" data-count="2156">2,156 phiếu</p>
+                                <button class="mt-3 px-4 py-1.5 bg-gold/10 border border-gold/30 text-gold rounded-full text-xs font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q Server -->
+                    <div class="card-glass rounded-xl p-5 border border-mist/10">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="px-3 py-1 rounded-full bg-mist/10 text-mist-light text-xs font-semibold">Q Server</span>
+                            <span class="text-gray-400 text-sm" data-i18n="vote.qServerTitle">Streamer dẫn dắt Q Server</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3" id="q-server-candidates">
+                            <div class="streamer-card card-glass rounded-xl p-4 border border-mist/10 text-center" onclick="vote('q', 0)">
+                                <img src="assets/heni.jpeg" alt="Heni" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-mist/30">
+                                <p class="font-semibold text-white text-sm">Heni</p>
+                                <p class="text-xs text-gray-400 mt-1 vote-count" data-count="3421">3,421 phiếu</p>
+                                <button class="mt-3 px-4 py-1.5 bg-gold/10 border border-gold/30 text-gold rounded-full text-xs font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
+                            </div>
+                            <div class="streamer-card card-glass rounded-xl p-4 border border-mist/10 text-center" onclick="vote('q', 1)">
+                                <img src="assets/ricon.jpeg" alt="Ricon" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-mist/30">
+                                <p class="font-semibold text-white text-sm">Ricon</p>
+                                <p class="text-xs text-gray-400 mt-1 vote-count" data-count="1890">1,890 phiếu</p>
+                                <button class="mt-3 px-4 py-1.5 bg-gold/10 border border-gold/30 text-gold rounded-full text-xs font-medium hover:bg-gold/20 transition-colors vote-btn" data-i18n="vote.voteBtn">Bỏ phiếu</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-info-circle text-amber-400 mt-0.5"></i>
+                        <p class="text-amber-200/80 text-sm" data-i18n="vote.note">
+                            Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Kết quả sẽ được công bố 2 ngày trước sự kiện.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rules Section -->
+        <section id="rules" class="mb-8">
+            <div class="card-glass rounded-2xl p-6 lg:p-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center text-gold">
+                        <i class="fas fa-scroll text-lg"></i>
+                    </div>
+                    <h2 class="font-display text-xl lg:text-2xl font-bold text-white" data-i18n="rules.title">Thể Lệ Sự Kiện</h2>
+                </div>
+
+                <!-- Monster Stats -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="card-glass rounded-xl p-4 text-center border border-mist/10">
+                        <i class="fas fa-dragon text-gold text-2xl mb-2"></i>
+                        <p class="text-2xl font-bold text-white">6</p>
+                        <p class="text-xs text-gray-400" data-i18n="rules.monsterCount">Rồng Sấm Đột Biến</p>
+                    </div>
+                    <div class="card-glass rounded-xl p-4 text-center border border-mist/10">
+                        <i class="fas fa-expand-arrows-alt text-gold text-2xl mb-2"></i>
+                        <p class="text-2xl font-bold text-white">+50%</p>
+                        <p class="text-xs text-gray-400" data-i18n="rules.size">Kích thước</p>
+                    </div>
+                    <div class="card-glass rounded-xl p-4 text-center border border-mist/10">
+                        <i class="fas fa-shield-alt text-gold text-2xl mb-2"></i>
+                        <p class="text-2xl font-bold text-white">×8</p>
+                        <p class="text-xs text-gray-400" data-i18n="rules.hp">Máu</p>
+                    </div>
+                    <div class="card-glass rounded-xl p-4 text-center border border-mist/10">
+                        <i class="fas fa-clock text-gold text-2xl mb-2"></i>
+                        <p class="text-2xl font-bold text-white">5'</p>
+                        <p class="text-xs text-gray-400" data-i18n="rules.spawnInterval">Mỗi con</p>
+                    </div>
+                </div>
+
+                <!-- Reward -->
+                <div class="card-glass rounded-xl p-5 border border-gold/20 bg-gold/5 mb-4">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-trophy text-gold text-xl"></i>
+                        <h3 class="font-bold text-white" data-i18n="rules.rewardTitle">Phần Thưởng</h3>
+                    </div>
+                    <p class="text-gray-300 text-sm" data-i18n="rules.rewardDesc">
+                        Mỗi lần tiêu diệt 1 Rồng Sấm Đột Biến, <span class="text-gold font-semibold">team của người hạ cuối</span> nhận được <span class="text-gold font-semibold">10 Rồng Cơ Khí / Rồng Đặc Bạo</span>, phát vào kho team.
+                    </p>
+                </div>
+
+                <!-- Collapsible Rules -->
+                <div class="space-y-3">
+                    <div class="card-glass rounded-xl border border-mist/10 overflow-hidden">
+                        <button onclick="toggleRule(this)" class="w-full px-5 py-4 flex items-center justify-between text-left">
+                            <span class="font-semibold text-white" data-i18n="rules.rule1Title">Cách tham gia</span>
+                            <i class="fas fa-chevron-down text-mist transition-transform"></i>
+                        </button>
+                        <div class="rule-content px-5">
+                            <p class="text-gray-300 text-sm pb-4" data-i18n="rules.rule1Content">
+                                Toàn bộ người chơi đều có thể tham gia, không cần đăng ký hay mua skin. Người chơi tự do tham gia tiêu diệt, nhưng phần thưởng được phát theo team.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-glass rounded-xl border border-mist/10 overflow-hidden">
+                        <button onclick="toggleRule(this)" class="w-full px-5 py-4 flex items-center justify-between text-left">
+                            <span class="font-semibold text-white" data-i18n="rules.rule2Title">Xác nhận hạ gục</span>
+                            <i class="fas fa-chevron-down text-mist transition-transform"></i>
+                        </button>
+                        <div class="rule-content px-5">
+                            <p class="text-gray-300 text-sm pb-4" data-i18n="rules.rule2Content">
+                                Người hạ cuối cần chụp ảnh màn hình trên kênh chung, ảnh phải hiển thị thời gian hệ thống, tên người chơi và tên quái vật "Rồng Sấm Đột Biến".
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-glass rounded-xl border border-mist/10 overflow-hidden">
+                        <button onclick="toggleRule(this)" class="w-full px-5 py-4 flex items-center justify-between text-left">
+                            <span class="font-semibold text-white" data-i18n="rules.rule3Title">Hành vi bị cấm</span>
+                            <i class="fas fa-chevron-down text-mist transition-transform"></i>
+                        </button>
+                        <div class="rule-content px-5">
+                            <p class="text-gray-300 text-sm pb-4" data-i18n="rules.rule3Content">
+                                Cấm sử dụng hack/script, kéo quái ra khỏi vùng một cách ác ý, hoặc cố tình gây cản trở hoạt động. Vi phạm sẽ bị xử lý sau sự kiện.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline Section -->
+        <section id="timeline" class="mb-8">
+            <div class="card-glass rounded-2xl p-6 lg:p-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center text-gold">
+                        <i class="fas fa-stream text-lg"></i>
+                    </div>
+                    <h2 class="font-display text-xl lg:text-2xl font-bold text-white" data-i18n="timeline.title">Lịch Trình Sự Kiện</h2>
+                </div>
+
+                <div class="relative pl-4 lg:pl-8">
+                    <div class="timeline-line"></div>
+                    
+                    <div class="relative mb-8 pl-10 lg:pl-12">
+                        <div class="absolute left-0 top-0 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-mist/10 border-2 border-mist flex items-center justify-center">
+                            <i class="fas fa-vote-yea text-mist-light"></i>
+                        </div>
+                        <div>
+                            <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase1Time">D-7 đến D-2</p>
+                            <h3 class="font-bold text-white mb-1" data-i18n="timeline.phase1Title">Bình chọn streamer</h3>
+                            <p class="text-gray-400 text-sm" data-i18n="timeline.phase1Desc">Người chơi vào trang chủ game bỏ phiếu chọn streamer dẫn dắt mỗi server.</p>
+                        </div>
+                    </div>
+
+                    <div class="relative mb-8 pl-10 lg:pl-12">
+                        <div class="absolute left-0 top-0 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-mist/10 border-2 border-mist flex items-center justify-center">
+                            <i class="fas fa-bullhorn text-mist-light"></i>
+                        </div>
+                        <div>
+                            <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase2Time">D-2</p>
+                            <h3 class="font-bold text-white mb-1" data-i18n="timeline.phase2Title">Công bố kết quả & tập hợp</h3>
+                            <p class="text-gray-400 text-sm" data-i18n="timeline.phase2Desc">Công bố streamer được chọn, mời người chơi tham gia Discord và tập trung tại Nhà Máy.</p>
+                        </div>
+                    </div>
+
+                    <div class="relative mb-8 pl-10 lg:pl-12">
+                        <div class="absolute left-0 top-0 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-gold/20 border-2 border-gold flex items-center justify-center">
+                            <i class="fas fa-dragon text-gold"></i>
+                        </div>
+                        <div>
+                            <p class="text-gold font-semibold text-sm">20:30 - 21:00</p>
+                            <h3 class="font-bold text-white mb-1" data-i18n="timeline.phase3Title">Săn Rồng Sấm Đột Biến</h3>
+                            <p class="text-gray-400 text-sm" data-i18n="timeline.phase3Desc">Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Streamer cùng người chơi tiêu diệt.</p>
+                        </div>
+                    </div>
+
+                    <div class="relative pl-10 lg:pl-12">
+                        <div class="absolute left-0 top-0 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-gold/20 border-2 border-gold flex items-center justify-center">
+                            <i class="fas fa-fire text-gold"></i>
+                        </div>
+                        <div>
+                            <p class="text-gold font-semibold text-sm">21:00 - 21:30</p>
+                            <h3 class="font-bold text-white mb-1" data-i18n="timeline.phase4Title">Chiến trường tự do</h3>
+                            <p class="text-gray-400 text-sm" data-i18n="timeline.phase4Desc">Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team chiến đấu tự do tại khu vực Nhà Máy.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Discord Section -->
+        <section id="discord" class="mb-8">
+            <div class="card-glass rounded-2xl p-6 lg:p-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-mist/10 to-transparent rounded-full blur-3xl"></div>
+                
+                <div class="relative z-10 flex flex-col lg:flex-row items-center gap-6">
+                    <div class="w-16 h-16 rounded-2xl bg-[#5865F2]/20 border border-[#5865F2]/30 flex items-center justify-center flex-shrink-0">
+                        <i class="fab fa-discord text-[#5865F2] text-3xl"></i>
+                    </div>
+                    <div class="flex-1 text-center lg:text-left">
+                        <h2 class="font-display text-xl lg:text-2xl font-bold text-white mb-2" data-i18n="discord.title">Tham Gia Discord</h2>
+                        <p class="text-gray-400 text-sm mb-4" data-i18n="discord.desc">
+                            Streamer sẽ trò chuyện trực tiếp qua giọng nói, chỉ huy săn rồng và chiến đấu. Kênh gồm 1 phòng chung + phòng K Server + phòng Q Server.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                            <button onclick="copyDiscord()" class="px-6 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold rounded-full transition-colors flex items-center justify-center gap-2" data-i18n="discord.copyLink">
+                                <i class="fas fa-copy"></i> Sao chép link
+                            </button>
+                            <a href="https://discord.gg/example" target="_blank" class="px-6 py-2.5 bg-jungle-700 border border-mist/30 text-mist-light font-semibold rounded-full hover:bg-jungle-600 transition-colors text-center flex items-center justify-center gap-2" data-i18n="discord.joinNow">
+                                <i class="fas fa-external-link-alt"></i> Tham gia ngay
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-mist/10 bg-jungle-900/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 lg:px-6 py-6">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <img src="assets/logo.png" alt="Logo" class="h-8 w-auto object-contain opacity-70">
+                    <span class="text-gray-500 text-sm">© 2026 MonsterLair</span>
+                </div>
+                <p class="text-gray-500 text-xs text-center lg:text-right" data-i18n="footer.note">
+                    *Thời gian và nội dung có thể điều chỉnh, vui lòng theo dõi thông báo trong game.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 bg-jungle-700 border border-mist/30 rounded-full text-white text-sm opacity-0 pointer-events-none transition-opacity z-50">
+        <span id="toast-text">Thông báo</span>
+    </div>
+
+    <script>
+        // Language data
+        const i18n = {
+            vi: {
+                "page.title": "Streamer Đột Kích Mùa 2 - Săn Rồng Sấm Đột Biến",
+                "nav.rules": "Thể Lệ",
+                "nav.vote": "Bỏ Phiếu",
+                "nav.timeline": "Lịch Trình",
+                "nav.discord": "Discord",
+                "common.days": "ngày",
+                "common.hours": "giờ",
+                "common.minutes": "phút",
+                "common.seconds": "giây",
+                "hero.tag": "MÙA 2 · SỰ KIỆN TOÀN SERVER",
+                "hero.title": "Săn Rồng Sấm Đột Biến",
+                "hero.subtitle": "Streamer Đột Kích Mùa 2 · 6 Rồng Sấm Khổng Lồ · Phần Thưởng Hấp Dẫn",
+                "hero.countdownLabel": "Đếm ngược đến sự kiện",
+                "hero.ctaVote": "Bỏ Phiếu Ngay",
+                "hero.ctaDiscord": "Tham Gia Discord",
+                "hero.eventTime": "20:30 - 21:30 · K Server + Q Server",
+                "vote.title": "Bình Chọn Streamer",
+                "vote.subtitle": "Chọn streamer yêu thích để dẫn dắt server của bạn",
+                "vote.kServerTitle": "Streamer dẫn dắt K Server",
+                "vote.qServerTitle": "Streamer dẫn dắt Q Server",
+                "vote.voteBtn": "Bỏ phiếu",
+                "vote.voted": "Đã bỏ phiếu",
+                "vote.note": "Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Kết quả sẽ được công bố 2 ngày trước sự kiện.",
+                "rules.title": "Thể Lệ Sự Kiện",
+                "rules.monsterCount": "Rồng Sấm Đột Biến",
+                "rules.size": "Kích thước",
+                "rules.hp": "Máu",
+                "rules.spawnInterval": "Mỗi con",
+                "rules.rewardTitle": "Phần Thưởng",
+                "rules.rewardDesc": "Mỗi lần tiêu diệt 1 Rồng Sấm Đột Biến, team của người hạ cuối nhận được 10 Rồng Cơ Khí / Rồng Đặc Bạo, phát vào kho team.",
+                "rules.rule1Title": "Cách tham gia",
+                "rules.rule1Content": "Toàn bộ người chơi đều có thể tham gia, không cần đăng ký hay mua skin. Người chơi tự do tham gia tiêu diệt, nhưng phần thưởng được phát theo team.",
+                "rules.rule2Title": "Xác nhận hạ gục",
+                "rules.rule2Content": "Người hạ cuối cần chụp ảnh màn hình trên kênh chung, ảnh phải hiển thị thời gian hệ thống, tên người chơi và tên quái vật \"Rồng Sấm Đột Biến\".",
+                "rules.rule3Title": "Hành vi bị cấm",
+                "rules.rule3Content": "Cấm sử dụng hack/script, kéo quái ra khỏi vùng một cách ác ý, hoặc cố tình gây cản trở hoạt động. Vi phạm sẽ bị xử lý sau sự kiện.",
+                "timeline.title": "Lịch Trình Sự Kiện",
+                "timeline.phase1Time": "D-7 đến D-2",
+                "timeline.phase1Title": "Bình chọn streamer",
+                "timeline.phase1Desc": "Người chơi vào trang chủ game bỏ phiếu chọn streamer dẫn dắt mỗi server.",
+                "timeline.phase2Time": "D-2",
+                "timeline.phase2Title": "Công bố kết quả & tập hợp",
+                "timeline.phase2Desc": "Công bố streamer được chọn, mời người chơi tham gia Discord và tập trung tại Nhà Máy.",
+                "timeline.phase3Title": "Săn Rồng Sấm Đột Biến",
+                "timeline.phase3Desc": "Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Streamer cùng người chơi tiêu diệt.",
+                "timeline.phase4Title": "Chiến trường tự do",
+                "timeline.phase4Desc": "Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team chiến đấu tự do tại khu vực Nhà Máy.",
+                "discord.title": "Tham Gia Discord",
+                "discord.desc": "Streamer sẽ trò chuyện trực tiếp qua giọng nói, chỉ huy săn rồng và chiến đấu. Kênh gồm 1 phòng chung + phòng K Server + phòng Q Server.",
+                "discord.copyLink": "Sao chép link",
+                "discord.joinNow": "Tham gia ngay",
+                "discord.copied": "Đã sao chép link Discord!",
+                "footer.note": "*Thời gian và nội dung có thể điều chỉnh, vui lòng theo dõi thông báo trong game.",
+                "toast.votedK": "Đã bỏ phiếu cho K Server!",
+                "toast.votedQ": "Đã bỏ phiếu cho Q Server!"
+            },
+            zh: {
+                "page.title": "主播空降第二季 - 变异大雷全服猎杀夜",
+                "nav.rules": "活动规则",
+                "nav.vote": "投票",
+                "nav.timeline": "活动流程",
+                "nav.discord": "Discord",
+                "common.days": "天",
+                "common.hours": "时",
+                "common.minutes": "分",
+                "common.seconds": "秒",
+                "hero.tag": "第二季 · 全服活动",
+                "hero.title": "变异大雷全服猎杀夜",
+                "hero.subtitle": "主播空降第二季 · 6 条巨型变异大雷 · 丰厚奖励",
+                "hero.countdownLabel": "距离活动开始",
+                "hero.ctaVote": "立即投票",
+                "hero.ctaDiscord": "加入 Discord",
+                "hero.eventTime": "20:30 - 21:30 · K服 + Q服",
+                "vote.title": "主播投票",
+                "vote.subtitle": "选出你喜欢的主播来带队你的服务器",
+                "vote.kServerTitle": "K服带队主播",
+                "vote.qServerTitle": "Q服带队主播",
+                "vote.voteBtn": "投票",
+                "vote.voted": "已投票",
+                "vote.note": "每个账号每服限投 1 票。投票结果将在活动前 2 天公布。",
+                "rules.title": "活动规则",
+                "rules.monsterCount": "变异大雷",
+                "rules.size": "体型",
+                "rules.hp": "血量",
+                "rules.spawnInterval": "刷新间隔",
+                "rules.rewardTitle": "击杀奖励",
+                "rules.rewardDesc": "每击杀 1 条变异大雷，击杀者所属团队可获得 10 条机械龙 / 特爆龙，发放至团库。",
+                "rules.rule1Title": "参与方式",
+                "rules.rule1Content": "全服玩家均可参与，无需报名或购买皮肤。个人可自由参与击杀，但奖励按团发放。",
+                "rules.rule2Title": "击杀核验",
+                "rules.rule2Content": "击杀者需在公屏截图，截图必须包含系统时间、击杀者名称和怪物名称「变异大雷」。",
+                "rules.rule3Title": "禁止行为",
+                "rules.rule3Content": "禁止使用外挂/脚本、恶意拉脱 Boss、恶意破坏活动秩序。违规者将在活动后处理。",
+                "timeline.title": "活动流程",
+                "timeline.phase1Time": "D-7 至 D-2",
+                "timeline.phase1Title": "主播投票",
+                "timeline.phase1Desc": "玩家在游戏主页投票，选出每个服务器的带队主播。",
+                "timeline.phase2Time": "D-2",
+                "timeline.phase2Title": "公布结果 & 集合",
+                "timeline.phase2Desc": "公布当选主播，邀请玩家加入 Discord，在工厂附近集合。",
+                "timeline.phase3Title": "变异大雷猎杀",
+                "timeline.phase3Desc": "每 5 分钟刷新 1 条，共 6 条。主播带领玩家共同击杀。",
+                "timeline.phase4Title": "自由团战",
+                "timeline.phase4Desc": "6 条大雷全部击杀后，主播带队在工厂区域开展自由团战。",
+                "discord.title": "加入 Discord",
+                "discord.desc": "主播将全程语音互动，指挥猎杀与团战。频道包含 1 个总大厅 + K服房 + Q服房。",
+                "discord.copyLink": "复制链接",
+                "discord.joinNow": "立即加入",
+                "discord.copied": "已复制 Discord 链接！",
+                "footer.note": "*活动时间和内容可能调整，请以游戏内公告为准。",
+                "toast.votedK": "已为 K服 投票！",
+                "toast.votedQ": "已为 Q服 投票！"
+            }
+        };
+
+        let currentLang = 'vi';
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) {
+                    el.innerHTML = i18n[lang][key];
+                }
+            });
+            document.getElementById('lang-btn').textContent = lang === 'vi' ? 'CN' : 'VI';
+            updateVotedUI();
+        }
+
+        function toggleLanguage() {
+            applyLanguage(currentLang === 'vi' ? 'zh' : 'vi');
+        }
+
+        // Countdown
+        const eventDate = new Date('2026-07-02T20:30:00+07:00');
+
+        function updateCountdown() {
+            const now = new Date();
+            const diff = eventDate - now;
+
+            if (diff <= 0) {
+                document.getElementById('countdown-days').textContent = '00';
+                document.getElementById('countdown-hours').textContent = '00';
+                document.getElementById('countdown-minutes').textContent = '00';
+                document.getElementById('countdown-seconds').textContent = '00';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown-days').textContent = String(days).padStart(2, '0');
+            document.getElementById('countdown-hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('countdown-minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('countdown-seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Voting
+        const votes = { k: null, q: null };
+
+        function vote(server, index) {
+            if (votes[server] !== null) return;
+            votes[server] = index;
+            updateVotedUI();
+            showToast(currentLang === 'vi' ? i18n.vi['toast.voted' + server.toUpperCase()] : i18n.zh['toast.voted' + server.toUpperCase()]);
+        }
+
+        function updateVotedUI() {
+            ['k', 'q'].forEach(server => {
+                const container = document.getElementById(server + '-server-candidates');
+                const cards = container.querySelectorAll('.streamer-card');
+                cards.forEach((card, index) => {
+                    const btn = card.querySelector('.vote-btn');
+                    if (votes[server] === index) {
+                        card.classList.add('selected', 'voted');
+                        btn.textContent = currentLang === 'vi' ? i18n.vi['vote.voted'] : i18n.zh['vote.voted'];
+                        btn.classList.remove('bg-gold/10', 'text-gold', 'border-gold/30');
+                        btn.classList.add('bg-green-500/20', 'text-green-400', 'border-green-500/30');
+                    } else if (votes[server] !== null) {
+                        card.classList.add('disabled');
+                        card.style.opacity = '0.5';
+                        card.style.pointerEvents = 'none';
+                    }
+                });
+            });
+        }
+
+        // Rules toggle
+        function toggleRule(btn) {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('.fa-chevron-down');
+            content.classList.toggle('expanded');
+            icon.style.transform = content.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        // Discord copy
+        function copyDiscord() {
+            navigator.clipboard.writeText('https://discord.gg/example').then(() => {
+                showToast(currentLang === 'vi' ? i18n.vi['discord.copied'] : i18n.zh['discord.copied']);
+            }).catch(() => {
+                showToast('Discord: https://discord.gg/example');
+            });
+        }
+
+        // Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const text = document.getElementById('toast-text');
+            text.textContent = message;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2500);
+        }
+
+        // Init
+        applyLanguage('vi');
+    </script>
+</body>
+</html>

@@ -66,6 +66,16 @@
       "description": "主播空降活动页",
       "note": "直接在 src/ 开发，对应 project/003-运营/003-01-streamer-dropin 为设计文档"
     },
+    "streamer-dropin-v2": {
+      "source": "projects/003-运营/003-01-streamer-dropin/src",
+      "src": "src/campaign/pages/streamer-dropin-v2",
+      "type": "campaign-page",
+      "status": "ready",
+      "confirmed": true,
+      "private": false,
+      "description": "主播空降第二届活动页",
+      "note": "源文件在 project 下开发，确认后同步到 src/"
+    },
     "invite-activity": {
       "src": "src/campaign/pages/invite-activity",
       "type": "campaign-page",
@@ -250,6 +260,12 @@
     },
     "streamer-dropin": {
       "srcPage": "src/campaign/pages/streamer-dropin",
+      "includeAssets": [],
+      "pathRewrite": {},
+      "versioning": "auto"
+    },
+    "streamer-dropin-v2": {
+      "srcPage": "src/campaign/pages/streamer-dropin-v2",
       "includeAssets": [],
       "pathRewrite": {},
       "versioning": "auto"
