@@ -394,56 +394,82 @@
                     <h2 class="font-display text-xl lg:text-2xl font-bold text-white" data-i18n="timeline.title">Lịch Trình Sự Kiện</h2>
                 </div>
 
-                <div class="relative pl-4 lg:pl-8">
-                    <div class="timeline-line"></div>
-                    
-                    <div class="relative mb-8 pl-10 lg:pl-12">
-                        <div class="absolute left-0 top-0 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-mist/10 border-2 border-mist flex items-center justify-center">
-                            <i class="fas fa-vote-yea text-mist-light"></i>
+                <!-- Giai đoạn sơ nóng -->
+                <div class="mb-8">
+                    <h3 class="text-mist-light font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-bullhorn text-sm"></i>
+                        <span data-i18n="timeline.preheatTitle">Giai đoạn sơ nóng</span>
+                    </h3>
+                    <div class="relative pl-4 lg:pl-8">
+                        <div class="timeline-line"></div>
+                        <div class="relative mb-6 pl-10 lg:pl-12">
+                            <div class="absolute left-0 top-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-mist/10 border-2 border-mist flex items-center justify-center">
+                                <i class="fas fa-vote-yea text-mist-light text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase1Time">D-7 đến D-2</p>
+                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase1Title">Bình chọn streamer</h4>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase1Desc">Ngườ i chơi vào trang chủ game bỏ phiếu chọn streamer dẫn dắt Khủng Long Chi Chiến và Quân Đoàn Chiến.</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase1Time">D-7 đến D-2</p>
-                            <h3 class="font-bold text-white mb-1" data-i18n="timeline.phase1Title">Bình chọn streamer</h3>
-                            <p class="text-gray-400 text-sm" data-i18n="timeline.phase1Desc">Người chơi vào trang chủ game bỏ phiếu chọn streamer dẫn dắt Khủng Long Chi Chiến và Quân Đoàn Chiến.</p>
-                        </div>
-                    </div>
-
-                    <div class="relative mb-8 pl-10 lg:pl-12">
-                        <div class="absolute left-0 top-0 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-mist/10 border-2 border-mist flex items-center justify-center">
-                            <i class="fas fa-bullhorn text-mist-light"></i>
-                        </div>
-                        <div>
-                            <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase2Time">D-2</p>
-                            <h3 class="font-bold text-white mb-1" data-i18n="timeline.phase2Title">Công bố kết quả & tập hợp</h3>
-                            <p class="text-gray-400 text-sm" data-i18n="timeline.phase2Desc">Công bố streamer được chọn, mời người chơi tham gia Discord và tập trung tại Nhà Máy.</p>
-                        </div>
-                    </div>
-
-                    <div class="relative mb-8 pl-10 lg:pl-12">
-                        <div class="absolute left-0 top-0 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-gold/20 border-2 border-gold flex items-center justify-center">
-                            <i class="fas fa-dragon text-gold"></i>
-                        </div>
-                        <div>
-                            <p class="text-gold font-semibold text-sm">20:30 - 21:00</p>
-                            <h3 class="font-bold text-white mb-1" data-i18n="timeline.phase3Title">Săn Cổ Dài Đột Biến</h3>
-                            <p class="text-gray-400 text-sm" data-i18n="timeline.phase3Desc">Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Streamer cùng người chơi tiêu diệt.</p>
+                        <div class="relative pl-10 lg:pl-12">
+                            <div class="absolute left-0 top-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-mist/10 border-2 border-mist flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-mist-light text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase2Time">D-2</p>
+                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase2Title">Công bố kết quả</h4>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase2Desc">Công bố streamer được chọn cho từng server, mở Discord chuẩn bị cho sự kiện.</p>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="relative pl-10 lg:pl-12">
-                        <div class="absolute left-0 top-0 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-gold/20 border-2 border-gold flex items-center justify-center">
-                            <i class="fas fa-fire text-gold"></i>
+                <!-- Flow trong game -->
+                <div>
+                    <h3 class="text-gold font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-gamepad text-sm"></i>
+                        <span data-i18n="timeline.ingameTitle">Flow trong game</span>
+                    </h3>
+                    <div class="relative pl-4 lg:pl-8">
+                        <div class="timeline-line"></div>
+
+                        <div class="relative mb-6 pl-10 lg:pl-12">
+                            <div class="absolute left-0 top-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gold/20 border-2 border-gold flex items-center justify-center">
+                                <i class="fas fa-users text-gold text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase3Time">20:15 - 20:30</p>
+                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase3Title">Streamer tập hợp đội</h4>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase3Desc">Streamer vào kênh Discord, kêu gọi ngườ i chơi tập trung tại khu vực Nhà Máy trong game.</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-gold font-semibold text-sm">21:00 - 21:30</p>
-                            <h3 class="font-bold text-white mb-1" data-i18n="timeline.phase4Title">Chiến trường tự do</h3>
-                            <p class="text-gray-400 text-sm" data-i18n="timeline.phase4Desc">Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team chiến đấu tự do tại khu vực Nhà Máy.</p>
+
+                        <div class="relative mb-6 pl-10 lg:pl-12">
+                            <div class="absolute left-0 top-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gold/20 border-2 border-gold flex items-center justify-center">
+                                <i class="fas fa-dragon text-gold text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase4Time">20:30 - 21:00</p>
+                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase4Title">Săn Cổ Dài Đột Biến</h4>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase4Desc">Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Team hạ cuối mỗi con nhận 10 Rồng Cơ Khí / Rồng Đặc Bạo vào kho team.</p>
+                            </div>
+                        </div>
+
+                        <div class="relative pl-10 lg:pl-12">
+                            <div class="absolute left-0 top-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gold/20 border-2 border-gold flex items-center justify-center">
+                                <i class="fas fa-fire text-gold text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase5Time">21:00 - 21:30</p>
+                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase5Title">Chiến trường tự do</h4>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase5Desc">Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team chiến đấu tự do tại khu vực Nhà Máy.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
-
         <!-- Discord Section -->
         <section id="discord" class="mb-8">
             <div class="card-glass rounded-2xl p-6 lg:p-8 relative overflow-hidden">
@@ -538,16 +564,23 @@
                 "rules.rule3Title": "Hành vi bị cấm",
                 "rules.rule3Content": "Cấm sử dụng hack/script, kéo quái ra khỏi vùng một cách ác ý, hoặc cố tình gây cản trở hoạt động. Vi phạm sẽ bị xử lý sau sự kiện.",
                 "timeline.title": "Lịch Trình Sự Kiện",
+                "timeline.preheatTitle": "Giai đoạn sơ nóng",
+                "timeline.ingameTitle": "Flow trong game",
                 "timeline.phase1Time": "D-7 đến D-2",
                 "timeline.phase1Title": "Bình chọn streamer",
-                "timeline.phase1Desc": "Người chơi vào trang chủ game bỏ phiếu chọn streamer dẫn dắt Khủng Long Chi Chiến và Quân Đoàn Chiến.",
+                "timeline.phase1Desc": "Ngườ i chơi vào trang chủ game bỏ phiếu chọn streamer dẫn dắt Khủng Long Chi Chiến và Quân Đoàn Chiến.",
                 "timeline.phase2Time": "D-2",
-                "timeline.phase2Title": "Công bố kết quả & tập hợp",
-                "timeline.phase2Desc": "Công bố streamer được chọn, mời người chơi tham gia Discord và tập trung tại Nhà Máy.",
-                "timeline.phase3Title": "Săn Cổ Dài Đột Biến",
-                "timeline.phase3Desc": "Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Streamer cùng người chơi tiêu diệt.",
-                "timeline.phase4Title": "Chiến trường tự do",
-                "timeline.phase4Desc": "Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team chiến đấu tự do tại khu vực Nhà Máy.",
+                "timeline.phase2Title": "Công bố kết quả",
+                "timeline.phase2Desc": "Công bố streamer được chọn cho từng server, mở Discord chuẩn bị cho sự kiện.",
+                "timeline.phase3Time": "20:15 - 20:30",
+                "timeline.phase3Title": "Streamer tập hợp đội",
+                "timeline.phase3Desc": "Streamer vào kênh Discord, kêu gọi ngườ i chơi tập trung tại khu vực Nhà Máy trong game.",
+                "timeline.phase4Time": "20:30 - 21:00",
+                "timeline.phase4Title": "Săn Cổ Dài Đột Biến",
+                "timeline.phase4Desc": "Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Team hạ cuối mỗi con nhận 10 Rồng Cơ Khí / Rồng Đặc Bạo vào kho team.",
+                "timeline.phase5Time": "21:00 - 21:30",
+                "timeline.phase5Title": "Chiến trường tự do",
+                "timeline.phase5Desc": "Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team chiến đấu tự do tại khu vực Nhà Máy.",
                 "discord.title": "Tham Gia Discord",
                 "discord.desc": "Streamer sẽ trò chuyện trực tiếp qua giọng nói, chỉ huy săn rồng và chiến đấu. Kênh gồm 1 phòng chung + phòng K Server + phòng Q Server.",
                 "discord.copyLink": "Sao chép link",
@@ -598,16 +631,23 @@
                 "rules.rule3Title": "禁止行为",
                 "rules.rule3Content": "禁止使用外挂/脚本、恶意拉脱 Boss、恶意破坏活动秩序。违规者将在活动后处理。",
                 "timeline.title": "活动流程",
+                "timeline.preheatTitle": "预热阶段",
+                "timeline.ingameTitle": "游戏内流程",
                 "timeline.phase1Time": "D-7 至 D-2",
                 "timeline.phase1Title": "主播投票",
                 "timeline.phase1Desc": "玩家在游戏主页分别为 K服 和 Q服 投票选出带队主播。",
                 "timeline.phase2Time": "D-2",
-                "timeline.phase2Title": "公布结果 & 集合",
-                "timeline.phase2Desc": "公布当选主播，邀请玩家加入 Discord，在工厂附近集合。",
-                "timeline.phase3Title": "变异雷龙猎杀",
-                "timeline.phase3Desc": "每 5 分钟刷新 1 条，共 6 条。主播带领玩家共同击杀。",
-                "timeline.phase4Title": "自由团战",
-                "timeline.phase4Desc": "6 条雷龙全部击杀后，主播带队在工厂区域开展自由团战。",
+                "timeline.phase2Title": "公布结果",
+                "timeline.phase2Desc": "公布各服当选主播，开启 Discord 频道为活动做准备。",
+                "timeline.phase3Time": "20:15 - 20:30",
+                "timeline.phase3Title": "主播集合队伍",
+                "timeline.phase3Desc": "主播进入 Discord 语音频道，号召玩家在游戏内工厂附近集合。",
+                "timeline.phase4Time": "20:30 - 21:00",
+                "timeline.phase4Title": "变异雷龙猎杀",
+                "timeline.phase4Desc": "每 5 分钟刷新 1 条，共 6 条。击杀者所属团队每杀 1 条可获得 10 机械龙 / 特爆龙。",
+                "timeline.phase5Time": "21:00 - 21:30",
+                "timeline.phase5Title": "自由团战",
+                "timeline.phase5Desc": "6 条雷龙全部击杀后，主播带队在工厂区域开展自由团战。",
                 "discord.title": "加入 Discord",
                 "discord.desc": "主播将全程语音互动，指挥猎杀与团战。频道包含 1 个总大厅 + K服房 + Q服房。",
                 "discord.copyLink": "复制链接",
