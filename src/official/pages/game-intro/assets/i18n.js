@@ -8,8 +8,11 @@
  * Language determined by:
  *   1. URL ?lang=vi or ?lang=en
  *   2. localStorage.getItem('lang')
- *   3. Browser language detection
- *   4. Fallback: en
+ *   3. Domain default
+ *      - *.daokhunglong.vn / *.monster-lair.vn / *.dkl.vn -> vi
+ *      - *.dinoraid.com -> en
+ *   4. Browser language detection
+ *   5. Fallback: en
  */
 (function () {
   const I18N_PATH = 'assets/i18n.json';
@@ -24,6 +27,18 @@
 
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && ['zh', 'en', 'vi'].includes(stored)) return stored;
+
+    const host = (window.location.hostname || '').toLowerCase();
+    if (
+      host.includes('daokhunglong.vn') ||
+      host.includes('monster-lair.vn') ||
+      host.includes('dkl.vn')
+    ) {
+      return 'vi';
+    }
+    if (host.includes('dinoraid.com')) {
+      return 'en';
+    }
 
     const nav = navigator.language || navigator.userLanguage || 'en';
     if (nav.toLowerCase().startsWith('vi')) return 'vi';
