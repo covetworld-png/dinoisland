@@ -132,6 +132,9 @@
         .rule-content.expanded {
             max-height: 500px;
         }
+        .modal-open {
+            overflow: hidden;
+        }
     </style>
 </head>
 <body class="text-gray-100 bg-dino">
@@ -279,16 +282,17 @@
                     </div>
                 </div>
 
-                <!-- StrawPoll Embed -->
-                <div class="strawpoll-embed" id="strawpoll_B2ZB9QMXxgJ" style="height: 580px; max-width: 640px; width: 100%; margin: 0 auto; display: flex; flex-direction: column;">
-                    <iframe title="StrawPoll Embed" id="strawpoll_iframe_B2ZB9QMXxgJ" src="https://strawpoll.com/embed/B2ZB9QMXxgJ" style="position: static; visibility: visible; display: block; width: 100%; flex-grow: 1;" frameborder="0" allowfullscreen allowtransparency>Loading...</iframe>
-                    <script nonce="YjIxODRhM2VlNzg1YzUyYWEwN2FlNDYxYTQ0NTQwYmQ3YWYxOTVjNw==" async src="https://cdn.strawpoll.com/dist/widgets.js" charset="utf-8"></script>
+                <!-- Vote CTA -->
+                <div class="text-center">
+                    <button onclick="openVoteModal()" class="px-8 py-3 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all inline-flex items-center gap-2" data-i18n="vote.openModal">
+                        <i class="fas fa-vote-yea"></i> Bỏ Phiếu Ngay
+                    </button>
                 </div>
                 <div class="mt-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
                     <div class="flex items-start gap-3">
                         <i class="fas fa-info-circle text-amber-400 mt-0.5"></i>
                         <p class="text-amber-200/80 text-sm" data-i18n="vote.note">
-                            Bấm vào khung bỏ phiếu bên dưới để tham gia. Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Streamer đứng đầu mỗi server sẽ dẫn dắt server đó.</p>
+                            Bấm nút bên dưới để mở khung bỏ phiếu. Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Streamer đứng đầu mỗi server sẽ dẫn dắt server đó.</p>
                     </div>
                 </div>
             </div>
@@ -566,12 +570,14 @@
                 "hero.ctaDiscord": "Tham Gia Discord",
                 "hero.eventTime": "Khủng Long Chi Chiến: 20:30-21:30 · Quân Đoàn Chiến: 22:00-23:00",
                 "vote.title": "Bình Chọn Streamer",
+                "vote.openModal": "Bỏ Phiếu Ngay",
+                "vote.modalTitle": "Bình Chọn Streamer",
                 "vote.subtitle": "Bình chọn riêng cho Khủng Long Chi Chiến (K Server) và Quân Đoàn Chiến (Q Server)",
                 "vote.kServerBadge": "Khủng Long Chi Chiến",
                 "vote.kServerTitle": "Streamer dẫn dắt K Server",
                 "vote.qServerBadge": "Quân Đoàn Chiến",
                 "vote.qServerTitle": "Streamer dẫn dắt Q Server",
-                "vote.note": "Bấm vào khung bỏ phiếu bên dưới để tham gia. Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Streamer đứng đầu mỗi server sẽ dẫn dắt server đó.",
+                "vote.note": "Bấm nút bên dưới để mở khung bỏ phiếu. Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Streamer đứng đầu mỗi server sẽ dẫn dắt server đó.",
                 "rules.title": "Thể Lệ Sự Kiện",
                 "rules.monsterCount": "Cổ Dài Đột Biến",
                 "rules.size": "Kích thước",
@@ -640,12 +646,14 @@
                 "hero.ctaDiscord": "加入 Discord",
                 "hero.eventTime": "K服 20:30-21:30 · Q服 22:00-23:00（中间休息 30 分钟）",
                 "vote.title": "主播投票",
+                "vote.openModal": "立即投票",
+                "vote.modalTitle": "主播投票",
                 "vote.subtitle": "分别为 Khủng Long Chi Chiến（K服）和 Quân Đoàn Chiến（Q服）选出带队主播",
                 "vote.kServerBadge": "Khủng Long Chi Chiến",
                 "vote.kServerTitle": "K服带队主播",
                 "vote.qServerBadge": "Quân Đoàn Chiến",
                 "vote.qServerTitle": "Q服带队主播",
-                "vote.note": "点击下方投票组件参与投票。每个账号每服限投 1 票，得票最高者将带领该服务器。",
+                "vote.note": "点击下方按钮打开投票浮层。每个账号每服限投 1 票，得票最高者将带领该服务器。",
                 "rules.title": "活动规则",
                 "rules.monsterCount": "变异雷龙",
                 "rules.size": "体型",
@@ -758,6 +766,23 @@
             icon.style.transform = content.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0deg)';
         }
 
+        // Vote Modal
+        function openVoteModal() {
+            const modal = document.getElementById('vote-modal');
+            modal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+        }
+
+        function closeVoteModal() {
+            const modal = document.getElementById('vote-modal');
+            modal.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeVoteModal();
+        });
+
         // Discord copy
         function copyDiscord() {
             navigator.clipboard.writeText('https://discord.gg/example').then(() => {
@@ -783,5 +808,26 @@
         // Init
         applyLanguage('vi');
     </script>
+
+    <!-- Vote Modal -->
+    <div id="vote-modal" class="fixed inset-0 z-[100] hidden" aria-modal="true" role="dialog">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onclick="closeVoteModal()"></div>
+        <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+            <div class="card-glass rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-mist/20 shadow-2xl">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-mist/10">
+                    <h3 class="font-display text-lg font-bold text-white" data-i18n="vote.modalTitle">Bình Chọn Streamer</h3>
+                    <button onclick="closeVoteModal()" class="w-8 h-8 rounded-full bg-jungle-700 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-1 flex-1 overflow-y-auto">
+                    <div class="strawpoll-embed" id="strawpoll_B2ZB9QMXxgJ" style="height: min(520px, 70vh); width: 100%; display: flex; flex-direction: column;">
+                        <iframe title="StrawPoll Embed" id="strawpoll_iframe_B2ZB9QMXxgJ" src="https://strawpoll.com/embed/B2ZB9QMXxgJ" style="position: static; visibility: visible; display: block; width: 100%; flex-grow: 1;" frameborder="0" allowfullscreen allowtransparency>Loading...</iframe>
+                        <script nonce="YjIxODRhM2VlNzg1YzUyYWEwN2FlNDYxYTQ0NTQwYmQ3YWYxOTVjNw==" async src="https://cdn.strawpoll.com/dist/widgets.js" charset="utf-8"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
