@@ -146,7 +146,7 @@
                 <a href="https://account.monster-lair.vn/#/index" class="w-9 h-9 lg:w-10 lg:h-10 rounded-lg bg-jungle-700 flex items-center justify-center text-mist-light hover:bg-jungle-600 transition-colors border border-mist/30" title="Trang chủ">
                     <i class="fas fa-home text-sm lg:text-base"></i>
                 </a>
-                <img src="assets/logo.png" alt="Logo" class="h-8 lg:h-10 w-auto object-contain">
+                <span class="font-display text-sm lg:text-base font-bold text-white" data-i18n="header.title">Streamer Đột Kích Mùa 2</span>
             </div>
             <div class="flex items-center gap-2 lg:gap-3">
                 <nav class="hidden lg:flex items-center gap-6 mr-4">
@@ -180,36 +180,18 @@
                         Streamer Đột Kích Mùa 2 · 6 Cổ Dài Khổng Lồ · Phần Thưởng Hấp Dẫn
                     </p>
 
-                    <!-- Countdown -->
-                    <div class="mb-6">
-                        <p class="text-gray-400 text-sm mb-3" data-i18n="hero.countdownLabel">Đếm ngược đến sự kiện</p>
-                        <div class="flex items-center justify-center gap-2 text-sm">
-                            <div class="countdown-box">
-                                <span class="text-gold font-display text-lg" id="countdown-days">00</span>
-                                <span class="text-xs text-gray-500 block" data-i18n="common.days">ngày</span>
-                            </div>
-                            <span class="text-gold text-xl">:</span>
-                            <div class="countdown-box">
-                                <span class="text-gold font-display text-lg" id="countdown-hours">00</span>
-                                <span class="text-xs text-gray-500 block" data-i18n="common.hours">giờ</span>
-                            </div>
-                            <span class="text-gold text-xl">:</span>
-                            <div class="countdown-box">
-                                <span class="text-gold font-display text-lg" id="countdown-minutes">00</span>
-                                <span class="text-xs text-gray-500 block" data-i18n="common.minutes">phút</span>
-                            </div>
-                            <span class="text-gold text-xl">:</span>
-                            <div class="countdown-box">
-                                <span class="text-gold font-display text-lg" id="countdown-seconds">00</span>
-                                <span class="text-xs text-gray-500 block" data-i18n="common.seconds">giây</span>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Duration -->
+                    <p class="text-mist-light text-base lg:text-lg mb-6" data-i18n="hero.duration">
+                        Mỗi server 1 giờ: 30 phút săn + 30 phút tương tác tại Nhà Máy
+                    </p>
 
                     <!-- CTA Buttons -->
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-                        <a href="#vote" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all text-center" data-i18n="hero.ctaVote">
-                            Bỏ Phiếu Ngay
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3" id="hero-cta">
+                        <button id="hero-vote-btn" onclick="openVoteModal()" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all text-center inline-flex items-center justify-center gap-2" data-i18n="hero.ctaVote">
+                            <i class="fas fa-vote-yea"></i> Bỏ Phiếu Ngay
+                        </button>
+                        <a id="hero-results-btn" href="#vote" class="hidden w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all text-center" data-i18n="hero.ctaResults">
+                            Xem Kết Quả
                         </a>
                         <a href="#discord" class="w-full sm:w-auto px-8 py-3 bg-jungle-700 border border-mist/30 text-mist-light font-semibold rounded-full hover:bg-jungle-600 transition-all text-center" data-i18n="hero.ctaDiscord">
                             Tham Gia Discord
@@ -217,7 +199,7 @@
                     </div>
 
                     <p class="text-gray-400 text-xs mt-4" data-i18n="hero.eventTime">
-                        Khủng Long Chi Chiến 20:30-21:30 · Quân Đoàn Chiến 22:00-23:00
+                        Quân Đoàn Chiến 21:00-22:00 · Khủng Long Chi Chiến 22:00-23:00
                     </p>
                 </div>
             </div>
@@ -231,59 +213,51 @@
                         <i class="fas fa-vote-yea text-lg"></i>
                     </div>
                     <div>
-                        <h2 class="font-display text-xl lg:text-2xl font-bold text-white" data-i18n="vote.title">Bình Chọn Streamer</h2>
-                        <p class="text-gray-400 text-sm" data-i18n="vote.subtitle">Bình chọn riêng cho Khủng Long Chi Chiến (K Server) và Quân Đoàn Chiến (Q Server)</p>
+                        <h2 class="font-display text-xl lg:text-2xl font-bold text-white" data-i18n="vote.title">Kết Quả Bình Chọn Streamer</h2>
+                        <p class="text-gray-400 text-sm" data-i18n="vote.subtitle">Streamer đứng đầu mỗi server sẽ dẫn dắt server đó</p>
                     </div>
                 </div>
 
                 <div class="grid lg:grid-cols-2 gap-6 mb-6">
-                    <!-- K Server -->
-                    <div class="card-glass rounded-xl p-5 border border-mist/10">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="px-3 py-1 rounded-full bg-mist/10 text-mist-light text-xs font-semibold" data-i18n="vote.kServerBadge">Khủng Long Chi Chiến</span>
-                            <span class="text-gray-400 text-sm" data-i18n="vote.kServerTitle">Streamer dẫn dắt K Server</span>
-                        </div>
-                        <div class="flex justify-center gap-4">
-                            <div class="text-center">
-                                <img src="assets/heni.jpeg" alt="Heni" class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-mist/30">
-                                <p class="font-semibold text-white text-xs">Heni</p>
-                            </div>
-                            <div class="text-center">
-                                <img src="assets/ricon.jpeg" alt="Ricon" class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-mist/30">
-                                <p class="font-semibold text-white text-xs">Ricon</p>
-                            </div>
-                            <div class="text-center">
-                                <img src="assets/miumiu.jpeg" alt="MiuMiu" class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-mist/30">
-                                <p class="font-semibold text-white text-xs">MiuMiu</p>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Q Server -->
-                    <div class="card-glass rounded-xl p-5 border border-mist/10">
+                    <div class="card-glass rounded-xl p-5 border border-gold/30 bg-gold/5">
                         <div class="flex items-center gap-2 mb-4">
                             <span class="px-3 py-1 rounded-full bg-mist/10 text-mist-light text-xs font-semibold" data-i18n="vote.qServerBadge">Quân Đoàn Chiến</span>
                             <span class="text-gray-400 text-sm" data-i18n="vote.qServerTitle">Streamer dẫn dắt Q Server</span>
                         </div>
-                        <div class="flex justify-center gap-4">
-                            <div class="text-center">
-                                <img src="assets/heni.jpeg" alt="Heni" class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-mist/30">
-                                <p class="font-semibold text-white text-xs">Heni</p>
+                        <div class="flex flex-col items-center">
+                            <div class="relative">
+                                <img src="assets/heni.jpeg" alt="Heni" class="w-20 h-20 rounded-full mx-auto mb-2 object-cover border-2 border-gold">
+                                <div class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-gold flex items-center justify-center text-jungle-900 text-xs">
+                                    <i class="fas fa-crown"></i>
+                                </div>
                             </div>
-                            <div class="text-center">
-                                <img src="assets/ricon.jpeg" alt="Ricon" class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-mist/30">
-                                <p class="font-semibold text-white text-xs">Ricon</p>
+                            <p class="font-semibold text-white text-base">Heni</p>
+                            <p class="text-xs text-gold mt-1" data-i18n="vote.winnerLabel">Streamer chiến thắng</p>
+                        </div>
+                    </div>
+
+                    <!-- K Server -->
+                    <div class="card-glass rounded-xl p-5 border border-gold/30 bg-gold/5">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="px-3 py-1 rounded-full bg-mist/10 text-mist-light text-xs font-semibold" data-i18n="vote.kServerBadge">Khủng Long Chi Chiến</span>
+                            <span class="text-gray-400 text-sm" data-i18n="vote.kServerTitle">Streamer dẫn dắt K Server</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="relative">
+                                <img src="assets/miumiu.jpeg" alt="MiuMiu" class="w-20 h-20 rounded-full mx-auto mb-2 object-cover border-2 border-gold">
+                                <div class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-gold flex items-center justify-center text-jungle-900 text-xs">
+                                    <i class="fas fa-crown"></i>
+                                </div>
                             </div>
-                            <div class="text-center">
-                                <img src="assets/miumiu.jpeg" alt="MiuMiu" class="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-mist/30">
-                                <p class="font-semibold text-white text-xs">MiuMiu</p>
-                            </div>
+                            <p class="font-semibold text-white text-base">MiuMiu</p>
+                            <p class="text-xs text-gold mt-1" data-i18n="vote.winnerLabel">Streamer chiến thắng</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Vote CTA -->
-                <div class="text-center">
+                <!-- Vote CTA (toggle via votingEnabled) -->
+                <div class="text-center" id="vote-section-cta">
                     <button onclick="openVoteModal()" class="px-8 py-3 bg-gradient-to-r from-gold to-gold-dark text-jungle-900 font-bold rounded-full text-sm gold-button-glow hover:brightness-110 transition-all inline-flex items-center gap-2" data-i18n="vote.openModal">
                         <i class="fas fa-vote-yea"></i> Bỏ Phiếu Ngay
                     </button>
@@ -292,7 +266,7 @@
                     <div class="flex items-start gap-3">
                         <i class="fas fa-info-circle text-amber-400 mt-0.5"></i>
                         <p class="text-amber-200/80 text-sm" data-i18n="vote.note">
-                            Bấm nút bên dưới để mở khung bỏ phiếu. Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Streamer đứng đầu mỗi server sẽ dẫn dắt server đó.</p>
+                            Bình chọn được thực hiện qua trang bỏ phiếu bên ngoài. Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Streamer đứng đầu mỗi server sẽ dẫn dắt server đó.</p>
                     </div>
                 </div>
             </div>
@@ -419,15 +393,14 @@
                     </h3>
                     <div class="relative pl-4 lg:pl-8">
                         <div class="timeline-line"></div>
-
                         <div class="relative mb-6 pl-10 lg:pl-12">
                             <div class="absolute left-0 top-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gold/20 border-2 border-gold flex items-center justify-center">
                                 <i class="fas fa-users text-gold text-sm"></i>
                             </div>
                             <div>
-                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase3Time">20:15 - 20:30</p>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase3Time">20:45 - 21:00</p>
                                 <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase3Title">Streamer tập hợp đội</h4>
-                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase3Desc">Streamer vào kênh Discord, kêu gọi người chơi tập trung tại khu vực Nhà Máy trong game.</p>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase3Desc">Streamer Quân Đoàn Chiến vào kênh Discord, kêu gọi ngườ i chơi tập trung tại khu vực Nhà Máy trong game.</p>
                             </div>
                         </div>
 
@@ -436,9 +409,9 @@
                                 <i class="fas fa-dragon text-gold text-sm"></i>
                             </div>
                             <div>
-                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase4Time">20:30 - 21:00</p>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase4Time">21:00 - 21:30</p>
                                 <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase4Title">Săn Cổ Dài Đột Biến</h4>
-                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase4Desc">Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Team hạ cuối mỗi con nhận 6 Hộp Quà.</p>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase4Desc">Q Server: Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Team hạ cuối mỗi con nhận 6 Hộp Quà.</p>
                             </div>
                         </div>
 
@@ -447,19 +420,9 @@
                                 <i class="fas fa-fire text-gold text-sm"></i>
                             </div>
                             <div>
-                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase5Time">21:00 - 21:30</p>
-                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase5Title">Chiến trường tự do</h4>
-                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase5Desc">Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team chiến đấu tự do tại khu vực Nhà Máy.</p>
-                            </div>
-                        </div>
-                        <div class="relative mb-6 pl-10 lg:pl-12">
-                            <div class="absolute left-0 top-0 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-mist/10 border-2 border-mist flex items-center justify-center">
-                                <i class="fas fa-coffee text-mist-light text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase6Time">21:30 - 22:00</p>
-                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase6Title">GM / Streamer nghỉ ngơi</h4>
-                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase6Desc">Chuyển server, nghỉ ngơi và chuẩn bị cho Quân Đoàn Chiến.</p>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase5Time">21:30 - 22:00</p>
+                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase5Title">Streamer tương tác tự do</h4>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase5Desc">Q Server: Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team tương tác tự do tại khu vực Nhà Máy.</p>
                             </div>
                         </div>
 
@@ -468,9 +431,9 @@
                                 <i class="fas fa-dragon text-gold text-sm"></i>
                             </div>
                             <div>
-                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase7Time">22:00 - 22:30</p>
-                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase7Title">Săn Cổ Dài Đột Biến</h4>
-                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase7Desc">Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Team hạ cuối mỗi con nhận 6 Hộp Quà.</p>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase6Time">22:00 - 22:30</p>
+                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase6Title">Săn Cổ Dài Đột Biến</h4>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase6Desc">K Server: Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Team hạ cuối mỗi con nhận 6 Hộp Quà.</p>
                             </div>
                         </div>
 
@@ -479,9 +442,9 @@
                                 <i class="fas fa-fire text-gold text-sm"></i>
                             </div>
                             <div>
-                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase8Time">22:30 - 23:00</p>
-                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase8Title">Chiến trường tự do</h4>
-                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase8Desc">Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team chiến đấu tự do tại khu vực Nhà Máy.</p>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase7Time">22:30 - 23:00</p>
+                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase7Title">Streamer tương tác tự do</h4>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase7Desc">K Server: Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team tương tác tự do tại khu vực Nhà Máy.</p>
                             </div>
                         </div>
 
@@ -490,9 +453,9 @@
                                 <i class="fas fa-gift text-gold text-sm"></i>
                             </div>
                             <div>
-                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase9Time">Sau sự kiện</p>
-                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase9Title">GM phát hộp quà</h4>
-                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase9Desc">Trưởng đoàn liên hệ GM xác nhận thời gian phát thưởng. GM đặt hộp quà trên mặt đất lãnh thổ team, người chơi đánh mở hộp để nhận quà.</p>
+                                <p class="text-gold font-semibold text-sm" data-i18n="timeline.phase8Time">Sau sự kiện</p>
+                                <h4 class="font-bold text-white mb-1" data-i18n="timeline.phase8Title">GM phát hộp quà</h4>
+                                <p class="text-gray-400 text-sm" data-i18n="timeline.phase8Desc">Trưởng đoàn liên hệ GM xác nhận thờ i gian phát thưởng. GM đặt hộp quà trên mặt đất lãnh thổ team, ngườ i chơi đánh mở hộp để nhận quà.</p>
                             </div>
                         </div>
 
@@ -512,7 +475,7 @@
                     <div class="flex-1 text-center lg:text-left">
                         <h2 class="font-display text-xl lg:text-2xl font-bold text-white mb-2" data-i18n="discord.title">Tham Gia Discord</h2>
                         <p class="text-gray-400 text-sm mb-4" data-i18n="discord.desc">
-                            Streamer sẽ trò chuyện trực tiếp qua giọng nói, chỉ huy săn rồng và chiến đấu. Kênh gồm 1 phòng chung + phòng K Server + phòng Q Server.
+                            Streamer sẽ trò chuyện trực tiếp qua giọng nói, chỉ huy săn rồng và chiến đấu. Kênh gồm 1 phòng chung + phòng Q Server + phòng K Server.
                         </p>
                         <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                             <button onclick="copyDiscord()" class="px-6 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold rounded-full transition-colors flex items-center justify-center gap-2" data-i18n="discord.copyLink">
@@ -533,8 +496,7 @@
     <footer class="border-t border-mist/10 bg-jungle-900/80 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 lg:px-6 py-6">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <img src="assets/logo.png" alt="Logo" class="h-8 w-auto object-contain opacity-70">
+                <div>
                     <span class="text-gray-500 text-sm">© 2026 MonsterLair</span>
                 </div>
                 <p class="text-gray-500 text-xs text-center lg:text-right" data-i18n="footer.note">
@@ -558,6 +520,7 @@
                 "nav.vote": "Bỏ Phiếu",
                 "nav.timeline": "Lịch Trình",
                 "nav.discord": "Discord",
+                "header.title": "Streamer Đột Kích Mùa 2",
                 "common.days": "ngày",
                 "common.hours": "giờ",
                 "common.minutes": "phút",
@@ -566,18 +529,21 @@
                 "hero.title": "Săn Cổ Dài Đột Biến",
                 "hero.subtitle": "Streamer Đột Kích Mùa 2 · 6 Cổ Dài Khổng Lồ · Phần Thưởng Hấp Dẫn",
                 "hero.countdownLabel": "Đếm ngược đến sự kiện",
+                "hero.duration": "Mỗi server 1 giờ: 30 phút săn + 30 phút tương tác tại Nhà Máy",
                 "hero.ctaVote": "Bỏ Phiếu Ngay",
+                "hero.ctaResults": "Xem Kết Quả",
                 "hero.ctaDiscord": "Tham Gia Discord",
-                "hero.eventTime": "Khủng Long Chi Chiến: 20:30-21:30 · Quân Đoàn Chiến: 22:00-23:00",
-                "vote.title": "Bình Chọn Streamer",
+                "hero.eventTime": "Quân Đoàn Chiến 21:00-22:00 · Khủng Long Chi Chiến 22:00-23:00",
+                "vote.title": "Kết Quả Bình Chọn Streamer",
                 "vote.openModal": "Bỏ Phiếu Ngay",
                 "vote.modalTitle": "Bình Chọn Streamer",
-                "vote.subtitle": "Bình chọn riêng cho Khủng Long Chi Chiến (K Server) và Quân Đoàn Chiến (Q Server)",
+                "vote.winnerLabel": "Streamer chiến thắng",
+                "vote.subtitle": "Streamer đứng đầu mỗi server sẽ dẫn dắt server đó",
                 "vote.kServerBadge": "Khủng Long Chi Chiến",
                 "vote.kServerTitle": "Streamer dẫn dắt K Server",
                 "vote.qServerBadge": "Quân Đoàn Chiến",
                 "vote.qServerTitle": "Streamer dẫn dắt Q Server",
-                "vote.note": "Bấm nút bên dưới để mở khung bỏ phiếu. Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Streamer đứng đầu mỗi server sẽ dẫn dắt server đó.",
+                "vote.note": "Bình chọn được thực hiện qua trang bỏ phiếu bên ngoài. Mỗi tài khoản được bỏ phiếu 1 lần cho mỗi server. Streamer đứng đầu mỗi server sẽ dẫn dắt server đó.",
                 "rules.title": "Thể Lệ Sự Kiện",
                 "rules.monsterCount": "Cổ Dài Đột Biến",
                 "rules.size": "Kích thước",
@@ -594,34 +560,31 @@
                 "timeline.ingameTitle": "Flow trong game",
                 "timeline.phase1Time": "D-7 đến D-2",
                 "timeline.phase1Title": "Bình chọn streamer",
-                "timeline.phase1Desc": "Người chơi vào trang chủ game bỏ phiếu chọn streamer dẫn dắt Khủng Long Chi Chiến và Quân Đoàn Chiến.",
+                "timeline.phase1Desc": "Ngườ i chơi bỏ phiếu qua trang bỏ phiếu bên ngoài để chọn streamer dẫn dắt Quân Đoàn Chiến và Khủng Long Chi Chiến.",
                 "timeline.phase2Time": "D-2",
                 "timeline.phase2Title": "Công bố kết quả",
                 "timeline.phase2Desc": "Công bố streamer được chọn cho từng server, mở Discord chuẩn bị cho sự kiện.",
-                "timeline.phase3Time": "20:15 - 20:30",
+                "timeline.phase3Time": "20:45 - 21:00",
                 "timeline.phase3Title": "Streamer tập hợp đội",
-                "timeline.phase3Desc": "Streamer vào kênh Discord, kêu gọi người chơi tập trung tại khu vực Nhà Máy trong game.",
-                "timeline.phase4Time": "20:30 - 21:00",
+                "timeline.phase3Desc": "Streamer Quân Đoàn Chiến vào kênh Discord, kêu gọi ngườ i chơi tập trung tại khu vực Nhà Máy trong game.",
+                "timeline.phase4Time": "21:00 - 21:30",
                 "timeline.phase4Title": "Săn Cổ Dài Đột Biến",
-                "timeline.phase4Desc": "Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Team hạ cuối mỗi con nhận 6 Hộp Quà.",
-                "timeline.phase5Time": "21:00 - 21:30",
-                "timeline.phase5Title": "Chiến trường tự do",
-                "timeline.phase5Desc": "Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team chiến đấu tự do tại khu vực Nhà Máy.",
-                "timeline.phase6Time": "21:30 - 22:00",
-                "timeline.phase6Title": "GM / Streamer nghỉ ngơi",
-                "timeline.phase6Desc": "Chuyển server, nghỉ ngơi và chuẩn bị cho Quân Đoàn Chiến.",
-                "timeline.phase7Time": "22:00 - 22:30",
-                "timeline.phase7Title": "Săn Cổ Dài Đột Biến",
-                "timeline.phase7Desc": "Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Team hạ cuối mỗi con nhận 6 Hộp Quà.",
-                "timeline.phase8Time": "22:30 - 23:00",
-                "timeline.phase8Title": "Chiến trường tự do",
-                "timeline.phase8Desc": "Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team chiến đấu tự do tại khu vực Nhà Máy.",
-                "timeline.phase9Time": "Sau sự kiện",
-                "timeline.phase9Title": "GM phát hộp quà",
-                "timeline.phase9Desc": "Trưởng đoàn liên hệ GM xác nhận thời gian phát thưởng. GM đặt hộp quà trên mặt đất lãnh thổ team, người chơi đánh mở hộp để nhận quà.",
+                "timeline.phase4Desc": "Q Server: Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Team hạ cuối mỗi con nhận 6 Hộp Quà.",
+                "timeline.phase5Time": "21:30 - 22:00",
+                "timeline.phase5Title": "Streamer tương tác tự do",
+                "timeline.phase5Desc": "Q Server: Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team tương tác tự do tại khu vực Nhà Máy.",
+                "timeline.phase6Time": "22:00 - 22:30",
+                "timeline.phase6Title": "Săn Cổ Dài Đột Biến",
+                "timeline.phase6Desc": "K Server: Mỗi 5 phút xuất hiện 1 con, tổng cộng 6 con. Team hạ cuối mỗi con nhận 6 Hộp Quà.",
+                "timeline.phase7Time": "22:30 - 23:00",
+                "timeline.phase7Title": "Streamer tương tác tự do",
+                "timeline.phase7Desc": "K Server: Sau khi 6 con rồng bị tiêu diệt, streamer dẫn team tương tác tự do tại khu vực Nhà Máy.",
+                "timeline.phase8Time": "Sau sự kiện",
+                "timeline.phase8Title": "GM phát hộp quà",
+                "timeline.phase8Desc": "Trưởng đoàn liên hệ GM xác nhận thờ i gian phát thưởng. GM đặt hộp quà trên mặt đất lãnh thổ team, ngườ i chơi đánh mở hộp để nhận quà.",
 
                 "discord.title": "Tham Gia Discord",
-                "discord.desc": "Streamer sẽ trò chuyện trực tiếp qua giọng nói, chỉ huy săn rồng và chiến đấu. Kênh gồm 1 phòng chung + phòng K Server + phòng Q Server.",
+                "discord.desc": "Streamer sẽ trò chuyện trực tiếp qua giọng nói, chỉ huy săn rồng và chiến đấu. Kênh gồm 1 phòng chung + phòng Q Server + phòng K Server.",
                 "discord.copyLink": "Sao chép link",
                 "discord.joinNow": "Tham gia ngay",
                 "discord.copied": "Đã sao chép link Discord!",
@@ -634,6 +597,7 @@
                 "nav.vote": "投票",
                 "nav.timeline": "活动流程",
                 "nav.discord": "Discord",
+                "header.title": "主播空降第二季",
                 "common.days": "天",
                 "common.hours": "时",
                 "common.minutes": "分",
@@ -642,18 +606,21 @@
                 "hero.title": "变异雷龙全服猎杀夜",
                 "hero.subtitle": "主播空降第二季 · 6 条巨型变异雷龙 · 丰厚奖励",
                 "hero.countdownLabel": "距离活动开始",
+                "hero.duration": "每个服务器 1 小时：半小时猎杀 + 半小时工厂互动",
                 "hero.ctaVote": "立即投票",
+                "hero.ctaResults": "查看结果",
                 "hero.ctaDiscord": "加入 Discord",
-                "hero.eventTime": "K服 20:30-21:30 · Q服 22:00-23:00（中间休息 30 分钟）",
-                "vote.title": "主播投票",
+                "hero.eventTime": "Q服 21:00-22:00 · K服 22:00-23:00",
+                "vote.title": "主播投票结果",
                 "vote.openModal": "立即投票",
                 "vote.modalTitle": "主播投票",
-                "vote.subtitle": "分别为 Khủng Long Chi Chiến（K服）和 Quân Đoàn Chiến（Q服）选出带队主播",
+                "vote.winnerLabel": "胜出主播",
+                "vote.subtitle": "每服得票最高者将带领该服务器",
                 "vote.kServerBadge": "Khủng Long Chi Chiến",
                 "vote.kServerTitle": "K服带队主播",
                 "vote.qServerBadge": "Quân Đoàn Chiến",
                 "vote.qServerTitle": "Q服带队主播",
-                "vote.note": "点击下方按钮打开投票浮层。每个账号每服限投 1 票，得票最高者将带领该服务器。",
+                "vote.note": "投票通过外部页面进行。每个账号每服限投 1 票，得票最高者将带领该服务器。",
                 "rules.title": "活动规则",
                 "rules.monsterCount": "变异雷龙",
                 "rules.size": "体型",
@@ -670,34 +637,31 @@
                 "timeline.ingameTitle": "游戏内流程",
                 "timeline.phase1Time": "D-7 至 D-2",
                 "timeline.phase1Title": "主播投票",
-                "timeline.phase1Desc": "玩家在游戏主页分别为 K服 和 Q服 投票选出带队主播。",
+                "timeline.phase1Desc": "玩家通过外部投票页面为 Q服 和 K服 投票选出带队主播。",
                 "timeline.phase2Time": "D-2",
                 "timeline.phase2Title": "公布结果",
                 "timeline.phase2Desc": "公布各服当选主播，开启 Discord 频道为活动做准备。",
-                "timeline.phase3Time": "20:15 - 20:30",
+                "timeline.phase3Time": "20:45 - 21:00",
                 "timeline.phase3Title": "主播集合队伍",
-                "timeline.phase3Desc": "主播进入 Discord 语音频道，号召玩家在游戏内工厂附近集合。",
-                "timeline.phase4Time": "20:30 - 21:00",
+                "timeline.phase3Desc": "Q服 主播进入 Discord 语音频道，号召玩家在游戏内工厂附近集合。",
+                "timeline.phase4Time": "21:00 - 21:30",
                 "timeline.phase4Title": "变异雷龙猎杀",
-                "timeline.phase4Desc": "每 5 分钟刷新 1 条，共 6 条。击杀者所属团队每杀 1 条可获得 6 个礼盒。",
-                "timeline.phase5Time": "21:00 - 21:30",
-                "timeline.phase5Title": "自由团战",
-                "timeline.phase5Desc": "6 条雷龙全部击杀后，主播带队在工厂区域开展自由团战。",
-                "timeline.phase6Time": "21:30 - 22:00",
-                "timeline.phase6Title": "GM / 主播休息",
-                "timeline.phase6Desc": "切换服务器、休息、为 Q服 做准备。",
-                "timeline.phase7Time": "22:00 - 22:30",
-                "timeline.phase7Title": "变异雷龙猎杀",
-                "timeline.phase7Desc": "每 5 分钟刷新 1 条，共 6 条。击杀者所属团队每杀 1 条可获得 6 个礼盒。",
-                "timeline.phase8Time": "22:30 - 23:00",
-                "timeline.phase8Title": "自由团战",
-                "timeline.phase8Desc": "6 条雷龙全部击杀后，主播带队在工厂区域开展自由团战。",
-                "timeline.phase9Time": "活动结束后",
-                "timeline.phase9Title": "GM 发放礼盒",
-                "timeline.phase9Desc": "团长联系 GM 确认发放时间。GM 将礼盒放置于团队领地地面，玩家击打后爆出奖品。",
+                "timeline.phase4Desc": "Q服：每 5 分钟刷新 1 条，共 6 条。击杀者所属团队每杀 1 条可获得 6 个礼盒。",
+                "timeline.phase5Time": "21:30 - 22:00",
+                "timeline.phase5Title": "主播自由互动",
+                "timeline.phase5Desc": "Q服：6 条雷龙全部击杀后，主播带队在工厂区域自由互动。",
+                "timeline.phase6Time": "22:00 - 22:30",
+                "timeline.phase6Title": "变异雷龙猎杀",
+                "timeline.phase6Desc": "K服：每 5 分钟刷新 1 条，共 6 条。击杀者所属团队每杀 1 条可获得 6 个礼盒。",
+                "timeline.phase7Time": "22:30 - 23:00",
+                "timeline.phase7Title": "主播自由互动",
+                "timeline.phase7Desc": "K服：6 条雷龙全部击杀后，主播带队在工厂区域自由互动。",
+                "timeline.phase8Time": "活动结束后",
+                "timeline.phase8Title": "GM 发放礼盒",
+                "timeline.phase8Desc": "团长联系 GM 确认发放时间。GM 将礼盒放置于团队领地地面，玩家击打后爆出奖品。",
 
                 "discord.title": "加入 Discord",
-                "discord.desc": "主播将全程语音互动，指挥猎杀与团战。频道包含 1 个总大厅 + K服房 + Q服房。",
+                "discord.desc": "主播将全程语音互动，指挥猎杀与团战。频道包含 1 个总大厅 + Q服房 + K服房。",
                 "discord.copyLink": "复制链接",
                 "discord.joinNow": "立即加入",
                 "discord.copied": "已复制 Discord 链接！",
@@ -707,6 +671,24 @@
         };
 
         let currentLang = 'vi';
+
+        // Toggle external voting page on/off
+        const votingEnabled = true;
+
+        function renderHeroCTA() {
+            const voteBtn = document.getElementById('hero-vote-btn');
+            const resultsBtn = document.getElementById('hero-results-btn');
+            const voteSectionCta = document.getElementById('vote-section-cta');
+            if (votingEnabled) {
+                voteBtn && voteBtn.classList.remove('hidden');
+                resultsBtn && resultsBtn.classList.add('hidden');
+                voteSectionCta && voteSectionCta.classList.remove('hidden');
+            } else {
+                voteBtn && voteBtn.classList.add('hidden');
+                resultsBtn && resultsBtn.classList.remove('hidden');
+                voteSectionCta && voteSectionCta.classList.add('hidden');
+            }
+        }
 
         function applyLanguage(lang) {
             currentLang = lang;
@@ -718,6 +700,7 @@
                 }
             });
             document.getElementById('lang-btn').textContent = lang === 'vi' ? 'CN' : 'VI';
+            renderHeroCTA();
         }
 
         function toggleLanguage() {
@@ -802,6 +785,7 @@
 
         // Init
         applyLanguage('vi');
+        renderHeroCTA();
     </script>
 
     <!-- Vote Modal -->
