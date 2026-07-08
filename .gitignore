@@ -1,45 +1,17 @@
 # Ignore everything by default
 *
 
-# Except docs (project documentation)
-!docs/
-!docs/**
+# Except .gitignore itself
+!.gitignore
 
 # Except src (frontend source code)
 !src/
 !src/**
 
-# Except build (pipeline manifests)
-!build/
-!build/**
-
-# Except scripts (utility scripts)
-!scripts/
-!scripts/**
-
-# Ignore public (static assets)
-public/
-
-# Except versions (backups)
-!versions/
-!versions/**
-
-# Except root index.html
-!index.html
-
-# Except .gitignore itself
-!.gitignore
-
 # Ignore unnecessary files
 **/.DS_Store
 **/*.zip
 **/README.md
-
-# Ignore other projects (all tracked pages should go through build/pipeline.py to src/)
-projects/001-增长/
-projects/002-内容/
-projects/003-运营/
-projects/004-工具/
 *.bak
 __pycache__/
 *.pyc
