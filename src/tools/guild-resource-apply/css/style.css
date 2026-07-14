@@ -221,6 +221,8 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 .status-pending { background: #fef3c7; color: #92400e; }
 .status-processing { background: #dbeafe; color: #1e40af; }
 .status-completed { background: #d1fae5; color: #065f46; }
+.status-approved { background: #d1fae5; color: #065f46; }
+.status-pending-approval { background: #fee2e2; color: #991b1b; }
 .status-clickable { cursor: pointer; user-select: none; transition: transform 0.1s, box-shadow 0.1s; }
 .status-clickable:hover { transform: scale(1.05); box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
 

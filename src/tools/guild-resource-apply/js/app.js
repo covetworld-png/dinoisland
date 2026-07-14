@@ -94,6 +94,15 @@ const translations = {
     pleaseSelectServer: "Chọn máy chủ",
     setAdmin: "Đặt làm Admin",
     removeAdmin: "Bỏ Admin",
+    statusApproved: "Đã duyệt",
+    statusPendingApproval: "Chờ duyệt",
+    approve: "Duyệt",
+    disable: "Vô hiệu",
+    delete: "Xóa",
+    confirmDeleteUser: "Xóa ngưởi dùng này? Đơn xin của họ sẽ được giữ lại.",
+    toastUserApproved: "Đã duyệt",
+    toastUserDisabled: "Đã vô hiệu",
+    toastUserDeleted: "Đã xóa",
   },
   zh: {
     appTitle: "资源申请工具",
@@ -181,6 +190,15 @@ const translations = {
     pleaseSelectServer: "请选择服务器",
     setAdmin: "设为管理员",
     removeAdmin: "取消管理员",
+    statusApproved: "已通过",
+    statusPendingApproval: "待审批",
+    approve: "通过",
+    disable: "禁用",
+    delete: "删除",
+    confirmDeleteUser: "确定删除该用户吗？其申请记录将保留。",
+    toastUserApproved: "已通过",
+    toastUserDisabled: "已禁用",
+    toastUserDeleted: "已删除",
   },
   en: {
     appTitle: "Resource Apply Tool",
@@ -268,6 +286,15 @@ const translations = {
     pleaseSelectServer: "Select Server",
     setAdmin: "Set Admin",
     removeAdmin: "Remove Admin",
+    statusApproved: "Approved",
+    statusPendingApproval: "Pending Approval",
+    approve: "Approve",
+    disable: "Disable",
+    delete: "Delete",
+    confirmDeleteUser: "Delete this user? Their applications will be kept.",
+    toastUserApproved: "User approved",
+    toastUserDisabled: "User disabled",
+    toastUserDeleted: "User deleted",
   },
 };
 
@@ -401,14 +428,15 @@ function applyI18n() {
 
   // Admin users table headers
   const userThs = $$("#usersTable th");
-  if (userThs.length >= 7) {
+  if (userThs.length >= 8) {
     userThs[0].textContent = "ID";
     userThs[1].textContent = t("username");
     userThs[2].textContent = t("password");
     userThs[3].textContent = t("nickname");
     userThs[4].textContent = t("role");
-    userThs[5].textContent = t("createdAt");
-    userThs[6].textContent = t("action");
+    userThs[5].textContent = t("status");
+    userThs[6].textContent = t("createdAt");
+    userThs[7].textContent = t("action");
   }
 
   // Admin items table headers
@@ -546,9 +574,15 @@ $("#registerForm").addEventListener("submit", async (e) => {
       password: fd.get("password"),
       nickname: fd.get("nickname"),
     });
-    currentUser = res.data;
-    showApp();
-    showToast(t("toastRegisterSuccess"));
+    if (res.data && res.data.role === "admin") {
+      currentUser = res.data;
+      showApp();
+      showToast(res.message || t("toastRegisterSuccess"));
+    } else {
+      e.target.reset();
+      switchAuthTab("login");
+      showToast(res.message || t("toastRegisterSuccess"));
+    }
   } catch (err) {
     showToast(err.message);
   }
@@ -898,6 +932,15 @@ async function loadAdminUsers() {
     const tbody = $("#usersTable tbody");
     tbody.innerHTML = "";
     (res.data || []).forEach(u => {
+      const isSelf = currentUser && currentUser.id === u.id;
+      const statusClass = u.approved ? "status-approved" : "status-pending-approval";
+      const statusText = u.approved ? t("statusApproved") : t("statusPendingApproval");
+      const approvalBtn = isSelf || u.role === "admin"
+        ? ""
+        : `<button class="btn btn-small" onclick="toggleApproval(${u.id}, ${u.approved ? 0 : 1})">${u.approved ? t("disable") : t("approve")}</button>`;
+      const deleteBtn = isSelf || u.role === "admin"
+        ? ""
+        : `<button class="btn btn-small" style="color:var(--danger)" onclick="deleteUser(${u.id})">${t("delete")}</button>`;
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${u.id}</td>
@@ -905,10 +948,13 @@ async function loadAdminUsers() {
         <td>${escapeHtml(u.password)}</td>
         <td>${escapeHtml(u.nickname)}</td>
         <td>${u.role === "admin" ? "管理员" : "用户"}</td>
+        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
         <td>${formatDate(u.created_at)}</td>
         <td>
           <button class="btn btn-small" onclick="resetPassword(${u.id})">${t("resetPassword")}</button>
           <button class="btn btn-small" onclick="toggleRole(${u.id})">${u.role === "admin" ? t("removeAdmin") : t("setAdmin")}</button>
+          ${approvalBtn}
+          ${deleteBtn}
         </td>
       `;
       tbody.appendChild(tr);
@@ -934,6 +980,27 @@ window.toggleRole = async (userId) => {
   try {
     await api("POST", `/admin/users/${userId}/toggle-role`);
     showToast(t("toastRoleToggled"));
+    loadAdminUsers();
+  } catch (err) {
+    showToast(err.message);
+  }
+};
+
+window.toggleApproval = async (userId, approve) => {
+  try {
+    await api("POST", `/admin/users/${userId}/toggle-approval`);
+    showToast(approve ? t("toastUserApproved") : t("toastUserDisabled"));
+    loadAdminUsers();
+  } catch (err) {
+    showToast(err.message);
+  }
+};
+
+window.deleteUser = async (userId) => {
+  if (!confirm(t("confirmDeleteUser"))) return;
+  try {
+    await api("DELETE", `/admin/users/${userId}`);
+    showToast(t("toastUserDeleted"));
     loadAdminUsers();
   } catch (err) {
     showToast(err.message);
