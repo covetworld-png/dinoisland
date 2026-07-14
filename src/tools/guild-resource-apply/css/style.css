@@ -190,6 +190,7 @@ main { max-width: 960px; margin: 20px auto; padding: 0 16px; }
 .status-pending { background: #fef3c7; color: #92400e; }
 .status-processing { background: #dbeafe; color: #1e40af; }
 .status-completed { background: #d1fae5; color: #065f46; }
+.status-clickable { cursor: pointer; user-select: none; }
 
 .btn {
   background: #fff; border: 1px solid var(--border); padding: 6px 12px;

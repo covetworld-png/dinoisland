@@ -831,21 +831,27 @@ function renderHistoryTable(apps) {
       <td>${escapeHtml(app.server)}</td>
       <td>${escapeHtml(formatItems(app.items))}</td>
       <td>${escapeHtml(app.reason)}</td>
-      <td><span class="status-badge ${statusClass(app.status)}">${statusText(app.status)}</span></td>
+      <td>${renderStatusBadge(app.id, app.status)}</td>
       <td>
         <button class="btn btn-small" onclick="copyAppText(${app.id})">${t("copy")}</button>
-        ${currentUser.role === "admin" ? renderStatusButtons(app.id, app.status) : ""}
       </td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-function renderStatusButtons(appId, currentStatus) {
-  const statuses = ["待发送", "已发送待处理", "已处理"];
-  return statuses.map(s =>
-    `<button class="btn btn-small ${s === currentStatus ? "active" : ""}" onclick="updateAppStatus(${appId}, '${s}')">${statusText(s)}</button>`
-  ).join(" ");
+function nextStatus(status) {
+  const order = ["待发送", "已发送待处理", "已处理"];
+  const idx = order.indexOf(status);
+  return order[(idx + 1) % order.length];
+}
+
+function renderStatusBadge(appId, status) {
+  const isAdmin = currentUser && currentUser.role === "admin";
+  if (!isAdmin) {
+    return `<span class="status-badge ${statusClass(status)}">${statusText(status)}</span>`;
+  }
+  return `<span class="status-badge ${statusClass(status)} status-clickable" onclick="cycleAppStatus(${appId}, '${status}')">${statusText(status)}</span>`;
 }
 
 window.copyAppText = (appId) => {
@@ -855,9 +861,9 @@ window.copyAppText = (appId) => {
   }
 };
 
-window.updateAppStatus = async (appId, status) => {
+window.cycleAppStatus = async (appId, currentStatus) => {
   try {
-    await api("PATCH", `/admin/applications/${appId}/status`, { status });
+    await api("PATCH", `/admin/applications/${appId}/status`, { status: nextStatus(currentStatus) });
     showToast(t("toastStatusUpdated"));
     loadHistory();
     if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
@@ -1022,10 +1028,9 @@ async function loadAdminAllApps() {
         <td>${escapeHtml(app.server)}</td>
         <td>${escapeHtml(formatItems(app.items))}</td>
         <td>${escapeHtml(app.reason)}</td>
-        <td><span class="status-badge ${statusClass(app.status)}">${statusText(app.status)}</span></td>
+        <td>${renderStatusBadge(app.id, app.status)}</td>
         <td>
           <button class="btn btn-small" onclick="copyAppText(${app.id})">${t("copy")}</button>
-          ${renderStatusButtons(app.id, app.status)}
         </td>
       `;
       tbody.appendChild(tr);
