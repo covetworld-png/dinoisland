@@ -826,6 +826,7 @@ $("#profileForm").addEventListener("submit", async (e) => {
     });
     currentUser = res.data;
     showToast(t("toastProfileUpdated"));
+    renderApplyView(); // 同步更新申请表单中的昵称
 
     // 如果开启了记住密码，同步更新本地存储的账号
     if (localStorage.getItem("gra_remember") === "1") {
@@ -872,7 +873,7 @@ function renderHistoryTable(apps) {
     tr.innerHTML = `
       <td>${formatDate(app.created_at)}</td>
       <td>${escapeHtml(app.game_account)}</td>
-      <td>${escapeHtml(app.game_nickname)}</td>
+      <td>${escapeHtml(app.user_nickname || app.game_nickname)}</td>
       <td>${escapeHtml(app.server)}</td>
       <td>${escapeHtml(formatItems(app.items))}</td>
       <td>${escapeHtml(app.reason)}</td>
@@ -1102,7 +1103,7 @@ async function loadAdminAllApps() {
         <td>${formatDate(app.created_at)}</td>
         <td>${escapeHtml(app.username)} (${escapeHtml(app.user_nickname)})</td>
         <td>${escapeHtml(app.game_account)}</td>
-        <td>${escapeHtml(app.game_nickname)}</td>
+        <td>${escapeHtml(app.user_nickname || app.game_nickname)}</td>
         <td>${escapeHtml(app.server)}</td>
         <td>${escapeHtml(formatItems(app.items))}</td>
         <td>${escapeHtml(app.reason)}</td>
