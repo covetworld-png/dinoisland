@@ -20,7 +20,7 @@ body {
   line-height: 1.5;
   background:
     linear-gradient(rgba(243, 244, 246, 0.88), rgba(243, 244, 246, 0.88)),
-    url('images/background.jpg') center/cover no-repeat fixed;
+    url('../images/background.jpg') center/cover no-repeat fixed;
 }
 
 .app-header {
