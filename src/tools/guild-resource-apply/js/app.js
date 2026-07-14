@@ -123,13 +123,13 @@ function showAuth() {
   $("#authView").classList.remove("hidden");
 }
 
-function showApp() {
+async function showApp() {
   $("#nav").classList.remove("hidden");
   $$(".admin-only").forEach(el => {
     el.classList.toggle("hidden", currentUser.role !== "admin");
   });
+  await loadItems();
   switchView("apply");
-  loadItems();
 }
 
 // ---------- Navigation ----------
@@ -193,7 +193,7 @@ function renderItemGrid() {
     catDiv.textContent = cat;
     container.appendChild(catDiv);
 
-    grouped[cat].forEach(it => {
+    (grouped[cat] || []).forEach(it => {
       const card = document.createElement("div");
       card.className = "item-card";
       card.dataset.propId = it.prop_id;
