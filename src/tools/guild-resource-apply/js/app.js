@@ -161,6 +161,7 @@ function switchView(viewName) {
 
   if (viewName === "apply") renderApplyView();
   if (viewName === "history") loadHistory();
+  if (viewName === "profile") renderProfileView();
   if (viewName === "admin") loadAdminUsers();
 }
 
@@ -311,6 +312,37 @@ function renderApplyView() {
   renderItemGrid();
   updatePreview();
 }
+
+// ---------- Profile ----------
+
+function renderProfileView() {
+  if (!currentUser) return;
+  $("#profileUsername").value = currentUser.username || "";
+  $("#profileNickname").value = currentUser.nickname || "";
+}
+
+$("#profileForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const newUsername = fd.get("username");
+  const newNickname = fd.get("nickname");
+
+  try {
+    const res = await api("PATCH", "/auth/profile", {
+      username: newUsername,
+      nickname: newNickname,
+    });
+    currentUser = res.data;
+    showToast("资料已更新");
+
+    // 如果开启了记住密码，同步更新本地存储的账号
+    if (localStorage.getItem("gra_remember") === "1") {
+      localStorage.setItem("gra_username", newUsername);
+    }
+  } catch (err) {
+    showToast(err.message);
+  }
+});
 
 // ---------- History ----------
 

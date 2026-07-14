@@ -13,6 +13,7 @@
       <nav id="nav" class="hidden">
         <button data-view="apply" class="nav-btn active">申请资源</button>
         <button data-view="history" class="nav-btn">历史记录</button>
+        <button data-view="profile" class="nav-btn">个人资料</button>
         <button data-view="admin" class="nav-btn admin-only hidden">管理后台</button>
         <button id="logoutBtn" class="nav-btn logout">退出</button>
       </nav>
@@ -73,6 +74,18 @@
           </div>
 
           <button type="submit" class="btn-primary">提交申请</button>
+        </form>
+      </section>
+
+      <!-- 个人资料 -->
+      <section id="profileView" class="view hidden">
+        <h2>个人资料</h2>
+        <form id="profileForm" class="auth-form">
+          <label>账号 <input type="text" name="username" id="profileUsername" required minlength="3"></label>
+          <p class="hint">修改账号后需使用新账号登录</p>
+          <label>昵称 <input type="text" name="nickname" id="profileNickname" required></label>
+          <p class="hint">游戏内昵称</p>
+          <button type="submit" class="btn-primary">保存修改</button>
         </form>
       </section>
 
