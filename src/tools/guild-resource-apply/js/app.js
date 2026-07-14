@@ -3,7 +3,6 @@ const API_BASE = window.API_BASE || localStorage.getItem("API_BASE") || "/api";
 
 let currentUser = null;
 let allItems = [];
-let selectedItems = {};
 let servers = [];
 
 // ---------- API ----------
@@ -160,7 +159,7 @@ async function loadItems() {
     showToast(e.message);
   }
   renderServerOptions();
-  renderItemList();
+  renderItemGrid();
 }
 
 function renderServerOptions() {
@@ -174,68 +173,73 @@ function renderServerOptions() {
   });
 }
 
-function renderItemList(filter = "") {
-  const container = $("#itemList");
+function renderItemGrid() {
+  const container = $("#itemGrid");
   container.innerHTML = "";
-  const term = filter.toLowerCase();
-  allItems.filter(it => {
-    return !term || it.name_cn.toLowerCase().includes(term) || it.name_vn.toLowerCase().includes(term);
-  }).forEach(it => {
-    const label = document.createElement("label");
-    label.className = "item-option";
-    label.innerHTML = `
-      <input type="checkbox" value="${it.prop_id}" ${selectedItems[it.prop_id] ? "checked" : ""}>
-      <span class="item-name-vn">${escapeHtml(it.name_vn)}</span>
-      <span class="item-name-cn">(${escapeHtml(it.name_cn)})</span>
-    `;
-    label.querySelector("input").addEventListener("change", (e) => {
-      if (e.target.checked) {
-        selectedItems[it.prop_id] = { ...it, quantity: 1 };
-      } else {
-        delete selectedItems[it.prop_id];
-      }
-      renderSelectedItems();
-      updatePreview();
+
+  // 按分类分组排序
+  const order = { "功能卡": 1, "货币": 2, "喷漆礼盒": 3, "恐龙": 4 };
+  const grouped = {};
+  allItems.forEach(it => {
+    const cat = it.category || "其他";
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(it);
+  });
+  const categories = Object.keys(grouped).sort((a, b) => (order[a] || 99) - (order[b] || 99));
+
+  categories.forEach(cat => {
+    const catDiv = document.createElement("div");
+    catDiv.className = "item-category";
+    catDiv.textContent = cat;
+    container.appendChild(catDiv);
+
+    grouped[cat].forEach(it => {
+      const card = document.createElement("div");
+      card.className = "item-card";
+      card.dataset.propId = it.prop_id;
+      card.innerHTML = `
+        <div class="item-name-vn">${escapeHtml(it.name_vn)}</div>
+        <div class="item-name-cn">${escapeHtml(it.name_cn)}</div>
+        <div class="item-qty">
+          <input type="number" min="0" value="" placeholder="0" data-prop="${it.prop_id}" data-name-cn="${escapeHtml(it.name_cn)}" data-name-vn="${escapeHtml(it.name_vn)}" data-unit="${escapeHtml(it.unit)}">
+          <span class="unit">${escapeHtml(it.unit)}</span>
+        </div>
+      `;
+      const input = card.querySelector("input");
+      input.addEventListener("input", (e) => {
+        const q = parseInt(e.target.value, 10);
+        card.classList.toggle("active", !isNaN(q) && q > 0);
+        updatePreview();
+      });
+      container.appendChild(card);
     });
-    container.appendChild(label);
   });
 }
 
-function renderSelectedItems() {
-  const container = $("#selectedItems");
-  container.innerHTML = "";
-  Object.values(selectedItems).forEach(it => {
-    const div = document.createElement("div");
-    div.className = "selected-item";
-    div.innerHTML = `
-      <span>${escapeHtml(it.name_vn)} (${escapeHtml(it.name_cn)})</span>
-      <input type="number" min="1" value="${it.quantity}" data-prop="${it.prop_id}">
-      <span class="unit">${escapeHtml(it.unit)}</span>
-      <span class="remove" data-prop="${it.prop_id}">删除</span>
-    `;
-    div.querySelector("input").addEventListener("input", (e) => {
-      const q = parseInt(e.target.value, 10);
-      selectedItems[it.prop_id].quantity = isNaN(q) || q < 1 ? 1 : q;
-      updatePreview();
-    });
-    div.querySelector(".remove").addEventListener("click", (e) => {
-      delete selectedItems[e.target.dataset.prop];
-      renderItemList($("#itemSearch").value);
-      renderSelectedItems();
-      updatePreview();
-    });
-    container.appendChild(div);
+function getSelectedItems() {
+  const items = [];
+  $$("#itemGrid input[type='number']").forEach(input => {
+    const q = parseInt(input.value, 10);
+    if (!isNaN(q) && q > 0) {
+      items.push({
+        prop_id: input.dataset.prop,
+        name_cn: input.dataset.nameCn,
+        name_vn: input.dataset.nameVn,
+        quantity: q,
+        unit: input.dataset.unit,
+      });
+    }
   });
+  return items.sort((a, b) => String(a.prop_id).localeCompare(String(b.prop_id)));
 }
-
-$("#itemSearch").addEventListener("input", (e) => renderItemList(e.target.value));
 
 function updatePreview() {
   const server = $("#serverSelect").value;
   const account = $("#applyForm input[name='game_account']").value.trim();
   const nickname = $("#applyForm input[name='game_nickname']").value.trim();
   const reason = $("#applyForm input[name='reason']").value.trim();
-  const itemsText = Object.values(selectedItems).map(it => `${it.quantity} ${it.unit}${it.name_cn}`).join(" ");
+  const items = getSelectedItems();
+  const itemsText = items.map(it => `${it.quantity} ${it.unit}${it.name_cn}`).join(" ");
 
   if (!server || !account || !nickname || !itemsText) {
     $("#applyPreview").textContent = "-";
@@ -253,13 +257,11 @@ $("#serverSelect").addEventListener("change", updatePreview);
 $("#applyForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
-  const items = Object.values(selectedItems).map(it => ({
-    prop_id: it.prop_id,
-    name_cn: it.name_cn,
-    name_vn: it.name_vn,
-    quantity: it.quantity,
-    unit: it.unit,
-  }));
+  const items = getSelectedItems();
+  if (!items.length) {
+    showToast("请至少填写一项道具数量");
+    return;
+  }
 
   try {
     await api("POST", "/applications", {
@@ -271,9 +273,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
     });
     showToast("申请已提交");
     e.target.reset();
-    selectedItems = {};
-    renderItemList();
-    renderSelectedItems();
+    renderItemGrid();
     updatePreview();
     switchView("history");
   } catch (err) {
@@ -287,8 +287,7 @@ function renderApplyView() {
     $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
   }
   renderServerOptions();
-  renderItemList();
-  renderSelectedItems();
+  renderItemGrid();
   updatePreview();
 }
 

@@ -32,7 +32,9 @@
         </form>
         <form id="registerForm" class="auth-form hidden">
           <label>账号 <input type="text" name="username" required minlength="3"></label>
-          <label>密码 <input type="password" name="password" required minlength="6"></label>
+          <p class="hint">请填写游戏内的数字账号（如 13219626）</p>
+          <label>密码 <input type="password" name="password" required></label>
+          <p class="hint">密码可任意设置</p>
           <button type="submit">注册</button>
         </form>
       </section>
@@ -54,12 +56,9 @@
           </div>
 
           <div class="form-row">
-            <label>选择道具（可多选）</label>
-            <input type="text" id="itemSearch" placeholder="搜索道具越语/中文..." class="search-input">
-            <div id="itemList" class="item-list"></div>
+            <label>选择道具（填写数量即可）</label>
+            <div id="itemGrid" class="item-grid"></div>
           </div>
-
-          <div id="selectedItems" class="selected-items"></div>
 
           <div class="form-row">
             <label>申请原因 <input type="text" name="reason" placeholder="如 团长申请资源" required></label>
