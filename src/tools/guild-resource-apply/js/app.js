@@ -31,7 +31,7 @@ const translations = {
     gameNickname: "Biệt Danh Game",
     selectItems: "Chọn vật phẩm (nhập số lượng)",
     reason: "Lý Do Xin",
-    chinesePreview: "Xem trước tiếng Trung",
+    preview: "Xem trước",
     submit: "Gửi & Sao Chép Văn Bản",
     historyTitle: "Lịch Sử Xin",
     searchPlaceholder: "Tìm tài khoản/biệt danh/vật phẩm...",
@@ -118,7 +118,7 @@ const translations = {
     gameNickname: "游戏昵称",
     selectItems: "选择道具（填写数量即可）",
     reason: "申请原因",
-    chinesePreview: "中文预览",
+    preview: "预览",
     submit: "提交并复制文本",
     historyTitle: "申请历史",
     searchPlaceholder: "搜索账号/昵称/道具...",
@@ -205,7 +205,7 @@ const translations = {
     gameNickname: "Game Nickname",
     selectItems: "Select Items (enter quantity)",
     reason: "Reason",
-    chinesePreview: "Chinese Preview",
+    preview: "Preview",
     submit: "Submit & Copy Text",
     historyTitle: "Application History",
     searchPlaceholder: "Search account/nickname/item...",
@@ -273,6 +273,11 @@ const translations = {
 
 function t(key) {
   return translations[currentLang]?.[key] || translations.zh[key] || key;
+}
+
+function itemName(it) {
+  if (currentLang === "vi") return it.name_vn || it.name_cn;
+  return it.name_cn;
 }
 
 function updateLangSwitcher() {
@@ -354,7 +359,7 @@ function applyI18n() {
   $$("#applyForm label")[2].childNodes[0].textContent = t("gameNickname");
   $$("#applyForm .form-row label")[3].childNodes[0].textContent = t("selectItems");
   $$("#applyForm label")[3].childNodes[0].textContent = t("reason");
-  $$("#applyForm .preview-box strong")[0].textContent = t("chinesePreview") + "：";
+  $$("#applyForm .preview-box strong")[0].textContent = t("preview") + "：";
   $("#applyForm button[type='submit']").textContent = t("submit");
 
   // History
@@ -453,7 +458,7 @@ function showToast(message, type = "info") {
 }
 
 function formatItems(items) {
-  return items.map(it => `${it.quantity} ${it.unit}${it.name_cn}`).join("、");
+  return items.map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join("、");
 }
 
 function formatDate(dt) {
@@ -475,7 +480,7 @@ function statusClass(status) {
 function formatApplicationText(app) {
   const serverMap = { "Q服 server1": "Q服", "K服 server2": "K服" };
   const server = serverMap[app.server] || app.server;
-  const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${it.name_cn}`).join(" ");
+  const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join(" ");
   return `${server} ${app.game_account} ${app.game_nickname} ${itemsText}${app.reason ? `（${app.reason}）` : ""}`;
 }
 
@@ -656,8 +661,7 @@ function renderItemGrid() {
       card.className = `item-card cat-${cat}`;
       card.dataset.propId = it.prop_id;
       card.innerHTML = `
-        <div class="item-name-vn">${escapeHtml(it.name_vn)}</div>
-        <div class="item-name-cn">${escapeHtml(it.name_cn)}</div>
+        <div class="item-name">${escapeHtml(itemName(it))}</div>
         <div class="item-qty">
           <input type="number" min="0" value="" placeholder="0" data-prop="${it.prop_id}" data-name-cn="${escapeHtml(it.name_cn)}" data-name-vn="${escapeHtml(it.name_vn)}" data-unit="${escapeHtml(it.unit)}">
           <span class="unit">${escapeHtml(it.unit)}</span>
@@ -702,7 +706,7 @@ function updatePreview() {
   const nickname = $("#applyForm input[name='game_nickname']").value.trim();
   const reason = $("#applyForm input[name='reason']").value.trim();
   const items = getSelectedItems();
-  const itemsText = items.map(it => `${it.quantity} ${it.unit}${it.name_cn}`).join(" ");
+  const itemsText = items.map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join(" ");
 
   if (!server || !account || !nickname || !itemsText) {
     $("#applyPreview").textContent = "-";
