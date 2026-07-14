@@ -32,7 +32,7 @@ const translations = {
     selectItems: "Chọn vật phẩm (nhập số lượng)",
     reason: "Lý Do Xin",
     chinesePreview: "Xem trước tiếng Trung",
-    submit: "Gửi Đơn",
+    submit: "Gửi & Sao Chép Văn Bản",
     historyTitle: "Lịch Sử Xin",
     searchPlaceholder: "Tìm tài khoản/biệt danh/vật phẩm...",
     allStatus: "Tất Cả Trạng Thái",
@@ -119,7 +119,7 @@ const translations = {
     selectItems: "选择道具（填写数量即可）",
     reason: "申请原因",
     chinesePreview: "中文预览",
-    submit: "提交申请",
+    submit: "提交并复制文本",
     historyTitle: "申请历史",
     searchPlaceholder: "搜索账号/昵称/道具...",
     allStatus: "全部状态",
@@ -206,7 +206,7 @@ const translations = {
     selectItems: "Select Items (enter quantity)",
     reason: "Reason",
     chinesePreview: "Chinese Preview",
-    submit: "Submit",
+    submit: "Submit & Copy Text",
     historyTitle: "Application History",
     searchPlaceholder: "Search account/nickname/item...",
     allStatus: "All Statuses",
@@ -717,6 +717,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
     return;
   }
 
+  const previewText = $("#applyPreview").textContent;
   try {
     await api("POST", "/applications", {
       server: fd.get("server"),
@@ -726,6 +727,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
       reason: fd.get("reason"),
     });
     showToast(t("toastAppSubmitted"));
+    copyToClipboard(previewText);
     e.target.reset();
     renderItemGrid();
     updatePreview();
