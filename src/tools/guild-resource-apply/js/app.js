@@ -92,7 +92,6 @@ $("#registerForm").addEventListener("submit", async (e) => {
     const res = await api("POST", "/auth/register", {
       username: fd.get("username"),
       password: fd.get("password"),
-      nickname: fd.get("nickname"),
     });
     currentUser = res.data;
     showApp();
@@ -284,7 +283,8 @@ $("#applyForm").addEventListener("submit", async (e) => {
 
 function renderApplyView() {
   if (currentUser) {
-    $("#applyForm input[name='game_nickname']").value = currentUser.nickname || "";
+    $("#applyForm input[name='game_account']").value = currentUser.username || "";
+    $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
   }
   renderServerOptions();
   renderItemList();
