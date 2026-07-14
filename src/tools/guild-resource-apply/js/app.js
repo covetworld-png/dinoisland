@@ -71,12 +71,21 @@ async function initAuth() {
 $("#loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
+  const username = fd.get("username");
+  const password = fd.get("password");
+  const remember = fd.get("remember") === "on";
   try {
-    const res = await api("POST", "/auth/login", {
-      username: fd.get("username"),
-      password: fd.get("password"),
-    });
+    const res = await api("POST", "/auth/login", { username, password });
     currentUser = res.data;
+    if (remember) {
+      localStorage.setItem("gra_username", username);
+      localStorage.setItem("gra_password", password);
+      localStorage.setItem("gra_remember", "1");
+    } else {
+      localStorage.removeItem("gra_username");
+      localStorage.removeItem("gra_password");
+      localStorage.removeItem("gra_remember");
+    }
     showApp();
     showToast("登录成功");
   } catch (err) {
@@ -121,6 +130,13 @@ function showAuth() {
   $("#nav").classList.add("hidden");
   $$(".view").forEach(v => v.classList.add("hidden"));
   $("#authView").classList.remove("hidden");
+  // 自动填充记住的账号密码
+  const remembered = localStorage.getItem("gra_remember") === "1";
+  if (remembered) {
+    $("#loginUsername").value = localStorage.getItem("gra_username") || "";
+    $("#loginPassword").value = localStorage.getItem("gra_password") || "";
+    $("#loginRemember").checked = true;
+  }
 }
 
 async function showApp() {

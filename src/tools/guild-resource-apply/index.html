@@ -26,8 +26,9 @@
           <button id="tabRegister" class="auth-tab">注册</button>
         </div>
         <form id="loginForm" class="auth-form">
-          <label>账号 <input type="text" name="username" required></label>
-          <label>密码 <input type="password" name="password" required></label>
+          <label>账号 <input type="text" name="username" id="loginUsername" required></label>
+          <label>密码 <input type="password" name="password" id="loginPassword" required></label>
+          <label class="inline-label"><input type="checkbox" name="remember" id="loginRemember"> 记住账号密码</label>
           <button type="submit">登录</button>
         </form>
         <form id="registerForm" class="auth-form hidden">

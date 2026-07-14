@@ -59,6 +59,8 @@ main { max-width: 960px; margin: 20px auto; padding: 0 16px; }
 .auth-tab.active { border-bottom-color: var(--primary); color: var(--primary); font-weight: 600; }
 .auth-form { display: flex; flex-direction: column; gap: 16px; max-width: 360px; }
 .auth-form label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--text-secondary); }
+.auth-form label.inline-label { flex-direction: row; align-items: center; gap: 8px; cursor: pointer; }
+.auth-form label.inline-label input { width: auto; }
 .auth-form input {
   padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 16px;
 }
