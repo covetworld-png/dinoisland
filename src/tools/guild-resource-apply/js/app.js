@@ -40,6 +40,8 @@ const translations = {
     filter: "Lọc",
     time: "Thởi Gian",
     account: "Tài Khoản",
+    gameAccount: "Tài Khoản Game",
+    gameNickname: "Biệt Danh Game",
     nicknameCol: "Biệt Danh",
     serverCol: "Máy Chủ",
     items: "Vật Phẩm",
@@ -136,6 +138,8 @@ const translations = {
     filter: "筛选",
     time: "时间",
     account: "账号",
+    gameAccount: "游戏账号",
+    gameNickname: "游戏昵称",
     nicknameCol: "昵称",
     serverCol: "服务器",
     items: "道具",
@@ -232,6 +236,8 @@ const translations = {
     filter: "Filter",
     time: "Time",
     account: "Account",
+    gameAccount: "Game Account",
+    gameNickname: "Game Nickname",
     nicknameCol: "Nickname",
     serverCol: "Server",
     items: "Items",
@@ -398,8 +404,8 @@ function applyI18n() {
   const historyThs = $$("#historyTable th");
   if (historyThs.length >= 8) {
     historyThs[0].textContent = t("time");
-    historyThs[1].textContent = t("account");
-    historyThs[2].textContent = t("nicknameCol");
+    historyThs[1].textContent = t("gameAccount");
+    historyThs[2].textContent = t("gameNickname");
     historyThs[3].textContent = t("serverCol");
     historyThs[4].textContent = t("items");
     historyThs[5].textContent = t("reasonCol");
@@ -456,8 +462,8 @@ function applyI18n() {
   if (allAppThs.length >= 9) {
     allAppThs[0].textContent = t("time");
     allAppThs[1].textContent = t("submitter");
-    allAppThs[2].textContent = t("account");
-    allAppThs[3].textContent = t("nicknameCol");
+    allAppThs[2].textContent = t("gameAccount");
+    allAppThs[3].textContent = t("gameNickname");
     allAppThs[4].textContent = t("serverCol");
     allAppThs[5].textContent = t("items");
     allAppThs[6].textContent = t("reasonCol");
@@ -873,7 +879,7 @@ function renderHistoryTable(apps) {
     tr.innerHTML = `
       <td>${formatDate(app.created_at)}</td>
       <td>${escapeHtml(app.game_account)}</td>
-      <td>${escapeHtml(app.user_nickname || app.game_nickname)}</td>
+      <td>${escapeHtml(app.game_nickname)}</td>
       <td>${escapeHtml(app.server)}</td>
       <td>${escapeHtml(formatItems(app.items))}</td>
       <td>${escapeHtml(app.reason)}</td>
@@ -1101,9 +1107,9 @@ async function loadAdminAllApps() {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${formatDate(app.created_at)}</td>
-        <td>${escapeHtml(app.username)} (${escapeHtml(app.user_nickname)})</td>
+        <td>${escapeHtml(app.username)}</td>
         <td>${escapeHtml(app.game_account)}</td>
-        <td>${escapeHtml(app.user_nickname || app.game_nickname)}</td>
+        <td>${escapeHtml(app.game_nickname)}</td>
         <td>${escapeHtml(app.server)}</td>
         <td>${escapeHtml(formatItems(app.items))}</td>
         <td>${escapeHtml(app.reason)}</td>
