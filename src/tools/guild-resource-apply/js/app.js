@@ -4,6 +4,7 @@ const API_BASE = window.API_BASE || localStorage.getItem("API_BASE") || "/api";
 let currentUser = null;
 let allItems = [];
 let servers = [];
+let currentApps = [];
 
 // ---------- API ----------
 
@@ -48,12 +49,34 @@ function formatDate(dt) {
 }
 
 function statusText(status) {
-  const map = { pending: "待处理", approved: "已通过", rejected: "已拒绝", completed: "已完成" };
+  const map = { "待发送": "待发送", "已发送待处理": "已发送待处理", "已处理": "已处理" };
   return map[status] || status;
 }
 
 function statusClass(status) {
-  return `status-${status}`;
+  const map = { "待发送": "status-pending", "已发送待处理": "status-processing", "已处理": "status-completed" };
+  return map[status] || "status-pending";
+}
+
+function formatApplicationText(app) {
+  const serverMap = { "Q服 server1": "Q服", "K服 server2": "K服" };
+  const server = serverMap[app.server] || app.server;
+  const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${it.name_cn}`).join(" ");
+  return `${server} ${app.game_account} ${app.game_nickname} ${itemsText}${app.reason ? `（${app.reason}）` : ""}`;
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast("已复制"));
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    showToast("已复制");
+  }
 }
 
 // ---------- Auth ----------
@@ -368,6 +391,7 @@ async function loadHistory() {
 }
 
 function renderHistoryTable(apps) {
+  currentApps = apps;
   const tbody = $("#historyTable tbody");
   tbody.innerHTML = "";
   if (!apps.length) {
@@ -384,7 +408,8 @@ function renderHistoryTable(apps) {
       <td>${escapeHtml(formatItems(app.items))}</td>
       <td>${escapeHtml(app.reason)}</td>
       <td><span class="status-badge ${statusClass(app.status)}">${statusText(app.status)}</span></td>
-      <td class="admin-only ${currentUser.role !== "admin" ? "hidden" : ""}">
+      <td>
+        <button class="btn btn-small" onclick="copyAppText(${app.id})">复制</button>
         ${currentUser.role === "admin" ? renderStatusButtons(app.id, app.status) : ""}
       </td>
     `;
@@ -393,11 +418,18 @@ function renderHistoryTable(apps) {
 }
 
 function renderStatusButtons(appId, currentStatus) {
-  const statuses = ["pending", "approved", "rejected", "completed"];
+  const statuses = ["待发送", "已发送待处理", "已处理"];
   return statuses.map(s =>
     `<button class="btn btn-small ${s === currentStatus ? "active" : ""}" onclick="updateAppStatus(${appId}, '${s}')">${statusText(s)}</button>`
   ).join(" ");
 }
+
+window.copyAppText = (appId) => {
+  const app = currentApps.find(a => a.id === appId);
+  if (app) {
+    copyToClipboard(formatApplicationText(app));
+  }
+};
 
 window.updateAppStatus = async (appId, status) => {
   try {
@@ -553,6 +585,7 @@ $("#reloadItemsBtn").addEventListener("click", async () => {
 async function loadAdminAllApps() {
   try {
     const res = await api("GET", "/applications");
+    currentApps = res.data || [];
     const tbody = $("#allAppsTable tbody");
     tbody.innerHTML = "";
     (res.data || []).forEach(app => {
@@ -566,7 +599,10 @@ async function loadAdminAllApps() {
         <td>${escapeHtml(formatItems(app.items))}</td>
         <td>${escapeHtml(app.reason)}</td>
         <td><span class="status-badge ${statusClass(app.status)}">${statusText(app.status)}</span></td>
-        <td>${renderStatusButtons(app.id, app.status)}</td>
+        <td>
+          <button class="btn btn-small" onclick="copyAppText(${app.id})">复制</button>
+          ${renderStatusButtons(app.id, app.status)}
+        </td>
       `;
       tbody.appendChild(tr);
     });

@@ -173,9 +173,8 @@ main { max-width: 960px; margin: 20px auto; padding: 0 16px; }
   display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 500;
 }
 .status-pending { background: #fef3c7; color: #92400e; }
-.status-approved { background: #d1fae5; color: #065f46; }
-.status-rejected { background: #fee2e2; color: #991b1b; }
-.status-completed { background: #dbeafe; color: #1e40af; }
+.status-processing { background: #dbeafe; color: #1e40af; }
+.status-completed { background: #d1fae5; color: #065f46; }
 
 .btn {
   background: #fff; border: 1px solid var(--border); padding: 6px 12px;
