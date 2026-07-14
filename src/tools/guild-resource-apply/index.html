@@ -1,15 +1,20 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>军团资源申请工具 | Guild Resource Apply</title>
+  <title>资源申请工具 | Resource Apply Tool</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div id="app">
     <header class="app-header">
-      <h1>军团资源申请工具</h1>
+      <h1 id="appTitle">资源申请工具</h1>
+      <select id="langSelector" class="lang-selector">
+        <option value="vi">Tiếng Việt</option>
+        <option value="zh">中文</option>
+        <option value="en">English</option>
+      </select>
       <nav id="nav" class="hidden">
         <button data-view="apply" class="nav-btn active">申请资源</button>
         <button data-view="history" class="nav-btn">历史记录</button>

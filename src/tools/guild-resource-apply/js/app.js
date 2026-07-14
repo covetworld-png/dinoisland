@@ -5,6 +5,286 @@ let currentUser = null;
 let allItems = [];
 let servers = [];
 let currentApps = [];
+let currentLang = localStorage.getItem("gra_lang") || "vi";
+
+const translations = {
+  vi: {
+    appTitle: "Công Cụ Xin Tài Nguyên",
+    navApply: "Xin Tài Nguyên",
+    navHistory: "Lịch Sử",
+    navProfile: "Thông Tin",
+    navAdmin: "Quản Lý",
+    navLogout: "Thoát",
+    tabLogin: "Đăng Nhập",
+    tabRegister: "Đăng Ký",
+    username: "Tài Khoản",
+    password: "Mật Khẩu",
+    nickname: "Biệt Danh",
+    rememberMe: "Nhớ tài khoản & mật khẩu",
+    login: "Đăng Nhập",
+    register: "Đăng Ký",
+    accountHint: "Vui lòng nhập ID số trong game (ví dụ: 13219626)",
+    passwordHint: "Mật khẩu có thể tùy ý",
+    nicknameHint: "Vui lòng nhập biệt danh trong game",
+    server: "Máy Chủ",
+    gameAccount: "Tài Khoản Game",
+    gameNickname: "Biệt Danh Game",
+    selectItems: "Chọn vật phẩm (nhập số lượng)",
+    reason: "Lý Do Xin",
+    chinesePreview: "Xem trước tiếng Trung",
+    submit: "Gửi Đơn",
+    historyTitle: "Lịch Sử Xin",
+    searchPlaceholder: "Tìm tài khoản/biệt danh/vật phẩm...",
+    allStatus: "Tất Cả Trạng Thái",
+    allServers: "Tất Cả Máy Chủ",
+    filter: "Lọc",
+    time: "Thởi Gian",
+    account: "Tài Khoản",
+    nicknameCol: "Biệt Danh",
+    serverCol: "Máy Chủ",
+    items: "Vật Phẩm",
+    reasonCol: "Lý Do",
+    status: "Trạng Thái",
+    action: "Thao Tác",
+    noRecords: "Chưa có dữ liệu",
+    copy: "Sao Chép",
+    profileTitle: "Thông Tin Cá Nhân",
+    profileAccountHint: "Sau khi đổi tài khoản cần đăng nhập lại bằng tài khoản mới",
+    profileNicknameHint: "Biệt danh trong game",
+    save: "Lưu Thay Đổi",
+    adminUsers: "Quản Lý Ngưởi Dùng",
+    adminItems: "Cấu Hình Vật Phẩm",
+    adminAllApps: "Tất Cả Đơn Xin",
+    resetPassword: "Đặt Lại Mật Khẩu",
+    toggleAdmin: "Chuyển Quyền Admin",
+    bulkEnable: "Bật Hàng Loạt",
+    bulkDisable: "Tắt Hàng Loạt",
+    reloadItems: "Tải Lại từ items.yaml",
+    propId: "prop_id",
+    nameCn: "Tên CN",
+    nameVn: "Tên VN",
+    unit: "Đơn Vị",
+    category: "Phân Loại",
+    enabled: "Bật",
+    sort: "Sắp Xếp",
+    role: "Vai Trò",
+    createdAt: "Thởi Gian Tạo",
+    submitter: "Ngưởi Gửi",
+    statusPending: "Đang Chờ Gửi",
+    statusProcessing: "Đã Gửi - Đang Xử Lý",
+    statusCompleted: "Đã Xử Lý",
+    toastLoginSuccess: "Đăng nhập thành công",
+    toastRegisterSuccess: "Đăng ký thành công",
+    toastAppSubmitted: "Đã gửi đơn",
+    toastStatusUpdated: "Trạng thái đã cập nhật",
+    toastProfileUpdated: "Thông tin đã cập nhật",
+    toastCopied: "Đã sao chép",
+    toastNoItems: "Vui lòng nhập số lượng ít nhất một vật phẩm",
+    toastPasswordReset: "Đã đặt lại mật khẩu",
+    toastRoleToggled: "Đã chuyển vai trò",
+    toastSaved: "Đã lưu",
+    toastSelectItemsFirst: "Vui lòng chọn vật phẩm trước",
+    toastBulkUpdated: "Cập nhật hàng loạt hoàn tất",
+    toastReloaded: "Đã tải lại",
+    categoryDinosaur: "Khủng Long",
+    categoryFunctionalCard: "Thẻ Chức Năng",
+    categoryCurrency: "Tiền Tệ",
+    categoryOther: "Khác",
+    categorySkin: "Skin",
+    pleaseSelectServer: "Chọn máy chủ",
+    setAdmin: "Đặt làm Admin",
+    removeAdmin: "Bỏ Admin",
+  },
+  zh: {
+    appTitle: "资源申请工具",
+    navApply: "申请资源",
+    navHistory: "历史记录",
+    navProfile: "个人资料",
+    navAdmin: "管理后台",
+    navLogout: "退出",
+    tabLogin: "登录",
+    tabRegister: "注册",
+    username: "账号",
+    password: "密码",
+    nickname: "昵称",
+    rememberMe: "记住账号密码",
+    login: "登录",
+    register: "注册",
+    accountHint: "请填写游戏内的数字账号（如 13219626）",
+    passwordHint: "密码可任意设置",
+    nicknameHint: "请填写游戏内的昵称",
+    server: "服务器",
+    gameAccount: "游戏账号",
+    gameNickname: "游戏昵称",
+    selectItems: "选择道具（填写数量即可）",
+    reason: "申请原因",
+    chinesePreview: "中文预览",
+    submit: "提交申请",
+    historyTitle: "申请历史",
+    searchPlaceholder: "搜索账号/昵称/道具...",
+    allStatus: "全部状态",
+    allServers: "全部服务器",
+    filter: "筛选",
+    time: "时间",
+    account: "账号",
+    nicknameCol: "昵称",
+    serverCol: "服务器",
+    items: "道具",
+    reasonCol: "原因",
+    status: "状态",
+    action: "操作",
+    noRecords: "暂无记录",
+    copy: "复制",
+    profileTitle: "个人资料",
+    profileAccountHint: "修改账号后需使用新账号登录",
+    profileNicknameHint: "游戏内昵称",
+    save: "保存修改",
+    adminUsers: "用户管理",
+    adminItems: "道具配置",
+    adminAllApps: "全部申请",
+    resetPassword: "重置密码",
+    toggleAdmin: "切换管理员",
+    bulkEnable: "批量启用",
+    bulkDisable: "批量禁用",
+    reloadItems: "从 items.yaml 重新加载",
+    propId: "prop_id",
+    nameCn: "中文名",
+    nameVn: "越南语名",
+    unit: "单位",
+    category: "分类",
+    enabled: "启用",
+    sort: "排序",
+    role: "角色",
+    createdAt: "注册时间",
+    submitter: "提交人",
+    statusPending: "待发送",
+    statusProcessing: "已发送待处理",
+    statusCompleted: "已处理",
+    toastLoginSuccess: "登录成功",
+    toastRegisterSuccess: "注册成功",
+    toastAppSubmitted: "申请已提交",
+    toastStatusUpdated: "状态已更新",
+    toastProfileUpdated: "资料已更新",
+    toastCopied: "已复制",
+    toastNoItems: "请至少填写一项道具数量",
+    toastPasswordReset: "密码已重置",
+    toastRoleToggled: "角色已切换",
+    toastSaved: "已保存",
+    toastSelectItemsFirst: "请先选择道具",
+    toastBulkUpdated: "批量更新完成",
+    toastReloaded: "已重新加载",
+    categoryDinosaur: "恐龙",
+    categoryFunctionalCard: "功能卡",
+    categoryCurrency: "货币",
+    categoryOther: "其他",
+    categorySkin: "皮肤",
+    pleaseSelectServer: "请选择服务器",
+    setAdmin: "设为管理员",
+    removeAdmin: "取消管理员",
+  },
+  en: {
+    appTitle: "Resource Apply Tool",
+    navApply: "Apply",
+    navHistory: "History",
+    navProfile: "Profile",
+    navAdmin: "Admin",
+    navLogout: "Logout",
+    tabLogin: "Login",
+    tabRegister: "Register",
+    username: "Username",
+    password: "Password",
+    nickname: "Nickname",
+    rememberMe: "Remember me",
+    login: "Login",
+    register: "Register",
+    accountHint: "Enter your in-game numeric ID (e.g. 13219626)",
+    passwordHint: "Password can be anything",
+    nicknameHint: "Enter your in-game nickname",
+    server: "Server",
+    gameAccount: "Game Account",
+    gameNickname: "Game Nickname",
+    selectItems: "Select Items (enter quantity)",
+    reason: "Reason",
+    chinesePreview: "Chinese Preview",
+    submit: "Submit",
+    historyTitle: "Application History",
+    searchPlaceholder: "Search account/nickname/item...",
+    allStatus: "All Statuses",
+    allServers: "All Servers",
+    filter: "Filter",
+    time: "Time",
+    account: "Account",
+    nicknameCol: "Nickname",
+    serverCol: "Server",
+    items: "Items",
+    reasonCol: "Reason",
+    status: "Status",
+    action: "Action",
+    noRecords: "No records",
+    copy: "Copy",
+    profileTitle: "Profile",
+    profileAccountHint: "Use new username to login after change",
+    profileNicknameHint: "In-game nickname",
+    save: "Save",
+    adminUsers: "User Management",
+    adminItems: "Item Config",
+    adminAllApps: "All Applications",
+    resetPassword: "Reset Password",
+    toggleAdmin: "Toggle Admin",
+    bulkEnable: "Bulk Enable",
+    bulkDisable: "Bulk Disable",
+    reloadItems: "Reload from items.yaml",
+    propId: "prop_id",
+    nameCn: "CN Name",
+    nameVn: "VN Name",
+    unit: "Unit",
+    category: "Category",
+    enabled: "Enabled",
+    sort: "Sort",
+    role: "Role",
+    createdAt: "Created At",
+    submitter: "Submitter",
+    statusPending: "Pending Send",
+    statusProcessing: "Sent - Processing",
+    statusCompleted: "Processed",
+    toastLoginSuccess: "Login successful",
+    toastRegisterSuccess: "Register successful",
+    toastAppSubmitted: "Application submitted",
+    toastStatusUpdated: "Status updated",
+    toastProfileUpdated: "Profile updated",
+    toastCopied: "Copied",
+    toastNoItems: "Please enter quantity for at least one item",
+    toastPasswordReset: "Password reset",
+    toastRoleToggled: "Role toggled",
+    toastSaved: "Saved",
+    toastSelectItemsFirst: "Please select items first",
+    toastBulkUpdated: "Bulk update completed",
+    toastReloaded: "Reloaded",
+    categoryDinosaur: "Dinosaur",
+    categoryFunctionalCard: "Functional Card",
+    categoryCurrency: "Currency",
+    categoryOther: "Other",
+    categorySkin: "Skin",
+    pleaseSelectServer: "Select Server",
+    setAdmin: "Set Admin",
+    removeAdmin: "Remove Admin",
+  },
+};
+
+function t(key) {
+  return translations[currentLang]?.[key] || translations.zh[key] || key;
+}
+
+function categoryName(cat) {
+  const map = {
+    "恐龙": "categoryDinosaur",
+    "功能卡": "categoryFunctionalCard",
+    "货币": "categoryCurrency",
+    "其他": "categoryOther",
+    "皮肤": "categorySkin",
+  };
+  return t(map[cat] || "categoryOther");
+}
 
 // ---------- API ----------
 
@@ -31,6 +311,131 @@ async function api(method, path, body = null) {
 function $(sel) { return document.querySelector(sel); }
 function $$(sel) { return document.querySelectorAll(sel); }
 
+function applyI18n() {
+  $("#appTitle").textContent = t("appTitle");
+  document.title = t("appTitle");
+
+  // Nav
+  $(".nav-btn[data-view='apply']").textContent = t("navApply");
+  $(".nav-btn[data-view='history']").textContent = t("navHistory");
+  $(".nav-btn[data-view='profile']").textContent = t("navProfile");
+  $(".nav-btn[data-view='admin']").textContent = t("navAdmin");
+  $("#logoutBtn").textContent = t("navLogout");
+
+  // Auth tabs
+  $("#tabLogin").textContent = t("tabLogin");
+  $("#tabRegister").textContent = t("tabRegister");
+
+  // Login form
+  $$("#loginForm label")[0].childNodes[0].textContent = t("username");
+  $$("#loginForm label")[1].childNodes[0].textContent = t("password");
+  $("#loginRemember").nextSibling.textContent = " " + t("rememberMe");
+  $("#loginForm button").textContent = t("login");
+
+  // Register form
+  const regLabels = $$("#registerForm label");
+  regLabels[0].childNodes[0].textContent = t("username");
+  regLabels[1].childNodes[0].textContent = t("password");
+  regLabels[2].childNodes[0].textContent = t("nickname");
+  $$("#registerForm .hint")[0].textContent = t("accountHint");
+  $$("#registerForm .hint")[1].textContent = t("passwordHint");
+  $$("#registerForm .hint")[2].textContent = t("nicknameHint");
+  $("#registerForm button").textContent = t("register");
+
+  // Apply form
+  $$("#applyForm label")[0].childNodes[0].textContent = t("server");
+  $$("#applyForm label")[1].childNodes[0].textContent = t("gameAccount");
+  $$("#applyForm label")[2].childNodes[0].textContent = t("gameNickname");
+  $$("#applyForm .form-row label")[3].childNodes[0].textContent = t("selectItems");
+  $$("#applyForm label")[3].childNodes[0].textContent = t("reason");
+  $$("#applyForm .preview-box strong")[0].textContent = t("chinesePreview") + "：";
+  $("#applyForm button[type='submit']").textContent = t("submit");
+
+  // History
+  $("#historyView h2").textContent = t("historyTitle");
+  $("#historySearch").placeholder = t("searchPlaceholder");
+  $("#historyStatus option[value='']").textContent = t("allStatus");
+  $("#historyServer option[value='']").textContent = t("allServers");
+  $("#historyFilterBtn").textContent = t("filter");
+  const historyThs = $$("#historyTable th");
+  if (historyThs.length >= 8) {
+    historyThs[0].textContent = t("time");
+    historyThs[1].textContent = t("account");
+    historyThs[2].textContent = t("nicknameCol");
+    historyThs[3].textContent = t("serverCol");
+    historyThs[4].textContent = t("items");
+    historyThs[5].textContent = t("reasonCol");
+    historyThs[6].textContent = t("status");
+    historyThs[7].textContent = t("action");
+  }
+
+  // Profile
+  $("#profileView h2").textContent = t("profileTitle");
+  $$("#profileForm label")[0].childNodes[0].textContent = t("username");
+  $$("#profileForm label")[1].childNodes[0].textContent = t("nickname");
+  $$("#profileForm .hint")[0].textContent = t("profileAccountHint");
+  $$("#profileForm .hint")[1].textContent = t("profileNicknameHint");
+  $("#profileForm button").textContent = t("save");
+
+  // Admin tabs
+  $$(".admin-tab[data-admin-tab='users']").textContent = t("adminUsers");
+  $$(".admin-tab[data-admin-tab='items']").textContent = t("adminItems");
+  $$(".admin-tab[data-admin-tab='allApps']").textContent = t("adminAllApps");
+  $("#adminUsers h3").textContent = t("adminUsers");
+  $("#adminItems h3").textContent = t("adminItems");
+  $("#adminAllApps h3").textContent = t("adminAllApps");
+  $("#bulkEnableBtn").textContent = t("bulkEnable");
+  $("#bulkDisableBtn").textContent = t("bulkDisable");
+  $("#reloadItemsBtn").textContent = t("reloadItems");
+
+  // Admin users table headers
+  const userThs = $$("#usersTable th");
+  if (userThs.length >= 7) {
+    userThs[0].textContent = "ID";
+    userThs[1].textContent = t("username");
+    userThs[2].textContent = t("password");
+    userThs[3].textContent = t("nickname");
+    userThs[4].textContent = t("role");
+    userThs[5].textContent = t("createdAt");
+    userThs[6].textContent = t("action");
+  }
+
+  // Admin items table headers
+  const itemThs = $$("#itemsTable th");
+  if (itemThs.length >= 8) {
+    itemThs[1].textContent = t("propId");
+    itemThs[2].textContent = t("nameCn");
+    itemThs[3].textContent = t("nameVn");
+    itemThs[4].textContent = t("unit");
+    itemThs[5].textContent = t("category");
+    itemThs[6].textContent = t("enabled");
+    itemThs[7].textContent = t("sort");
+  }
+
+  // Admin all apps table headers
+  const allAppThs = $$("#allAppsTable th");
+  if (allAppThs.length >= 9) {
+    allAppThs[0].textContent = t("time");
+    allAppThs[1].textContent = t("submitter");
+    allAppThs[2].textContent = t("account");
+    allAppThs[3].textContent = t("nicknameCol");
+    allAppThs[4].textContent = t("serverCol");
+    allAppThs[5].textContent = t("items");
+    allAppThs[6].textContent = t("reasonCol");
+    allAppThs[7].textContent = t("status");
+    allAppThs[8].textContent = t("action");
+  }
+}
+
+$("#langSelector").addEventListener("change", (e) => {
+  currentLang = e.target.value;
+  localStorage.setItem("gra_lang", currentLang);
+  applyI18n();
+  renderItemGrid();
+  if (!$('#historyView').classList.contains('hidden')) loadHistory();
+  if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
+});
+
 function showToast(message, type = "info") {
   const el = $("#toast");
   el.textContent = message;
@@ -49,8 +454,8 @@ function formatDate(dt) {
 }
 
 function statusText(status) {
-  const map = { "待发送": "待发送", "已发送待处理": "已发送待处理", "已处理": "已处理" };
-  return map[status] || status;
+  const map = { "待发送": "statusPending", "已发送待处理": "statusProcessing", "已处理": "statusCompleted" };
+  return t(map[status] || "statusPending");
 }
 
 function statusClass(status) {
@@ -67,7 +472,7 @@ function formatApplicationText(app) {
 
 function copyToClipboard(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => showToast("已复制"));
+    navigator.clipboard.writeText(text).then(() => showToast(t("toastCopied")));
   } else {
     const ta = document.createElement("textarea");
     ta.value = text;
@@ -75,7 +480,7 @@ function copyToClipboard(text) {
     ta.select();
     document.execCommand("copy");
     document.body.removeChild(ta);
-    showToast("已复制");
+    showToast(t("toastCopied"));
   }
 }
 
@@ -110,7 +515,7 @@ $("#loginForm").addEventListener("submit", async (e) => {
       localStorage.removeItem("gra_remember");
     }
     showApp();
-    showToast("登录成功");
+    showToast(t("toastLoginSuccess"));
   } catch (err) {
     showToast(err.message);
   }
@@ -127,7 +532,7 @@ $("#registerForm").addEventListener("submit", async (e) => {
     });
     currentUser = res.data;
     showApp();
-    showToast("注册成功");
+    showToast(t("toastRegisterSuccess"));
   } catch (err) {
     showToast(err.message);
   }
@@ -153,6 +558,8 @@ function showAuth() {
   $("#nav").classList.add("hidden");
   $$(".view").forEach(v => v.classList.add("hidden"));
   $("#authView").classList.remove("hidden");
+  $("#langSelector").value = currentLang;
+  applyI18n();
   // 自动填充记住的账号密码
   const remembered = localStorage.getItem("gra_remember") === "1";
   if (remembered) {
@@ -164,6 +571,8 @@ function showAuth() {
 
 async function showApp() {
   $("#nav").classList.remove("hidden");
+  $("#langSelector").value = currentLang;
+  applyI18n();
   $$(".admin-only").forEach(el => {
     el.classList.toggle("hidden", currentUser.role !== "admin");
   });
@@ -206,8 +615,8 @@ async function loadItems() {
 function renderServerOptions() {
   const sel = $("#serverSelect");
   const histSel = $("#historyServer");
-  sel.innerHTML = '<option value="">请选择服务器</option>';
-  histSel.innerHTML = '<option value="">全部服务器</option>';
+  sel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
+  histSel.innerHTML = `<option value="">${t("allServers")}</option>`;
   servers.forEach(s => {
     sel.appendChild(new Option(s, s));
     histSel.appendChild(new Option(s, s));
@@ -304,7 +713,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
   const fd = new FormData(e.target);
   const items = getSelectedItems();
   if (!items.length) {
-    showToast("请至少填写一项道具数量");
+    showToast(t("toastNoItems"));
     return;
   }
 
@@ -316,7 +725,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
       items,
       reason: fd.get("reason"),
     });
-    showToast("申请已提交");
+    showToast(t("toastAppSubmitted"));
     e.target.reset();
     renderItemGrid();
     updatePreview();
@@ -356,7 +765,7 @@ $("#profileForm").addEventListener("submit", async (e) => {
       nickname: newNickname,
     });
     currentUser = res.data;
-    showToast("资料已更新");
+    showToast(t("toastProfileUpdated"));
 
     // 如果开启了记住密码，同步更新本地存储的账号
     if (localStorage.getItem("gra_remember") === "1") {
@@ -395,7 +804,7 @@ function renderHistoryTable(apps) {
   const tbody = $("#historyTable tbody");
   tbody.innerHTML = "";
   if (!apps.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">暂无记录</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center">${t("noRecords")}</td></tr>`;
     return;
   }
   apps.forEach(app => {
@@ -409,7 +818,7 @@ function renderHistoryTable(apps) {
       <td>${escapeHtml(app.reason)}</td>
       <td><span class="status-badge ${statusClass(app.status)}">${statusText(app.status)}</span></td>
       <td>
-        <button class="btn btn-small" onclick="copyAppText(${app.id})">复制</button>
+        <button class="btn btn-small" onclick="copyAppText(${app.id})">${t("copy")}</button>
         ${currentUser.role === "admin" ? renderStatusButtons(app.id, app.status) : ""}
       </td>
     `;
@@ -434,7 +843,7 @@ window.copyAppText = (appId) => {
 window.updateAppStatus = async (appId, status) => {
   try {
     await api("PATCH", `/admin/applications/${appId}/status`, { status });
-    showToast("状态已更新");
+    showToast(t("toastStatusUpdated"));
     loadHistory();
     if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
   } catch (err) {
@@ -475,8 +884,8 @@ async function loadAdminUsers() {
         <td>${u.role === "admin" ? "管理员" : "用户"}</td>
         <td>${formatDate(u.created_at)}</td>
         <td>
-          <button class="btn btn-small" onclick="resetPassword(${u.id})">重置密码</button>
-          <button class="btn btn-small" onclick="toggleRole(${u.id})">${u.role === "admin" ? "取消管理员" : "设为管理员"}</button>
+          <button class="btn btn-small" onclick="resetPassword(${u.id})">${t("resetPassword")}</button>
+          <button class="btn btn-small" onclick="toggleRole(${u.id})">${u.role === "admin" ? t("removeAdmin") : t("setAdmin")}</button>
         </td>
       `;
       tbody.appendChild(tr);
@@ -491,7 +900,7 @@ window.resetPassword = async (userId) => {
   if (!pwd || pwd.length < 6) return;
   try {
     await api("POST", `/admin/users/${userId}/reset-password`, { password: pwd });
-    showToast("密码已重置");
+    showToast(t("toastPasswordReset"));
     loadAdminUsers();
   } catch (err) {
     showToast(err.message);
@@ -501,7 +910,7 @@ window.resetPassword = async (userId) => {
 window.toggleRole = async (userId) => {
   try {
     await api("POST", `/admin/users/${userId}/toggle-role`);
-    showToast("角色已切换");
+    showToast(t("toastRoleToggled"));
     loadAdminUsers();
   } catch (err) {
     showToast(err.message);
@@ -537,16 +946,16 @@ function renderAdminItems() {
     `;
     tr.querySelector(".enable-check").addEventListener("change", async (e) => {
       await api("PATCH", `/admin/items/${it.prop_id}`, { enabled: e.target.checked });
-      showToast("已保存");
+      showToast(t("toastSaved"));
       loadAdminItems();
     });
     tr.querySelector(".unit-input").addEventListener("change", async (e) => {
       await api("PATCH", `/admin/items/${it.prop_id}`, { unit: e.target.value });
-      showToast("已保存");
+      showToast(t("toastSaved"));
     });
     tr.querySelector(".sort-input").addEventListener("change", async (e) => {
       await api("PATCH", `/admin/items/${it.prop_id}`, { sort_order: parseInt(e.target.value, 10) || 0 });
-      showToast("已保存");
+      showToast(t("toastSaved"));
       loadAdminItems();
     });
     tbody.appendChild(tr);
@@ -562,10 +971,10 @@ $("#bulkDisableBtn").addEventListener("click", () => bulkUpdateItems(false));
 
 async function bulkUpdateItems(enabled) {
   const ids = [...$$(".item-check:checked")].map(cb => cb.value);
-  if (!ids.length) return showToast("请先选择道具");
+  if (!ids.length) return showToast(t("toastSelectItemsFirst"));
   try {
     await api("POST", "/admin/items/bulk", { prop_ids: ids, enabled });
-    showToast("批量更新完成");
+    showToast(t("toastBulkUpdated"));
     loadAdminItems();
   } catch (err) {
     showToast(err.message);
@@ -575,7 +984,7 @@ async function bulkUpdateItems(enabled) {
 $("#reloadItemsBtn").addEventListener("click", async () => {
   try {
     await api("POST", "/admin/items/reload");
-    showToast("已重新加载");
+    showToast(t("toastReloaded"));
     loadAdminItems();
   } catch (err) {
     showToast(err.message);
@@ -600,7 +1009,7 @@ async function loadAdminAllApps() {
         <td>${escapeHtml(app.reason)}</td>
         <td><span class="status-badge ${statusClass(app.status)}">${statusText(app.status)}</span></td>
         <td>
-          <button class="btn btn-small" onclick="copyAppText(${app.id})">复制</button>
+          <button class="btn btn-small" onclick="copyAppText(${app.id})">${t("copy")}</button>
           ${renderStatusButtons(app.id, app.status)}
         </td>
       `;
