@@ -134,12 +134,12 @@
       <!-- 管理后台 -->
       <section id="adminView" class="view hidden">
         <div class="admin-tabs">
-          <button data-admin-tab="users" class="admin-tab active">用户管理</button>
+          <button data-admin-tab="users" class="admin-tab">用户管理</button>
           <button data-admin-tab="items" class="admin-tab">道具配置</button>
-          <button data-admin-tab="allApps" class="admin-tab">全部申请</button>
+          <button data-admin-tab="allApps" class="admin-tab active">全部申请</button>
         </div>
 
-        <div id="adminUsers" class="admin-panel">
+        <div id="adminUsers" class="admin-panel hidden">
           <h3>用户管理</h3>
           <div class="table-wrap">
             <table id="usersTable" class="data-table">
@@ -186,7 +186,7 @@
           </div>
         </div>
 
-        <div id="adminAllApps" class="admin-panel hidden">
+        <div id="adminAllApps" class="admin-panel">
           <h3>全部申请</h3>
           <div class="table-wrap">
             <table id="allAppsTable" class="data-table">

@@ -644,7 +644,16 @@ function switchView(viewName) {
   if (viewName === "apply") renderApplyView();
   if (viewName === "history") loadHistory();
   if (viewName === "profile") renderProfileView();
-  if (viewName === "admin") loadAdminUsers();
+  if (viewName === "admin") loadCurrentAdminPanel();
+}
+
+function loadCurrentAdminPanel() {
+  const activeTab = $(".admin-tab.active");
+  if (!activeTab) return;
+  const tab = activeTab.dataset.adminTab;
+  if (tab === "users") loadAdminUsers();
+  if (tab === "items") loadAdminItems();
+  if (tab === "allApps") loadAdminAllApps();
 }
 
 // ---------- Apply View ----------
