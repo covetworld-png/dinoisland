@@ -33,23 +33,18 @@ body {
 }
 .app-header h1 { margin: 0; font-size: 20px; }
 
-.lang-switcher {
-  display: flex;
-  gap: 4px;
+.lang-toggle {
   margin-left: auto;
-}
-.lang-switcher button {
   background: #fff;
   border: 1px solid var(--border);
-  padding: 5px 10px;
+  padding: 5px 12px;
   border-radius: var(--radius);
   font-size: 13px;
   cursor: pointer;
 }
-.lang-switcher button.active {
-  background: var(--primary);
-  color: #fff;
+.lang-toggle:hover {
   border-color: var(--primary);
+  color: var(--primary);
 }
 
 nav { display: flex; gap: 8px; flex-wrap: wrap; }
