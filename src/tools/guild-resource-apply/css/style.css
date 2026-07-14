@@ -136,6 +136,22 @@ main { max-width: 960px; margin: 20px auto; padding: 0 16px; }
   font-size: 13px;
 }
 
+/* 分类背景色 */
+.item-card.cat-恐龙 { background: #f0fdf4; border-color: #bbf7d0; }
+.item-card.cat-恐龙.active { background: #dcfce7; border-color: #22c55e; }
+
+.item-card.cat-功能卡 { background: #eff6ff; border-color: #bfdbfe; }
+.item-card.cat-功能卡.active { background: #dbeafe; border-color: #3b82f6; }
+
+.item-card.cat-货币 { background: #fffbeb; border-color: #fde68a; }
+.item-card.cat-货币.active { background: #fef3c7; border-color: #f59e0b; }
+
+.item-card.cat-其他 { background: #faf5ff; border-color: #e9d5ff; }
+.item-card.cat-其他.active { background: #f3e8ff; border-color: #a855f7; }
+
+.item-card.cat-皮肤 { background: #fdf2f8; border-color: #fbcfe8; }
+.item-card.cat-皮肤.active { background: #fce7f3; border-color: #ec4899; }
+
 .preview-box {
   background: #f9fafb; border: 1px dashed var(--border); border-radius: var(--radius);
   padding: 14px; margin-bottom: 18px;

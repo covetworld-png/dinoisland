@@ -211,7 +211,7 @@ function renderItemGrid() {
 
     (grouped[cat] || []).forEach(it => {
       const card = document.createElement("div");
-      card.className = "item-card";
+      card.className = `item-card cat-${cat}`;
       card.dataset.propId = it.prop_id;
       card.innerHTML = `
         <div class="item-name-vn">${escapeHtml(it.name_vn)}</div>
