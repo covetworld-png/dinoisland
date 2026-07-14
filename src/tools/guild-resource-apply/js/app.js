@@ -91,6 +91,7 @@ $("#registerForm").addEventListener("submit", async (e) => {
     const res = await api("POST", "/auth/register", {
       username: fd.get("username"),
       password: fd.get("password"),
+      nickname: fd.get("nickname"),
     });
     currentUser = res.data;
     showApp();
