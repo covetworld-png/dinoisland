@@ -178,15 +178,14 @@ function renderItemGrid() {
   const container = $("#itemGrid");
   container.innerHTML = "";
 
-  // 按分类分组排序
-  const order = { "功能卡": 1, "货币": 2, "喷漆礼盒": 3, "恐龙": 4 };
+  // 固定分类顺序，皮肤暂时为空也显示
+  const categories = ["恐龙", "功能卡", "货币", "其他", "皮肤"];
   const grouped = {};
   allItems.forEach(it => {
     const cat = it.category || "其他";
     if (!grouped[cat]) grouped[cat] = [];
     grouped[cat].push(it);
   });
-  const categories = Object.keys(grouped).sort((a, b) => (order[a] || 99) - (order[b] || 99));
 
   categories.forEach(cat => {
     const catDiv = document.createElement("div");
