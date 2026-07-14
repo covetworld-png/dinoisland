@@ -463,7 +463,9 @@ function formatItems(items) {
 
 function formatDate(dt) {
   if (!dt) return "-";
-  const d = new Date(dt);
+  // 后端返回的是 UTC 时间字符串，按 UTC 解析后转本地时间显示
+  const d = new Date(/Z$|^[+-]\d{2}:/.test(dt) ? dt : dt + "Z");
+  if (isNaN(d.getTime())) return dt;
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }
 
