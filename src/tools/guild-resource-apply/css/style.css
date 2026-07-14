@@ -1,0 +1,160 @@
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #d97706;
+  --bg: #f3f4f6;
+  --card: #ffffff;
+  --text: #111827;
+  --text-secondary: #6b7280;
+  --border: #d1d5db;
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.app-header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.app-header h1 { margin: 0; font-size: 20px; }
+
+nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.nav-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 14px;
+}
+.nav-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.nav-btn.logout { color: var(--danger); }
+
+main { max-width: 960px; margin: 20px auto; padding: 0 16px; }
+.view { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+.hidden { display: none !important; }
+
+/* Auth */
+.auth-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+.auth-tab {
+  background: none; border: none; padding: 10px 16px; cursor: pointer;
+  border-bottom: 2px solid transparent; font-size: 16px;
+}
+.auth-tab.active { border-bottom-color: var(--primary); color: var(--primary); font-weight: 600; }
+.auth-form { display: flex; flex-direction: column; gap: 16px; max-width: 360px; }
+.auth-form label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--text-secondary); }
+.auth-form input {
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 16px;
+}
+.auth-form button, .btn-primary {
+  background: var(--primary); color: #fff; border: none; padding: 12px;
+  border-radius: var(--radius); font-size: 16px; cursor: pointer;
+}
+.auth-form button:hover, .btn-primary:hover { background: var(--primary-dark); }
+.hint { color: var(--text-secondary); font-size: 13px; margin: 0; }
+
+/* Forms */
+.form-row { margin-bottom: 18px; }
+.form-row label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--text-secondary); }
+.form-row input, .form-row select {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 15px;
+}
+.form-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.search-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; }
+
+.item-list {
+  max-height: 220px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 8px; background: #fafafa;
+}
+.item-option {
+  display: flex; align-items: center; gap: 8px; padding: 6px 4px; cursor: pointer;
+}
+.item-option:hover { background: #eff6ff; }
+.item-option input { width: auto; }
+.item-name-vn { font-weight: 500; }
+.item-name-cn { color: var(--text-secondary); font-size: 13px; }
+
+.selected-items { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.selected-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  background: #eff6ff; border-radius: var(--radius); border: 1px solid #bfdbfe;
+}
+.selected-item input[type="number"] {
+  width: 80px; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius);
+}
+.selected-item .unit { color: var(--text-secondary); }
+.selected-item .remove { margin-left: auto; color: var(--danger); cursor: pointer; font-size: 13px; }
+
+.preview-box {
+  background: #f9fafb; border: 1px dashed var(--border); border-radius: var(--radius);
+  padding: 14px; margin-bottom: 18px;
+}
+.preview-text { margin: 6px 0 0; font-size: 16px; color: var(--text); word-break: break-word; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; }
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 12px;
+}
+.data-table th, .data-table td {
+  border: 1px solid var(--border); padding: 10px; text-align: left; vertical-align: top;
+}
+.data-table th { background: #f9fafb; font-weight: 600; }
+.data-table tbody tr:nth-child(even) { background: #fafafa; }
+
+.status-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 500;
+}
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-approved { background: #d1fae5; color: #065f46; }
+.status-rejected { background: #fee2e2; color: #991b1b; }
+.status-completed { background: #dbeafe; color: #1e40af; }
+
+.btn {
+  background: #fff; border: 1px solid var(--border); padding: 6px 12px;
+  border-radius: var(--radius); cursor: pointer; font-size: 13px;
+}
+.btn:hover { background: #f3f4f6; }
+.btn-small { padding: 4px 8px; font-size: 12px; }
+
+.filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.filter-bar input, .filter-bar select { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
+
+/* Admin */
+.admin-tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.admin-tab {
+  background: none; border: none; padding: 10px 14px; cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.admin-tab.active { border-bottom-color: var(--primary); color: var(--primary); font-weight: 600; }
+.bulk-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: #1f2937; color: #fff; padding: 10px 20px; border-radius: var(--radius);
+  z-index: 1000; font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .form-row.two-col { grid-template-columns: 1fr; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .app-header { flex-direction: column; align-items: flex-start; }
+}

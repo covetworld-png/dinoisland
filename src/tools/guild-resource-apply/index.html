@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>军团资源申请工具 | Guild Resource Apply</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>军团资源申请工具</h1>
+      <nav id="nav" class="hidden">
+        <button data-view="apply" class="nav-btn active">申请资源</button>
+        <button data-view="history" class="nav-btn">历史记录</button>
+        <button data-view="admin" class="nav-btn admin-only hidden">管理后台</button>
+        <button id="logoutBtn" class="nav-btn logout">退出</button>
+      </nav>
+    </header>
+
+    <main id="main">
+      <!-- 登录/注册 -->
+      <section id="authView" class="view">
+        <div class="auth-tabs">
+          <button id="tabLogin" class="auth-tab active">登录</button>
+          <button id="tabRegister" class="auth-tab">注册</button>
+        </div>
+        <form id="loginForm" class="auth-form">
+          <label>账号 <input type="text" name="username" required></label>
+          <label>密码 <input type="password" name="password" required></label>
+          <button type="submit">登录</button>
+          <p class="hint">默认管理员：robot / FWJ123123</p>
+        </form>
+        <form id="registerForm" class="auth-form hidden">
+          <label>账号 <input type="text" name="username" required minlength="3"></label>
+          <label>密码 <input type="password" name="password" required minlength="6"></label>
+          <label>昵称 <input type="text" name="nickname" required></label>
+          <button type="submit">注册</button>
+        </form>
+      </section>
+
+      <!-- 申请表单 -->
+      <section id="applyView" class="view hidden">
+        <h2>申请资源</h2>
+        <form id="applyForm">
+          <div class="form-row">
+            <label>服务器
+              <select name="server" id="serverSelect" required>
+                <option value="">请选择服务器</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-row two-col">
+            <label>游戏账号 <input type="text" name="game_account" placeholder="如 13219626" required></label>
+            <label>游戏昵称 <input type="text" name="game_nickname" placeholder="如 SPECTER" required></label>
+          </div>
+
+          <div class="form-row">
+            <label>选择道具（可多选）</label>
+            <input type="text" id="itemSearch" placeholder="搜索道具越语/中文..." class="search-input">
+            <div id="itemList" class="item-list"></div>
+          </div>
+
+          <div id="selectedItems" class="selected-items"></div>
+
+          <div class="form-row">
+            <label>申请原因 <input type="text" name="reason" placeholder="如 团长申请资源" required></label>
+          </div>
+
+          <div class="form-row preview-box">
+            <strong>中文预览：</strong>
+            <p id="applyPreview" class="preview-text">-</p>
+          </div>
+
+          <button type="submit" class="btn-primary">提交申请</button>
+        </form>
+      </section>
+
+      <!-- 历史记录 -->
+      <section id="historyView" class="view hidden">
+        <h2>申请历史</h2>
+        <div class="filter-bar">
+          <input type="text" id="historySearch" placeholder="搜索账号/昵称/道具..." class="search-input">
+          <select id="historyStatus">
+            <option value="">全部状态</option>
+            <option value="pending">待处理</option>
+            <option value="approved">已通过</option>
+            <option value="rejected">已拒绝</option>
+            <option value="completed">已完成</option>
+          </select>
+          <select id="historyServer">
+            <option value="">全部服务器</option>
+          </select>
+          <input type="date" id="historyStart">
+          <input type="date" id="historyEnd">
+          <button id="historyFilterBtn" class="btn">筛选</button>
+        </div>
+        <div class="table-wrap">
+          <table id="historyTable" class="data-table">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>账号</th>
+                <th>昵称</th>
+                <th>服务器</th>
+                <th>道具</th>
+                <th>原因</th>
+                <th>状态</th>
+                <th class="admin-only hidden">操作</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 管理后台 -->
+      <section id="adminView" class="view hidden">
+        <div class="admin-tabs">
+          <button data-admin-tab="users" class="admin-tab active">用户管理</button>
+          <button data-admin-tab="items" class="admin-tab">道具配置</button>
+          <button data-admin-tab="allApps" class="admin-tab">全部申请</button>
+        </div>
+
+        <div id="adminUsers" class="admin-panel">
+          <h3>用户管理</h3>
+          <div class="table-wrap">
+            <table id="usersTable" class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>账号</th>
+                  <th>密码</th>
+                  <th>昵称</th>
+                  <th>角色</th>
+                  <th>注册时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adminItems" class="admin-panel hidden">
+          <h3>道具配置</h3>
+          <div class="bulk-actions">
+            <button id="bulkEnableBtn" class="btn">批量启用</button>
+            <button id="bulkDisableBtn" class="btn">批量禁用</button>
+            <button id="reloadItemsBtn" class="btn">从 items.yaml 重新加载</button>
+          </div>
+          <div class="table-wrap">
+            <table id="itemsTable" class="data-table">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="selectAllItems"></th>
+                  <th>prop_id</th>
+                  <th>中文名</th>
+                  <th>越南语名</th>
+                  <th>单位</th>
+                  <th>分类</th>
+                  <th>启用</th>
+                  <th>排序</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adminAllApps" class="admin-panel hidden">
+          <h3>全部申请</h3>
+          <div class="table-wrap">
+            <table id="allAppsTable" class="data-table">
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>提交人</th>
+                  <th>账号</th>
+                  <th>昵称</th>
+                  <th>服务器</th>
+                  <th>道具</th>
+                  <th>原因</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
