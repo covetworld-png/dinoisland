@@ -275,11 +275,10 @@ function t(key) {
   return translations[currentLang]?.[key] || translations.zh[key] || key;
 }
 
-function updateLangToggle() {
-  const btn = $("#langToggle");
-  if (!btn) return;
-  // 按钮显示目标语言：当前越南语则显示 CN，反之显示 VI
-  btn.textContent = currentLang === "vi" ? "CN" : "VI";
+function updateLangSwitcher() {
+  $$("#langSwitcher button").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === currentLang);
+  });
 }
 
 function categoryName(cat) {
@@ -434,14 +433,16 @@ function applyI18n() {
   }
 }
 
-$("#langToggle").addEventListener("click", () => {
-  currentLang = currentLang === "vi" ? "zh" : "vi";
-  localStorage.setItem("gra_lang", currentLang);
-  updateLangToggle();
-  applyI18n();
-  renderItemGrid();
-  if (!$('#historyView').classList.contains('hidden')) loadHistory();
-  if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
+$$("#langSwitcher button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentLang = btn.dataset.lang;
+    localStorage.setItem("gra_lang", currentLang);
+    updateLangSwitcher();
+    applyI18n();
+    renderItemGrid();
+    if (!$('#historyView').classList.contains('hidden')) loadHistory();
+    if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
+  });
 });
 
 function showToast(message, type = "info") {
@@ -566,7 +567,7 @@ function showAuth() {
   $("#nav").classList.add("hidden");
   $$(".view").forEach(v => v.classList.add("hidden"));
   $("#authView").classList.remove("hidden");
-  updateLangToggle();
+  updateLangSwitcher();
   applyI18n();
   // 自动填充记住的账号密码
   const remembered = localStorage.getItem("gra_remember") === "1";
@@ -579,7 +580,7 @@ function showAuth() {
 
 async function showApp() {
   $("#nav").classList.remove("hidden");
-  updateLangToggle();
+  updateLangSwitcher();
   applyI18n();
   $$(".admin-only").forEach(el => {
     el.classList.toggle("hidden", currentUser.role !== "admin");

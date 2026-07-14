@@ -10,7 +10,11 @@
   <div id="app">
     <header class="app-header">
       <h1 id="appTitle">资源申请工具</h1>
-      <button id="langToggle" type="button" class="lang-toggle">CN</button>
+      <div id="langSwitcher" class="lang-switcher">
+        <button type="button" data-lang="vi" class="active">VI</button>
+        <button type="button" data-lang="zh">CN</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
       <nav id="nav" class="hidden">
         <button data-view="apply" class="nav-btn active">申请资源</button>
         <button data-view="history" class="nav-btn">历史记录</button>
