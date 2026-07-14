@@ -249,6 +249,11 @@ function getSelectedItems() {
   return items.sort((a, b) => String(a.prop_id).localeCompare(String(b.prop_id)));
 }
 
+function getServerPreviewName(server) {
+  const map = { "Q服 server1": "Q服", "K服 server2": "K服" };
+  return map[server] || server;
+}
+
 function updatePreview() {
   const server = $("#serverSelect").value;
   const account = $("#applyForm input[name='game_account']").value.trim();
@@ -261,7 +266,7 @@ function updatePreview() {
     $("#applyPreview").textContent = "-";
     return;
   }
-  const text = `${server} ${account} ${nickname} ${itemsText}${reason ? `（${reason}）` : ""}`;
+  const text = `${getServerPreviewName(server)} ${account} ${nickname} ${itemsText}${reason ? `（${reason}）` : ""}`;
   $("#applyPreview").textContent = text;
 }
 
