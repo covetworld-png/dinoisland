@@ -59,6 +59,7 @@ const translations = {
     adminItems: "Cấu Hình Vật Phẩm",
     adminAllApps: "Tất Cả Đơn Xin",
     resetPassword: "Đặt Lại Mật Khẩu",
+    downloadBackup: "Tải Sao Lưu Dữ Liệu",
     toggleAdmin: "Chuyển Quyền Admin",
     bulkEnable: "Bật Hàng Loạt",
     bulkDisable: "Tắt Hàng Loạt",
@@ -158,6 +159,7 @@ const translations = {
     adminItems: "道具配置",
     adminAllApps: "全部申请",
     resetPassword: "重置密码",
+    downloadBackup: "下载数据备份",
     toggleAdmin: "切换管理员",
     bulkEnable: "批量启用",
     bulkDisable: "批量禁用",
@@ -257,6 +259,7 @@ const translations = {
     adminItems: "Item Config",
     adminAllApps: "All Applications",
     resetPassword: "Reset Password",
+    downloadBackup: "Download Backup",
     toggleAdmin: "Toggle Admin",
     bulkEnable: "Bulk Enable",
     bulkDisable: "Bulk Disable",
@@ -432,6 +435,7 @@ function applyI18n() {
   $("#adminUsers h3").textContent = t("adminUsers");
   $("#adminItems h3").textContent = t("adminItems");
   $("#adminAllApps h3").textContent = t("adminAllApps");
+  $("#downloadBackupBtn").textContent = t("downloadBackup");
   $("#bulkEnableBtn").textContent = t("bulkEnable");
   $("#bulkDisableBtn").textContent = t("bulkDisable");
   $("#reloadItemsBtn").textContent = t("reloadItems");
@@ -1131,6 +1135,15 @@ $("#reloadItemsBtn").addEventListener("click", async () => {
   } catch (err) {
     showToast(err.message);
   }
+});
+
+$("#downloadBackupBtn").addEventListener("click", () => {
+  const a = document.createElement("a");
+  a.href = `${API_BASE}/admin/backup`;
+  a.download = "";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 });
 
 async function loadAdminAllApps() {

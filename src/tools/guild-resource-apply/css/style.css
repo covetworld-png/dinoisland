@@ -246,6 +246,8 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 }
 .admin-tab.active { border-bottom-color: var(--primary); color: var(--primary); font-weight: 600; }
 .bulk-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+.admin-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.admin-panel-header h3 { margin: 0; }
 
 /* Toast */
 .toast {
