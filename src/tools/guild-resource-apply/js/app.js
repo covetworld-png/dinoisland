@@ -27,6 +27,7 @@ const translations = {
     passwordHint: "Mật khẩu có thể tùy ý",
     nicknameHint: "Vui lòng nhập biệt danh trong game",
     server: "Máy Chủ",
+    selectUser: "Chọn Ngưởi Dùng",
     gameAccount: "Tài Khoản Game",
     gameNickname: "Biệt Danh Game",
     selectItems: "Chọn vật phẩm (nhập số lượng)",
@@ -125,6 +126,7 @@ const translations = {
     passwordHint: "密码可任意设置",
     nicknameHint: "请填写游戏内的昵称",
     server: "服务器",
+    selectUser: "选择用户",
     gameAccount: "游戏账号",
     gameNickname: "游戏昵称",
     selectItems: "选择道具（填写数量即可）",
@@ -223,6 +225,7 @@ const translations = {
     passwordHint: "Password can be anything",
     nicknameHint: "Enter your in-game nickname",
     server: "Server",
+    selectUser: "Select User",
     gameAccount: "Game Account",
     gameNickname: "Game Nickname",
     selectItems: "Select Items (enter quantity)",
@@ -388,10 +391,11 @@ function applyI18n() {
 
   // Apply form
   $$("#applyForm label")[0].childNodes[0].textContent = t("server");
-  $$("#applyForm label")[1].childNodes[0].textContent = t("gameAccount");
-  $$("#applyForm label")[2].childNodes[0].textContent = t("gameNickname");
-  $$("#applyForm .form-row label")[3].childNodes[0].textContent = t("selectItems");
-  $$("#applyForm label")[3].childNodes[0].textContent = t("reason");
+  $$("#applyForm label")[1].childNodes[0].textContent = t("selectUser");
+  $$("#applyForm label")[2].childNodes[0].textContent = t("gameAccount");
+  $$("#applyForm label")[3].childNodes[0].textContent = t("gameNickname");
+  $$("#applyForm .form-row label")[4].childNodes[0].textContent = t("selectItems");
+  $$("#applyForm label")[5].childNodes[0].textContent = t("reason");
   $$("#applyForm .preview-box strong")[0].textContent = t("preview") + "：";
   $("#applyForm button[type='submit']").textContent = t("submit");
 
@@ -801,7 +805,16 @@ $("#applyForm").addEventListener("submit", async (e) => {
   }
 });
 
-function renderApplyView() {
+async function renderApplyView() {
+  const userSelectRow = $("#userSelectRow");
+  const userSelect = $("#userSelect");
+  if (currentUser && currentUser.role === "admin") {
+    userSelectRow.classList.remove("hidden");
+    await loadUserSelect(userSelect);
+  } else if (userSelectRow) {
+    userSelectRow.classList.add("hidden");
+  }
+
   if (currentUser) {
     $("#applyForm input[name='game_account']").value = currentUser.username || "";
     $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
@@ -810,6 +823,29 @@ function renderApplyView() {
   renderItemGrid();
   updatePreview();
 }
+
+async function loadUserSelect(sel) {
+  sel.innerHTML = `<option value="">${t("pleaseSelectUser")}</option>`;
+  try {
+    const res = await api("GET", "/admin/users");
+    (res.data || []).forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = JSON.stringify({ username: u.username, nickname: u.nickname });
+      opt.textContent = `${escapeHtml(u.username)} (${escapeHtml(u.nickname)})`;
+      sel.appendChild(opt);
+    });
+  } catch (err) {
+    showToast(err.message);
+  }
+}
+
+$("#userSelect").addEventListener("change", (e) => {
+  if (!e.target.value) return;
+  const user = JSON.parse(e.target.value);
+  $("#applyForm input[name='game_account']").value = user.username || "";
+  $("#applyForm input[name='game_nickname']").value = user.nickname || user.username || "";
+  updatePreview();
+});
 
 // ---------- Profile ----------
 
