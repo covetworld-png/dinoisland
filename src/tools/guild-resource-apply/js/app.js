@@ -1173,7 +1173,8 @@ function lookupSkin() {
   if (skin) {
     priceInput.value = skin.price;
     priceInput.readOnly = true;
-    resultEl.textContent = t("skinFound").replace("{name}", skin.name_cn).replace("{price}", skin.price);
+    const displayName = currentLang === "vi" ? skin.name_vn : (currentLang === "en" ? skin.name_en : skin.name_cn);
+    resultEl.textContent = t("skinFound").replace("{name}", displayName).replace("{price}", skin.price);
   } else {
     priceInput.value = "";
     priceInput.readOnly = false;
@@ -1197,23 +1198,27 @@ function addCustomSkin() {
   }
   const skin = allSkins[skinId];
   let price;
-  let label;
+  let name_cn, name_vn, name_en;
   if (skin) {
     price = skin.price;
-    label = skin.name_cn;
+    name_cn = skin.name_cn;
+    name_vn = skin.name_vn || skin.name_cn;
+    name_en = skin.name_en || skin.name_cn;
   } else {
     price = parseInt($("#skinPrice").value, 10);
     if (isNaN(price) || price < 0) {
       showToast(t("toastSkinInvalid"));
       return;
     }
-    label = `PF ${skinId}`;
+    name_cn = `PF ${skinId}`;
+    name_vn = name_cn;
+    name_en = name_cn;
   }
   selectedItems[skinId] = {
     prop_id: skinId,
-    name_cn: label,
-    name_vn: label,
-    name_en: label,
+    name_cn,
+    name_vn,
+    name_en,
     unit: "",
     quantity: 1,
     vip_value: price,
