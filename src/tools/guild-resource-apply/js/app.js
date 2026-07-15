@@ -35,7 +35,7 @@ const translations = {
     accountHint: "Vui lòng nhập ID số trong game (ví dụ: 13219626)",
     passwordHint: "Mật khẩu có thể tùy ý",
     nicknameHint: "Vui lòng nhập biệt danh trong game",
-    registerRoleHint: "Vui lòng chọn máy chủ và biệt danh của vai trò đầu tiên",
+    registerRoleHint: "Vai trò đầu tiên sẽ do quản trị viên tạo sau khi duyệt",
     pleaseFillServer: "chưa chọn máy chủ",
     pleaseFillGameAccount: "chưa điền tài khoản game",
     pleaseFillGameNickname: "chưa điền biệt danh game",
@@ -160,6 +160,7 @@ const translations = {
     statusApproved: "Đã duyệt",
     statusPendingApproval: "Chờ duyệt",
     approve: "Duyệt",
+    approveAndCreateRole: "Duyệt và tạo vai trò",
     disable: "Vô hiệu",
     delete: "Xóa",
     confirmDeleteUser: "Xóa ngưởi dùng này? Đơn xin của họ sẽ được giữ lại.",
@@ -185,6 +186,7 @@ const translations = {
     accountHint: "请填写游戏内的数字账号（如 13219626）",
     passwordHint: "密码可任意设置",
     nicknameHint: "请填写游戏内的昵称",
+    registerRoleHint: "首个角色将在管理员审批后创建",
     registerServerHint: "请选择角色所在的服务器",
     pleaseFillServer: "未选择服务器",
     pleaseFillGameAccount: "未填写游戏账号",
@@ -310,6 +312,7 @@ const translations = {
     statusApproved: "已通过",
     statusPendingApproval: "待审批",
     approve: "通过",
+    approveAndCreateRole: "审批并建角色",
     disable: "禁用",
     delete: "删除",
     confirmDeleteUser: "确定删除该用户吗？其申请记录将保留。",
@@ -335,7 +338,7 @@ const translations = {
     accountHint: "Enter your in-game numeric ID (e.g. 13219626)",
     passwordHint: "Password can be anything",
     nicknameHint: "Enter your in-game nickname",
-    registerRoleHint: "Please select the server and nickname of your first role",
+    registerRoleHint: "Your first role will be created by an admin after approval",
     pleaseFillServer: "server not selected",
     pleaseFillGameAccount: "game account not entered",
     pleaseFillGameNickname: "game nickname not entered",
@@ -460,6 +463,7 @@ const translations = {
     statusApproved: "Approved",
     statusPendingApproval: "Pending Approval",
     approve: "Approve",
+    approveAndCreateRole: "Approve & Create Role",
     disable: "Disable",
     delete: "Delete",
     confirmDeleteUser: "Delete this user? Their applications will be kept.",
@@ -546,8 +550,7 @@ function applyI18n() {
   const regLabels = $$("#registerForm label");
   regLabels[0].childNodes[0].textContent = t("username");
   regLabels[1].childNodes[0].textContent = t("password");
-  regLabels[2].childNodes[0].textContent = t("server");
-  regLabels[3].childNodes[0].textContent = t("nickname");
+  regLabels[2].childNodes[0].textContent = t("nickname");
   $$("#registerForm .hint")[0].textContent = t("accountHint");
   $$("#registerForm .hint")[1].textContent = t("passwordHint");
   $$("#registerForm .hint")[2].textContent = t("registerRoleHint");
@@ -777,17 +780,16 @@ $("#loginForm").addEventListener("submit", async (e) => {
 $("#registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
-  const server = fd.get("server");
-  if (!server) {
-    showToast(t("missingFieldsHint").replace("{fields}", t("pleaseFillServer")));
+  const nickname = fd.get("nickname");
+  if (!nickname) {
+    showToast(t("missingFieldsHint").replace("{fields}", t("nickname")));
     return;
   }
   try {
     const res = await api("POST", "/auth/register", {
       username: fd.get("username"),
       password: fd.get("password"),
-      nickname: fd.get("nickname"),
-      server,
+      nickname,
     });
     if (res.data && res.data.role === "admin") {
       currentUser = res.data;
@@ -1160,9 +1162,12 @@ function renderRoleSelect(selectedValue = "") {
     const label = `${escapeHtml(role.server)} - ${escapeHtml(role.nickname)}${role.is_main ? ` (${t("mainRole")})` : ""}`;
     html += `<option value="role:${role.id}">${label}</option>`;
   });
-  html += `<option value="other">${escapeHtml(t("otherRole"))}</option>`;
   sel.innerHTML = html;
   sel.value = selectedValue;
+
+  // 没有角色时显示提示
+  const noRoleHint = $("#noRoleHint");
+  if (noRoleHint) noRoleHint.classList.toggle("hidden", userRoles.length > 0);
 }
 
 function applyRoleSelection(value) {
@@ -1185,17 +1190,12 @@ function applyRoleSelection(value) {
       $("#currentVipPoints").value = "";
       updateVipLevelBadge();
     }
-  } else if (value === "other") {
-    gameNicknameInput.value = "";
-    serverSelect.value = "";
-    gameNicknameInput.readOnly = false;
-    serverSelect.disabled = false;
   } else {
-    // 未选择
+    // 未选择或清空：保持只读/禁用，禁止手动输入
     gameNicknameInput.value = "";
     serverSelect.value = "";
-    gameNicknameInput.readOnly = false;
-    serverSelect.disabled = false;
+    gameNicknameInput.readOnly = true;
+    serverSelect.disabled = true;
   }
   updatePreview();
   updateItemGridState();
@@ -1207,32 +1207,48 @@ function renderProfileRoles() {
   const addForm = $("#addRoleForm");
   if (!list || !addForm) return;
 
+  const isAdmin = currentUser && currentUser.role === "admin";
   if (!userRoles.length) {
     list.innerHTML = `<p class="hint">${t("noSavedRoles")}</p>`;
   } else {
-    list.innerHTML = userRoles.map(role => `
-      <div class="role-item ${role.is_main ? "main" : ""}" data-id="${role.id}">
-        <div class="role-info">
-          <span class="role-server">${escapeHtml(role.server)}</span>
-          <input type="text" class="role-edit-nickname" value="${escapeHtml(role.nickname)}" placeholder="${t("gameNickname")}">
-          ${role.is_main ? `<span class="role-main-badge">${t("mainRole")}</span>` : ""}
+    list.innerHTML = userRoles.map(role => {
+      if (isAdmin) {
+        return `
+          <div class="role-item ${role.is_main ? "main" : ""}" data-id="${role.id}">
+            <div class="role-info">
+              <span class="role-server">${escapeHtml(role.server)}</span>
+              <input type="text" class="role-edit-nickname" value="${escapeHtml(role.nickname)}" placeholder="${t("gameNickname")}">
+              ${role.is_main ? `<span class="role-main-badge">${t("mainRole")}</span>` : ""}
+            </div>
+            <div class="role-actions">
+              <button type="button" class="btn-secondary btn-icon btn-save-role" data-id="${role.id}">${t("editRole")}</button>
+              ${role.is_main ? "" : `<button type="button" class="btn-danger btn-icon btn-delete-role" data-id="${role.id}">${t("deleteRole")}</button>`}
+            </div>
+          </div>
+        `;
+      }
+      return `
+        <div class="role-item ${role.is_main ? "main" : ""}" data-id="${role.id}">
+          <div class="role-info">
+            <span class="role-server">${escapeHtml(role.server)}</span>
+            <span class="role-nickname">${escapeHtml(role.nickname)}</span>
+            ${role.is_main ? `<span class="role-main-badge">${t("mainRole")}</span>` : ""}
+          </div>
         </div>
-        <div class="role-actions">
-          <button type="button" class="btn-secondary btn-icon btn-save-role" data-id="${role.id}">${t("editRole")}</button>
-          ${role.is_main ? "" : `<button type="button" class="btn-danger btn-icon btn-delete-role" data-id="${role.id}">${t("deleteRole")}</button>`}
-        </div>
-      </div>
-    `).join("");
+      `;
+    }).join("");
   }
 
-  // 最多两个服务器角色，已有两个则隐藏添加表单
-  const maxRolesReached = userRoles.length >= servers.length;
-  addForm.classList.toggle("hidden", maxRolesReached);
-  if (!maxRolesReached) {
-    const newRoleServer = $("#newRoleServer");
-    const usedServers = new Set(userRoles.map(r => r.server));
-    const availableServers = servers.filter(s => !usedServers.has(s));
-    newRoleServer.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>` + availableServers.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+  // 管理员可添加角色；添加表单本身已通过 admin-only 类控制
+  if (isAdmin) {
+    const maxRolesReached = userRoles.length >= servers.length;
+    addForm.classList.toggle("hidden", maxRolesReached);
+    if (!maxRolesReached) {
+      const newRoleServer = $("#newRoleServer");
+      const usedServers = new Set(userRoles.map(r => r.server));
+      const availableServers = servers.filter(s => !usedServers.has(s));
+      newRoleServer.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>` + availableServers.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+    }
   }
 }
 
@@ -1666,7 +1682,9 @@ async function loadAdminUsers() {
       const statusText = u.approved ? t("statusApproved") : t("statusPendingApproval");
       const approvalBtn = isSelf || u.role === "admin"
         ? ""
-        : `<button class="btn btn-small" onclick="toggleApproval(${u.id}, ${u.approved ? 0 : 1})">${u.approved ? t("disable") : t("approve")}</button>`;
+        : u.approved
+          ? `<button class="btn btn-small" onclick="toggleApproval(${u.id}, 0)">${t("disable")}</button>`
+          : `<button class="btn btn-small" onclick="approveUserWithRole(${u.id})">${t("approveAndCreateRole")}</button>`;
       const deleteBtn = isSelf || u.role === "admin"
         ? ""
         : `<button class="btn btn-small" style="color:var(--danger)" onclick="deleteUser(${u.id})">${t("delete")}</button>`;
@@ -1719,6 +1737,20 @@ window.toggleApproval = async (userId, approve) => {
   try {
     await api("POST", `/admin/users/${userId}/toggle-approval`);
     showToast(approve ? t("toastUserApproved") : t("toastUserDisabled"));
+    loadAdminUsers();
+  } catch (err) {
+    showToast(err.message);
+  }
+};
+
+window.approveUserWithRole = async (userId) => {
+  const server = prompt(t("pleaseFillServer"));
+  if (!server) return;
+  const nickname = prompt(t("pleaseFillGameNickname"));
+  if (!nickname) return;
+  try {
+    await api("POST", `/admin/users/${userId}/approve`, { server, nickname });
+    showToast(t("toastUserApproved"));
     loadAdminUsers();
   } catch (err) {
     showToast(err.message);

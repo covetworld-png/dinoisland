@@ -42,15 +42,8 @@
           <p class="hint">请填写游戏内的数字账号（如 13219626），该账号将用于申请资源</p>
           <label>密码 <input type="password" name="password" required></label>
           <p class="hint">密码可任意设置</p>
-          <div class="form-row two-col">
-            <label id="registerServerLabel">服务器
-              <select name="server" id="registerServerSelect" required>
-                <option value="">请选择服务器</option>
-              </select>
-            </label>
-            <label id="registerNicknameLabel">昵称 <input type="text" name="nickname" id="registerNickname" required></label>
-          </div>
-          <p class="hint" id="registerRoleHint">请填写第一个角色所在的服务器和昵称</p>
+          <label>昵称 <input type="text" name="nickname" id="registerNickname" required></label>
+          <p class="hint">昵称用于显示，角色需由管理员审核后添加</p>
           <button type="submit">注册</button>
         </form>
       </section>
@@ -72,9 +65,9 @@
             <label id="roleLabel">选择角色
               <select id="roleSelect">
                 <option value="">请选择角色</option>
-                <option value="other">其他（手动输入）</option>
               </select>
             </label>
+            <p id="noRoleHint" class="hint hidden">暂无角色，请联系管理员添加</p>
           </div>
 
           <div class="form-row three-col account-row">
@@ -141,12 +134,13 @@
         <div class="profile-roles-section">
           <h3 id="profileRolesTitle">我的角色</h3>
           <div id="roleList" class="role-list"></div>
-          <div id="addRoleForm" class="role-add-form">
+          <div id="addRoleForm" class="role-add-form admin-only hidden">
             <select id="newRoleServer"></select>
             <input type="text" id="newRoleNickname" placeholder="昵称">
             <button type="button" id="addRoleBtn" class="btn-primary">添加角色</button>
           </div>
-          <p id="roleLimitHint" class="hint">每个服务器只能有一个角色</p>
+          <p id="roleLimitHint" class="hint admin-only hidden">每个服务器只能有一个角色</p>
+          <p id="roleReadonlyHint" class="hint">角色由管理员统一管理，如需新增请联系管理员</p>
         </div>
       </section>
 
