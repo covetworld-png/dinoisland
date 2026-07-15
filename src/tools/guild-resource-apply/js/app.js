@@ -1,7 +1,7 @@
 // 若前后端部署在不同域名或端口，可在浏览器控制台设置 window.API_BASE 或 localStorage.setItem('API_BASE', 'http://127.0.0.1:5001/api')
 function detectApiBase() {
   const path = location.pathname;
-  if (path.startsWith('/gra-prod/')) return '/gra-prod/api';
+  if (path.startsWith('/gra-test/')) return '/gra-test/api';
   if (path.startsWith('/gra/')) return '/gra/api';
   return '/gra/api';
 }
