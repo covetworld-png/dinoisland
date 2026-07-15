@@ -103,6 +103,11 @@ const translations = {
     adminItems: "Cấu Hình Vật Phẩm",
     adminAllApps: "Tất Cả Đơn Xin",
     adminAccountApproval: "Phê Duyệt Tài Khoản",
+    adminSettings: "Cài Đặt Hệ Thống",
+    settingEnableSubAccounts: "Bật chức năng tài khoản con",
+    settingEnableSubAccountsDesc: "Khi tắt, ngưởi dùng thường chỉ có thể dùng tài khoản chính để gửi đơn, không thể thêm/chọn tài khoản con",
+    saveSettings: "Lưu cài đặt",
+    toastSettingsSaved: "Đã lưu cài đặt",
     resetPassword: "Đặt Lại Mật Khẩu",
     downloadBackup: "Tải Sao Lưu Dữ Liệu",
     toggleAdmin: "Chuyển Quyền Admin",
@@ -247,6 +252,11 @@ const translations = {
     adminItems: "道具配置",
     adminAllApps: "全部申请",
     adminAccountApproval: "常用账号审批",
+    adminSettings: "系统设置",
+    settingEnableSubAccounts: "启用子账号功能",
+    settingEnableSubAccountsDesc: "关闭后，普通用户申请时只能使用主账号，无法添加/选择常用账号",
+    saveSettings: "保存设置",
+    toastSettingsSaved: "设置已保存",
     resetPassword: "重置密码",
     downloadBackup: "下载数据备份",
     toggleAdmin: "切换管理员",
@@ -391,6 +401,11 @@ const translations = {
     adminItems: "Item Config",
     adminAllApps: "All Applications",
     adminAccountApproval: "Account Approval",
+    adminSettings: "System Settings",
+    settingEnableSubAccounts: "Enable sub-account feature",
+    settingEnableSubAccountsDesc: "When disabled, regular users can only use their main account to apply, and cannot add/select sub-accounts",
+    saveSettings: "Save Settings",
+    toastSettingsSaved: "Settings saved",
     resetPassword: "Reset Password",
     downloadBackup: "Download Backup",
     toggleAdmin: "Toggle Admin",
@@ -595,10 +610,15 @@ function applyI18n() {
   $$(".admin-tab[data-admin-tab='items']").textContent = t("adminItems");
   $$(".admin-tab[data-admin-tab='allApps']").textContent = t("adminAllApps");
   $$(".admin-tab[data-admin-tab='accountApproval']").textContent = t("adminAccountApproval");
+  $$(".admin-tab[data-admin-tab='settings']").textContent = t("adminSettings");
   $("#adminUsers h3").textContent = t("adminUsers");
   $("#adminItems h3").textContent = t("adminItems");
   $("#adminAllApps h3").textContent = t("adminAllApps");
   $("#adminAccountApproval h3").textContent = t("adminAccountApproval");
+  $("#adminSettings h3").textContent = t("adminSettings");
+  $("#settingSubAccountsLabel").textContent = t("settingEnableSubAccounts");
+  $("#settingSubAccountsDesc").textContent = t("settingEnableSubAccountsDesc");
+  $("#saveSettingsBtn").textContent = t("saveSettings");
   $("#downloadBackupBtn").textContent = t("downloadBackup");
   $("#bulkEnableBtn").textContent = t("bulkEnable");
   $("#bulkDisableBtn").textContent = t("bulkDisable");
@@ -662,6 +682,7 @@ $$("#langSwitcher button").forEach(btn => {
     if (!$('#historyView').classList.contains('hidden')) loadHistory();
     if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
     if (!$('#adminAccountApproval').classList.contains('hidden')) loadAdminAccountApprovals();
+    if (!$('#adminSettings').classList.contains('hidden')) renderAdminSettings();
   });
 });
 
@@ -830,6 +851,7 @@ async function showApp() {
     el.classList.toggle("hidden", currentUser.role !== "admin");
   });
   await loadItems();
+  await loadSettings();
   switchView("apply");
 }
 
@@ -858,6 +880,7 @@ function loadCurrentAdminPanel() {
   if (tab === "items") loadAdminItems();
   if (tab === "allApps") loadAdminAllApps();
   if (tab === "accountApproval") loadAdminAccountApprovals();
+  if (tab === "settings") renderAdminSettings();
 }
 
 // ---------- Apply View ----------
@@ -885,6 +908,54 @@ async function loadItems() {
   }
   renderServerOptions();
   renderItemGrid();
+}
+
+async function loadSettings() {
+  try {
+    const res = await api("GET", "/settings");
+    appSettings = res.data || {};
+  } catch (e) {
+    appSettings = {};
+  }
+  updateSubAccountUI();
+  renderAdminSettings();
+}
+
+function isSubAccountsEnabled() {
+  return String(appSettings.enable_sub_accounts || "1") !== "0";
+}
+
+function updateSubAccountUI() {
+  const enabled = isSubAccountsEnabled();
+  const accountSelectRow = $(".account-select-row");
+  const gameAccountInput = $("#applyForm input[name='game_account']");
+  const gameNicknameInput = $("#applyForm input[name='game_nickname']");
+  const serverSelect = $("#serverSelect");
+  const isAdmin = currentUser && currentUser.role === "admin";
+
+  if (accountSelectRow) {
+    accountSelectRow.classList.toggle("hidden", !enabled);
+  }
+
+  if (!enabled) {
+    // 关闭子账号：默认使用主账号信息
+    if (currentUser) {
+      gameAccountInput.value = currentUser.username || "";
+      gameNicknameInput.value = currentUser.nickname || currentUser.username || "";
+      serverSelect.value = currentUser.server || "";
+    }
+    // 普通用户强制只读，管理员仍可代申请
+    gameAccountInput.readOnly = !isAdmin;
+    gameNicknameInput.readOnly = !isAdmin;
+    serverSelect.disabled = !isAdmin;
+  } else {
+    // 开启子账号：恢复可编辑，由账号选择控制服务器禁用状态
+    gameAccountInput.readOnly = false;
+    gameNicknameInput.readOnly = false;
+    applyAccountSelection($("#accountSelect").value);
+  }
+  updatePreview();
+  updateItemGridState();
 }
 
 function getVipLevel(points) {
@@ -1109,6 +1180,7 @@ function getSelectedItems() {
 }
 
 let savedAccounts = [];
+let appSettings = {};
 
 async function loadSavedAccounts() {
   if (!currentUser) {
@@ -1474,6 +1546,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
     updateVipLevelBadge();
     renderAccountSelect("main");
     applyAccountSelection("main");
+    updateSubAccountUI();
     renderItemGrid();
     renderSelectedItems();
     updatePreview();
@@ -1498,6 +1571,7 @@ async function renderApplyView() {
   renderServerOptions();
   renderAccountSelect("main");
   applyAccountSelection("main");
+  updateSubAccountUI();
   $("#currentVipPoints").value = "";
   renderItemGrid();
   renderSelectedItems();
@@ -1659,6 +1733,7 @@ $$(".admin-tab").forEach(tab => {
     if (tab.dataset.adminTab === "items") loadAdminItems();
     if (tab.dataset.adminTab === "allApps") loadAdminAllApps();
     if (tab.dataset.adminTab === "accountApproval") loadAdminAccountApprovals();
+    if (tab.dataset.adminTab === "settings") renderAdminSettings();
   });
 });
 
@@ -1901,6 +1976,26 @@ window.rejectAccount = async (accountId) => {
     showToast(err.message);
   }
 };
+
+function renderAdminSettings() {
+  const checkbox = $("#settingEnableSubAccounts");
+  if (!checkbox) return;
+  checkbox.checked = isSubAccountsEnabled();
+}
+
+async function saveAdminSettings() {
+  const enabled = $("#settingEnableSubAccounts").checked ? "1" : "0";
+  try {
+    await api("PUT", "/admin/settings", { enable_sub_accounts: enabled });
+    appSettings.enable_sub_accounts = enabled;
+    showToast(t("toastSettingsSaved"));
+    updateSubAccountUI();
+  } catch (err) {
+    showToast(err.message);
+  }
+}
+
+$("#saveSettingsBtn").addEventListener("click", saveAdminSettings);
 
 // ---------- Misc ----------
 

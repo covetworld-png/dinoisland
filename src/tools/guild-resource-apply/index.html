@@ -209,6 +209,7 @@
           <button data-admin-tab="items" class="admin-tab">道具配置</button>
           <button data-admin-tab="allApps" class="admin-tab active">全部申请</button>
           <button data-admin-tab="accountApproval" class="admin-tab">常用账号审批</button>
+          <button data-admin-tab="settings" class="admin-tab">系统设置</button>
         </div>
 
         <div id="adminUsers" class="admin-panel hidden">
@@ -299,6 +300,23 @@
               </thead>
               <tbody></tbody>
             </table>
+          </div>
+        </div>
+
+        <div id="adminSettings" class="admin-panel hidden">
+          <h3>系统设置</h3>
+          <div class="settings-list">
+            <div class="setting-item">
+              <div class="setting-info">
+                <strong id="settingSubAccountsLabel">启用子账号功能</strong>
+                <p id="settingSubAccountsDesc" class="hint">关闭后，普通用户申请时只能使用主账号，无法添加/选择常用账号</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="settingEnableSubAccounts">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <button type="button" id="saveSettingsBtn" class="btn-primary">保存设置</button>
           </div>
         </div>
       </section>
