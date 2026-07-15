@@ -58,13 +58,6 @@
       <section id="applyView" class="view hidden">
         <h2>申请资源</h2>
         <form id="applyForm">
-          <div class="form-row">
-            <label id="serverLabel">服务器
-              <select name="server" id="serverSelect" required>
-                <option value="">请选择服务器</option>
-              </select>
-            </label>
-          </div>
           <div id="userSelectRow" class="form-row admin-only hidden">
             <label>选择用户
               <select id="userSelect">
@@ -81,6 +74,14 @@
               </select>
             </label>
             <button type="button" id="manageAccountsBtn" class="btn-secondary btn-manage">管理常用账号</button>
+          </div>
+
+          <div class="form-row">
+            <label id="serverLabel">服务器
+              <select name="server" id="serverSelect" required>
+                <option value="">请选择服务器</option>
+              </select>
+            </label>
           </div>
 
           <div id="accountModal" class="modal hidden">

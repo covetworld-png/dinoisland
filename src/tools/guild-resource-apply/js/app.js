@@ -987,7 +987,7 @@ function highlightMissingFields() {
   const accountInput = $("#applyForm input[name='game_account']");
   const nicknameInput = $("#applyForm input[name='game_nickname']");
 
-  if (!serverSel.value) {
+  if (!serverSel.disabled && !serverSel.value) {
     missing.push(t("pleaseFillServer"));
     serverSel.classList.add("input-error");
   } else {
@@ -1130,11 +1130,13 @@ function renderAccountSelect(selectedValue = "main") {
 }
 
 function applyAccountSelection(value) {
+  const serverSelect = $("#serverSelect");
   if (value === "main") {
     if (currentUser) {
       $("#applyForm input[name='game_account']").value = currentUser.username || "";
       $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
-      $("#serverSelect").value = currentUser.server || "";
+      serverSelect.value = currentUser.server || "";
+      serverSelect.disabled = true;
       $("#currentVipPoints").value = "";
     }
   } else if (value.startsWith("saved:")) {
@@ -1143,10 +1145,14 @@ function applyAccountSelection(value) {
     if (acc) {
       $("#applyForm input[name='game_account']").value = acc.account;
       $("#applyForm input[name='game_nickname']").value = acc.nickname;
-      $("#serverSelect").value = acc.server || "";
+      serverSelect.value = acc.server || "";
+      serverSelect.disabled = true;
       $("#currentVipPoints").value = "";
       updateVipLevelBadge();
     }
+  } else if (value === "other") {
+    serverSelect.value = "";
+    serverSelect.disabled = false;
   }
   updatePreview();
   updateItemGridState();
@@ -1445,7 +1451,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
 
   try {
     await api("POST", "/applications", {
-      server: fd.get("server"),
+      server: $("#serverSelect").value,
       game_account: fd.get("game_account"),
       game_nickname: fd.get("game_nickname"),
       current_vip_points: parseInt(fd.get("current_vip_points") || "0", 10),
@@ -1459,6 +1465,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
     $("#currentVipPoints").value = "";
     updateVipLevelBadge();
     renderAccountSelect("main");
+    applyAccountSelection("main");
     renderItemGrid();
     renderSelectedItems();
     updatePreview();
@@ -1479,14 +1486,11 @@ async function renderApplyView() {
     userSelectRow.classList.add("hidden");
   }
 
-  if (currentUser) {
-    $("#applyForm input[name='game_account']").value = currentUser.username || "";
-    $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
-    $("#currentVipPoints").value = "";
-  }
   updateVipLevelBadge();
   renderServerOptions();
   renderAccountSelect("main");
+  applyAccountSelection("main");
+  $("#currentVipPoints").value = "";
   renderItemGrid();
   renderSelectedItems();
   updatePreview();
@@ -1514,6 +1518,7 @@ $("#userSelect").addEventListener("change", (e) => {
   $("#applyForm input[name='game_account']").value = user.username || "";
   $("#applyForm input[name='game_nickname']").value = user.nickname || user.username || "";
   $("#accountSelect").value = "other";
+  applyAccountSelection("other");
   updatePreview();
   updateItemGridState();
 });
