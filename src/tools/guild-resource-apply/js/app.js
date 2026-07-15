@@ -1753,47 +1753,50 @@ window.toggleApproval = async (userId, approve) => {
   }
 };
 
-function promptForServerAndNickname() {
-  if (!servers.length) {
-    showToast(t("noServersAvailable"));
-    return null;
-  }
-  const options = servers.map((s, i) => `${i + 1}. ${s}`).join("\n");
-  const serverInput = prompt(`${t("promptServer")}\n${options}`);
-  if (!serverInput) return null;
-  let server = serverInput.trim();
-  const idx = parseInt(server, 10);
-  if (!isNaN(idx) && idx >= 1 && idx <= servers.length) {
-    server = servers[idx - 1];
-  }
-  const nickname = prompt(t("promptNickname"));
-  if (!nickname) return null;
-  return { server, nickname: nickname.trim() };
-}
+let roleModalMode = "";
+let roleModalUserId = null;
 
-window.approveUserWithRole = async (userId) => {
-  const input = promptForServerAndNickname();
-  if (!input) return;
+window.openRoleModal = (userId, mode) => {
+  roleModalUserId = userId;
+  roleModalMode = mode;
+  $("#roleModalTitle").textContent = mode === "approve" ? t("approveAndCreateRole") : t("addRole");
+  const serverSelect = $("#modalRoleServer");
+  serverSelect.innerHTML = servers.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+  $("#modalRoleNickname").value = "";
+  $("#roleModal").classList.remove("hidden");
+};
+
+window.closeRoleModal = () => {
+  $("#roleModal").classList.add("hidden");
+  roleModalUserId = null;
+  roleModalMode = "";
+};
+
+$("#modalRoleConfirmBtn").addEventListener("click", async () => {
+  if (!roleModalUserId) return;
+  const server = $("#modalRoleServer").value;
+  const nickname = $("#modalRoleNickname").value.trim();
+  if (!server || !nickname) {
+    showToast(t("missingFieldsHint").replace("{fields}", t("pleaseFillServer") + "、" + t("pleaseFillGameNickname")));
+    return;
+  }
   try {
-    await api("POST", `/admin/users/${userId}/approve`, input);
-    showToast(t("toastUserApproved"));
+    if (roleModalMode === "approve") {
+      await api("POST", `/admin/users/${roleModalUserId}/approve`, { server, nickname });
+      showToast(t("toastUserApproved"));
+    } else {
+      await api("POST", "/roles", { server, nickname, user_id: roleModalUserId });
+      showToast(t("toastRoleSaved"));
+    }
+    closeRoleModal();
     loadAdminUsers();
   } catch (err) {
     showToast(err.message);
   }
-};
+});
 
-window.addRoleForUser = async (userId) => {
-  const input = promptForServerAndNickname();
-  if (!input) return;
-  try {
-    await api("POST", "/roles", { ...input, user_id: userId });
-    showToast(t("toastRoleSaved"));
-    loadAdminUsers();
-  } catch (err) {
-    showToast(err.message);
-  }
-};
+window.approveUserWithRole = (userId) => openRoleModal(userId, "approve");
+window.addRoleForUser = (userId) => openRoleModal(userId, "add");
 
 window.deleteUser = async (userId) => {
   if (!confirm(t("confirmDeleteUser"))) return;

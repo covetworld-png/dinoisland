@@ -268,6 +268,33 @@
     <div id="toast" class="toast hidden"></div>
   </div>
 
+  <!-- 角色管理弹窗 -->
+  <div id="roleModal" class="modal hidden">
+    <div class="modal-overlay" onclick="closeRoleModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="roleModalTitle">添加角色</h3>
+        <button type="button" class="modal-close" onclick="closeRoleModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>服务器
+            <select id="modalRoleServer"></select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>游戏昵称
+            <input type="text" id="modalRoleNickname" placeholder="请输入游戏昵称">
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeRoleModal()">取消</button>
+        <button type="button" class="btn btn-primary" id="modalRoleConfirmBtn">确认</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/app.js?v=20260715h"></script>
 </body>
 </html>
