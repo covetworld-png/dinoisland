@@ -751,6 +751,10 @@ $("#loginForm").addEventListener("submit", async (e) => {
   const remember = fd.get("remember") === "on";
   try {
     const res = await api("POST", "/auth/login", { username, password });
+    if (!res || !res.data) {
+      showToast("登录响应异常，请重试");
+      return;
+    }
     currentUser = res.data;
     loadRoles();
     if (remember) {
@@ -834,6 +838,11 @@ function showAuth() {
 
 async function showApp() {
   try {
+    if (!currentUser) {
+      showToast("用户信息未获取到，请重新登录");
+      showAuth();
+      return;
+    }
     $("#nav").classList.remove("hidden");
     updateLangSwitcher();
     applyI18n();
