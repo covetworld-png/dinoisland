@@ -855,8 +855,10 @@ function renderItemGrid() {
       card.dataset.propId = it.prop_id;
       card.innerHTML = `
         <input type="checkbox" ${isSelected ? "checked" : ""} data-prop="${it.prop_id}" aria-label="${escapeHtml(itemName(it))}">
-        <div class="item-name">${escapeHtml(itemName(it))}</div>
-        <div class="item-price">${it.vip_value || 0} ${t("beastCoin")}</div>
+        <div class="item-info">
+          <div class="item-name">${escapeHtml(itemName(it))}</div>
+          <div class="item-price">${it.vip_value || 0} ${t("beastCoin")}</div>
+        </div>
       `;
       const checkbox = card.querySelector("input[type='checkbox']");
       checkbox.addEventListener("click", (e) => {
