@@ -831,7 +831,12 @@ async function loadItems() {
     const skinsRes = await api("GET", "/skins");
     allSkins = {};
     (skinsRes.data || []).forEach(s => {
-      allSkins[s.prop_id] = { name_cn: s.name_cn, price: s.price };
+      allSkins[s.prop_id] = {
+        name_cn: s.name_cn,
+        name_vn: s.name_vn,
+        name_en: s.name_en,
+        price: s.price,
+      };
     });
   } catch (e) {
     showToast(e.message);
