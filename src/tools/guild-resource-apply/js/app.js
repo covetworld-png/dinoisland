@@ -70,6 +70,7 @@ const translations = {
     propId: "prop_id",
     nameCn: "Tên CN",
     nameVn: "Tên VN",
+    nameEn: "Tên EN",
     unit: "Đơn Vị",
     category: "Phân Loại",
     enabled: "Bật",
@@ -172,6 +173,7 @@ const translations = {
     propId: "prop_id",
     nameCn: "中文名",
     nameVn: "越南语名",
+    nameEn: "英文名",
     unit: "单位",
     category: "分类",
     enabled: "启用",
@@ -274,6 +276,7 @@ const translations = {
     propId: "prop_id",
     nameCn: "CN Name",
     nameVn: "VN Name",
+    nameEn: "EN Name",
     unit: "Unit",
     category: "Category",
     enabled: "Enabled",
@@ -323,6 +326,7 @@ function t(key) {
 
 function itemName(it) {
   if (currentLang === "vi") return it.name_vn || it.name_cn;
+  if (currentLang === "en") return it.name_en || it.name_cn;
   return it.name_cn;
 }
 
@@ -463,14 +467,15 @@ function applyI18n() {
 
   // Admin items table headers
   const itemThs = $$("#itemsTable th");
-  if (itemThs.length >= 8) {
+  if (itemThs.length >= 9) {
     itemThs[1].textContent = t("propId");
     itemThs[2].textContent = t("nameCn");
     itemThs[3].textContent = t("nameVn");
-    itemThs[4].textContent = t("unit");
-    itemThs[5].textContent = t("category");
-    itemThs[6].textContent = t("enabled");
-    itemThs[7].textContent = t("sort");
+    itemThs[4].textContent = t("nameEn");
+    itemThs[5].textContent = t("unit");
+    itemThs[6].textContent = t("category");
+    itemThs[7].textContent = t("enabled");
+    itemThs[8].textContent = t("sort");
   }
 
   // Admin all apps table headers
@@ -754,6 +759,7 @@ function toggleItemSelection(item) {
       prop_id: item.prop_id,
       name_cn: item.name_cn,
       name_vn: item.name_vn,
+      name_en: item.name_en,
       unit: item.unit,
       quantity: 1,
     };
@@ -1129,6 +1135,7 @@ function renderAdminItems() {
       <td>${escapeHtml(it.prop_id)}</td>
       <td>${escapeHtml(it.name_cn)}</td>
       <td>${escapeHtml(it.name_vn)}</td>
+      <td>${escapeHtml(it.name_en || "")}</td>
       <td><input type="text" class="unit-input" data-prop="${it.prop_id}" value="${escapeHtml(it.unit)}" size="4"></td>
       <td>${escapeHtml(it.category)}</td>
       <td><input type="checkbox" class="enable-check" data-prop="${it.prop_id}" ${it.enabled ? "checked" : ""}></td>
