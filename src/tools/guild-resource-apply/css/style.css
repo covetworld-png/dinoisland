@@ -398,11 +398,20 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 .modal-body { padding: 16px 18px; overflow-y: auto; }
 .modal-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 .modal-account-item {
-  display: grid; grid-template-columns: 1fr 1fr auto auto; align-items: center;
+  display: grid; grid-template-columns: 1.2fr 1.2fr 0.8fr auto auto; align-items: center;
   gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa;
 }
 .modal-account-item input { min-width: 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
 .modal-account-item .btn-icon { padding: 7px 12px; font-size: 13px; line-height: 1; }
-.modal-add-form { display: flex; gap: 8px; }
-.modal-add-form input { flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
+.modal-add-form { display: grid; grid-template-columns: 1.2fr 1.2fr 0.8fr auto; gap: 8px; align-items: center; }
+.modal-add-form input { min-width: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
+.modal-add-form input[type="number"] { width: 100%; }
+@media (max-width: 480px) {
+  .modal-add-form { grid-template-columns: 1fr; }
+  .modal-account-item { grid-template-columns: 1fr 1fr; }
+  .modal-account-item input:nth-of-type(3) { grid-column: 1 / -1; }
+  .modal-account-item .btn-secondary { grid-column: 1; }
+  .modal-account-item .btn-danger { grid-column: 2; }
+}
 .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+.vip-upgrade-hint { color: var(--primary); font-weight: 500; margin-top: -8px; }

@@ -4,6 +4,7 @@ const API_BASE = window.API_BASE || localStorage.getItem("API_BASE") || "/gra/ap
 let currentUser = null;
 let allItems = [];
 let servers = [];
+let vipLevels = [];
 let currentApps = [];
 let currentLang = localStorage.getItem("gra_lang") || "vi";
 let selectedItems = {}; // { prop_id: { prop_id, name_cn, name_vn, unit, quantity } }
@@ -117,6 +118,7 @@ const translations = {
     toastAccountSaved: "Đã lưu tài khoản",
     toastAccountExists: "Tài khoản này đã được lưu",
     itemGridHint: "Vui lòng chọn máy chủ, tài khoản game, biệt danh và điểm VIP trước khi chọn vật phẩm",
+    vipUpgradeHint: "Sau đơn này VIP sẽ tăng từ cấp {before} lên cấp {after}",
     toastBulkUpdated: "Cập nhật hàng loạt hoàn tất",
     toastReloaded: "Đã tải lại",
     categoryDinosaur: "Khủng Long",
@@ -245,6 +247,7 @@ const translations = {
     toastAccountSaved: "账号已保存",
     toastAccountExists: "该账号已存在",
     itemGridHint: "请先选择服务器、填写游戏账号、昵称和 VIP 积分后再选择道具",
+    vipUpgradeHint: "本次申请后 VIP 将从 {before} 级升至 {after} 级",
     toastBulkUpdated: "批量更新完成",
     toastReloaded: "已重新加载",
     categoryDinosaur: "恐龙",
@@ -373,6 +376,7 @@ const translations = {
     toastAccountSaved: "Account saved",
     toastAccountExists: "Account already exists",
     itemGridHint: "Please select server, enter game account, nickname and VIP points before selecting items",
+    vipUpgradeHint: "After this request, VIP will upgrade from level {before} to level {after}",
     toastBulkUpdated: "Bulk update completed",
     toastReloaded: "Reloaded",
     categoryDinosaur: "Dinosaur",
@@ -498,6 +502,7 @@ function applyI18n() {
   $("#addAccountConfirmBtn").textContent = t("addAccount");
   $("#newAccountName").placeholder = t("gameAccount");
   $("#newAccountNickname").placeholder = t("gameNickname");
+  $("#newAccountVip").placeholder = t("vipPoints");
   $$("#accountSelect option[value='main']")[0].textContent = t("mainAccount");
   $$("#accountSelect option[value='other']")[0].textContent = t("otherAccount");
   $$("#applyForm .preview-box strong")[0].textContent = t("preview") + "：";
@@ -786,11 +791,25 @@ async function loadItems() {
     allItems = itemsRes.data || [];
     const serversRes = await api("GET", "/servers");
     servers = serversRes.data || [];
+    const vipRes = await api("GET", "/vip-levels");
+    vipLevels = vipRes.data || [];
   } catch (e) {
     showToast(e.message);
   }
   renderServerOptions();
   renderItemGrid();
+}
+
+function getVipLevel(points) {
+  let level = 0;
+  for (const l of vipLevels) {
+    if (points >= (l.min_points || 0)) {
+      level = l.level || 0;
+    } else {
+      break;
+    }
+  }
+  return level;
 }
 
 function renderServerOptions() {
@@ -882,6 +901,7 @@ function toggleItemSelection(item) {
       name_en: item.name_en,
       unit: item.unit,
       quantity: 1,
+      vip_value: item.vip_value || 0,
     };
   }
   renderItemGrid();
@@ -968,6 +988,7 @@ function applyAccountSelection(value) {
     if (currentUser) {
       $("#applyForm input[name='game_account']").value = currentUser.username || "";
       $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
+      $("#currentVipPoints").value = currentUser.vip_points || 0;
     }
   } else if (value.startsWith("saved:")) {
     const id = parseInt(value.split(":")[1], 10);
@@ -975,6 +996,7 @@ function applyAccountSelection(value) {
     if (acc) {
       $("#applyForm input[name='game_account']").value = acc.account;
       $("#applyForm input[name='game_nickname']").value = acc.nickname;
+      $("#currentVipPoints").value = acc.vip_points || 0;
     }
   }
   updatePreview();
@@ -984,6 +1006,7 @@ function applyAccountSelection(value) {
 function openAccountModal() {
   $("#newAccountName").value = "";
   $("#newAccountNickname").value = "";
+  $("#newAccountVip").value = "";
   renderAccountList();
   $("#accountModal").classList.remove("hidden");
   $("#newAccountName").focus();
@@ -1003,6 +1026,7 @@ function renderAccountList() {
     <div class="modal-account-item" data-id="${acc.id}">
       <input type="text" class="account-edit-name" value="${escapeHtml(acc.account)}" placeholder="${t("gameAccount")}">
       <input type="text" class="account-edit-nickname" value="${escapeHtml(acc.nickname)}" placeholder="${t("gameNickname")}">
+      <input type="number" class="account-edit-vip" value="${acc.vip_points || 0}" placeholder="${t("vipPoints")}" min="0">
       <button type="button" class="btn-secondary btn-icon" data-id="${acc.id}">${t("save")}</button>
       <button type="button" class="btn-danger btn-icon" data-id="${acc.id}">${t("delete")}</button>
     </div>
@@ -1012,14 +1036,16 @@ function renderAccountList() {
 async function addNewAccount() {
   const account = $("#newAccountName").value.trim();
   const nickname = $("#newAccountNickname").value.trim();
+  const vip_points = parseInt($("#newAccountVip").value || "0", 10);
   if (!account || !nickname) {
     showToast(t("toastSelectAccount"));
     return;
   }
   try {
-    await api("POST", "/accounts", { account, nickname });
+    await api("POST", "/accounts", { account, nickname, vip_points });
     $("#newAccountName").value = "";
     $("#newAccountNickname").value = "";
+    $("#newAccountVip").value = "";
     await loadSavedAccounts();
     renderAccountList();
     showToast(t("toastAccountSaved"));
@@ -1032,12 +1058,13 @@ async function updateSavedAccount(id) {
   const row = $(`.modal-account-item[data-id='${id}']`);
   const account = row.querySelector(".account-edit-name").value.trim();
   const nickname = row.querySelector(".account-edit-nickname").value.trim();
+  const vip_points = parseInt(row.querySelector(".account-edit-vip").value || "0", 10);
   if (!account || !nickname) {
     showToast(t("toastSelectAccount"));
     return;
   }
   try {
-    await api("PUT", `/accounts/${id}`, { account, nickname });
+    await api("PUT", `/accounts/${id}`, { account, nickname, vip_points });
     await loadSavedAccounts();
     renderAccountList();
     showToast(t("toastAccountUpdated"));
@@ -1107,12 +1134,28 @@ function updatePreview() {
   const reason = $("#applyForm input[name='reason']").value.trim();
   const items = getSelectedItems();
   const itemsText = items.map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join("，");
+  const hintEl = $("#vipUpgradeHint");
 
   if (!server || !account || !nickname || !itemsText) {
     $("#applyPreview").textContent = "-";
+    hintEl.classList.add("hidden");
     return;
   }
-  const text = `${getServerPreviewName(server)} ${account} ${nickname} ${itemsText}${reason ? `（${reason}）` : ""}`;
+
+  let text = `${getServerPreviewName(server)} ${account} ${nickname} ${itemsText}${reason ? `（${reason}）` : ""}`;
+
+  const currentPoints = parseInt($("#currentVipPoints").value || "0", 10);
+  const delta = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
+  const levelBefore = getVipLevel(currentPoints);
+  const levelAfter = getVipLevel(currentPoints + delta);
+  if (levelAfter > levelBefore) {
+    text += `，提升 VIP 等级到 ${levelAfter} 级`;
+    hintEl.textContent = t("vipUpgradeHint").replace("{before}", levelBefore).replace("{after}", levelAfter);
+    hintEl.classList.remove("hidden");
+  } else {
+    hintEl.classList.add("hidden");
+  }
+
   $("#applyPreview").textContent = text;
 }
 
@@ -1122,7 +1165,10 @@ $$("#applyForm input[name='game_account'], #applyForm input[name='game_nickname'
     updateItemGridState();
   });
 });
-$("#currentVipPoints").addEventListener("input", updateItemGridState);
+$("#currentVipPoints").addEventListener("input", () => {
+  updatePreview();
+  updateItemGridState();
+});
 $("#applyForm input[name='reason']").addEventListener("input", updatePreview);
 $("#serverSelect").addEventListener("change", () => {
   updatePreview();
@@ -1147,6 +1193,9 @@ $("#newAccountName").addEventListener("keydown", (e) => {
   if (e.key === "Enter") $("#newAccountNickname").focus();
 });
 $("#newAccountNickname").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") $("#newAccountVip").focus();
+});
+$("#newAccountVip").addEventListener("keydown", (e) => {
   if (e.key === "Enter") addNewAccount();
 });
 $("#addSkinBtn").addEventListener("click", addCustomSkin);
