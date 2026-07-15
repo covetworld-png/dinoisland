@@ -43,6 +43,8 @@ const translations = {
     missingFieldsHint: "Vui lòng điền: {fields}",
     server: "Máy Chủ",
     selectUser: "Chọn Ngưởi Dùng",
+    pleaseSelectUser: "Chọn ngưởi dùng",
+    selectUserHint: "Admin chọn ngưởi dùng để thay mặt gửi đơn xin tài nguyên",
     gameAccount: "Tài Khoản Game",
     gameNickname: "Biệt Danh Game",
     vipPoints: "Điểm VIP",
@@ -185,6 +187,8 @@ const translations = {
     missingFieldsHint: "请先填写：{fields}",
     server: "服务器",
     selectUser: "选择用户",
+    pleaseSelectUser: "请选择用户",
+    selectUserHint: "管理员选择用户后可代其提交资源申请",
     gameAccount: "游戏账号",
     gameNickname: "游戏昵称",
     vipPoints: "VIP 积分",
@@ -327,6 +331,8 @@ const translations = {
     missingFieldsHint: "Please fill in: {fields}",
     server: "Server",
     selectUser: "Select User",
+    pleaseSelectUser: "Please select user",
+    selectUserHint: "Admin selects a user to submit an application on their behalf",
     gameAccount: "Game Account",
     gameNickname: "Game Nickname",
     vipPoints: "VIP Points",
@@ -533,6 +539,8 @@ function applyI18n() {
   // Apply form
   $("#serverLabel").childNodes[0].textContent = t("server");
   $("#userSelectRow label").childNodes[0].textContent = t("selectUser");
+  const userSelectHint = $("#userSelectHint");
+  if (userSelectHint) userSelectHint.textContent = t("selectUserHint");
   $("#accountSelect").parentElement.childNodes[0].textContent = t("selectAccount");
   $("#gameAccountLabel").childNodes[0].textContent = t("gameAccount");
   $("#gameNicknameLabel").childNodes[0].textContent = t("gameNickname");
