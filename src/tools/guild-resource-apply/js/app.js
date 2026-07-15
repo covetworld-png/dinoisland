@@ -83,6 +83,7 @@ const translations = {
     adminUsers: "Quản Lý Ngưởi Dùng",
     adminItems: "Cấu Hình Vật Phẩm",
     adminAllApps: "Tất Cả Đơn Xin",
+    adminAccountApproval: "Phê Duyệt Tài Khoản",
     resetPassword: "Đặt Lại Mật Khẩu",
     downloadBackup: "Tải Sao Lưu Dữ Liệu",
     toggleAdmin: "Chuyển Quyền Admin",
@@ -213,6 +214,7 @@ const translations = {
     adminUsers: "用户管理",
     adminItems: "道具配置",
     adminAllApps: "全部申请",
+    adminAccountApproval: "常用账号审批",
     resetPassword: "重置密码",
     downloadBackup: "下载数据备份",
     toggleAdmin: "切换管理员",
@@ -343,6 +345,7 @@ const translations = {
     adminUsers: "User Management",
     adminItems: "Item Config",
     adminAllApps: "All Applications",
+    adminAccountApproval: "Account Approval",
     resetPassword: "Reset Password",
     downloadBackup: "Download Backup",
     toggleAdmin: "Toggle Admin",
@@ -541,9 +544,11 @@ function applyI18n() {
   $$(".admin-tab[data-admin-tab='users']").textContent = t("adminUsers");
   $$(".admin-tab[data-admin-tab='items']").textContent = t("adminItems");
   $$(".admin-tab[data-admin-tab='allApps']").textContent = t("adminAllApps");
+  $$(".admin-tab[data-admin-tab='accountApproval']").textContent = t("adminAccountApproval");
   $("#adminUsers h3").textContent = t("adminUsers");
   $("#adminItems h3").textContent = t("adminItems");
   $("#adminAllApps h3").textContent = t("adminAllApps");
+  $("#adminAccountApproval h3").textContent = t("adminAccountApproval");
   $("#downloadBackupBtn").textContent = t("downloadBackup");
   $("#bulkEnableBtn").textContent = t("bulkEnable");
   $("#bulkDisableBtn").textContent = t("bulkDisable");
@@ -600,6 +605,7 @@ $$("#langSwitcher button").forEach(btn => {
     renderSelectedItems();
     if (!$('#historyView').classList.contains('hidden')) loadHistory();
     if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
+    if (!$('#adminAccountApproval').classList.contains('hidden')) loadAdminAccountApprovals();
   });
 });
 
@@ -784,6 +790,7 @@ function loadCurrentAdminPanel() {
   if (tab === "users") loadAdminUsers();
   if (tab === "items") loadAdminItems();
   if (tab === "allApps") loadAdminAllApps();
+  if (tab === "accountApproval") loadAdminAccountApprovals();
 }
 
 // ---------- Apply View ----------
@@ -983,7 +990,7 @@ async function loadSavedAccounts() {
     return;
   }
   try {
-    const res = await api("GET", "/accounts");
+    const res = await api("GET", "/accounts/all");
     savedAccounts = Array.isArray(res.data) ? res.data : [];
   } catch (e) {
     savedAccounts = [];
@@ -994,7 +1001,7 @@ async function loadSavedAccounts() {
 function renderAccountSelect(selectedValue = "main") {
   const sel = $("#accountSelect");
   let html = `<option value="main">${escapeHtml(t("mainAccount"))}</option>`;
-  savedAccounts.forEach(acc => {
+  savedAccounts.filter(acc => acc.approved).forEach(acc => {
     const label = `${escapeHtml(acc.account)} (${escapeHtml(acc.nickname)})`;
     html += `<option value="saved:${acc.id}">${label}</option>`;
   });
@@ -1042,15 +1049,20 @@ function renderAccountList() {
     list.innerHTML = `<p class="hint">${t("noSavedAccounts")}</p>`;
     return;
   }
-  list.innerHTML = savedAccounts.map(acc => `
-    <div class="modal-account-item" data-id="${acc.id}">
+  list.innerHTML = savedAccounts.map(acc => {
+    const statusClass = acc.approved ? "status-approved" : "status-pending-approval";
+    const statusText = acc.approved ? t("statusApproved") : t("statusPendingApproval");
+    return `
+    <div class="modal-account-item ${acc.approved ? "" : "pending"}" data-id="${acc.id}">
       <input type="text" class="account-edit-name" value="${escapeHtml(acc.account)}" placeholder="${t("gameAccount")}">
       <input type="text" class="account-edit-nickname" value="${escapeHtml(acc.nickname)}" placeholder="${t("gameNickname")}">
       <input type="number" class="account-edit-vip" value="${acc.vip_points || 0}" placeholder="${t("vipPoints")}" min="0">
+      <span class="account-status-badge status-badge ${statusClass}">${statusText}</span>
       <button type="button" class="btn-secondary btn-icon" data-id="${acc.id}">${t("save")}</button>
       <button type="button" class="btn-danger btn-icon" data-id="${acc.id}">${t("delete")}</button>
     </div>
-  `).join("");
+  `;
+  }).join("");
 }
 
 async function addNewAccount() {
@@ -1420,6 +1432,7 @@ window.cycleAppStatus = async (appId, currentStatus) => {
     showToast(t("toastStatusUpdated"));
     loadHistory();
     if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
+    if (!$('#adminAccountApproval').classList.contains('hidden')) loadAdminAccountApprovals();
   } catch (err) {
     showToast(err.message);
   }
@@ -1438,6 +1451,7 @@ $$(".admin-tab").forEach(tab => {
     if (tab.dataset.adminTab === "users") loadAdminUsers();
     if (tab.dataset.adminTab === "items") loadAdminItems();
     if (tab.dataset.adminTab === "allApps") loadAdminAllApps();
+    if (tab.dataset.adminTab === "accountApproval") loadAdminAccountApprovals();
   });
 });
 
@@ -1635,6 +1649,52 @@ async function loadAdminAllApps() {
     showToast(err.message);
   }
 }
+
+async function loadAdminAccountApprovals() {
+  try {
+    const res = await api("GET", "/admin/accounts");
+    const tbody = $("#accountApprovalTable tbody");
+    tbody.innerHTML = "";
+    (res.data || []).forEach(acc => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${formatDate(acc.created_at)}</td>
+        <td>${escapeHtml(acc.username)}</td>
+        <td>${escapeHtml(acc.account)}</td>
+        <td>${escapeHtml(acc.nickname)}</td>
+        <td>${acc.vip_points || 0}</td>
+        <td>
+          <button class="btn btn-small" onclick="approveAccount(${acc.id})">${t("approve")}</button>
+          <button class="btn btn-small" style="color:var(--danger)" onclick="rejectAccount(${acc.id})">${t("delete")}</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    showToast(err.message);
+  }
+}
+
+window.approveAccount = async (accountId) => {
+  try {
+    await api("POST", `/admin/accounts/${accountId}/approve`);
+    showToast(t("toastUserApproved"));
+    loadAdminAccountApprovals();
+  } catch (err) {
+    showToast(err.message);
+  }
+};
+
+window.rejectAccount = async (accountId) => {
+  if (!confirm(t("confirmDeleteAccount"))) return;
+  try {
+    await api("POST", `/admin/accounts/${accountId}/reject`);
+    showToast(t("toastAccountDeleted"));
+    loadAdminAccountApprovals();
+  } catch (err) {
+    showToast(err.message);
+  }
+};
 
 // ---------- Misc ----------
 

@@ -196,6 +196,7 @@
           <button data-admin-tab="users" class="admin-tab">用户管理</button>
           <button data-admin-tab="items" class="admin-tab">道具配置</button>
           <button data-admin-tab="allApps" class="admin-tab active">全部申请</button>
+          <button data-admin-tab="accountApproval" class="admin-tab">常用账号审批</button>
         </div>
 
         <div id="adminUsers" class="admin-panel hidden">
@@ -263,6 +264,25 @@
                   <th>道具</th>
                   <th>原因</th>
                   <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adminAccountApproval" class="admin-panel hidden">
+          <h3>常用账号审批</h3>
+          <div class="table-wrap">
+            <table id="accountApprovalTable" class="data-table">
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>提交人</th>
+                  <th>游戏账号</th>
+                  <th>游戏昵称</th>
+                  <th>VIP 积分</th>
                   <th>操作</th>
                 </tr>
               </thead>
