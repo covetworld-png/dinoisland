@@ -919,33 +919,47 @@ function renderSelectedItems() {
   panel.innerHTML = "";
   items.forEach(it => {
     const row = document.createElement("div");
-    row.className = "selected-item";
-    row.innerHTML = `
-      <span class="selected-name" title="${escapeHtml(itemName(it))}">${escapeHtml(itemName(it))}</span>
-      <div class="qty-stepper">
-        <button type="button" class="qty-btn minus" data-prop="${it.prop_id}" aria-label="-">−</button>
-        <input type="number" min="1" value="${it.quantity}" data-prop="${it.prop_id}" inputmode="numeric" pattern="[0-9]*">
-        <button type="button" class="qty-btn plus" data-prop="${it.prop_id}" aria-label="+">+</button>
-      </div>
-      <span class="unit">${escapeHtml(it.unit)}</span>
-    `;
+    row.className = it.is_skin ? "selected-item skin-item" : "selected-item";
+    if (it.is_skin) {
+      row.innerHTML = `
+        <span class="selected-name" title="${escapeHtml(itemName(it))}">${escapeHtml(itemName(it))}</span>
+        <button type="button" class="remove-item-btn" data-prop="${it.prop_id}" aria-label="remove">×</button>
+      `;
+    } else {
+      row.innerHTML = `
+        <span class="selected-name" title="${escapeHtml(itemName(it))}">${escapeHtml(itemName(it))}</span>
+        <div class="qty-stepper">
+          <button type="button" class="qty-btn minus" data-prop="${it.prop_id}" aria-label="-">−</button>
+          <input type="number" min="1" value="${it.quantity}" data-prop="${it.prop_id}" inputmode="numeric" pattern="[0-9]*">
+          <button type="button" class="qty-btn plus" data-prop="${it.prop_id}" aria-label="+">+</button>
+        </div>
+        <span class="unit">${escapeHtml(it.unit)}</span>
+      `;
 
-    const input = row.querySelector("input");
-    const updateQty = (q) => {
-      const val = Math.max(1, parseInt(q, 10) || 1);
-      input.value = val;
-      selectedItems[it.prop_id].quantity = val;
-      updatePreview();
-    };
+      const input = row.querySelector("input");
+      const updateQty = (q) => {
+        const val = Math.max(1, parseInt(q, 10) || 1);
+        input.value = val;
+        selectedItems[it.prop_id].quantity = val;
+        updatePreview();
+      };
 
-    input.addEventListener("input", () => updateQty(input.value));
-    input.addEventListener("blur", () => updateQty(input.value));
+      input.addEventListener("input", () => updateQty(input.value));
+      input.addEventListener("blur", () => updateQty(input.value));
 
-    row.querySelector(".qty-btn.minus").addEventListener("click", () => updateQty(input.value - 1));
-    row.querySelector(".qty-btn.plus").addEventListener("click", () => updateQty(parseInt(input.value, 10) + 1));
+      row.querySelector(".qty-btn.minus").addEventListener("click", () => updateQty(input.value - 1));
+      row.querySelector(".qty-btn.plus").addEventListener("click", () => updateQty(parseInt(input.value, 10) + 1));
+    }
 
     panel.appendChild(row);
   });
+}
+
+function removeSelectedItem(propId) {
+  delete selectedItems[propId];
+  renderItemGrid();
+  renderSelectedItems();
+  updatePreview();
 }
 
 function getSelectedItems() {
@@ -1105,15 +1119,16 @@ function addCustomSkin() {
     showToast(t("toastSkinExists"));
     return;
   }
-  const label = `皮肤 ${skinId}`;
+  const label = `PF ${skinId}`;
   selectedItems[skinId] = {
     prop_id: skinId,
     name_cn: label,
-    name_vn: `Skin ${skinId}`,
-    name_en: `Skin ${skinId}`,
-    unit: "个",
+    name_vn: label,
+    name_en: label,
+    unit: "",
     quantity: 1,
     vip_value: price,
+    is_skin: true,
   };
   $("#skinId").value = "";
   $("#skinPrice").value = "";
@@ -1133,7 +1148,10 @@ function updatePreview() {
   const nickname = $("#applyForm input[name='game_nickname']").value.trim();
   const reason = $("#applyForm input[name='reason']").value.trim();
   const items = getSelectedItems();
-  const itemsText = items.map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join("，");
+  const itemsText = items.map(it => {
+    if (it.is_skin) return itemName(it);
+    return `${it.quantity} ${it.unit}${itemName(it)}`;
+  }).join("，");
   const hintEl = $("#vipUpgradeHint");
 
   if (!server || !account || !nickname || !itemsText) {
@@ -1199,6 +1217,11 @@ $("#newAccountVip").addEventListener("keydown", (e) => {
   if (e.key === "Enter") addNewAccount();
 });
 $("#addSkinBtn").addEventListener("click", addCustomSkin);
+$("#selectedItemsPanel").addEventListener("click", (e) => {
+  const btn = e.target.closest(".remove-item-btn");
+  if (!btn) return;
+  removeSelectedItem(btn.dataset.prop);
+});
 
 $("#applyForm").addEventListener("submit", async (e) => {
   e.preventDefault();

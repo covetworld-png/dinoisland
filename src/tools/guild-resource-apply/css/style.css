@@ -294,6 +294,14 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
   -webkit-appearance: none;
   margin: 0;
 }
+.selected-item.skin-item { padding: 6px 10px; }
+.remove-item-btn {
+  width: 22px; height: 22px; border-radius: 50%; border: none;
+  background: #e5e7eb; color: #6b7280; font-size: 18px; line-height: 1;
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+  margin-left: auto; padding-bottom: 2px;
+}
+.remove-item-btn:hover { background: #fee2e2; color: #991b1b; }
 .selected-item .unit {
   color: var(--text-secondary);
   font-size: 13px;
