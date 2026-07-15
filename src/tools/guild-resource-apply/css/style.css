@@ -153,10 +153,13 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
   content: "⚙"; font-size: 15px; line-height: 1;
 }
 .item-grid-hint { color: var(--warning); margin: 0 0 8px; }
-.skin-input-row { display: flex; gap: 10px; align-items: center; }
-.skin-input-row input[type="text"] { flex: 1; }
-.skin-input-row input[type="number"] { width: 140px; flex-shrink: 0; }
-.skin-input-row button { flex-shrink: 0; }
+.skin-input-row { display: grid; grid-template-columns: 1fr 1.6fr auto; gap: 10px; align-items: center; }
+.skin-input-row input[type="text"],
+.skin-input-row input[type="number"] { width: 100%; min-width: 0; }
+.skin-input-row button { white-space: nowrap; }
+@media (max-width: 480px) {
+  .skin-input-row { grid-template-columns: 1fr; }
+}
 .item-grid.disabled { opacity: 0.45; pointer-events: none; filter: grayscale(0.6); }
 
 .search-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; }
