@@ -153,10 +153,11 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
   content: "⚙"; font-size: 15px; line-height: 1;
 }
 .item-grid-hint { color: var(--warning); margin: 0 0 8px; }
-.skin-input-row { display: grid; grid-template-columns: 1fr 1.6fr auto; gap: 10px; align-items: center; }
+.skin-input-row { display: grid; grid-template-columns: 1fr auto 1fr auto; gap: 10px; align-items: center; }
 .skin-input-row input[type="text"],
 .skin-input-row input[type="number"] { width: 100%; min-width: 0; }
 .skin-input-row button { white-space: nowrap; }
+.skin-lookup-result { margin-top: 6px; }
 @media (max-width: 480px) {
   .skin-input-row { grid-template-columns: 1fr; }
 }

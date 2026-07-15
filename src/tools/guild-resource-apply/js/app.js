@@ -5,6 +5,7 @@ let currentUser = null;
 let allItems = [];
 let servers = [];
 let vipLevels = [];
+let allSkins = {}; // prop_id -> {name_cn, price}
 let currentApps = [];
 let currentLang = localStorage.getItem("gra_lang") || "vi";
 let selectedItems = {}; // { prop_id: { prop_id, name_cn, name_vn, unit, quantity } }
@@ -48,7 +49,10 @@ const translations = {
     toastAccountUpdated: "Đã cập nhật, chờ quản trị viên phê duyệt",
     toastAccountDeleted: "Đã xóa tài khoản",
     selectItems: "Chọn vật phẩm (tích chọn để nhập số lượng)",
-    skinCustom: "Skin (tùy chỉnh ID và giá)",
+    skinCustom: "Skin",
+    lookupSkin: "Tìm",
+    skinNotFound: "Không tìm thấy skin, vui lòng nhập giá thủ công",
+    skinFound: "{name} - {price} xu thú",
     skinIdPlaceholder: "ID skin",
     skinPricePlaceholder: "Giá skin (xu thú)",
     addSkin: "Thêm skin",
@@ -181,7 +185,10 @@ const translations = {
     toastAccountUpdated: "账号已更新，等待管理员审批",
     toastAccountDeleted: "账号已删除",
     selectItems: "选择道具（勾选后填写数量）",
-    skinCustom: "皮肤（自定义编号和价格）",
+    skinCustom: "皮肤",
+    lookupSkin: "查询",
+    skinNotFound: "未找到该皮肤，请手动填写价格",
+    skinFound: "{name} - {price} 兽币",
     skinIdPlaceholder: "皮肤编号",
     skinPricePlaceholder: "皮肤价格（兽币）",
     addSkin: "添加皮肤",
@@ -314,7 +321,10 @@ const translations = {
     toastAccountUpdated: "Account updated, pending admin approval",
     toastAccountDeleted: "Account deleted",
     selectItems: "Select items (check to enter quantity)",
-    skinCustom: "Skin (custom ID and price)",
+    skinCustom: "Skin",
+    lookupSkin: "Lookup",
+    skinNotFound: "Skin not found, please enter price manually",
+    skinFound: "{name} - {price} beast coins",
     skinIdPlaceholder: "Skin ID",
     skinPricePlaceholder: "Skin price (beast coins)",
     addSkin: "Add skin",
@@ -504,6 +514,7 @@ function applyI18n() {
   $("#selectItemsLabel").childNodes[0].textContent = t("selectItems");
   $("#itemGridHint").textContent = t("itemGridHint");
   $("#skinLabel").childNodes[0].textContent = t("skinCustom");
+  $("#lookupSkinBtn").textContent = t("lookupSkin");
   $("#skinId").placeholder = t("skinIdPlaceholder");
   $("#skinPrice").placeholder = t("skinPricePlaceholder");
   $("#addSkinBtn").textContent = t("addSkin");
@@ -628,7 +639,10 @@ function showToast(message, type = "info") {
 }
 
 function formatItems(items) {
-  return items.map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join("、");
+  return items.map(it => {
+    if (it.is_skin) return itemName(it);
+    return `${it.quantity} ${it.unit}${itemName(it)}`;
+  }).join("、");
 }
 
 function formatDate(dt) {
@@ -814,6 +828,11 @@ async function loadItems() {
     servers = serversRes.data || [];
     const vipRes = await api("GET", "/vip-levels");
     vipLevels = vipRes.data || [];
+    const skinsRes = await api("GET", "/skins");
+    allSkins = {};
+    (skinsRes.data || []).forEach(s => {
+      allSkins[s.prop_id] = { name_cn: s.name_cn, price: s.price };
+    });
   } catch (e) {
     showToast(e.message);
   }
@@ -1141,14 +1160,34 @@ async function deleteSavedAccount(id) {
   }
 }
 
+function lookupSkin() {
+  const skinId = $("#skinId").value.trim();
+  const resultEl = $("#skinLookupResult");
+  const priceInput = $("#skinPrice");
+  if (!skinId) {
+    resultEl.textContent = "";
+    priceInput.readOnly = false;
+    return;
+  }
+  const skin = allSkins[skinId];
+  if (skin) {
+    priceInput.value = skin.price;
+    priceInput.readOnly = true;
+    resultEl.textContent = t("skinFound").replace("{name}", skin.name_cn).replace("{price}", skin.price);
+  } else {
+    priceInput.value = "";
+    priceInput.readOnly = false;
+    resultEl.textContent = t("skinNotFound");
+  }
+}
+
 function addCustomSkin() {
   if (!canSelectItems()) {
     showToast(t("toastSelectAccount"));
     return;
   }
   const skinId = $("#skinId").value.trim();
-  const price = parseInt($("#skinPrice").value, 10);
-  if (!skinId || isNaN(price) || price < 0) {
+  if (!skinId) {
     showToast(t("toastSkinInvalid"));
     return;
   }
@@ -1156,7 +1195,20 @@ function addCustomSkin() {
     showToast(t("toastSkinExists"));
     return;
   }
-  const label = `PF ${skinId}`;
+  const skin = allSkins[skinId];
+  let price;
+  let label;
+  if (skin) {
+    price = skin.price;
+    label = skin.name_cn;
+  } else {
+    price = parseInt($("#skinPrice").value, 10);
+    if (isNaN(price) || price < 0) {
+      showToast(t("toastSkinInvalid"));
+      return;
+    }
+    label = `PF ${skinId}`;
+  }
   selectedItems[skinId] = {
     prop_id: skinId,
     name_cn: label,
@@ -1169,6 +1221,8 @@ function addCustomSkin() {
   };
   $("#skinId").value = "";
   $("#skinPrice").value = "";
+  $("#skinLookupResult").textContent = "";
+  $("#skinPrice").readOnly = false;
   renderSelectedItems();
   updatePreview();
   showToast(t("toastSkinAdded"));
@@ -1251,6 +1305,11 @@ $("#newAccountName").addEventListener("keydown", (e) => {
 $("#newAccountNickname").addEventListener("keydown", (e) => {
   if (e.key === "Enter") addNewAccount();
 });
+$("#lookupSkinBtn").addEventListener("click", lookupSkin);
+$("#skinId").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") lookupSkin();
+});
+$("#skinId").addEventListener("blur", lookupSkin);
 $("#addSkinBtn").addEventListener("click", addCustomSkin);
 $("#selectedItemsPanel").addEventListener("click", (e) => {
   const btn = e.target.closest(".remove-item-btn");

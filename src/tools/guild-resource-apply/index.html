@@ -113,12 +113,14 @@
           </div>
 
           <div class="form-row">
-            <label id="skinLabel">皮肤（自定义编号和价格）</label>
+            <label id="skinLabel">皮肤</label>
             <div class="skin-input-row">
               <input type="text" id="skinId" placeholder="皮肤编号">
+              <button type="button" id="lookupSkinBtn" class="btn-secondary">查询</button>
               <input type="number" id="skinPrice" placeholder="皮肤价格（兽币）" min="0">
               <button type="button" id="addSkinBtn" class="btn-secondary">添加皮肤</button>
             </div>
+            <p id="skinLookupResult" class="hint skin-lookup-result"></p>
           </div>
 
           <div class="form-row">
