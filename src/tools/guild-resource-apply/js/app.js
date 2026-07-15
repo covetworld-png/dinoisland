@@ -121,6 +121,7 @@ const translations = {
     toastAccountExists: "Tài khoản này đã được lưu",
     itemGridHint: "Vui lòng chọn máy chủ, tài khoản game, biệt danh và điểm VIP trước khi chọn vật phẩm",
     vipUpgradeHint: "Sau đơn này VIP sẽ tăng từ cấp {before} lên cấp {after}",
+    highValueConfirm: "Tổng giá trị vật phẩm {value} xu thú。Điểm VIP hiện tại {points}（cấp {before}），sau khi gửi là cấp {after}。Tiếp tục？",
     toastBulkUpdated: "Cập nhật hàng loạt hoàn tất",
     toastReloaded: "Đã tải lại",
     categoryDinosaur: "Khủng Long",
@@ -252,6 +253,7 @@ const translations = {
     toastAccountExists: "该账号已存在",
     itemGridHint: "请先选择服务器、填写游戏账号、昵称和 VIP 积分后再选择道具",
     vipUpgradeHint: "本次申请后 VIP 将从 {before} 级升至 {after} 级",
+    highValueConfirm: "道具总价值 {value} 兽币，当前 VIP 积分 {points}（{before} 级），提交后 VIP 等级为 {after} 级。是否继续？",
     toastBulkUpdated: "批量更新完成",
     toastReloaded: "已重新加载",
     categoryDinosaur: "恐龙",
@@ -383,6 +385,7 @@ const translations = {
     toastAccountExists: "Account already exists",
     itemGridHint: "Please select server, enter game account, nickname and VIP points before selecting items",
     vipUpgradeHint: "After this request, VIP will upgrade from level {before} to level {after}",
+    highValueConfirm: "Total item value {value} beast coins. Current VIP points {points}（level {before}），after submission will be level {after}. Continue?",
     toastBulkUpdated: "Bulk update completed",
     toastReloaded: "Reloaded",
     categoryDinosaur: "Dinosaur",
@@ -1251,6 +1254,20 @@ $("#applyForm").addEventListener("submit", async (e) => {
   }
 
   const previewText = $("#applyPreview").textContent;
+
+  const totalValue = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
+  if (totalValue > 300) {
+    const currentPoints = parseInt(fd.get("current_vip_points") || "0", 10);
+    const levelBefore = getVipLevel(currentPoints);
+    const levelAfter = getVipLevel(currentPoints + totalValue);
+    const msg = t("highValueConfirm")
+      .replace("{value}", totalValue)
+      .replace("{points}", currentPoints)
+      .replace("{before}", levelBefore)
+      .replace("{after}", levelAfter);
+    if (!confirm(msg)) return;
+  }
+
   try {
     await api("POST", "/applications", {
       server: fd.get("server"),
