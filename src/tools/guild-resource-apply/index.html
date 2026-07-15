@@ -44,6 +44,12 @@
           <p class="hint">密码可任意设置</p>
           <label>昵称 <input type="text" name="nickname" required></label>
           <p class="hint">请填写游戏内的昵称</p>
+          <label id="registerServerLabel">服务器
+            <select name="server" id="registerServerSelect" required>
+              <option value="">请选择服务器</option>
+            </select>
+          </label>
+          <p class="hint" id="registerServerHint">请选择游戏角色所在的服务器</p>
           <button type="submit">注册</button>
         </form>
       </section>
@@ -89,6 +95,7 @@
                 <div class="modal-add-form">
                   <input type="text" id="newAccountName" placeholder="游戏账号">
                   <input type="text" id="newAccountNickname" placeholder="游戏昵称">
+                  <select id="newAccountServer"></select>
                   <button type="button" id="addAccountConfirmBtn" class="btn-primary">添加</button>
                 </div>
               </div>

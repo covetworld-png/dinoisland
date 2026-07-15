@@ -35,6 +35,12 @@ const translations = {
     accountHint: "Vui lòng nhập ID số trong game (ví dụ: 13219626)",
     passwordHint: "Mật khẩu có thể tùy ý",
     nicknameHint: "Vui lòng nhập biệt danh trong game",
+    registerServerHint: "Vui lòng chọn máy chủ của nhân vật",
+    pleaseFillServer: "chưa chọn máy chủ",
+    pleaseFillGameAccount: "chưa điền tài khoản game",
+    pleaseFillGameNickname: "chưa điền biệt danh game",
+    pleaseFillVipPoints: "chưa điền điểm VIP",
+    missingFieldsHint: "Vui lòng điền: {fields}",
     server: "Máy Chủ",
     selectUser: "Chọn Ngưởi Dùng",
     gameAccount: "Tài Khoản Game",
@@ -127,10 +133,10 @@ const translations = {
     toastSaved: "Đã lưu",
     toastSelectItemsFirst: "Vui lòng chọn vật phẩm trước",
     toastSelectServer: "Vui lòng chọn máy chủ trước",
-    toastSelectAccount: "Vui lòng chọn máy chủ, tài khoản game, biệt danh và điểm VIP trước",
+    toastSelectAccount: "Vui lòng chọn máy chủ, tài khoản game và biệt danh trước",
     toastAccountSaved: "Đã lưu tài khoản, chờ quản trị viên phê duyệt",
     toastAccountExists: "Tài khoản này đã được lưu",
-    itemGridHint: "Vui lòng chọn máy chủ, tài khoản game, biệt danh và điểm VIP trước khi chọn vật phẩm",
+    itemGridHint: "Vui lòng chọn máy chủ, tài khoản game và biệt danh trước khi chọn vật phẩm",
     vipUpgradeHint: "Sau đơn này VIP sẽ tăng từ cấp {before} lên cấp {after}",
     highValueConfirm: "Tổng giá trị vật phẩm {value} xu thú。Điểm VIP hiện tại {points}（cấp {before}），sau khi gửi là cấp {after}。Tiếp tục？",
     toastBulkUpdated: "Cập nhật hàng loạt hoàn tất",
@@ -171,6 +177,12 @@ const translations = {
     accountHint: "请填写游戏内的数字账号（如 13219626）",
     passwordHint: "密码可任意设置",
     nicknameHint: "请填写游戏内的昵称",
+    registerServerHint: "请选择角色所在的服务器",
+    pleaseFillServer: "未选择服务器",
+    pleaseFillGameAccount: "未填写游戏账号",
+    pleaseFillGameNickname: "未填写游戏昵称",
+    pleaseFillVipPoints: "未填写 VIP 积分",
+    missingFieldsHint: "请先填写：{fields}",
     server: "服务器",
     selectUser: "选择用户",
     gameAccount: "游戏账号",
@@ -263,10 +275,10 @@ const translations = {
     toastSaved: "已保存",
     toastSelectItemsFirst: "请先选择道具",
     toastSelectServer: "请先选择服务器",
-    toastSelectAccount: "请先选择服务器、游戏账号、昵称和 VIP 积分",
+    toastSelectAccount: "请先选择服务器、游戏账号和昵称",
     toastAccountSaved: "账号已保存，等待管理员审批",
     toastAccountExists: "该账号已存在",
-    itemGridHint: "请先选择服务器、填写游戏账号、昵称和 VIP 积分后再选择道具",
+    itemGridHint: "请先选择服务器、填写游戏账号和昵称后再选择道具",
     vipUpgradeHint: "本次申请后 VIP 将从 {before} 级升至 {after} 级",
     highValueConfirm: "道具总价值 {value} 兽币，当前 VIP 积分 {points}（{before} 级），提交后 VIP 等级为 {after} 级。是否继续？",
     toastBulkUpdated: "批量更新完成",
@@ -307,6 +319,12 @@ const translations = {
     accountHint: "Enter your in-game numeric ID (e.g. 13219626)",
     passwordHint: "Password can be anything",
     nicknameHint: "Enter your in-game nickname",
+    registerServerHint: "Please select your character server",
+    pleaseFillServer: "server not selected",
+    pleaseFillGameAccount: "game account not entered",
+    pleaseFillGameNickname: "game nickname not entered",
+    pleaseFillVipPoints: "VIP points not entered",
+    missingFieldsHint: "Please fill in: {fields}",
     server: "Server",
     selectUser: "Select User",
     gameAccount: "Game Account",
@@ -399,10 +417,10 @@ const translations = {
     toastSaved: "Saved",
     toastSelectItemsFirst: "Please select items first",
     toastSelectServer: "Please select a server first",
-    toastSelectAccount: "Please select server, game account, nickname and VIP points first",
+    toastSelectAccount: "Please select server, game account and nickname first",
     toastAccountSaved: "Account saved, pending admin approval",
     toastAccountExists: "Account already exists",
-    itemGridHint: "Please select server, enter game account, nickname and VIP points before selecting items",
+    itemGridHint: "Please select server, enter game account and nickname before selecting items",
     vipUpgradeHint: "After this request, VIP will upgrade from level {before} to level {after}",
     highValueConfirm: "Total item value {value} beast coins. Current VIP points {points}（level {before}），after submission will be level {after}. Continue?",
     toastBulkUpdated: "Bulk update completed",
@@ -505,9 +523,11 @@ function applyI18n() {
   regLabels[0].childNodes[0].textContent = t("username");
   regLabels[1].childNodes[0].textContent = t("password");
   regLabels[2].childNodes[0].textContent = t("nickname");
+  regLabels[3].childNodes[0].textContent = t("server");
   $$("#registerForm .hint")[0].textContent = t("accountHint");
   $$("#registerForm .hint")[1].textContent = t("passwordHint");
   $$("#registerForm .hint")[2].textContent = t("nicknameHint");
+  $$("#registerForm .hint")[3].textContent = t("registerServerHint");
   $("#registerForm button").textContent = t("register");
 
   // Apply form
@@ -693,6 +713,8 @@ function copyToClipboard(text) {
 // ---------- Auth ----------
 
 async function initAuth() {
+  // 先加载服务器、道具等静态数据，确保注册/申请表单可用
+  await loadItems();
   try {
     const res = await api("GET", "/auth/me");
     currentUser = res.data;
@@ -732,11 +754,17 @@ $("#loginForm").addEventListener("submit", async (e) => {
 $("#registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
+  const server = fd.get("server");
+  if (!server) {
+    showToast(t("missingFieldsHint").replace("{fields}", t("pleaseFillServer")));
+    return;
+  }
   try {
     const res = await api("POST", "/auth/register", {
       username: fd.get("username"),
       password: fd.get("password"),
       nickname: fd.get("nickname"),
+      server,
     });
     if (res.data && res.data.role === "admin") {
       currentUser = res.data;
@@ -878,11 +906,17 @@ function updateVipLevelBadge() {
 function renderServerOptions() {
   const sel = $("#serverSelect");
   const histSel = $("#historyServer");
+  const regSel = $("#registerServerSelect");
+  const accountServerSel = $("#newAccountServer");
   sel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
   histSel.innerHTML = `<option value="">${t("allServers")}</option>`;
+  if (regSel) regSel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
+  if (accountServerSel) accountServerSel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
   servers.forEach(s => {
     sel.appendChild(new Option(s, s));
     histSel.appendChild(new Option(s, s));
+    if (regSel) regSel.appendChild(new Option(s, s));
+    if (accountServerSel) accountServerSel.appendChild(new Option(s, s));
   });
 }
 
@@ -937,8 +971,7 @@ function canSelectItems() {
   return !!(
     $("#serverSelect").value &&
     $("#applyForm input[name='game_account']").value.trim() &&
-    $("#applyForm input[name='game_nickname']").value.trim() &&
-    $("#currentVipPoints").value.trim()
+    $("#applyForm input[name='game_nickname']").value.trim()
   );
 }
 
@@ -948,13 +981,46 @@ function updateItemGridState() {
   $("#itemGridHint").classList.toggle("hidden", ok);
 }
 
-function toggleItemSelection(item) {
-  if (!$("#serverSelect").value) {
-    showToast(t("toastSelectServer"));
-    return;
+function highlightMissingFields() {
+  const missing = [];
+  const serverSel = $("#serverSelect");
+  const accountInput = $("#applyForm input[name='game_account']");
+  const nicknameInput = $("#applyForm input[name='game_nickname']");
+
+  if (!serverSel.value) {
+    missing.push(t("pleaseFillServer"));
+    serverSel.classList.add("input-error");
+  } else {
+    serverSel.classList.remove("input-error");
   }
-  if (!$("#applyForm input[name='game_account']").value.trim() || !$("#applyForm input[name='game_nickname']").value.trim()) {
-    showToast(t("toastSelectAccount"));
+
+  if (!accountInput.value.trim()) {
+    missing.push(t("pleaseFillGameAccount"));
+    accountInput.classList.add("input-error");
+  } else {
+    accountInput.classList.remove("input-error");
+  }
+
+  if (!nicknameInput.value.trim()) {
+    missing.push(t("pleaseFillGameNickname"));
+    nicknameInput.classList.add("input-error");
+  } else {
+    nicknameInput.classList.remove("input-error");
+  }
+
+  return missing;
+}
+
+function clearFieldHighlights() {
+  $("#serverSelect").classList.remove("input-error");
+  $("#applyForm input[name='game_account']").classList.remove("input-error");
+  $("#applyForm input[name='game_nickname']").classList.remove("input-error");
+}
+
+function toggleItemSelection(item) {
+  const missing = highlightMissingFields();
+  if (missing.length) {
+    showToast(t("missingFieldsHint").replace("{fields}", missing.join("、")));
     return;
   }
   if (selectedItems[item.prop_id]) {
@@ -1068,6 +1134,7 @@ function applyAccountSelection(value) {
     if (currentUser) {
       $("#applyForm input[name='game_account']").value = currentUser.username || "";
       $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
+      $("#serverSelect").value = currentUser.server || "";
       $("#currentVipPoints").value = "";
     }
   } else if (value.startsWith("saved:")) {
@@ -1076,17 +1143,20 @@ function applyAccountSelection(value) {
     if (acc) {
       $("#applyForm input[name='game_account']").value = acc.account;
       $("#applyForm input[name='game_nickname']").value = acc.nickname;
+      $("#serverSelect").value = acc.server || "";
       $("#currentVipPoints").value = "";
       updateVipLevelBadge();
     }
   }
   updatePreview();
   updateItemGridState();
+  clearFieldHighlights();
 }
 
 function openAccountModal() {
   $("#newAccountName").value = "";
   $("#newAccountNickname").value = "";
+  $("#newAccountServer").value = "";
   renderAccountList();
   $("#accountModal").classList.remove("hidden");
   $("#newAccountName").focus();
@@ -1105,10 +1175,12 @@ function renderAccountList() {
   list.innerHTML = savedAccounts.map(acc => {
     const statusClass = acc.approved ? "status-approved" : "status-pending-approval";
     const statusText = acc.approved ? t("statusApproved") : t("statusPendingApproval");
+    const serverOptionsForAcc = servers.map(s => `<option value="${escapeHtml(s)}" ${s === acc.server ? "selected" : ""}>${escapeHtml(s)}</option>`).join("");
     return `
     <div class="modal-account-item ${acc.approved ? "" : "pending"}" data-id="${acc.id}">
       <input type="text" class="account-edit-name" value="${escapeHtml(acc.account)}" placeholder="${t("gameAccount")}">
       <input type="text" class="account-edit-nickname" value="${escapeHtml(acc.nickname)}" placeholder="${t("gameNickname")}">
+      <select class="account-edit-server">${serverOptionsForAcc}</select>
       <span class="account-status-badge status-badge ${statusClass}">${statusText}</span>
       <button type="button" class="btn-secondary btn-icon" data-id="${acc.id}">${t("save")}</button>
       <button type="button" class="btn-danger btn-icon" data-id="${acc.id}">${t("delete")}</button>
@@ -1120,14 +1192,20 @@ function renderAccountList() {
 async function addNewAccount() {
   const account = $("#newAccountName").value.trim();
   const nickname = $("#newAccountNickname").value.trim();
+  const server = $("#newAccountServer").value;
   if (!account || !nickname) {
     showToast(t("toastSelectAccount"));
     return;
   }
+  if (!server) {
+    showToast(t("missingFieldsHint").replace("{fields}", t("pleaseFillServer")));
+    return;
+  }
   try {
-    await api("POST", "/accounts", { account, nickname });
+    await api("POST", "/accounts", { account, nickname, server });
     $("#newAccountName").value = "";
     $("#newAccountNickname").value = "";
+    $("#newAccountServer").value = "";
     await loadSavedAccounts();
     renderAccountList();
     showToast(t("toastAccountSaved"));
@@ -1140,12 +1218,17 @@ async function updateSavedAccount(id) {
   const row = $(`.modal-account-item[data-id='${id}']`);
   const account = row.querySelector(".account-edit-name").value.trim();
   const nickname = row.querySelector(".account-edit-nickname").value.trim();
+  const server = row.querySelector(".account-edit-server").value;
   if (!account || !nickname) {
     showToast(t("toastSelectAccount"));
     return;
   }
+  if (!server) {
+    showToast(t("missingFieldsHint").replace("{fields}", t("pleaseFillServer")));
+    return;
+  }
   try {
-    await api("PUT", `/accounts/${id}`, { account, nickname });
+    await api("PUT", `/accounts/${id}`, { account, nickname, server });
     await loadSavedAccounts();
     renderAccountList();
     showToast(t("toastAccountUpdated"));
@@ -1194,8 +1277,9 @@ function lookupSkin() {
 }
 
 function addCustomSkin() {
-  if (!canSelectItems()) {
-    showToast(t("toastSelectAccount"));
+  const missing = highlightMissingFields();
+  if (missing.length) {
+    showToast(t("missingFieldsHint").replace("{fields}", missing.join("、")));
     return;
   }
   const skinId = $("#skinId").value.trim();
@@ -1288,6 +1372,7 @@ $$("#applyForm input[name='game_account'], #applyForm input[name='game_nickname'
   input.addEventListener("input", () => {
     updatePreview();
     updateItemGridState();
+    clearFieldHighlights();
   });
 });
 $("#currentVipPoints").addEventListener("input", () => {
@@ -1299,6 +1384,7 @@ $("#applyForm input[name='reason']").addEventListener("input", updatePreview);
 $("#serverSelect").addEventListener("change", () => {
   updatePreview();
   updateItemGridState();
+  clearFieldHighlights();
 });
 $("#accountSelect").addEventListener("change", (e) => applyAccountSelection(e.target.value));
 $("#manageAccountsBtn").addEventListener("click", openAccountModal);

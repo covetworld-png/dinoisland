@@ -139,6 +139,14 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 .form-row input, .form-row select {
   width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 15px;
 }
+.form-row input.input-error, .form-row select.input-error,
+.auth-form input.input-error, .auth-form select.input-error,
+.modal-add-form input.input-error, .modal-add-form select.input-error,
+.modal-account-item input.input-error, .modal-account-item select.input-error {
+  border-color: var(--danger);
+  background: #fef2f2;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+}
 .form-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .form-row.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 .form-row.account-select-row { display: flex; align-items: flex-end; gap: 12px; }
@@ -413,19 +421,20 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 .modal-body { padding: 16px 18px; overflow-y: auto; }
 .modal-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 .modal-account-item {
-  display: grid; grid-template-columns: 1.3fr 1.3fr auto auto auto; align-items: center;
+  display: grid; grid-template-columns: 1.3fr 1.3fr 1fr auto auto auto; align-items: center;
   gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa;
 }
 .modal-account-item.pending { background: #fffbeb; border-color: #fde68a; }
-.modal-account-item input { min-width: 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+.modal-account-item input, .modal-account-item select { min-width: 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
 .modal-account-item .btn-icon { padding: 7px 12px; font-size: 13px; line-height: 1; }
 .account-status-badge { font-size: 12px; justify-self: center; }
-.modal-add-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: center; }
-.modal-add-form input { min-width: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
+.modal-add-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: center; }
+.modal-add-form input, .modal-add-form select { min-width: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
 .modal-add-form input[type="number"] { width: 100%; }
 @media (max-width: 480px) {
   .modal-add-form { grid-template-columns: 1fr; }
   .modal-account-item { grid-template-columns: 1fr 1fr; }
+  .modal-account-item .account-edit-server { grid-column: 1 / -1; }
   .modal-account-item .account-status-badge { grid-column: 1 / -1; justify-self: start; }
   .modal-account-item .btn-secondary { grid-column: 1; }
   .modal-account-item .btn-danger { grid-column: 2; }
