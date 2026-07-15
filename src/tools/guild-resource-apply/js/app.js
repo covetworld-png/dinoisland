@@ -598,6 +598,12 @@ function applyI18n() {
     allAppThs[7].textContent = t("status");
     allAppThs[8].textContent = t("action");
   }
+
+  updateVipLevelBadge();
+  updatePreview();
+  if (!$("#accountModal").classList.contains("hidden")) {
+    renderAccountList();
+  }
 }
 
 $$("#langSwitcher button").forEach(btn => {
