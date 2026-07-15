@@ -432,3 +432,11 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 }
 .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
 .vip-upgrade-hint { color: var(--primary); font-weight: 500; margin-top: -8px; }
+.vip-level-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #e0e7ff; color: #4338ca;
+  font-size: 12px; font-weight: 600;
+  padding: 2px 8px; border-radius: 999px;
+  margin-left: 6px; vertical-align: middle;
+}
+.vip-level-badge:empty { display: none; }

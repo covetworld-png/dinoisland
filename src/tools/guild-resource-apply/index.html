@@ -102,7 +102,9 @@
           <div class="form-row three-col account-row">
             <label id="gameAccountLabel">游戏账号 <input type="text" name="game_account" placeholder="如 13219626" required></label>
             <label id="gameNicknameLabel">游戏昵称 <input type="text" name="game_nickname" placeholder="如 SPECTER" required></label>
-            <label id="vipPointsLabel">VIP 积分 <input type="number" name="current_vip_points" id="currentVipPoints" placeholder="0" min="0" required></label>
+            <label id="vipPointsLabel">VIP 积分 <span id="vipLevelBadge" class="vip-level-badge"></span>
+              <input type="number" name="current_vip_points" id="currentVipPoints" placeholder="0" min="0" required>
+            </label>
           </div>
 
           <div class="form-row">

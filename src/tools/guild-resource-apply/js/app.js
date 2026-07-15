@@ -33,6 +33,7 @@ const translations = {
     gameAccount: "Tài Khoản Game",
     gameNickname: "Biệt Danh Game",
     vipPoints: "Điểm VIP",
+    vipLevel: "Cấp VIP",
     beastCoin: "xu thú",
     selectAccount: "Chọn tài khoản",
     mainAccount: "Tài khoản chính",
@@ -165,6 +166,7 @@ const translations = {
     gameAccount: "游戏账号",
     gameNickname: "游戏昵称",
     vipPoints: "VIP 积分",
+    vipLevel: "VIP 等级",
     beastCoin: "兽币",
     selectAccount: "选择账号",
     mainAccount: "主账号",
@@ -297,6 +299,7 @@ const translations = {
     gameAccount: "Game Account",
     gameNickname: "Game Nickname",
     vipPoints: "VIP Points",
+    vipLevel: "VIP Level",
     beastCoin: "beast coins",
     selectAccount: "Select Account",
     mainAccount: "Main Account",
@@ -825,6 +828,18 @@ function getVipLevel(points) {
   return level;
 }
 
+function updateVipLevelBadge() {
+  const input = $("#currentVipPoints");
+  const badge = $("#vipLevelBadge");
+  if (!input || !badge) return;
+  if (input.value === "") {
+    badge.textContent = "";
+    return;
+  }
+  const points = parseInt(input.value || "0", 10);
+  badge.textContent = `${t("vipLevel")} ${getVipLevel(points)}`;
+}
+
 function renderServerOptions() {
   const sel = $("#serverSelect");
   const histSel = $("#historyServer");
@@ -1018,7 +1033,7 @@ function applyAccountSelection(value) {
     if (currentUser) {
       $("#applyForm input[name='game_account']").value = currentUser.username || "";
       $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
-      $("#currentVipPoints").value = currentUser.vip_points || 0;
+      $("#currentVipPoints").value = "";
     }
   } else if (value.startsWith("saved:")) {
     const id = parseInt(value.split(":")[1], 10);
@@ -1027,6 +1042,7 @@ function applyAccountSelection(value) {
       $("#applyForm input[name='game_account']").value = acc.account;
       $("#applyForm input[name='game_nickname']").value = acc.nickname;
       $("#currentVipPoints").value = acc.vip_points || 0;
+      updateVipLevelBadge();
     }
   }
   updatePreview();
@@ -1205,6 +1221,7 @@ $$("#applyForm input[name='game_account'], #applyForm input[name='game_nickname'
   });
 });
 $("#currentVipPoints").addEventListener("input", () => {
+  updateVipLevelBadge();
   updatePreview();
   updateItemGridState();
 });
@@ -1281,7 +1298,8 @@ $("#applyForm").addEventListener("submit", async (e) => {
     copyToClipboard(previewText);
     e.target.reset();
     selectedItems = {};
-    $("#currentVipPoints").value = currentUser ? (currentUser.vip_points || 0) : 0;
+    $("#currentVipPoints").value = "";
+    updateVipLevelBadge();
     renderAccountSelect("main");
     renderItemGrid();
     renderSelectedItems();
@@ -1306,8 +1324,9 @@ async function renderApplyView() {
   if (currentUser) {
     $("#applyForm input[name='game_account']").value = currentUser.username || "";
     $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
-    $("#currentVipPoints").value = currentUser.vip_points || 0;
+    $("#currentVipPoints").value = "";
   }
+  updateVipLevelBadge();
   renderServerOptions();
   renderAccountSelect("main");
   renderItemGrid();
