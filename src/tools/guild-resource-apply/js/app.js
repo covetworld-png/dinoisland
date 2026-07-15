@@ -541,6 +541,8 @@ function $(sel) { return document.querySelector(sel); }
 function $$(sel) { return document.querySelectorAll(sel); }
 
 function applyI18n() {
+  const langMap = { zh: "zh-CN", vi: "vi", en: "en" };
+  document.documentElement.lang = langMap[currentLang] || "zh-CN";
   $("#appTitle").textContent = t("appTitle");
   document.title = t("appTitle");
 
