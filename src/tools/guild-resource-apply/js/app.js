@@ -6,6 +6,7 @@ let allItems = [];
 let servers = [];
 let currentApps = [];
 let currentLang = localStorage.getItem("gra_lang") || "vi";
+let selectedItems = {}; // { prop_id: { prop_id, name_cn, name_vn, unit, quantity } }
 
 const translations = {
   vi: {
@@ -30,7 +31,9 @@ const translations = {
     selectUser: "Chọn Ngưởi Dùng",
     gameAccount: "Tài Khoản Game",
     gameNickname: "Biệt Danh Game",
-    selectItems: "Chọn vật phẩm (nhập số lượng)",
+    selectItems: "Chọn vật phẩm (tích chọn để nhập số lượng)",
+    selectedItems: "Vật phẩm đã chọn",
+    noSelectedItems: "Chưa chọn vật phẩm nào",
     reason: "Lý Do Xin",
     preview: "Xem trước",
     submit: "Gửi & Sao Chép Văn Bản",
@@ -130,7 +133,9 @@ const translations = {
     selectUser: "选择用户",
     gameAccount: "游戏账号",
     gameNickname: "游戏昵称",
-    selectItems: "选择道具（填写数量即可）",
+    selectItems: "选择道具（勾选后填写数量）",
+    selectedItems: "已选道具",
+    noSelectedItems: "尚未选择任何道具",
     reason: "申请原因",
     preview: "预览",
     submit: "提交并复制文本",
@@ -230,7 +235,9 @@ const translations = {
     selectUser: "Select User",
     gameAccount: "Game Account",
     gameNickname: "Game Nickname",
-    selectItems: "Select Items (enter quantity)",
+    selectItems: "Select items (check to enter quantity)",
+    selectedItems: "Selected Items",
+    noSelectedItems: "No items selected",
     reason: "Reason",
     preview: "Preview",
     submit: "Submit & Copy Text",
@@ -398,7 +405,8 @@ function applyI18n() {
   $$("#applyForm label")[2].childNodes[0].textContent = t("gameAccount");
   $$("#applyForm label")[3].childNodes[0].textContent = t("gameNickname");
   $$("#applyForm .form-row label")[4].childNodes[0].textContent = t("selectItems");
-  $$("#applyForm label")[5].childNodes[0].textContent = t("reason");
+  $$("#applyForm label")[5].childNodes[0].textContent = t("selectedItems");
+  $$("#applyForm label")[6].childNodes[0].textContent = t("reason");
   $$("#applyForm .preview-box strong")[0].textContent = t("preview") + "：";
   $("#applyForm button[type='submit']").textContent = t("submit");
 
@@ -487,6 +495,7 @@ $$("#langSwitcher button").forEach(btn => {
     updateLangSwitcher();
     applyI18n();
     renderItemGrid();
+    renderSelectedItems();
     if (!$('#historyView').classList.contains('hidden')) loadHistory();
     if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
   });
@@ -712,46 +721,78 @@ function renderItemGrid() {
   categories.forEach(cat => {
     const catDiv = document.createElement("div");
     catDiv.className = "item-category";
-    catDiv.textContent = cat;
+    catDiv.textContent = categoryName(cat);
     container.appendChild(catDiv);
 
     (grouped[cat] || []).forEach(it => {
+      const isSelected = !!selectedItems[it.prop_id];
       const card = document.createElement("div");
-      card.className = `item-card cat-${cat}`;
+      card.className = `item-card cat-${cat}${isSelected ? " active" : ""}`;
       card.dataset.propId = it.prop_id;
       card.innerHTML = `
+        <input type="checkbox" ${isSelected ? "checked" : ""} data-prop="${it.prop_id}" aria-label="${escapeHtml(itemName(it))}">
         <div class="item-name">${escapeHtml(itemName(it))}</div>
-        <div class="item-qty">
-          <input type="number" min="0" value="" placeholder="0" data-prop="${it.prop_id}" data-name-cn="${escapeHtml(it.name_cn)}" data-name-vn="${escapeHtml(it.name_vn)}" data-unit="${escapeHtml(it.unit)}">
-          <span class="unit">${escapeHtml(it.unit)}</span>
-        </div>
       `;
-      const input = card.querySelector("input");
-      input.addEventListener("input", (e) => {
-        const q = parseInt(e.target.value, 10);
-        card.classList.toggle("active", !isNaN(q) && q > 0);
-        updatePreview();
+      const checkbox = card.querySelector("input[type='checkbox']");
+      checkbox.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleItemSelection(it);
+      });
+      card.addEventListener("click", (e) => {
+        if (e.target !== checkbox) toggleItemSelection(it);
       });
       container.appendChild(card);
     });
   });
 }
 
-function getSelectedItems() {
-  const items = [];
-  $$("#itemGrid input[type='number']").forEach(input => {
-    const q = parseInt(input.value, 10);
-    if (!isNaN(q) && q > 0) {
-      items.push({
-        prop_id: input.dataset.prop,
-        name_cn: input.dataset.nameCn,
-        name_vn: input.dataset.nameVn,
-        quantity: q,
-        unit: input.dataset.unit,
-      });
-    }
+function toggleItemSelection(item) {
+  if (selectedItems[item.prop_id]) {
+    delete selectedItems[item.prop_id];
+  } else {
+    selectedItems[item.prop_id] = {
+      prop_id: item.prop_id,
+      name_cn: item.name_cn,
+      name_vn: item.name_vn,
+      unit: item.unit,
+      quantity: 1,
+    };
+  }
+  renderItemGrid();
+  renderSelectedItems();
+  updatePreview();
+}
+
+function renderSelectedItems() {
+  const panel = $("#selectedItemsPanel");
+  const items = Object.values(selectedItems).sort((a, b) => String(a.prop_id).localeCompare(String(b.prop_id)));
+  if (!items.length) {
+    panel.innerHTML = `<p class="hint" id="selectedItemsHint">${t("noSelectedItems")}</p>`;
+    return;
+  }
+  panel.innerHTML = "";
+  items.forEach(it => {
+    const row = document.createElement("div");
+    row.className = "selected-item";
+    row.innerHTML = `
+      <span class="selected-name">${escapeHtml(itemName(it))}</span>
+      <input type="number" min="1" value="${it.quantity}" data-prop="${it.prop_id}">
+      <span class="unit">${escapeHtml(it.unit)}</span>
+    `;
+    const input = row.querySelector("input");
+    input.addEventListener("input", (e) => {
+      const q = parseInt(e.target.value, 10);
+      selectedItems[it.prop_id].quantity = isNaN(q) ? 0 : q;
+      updatePreview();
+    });
+    panel.appendChild(row);
   });
-  return items.sort((a, b) => String(a.prop_id).localeCompare(String(b.prop_id)));
+}
+
+function getSelectedItems() {
+  return Object.values(selectedItems)
+    .filter(it => it.quantity > 0)
+    .sort((a, b) => String(a.prop_id).localeCompare(String(b.prop_id)));
 }
 
 function getServerPreviewName(server) {
@@ -801,7 +842,9 @@ $("#applyForm").addEventListener("submit", async (e) => {
     showToast(t("toastAppSubmitted"));
     copyToClipboard(previewText);
     e.target.reset();
+    selectedItems = {};
     renderItemGrid();
+    renderSelectedItems();
     updatePreview();
     switchView("history");
   } catch (err) {
@@ -825,6 +868,7 @@ async function renderApplyView() {
   }
   renderServerOptions();
   renderItemGrid();
+  renderSelectedItems();
   updatePreview();
 }
 
