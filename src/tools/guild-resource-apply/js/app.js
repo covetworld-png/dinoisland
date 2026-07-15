@@ -514,7 +514,6 @@ function applyI18n() {
   $("#addAccountConfirmBtn").textContent = t("addAccount");
   $("#newAccountName").placeholder = t("gameAccount");
   $("#newAccountNickname").placeholder = t("gameNickname");
-  $("#newAccountVip").placeholder = t("vipPoints");
   $$("#accountSelect option[value='main']")[0].textContent = t("mainAccount");
   $$("#accountSelect option[value='other']")[0].textContent = t("otherAccount");
   $$("#applyForm .preview-box strong")[0].textContent = t("preview") + "：";
@@ -1041,7 +1040,7 @@ function applyAccountSelection(value) {
     if (acc) {
       $("#applyForm input[name='game_account']").value = acc.account;
       $("#applyForm input[name='game_nickname']").value = acc.nickname;
-      $("#currentVipPoints").value = acc.vip_points || 0;
+      $("#currentVipPoints").value = "";
       updateVipLevelBadge();
     }
   }
@@ -1052,7 +1051,6 @@ function applyAccountSelection(value) {
 function openAccountModal() {
   $("#newAccountName").value = "";
   $("#newAccountNickname").value = "";
-  $("#newAccountVip").value = "";
   renderAccountList();
   $("#accountModal").classList.remove("hidden");
   $("#newAccountName").focus();
@@ -1075,7 +1073,6 @@ function renderAccountList() {
     <div class="modal-account-item ${acc.approved ? "" : "pending"}" data-id="${acc.id}">
       <input type="text" class="account-edit-name" value="${escapeHtml(acc.account)}" placeholder="${t("gameAccount")}">
       <input type="text" class="account-edit-nickname" value="${escapeHtml(acc.nickname)}" placeholder="${t("gameNickname")}">
-      <input type="number" class="account-edit-vip" value="${acc.vip_points || 0}" placeholder="${t("vipPoints")}" min="0">
       <span class="account-status-badge status-badge ${statusClass}">${statusText}</span>
       <button type="button" class="btn-secondary btn-icon" data-id="${acc.id}">${t("save")}</button>
       <button type="button" class="btn-danger btn-icon" data-id="${acc.id}">${t("delete")}</button>
@@ -1087,16 +1084,14 @@ function renderAccountList() {
 async function addNewAccount() {
   const account = $("#newAccountName").value.trim();
   const nickname = $("#newAccountNickname").value.trim();
-  const vip_points = parseInt($("#newAccountVip").value || "0", 10);
   if (!account || !nickname) {
     showToast(t("toastSelectAccount"));
     return;
   }
   try {
-    await api("POST", "/accounts", { account, nickname, vip_points });
+    await api("POST", "/accounts", { account, nickname });
     $("#newAccountName").value = "";
     $("#newAccountNickname").value = "";
-    $("#newAccountVip").value = "";
     await loadSavedAccounts();
     renderAccountList();
     showToast(t("toastAccountSaved"));
@@ -1109,13 +1104,12 @@ async function updateSavedAccount(id) {
   const row = $(`.modal-account-item[data-id='${id}']`);
   const account = row.querySelector(".account-edit-name").value.trim();
   const nickname = row.querySelector(".account-edit-nickname").value.trim();
-  const vip_points = parseInt(row.querySelector(".account-edit-vip").value || "0", 10);
   if (!account || !nickname) {
     showToast(t("toastSelectAccount"));
     return;
   }
   try {
-    await api("PUT", `/accounts/${id}`, { account, nickname, vip_points });
+    await api("PUT", `/accounts/${id}`, { account, nickname });
     await loadSavedAccounts();
     renderAccountList();
     showToast(t("toastAccountUpdated"));
@@ -1249,9 +1243,6 @@ $("#newAccountName").addEventListener("keydown", (e) => {
   if (e.key === "Enter") $("#newAccountNickname").focus();
 });
 $("#newAccountNickname").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") $("#newAccountVip").focus();
-});
-$("#newAccountVip").addEventListener("keydown", (e) => {
   if (e.key === "Enter") addNewAccount();
 });
 $("#addSkinBtn").addEventListener("click", addCustomSkin);
@@ -1698,7 +1689,6 @@ async function loadAdminAccountApprovals() {
         <td>${escapeHtml(acc.username)}</td>
         <td>${escapeHtml(acc.account)}</td>
         <td>${escapeHtml(acc.nickname)}</td>
-        <td>${acc.vip_points || 0}</td>
         <td>
           <button class="btn btn-small" onclick="approveAccount(${acc.id})">${t("approve")}</button>
           <button class="btn btn-small" style="color:var(--danger)" onclick="rejectAccount(${acc.id})">${t("delete")}</button>
