@@ -1700,6 +1700,7 @@ async function loadAdminUsers() {
         <td>
           <button class="btn btn-small" onclick="resetPassword(${u.id})">${t("resetPassword")}</button>
           <button class="btn btn-small" onclick="toggleRole(${u.id})">${u.role === "admin" ? t("removeAdmin") : t("setAdmin")}</button>
+          ${isSelf ? "" : `<button class="btn btn-small" onclick="addRoleForUser(${u.id})">${t("addRole")}</button>`}
           ${approvalBtn}
           ${deleteBtn}
         </td>
@@ -1751,6 +1752,20 @@ window.approveUserWithRole = async (userId) => {
   try {
     await api("POST", `/admin/users/${userId}/approve`, { server, nickname });
     showToast(t("toastUserApproved"));
+    loadAdminUsers();
+  } catch (err) {
+    showToast(err.message);
+  }
+};
+
+window.addRoleForUser = async (userId) => {
+  const server = prompt(t("pleaseFillServer"));
+  if (!server) return;
+  const nickname = prompt(t("pleaseFillGameNickname"));
+  if (!nickname) return;
+  try {
+    await api("POST", "/roles", { server, nickname, user_id: userId });
+    showToast(t("toastRoleSaved"));
     loadAdminUsers();
   } catch (err) {
     showToast(err.message);
