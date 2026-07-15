@@ -36,6 +36,8 @@ const translations = {
     passwordHint: "Mật khẩu có thể tùy ý",
     nicknameHint: "Vui lòng nhập biệt danh trong game",
     registerRoleHint: "Vai trò đầu tiên sẽ do quản trị viên tạo sau khi duyệt",
+    promptServer: "Nhập máy chủ",
+    promptNickname: "Nhập biệt danh game",
     pleaseFillServer: "chưa chọn máy chủ",
     pleaseFillGameAccount: "chưa điền tài khoản game",
     pleaseFillGameNickname: "chưa điền biệt danh game",
@@ -187,6 +189,8 @@ const translations = {
     passwordHint: "密码可任意设置",
     nicknameHint: "请填写游戏内的昵称",
     registerRoleHint: "首个角色将在管理员审批后创建",
+    promptServer: "请输入服务器",
+    promptNickname: "请输入游戏昵称",
     registerServerHint: "请选择角色所在的服务器",
     pleaseFillServer: "未选择服务器",
     pleaseFillGameAccount: "未填写游戏账号",
@@ -339,6 +343,8 @@ const translations = {
     passwordHint: "Password can be anything",
     nicknameHint: "Enter your in-game nickname",
     registerRoleHint: "Your first role will be created by an admin after approval",
+    promptServer: "Enter server",
+    promptNickname: "Enter game nickname",
     pleaseFillServer: "server not selected",
     pleaseFillGameAccount: "game account not entered",
     pleaseFillGameNickname: "game nickname not entered",
@@ -1745,9 +1751,9 @@ window.toggleApproval = async (userId, approve) => {
 };
 
 window.approveUserWithRole = async (userId) => {
-  const server = prompt(t("pleaseFillServer"));
+  const server = prompt(t("promptServer"));
   if (!server) return;
-  const nickname = prompt(t("pleaseFillGameNickname"));
+  const nickname = prompt(t("promptNickname"));
   if (!nickname) return;
   try {
     await api("POST", `/admin/users/${userId}/approve`, { server, nickname });
@@ -1759,9 +1765,9 @@ window.approveUserWithRole = async (userId) => {
 };
 
 window.addRoleForUser = async (userId) => {
-  const server = prompt(t("pleaseFillServer"));
+  const server = prompt(t("promptServer"));
   if (!server) return;
-  const nickname = prompt(t("pleaseFillGameNickname"));
+  const nickname = prompt(t("promptNickname"));
   if (!nickname) return;
   try {
     await api("POST", "/roles", { server, nickname, user_id: userId });
