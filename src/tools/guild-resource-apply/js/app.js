@@ -31,7 +31,27 @@ const translations = {
     selectUser: "Chọn Ngưởi Dùng",
     gameAccount: "Tài Khoản Game",
     gameNickname: "Biệt Danh Game",
+    vipPoints: "Điểm VIP",
+    selectAccount: "Chọn tài khoản",
+    mainAccount: "Tài khoản chính",
+    otherAccount: "Khác (nhập thủ công)",
+    manageAccounts: "Quản lý tài khoản",
+    accountModalTitle: "Quản lý tài khoản thường dùng",
+    addAccount: "Thêm",
+    editAccount: "Sửa",
+    deleteAccount: "Xóa",
+    confirmDeleteAccount: "Xóa tài khoản này?",
+    noSavedAccounts: "Chưa có tài khoản nào",
+    toastAccountUpdated: "Đã cập nhật tài khoản",
+    toastAccountDeleted: "Đã xóa tài khoản",
     selectItems: "Chọn vật phẩm (tích chọn để nhập số lượng)",
+    skinCustom: "Skin (tùy chỉnh ID và giá)",
+    skinIdPlaceholder: "ID skin",
+    skinPricePlaceholder: "Giá skin (xu thú)",
+    addSkin: "Thêm skin",
+    toastSkinAdded: "Đã thêm skin",
+    toastSkinExists: "Skin này đã được chọn",
+    toastSkinInvalid: "Vui lòng nhập ID skin và giá hợp lệ",
     selectedItems: "Vật phẩm đã chọn",
     noSelectedItems: "Chưa chọn vật phẩm nào",
     reason: "Lý Do Xin",
@@ -92,6 +112,11 @@ const translations = {
     toastRoleToggled: "Đã chuyển vai trò",
     toastSaved: "Đã lưu",
     toastSelectItemsFirst: "Vui lòng chọn vật phẩm trước",
+    toastSelectServer: "Vui lòng chọn máy chủ trước",
+    toastSelectAccount: "Vui lòng chọn máy chủ, tài khoản game, biệt danh và điểm VIP trước",
+    toastAccountSaved: "Đã lưu tài khoản",
+    toastAccountExists: "Tài khoản này đã được lưu",
+    itemGridHint: "Vui lòng chọn máy chủ, tài khoản game, biệt danh và điểm VIP trước khi chọn vật phẩm",
     toastBulkUpdated: "Cập nhật hàng loạt hoàn tất",
     toastReloaded: "Đã tải lại",
     categoryDinosaur: "Khủng Long",
@@ -134,7 +159,27 @@ const translations = {
     selectUser: "选择用户",
     gameAccount: "游戏账号",
     gameNickname: "游戏昵称",
+    vipPoints: "VIP 积分",
+    selectAccount: "选择账号",
+    mainAccount: "主账号",
+    otherAccount: "其他（手动输入）",
+    manageAccounts: "管理常用账号",
+    accountModalTitle: "管理常用账号",
+    addAccount: "添加",
+    editAccount: "保存",
+    deleteAccount: "删除",
+    confirmDeleteAccount: "确定删除该常用账号？",
+    noSavedAccounts: "暂无常用账号",
+    toastAccountUpdated: "账号已更新",
+    toastAccountDeleted: "账号已删除",
     selectItems: "选择道具（勾选后填写数量）",
+    skinCustom: "皮肤（自定义编号和价格）",
+    skinIdPlaceholder: "皮肤编号",
+    skinPricePlaceholder: "皮肤价格（兽币）",
+    addSkin: "添加皮肤",
+    toastSkinAdded: "皮肤已添加",
+    toastSkinExists: "该皮肤已选择",
+    toastSkinInvalid: "请输入皮肤编号和有效价格",
     selectedItems: "已选道具",
     noSelectedItems: "尚未选择任何道具",
     reason: "申请原因",
@@ -195,6 +240,11 @@ const translations = {
     toastRoleToggled: "角色已切换",
     toastSaved: "已保存",
     toastSelectItemsFirst: "请先选择道具",
+    toastSelectServer: "请先选择服务器",
+    toastSelectAccount: "请先选择服务器、游戏账号、昵称和 VIP 积分",
+    toastAccountSaved: "账号已保存",
+    toastAccountExists: "该账号已存在",
+    itemGridHint: "请先选择服务器、填写游戏账号、昵称和 VIP 积分后再选择道具",
     toastBulkUpdated: "批量更新完成",
     toastReloaded: "已重新加载",
     categoryDinosaur: "恐龙",
@@ -237,7 +287,27 @@ const translations = {
     selectUser: "Select User",
     gameAccount: "Game Account",
     gameNickname: "Game Nickname",
+    vipPoints: "VIP Points",
+    selectAccount: "Select Account",
+    mainAccount: "Main Account",
+    otherAccount: "Other (manual)",
+    manageAccounts: "Manage accounts",
+    accountModalTitle: "Manage common accounts",
+    addAccount: "Add",
+    editAccount: "Save",
+    deleteAccount: "Delete",
+    confirmDeleteAccount: "Delete this account?",
+    noSavedAccounts: "No saved accounts",
+    toastAccountUpdated: "Account updated",
+    toastAccountDeleted: "Account deleted",
     selectItems: "Select items (check to enter quantity)",
+    skinCustom: "Skin (custom ID and price)",
+    skinIdPlaceholder: "Skin ID",
+    skinPricePlaceholder: "Skin price (beast coins)",
+    addSkin: "Add skin",
+    toastSkinAdded: "Skin added",
+    toastSkinExists: "Skin already selected",
+    toastSkinInvalid: "Please enter skin ID and valid price",
     selectedItems: "Selected Items",
     noSelectedItems: "No items selected",
     reason: "Reason",
@@ -298,6 +368,11 @@ const translations = {
     toastRoleToggled: "Role toggled",
     toastSaved: "Saved",
     toastSelectItemsFirst: "Please select items first",
+    toastSelectServer: "Please select a server first",
+    toastSelectAccount: "Please select server, game account, nickname and VIP points first",
+    toastAccountSaved: "Account saved",
+    toastAccountExists: "Account already exists",
+    itemGridHint: "Please select server, enter game account, nickname and VIP points before selecting items",
     toastBulkUpdated: "Bulk update completed",
     toastReloaded: "Reloaded",
     categoryDinosaur: "Dinosaur",
@@ -404,13 +479,27 @@ function applyI18n() {
   $("#registerForm button").textContent = t("register");
 
   // Apply form
-  $$("#applyForm label")[0].childNodes[0].textContent = t("server");
-  $$("#applyForm label")[1].childNodes[0].textContent = t("selectUser");
-  $$("#applyForm label")[2].childNodes[0].textContent = t("gameAccount");
-  $$("#applyForm label")[3].childNodes[0].textContent = t("gameNickname");
-  $$("#applyForm .form-row label")[4].childNodes[0].textContent = t("selectItems");
-  $$("#applyForm label")[5].childNodes[0].textContent = t("selectedItems");
-  $$("#applyForm label")[6].childNodes[0].textContent = t("reason");
+  $("#serverLabel").childNodes[0].textContent = t("server");
+  $("#userSelectRow label").childNodes[0].textContent = t("selectUser");
+  $("#accountSelect").parentElement.childNodes[0].textContent = t("selectAccount");
+  $("#gameAccountLabel").childNodes[0].textContent = t("gameAccount");
+  $("#gameNicknameLabel").childNodes[0].textContent = t("gameNickname");
+  $("#vipPointsLabel").childNodes[0].textContent = t("vipPoints");
+  $("#selectItemsLabel").childNodes[0].textContent = t("selectItems");
+  $("#itemGridHint").textContent = t("itemGridHint");
+  $("#skinLabel").childNodes[0].textContent = t("skinCustom");
+  $("#skinId").placeholder = t("skinIdPlaceholder");
+  $("#skinPrice").placeholder = t("skinPricePlaceholder");
+  $("#addSkinBtn").textContent = t("addSkin");
+  $("#selectedItemsLabel").childNodes[0].textContent = t("selectedItems");
+  $("#reasonLabel").childNodes[0].textContent = t("reason");
+  $("#manageAccountsBtn").textContent = t("manageAccounts");
+  $("#accountModalTitle").textContent = t("accountModalTitle");
+  $("#addAccountConfirmBtn").textContent = t("addAccount");
+  $("#newAccountName").placeholder = t("gameAccount");
+  $("#newAccountNickname").placeholder = t("gameNickname");
+  $$("#accountSelect option[value='main']")[0].textContent = t("mainAccount");
+  $$("#accountSelect option[value='other']")[0].textContent = t("otherAccount");
   $$("#applyForm .preview-box strong")[0].textContent = t("preview") + "：";
   $("#applyForm button[type='submit']").textContent = t("submit");
 
@@ -538,7 +627,7 @@ function statusClass(status) {
 function formatApplicationText(app) {
   const serverMap = { "Q服 server1": "Q服", "K服 server2": "K服" };
   const server = serverMap[app.server] || app.server;
-  const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join(" ");
+  const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join("，");
   return `${server} ${app.game_account} ${app.game_nickname} ${itemsText}${app.reason ? `（${app.reason}）` : ""}`;
 }
 
@@ -563,6 +652,7 @@ async function initAuth() {
     const res = await api("GET", "/auth/me");
     currentUser = res.data;
     showApp();
+    loadSavedAccounts();
   } catch (e) {
     showAuth();
   }
@@ -577,6 +667,7 @@ $("#loginForm").addEventListener("submit", async (e) => {
   try {
     const res = await api("POST", "/auth/login", { username, password });
     currentUser = res.data;
+    loadSavedAccounts();
     if (remember) {
       localStorage.setItem("gra_username", username);
       localStorage.setItem("gra_password", password);
@@ -605,6 +696,7 @@ $("#registerForm").addEventListener("submit", async (e) => {
     if (res.data && res.data.role === "admin") {
       currentUser = res.data;
       showApp();
+      loadSavedAccounts();
       showToast(res.message || t("toastRegisterSuccess"));
     } else {
       e.target.reset();
@@ -629,6 +721,8 @@ function switchAuthTab(tab) {
 $("#logoutBtn").addEventListener("click", async () => {
   await api("POST", "/auth/logout");
   currentUser = null;
+  savedAccounts = [];
+  renderAccountSelect("main");
   showAuth();
 });
 
@@ -724,12 +818,15 @@ function renderItemGrid() {
   });
 
   categories.forEach(cat => {
+    const catItems = grouped[cat] || [];
+    if (!catItems.length) return;
+
     const catDiv = document.createElement("div");
     catDiv.className = "item-category";
     catDiv.textContent = categoryName(cat);
     container.appendChild(catDiv);
 
-    (grouped[cat] || []).forEach(it => {
+    catItems.forEach(it => {
       const isSelected = !!selectedItems[it.prop_id];
       const card = document.createElement("div");
       card.className = `item-card cat-${cat}${isSelected ? " active" : ""}`;
@@ -751,7 +848,30 @@ function renderItemGrid() {
   });
 }
 
+function canSelectItems() {
+  return !!(
+    $("#serverSelect").value &&
+    $("#applyForm input[name='game_account']").value.trim() &&
+    $("#applyForm input[name='game_nickname']").value.trim() &&
+    $("#currentVipPoints").value.trim()
+  );
+}
+
+function updateItemGridState() {
+  const ok = canSelectItems();
+  $("#itemGrid").classList.toggle("disabled", !ok);
+  $("#itemGridHint").classList.toggle("hidden", ok);
+}
+
 function toggleItemSelection(item) {
+  if (!$("#serverSelect").value) {
+    showToast(t("toastSelectServer"));
+    return;
+  }
+  if (!$("#applyForm input[name='game_account']").value.trim() || !$("#applyForm input[name='game_nickname']").value.trim()) {
+    showToast(t("toastSelectAccount"));
+    return;
+  }
   if (selectedItems[item.prop_id]) {
     delete selectedItems[item.prop_id];
   } else {
@@ -781,16 +901,29 @@ function renderSelectedItems() {
     const row = document.createElement("div");
     row.className = "selected-item";
     row.innerHTML = `
-      <span class="selected-name">${escapeHtml(itemName(it))}</span>
-      <input type="number" min="1" value="${it.quantity}" data-prop="${it.prop_id}">
+      <span class="selected-name" title="${escapeHtml(itemName(it))}">${escapeHtml(itemName(it))}</span>
+      <div class="qty-stepper">
+        <button type="button" class="qty-btn minus" data-prop="${it.prop_id}" aria-label="-">−</button>
+        <input type="number" min="1" value="${it.quantity}" data-prop="${it.prop_id}" inputmode="numeric" pattern="[0-9]*">
+        <button type="button" class="qty-btn plus" data-prop="${it.prop_id}" aria-label="+">+</button>
+      </div>
       <span class="unit">${escapeHtml(it.unit)}</span>
     `;
+
     const input = row.querySelector("input");
-    input.addEventListener("input", (e) => {
-      const q = parseInt(e.target.value, 10);
-      selectedItems[it.prop_id].quantity = isNaN(q) ? 0 : q;
+    const updateQty = (q) => {
+      const val = Math.max(1, parseInt(q, 10) || 1);
+      input.value = val;
+      selectedItems[it.prop_id].quantity = val;
       updatePreview();
-    });
+    };
+
+    input.addEventListener("input", () => updateQty(input.value));
+    input.addEventListener("blur", () => updateQty(input.value));
+
+    row.querySelector(".qty-btn.minus").addEventListener("click", () => updateQty(input.value - 1));
+    row.querySelector(".qty-btn.plus").addEventListener("click", () => updateQty(parseInt(input.value, 10) + 1));
+
     panel.appendChild(row);
   });
 }
@@ -799,6 +932,167 @@ function getSelectedItems() {
   return Object.values(selectedItems)
     .filter(it => it.quantity > 0)
     .sort((a, b) => String(a.prop_id).localeCompare(String(b.prop_id)));
+}
+
+let savedAccounts = [];
+
+async function loadSavedAccounts() {
+  if (!currentUser) {
+    savedAccounts = [];
+    renderAccountSelect("main");
+    return;
+  }
+  try {
+    const res = await api("GET", "/accounts");
+    savedAccounts = Array.isArray(res.data) ? res.data : [];
+  } catch (e) {
+    savedAccounts = [];
+  }
+  renderAccountSelect("main");
+}
+
+function renderAccountSelect(selectedValue = "main") {
+  const sel = $("#accountSelect");
+  let html = `<option value="main">${escapeHtml(t("mainAccount"))}</option>`;
+  savedAccounts.forEach(acc => {
+    const label = `${escapeHtml(acc.account)} (${escapeHtml(acc.nickname)})`;
+    html += `<option value="saved:${acc.id}">${label}</option>`;
+  });
+  html += `<option value="other">${escapeHtml(t("otherAccount"))}</option>`;
+  sel.innerHTML = html;
+  sel.value = selectedValue;
+}
+
+function applyAccountSelection(value) {
+  if (value === "main") {
+    if (currentUser) {
+      $("#applyForm input[name='game_account']").value = currentUser.username || "";
+      $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
+    }
+  } else if (value.startsWith("saved:")) {
+    const id = parseInt(value.split(":")[1], 10);
+    const acc = savedAccounts.find(a => a.id === id);
+    if (acc) {
+      $("#applyForm input[name='game_account']").value = acc.account;
+      $("#applyForm input[name='game_nickname']").value = acc.nickname;
+    }
+  }
+  updatePreview();
+  updateItemGridState();
+}
+
+function openAccountModal() {
+  $("#newAccountName").value = "";
+  $("#newAccountNickname").value = "";
+  renderAccountList();
+  $("#accountModal").classList.remove("hidden");
+  $("#newAccountName").focus();
+}
+
+function closeAccountModal() {
+  $("#accountModal").classList.add("hidden");
+}
+
+function renderAccountList() {
+  const list = $("#accountModalList");
+  if (!savedAccounts.length) {
+    list.innerHTML = `<p class="hint">${t("noSavedAccounts")}</p>`;
+    return;
+  }
+  list.innerHTML = savedAccounts.map(acc => `
+    <div class="modal-account-item" data-id="${acc.id}">
+      <input type="text" class="account-edit-name" value="${escapeHtml(acc.account)}" placeholder="${t("gameAccount")}">
+      <input type="text" class="account-edit-nickname" value="${escapeHtml(acc.nickname)}" placeholder="${t("gameNickname")}">
+      <button type="button" class="btn-secondary btn-icon" data-id="${acc.id}">${t("save")}</button>
+      <button type="button" class="btn-danger btn-icon" data-id="${acc.id}">${t("delete")}</button>
+    </div>
+  `).join("");
+}
+
+async function addNewAccount() {
+  const account = $("#newAccountName").value.trim();
+  const nickname = $("#newAccountNickname").value.trim();
+  if (!account || !nickname) {
+    showToast(t("toastSelectAccount"));
+    return;
+  }
+  try {
+    await api("POST", "/accounts", { account, nickname });
+    $("#newAccountName").value = "";
+    $("#newAccountNickname").value = "";
+    await loadSavedAccounts();
+    renderAccountList();
+    showToast(t("toastAccountSaved"));
+  } catch (e) {
+    showToast(e.message);
+  }
+}
+
+async function updateSavedAccount(id) {
+  const row = $(`.modal-account-item[data-id='${id}']`);
+  const account = row.querySelector(".account-edit-name").value.trim();
+  const nickname = row.querySelector(".account-edit-nickname").value.trim();
+  if (!account || !nickname) {
+    showToast(t("toastSelectAccount"));
+    return;
+  }
+  try {
+    await api("PUT", `/accounts/${id}`, { account, nickname });
+    await loadSavedAccounts();
+    renderAccountList();
+    showToast(t("toastAccountUpdated"));
+  } catch (e) {
+    showToast(e.message);
+  }
+}
+
+async function deleteSavedAccount(id) {
+  if (!confirm(t("confirmDeleteAccount"))) return;
+  try {
+    await api("DELETE", `/accounts/${id}`);
+    await loadSavedAccounts();
+    renderAccountList();
+    const sel = $("#accountSelect").value;
+    if (sel === `saved:${id}`) {
+      $("#accountSelect").value = "main";
+      applyAccountSelection("main");
+    }
+    showToast(t("toastAccountDeleted"));
+  } catch (e) {
+    showToast(e.message);
+  }
+}
+
+function addCustomSkin() {
+  if (!canSelectItems()) {
+    showToast(t("toastSelectAccount"));
+    return;
+  }
+  const skinId = $("#skinId").value.trim();
+  const price = parseInt($("#skinPrice").value, 10);
+  if (!skinId || isNaN(price) || price < 0) {
+    showToast(t("toastSkinInvalid"));
+    return;
+  }
+  if (selectedItems[skinId]) {
+    showToast(t("toastSkinExists"));
+    return;
+  }
+  const label = `皮肤 ${skinId}`;
+  selectedItems[skinId] = {
+    prop_id: skinId,
+    name_cn: label,
+    name_vn: `Skin ${skinId}`,
+    name_en: `Skin ${skinId}`,
+    unit: "个",
+    quantity: 1,
+    vip_value: price,
+  };
+  $("#skinId").value = "";
+  $("#skinPrice").value = "";
+  renderSelectedItems();
+  updatePreview();
+  showToast(t("toastSkinAdded"));
 }
 
 function getServerPreviewName(server) {
@@ -812,7 +1106,7 @@ function updatePreview() {
   const nickname = $("#applyForm input[name='game_nickname']").value.trim();
   const reason = $("#applyForm input[name='reason']").value.trim();
   const items = getSelectedItems();
-  const itemsText = items.map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join(" ");
+  const itemsText = items.map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join("，");
 
   if (!server || !account || !nickname || !itemsText) {
     $("#applyPreview").textContent = "-";
@@ -822,10 +1116,40 @@ function updatePreview() {
   $("#applyPreview").textContent = text;
 }
 
-$$("#applyForm input[name='game_account'], #applyForm input[name='game_nickname'], #applyForm input[name='reason']").forEach(input => {
-  input.addEventListener("input", updatePreview);
+$$("#applyForm input[name='game_account'], #applyForm input[name='game_nickname']").forEach(input => {
+  input.addEventListener("input", () => {
+    updatePreview();
+    updateItemGridState();
+  });
 });
-$("#serverSelect").addEventListener("change", updatePreview);
+$("#currentVipPoints").addEventListener("input", updateItemGridState);
+$("#applyForm input[name='reason']").addEventListener("input", updatePreview);
+$("#serverSelect").addEventListener("change", () => {
+  updatePreview();
+  updateItemGridState();
+});
+$("#accountSelect").addEventListener("change", (e) => applyAccountSelection(e.target.value));
+$("#manageAccountsBtn").addEventListener("click", openAccountModal);
+$("#closeAccountModal").addEventListener("click", closeAccountModal);
+$("#cancelAccountBtn").addEventListener("click", closeAccountModal);
+$("#addAccountConfirmBtn").addEventListener("click", addNewAccount);
+$("#accountModalList").addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  const id = parseInt(btn.dataset.id, 10);
+  if (btn.classList.contains("btn-secondary")) {
+    updateSavedAccount(id);
+  } else if (btn.classList.contains("btn-danger")) {
+    deleteSavedAccount(id);
+  }
+});
+$("#newAccountName").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") $("#newAccountNickname").focus();
+});
+$("#newAccountNickname").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addNewAccount();
+});
+$("#addSkinBtn").addEventListener("click", addCustomSkin);
 
 $("#applyForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -842,6 +1166,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
       server: fd.get("server"),
       game_account: fd.get("game_account"),
       game_nickname: fd.get("game_nickname"),
+      current_vip_points: parseInt(fd.get("current_vip_points") || "0", 10),
       items,
       reason: fd.get("reason"),
     });
@@ -849,9 +1174,12 @@ $("#applyForm").addEventListener("submit", async (e) => {
     copyToClipboard(previewText);
     e.target.reset();
     selectedItems = {};
+    $("#currentVipPoints").value = currentUser ? (currentUser.vip_points || 0) : 0;
+    renderAccountSelect("main");
     renderItemGrid();
     renderSelectedItems();
     updatePreview();
+    updateItemGridState();
     switchView("history");
   } catch (err) {
     showToast(err.message);
@@ -871,11 +1199,14 @@ async function renderApplyView() {
   if (currentUser) {
     $("#applyForm input[name='game_account']").value = currentUser.username || "";
     $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
+    $("#currentVipPoints").value = currentUser.vip_points || 0;
   }
   renderServerOptions();
+  renderAccountSelect("main");
   renderItemGrid();
   renderSelectedItems();
   updatePreview();
+  updateItemGridState();
 }
 
 async function loadUserSelect(sel) {
@@ -898,7 +1229,9 @@ $("#userSelect").addEventListener("change", (e) => {
   const user = JSON.parse(e.target.value);
   $("#applyForm input[name='game_account']").value = user.username || "";
   $("#applyForm input[name='game_nickname']").value = user.nickname || user.username || "";
+  $("#accountSelect").value = "other";
   updatePreview();
+  updateItemGridState();
 });
 
 // ---------- Profile ----------
