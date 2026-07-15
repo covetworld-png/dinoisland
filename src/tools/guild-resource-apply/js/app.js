@@ -833,15 +833,21 @@ function showAuth() {
 }
 
 async function showApp() {
-  $("#nav").classList.remove("hidden");
-  updateLangSwitcher();
-  applyI18n();
-  $$(".admin-only").forEach(el => {
-    el.classList.toggle("hidden", currentUser.role !== "admin");
-  });
-  await loadItems();
-  await loadRoles();
-  switchView("apply");
+  try {
+    $("#nav").classList.remove("hidden");
+    updateLangSwitcher();
+    applyI18n();
+    $$(".admin-only").forEach(el => {
+      el.classList.toggle("hidden", currentUser.role !== "admin");
+    });
+    await loadItems();
+    await loadRoles();
+    switchView("apply");
+  } catch (e) {
+    console.error("showApp error:", e);
+    showToast("页面切换失败: " + (e.message || e));
+    throw e;
+  }
 }
 
 // ---------- Navigation ----------
@@ -1843,6 +1849,18 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+// 全局错误捕获，便于排查问题
+window.addEventListener("error", (e) => {
+  const msg = `JS Error: ${e.message} at ${e.filename}:${e.lineno}`;
+  console.error(msg);
+  if (typeof showToast === "function") showToast(msg);
+});
+window.addEventListener("unhandledrejection", (e) => {
+  const msg = `JS Promise Error: ${e.reason && e.reason.message ? e.reason.message : e.reason}`;
+  console.error(msg);
+  if (typeof showToast === "function") showToast(msg);
+});
 
 // 启动
 initAuth();
