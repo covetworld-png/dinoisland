@@ -595,11 +595,12 @@ function applyI18n() {
 
   // Profile
   $("#profileView h2").textContent = t("profileTitle");
-  $$("#profileForm label")[0].childNodes[0].textContent = t("username");
-  $$("#profileForm label")[1].childNodes[0].textContent = t("nickname");
-  $$("#profileForm .hint")[0].textContent = t("profileAccountHint");
-  $$("#profileForm .hint")[1].textContent = t("profileNicknameHint");
-  $("#profileForm button").textContent = t("save");
+  const profileLabels = $$("#profileForm label");
+  if (profileLabels[0]) profileLabels[0].childNodes[0].textContent = t("username");
+  const profileHints = $$("#profileForm .hint");
+  if (profileHints[0]) profileHints[0].textContent = t("profileAccountHint");
+  const profileBtn = $("#profileForm button");
+  if (profileBtn) profileBtn.textContent = t("save");
 
   // Admin tabs
   $$(".admin-tab[data-admin-tab='users']").textContent = t("adminUsers");
