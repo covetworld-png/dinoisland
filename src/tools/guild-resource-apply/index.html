@@ -39,17 +39,18 @@
         </form>
         <form id="registerForm" class="auth-form hidden">
           <label>账号 <input type="text" name="username" required minlength="3"></label>
-          <p class="hint">请填写游戏内的数字账号（如 13219626）</p>
+          <p class="hint">请填写游戏内的数字账号（如 13219626），该账号将用于申请资源</p>
           <label>密码 <input type="password" name="password" required></label>
           <p class="hint">密码可任意设置</p>
-          <label>昵称 <input type="text" name="nickname" required></label>
-          <p class="hint">请填写游戏内的昵称</p>
-          <label id="registerServerLabel">服务器
-            <select name="server" id="registerServerSelect" required>
-              <option value="">请选择服务器</option>
-            </select>
-          </label>
-          <p class="hint" id="registerServerHint">请选择游戏角色所在的服务器</p>
+          <div class="form-row two-col">
+            <label id="registerServerLabel">服务器
+              <select name="server" id="registerServerSelect" required>
+                <option value="">请选择服务器</option>
+              </select>
+            </label>
+            <label id="registerNicknameLabel">昵称 <input type="text" name="nickname" id="registerNickname" required></label>
+          </div>
+          <p class="hint" id="registerRoleHint">请填写第一个角色所在的服务器和昵称</p>
           <button type="submit">注册</button>
         </form>
       </section>
@@ -67,14 +68,21 @@
             <p id="userSelectHint" class="hint">管理员选择用户后可代其提交资源申请</p>
           </div>
 
-          <div class="form-row account-select-row">
-            <label class="account-select-label">选择账号
-              <select id="accountSelect">
-                <option value="main">主账号</option>
+          <div class="form-row">
+            <label id="roleLabel">选择角色
+              <select id="roleSelect">
+                <option value="">请选择角色</option>
                 <option value="other">其他（手动输入）</option>
               </select>
             </label>
-            <button type="button" id="manageAccountsBtn" class="btn-secondary btn-manage">管理常用账号</button>
+          </div>
+
+          <div class="form-row three-col account-row">
+            <label id="gameAccountLabel">游戏账号 <input type="text" name="game_account" id="gameAccountInput" placeholder="如 13219626" readonly></label>
+            <label id="gameNicknameLabel">游戏昵称 <input type="text" name="game_nickname" id="gameNicknameInput" placeholder="如 SPECTER" required></label>
+            <label id="vipPointsLabel">VIP 积分 <span id="vipLevelBadge" class="vip-level-badge"></span>
+              <input type="number" name="current_vip_points" id="currentVipPoints" placeholder="0" min="0" required>
+            </label>
           </div>
 
           <div class="form-row">
@@ -82,36 +90,6 @@
               <select name="server" id="serverSelect" required>
                 <option value="">请选择服务器</option>
               </select>
-            </label>
-          </div>
-
-          <div id="accountModal" class="modal hidden">
-            <div class="modal-overlay"></div>
-            <div class="modal-content">
-              <div class="modal-header">
-                <h3 id="accountModalTitle">管理常用账号</h3>
-                <button type="button" id="closeAccountModal" class="modal-close">&times;</button>
-              </div>
-              <div class="modal-body">
-                <div id="accountModalList" class="modal-list"></div>
-                <div class="modal-add-form">
-                  <input type="text" id="newAccountName" placeholder="游戏账号">
-                  <input type="text" id="newAccountNickname" placeholder="游戏昵称">
-                  <select id="newAccountServer"></select>
-                  <button type="button" id="addAccountConfirmBtn" class="btn-primary">添加</button>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" id="cancelAccountBtn" class="btn-secondary">关闭</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row three-col account-row">
-            <label id="gameAccountLabel">游戏账号 <input type="text" name="game_account" placeholder="如 13219626" required></label>
-            <label id="gameNicknameLabel">游戏昵称 <input type="text" name="game_nickname" placeholder="如 SPECTER" required></label>
-            <label id="vipPointsLabel">VIP 积分 <span id="vipLevelBadge" class="vip-level-badge"></span>
-              <input type="number" name="current_vip_points" id="currentVipPoints" placeholder="0" min="0" required>
             </label>
           </div>
 
@@ -157,12 +135,19 @@
       <section id="profileView" class="view hidden">
         <h2>个人资料</h2>
         <form id="profileForm" class="auth-form">
-          <label>账号 <input type="text" name="username" id="profileUsername" required minlength="3"></label>
-          <p class="hint">修改账号后需使用新账号登录</p>
-          <label>昵称 <input type="text" name="nickname" id="profileNickname" required></label>
-          <p class="hint">游戏内昵称</p>
-          <button type="submit" class="btn-primary">保存修改</button>
+          <label>账号 <input type="text" name="username" id="profileUsername" required minlength="3" readonly></label>
+          <p class="hint">登录账号，也是申请时使用的游戏账号</p>
         </form>
+        <div class="profile-roles-section">
+          <h3 id="profileRolesTitle">我的角色</h3>
+          <div id="roleList" class="role-list"></div>
+          <div id="addRoleForm" class="role-add-form">
+            <select id="newRoleServer"></select>
+            <input type="text" id="newRoleNickname" placeholder="昵称">
+            <button type="button" id="addRoleBtn" class="btn-primary">添加角色</button>
+          </div>
+          <p id="roleLimitHint" class="hint">每个服务器只能有一个角色</p>
+        </div>
       </section>
 
       <!-- 历史记录 -->
@@ -208,8 +193,6 @@
           <button data-admin-tab="users" class="admin-tab">用户管理</button>
           <button data-admin-tab="items" class="admin-tab">道具配置</button>
           <button data-admin-tab="allApps" class="admin-tab active">全部申请</button>
-          <button data-admin-tab="accountApproval" class="admin-tab">常用账号审批</button>
-          <button data-admin-tab="settings" class="admin-tab">系统设置</button>
         </div>
 
         <div id="adminUsers" class="admin-panel hidden">
@@ -285,40 +268,6 @@
           </div>
         </div>
 
-        <div id="adminAccountApproval" class="admin-panel hidden">
-          <h3>常用账号审批</h3>
-          <div class="table-wrap">
-            <table id="accountApprovalTable" class="data-table">
-              <thead>
-                <tr>
-                  <th>时间</th>
-                  <th>提交人</th>
-                  <th>游戏账号</th>
-                  <th>游戏昵称</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="adminSettings" class="admin-panel hidden">
-          <h3>系统设置</h3>
-          <div class="settings-list">
-            <div class="setting-item">
-              <div class="setting-info">
-                <strong id="settingSubAccountsLabel">启用子账号功能</strong>
-                <p id="settingSubAccountsDesc" class="hint">关闭后，普通用户申请时只能使用主账号，无法添加/选择常用账号</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="settingEnableSubAccounts">
-                <span class="slider"></span>
-              </label>
-            </div>
-            <button type="button" id="saveSettingsBtn" class="btn-primary">保存设置</button>
-          </div>
-        </div>
       </section>
     </main>
 

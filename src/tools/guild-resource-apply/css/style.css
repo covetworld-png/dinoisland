@@ -442,6 +442,29 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
 .vip-upgrade-hint { color: var(--primary); font-weight: 500; margin-top: -8px; }
 
+/* Profile Roles */
+.profile-roles-section { margin-top: 24px; }
+.profile-roles-section h3 { margin-bottom: 12px; font-size: 18px; }
+.role-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.role-item {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: #fafafa;
+}
+.role-item.main { background: #eff6ff; border-color: #bfdbfe; }
+.role-info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.role-server { font-weight: 500; color: var(--text-secondary); white-space: nowrap; }
+.role-edit-nickname { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+.role-main-badge { font-size: 12px; background: var(--primary); color: #fff; padding: 2px 8px; border-radius: 12px; }
+.role-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.role-add-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: center; }
+.role-add-form input, .role-add-form select { min-width: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
+@media (max-width: 480px) {
+  .role-add-form { grid-template-columns: 1fr; }
+  .role-item { flex-direction: column; align-items: stretch; }
+  .role-actions { justify-content: flex-end; }
+}
+
 /* Settings */
 .settings-list { max-width: 640px; }
 .setting-item {

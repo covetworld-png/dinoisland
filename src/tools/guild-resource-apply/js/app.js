@@ -35,7 +35,7 @@ const translations = {
     accountHint: "Vui lòng nhập ID số trong game (ví dụ: 13219626)",
     passwordHint: "Mật khẩu có thể tùy ý",
     nicknameHint: "Vui lòng nhập biệt danh trong game",
-    registerServerHint: "Vui lòng chọn máy chủ của nhân vật",
+    registerRoleHint: "Vui lòng chọn máy chủ và biệt danh của vai trò đầu tiên",
     pleaseFillServer: "chưa chọn máy chủ",
     pleaseFillGameAccount: "chưa điền tài khoản game",
     pleaseFillGameNickname: "chưa điền biệt danh game",
@@ -50,18 +50,22 @@ const translations = {
     vipPoints: "Điểm VIP",
     vipLevel: "Cấp VIP",
     beastCoin: "xu thú",
-    selectAccount: "Chọn tài khoản",
-    mainAccount: "Tài khoản chính",
-    otherAccount: "Khác (nhập thủ công)",
-    manageAccounts: "Quản lý tài khoản",
-    accountModalTitle: "Quản lý tài khoản thường dùng",
-    addAccount: "Thêm",
-    editAccount: "Sửa",
-    deleteAccount: "Xóa",
-    confirmDeleteAccount: "Xóa tài khoản này?",
-    noSavedAccounts: "Chưa có tài khoản nào",
-    toastAccountUpdated: "Đã cập nhật, chờ quản trị viên phê duyệt",
-    toastAccountDeleted: "Đã xóa tài khoản",
+    selectRole: "Chọn vai trò",
+    otherRole: "Khác (nhập thủ công)",
+    manageRoles: "Quản lý vai trò",
+    roleModalTitle: "Quản lý vai trò",
+    addRole: "Thêm vai trò",
+    editRole: "Lưu",
+    deleteRole: "Xóa",
+    confirmDeleteRole: "Xóa vai trò này?",
+    noSavedRoles: "Chưa có vai trò nào",
+    toastRoleUpdated: "Đã cập nhật vai trò",
+    toastRoleDeleted: "Đã xóa vai trò",
+    toastRoleSaved: "Đã lưu vai trò",
+    toastRoleExists: "Vai trò trong máy chủ này đã tồn tại",
+    profileRolesTitle: "Vai trò của tôi",
+    roleLimitHint: "Mỗi máy chủ chỉ có một vai trò",
+    mainRole: "Vai trò chính",
     selectItems: "Chọn vật phẩm (tích chọn để nhập số lượng)",
     skinCustom: "Skin",
     lookupSkin: "Tìm",
@@ -103,11 +107,8 @@ const translations = {
     adminItems: "Cấu Hình Vật Phẩm",
     adminAllApps: "Tất Cả Đơn Xin",
     adminAccountApproval: "Phê Duyệt Tài Khoản",
-    adminSettings: "Cài Đặt Hệ Thống",
     settingEnableSubAccounts: "Bật chức năng tài khoản con",
     settingEnableSubAccountsDesc: "Khi tắt, ngưởi dùng thường chỉ có thể dùng tài khoản chính để gửi đơn, không thể thêm/chọn tài khoản con",
-    saveSettings: "Lưu cài đặt",
-    toastSettingsSaved: "Đã lưu cài đặt",
     resetPassword: "Đặt Lại Mật Khẩu",
     downloadBackup: "Tải Sao Lưu Dữ Liệu",
     toggleAdmin: "Chuyển Quyền Admin",
@@ -140,10 +141,10 @@ const translations = {
     toastSaved: "Đã lưu",
     toastSelectItemsFirst: "Vui lòng chọn vật phẩm trước",
     toastSelectServer: "Vui lòng chọn máy chủ trước",
-    toastSelectAccount: "Vui lòng chọn máy chủ, tài khoản game và biệt danh trước",
-    toastAccountSaved: "Đã lưu tài khoản, chờ quản trị viên phê duyệt",
-    toastAccountExists: "Tài khoản này đã được lưu",
-    itemGridHint: "Vui lòng chọn máy chủ, tài khoản game và biệt danh trước khi chọn vật phẩm",
+    toastSelectRole: "Vui lòng chọn vai trò trước",
+    toastRoleSaved: "Đã lưu vai trò",
+    toastRoleExists: "Vai trò trong máy chủ này đã tồn tại",
+    itemGridHint: "Vui lòng chọn vai trò trước khi chọn vật phẩm",
     vipUpgradeHint: "Sau đơn này VIP sẽ tăng từ cấp {before} lên cấp {after}",
     highValueConfirm: "Tổng giá trị vật phẩm {value} xu thú。Điểm VIP hiện tại {points}（cấp {before}），sau khi gửi là cấp {after}。Tiếp tục？",
     toastBulkUpdated: "Cập nhật hàng loạt hoàn tất",
@@ -199,18 +200,22 @@ const translations = {
     vipPoints: "VIP 积分",
     vipLevel: "VIP 等级",
     beastCoin: "兽币",
-    selectAccount: "选择账号",
-    mainAccount: "主账号",
-    otherAccount: "其他（手动输入）",
-    manageAccounts: "管理常用账号",
-    accountModalTitle: "管理常用账号",
-    addAccount: "添加",
-    editAccount: "保存",
-    deleteAccount: "删除",
-    confirmDeleteAccount: "确定删除该常用账号？",
-    noSavedAccounts: "暂无常用账号",
-    toastAccountUpdated: "账号已更新，等待管理员审批",
-    toastAccountDeleted: "账号已删除",
+    selectRole: "选择角色",
+    otherRole: "其他（手动输入）",
+    manageRoles: "管理角色",
+    roleModalTitle: "管理角色",
+    addRole: "添加角色",
+    editRole: "保存",
+    deleteRole: "删除",
+    confirmDeleteRole: "确定删除该角色？",
+    noSavedRoles: "暂无角色",
+    toastRoleUpdated: "角色已更新",
+    toastRoleDeleted: "角色已删除",
+    toastRoleSaved: "角色已保存",
+    toastRoleExists: "该服务器下已存在角色",
+    profileRolesTitle: "我的角色",
+    roleLimitHint: "每个服务器只能有一个角色",
+    mainRole: "主角色",
     selectItems: "选择道具（勾选后填写数量）",
     skinCustom: "皮肤",
     lookupSkin: "查询",
@@ -252,11 +257,8 @@ const translations = {
     adminItems: "道具配置",
     adminAllApps: "全部申请",
     adminAccountApproval: "常用账号审批",
-    adminSettings: "系统设置",
     settingEnableSubAccounts: "启用子账号功能",
     settingEnableSubAccountsDesc: "关闭后，普通用户申请时只能使用主账号，无法添加/选择常用账号",
-    saveSettings: "保存设置",
-    toastSettingsSaved: "设置已保存",
     resetPassword: "重置密码",
     downloadBackup: "下载数据备份",
     toggleAdmin: "切换管理员",
@@ -289,10 +291,10 @@ const translations = {
     toastSaved: "已保存",
     toastSelectItemsFirst: "请先选择道具",
     toastSelectServer: "请先选择服务器",
-    toastSelectAccount: "请先选择服务器、游戏账号和昵称",
-    toastAccountSaved: "账号已保存，等待管理员审批",
-    toastAccountExists: "该账号已存在",
-    itemGridHint: "请先选择服务器、填写游戏账号和昵称后再选择道具",
+    toastSelectRole: "请先选择角色",
+    toastRoleSaved: "角色已保存",
+    toastRoleExists: "该服务器下已存在角色",
+    itemGridHint: "请先选择角色后再选择道具",
     vipUpgradeHint: "本次申请后 VIP 将从 {before} 级升至 {after} 级",
     highValueConfirm: "道具总价值 {value} 兽币，当前 VIP 积分 {points}（{before} 级），提交后 VIP 等级为 {after} 级。是否继续？",
     toastBulkUpdated: "批量更新完成",
@@ -333,7 +335,7 @@ const translations = {
     accountHint: "Enter your in-game numeric ID (e.g. 13219626)",
     passwordHint: "Password can be anything",
     nicknameHint: "Enter your in-game nickname",
-    registerServerHint: "Please select your character server",
+    registerRoleHint: "Please select the server and nickname of your first role",
     pleaseFillServer: "server not selected",
     pleaseFillGameAccount: "game account not entered",
     pleaseFillGameNickname: "game nickname not entered",
@@ -348,18 +350,22 @@ const translations = {
     vipPoints: "VIP Points",
     vipLevel: "VIP Level",
     beastCoin: "beast coins",
-    selectAccount: "Select Account",
-    mainAccount: "Main Account",
-    otherAccount: "Other (manual)",
-    manageAccounts: "Manage accounts",
-    accountModalTitle: "Manage common accounts",
-    addAccount: "Add",
-    editAccount: "Save",
-    deleteAccount: "Delete",
-    confirmDeleteAccount: "Delete this account?",
-    noSavedAccounts: "No saved accounts",
-    toastAccountUpdated: "Account updated, pending admin approval",
-    toastAccountDeleted: "Account deleted",
+    selectRole: "Select Role",
+    otherRole: "Other (manual)",
+    manageRoles: "Manage Roles",
+    roleModalTitle: "Manage Roles",
+    addRole: "Add Role",
+    editRole: "Save",
+    deleteRole: "Delete",
+    confirmDeleteRole: "Delete this role?",
+    noSavedRoles: "No saved roles",
+    toastRoleUpdated: "Role updated",
+    toastRoleDeleted: "Role deleted",
+    toastRoleSaved: "Role saved",
+    toastRoleExists: "Role already exists in this server",
+    profileRolesTitle: "My Roles",
+    roleLimitHint: "Only one role per server",
+    mainRole: "Main Role",
     selectItems: "Select items (check to enter quantity)",
     skinCustom: "Skin",
     lookupSkin: "Lookup",
@@ -401,11 +407,8 @@ const translations = {
     adminItems: "Item Config",
     adminAllApps: "All Applications",
     adminAccountApproval: "Account Approval",
-    adminSettings: "System Settings",
     settingEnableSubAccounts: "Enable sub-account feature",
     settingEnableSubAccountsDesc: "When disabled, regular users can only use their main account to apply, and cannot add/select sub-accounts",
-    saveSettings: "Save Settings",
-    toastSettingsSaved: "Settings saved",
     resetPassword: "Reset Password",
     downloadBackup: "Download Backup",
     toggleAdmin: "Toggle Admin",
@@ -438,10 +441,10 @@ const translations = {
     toastSaved: "Saved",
     toastSelectItemsFirst: "Please select items first",
     toastSelectServer: "Please select a server first",
-    toastSelectAccount: "Please select server, game account and nickname first",
-    toastAccountSaved: "Account saved, pending admin approval",
-    toastAccountExists: "Account already exists",
-    itemGridHint: "Please select server, enter game account and nickname before selecting items",
+    toastSelectRole: "Please select a role first",
+    toastRoleSaved: "Role saved",
+    toastRoleExists: "Role already exists in this server",
+    itemGridHint: "Please select a role before selecting items",
     vipUpgradeHint: "After this request, VIP will upgrade from level {before} to level {after}",
     highValueConfirm: "Total item value {value} beast coins. Current VIP points {points}（level {before}），after submission will be level {after}. Continue?",
     toastBulkUpdated: "Bulk update completed",
@@ -543,12 +546,11 @@ function applyI18n() {
   const regLabels = $$("#registerForm label");
   regLabels[0].childNodes[0].textContent = t("username");
   regLabels[1].childNodes[0].textContent = t("password");
-  regLabels[2].childNodes[0].textContent = t("nickname");
-  regLabels[3].childNodes[0].textContent = t("server");
+  regLabels[2].childNodes[0].textContent = t("server");
+  regLabels[3].childNodes[0].textContent = t("nickname");
   $$("#registerForm .hint")[0].textContent = t("accountHint");
   $$("#registerForm .hint")[1].textContent = t("passwordHint");
-  $$("#registerForm .hint")[2].textContent = t("nicknameHint");
-  $$("#registerForm .hint")[3].textContent = t("registerServerHint");
+  $$("#registerForm .hint")[2].textContent = t("registerRoleHint");
   $("#registerForm button").textContent = t("register");
 
   // Apply form
@@ -556,7 +558,7 @@ function applyI18n() {
   $("#userSelectRow label").childNodes[0].textContent = t("selectUser");
   const userSelectHint = $("#userSelectHint");
   if (userSelectHint) userSelectHint.textContent = t("selectUserHint");
-  $("#accountSelect").parentElement.childNodes[0].textContent = t("selectAccount");
+  $("#roleLabel").childNodes[0].textContent = t("selectRole");
   $("#gameAccountLabel").childNodes[0].textContent = t("gameAccount");
   $("#gameNicknameLabel").childNodes[0].textContent = t("gameNickname");
   $("#vipPointsLabel").childNodes[0].textContent = t("vipPoints");
@@ -569,13 +571,7 @@ function applyI18n() {
   $("#addSkinBtn").textContent = t("addSkin");
   $("#selectedItemsLabel").childNodes[0].textContent = t("selectedItems");
   $("#reasonLabel").childNodes[0].textContent = t("reason");
-  $("#manageAccountsBtn").textContent = t("manageAccounts");
-  $("#accountModalTitle").textContent = t("accountModalTitle");
-  $("#addAccountConfirmBtn").textContent = t("addAccount");
-  $("#newAccountName").placeholder = t("gameAccount");
-  $("#newAccountNickname").placeholder = t("gameNickname");
-  $$("#accountSelect option[value='main']")[0].textContent = t("mainAccount");
-  $$("#accountSelect option[value='other']")[0].textContent = t("otherAccount");
+  $("#newRoleNickname").placeholder = t("gameNickname");
   $$("#applyForm .preview-box strong")[0].textContent = t("preview") + "：";
   $("#applyForm button[type='submit']").textContent = t("submit");
 
@@ -609,16 +605,13 @@ function applyI18n() {
   $$(".admin-tab[data-admin-tab='users']").textContent = t("adminUsers");
   $$(".admin-tab[data-admin-tab='items']").textContent = t("adminItems");
   $$(".admin-tab[data-admin-tab='allApps']").textContent = t("adminAllApps");
-  $$(".admin-tab[data-admin-tab='accountApproval']").textContent = t("adminAccountApproval");
-  $$(".admin-tab[data-admin-tab='settings']").textContent = t("adminSettings");
   $("#adminUsers h3").textContent = t("adminUsers");
   $("#adminItems h3").textContent = t("adminItems");
   $("#adminAllApps h3").textContent = t("adminAllApps");
-  $("#adminAccountApproval h3").textContent = t("adminAccountApproval");
-  $("#adminSettings h3").textContent = t("adminSettings");
-  $("#settingSubAccountsLabel").textContent = t("settingEnableSubAccounts");
-  $("#settingSubAccountsDesc").textContent = t("settingEnableSubAccountsDesc");
-  $("#saveSettingsBtn").textContent = t("saveSettings");
+  $("#profileRolesTitle").textContent = t("profileRolesTitle");
+  $("#roleLimitHint").textContent = t("roleLimitHint");
+  $("#addRoleBtn").textContent = t("addRole");
+  $("#roleLabel").childNodes[0].textContent = t("selectRole");
   $("#downloadBackupBtn").textContent = t("downloadBackup");
   $("#bulkEnableBtn").textContent = t("bulkEnable");
   $("#bulkDisableBtn").textContent = t("bulkDisable");
@@ -666,9 +659,6 @@ function applyI18n() {
 
   updateVipLevelBadge();
   updatePreview();
-  if (!$("#accountModal").classList.contains("hidden")) {
-    renderAccountList();
-  }
 }
 
 $$("#langSwitcher button").forEach(btn => {
@@ -681,8 +671,7 @@ $$("#langSwitcher button").forEach(btn => {
     renderSelectedItems();
     if (!$('#historyView').classList.contains('hidden')) loadHistory();
     if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
-    if (!$('#adminAccountApproval').classList.contains('hidden')) loadAdminAccountApprovals();
-    if (!$('#adminSettings').classList.contains('hidden')) renderAdminSettings();
+    if (!$('#profileView').classList.contains('hidden')) renderProfileView();
   });
 });
 
@@ -748,7 +737,7 @@ async function initAuth() {
     const res = await api("GET", "/auth/me");
     currentUser = res.data;
     showApp();
-    loadSavedAccounts();
+    loadRoles();
   } catch (e) {
     showAuth();
   }
@@ -763,7 +752,7 @@ $("#loginForm").addEventListener("submit", async (e) => {
   try {
     const res = await api("POST", "/auth/login", { username, password });
     currentUser = res.data;
-    loadSavedAccounts();
+    loadRoles();
     if (remember) {
       localStorage.setItem("gra_username", username);
       localStorage.setItem("gra_password", password);
@@ -798,7 +787,7 @@ $("#registerForm").addEventListener("submit", async (e) => {
     if (res.data && res.data.role === "admin") {
       currentUser = res.data;
       showApp();
-      loadSavedAccounts();
+      loadRoles();
       showToast(res.message || t("toastRegisterSuccess"));
     } else {
       e.target.reset();
@@ -823,8 +812,8 @@ function switchAuthTab(tab) {
 $("#logoutBtn").addEventListener("click", async () => {
   await api("POST", "/auth/logout");
   currentUser = null;
-  savedAccounts = [];
-  renderAccountSelect("main");
+  userRoles = [];
+  renderRoleSelect();
   showAuth();
 });
 
@@ -851,7 +840,7 @@ async function showApp() {
     el.classList.toggle("hidden", currentUser.role !== "admin");
   });
   await loadItems();
-  await loadSettings();
+  await loadRoles();
   switchView("apply");
 }
 
@@ -879,8 +868,6 @@ function loadCurrentAdminPanel() {
   if (tab === "users") loadAdminUsers();
   if (tab === "items") loadAdminItems();
   if (tab === "allApps") loadAdminAllApps();
-  if (tab === "accountApproval") loadAdminAccountApprovals();
-  if (tab === "settings") renderAdminSettings();
 }
 
 // ---------- Apply View ----------
@@ -908,54 +895,6 @@ async function loadItems() {
   }
   renderServerOptions();
   renderItemGrid();
-}
-
-async function loadSettings() {
-  try {
-    const res = await api("GET", "/settings");
-    appSettings = res.data || {};
-  } catch (e) {
-    appSettings = {};
-  }
-  updateSubAccountUI();
-  renderAdminSettings();
-}
-
-function isSubAccountsEnabled() {
-  return String(appSettings.enable_sub_accounts || "1") !== "0";
-}
-
-function updateSubAccountUI() {
-  const enabled = isSubAccountsEnabled();
-  const accountSelectRow = $(".account-select-row");
-  const gameAccountInput = $("#applyForm input[name='game_account']");
-  const gameNicknameInput = $("#applyForm input[name='game_nickname']");
-  const serverSelect = $("#serverSelect");
-  const isAdmin = currentUser && currentUser.role === "admin";
-
-  if (accountSelectRow) {
-    accountSelectRow.classList.toggle("hidden", !enabled);
-  }
-
-  if (!enabled) {
-    // 关闭子账号：默认使用主账号信息
-    if (currentUser) {
-      gameAccountInput.value = currentUser.username || "";
-      gameNicknameInput.value = currentUser.nickname || currentUser.username || "";
-      serverSelect.value = currentUser.server || "";
-    }
-    // 普通用户强制只读，管理员仍可代申请
-    gameAccountInput.readOnly = !isAdmin;
-    gameNicknameInput.readOnly = !isAdmin;
-    serverSelect.disabled = !isAdmin;
-  } else {
-    // 开启子账号：恢复可编辑，由账号选择控制服务器禁用状态
-    gameAccountInput.readOnly = false;
-    gameNicknameInput.readOnly = false;
-    applyAccountSelection($("#accountSelect").value);
-  }
-  updatePreview();
-  updateItemGridState();
 }
 
 function getVipLevel(points) {
@@ -986,16 +925,16 @@ function renderServerOptions() {
   const sel = $("#serverSelect");
   const histSel = $("#historyServer");
   const regSel = $("#registerServerSelect");
-  const accountServerSel = $("#newAccountServer");
+  const roleServerSel = $("#newRoleServer");
   sel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
   histSel.innerHTML = `<option value="">${t("allServers")}</option>`;
   if (regSel) regSel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
-  if (accountServerSel) accountServerSel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
+  if (roleServerSel) roleServerSel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
   servers.forEach(s => {
     sel.appendChild(new Option(s, s));
     histSel.appendChild(new Option(s, s));
     if (regSel) regSel.appendChild(new Option(s, s));
-    if (accountServerSel) accountServerSel.appendChild(new Option(s, s));
+    if (roleServerSel) roleServerSel.appendChild(new Option(s, s));
   });
 }
 
@@ -1049,8 +988,8 @@ function renderItemGrid() {
 function canSelectItems() {
   return !!(
     $("#serverSelect").value &&
-    $("#applyForm input[name='game_account']").value.trim() &&
-    $("#applyForm input[name='game_nickname']").value.trim()
+    $("#gameAccountInput").value.trim() &&
+    $("#gameNicknameInput").value.trim()
   );
 }
 
@@ -1063,8 +1002,8 @@ function updateItemGridState() {
 function highlightMissingFields() {
   const missing = [];
   const serverSel = $("#serverSelect");
-  const accountInput = $("#applyForm input[name='game_account']");
-  const nicknameInput = $("#applyForm input[name='game_nickname']");
+  const accountInput = $("#gameAccountInput");
+  const nicknameInput = $("#gameNicknameInput");
 
   if (!serverSel.disabled && !serverSel.value) {
     missing.push(t("pleaseFillServer"));
@@ -1092,8 +1031,8 @@ function highlightMissingFields() {
 
 function clearFieldHighlights() {
   $("#serverSelect").classList.remove("input-error");
-  $("#applyForm input[name='game_account']").classList.remove("input-error");
-  $("#applyForm input[name='game_nickname']").classList.remove("input-error");
+  $("#gameAccountInput").classList.remove("input-error");
+  $("#gameNicknameInput").classList.remove("input-error");
 }
 
 function toggleItemSelection(item) {
@@ -1179,59 +1118,67 @@ function getSelectedItems() {
     .sort((a, b) => String(a.prop_id).localeCompare(String(b.prop_id)));
 }
 
-let savedAccounts = [];
-let appSettings = {};
+let userRoles = [];
 
-async function loadSavedAccounts() {
+async function loadRoles() {
   if (!currentUser) {
-    savedAccounts = [];
-    renderAccountSelect("main");
+    userRoles = [];
+    renderRoleSelect();
     return;
   }
   try {
-    const res = await api("GET", "/accounts/all");
-    savedAccounts = Array.isArray(res.data) ? res.data : [];
+    const res = await api("GET", "/roles");
+    userRoles = Array.isArray(res.data) ? res.data : [];
   } catch (e) {
-    savedAccounts = [];
+    userRoles = [];
   }
-  renderAccountSelect("main");
+  renderRoleSelect();
+  renderProfileRoles();
 }
 
-function renderAccountSelect(selectedValue = "main") {
-  const sel = $("#accountSelect");
-  let html = `<option value="main">${escapeHtml(t("mainAccount"))}</option>`;
-  savedAccounts.filter(acc => acc.approved).forEach(acc => {
-    const label = `${escapeHtml(acc.account)} (${escapeHtml(acc.nickname)})`;
-    html += `<option value="saved:${acc.id}">${label}</option>`;
+function renderRoleSelect(selectedValue = "") {
+  const sel = $("#roleSelect");
+  if (!sel) return;
+  let html = `<option value="">${escapeHtml(t("selectRole"))}</option>`;
+  userRoles.forEach(role => {
+    const label = `${escapeHtml(role.server)} - ${escapeHtml(role.nickname)}${role.is_main ? ` (${t("mainRole")})` : ""}`;
+    html += `<option value="role:${role.id}">${label}</option>`;
   });
-  html += `<option value="other">${escapeHtml(t("otherAccount"))}</option>`;
+  html += `<option value="other">${escapeHtml(t("otherRole"))}</option>`;
   sel.innerHTML = html;
   sel.value = selectedValue;
 }
 
-function applyAccountSelection(value) {
+function applyRoleSelection(value) {
   const serverSelect = $("#serverSelect");
-  if (value === "main") {
-    if (currentUser) {
-      $("#applyForm input[name='game_account']").value = currentUser.username || "";
-      $("#applyForm input[name='game_nickname']").value = currentUser.nickname || currentUser.username || "";
-      serverSelect.value = currentUser.server || "";
-      serverSelect.disabled = true;
-      $("#currentVipPoints").value = "";
-    }
-  } else if (value.startsWith("saved:")) {
+  const gameAccountInput = $("#gameAccountInput");
+  const gameNicknameInput = $("#gameNicknameInput");
+
+  if (!gameAccountInput || !gameNicknameInput || !serverSelect) return;
+
+  gameAccountInput.value = currentUser ? currentUser.username : "";
+
+  if (value.startsWith("role:")) {
     const id = parseInt(value.split(":")[1], 10);
-    const acc = savedAccounts.find(a => a.id === id);
-    if (acc) {
-      $("#applyForm input[name='game_account']").value = acc.account;
-      $("#applyForm input[name='game_nickname']").value = acc.nickname;
-      serverSelect.value = acc.server || "";
+    const role = userRoles.find(r => r.id === id);
+    if (role) {
+      gameNicknameInput.value = role.nickname;
+      serverSelect.value = role.server;
+      gameNicknameInput.readOnly = true;
       serverSelect.disabled = true;
       $("#currentVipPoints").value = "";
       updateVipLevelBadge();
     }
   } else if (value === "other") {
+    gameNicknameInput.value = "";
     serverSelect.value = "";
+    gameNicknameInput.readOnly = false;
+    serverSelect.disabled = false;
+  } else {
+    // 未选择
+    gameNicknameInput.value = "";
+    serverSelect.value = "";
+    gameNicknameInput.readOnly = false;
     serverSelect.disabled = false;
   }
   updatePreview();
@@ -1239,102 +1186,89 @@ function applyAccountSelection(value) {
   clearFieldHighlights();
 }
 
-function openAccountModal() {
-  $("#newAccountName").value = "";
-  $("#newAccountNickname").value = "";
-  $("#newAccountServer").value = "";
-  renderAccountList();
-  $("#accountModal").classList.remove("hidden");
-  $("#newAccountName").focus();
-}
+function renderProfileRoles() {
+  const list = $("#roleList");
+  const addForm = $("#addRoleForm");
+  if (!list || !addForm) return;
 
-function closeAccountModal() {
-  $("#accountModal").classList.add("hidden");
-}
-
-function renderAccountList() {
-  const list = $("#accountModalList");
-  if (!savedAccounts.length) {
-    list.innerHTML = `<p class="hint">${t("noSavedAccounts")}</p>`;
-    return;
+  if (!userRoles.length) {
+    list.innerHTML = `<p class="hint">${t("noSavedRoles")}</p>`;
+  } else {
+    list.innerHTML = userRoles.map(role => `
+      <div class="role-item ${role.is_main ? "main" : ""}" data-id="${role.id}">
+        <div class="role-info">
+          <span class="role-server">${escapeHtml(role.server)}</span>
+          <input type="text" class="role-edit-nickname" value="${escapeHtml(role.nickname)}" placeholder="${t("gameNickname")}">
+          ${role.is_main ? `<span class="role-main-badge">${t("mainRole")}</span>` : ""}
+        </div>
+        <div class="role-actions">
+          <button type="button" class="btn-secondary btn-icon btn-save-role" data-id="${role.id}">${t("editRole")}</button>
+          ${role.is_main ? "" : `<button type="button" class="btn-danger btn-icon btn-delete-role" data-id="${role.id}">${t("deleteRole")}</button>`}
+        </div>
+      </div>
+    `).join("");
   }
-  list.innerHTML = savedAccounts.map(acc => {
-    const statusClass = acc.approved ? "status-approved" : "status-pending-approval";
-    const statusText = acc.approved ? t("statusApproved") : t("statusPendingApproval");
-    const serverOptionsForAcc = servers.map(s => `<option value="${escapeHtml(s)}" ${s === acc.server ? "selected" : ""}>${escapeHtml(s)}</option>`).join("");
-    return `
-    <div class="modal-account-item ${acc.approved ? "" : "pending"}" data-id="${acc.id}">
-      <input type="text" class="account-edit-name" value="${escapeHtml(acc.account)}" placeholder="${t("gameAccount")}">
-      <input type="text" class="account-edit-nickname" value="${escapeHtml(acc.nickname)}" placeholder="${t("gameNickname")}">
-      <select class="account-edit-server">${serverOptionsForAcc}</select>
-      <span class="account-status-badge status-badge ${statusClass}">${statusText}</span>
-      <button type="button" class="btn-secondary btn-icon" data-id="${acc.id}">${t("save")}</button>
-      <button type="button" class="btn-danger btn-icon" data-id="${acc.id}">${t("delete")}</button>
-    </div>
-  `;
-  }).join("");
+
+  // 最多两个服务器角色，已有两个则隐藏添加表单
+  const maxRolesReached = userRoles.length >= servers.length;
+  addForm.classList.toggle("hidden", maxRolesReached);
+  if (!maxRolesReached) {
+    const newRoleServer = $("#newRoleServer");
+    const usedServers = new Set(userRoles.map(r => r.server));
+    const availableServers = servers.filter(s => !usedServers.has(s));
+    newRoleServer.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>` + availableServers.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+  }
 }
 
-async function addNewAccount() {
-  const account = $("#newAccountName").value.trim();
-  const nickname = $("#newAccountNickname").value.trim();
-  const server = $("#newAccountServer").value;
-  if (!account || !nickname) {
-    showToast(t("toastSelectAccount"));
-    return;
-  }
-  if (!server) {
-    showToast(t("missingFieldsHint").replace("{fields}", t("pleaseFillServer")));
+async function addNewRole() {
+  const server = $("#newRoleServer").value;
+  const nickname = $("#newRoleNickname").value.trim();
+  if (!server || !nickname) {
+    showToast(t("missingFieldsHint").replace("{fields}", t("pleaseFillServer") + "、" + t("pleaseFillGameNickname")));
     return;
   }
   try {
-    await api("POST", "/accounts", { account, nickname, server });
-    $("#newAccountName").value = "";
-    $("#newAccountNickname").value = "";
-    $("#newAccountServer").value = "";
-    await loadSavedAccounts();
-    renderAccountList();
-    showToast(t("toastAccountSaved"));
+    await api("POST", "/roles", { server, nickname });
+    $("#newRoleServer").value = "";
+    $("#newRoleNickname").value = "";
+    await loadRoles();
+    renderRoleSelect();
+    showToast(t("toastRoleSaved"));
+  } catch (e) {
+    showToast(e.message || t("toastRoleExists"));
+  }
+}
+
+async function updateRole(id) {
+  const row = $(`.role-item[data-id='${id}']`);
+  const nickname = row.querySelector(".role-edit-nickname").value.trim();
+  const server = row.querySelector(".role-server").textContent.trim();
+  if (!server || !nickname) {
+    showToast(t("missingFieldsHint").replace("{fields}", t("pleaseFillServer") + "、" + t("pleaseFillGameNickname")));
+    return;
+  }
+  try {
+    await api("PUT", `/roles/${id}`, { server, nickname });
+    await loadRoles();
+    renderRoleSelect();
+    showToast(t("toastRoleUpdated"));
   } catch (e) {
     showToast(e.message);
   }
 }
 
-async function updateSavedAccount(id) {
-  const row = $(`.modal-account-item[data-id='${id}']`);
-  const account = row.querySelector(".account-edit-name").value.trim();
-  const nickname = row.querySelector(".account-edit-nickname").value.trim();
-  const server = row.querySelector(".account-edit-server").value;
-  if (!account || !nickname) {
-    showToast(t("toastSelectAccount"));
-    return;
-  }
-  if (!server) {
-    showToast(t("missingFieldsHint").replace("{fields}", t("pleaseFillServer")));
-    return;
-  }
+async function deleteRole(id) {
+  if (!confirm(t("confirmDeleteRole"))) return;
   try {
-    await api("PUT", `/accounts/${id}`, { account, nickname, server });
-    await loadSavedAccounts();
-    renderAccountList();
-    showToast(t("toastAccountUpdated"));
-  } catch (e) {
-    showToast(e.message);
-  }
-}
-
-async function deleteSavedAccount(id) {
-  if (!confirm(t("confirmDeleteAccount"))) return;
-  try {
-    await api("DELETE", `/accounts/${id}`);
-    await loadSavedAccounts();
-    renderAccountList();
-    const sel = $("#accountSelect").value;
-    if (sel === `saved:${id}`) {
-      $("#accountSelect").value = "main";
-      applyAccountSelection("main");
+    await api("DELETE", `/roles/${id}`);
+    await loadRoles();
+    renderRoleSelect();
+    const sel = $("#roleSelect").value;
+    if (sel === `role:${id}`) {
+      $("#roleSelect").value = "";
+      applyRoleSelection("");
     }
-    showToast(t("toastAccountDeleted"));
+    showToast(t("toastRoleDeleted"));
   } catch (e) {
     showToast(e.message);
   }
@@ -1421,8 +1355,8 @@ function getServerPreviewName(server) {
 
 function updatePreview() {
   const server = $("#serverSelect").value;
-  const account = $("#applyForm input[name='game_account']").value.trim();
-  const nickname = $("#applyForm input[name='game_nickname']").value.trim();
+  const account = $("#gameAccountInput").value.trim();
+  const nickname = $("#gameNicknameInput").value.trim();
   const reason = $("#applyForm input[name='reason']").value.trim();
   const items = getSelectedItems();
   const itemsText = items.map(it => {
@@ -1454,7 +1388,7 @@ function updatePreview() {
   hintEl.classList.add("hidden");
 }
 
-$$("#applyForm input[name='game_account'], #applyForm input[name='game_nickname']").forEach(input => {
+$$("#gameNicknameInput").forEach(input => {
   input.addEventListener("input", () => {
     updatePreview();
     updateItemGridState();
@@ -1472,26 +1406,20 @@ $("#serverSelect").addEventListener("change", () => {
   updateItemGridState();
   clearFieldHighlights();
 });
-$("#accountSelect").addEventListener("change", (e) => applyAccountSelection(e.target.value));
-$("#manageAccountsBtn").addEventListener("click", openAccountModal);
-$("#closeAccountModal").addEventListener("click", closeAccountModal);
-$("#cancelAccountBtn").addEventListener("click", closeAccountModal);
-$("#addAccountConfirmBtn").addEventListener("click", addNewAccount);
-$("#accountModalList").addEventListener("click", (e) => {
+$("#roleSelect").addEventListener("change", (e) => applyRoleSelection(e.target.value));
+$("#roleList").addEventListener("click", (e) => {
   const btn = e.target.closest("button");
   if (!btn) return;
   const id = parseInt(btn.dataset.id, 10);
-  if (btn.classList.contains("btn-secondary")) {
-    updateSavedAccount(id);
-  } else if (btn.classList.contains("btn-danger")) {
-    deleteSavedAccount(id);
+  if (btn.classList.contains("btn-save-role")) {
+    updateRole(id);
+  } else if (btn.classList.contains("btn-delete-role")) {
+    deleteRole(id);
   }
 });
-$("#newAccountName").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") $("#newAccountNickname").focus();
-});
-$("#newAccountNickname").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") addNewAccount();
+$("#addRoleBtn").addEventListener("click", addNewRole);
+$("#newRoleNickname").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addNewRole();
 });
 $("#lookupSkinBtn").addEventListener("click", lookupSkin);
 $("#skinId").addEventListener("keydown", (e) => {
@@ -1544,9 +1472,8 @@ $("#applyForm").addEventListener("submit", async (e) => {
     selectedItems = {};
     $("#currentVipPoints").value = "";
     updateVipLevelBadge();
-    renderAccountSelect("main");
-    applyAccountSelection("main");
-    updateSubAccountUI();
+    renderRoleSelect("");
+    applyRoleSelection("");
     renderItemGrid();
     renderSelectedItems();
     updatePreview();
@@ -1569,9 +1496,9 @@ async function renderApplyView() {
 
   updateVipLevelBadge();
   renderServerOptions();
-  renderAccountSelect("main");
-  applyAccountSelection("main");
-  updateSubAccountUI();
+  $("#gameAccountInput").value = currentUser ? currentUser.username : "";
+  renderRoleSelect("");
+  applyRoleSelection("");
   $("#currentVipPoints").value = "";
   renderItemGrid();
   renderSelectedItems();
@@ -1597,10 +1524,10 @@ async function loadUserSelect(sel) {
 $("#userSelect").addEventListener("change", (e) => {
   if (!e.target.value) return;
   const user = JSON.parse(e.target.value);
-  $("#applyForm input[name='game_account']").value = user.username || "";
-  $("#applyForm input[name='game_nickname']").value = user.nickname || user.username || "";
-  $("#accountSelect").value = "other";
-  applyAccountSelection("other");
+  $("#gameAccountInput").value = user.username || "";
+  $("#gameNicknameInput").value = user.nickname || user.username || "";
+  $("#roleSelect").value = "other";
+  applyRoleSelection("other");
   updatePreview();
   updateItemGridState();
 });
@@ -1610,32 +1537,8 @@ $("#userSelect").addEventListener("change", (e) => {
 function renderProfileView() {
   if (!currentUser) return;
   $("#profileUsername").value = currentUser.username || "";
-  $("#profileNickname").value = currentUser.nickname || "";
+  renderProfileRoles();
 }
-
-$("#profileForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const newUsername = fd.get("username");
-  const newNickname = fd.get("nickname");
-
-  try {
-    const res = await api("PATCH", "/auth/profile", {
-      username: newUsername,
-      nickname: newNickname,
-    });
-    currentUser = res.data;
-    showToast(t("toastProfileUpdated"));
-    renderApplyView(); // 同步更新申请表单中的昵称
-
-    // 如果开启了记住密码，同步更新本地存储的账号
-    if (localStorage.getItem("gra_remember") === "1") {
-      localStorage.setItem("gra_username", newUsername);
-    }
-  } catch (err) {
-    showToast(err.message);
-  }
-});
 
 // ---------- History ----------
 
@@ -1713,7 +1616,6 @@ window.cycleAppStatus = async (appId, currentStatus) => {
     showToast(t("toastStatusUpdated"));
     loadHistory();
     if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
-    if (!$('#adminAccountApproval').classList.contains('hidden')) loadAdminAccountApprovals();
   } catch (err) {
     showToast(err.message);
   }
@@ -1732,8 +1634,6 @@ $$(".admin-tab").forEach(tab => {
     if (tab.dataset.adminTab === "users") loadAdminUsers();
     if (tab.dataset.adminTab === "items") loadAdminItems();
     if (tab.dataset.adminTab === "allApps") loadAdminAllApps();
-    if (tab.dataset.adminTab === "accountApproval") loadAdminAccountApprovals();
-    if (tab.dataset.adminTab === "settings") renderAdminSettings();
   });
 });
 
@@ -1931,71 +1831,6 @@ async function loadAdminAllApps() {
     showToast(err.message);
   }
 }
-
-async function loadAdminAccountApprovals() {
-  try {
-    const res = await api("GET", "/admin/accounts");
-    const tbody = $("#accountApprovalTable tbody");
-    tbody.innerHTML = "";
-    (res.data || []).forEach(acc => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${formatDate(acc.created_at)}</td>
-        <td>${escapeHtml(acc.username)}</td>
-        <td>${escapeHtml(acc.account)}</td>
-        <td>${escapeHtml(acc.nickname)}</td>
-        <td>
-          <button class="btn btn-small" onclick="approveAccount(${acc.id})">${t("approve")}</button>
-          <button class="btn btn-small" style="color:var(--danger)" onclick="rejectAccount(${acc.id})">${t("delete")}</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    showToast(err.message);
-  }
-}
-
-window.approveAccount = async (accountId) => {
-  try {
-    await api("POST", `/admin/accounts/${accountId}/approve`);
-    showToast(t("toastUserApproved"));
-    loadAdminAccountApprovals();
-  } catch (err) {
-    showToast(err.message);
-  }
-};
-
-window.rejectAccount = async (accountId) => {
-  if (!confirm(t("confirmDeleteAccount"))) return;
-  try {
-    await api("POST", `/admin/accounts/${accountId}/reject`);
-    showToast(t("toastAccountDeleted"));
-    loadAdminAccountApprovals();
-  } catch (err) {
-    showToast(err.message);
-  }
-};
-
-function renderAdminSettings() {
-  const checkbox = $("#settingEnableSubAccounts");
-  if (!checkbox) return;
-  checkbox.checked = isSubAccountsEnabled();
-}
-
-async function saveAdminSettings() {
-  const enabled = $("#settingEnableSubAccounts").checked ? "1" : "0";
-  try {
-    await api("PUT", "/admin/settings", { enable_sub_accounts: enabled });
-    appSettings.enable_sub_accounts = enabled;
-    showToast(t("toastSettingsSaved"));
-    updateSubAccountUI();
-  } catch (err) {
-    showToast(err.message);
-  }
-}
-
-$("#saveSettingsBtn").addEventListener("click", saveAdminSettings);
 
 // ---------- Misc ----------
 
