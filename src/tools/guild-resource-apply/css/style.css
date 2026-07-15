@@ -459,6 +459,9 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 .role-actions { display: flex; gap: 8px; flex-shrink: 0; }
 .role-add-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: center; }
 .role-add-form input, .role-add-form select { min-width: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
+.role-existing-list { margin-bottom: 16px; padding: 12px; background: #f9fafb; border-radius: var(--radius); border: 1px solid var(--border); }
+.role-existing-list h4 { margin: 0 0 10px; font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+.role-existing-list .role-item { background: #fff; }
 @media (max-width: 480px) {
   .role-add-form { grid-template-columns: 1fr; }
   .role-item { flex-direction: column; align-items: stretch; }

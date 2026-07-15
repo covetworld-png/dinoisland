@@ -168,6 +168,7 @@ const translations = {
     disable: "Vô hiệu",
     delete: "Xóa",
     confirmDeleteUser: "Xóa ngưởi dùng này? Đơn xin của họ sẽ được giữ lại.",
+    confirmSetAdmin: "Bạn có chắc muốn đặt ngưởi dùng này làm quản trị viên?",
     toastUserApproved: "Đã duyệt",
     toastUserDisabled: "Đã vô hiệu",
     toastUserDeleted: "Đã xóa",
@@ -324,6 +325,7 @@ const translations = {
     disable: "禁用",
     delete: "删除",
     confirmDeleteUser: "确定删除该用户吗？其申请记录将保留。",
+    confirmSetAdmin: "确定将该用户设为管理员吗？",
     toastUserApproved: "已通过",
     toastUserDisabled: "已禁用",
     toastUserDeleted: "已删除",
@@ -479,6 +481,7 @@ const translations = {
     disable: "Disable",
     delete: "Delete",
     confirmDeleteUser: "Delete this user? Their applications will be kept.",
+    confirmSetAdmin: "Are you sure you want to set this user as admin?",
     toastUserApproved: "User approved",
     toastUserDisabled: "User disabled",
     toastUserDeleted: "User deleted",
@@ -1716,7 +1719,9 @@ async function loadAdminUsers() {
         <td>${formatDate(u.created_at)}</td>
         <td>
           <button class="btn btn-small" onclick="resetPassword(${u.id})">${t("resetPassword")}</button>
-          <button class="btn btn-small" onclick="toggleRole(${u.id})">${u.role === "admin" ? t("removeAdmin") : t("setAdmin")}</button>
+          ${isSelf ? "" : (u.role === "admin"
+            ? `<button class="btn btn-small" onclick="toggleRole(${u.id}, 'remove')">${t("removeAdmin")}</button>`
+            : `<button class="btn btn-small btn-danger" onclick="toggleRole(${u.id}, 'set')">${t("setAdmin")}</button>`)}
           ${isSelf ? "" : `<button class="btn btn-small" onclick="addRoleForUser(${u.id})">${t("addRole")}</button>`}
           ${approvalBtn}
           ${deleteBtn}
@@ -1741,7 +1746,8 @@ window.resetPassword = async (userId) => {
   }
 };
 
-window.toggleRole = async (userId) => {
+window.toggleRole = async (userId, action) => {
+  if (action === "set" && !confirm(t("confirmSetAdmin"))) return;
   try {
     await api("POST", `/admin/users/${userId}/toggle-role`);
     showToast(t("toastRoleToggled"));
@@ -1764,13 +1770,40 @@ window.toggleApproval = async (userId, approve) => {
 let roleModalMode = "";
 let roleModalUserId = null;
 
-window.openRoleModal = (userId, mode) => {
+window.openRoleModal = async (userId, mode) => {
   roleModalUserId = userId;
   roleModalMode = mode;
   $("#roleModalTitle").textContent = mode === "approve" ? t("approveAndCreateRole") : t("addRole");
   const serverSelect = $("#modalRoleServer");
   serverSelect.innerHTML = servers.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
   $("#modalRoleNickname").value = "";
+
+  // 加载该用户现有角色
+  const existingContainer = $("#modalRoleExisting");
+  const existingList = $("#modalRoleExistingList");
+  try {
+    const res = await api("GET", `/admin/users/${userId}/roles`);
+    const roles = res.data || [];
+    if (roles.length) {
+      existingContainer.classList.remove("hidden");
+      existingList.innerHTML = roles.map(role => `
+        <div class="role-item ${role.is_main ? "main" : ""}">
+          <div class="role-info">
+            <span class="role-server">${escapeHtml(role.server)}</span>
+            <span class="role-nickname">${escapeHtml(role.nickname)}</span>
+            ${role.is_main ? `<span class="role-main-badge">${t("mainRole")}</span>` : ""}
+          </div>
+        </div>
+      `).join("");
+    } else {
+      existingContainer.classList.add("hidden");
+      existingList.innerHTML = "";
+    }
+  } catch (e) {
+    existingContainer.classList.add("hidden");
+    existingList.innerHTML = "";
+  }
+
   $("#roleModal").classList.remove("hidden");
 };
 
