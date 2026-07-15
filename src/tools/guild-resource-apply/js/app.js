@@ -61,6 +61,7 @@ const translations = {
     deleteRole: "Xóa",
     confirmDeleteRole: "Xóa vai trò này?",
     noSavedRoles: "Chưa có vai trò nào",
+    noServersAvailable: "Không có máy chủ nào",
     toastRoleUpdated: "Đã cập nhật vai trò",
     toastRoleDeleted: "Đã xóa vai trò",
     toastRoleSaved: "Đã lưu vai trò",
@@ -215,6 +216,7 @@ const translations = {
     deleteRole: "删除",
     confirmDeleteRole: "确定删除该角色？",
     noSavedRoles: "暂无角色",
+    noServersAvailable: "没有可用服务器",
     toastRoleUpdated: "角色已更新",
     toastRoleDeleted: "角色已删除",
     toastRoleSaved: "角色已保存",
@@ -368,6 +370,7 @@ const translations = {
     deleteRole: "Delete",
     confirmDeleteRole: "Delete this role?",
     noSavedRoles: "No saved roles",
+    noServersAvailable: "No servers available",
     toastRoleUpdated: "Role updated",
     toastRoleDeleted: "Role deleted",
     toastRoleSaved: "Role saved",
@@ -1750,13 +1753,29 @@ window.toggleApproval = async (userId, approve) => {
   }
 };
 
-window.approveUserWithRole = async (userId) => {
-  const server = prompt(t("promptServer"));
-  if (!server) return;
+function promptForServerAndNickname() {
+  if (!servers.length) {
+    showToast(t("noServersAvailable"));
+    return null;
+  }
+  const options = servers.map((s, i) => `${i + 1}. ${s}`).join("\n");
+  const serverInput = prompt(`${t("promptServer")}\n${options}`);
+  if (!serverInput) return null;
+  let server = serverInput.trim();
+  const idx = parseInt(server, 10);
+  if (!isNaN(idx) && idx >= 1 && idx <= servers.length) {
+    server = servers[idx - 1];
+  }
   const nickname = prompt(t("promptNickname"));
-  if (!nickname) return;
+  if (!nickname) return null;
+  return { server, nickname: nickname.trim() };
+}
+
+window.approveUserWithRole = async (userId) => {
+  const input = promptForServerAndNickname();
+  if (!input) return;
   try {
-    await api("POST", `/admin/users/${userId}/approve`, { server, nickname });
+    await api("POST", `/admin/users/${userId}/approve`, input);
     showToast(t("toastUserApproved"));
     loadAdminUsers();
   } catch (err) {
@@ -1765,12 +1784,10 @@ window.approveUserWithRole = async (userId) => {
 };
 
 window.addRoleForUser = async (userId) => {
-  const server = prompt(t("promptServer"));
-  if (!server) return;
-  const nickname = prompt(t("promptNickname"));
-  if (!nickname) return;
+  const input = promptForServerAndNickname();
+  if (!input) return;
   try {
-    await api("POST", "/roles", { server, nickname, user_id: userId });
+    await api("POST", "/roles", { ...input, user_id: userId });
     showToast(t("toastRoleSaved"));
     loadAdminUsers();
   } catch (err) {
