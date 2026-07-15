@@ -33,6 +33,7 @@ const translations = {
     gameAccount: "Tài Khoản Game",
     gameNickname: "Biệt Danh Game",
     vipPoints: "Điểm VIP",
+    beastCoin: "xu thú",
     selectAccount: "Chọn tài khoản",
     mainAccount: "Tài khoản chính",
     otherAccount: "Khác (nhập thủ công)",
@@ -162,6 +163,7 @@ const translations = {
     gameAccount: "游戏账号",
     gameNickname: "游戏昵称",
     vipPoints: "VIP 积分",
+    beastCoin: "兽币",
     selectAccount: "选择账号",
     mainAccount: "主账号",
     otherAccount: "其他（手动输入）",
@@ -291,6 +293,7 @@ const translations = {
     gameAccount: "Game Account",
     gameNickname: "Game Nickname",
     vipPoints: "VIP Points",
+    beastCoin: "beast coins",
     selectAccount: "Select Account",
     mainAccount: "Main Account",
     otherAccount: "Other (manual)",
@@ -853,6 +856,7 @@ function renderItemGrid() {
       card.innerHTML = `
         <input type="checkbox" ${isSelected ? "checked" : ""} data-prop="${it.prop_id}" aria-label="${escapeHtml(itemName(it))}">
         <div class="item-name">${escapeHtml(itemName(it))}</div>
+        <div class="item-price">${it.vip_value || 0} ${t("beastCoin")}</div>
       `;
       const checkbox = card.querySelector("input[type='checkbox']");
       checkbox.addEventListener("click", (e) => {
