@@ -38,8 +38,8 @@
           <button type="submit">登录</button>
         </form>
         <form id="registerForm" class="auth-form hidden">
-          <label>账号 <input type="text" name="username" required minlength="3"></label>
-          <p class="hint">请填写游戏内的数字账号（如 13219626），该账号将用于申请资源</p>
+          <label>账号 <input type="text" name="username" required pattern="132[0-9]{5}" title="账号必须是 132 开头的 8 位数字"></label>
+          <p class="hint">账号必须是 132 开头的 8 位数字（如 13219626）</p>
           <label>密码 <input type="password" name="password" required></label>
           <p class="hint">密码可任意设置</p>
           <label>昵称 <input type="text" name="nickname" id="registerNickname" required></label>

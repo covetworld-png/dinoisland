@@ -43,6 +43,7 @@ const translations = {
     pleaseFillGameNickname: "chưa điền biệt danh game",
     pleaseFillVipPoints: "chưa điền điểm VIP",
     missingFieldsHint: "Vui lòng điền: {fields}",
+    invalidUsernameFormat: "Tài khoản phải là 8 chữ số bắt đầu bằng 132",
     server: "Máy Chủ",
     selectUser: "Chọn Ngưởi Dùng",
     pleaseSelectUser: "Chọn ngưởi dùng",
@@ -198,6 +199,7 @@ const translations = {
     pleaseFillGameNickname: "未填写游戏昵称",
     pleaseFillVipPoints: "未填写 VIP 积分",
     missingFieldsHint: "请先填写：{fields}",
+    invalidUsernameFormat: "账号必须是 132 开头的 8 位数字",
     server: "服务器",
     selectUser: "选择用户",
     pleaseSelectUser: "请选择用户",
@@ -352,6 +354,7 @@ const translations = {
     pleaseFillGameNickname: "game nickname not entered",
     pleaseFillVipPoints: "VIP points not entered",
     missingFieldsHint: "Please fill in: {fields}",
+    invalidUsernameFormat: "Username must be 8 digits starting with 132",
     server: "Server",
     selectUser: "Select User",
     pleaseSelectUser: "Please select user",
@@ -789,6 +792,11 @@ $("#loginForm").addEventListener("submit", async (e) => {
 $("#registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
+  const username = fd.get("username") || "";
+  if (!/^132\d{5}$/.test(username)) {
+    showToast(t("invalidUsernameFormat"));
+    return;
+  }
   const nickname = fd.get("nickname");
   if (!nickname) {
     showToast(t("missingFieldsHint").replace("{fields}", t("nickname")));
