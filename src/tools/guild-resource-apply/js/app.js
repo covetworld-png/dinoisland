@@ -1181,21 +1181,21 @@ function updatePreview() {
     return;
   }
 
-  let text = `${getServerPreviewName(server)} ${account} ${nickname} ${itemsText}${reason ? `（${reason}）` : ""}`;
+  let text = `${getServerPreviewName(server)} ${account} ${nickname} ${itemsText}`;
 
   const currentPoints = parseInt($("#currentVipPoints").value || "0", 10);
   const delta = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
-  const levelBefore = getVipLevel(currentPoints);
-  const levelAfter = getVipLevel(currentPoints + delta);
-  if (levelAfter > levelBefore) {
-    text += `，提升 VIP 等级到 ${levelAfter} 级`;
-    hintEl.textContent = t("vipUpgradeHint").replace("{before}", levelBefore).replace("{after}", levelAfter);
-    hintEl.classList.remove("hidden");
-  } else {
-    hintEl.classList.add("hidden");
+  if (delta > 0) {
+    const levelAfter = getVipLevel(currentPoints + delta);
+    text += `，VIP 积分 ${currentPoints} + ${delta} = ${currentPoints + delta}（${levelAfter} 级）`;
+  }
+
+  if (reason) {
+    text += `（${reason}）`;
   }
 
   $("#applyPreview").textContent = text;
+  hintEl.classList.add("hidden");
 }
 
 $$("#applyForm input[name='game_account'], #applyForm input[name='game_nickname']").forEach(input => {
