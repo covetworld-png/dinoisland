@@ -1221,10 +1221,14 @@ function applyRoleSelection(value) {
   // 游戏账号由用户选择 / 视图初始化负责设置，此处不再重置
 
   if (value === "manual" && isStaff()) {
-    // 管理员/客服手动输入模式：账号/昵称/服务器均可自由编辑
+    // 管理员/客服手动输入模式：账号/昵称/服务器均可自由编辑；VIP 积分默认 0 且不计算
     gameAccountInput.readOnly = false;
     gameNicknameInput.readOnly = false;
     serverSelect.disabled = false;
+    const vipLabel = $("#vipPointsLabel");
+    if (vipLabel) vipLabel.classList.add("hidden");
+    $("#currentVipPoints").value = "0";
+    updateVipLevelBadge();
   } else if (value.startsWith("role:")) {
     gameAccountInput.readOnly = true;
     const id = parseInt(value.split(":")[1], 10);
@@ -1244,6 +1248,8 @@ function applyRoleSelection(value) {
     serverSelect.value = "";
     gameNicknameInput.readOnly = true;
     serverSelect.disabled = true;
+    const vipLabel = $("#vipPointsLabel");
+    if (vipLabel) vipLabel.classList.remove("hidden");
   }
   updatePreview();
   updateItemGridState();
@@ -1453,9 +1459,11 @@ function updatePreview() {
 
   let text = `${getServerPreviewName(server)} ${account} ${nickname} ${itemsText}`;
 
-  const currentPoints = parseInt($("#currentVipPoints").value || "0", 10);
+  // 管理员/客服手动输入模式不计算 VIP 积分
+  const isManual = $("#roleSelect").value === "manual";
   const delta = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
-  if (delta > 0) {
+  if (!isManual && delta > 0) {
+    const currentPoints = parseInt($("#currentVipPoints").value || "0", 10);
     const levelAfter = getVipLevel(currentPoints + delta);
     text += `，VIP 积分 ${currentPoints} + ${delta} = ${currentPoints + delta}（${levelAfter} 级）`;
   }
@@ -1524,8 +1532,10 @@ $("#applyForm").addEventListener("submit", async (e) => {
 
   const previewText = $("#applyPreview").textContent;
 
+  const isManual = $("#roleSelect").value === "manual";
   const totalValue = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
-  if (totalValue > 300) {
+  // 手动输入模式不涉及 VIP 积分计算，跳过含 VIP 等级的高价值确认
+  if (!isManual && totalValue > 300) {
     const currentPoints = parseInt(fd.get("current_vip_points") || "0", 10);
     const levelBefore = getVipLevel(currentPoints);
     const levelAfter = getVipLevel(currentPoints + totalValue);
@@ -1542,7 +1552,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
       server: $("#serverSelect").value,
       game_account: fd.get("game_account"),
       game_nickname: fd.get("game_nickname"),
-      current_vip_points: parseInt(fd.get("current_vip_points") || "0", 10),
+      current_vip_points: isManual ? 0 : parseInt(fd.get("current_vip_points") || "0", 10),
       items,
       reason: fd.get("reason"),
     });
