@@ -380,6 +380,7 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 .btn:hover { background: #f3f4f6; border-color: #9ca3af; }
 .btn:active { transform: translateY(1px); }
 .btn-small { padding: 4px 8px; font-size: 12px; }
+.role-select { padding: 4px 6px; font-size: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text); }
 
 .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
 .filter-bar input, .filter-bar select { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }

@@ -141,7 +141,10 @@ const translations = {
     toastCopied: "Đã sao chép",
     toastNoItems: "Vui lòng nhập số lượng ít nhất một vật phẩm",
     toastPasswordReset: "Đã đặt lại mật khẩu",
-    toastRoleToggled: "Đã chuyển vai trò",
+    toastRoleToggled: "Đã cập nhật vai trò",
+    roleUser: "Ngưởi dùng",
+    roleCs: "CSKH",
+    roleAdmin: "Quản trị",
     toastSaved: "Đã lưu",
     toastSelectItemsFirst: "Vui lòng chọn vật phẩm trước",
     toastSelectServer: "Vui lòng chọn máy chủ trước",
@@ -298,7 +301,10 @@ const translations = {
     toastCopied: "已复制",
     toastNoItems: "请至少填写一项道具数量",
     toastPasswordReset: "密码已重置",
-    toastRoleToggled: "角色已切换",
+    toastRoleToggled: "角色已更新",
+    roleUser: "用户",
+    roleCs: "客服",
+    roleAdmin: "管理员",
     toastSaved: "已保存",
     toastSelectItemsFirst: "请先选择道具",
     toastSelectServer: "请先选择服务器",
@@ -454,7 +460,10 @@ const translations = {
     toastCopied: "Copied",
     toastNoItems: "Please enter quantity for at least one item",
     toastPasswordReset: "Password reset",
-    toastRoleToggled: "Role toggled",
+    toastRoleToggled: "Role updated",
+    roleUser: "User",
+    roleCs: "Support",
+    roleAdmin: "Admin",
     toastSaved: "Saved",
     toastSelectItemsFirst: "Please select items first",
     toastSelectServer: "Please select a server first",
@@ -1543,11 +1552,14 @@ $("#applyForm").addEventListener("submit", async (e) => {
   }
 });
 
+// 管理员或客服：可代任意用户提交申请
+const isStaff = () => currentUser && (currentUser.role === "admin" || currentUser.role === "cs");
+
 async function renderApplyView() {
   applyTargetRoles = null;
   const userSelectRow = $("#userSelectRow");
   const userSelect = $("#userSelect");
-  if (currentUser && currentUser.role === "admin") {
+  if (isStaff()) {
     userSelectRow.classList.remove("hidden");
     await loadUserSelect(userSelect);
   } else if (userSelectRow) {
@@ -1569,7 +1581,7 @@ async function renderApplyView() {
 async function loadUserSelect(sel) {
   sel.innerHTML = `<option value="">${t("pleaseSelectUser")}</option>`;
   try {
-    const res = await api("GET", "/admin/users");
+    const res = await api("GET", "/staff/users");
     (res.data || []).forEach(u => {
       const opt = document.createElement("option");
       opt.value = JSON.stringify({ id: u.id, username: u.username });
@@ -1594,7 +1606,7 @@ $("#userSelect").addEventListener("change", async (e) => {
   const user = JSON.parse(e.target.value);
   accountInput.value = user.username || "";
   try {
-    const res = await api("GET", `/admin/users/${user.id}/roles`);
+    const res = await api("GET", `/staff/users/${user.id}/roles`);
     applyTargetRoles = Array.isArray(res.data) ? res.data : [];
   } catch (err) {
     applyTargetRoles = [];
@@ -1734,14 +1746,16 @@ async function loadAdminUsers() {
         <td>${escapeHtml(u.username)}</td>
         <td>${escapeHtml(u.password)}</td>
         <td>${escapeHtml(u.nickname)}</td>
-        <td>${u.role === "admin" ? "管理员" : "用户"}</td>
+        <td>${roleText(u.role)}</td>
         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
         <td>${formatDate(u.created_at)}</td>
         <td>
           <button class="btn btn-small" onclick="resetPassword(${u.id})">${t("resetPassword")}</button>
-          ${isSelf ? "" : (u.role === "admin"
-            ? `<button class="btn btn-small" onclick="toggleRole(${u.id}, 'remove')">${t("removeAdmin")}</button>`
-            : `<button class="btn btn-small btn-danger" onclick="toggleRole(${u.id}, 'set')">${t("setAdmin")}</button>`)}
+          ${isSelf ? "" : `<select class="role-select" onchange="setUserRole(${u.id}, this.value)">
+            <option value="user" ${u.role === "user" ? "selected" : ""}>${t("roleUser")}</option>
+            <option value="cs" ${u.role === "cs" ? "selected" : ""}>${t("roleCs")}</option>
+            <option value="admin" ${u.role === "admin" ? "selected" : ""}>${t("roleAdmin")}</option>
+          </select>`}
           ${isSelf ? "" : `<button class="btn btn-small" onclick="addRoleForUser(${u.id})">${t("addRole")}</button>`}
           ${approvalBtn}
           ${deleteBtn}
@@ -1766,14 +1780,24 @@ window.resetPassword = async (userId) => {
   }
 };
 
-window.toggleRole = async (userId, action) => {
-  if (action === "set" && !confirm(t("confirmSetAdmin"))) return;
+function roleText(role) {
+  if (role === "admin") return t("roleAdmin");
+  if (role === "cs") return t("roleCs");
+  return t("roleUser");
+}
+
+window.setUserRole = async (userId, role) => {
+  if (role === "admin" && !confirm(t("confirmSetAdmin"))) {
+    loadAdminUsers(); // 还原下拉框选中值
+    return;
+  }
   try {
-    await api("POST", `/admin/users/${userId}/toggle-role`);
+    await api("POST", `/admin/users/${userId}/role`, { role });
     showToast(t("toastRoleToggled"));
     loadAdminUsers();
   } catch (err) {
     showToast(err.message);
+    loadAdminUsers();
   }
 };
 
