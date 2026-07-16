@@ -145,6 +145,7 @@ const translations = {
     roleUser: "Ngưởi dùng",
     roleCs: "CSKH",
     roleAdmin: "Quản trị",
+    manualInput: "Nhập thủ công",
     toastSaved: "Đã lưu",
     toastSelectItemsFirst: "Vui lòng chọn vật phẩm trước",
     toastSelectServer: "Vui lòng chọn máy chủ trước",
@@ -305,6 +306,7 @@ const translations = {
     roleUser: "用户",
     roleCs: "客服",
     roleAdmin: "管理员",
+    manualInput: "手动输入",
     toastSaved: "已保存",
     toastSelectItemsFirst: "请先选择道具",
     toastSelectServer: "请先选择服务器",
@@ -464,6 +466,7 @@ const translations = {
     roleUser: "User",
     roleCs: "Support",
     roleAdmin: "Admin",
+    manualInput: "Manual Input",
     toastSaved: "Saved",
     toastSelectItemsFirst: "Please select items first",
     toastSelectServer: "Please select a server first",
@@ -1196,12 +1199,16 @@ function renderRoleSelect(selectedValue = "") {
     const label = `${escapeHtml(role.server)} - ${escapeHtml(role.nickname)}${role.is_main ? ` (${t("mainRole")})` : ""}`;
     html += `<option value="role:${role.id}">${label}</option>`;
   });
+  // 管理员/客服可手动输入任意账号+昵称+服务器（可代未注册玩家申请）
+  if (isStaff()) {
+    html += `<option value="manual">${escapeHtml(t("manualInput"))}</option>`;
+  }
   sel.innerHTML = html;
   sel.value = selectedValue;
 
-  // 没有角色时显示提示
+  // 没有角色时显示提示（staff 有手动输入兄底，不显示）
   const noRoleHint = $("#noRoleHint");
-  if (noRoleHint) noRoleHint.classList.toggle("hidden", roles.length > 0);
+  if (noRoleHint) noRoleHint.classList.toggle("hidden", roles.length > 0 || isStaff());
 }
 
 function applyRoleSelection(value) {
@@ -1213,7 +1220,13 @@ function applyRoleSelection(value) {
 
   // 游戏账号由用户选择 / 视图初始化负责设置，此处不再重置
 
-  if (value.startsWith("role:")) {
+  if (value === "manual" && isStaff()) {
+    // 管理员/客服手动输入模式：账号/昵称/服务器均可自由编辑
+    gameAccountInput.readOnly = false;
+    gameNicknameInput.readOnly = false;
+    serverSelect.disabled = false;
+  } else if (value.startsWith("role:")) {
+    gameAccountInput.readOnly = true;
     const id = parseInt(value.split(":")[1], 10);
     const role = (applyTargetRoles || userRoles).find(r => r.id === id);
     if (role) {
@@ -1226,6 +1239,7 @@ function applyRoleSelection(value) {
     }
   } else {
     // 未选择或清空：保持只读/禁用，禁止手动输入
+    gameAccountInput.readOnly = true;
     gameNicknameInput.value = "";
     serverSelect.value = "";
     gameNicknameInput.readOnly = true;
