@@ -1159,6 +1159,8 @@ function getSelectedItems() {
 }
 
 let userRoles = [];
+// 管理员代申请时，目标用户的角色列表；null = 使用当前登录用户自己的 userRoles
+let applyTargetRoles = null;
 
 async function loadRoles() {
   if (!currentUser) {
@@ -1179,8 +1181,9 @@ async function loadRoles() {
 function renderRoleSelect(selectedValue = "") {
   const sel = $("#roleSelect");
   if (!sel) return;
+  const roles = applyTargetRoles || userRoles;
   let html = `<option value="">${escapeHtml(t("selectRole"))}</option>`;
-  userRoles.forEach(role => {
+  roles.forEach(role => {
     const label = `${escapeHtml(role.server)} - ${escapeHtml(role.nickname)}${role.is_main ? ` (${t("mainRole")})` : ""}`;
     html += `<option value="role:${role.id}">${label}</option>`;
   });
@@ -1189,7 +1192,7 @@ function renderRoleSelect(selectedValue = "") {
 
   // 没有角色时显示提示
   const noRoleHint = $("#noRoleHint");
-  if (noRoleHint) noRoleHint.classList.toggle("hidden", userRoles.length > 0);
+  if (noRoleHint) noRoleHint.classList.toggle("hidden", roles.length > 0);
 }
 
 function applyRoleSelection(value) {
@@ -1199,11 +1202,11 @@ function applyRoleSelection(value) {
 
   if (!gameAccountInput || !gameNicknameInput || !serverSelect) return;
 
-  gameAccountInput.value = currentUser ? currentUser.username : "";
+  // 游戏账号由用户选择 / 视图初始化负责设置，此处不再重置
 
   if (value.startsWith("role:")) {
     const id = parseInt(value.split(":")[1], 10);
-    const role = userRoles.find(r => r.id === id);
+    const role = (applyTargetRoles || userRoles).find(r => r.id === id);
     if (role) {
       gameNicknameInput.value = role.nickname;
       serverSelect.value = role.server;
@@ -1524,6 +1527,8 @@ $("#applyForm").addEventListener("submit", async (e) => {
     copyToClipboard(previewText);
     e.target.reset();
     selectedItems = {};
+    applyTargetRoles = null;
+    $("#gameAccountInput").value = currentUser ? currentUser.username : "";
     $("#currentVipPoints").value = "";
     updateVipLevelBadge();
     renderRoleSelect("");
@@ -1539,6 +1544,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
 });
 
 async function renderApplyView() {
+  applyTargetRoles = null;
   const userSelectRow = $("#userSelectRow");
   const userSelect = $("#userSelect");
   if (currentUser && currentUser.role === "admin") {
@@ -1566,7 +1572,7 @@ async function loadUserSelect(sel) {
     const res = await api("GET", "/admin/users");
     (res.data || []).forEach(u => {
       const opt = document.createElement("option");
-      opt.value = JSON.stringify({ username: u.username, nickname: u.nickname });
+      opt.value = JSON.stringify({ id: u.id, username: u.username });
       opt.textContent = `${escapeHtml(u.username)} (${escapeHtml(u.nickname)})`;
       sel.appendChild(opt);
     });
@@ -1575,15 +1581,27 @@ async function loadUserSelect(sel) {
   }
 }
 
-$("#userSelect").addEventListener("change", (e) => {
-  if (!e.target.value) return;
+// 管理员选择代申请的目标用户：加载该用户的角色列表，账号跟随目标用户
+$("#userSelect").addEventListener("change", async (e) => {
+  const accountInput = $("#gameAccountInput");
+  if (!e.target.value) {
+    applyTargetRoles = null;
+    accountInput.value = currentUser ? currentUser.username : "";
+    renderRoleSelect("");
+    applyRoleSelection("");
+    return;
+  }
   const user = JSON.parse(e.target.value);
-  $("#gameAccountInput").value = user.username || "";
-  $("#gameNicknameInput").value = user.nickname || user.username || "";
-  $("#roleSelect").value = "other";
-  applyRoleSelection("other");
-  updatePreview();
-  updateItemGridState();
+  accountInput.value = user.username || "";
+  try {
+    const res = await api("GET", `/admin/users/${user.id}/roles`);
+    applyTargetRoles = Array.isArray(res.data) ? res.data : [];
+  } catch (err) {
+    applyTargetRoles = [];
+    showToast(err.message);
+  }
+  renderRoleSelect("");
+  applyRoleSelection("");
 });
 
 // ---------- Profile ----------
