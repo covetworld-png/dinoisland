@@ -582,13 +582,13 @@ function applyI18n() {
   const regLabels = $$("#registerForm label");
   if (regLabels[0]) regLabels[0].childNodes[0].textContent = t("username");
   if (regLabels[1]) regLabels[1].childNodes[0].textContent = t("password");
-  if (regLabels[2]) regLabels[2].childNodes[0].textContent = t("nickname");
-  if (regLabels[3]) regLabels[3].childNodes[0].textContent = t("server");
+  if (regLabels[2]) regLabels[2].childNodes[0].textContent = t("server");
+  if (regLabels[3]) regLabels[3].childNodes[0].textContent = t("nickname");
   const regHints = $$("#registerForm .hint");
   if (regHints[0]) regHints[0].textContent = t("accountHint");
   if (regHints[1]) regHints[1].textContent = t("passwordHint");
-  if (regHints[2]) regHints[2].textContent = t("registerRoleHint");
-  if (regHints[3]) regHints[3].textContent = t("registerServerHint");
+  if (regHints[2]) regHints[2].textContent = t("registerServerHint");
+  if (regHints[3]) regHints[3].textContent = t("registerRoleHint");
   $("#registerForm button").textContent = t("register");
 
   // Apply form
