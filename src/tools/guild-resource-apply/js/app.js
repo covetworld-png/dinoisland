@@ -35,7 +35,8 @@ const translations = {
     accountHint: "Vui lòng nhập ID số trong game (ví dụ: 13219626)",
     passwordHint: "Mật khẩu có thể tùy ý",
     nicknameHint: "Vui lòng nhập biệt danh trong game",
-    registerRoleHint: "Vai trò đầu tiên sẽ do quản trị viên tạo sau khi duyệt",
+    registerRoleHint: "Biệt danh là tên trong game và sẽ trở thành vai trò đầu tiên",
+    registerServerHint: "Vui lòng chọn máy chủ của vai trò đầu tiên",
     promptServer: "Nhập máy chủ",
     promptNickname: "Nhập biệt danh game",
     pleaseFillServer: "chưa chọn máy chủ",
@@ -195,7 +196,8 @@ const translations = {
     accountHint: "请填写游戏内的数字账号（如 13219626）",
     passwordHint: "密码可任意设置",
     nicknameHint: "请填写游戏内的昵称",
-    registerRoleHint: "首个角色将在管理员审批后创建",
+    registerRoleHint: "昵称即游戏内昵称，将作为首个角色",
+    registerServerHint: "请选择角色所在的服务器",
     promptServer: "请输入服务器",
     promptNickname: "请输入游戏昵称",
     registerServerHint: "请选择角色所在的服务器",
@@ -356,7 +358,8 @@ const translations = {
     accountHint: "Enter your in-game numeric ID (e.g. 13219626)",
     passwordHint: "Password can be anything",
     nicknameHint: "Enter your in-game nickname",
-    registerRoleHint: "Your first role will be created by an admin after approval",
+    registerRoleHint: "Nickname is your in-game name and will be your first role",
+    registerServerHint: "Select the server for your first role",
     promptServer: "Enter server",
     promptNickname: "Enter game nickname",
     pleaseFillServer: "server not selected",
@@ -577,12 +580,15 @@ function applyI18n() {
 
   // Register form
   const regLabels = $$("#registerForm label");
-  regLabels[0].childNodes[0].textContent = t("username");
-  regLabels[1].childNodes[0].textContent = t("password");
-  regLabels[2].childNodes[0].textContent = t("nickname");
-  $$("#registerForm .hint")[0].textContent = t("accountHint");
-  $$("#registerForm .hint")[1].textContent = t("passwordHint");
-  $$("#registerForm .hint")[2].textContent = t("registerRoleHint");
+  if (regLabels[0]) regLabels[0].childNodes[0].textContent = t("username");
+  if (regLabels[1]) regLabels[1].childNodes[0].textContent = t("password");
+  if (regLabels[2]) regLabels[2].childNodes[0].textContent = t("nickname");
+  if (regLabels[3]) regLabels[3].childNodes[0].textContent = t("server");
+  const regHints = $$("#registerForm .hint");
+  if (regHints[0]) regHints[0].textContent = t("accountHint");
+  if (regHints[1]) regHints[1].textContent = t("passwordHint");
+  if (regHints[2]) regHints[2].textContent = t("registerRoleHint");
+  if (regHints[3]) regHints[3].textContent = t("registerServerHint");
   $("#registerForm button").textContent = t("register");
 
   // Apply form
@@ -820,11 +826,17 @@ $("#registerForm").addEventListener("submit", async (e) => {
     showToast(t("missingFieldsHint").replace("{fields}", t("nickname")));
     return;
   }
+  const server = fd.get("server");
+  if (!server) {
+    showToast(t("missingFieldsHint").replace("{fields}", t("server")));
+    return;
+  }
   try {
     const res = await api("POST", "/auth/register", {
       username: fd.get("username"),
       password: fd.get("password"),
       nickname,
+      server,
     });
     if (res.data && res.data.role === "admin") {
       currentUser = res.data;
@@ -1763,7 +1775,7 @@ async function loadAdminUsers() {
         ? ""
         : u.approved
           ? `<button class="btn btn-small" onclick="toggleApproval(${u.id}, 0)">${t("disable")}</button>`
-          : `<button class="btn btn-small" onclick="approveUserWithRole(${u.id})">${t("approveAndCreateRole")}</button>`;
+          : `<button class="btn btn-small" onclick="approveUser(${u.id})">${t("approve")}</button>`;
       const deleteBtn = isSelf || u.role === "admin"
         ? ""
         : `<button class="btn btn-small" style="color:var(--danger)" onclick="deleteUser(${u.id})">${t("delete")}</button>`;
@@ -1907,7 +1919,15 @@ $("#modalRoleConfirmBtn").addEventListener("click", async () => {
   }
 });
 
-window.approveUserWithRole = (userId) => openRoleModal(userId, "approve");
+window.approveUser = async (userId) => {
+  try {
+    await api("POST", `/admin/users/${userId}/approve`);
+    showToast(t("toastUserApproved"));
+    loadAdminUsers();
+  } catch (err) {
+    showToast(err.message);
+  }
+};
 window.addRoleForUser = (userId) => openRoleModal(userId, "add");
 
 window.deleteUser = async (userId) => {
