@@ -1224,7 +1224,9 @@ function applyRoleSelection(value) {
   if (value === "manual" && isStaff()) {
     // 管理员/客服手动输入模式：账号/昵称/服务器均可自由编辑；VIP 积分默认 0 且不计算
     gameAccountInput.readOnly = false;
+    gameAccountInput.value = "";
     gameNicknameInput.readOnly = false;
+    gameNicknameInput.value = "";
     serverSelect.disabled = false;
     const vipLabel = $("#vipPointsLabel");
     if (vipLabel) vipLabel.classList.add("hidden");
