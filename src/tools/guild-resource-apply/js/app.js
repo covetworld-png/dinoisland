@@ -744,7 +744,8 @@ function formatApplicationText(app) {
   const serverMap = { "Q服 server1": "Q服", "K服 server2": "K服" };
   const server = serverMap[app.server] || app.server;
   const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join("，");
-  return `${server} ${app.game_account} ${app.game_nickname} ${itemsText}${app.reason ? `（${app.reason}）` : ""}`;
+  const reason = app.reason_cn || app.reason || "";
+  return `${server} ${app.game_account} ${app.game_nickname} ${itemsText}${reason ? `（${reason}）` : ""}`;
 }
 
 function copyToClipboard(text) {
@@ -1687,7 +1688,7 @@ function renderHistoryTable(apps) {
       <td>${escapeHtml(app.game_nickname)}</td>
       <td>${escapeHtml(app.server)}</td>
       <td>${escapeHtml(formatItems(app.items))}</td>
-      <td>${escapeHtml(app.reason)}</td>
+      <td title="${escapeHtml(app.reason || '')}">${escapeHtml(app.reason_cn || app.reason || "")}</td>
       <td>${renderStatusBadge(app.id, app.status)}</td>
       <td>
         <button class="btn btn-small" onclick="copyAppText(${app.id})">${t("copy")}</button>
@@ -2017,7 +2018,7 @@ async function loadAdminAllApps() {
         <td>${escapeHtml(app.game_nickname)}</td>
         <td>${escapeHtml(app.server)}</td>
         <td>${escapeHtml(formatItems(app.items))}</td>
-        <td>${escapeHtml(app.reason)}</td>
+        <td title="${escapeHtml(app.reason || '')}">${escapeHtml(app.reason_cn || app.reason || "")}</td>
         <td>${renderStatusBadge(app.id, app.status)}</td>
         <td>
           <button class="btn btn-small" onclick="copyAppText(${app.id})">${t("copy")}</button>
