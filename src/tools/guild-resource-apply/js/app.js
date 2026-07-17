@@ -1598,7 +1598,8 @@ async function renderApplyView() {
   applyTargetRoles = null;
   const userSelectRow = $("#userSelectRow");
   const userSelect = $("#userSelect");
-  if (isStaff()) {
+  // 只有管理员可选择用户代提交；客服只能手动输入
+  if (currentUser && currentUser.role === "admin") {
     userSelectRow.classList.remove("hidden");
     await loadUserSelect(userSelect);
   } else if (userSelectRow) {
