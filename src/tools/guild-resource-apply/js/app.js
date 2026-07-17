@@ -867,6 +867,8 @@ $("#logoutBtn").addEventListener("click", async () => {
   await api("POST", "/auth/logout");
   currentUser = null;
   userRoles = [];
+  stopAdminStatsPolling();
+  renderAdminStats({ pending_users: 0, pending_applications: 0 });
   renderRoleSelect();
   showAuth();
 });
@@ -899,6 +901,7 @@ async function showApp() {
     $$(".admin-only").forEach(el => {
       el.classList.toggle("hidden", currentUser.role !== "admin");
     });
+    startAdminStatsPolling();
     await loadItems();
     await loadRoles();
     switchView("apply");
@@ -923,7 +926,10 @@ function switchView(viewName) {
   if (viewName === "apply") renderApplyView();
   if (viewName === "history") loadHistory();
   if (viewName === "profile") renderProfileView();
-  if (viewName === "admin") loadCurrentAdminPanel();
+  if (viewName === "admin") {
+    loadCurrentAdminPanel();
+    loadAdminStats();
+  }
 }
 
 function loadCurrentAdminPanel() {
@@ -1818,6 +1824,7 @@ window.resetPassword = async (userId) => {
   } catch (err) {
     showToast(err.message);
   }
+  loadAdminStats();
 };
 
 function roleText(role) {
@@ -1940,7 +1947,49 @@ window.deleteUser = async (userId) => {
   } catch (err) {
     showToast(err.message);
   }
+  loadAdminStats();
 };
+
+// ---------- Admin stats badges ----------
+
+let adminStatsTimer = null;
+
+async function loadAdminStats() {
+  if (!currentUser || currentUser.role !== "admin") return;
+  try {
+    const res = await api("GET", "/admin/stats");
+    renderAdminStats(res.data || {});
+  } catch (err) {
+    // 静默失败，不打扰用户
+  }
+}
+
+function renderAdminStats(stats) {
+  const navBadge = $("#adminNavBadge");
+  const usersBadge = $("#adminUsersBadge");
+  const appsBadge = $("#adminAppsBadge");
+  const pendingUsers = stats.pending_users || 0;
+  const pendingApps = stats.pending_applications || 0;
+  const total = pendingUsers + pendingApps;
+  if (navBadge) navBadge.textContent = total > 0 ? String(total) : "";
+  if (usersBadge) usersBadge.textContent = pendingUsers > 0 ? String(pendingUsers) : "";
+  if (appsBadge) appsBadge.textContent = pendingApps > 0 ? String(pendingApps) : "";
+}
+
+function startAdminStatsPolling() {
+  stopAdminStatsPolling();
+  if (currentUser && currentUser.role === "admin") {
+    loadAdminStats();
+    adminStatsTimer = setInterval(loadAdminStats, 30000);
+  }
+}
+
+function stopAdminStatsPolling() {
+  if (adminStatsTimer) {
+    clearInterval(adminStatsTimer);
+    adminStatsTimer = null;
+  }
+}
 
 let adminItems = [];
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>资源申请工具 | Resource Apply Tool</title>
-  <link rel="stylesheet" href="css/style.css?v=20260717c">
+  <link rel="stylesheet" href="css/style.css?v=20260717d">
 </head>
 <body>
   <div id="app">
@@ -19,7 +19,7 @@
         <button data-view="apply" class="nav-btn active">申请资源</button>
         <button data-view="history" class="nav-btn">历史记录</button>
         <button data-view="profile" class="nav-btn">个人资料</button>
-        <button data-view="admin" class="nav-btn admin-only hidden">管理后台</button>
+        <button data-view="admin" class="nav-btn admin-only hidden">管理后台<span id="adminNavBadge" class="badge"></span></button>
         <button id="logoutBtn" class="nav-btn logout">退出</button>
       </nav>
     </header>
@@ -186,9 +186,9 @@
       <!-- 管理后台 -->
       <section id="adminView" class="view hidden">
         <div class="admin-tabs">
-          <button data-admin-tab="users" class="admin-tab">用户管理</button>
+          <button data-admin-tab="users" class="admin-tab">用户管理<span id="adminUsersBadge" class="badge"></span></button>
           <button data-admin-tab="items" class="admin-tab">道具配置</button>
-          <button data-admin-tab="allApps" class="admin-tab active">全部申请</button>
+          <button data-admin-tab="allApps" class="admin-tab active">全部申请<span id="adminAppsBadge" class="badge"></span></button>
         </div>
 
         <div id="adminUsers" class="admin-panel hidden">
@@ -301,6 +301,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260717c"></script>
+  <script src="js/app.js?v=20260717d"></script>
 </body>
 </html>
