@@ -561,12 +561,12 @@ function applyI18n() {
   $("#appTitle").textContent = t("appTitle");
   document.title = t("appTitle");
 
-  // Nav
-  $(".nav-btn[data-view='apply']").textContent = t("navApply");
-  $(".nav-btn[data-view='history']").textContent = t("navHistory");
-  $(".nav-btn[data-view='profile']").textContent = t("navProfile");
-  $(".nav-btn[data-view='admin']").textContent = t("navAdmin");
-  $("#logoutBtn").textContent = t("navLogout");
+  // Nav（保留 badge span，只更新文本节点）
+  $(".nav-btn[data-view='apply']").childNodes[0].textContent = t("navApply");
+  $(".nav-btn[data-view='history']").childNodes[0].textContent = t("navHistory");
+  $(".nav-btn[data-view='profile']").childNodes[0].textContent = t("navProfile");
+  $(".nav-btn[data-view='admin']").childNodes[0].textContent = t("navAdmin");
+  $("#logoutBtn").childNodes[0].textContent = t("navLogout");
 
   // Auth tabs
   $("#tabLogin").textContent = t("tabLogin");
@@ -640,10 +640,10 @@ function applyI18n() {
   const profileBtn = $("#profileForm button");
   if (profileBtn) profileBtn.textContent = t("save");
 
-  // Admin tabs
-  $$(".admin-tab[data-admin-tab='users']").textContent = t("adminUsers");
-  $$(".admin-tab[data-admin-tab='items']").textContent = t("adminItems");
-  $$(".admin-tab[data-admin-tab='allApps']").textContent = t("adminAllApps");
+  // Admin tabs（保留 badge span，只更新文本节点）
+  $$(".admin-tab[data-admin-tab='users']")[0].childNodes[0].textContent = t("adminUsers");
+  $$(".admin-tab[data-admin-tab='items']")[0].childNodes[0].textContent = t("adminItems");
+  $$(".admin-tab[data-admin-tab='allApps']")[0].childNodes[0].textContent = t("adminAllApps");
   $("#adminUsers h3").textContent = t("adminUsers");
   $("#adminItems h3").textContent = t("adminItems");
   $("#adminAllApps h3").textContent = t("adminAllApps");
