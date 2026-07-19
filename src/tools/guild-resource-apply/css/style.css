@@ -437,6 +437,24 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 .modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--text-secondary); padding: 0 4px; }
 .modal-close:hover { color: var(--text); }
 .modal-body { padding: 16px 18px; overflow-y: auto; }
+.modal-body textarea[readonly] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f9fafb;
+  color: var(--text);
+  resize: vertical;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.reason-cell {
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  color: var(--text);
+}
+.reason-cell:hover { color: var(--primary); }
 .modal-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 .modal-account-item {
   display: grid; grid-template-columns: 1.3fr 1.3fr 1fr auto auto auto; align-items: center;

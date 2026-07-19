@@ -104,6 +104,12 @@ const translations = {
     action: "Thao Tác",
     noRecords: "Chưa có dữ liệu",
     copy: "Sao Chép",
+    copyOriginal: "Sao chép bản gốc",
+    copyTranslated: "Sao chép bản dịch",
+    reasonOriginal: "Văn bản gốc",
+    reasonTranslated: "Bản dịch tiếng Trung",
+    reasonModalTitle: "Lý do xin",
+    clickToViewReason: "Nhấn để xem văn bản gốc/bản dịch",
     profileTitle: "Thông Tin Cá Nhân",
     profileAccountHint: "Sau khi đổi tài khoản cần đăng nhập lại bằng tài khoản mới",
     profileNicknameHint: "Biệt danh trong game",
@@ -269,6 +275,12 @@ const translations = {
     action: "操作",
     noRecords: "暂无记录",
     copy: "复制",
+    copyOriginal: "复制原文",
+    copyTranslated: "复制译文",
+    reasonOriginal: "原文",
+    reasonTranslated: "中文译文",
+    reasonModalTitle: "申请原因",
+    clickToViewReason: "点击查看原文/译文",
     profileTitle: "个人资料",
     profileAccountHint: "修改账号后需使用新账号登录",
     profileNicknameHint: "游戏内昵称",
@@ -433,6 +445,12 @@ const translations = {
     action: "Action",
     noRecords: "No records",
     copy: "Copy",
+    copyOriginal: "Copy Original",
+    copyTranslated: "Copy Translation",
+    reasonOriginal: "Original Text",
+    reasonTranslated: "Chinese Translation",
+    reasonModalTitle: "Application Reason",
+    clickToViewReason: "Click to view original/translation",
     profileTitle: "Profile",
     profileAccountHint: "Use new username to login after change",
     profileNicknameHint: "In-game nickname",
@@ -704,6 +722,13 @@ function applyI18n() {
     allAppThs[7].textContent = t("status");
     allAppThs[8].textContent = t("action");
   }
+
+  // Reason modal
+  $("#reasonModalTitle").textContent = t("reasonModalTitle");
+  $("#reasonOriginalLabel").childNodes[0].textContent = t("reasonOriginal");
+  $("#reasonTranslatedLabel").childNodes[0].textContent = t("reasonTranslated");
+  $("#copyOriginalBtn").textContent = t("copyOriginal");
+  $("#copyTranslatedBtn").textContent = t("copyTranslated");
 
   updateVipLevelBadge();
   updatePreview();
@@ -1723,7 +1748,7 @@ function renderHistoryTable(apps) {
       <td>${escapeHtml(app.game_nickname)}</td>
       <td>${escapeHtml(app.server)}</td>
       <td>${escapeHtml(formatItems(app.items))}</td>
-      <td title="${escapeHtml(app.reason || '')}">${escapeHtml(app.reason_cn || app.reason || "")}</td>
+      <td class="reason-cell" onclick="showReasonModal(${app.id})" title="${t("clickToViewReason")}">${escapeHtml(app.reason_cn || app.reason || "")}</td>
       <td>${renderStatusBadge(app.id, app.status)}</td>
       <td>
         <button class="btn btn-small" onclick="copyAppText(${app.id})">${t("copy")}</button>
@@ -1776,6 +1801,28 @@ window.rejectApp = async (appId) => {
   } catch (err) {
     showToast(err.message);
   }
+};
+
+// ---------- Reason modal ----------
+
+window.showReasonModal = (appId) => {
+  const app = currentApps.find(a => a.id === appId);
+  if (!app) return;
+  $("#reasonOriginal").value = app.reason || "";
+  $("#reasonTranslated").value = app.reason_cn || app.reason || "";
+  $("#reasonModal").classList.remove("hidden");
+};
+
+window.closeReasonModal = () => {
+  $("#reasonModal").classList.add("hidden");
+};
+
+window.copyReasonOriginal = () => {
+  copyToClipboard($("#reasonOriginal").value);
+};
+
+window.copyReasonTranslated = () => {
+  copyToClipboard($("#reasonTranslated").value);
 };
 
 $("#historyFilterBtn").addEventListener("click", loadHistory);
@@ -2120,7 +2167,7 @@ async function loadAdminAllApps() {
         <td>${escapeHtml(app.game_nickname)}</td>
         <td>${escapeHtml(app.server)}</td>
         <td>${escapeHtml(formatItems(app.items))}</td>
-        <td title="${escapeHtml(app.reason || '')}">${escapeHtml(app.reason_cn || app.reason || "")}</td>
+        <td class="reason-cell" onclick="showReasonModal(${app.id})" title="${t("clickToViewReason")}">${escapeHtml(app.reason_cn || app.reason || "")}</td>
         <td>${renderStatusBadge(app.id, app.status)}</td>
         <td>
           <button class="btn btn-small" onclick="copyAppText(${app.id})">${t("copy")}</button>

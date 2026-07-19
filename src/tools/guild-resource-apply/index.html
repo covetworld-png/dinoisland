@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>资源申请工具 | Resource Apply Tool</title>
-  <link rel="stylesheet" href="css/style.css?v=20260717f">
+  <link rel="stylesheet" href="css/style.css?v=20260717g">
 </head>
 <body>
   <div id="app">
@@ -301,6 +301,33 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260717f"></script>
+  <!-- 申请原因弹窗（原文/译文对照） -->
+  <div id="reasonModal" class="modal hidden">
+    <div class="modal-overlay" onclick="closeReasonModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="reasonModalTitle">申请原因</h3>
+        <button type="button" class="modal-close" onclick="closeReasonModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label id="reasonOriginalLabel">原文
+            <textarea id="reasonOriginal" rows="3" readonly></textarea>
+          </label>
+        </div>
+        <div class="form-row">
+          <label id="reasonTranslatedLabel">译文
+            <textarea id="reasonTranslated" rows="3" readonly></textarea>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="copyReasonTranslated()" id="copyTranslatedBtn">复制译文</button>
+        <button type="button" class="btn-primary" onclick="copyReasonOriginal()" id="copyOriginalBtn">复制原文</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js?v=20260717g"></script>
 </body>
 </html>
