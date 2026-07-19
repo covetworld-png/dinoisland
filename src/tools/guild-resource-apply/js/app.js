@@ -134,6 +134,7 @@ const translations = {
     statusPending: "Đang Chờ Gửi",
     statusProcessing: "Đã Gửi - Đang Xử Lý",
     statusCompleted: "Đã Xử Lý",
+    statusRejected: "Đã Từ Chối",
     toastLoginSuccess: "Đăng nhập thành công",
     toastRegisterSuccess: "Đăng ký thành công",
     toastAppSubmitted: "Đã gửi đơn",
@@ -169,6 +170,8 @@ const translations = {
     statusApproved: "Đã duyệt",
     statusPendingApproval: "Chờ duyệt",
     approve: "Duyệt",
+    reject: "Từ chối",
+    confirmRejectApp: "Bạn có chắc muốn từ chối đơn xin này?",
     approveAndCreateRole: "Duyệt và tạo vai trò",
     disable: "Vô hiệu",
     delete: "Xóa",
@@ -296,6 +299,7 @@ const translations = {
     statusPending: "待发送",
     statusProcessing: "已发送待处理",
     statusCompleted: "已处理",
+    statusRejected: "已拒绝",
     toastLoginSuccess: "登录成功",
     toastRegisterSuccess: "注册成功",
     toastAppSubmitted: "申请已提交",
@@ -331,6 +335,8 @@ const translations = {
     statusApproved: "已通过",
     statusPendingApproval: "待审批",
     approve: "通过",
+    reject: "拒绝",
+    confirmRejectApp: "确定拒绝该申请吗？",
     approveAndCreateRole: "审批并建角色",
     disable: "禁用",
     delete: "删除",
@@ -457,6 +463,7 @@ const translations = {
     statusPending: "Pending Send",
     statusProcessing: "Sent - Processing",
     statusCompleted: "Processed",
+    statusRejected: "Rejected",
     toastLoginSuccess: "Login successful",
     toastRegisterSuccess: "Register successful",
     toastAppSubmitted: "Application submitted",
@@ -492,6 +499,8 @@ const translations = {
     statusApproved: "Approved",
     statusPendingApproval: "Pending Approval",
     approve: "Approve",
+    reject: "Reject",
+    confirmRejectApp: "Are you sure you want to reject this application?",
     approveAndCreateRole: "Approve & Create Role",
     disable: "Disable",
     delete: "Delete",
@@ -737,19 +746,20 @@ function formatDate(dt) {
 }
 
 function statusText(status) {
-  const map = { "待发送": "statusPending", "已发送待处理": "statusProcessing", "已处理": "statusCompleted" };
+  const map = { "待发送": "statusPending", "已发送待处理": "statusProcessing", "已处理": "statusCompleted", "已拒绝": "statusRejected" };
   return t(map[status] || "statusPending");
 }
 
 function statusClass(status) {
-  const map = { "待发送": "status-pending", "已发送待处理": "status-processing", "已处理": "status-completed" };
+  const map = { "待发送": "status-pending", "已发送待处理": "status-processing", "已处理": "status-completed", "已拒绝": "status-rejected" };
   return map[status] || "status-pending";
 }
 
+// 复制/导出固定使用中文（给管理员看的标准文案），不受界面语言影响
 function formatApplicationText(app) {
   const serverMap = { "Q服 server1": "Q服", "K服 server2": "K服" };
   const server = serverMap[app.server] || app.server;
-  const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${itemName(it)}`).join("，");
+  const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${it.name_cn || it.name_vn || it.name_en}`).join("，");
   const reason = app.reason_cn || app.reason || "";
   return `${server} ${app.game_account} ${app.game_nickname} ${itemsText}${reason ? `（${reason}）` : ""}`;
 }
@@ -1551,8 +1561,6 @@ $("#applyForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  const previewText = $("#applyPreview").textContent;
-
   const isManual = $("#roleSelect").value === "manual";
   const totalValue = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
   // 手动输入模式不涉及 VIP 积分计算，跳过含 VIP 等级的高价值确认
@@ -1569,7 +1577,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
   }
 
   try {
-    await api("POST", "/applications", {
+    const res = await api("POST", "/applications", {
       server: $("#serverSelect").value,
       game_account: fd.get("game_account"),
       game_nickname: fd.get("game_nickname"),
@@ -1577,8 +1585,10 @@ $("#applyForm").addEventListener("submit", async (e) => {
       items,
       reason: fd.get("reason"),
     });
+    const submittedApp = res.data;
     showToast(t("toastAppSubmitted"));
-    copyToClipboard(previewText);
+    // 复制给管理员的固定中文文案，不受界面语言影响
+    copyToClipboard(formatApplicationText(submittedApp));
     e.target.reset();
     selectedItems = {};
     applyTargetRoles = null;
@@ -1696,6 +1706,7 @@ async function loadHistory() {
 function renderHistoryTable(apps) {
   currentApps = apps;
   const tbody = $("#historyTable tbody");
+  const isAdmin = currentUser && currentUser.role === "admin";
   tbody.innerHTML = "";
   if (!apps.length) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center">${t("noRecords")}</td></tr>`;
@@ -1703,6 +1714,9 @@ function renderHistoryTable(apps) {
   }
   apps.forEach(app => {
     const tr = document.createElement("tr");
+    const rejectBtn = isAdmin && app.status !== "已拒绝"
+      ? `<button class="btn btn-small btn-danger" onclick="rejectApp(${app.id})">${t("reject")}</button>`
+      : "";
     tr.innerHTML = `
       <td>${formatDate(app.created_at)}</td>
       <td>${escapeHtml(app.game_account)}</td>
@@ -1713,6 +1727,7 @@ function renderHistoryTable(apps) {
       <td>${renderStatusBadge(app.id, app.status)}</td>
       <td>
         <button class="btn btn-small" onclick="copyAppText(${app.id})">${t("copy")}</button>
+        ${rejectBtn}
       </td>
     `;
     tbody.appendChild(tr);
@@ -1743,6 +1758,18 @@ window.copyAppText = (appId) => {
 window.cycleAppStatus = async (appId, currentStatus) => {
   try {
     await api("PATCH", `/admin/applications/${appId}/status`, { status: nextStatus(currentStatus) });
+    showToast(t("toastStatusUpdated"));
+    loadHistory();
+    if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
+  } catch (err) {
+    showToast(err.message);
+  }
+};
+
+window.rejectApp = async (appId) => {
+  if (!confirm(t("confirmRejectApp"))) return;
+  try {
+    await api("PATCH", `/admin/applications/${appId}/status`, { status: "已拒绝" });
     showToast(t("toastStatusUpdated"));
     loadHistory();
     if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
@@ -2083,6 +2110,9 @@ async function loadAdminAllApps() {
     tbody.innerHTML = "";
     (res.data || []).forEach(app => {
       const tr = document.createElement("tr");
+      const rejectBtn = app.status !== "已拒绝"
+        ? `<button class="btn btn-small btn-danger" onclick="rejectApp(${app.id})">${t("reject")}</button>`
+        : "";
       tr.innerHTML = `
         <td>${formatDate(app.created_at)}</td>
         <td>${escapeHtml(app.username)}</td>
@@ -2094,6 +2124,7 @@ async function loadAdminAllApps() {
         <td>${renderStatusBadge(app.id, app.status)}</td>
         <td>
           <button class="btn btn-small" onclick="copyAppText(${app.id})">${t("copy")}</button>
+          ${rejectBtn}
         </td>
       `;
       tbody.appendChild(tr);
