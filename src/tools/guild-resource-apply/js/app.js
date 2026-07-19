@@ -139,13 +139,13 @@ const translations = {
     role: "Vai Trò",
     createdAt: "Thởi Gian Tạo",
     submitter: "Ngưởi Gửi",
-    statusPending: "Đang Chờ Gửi",
+    statusPending: "Chờ Phê Duyệt",
     statusProcessing: "Đã Gửi - Đang Xử Lý",
     statusCompleted: "Đã Xử Lý",
     statusRejected: "Đã Từ Chối",
     toastLoginSuccess: "Đăng nhập thành công",
     toastRegisterSuccess: "Đăng ký thành công",
-    toastAppSubmitted: "Đã gửi đơn",
+    toastAppSubmitted: "Đã gửi đơn, đang chờ quản trị viên phê duyệt",
     toastStatusUpdated: "Trạng thái đã cập nhật",
     toastProfileUpdated: "Thông tin đã cập nhật",
     toastCopied: "Đã sao chép",
@@ -312,13 +312,13 @@ const translations = {
     role: "角色",
     createdAt: "注册时间",
     submitter: "提交人",
-    statusPending: "待发送",
+    statusPending: "待审批",
     statusProcessing: "已发送待处理",
     statusCompleted: "已处理",
     statusRejected: "已拒绝",
     toastLoginSuccess: "登录成功",
     toastRegisterSuccess: "注册成功",
-    toastAppSubmitted: "申请已提交",
+    toastAppSubmitted: "申请已提交，等待管理员审批",
     toastStatusUpdated: "状态已更新",
     toastProfileUpdated: "资料已更新",
     toastCopied: "已复制",
@@ -484,13 +484,13 @@ const translations = {
     role: "Role",
     createdAt: "Created At",
     submitter: "Submitter",
-    statusPending: "Pending Send",
+    statusPending: "Pending Approval",
     statusProcessing: "Sent - Processing",
     statusCompleted: "Processed",
     statusRejected: "Rejected",
     toastLoginSuccess: "Login successful",
     toastRegisterSuccess: "Register successful",
-    toastAppSubmitted: "Application submitted",
+    toastAppSubmitted: "Application submitted, pending admin approval",
     toastStatusUpdated: "Status updated",
     toastProfileUpdated: "Profile updated",
     toastCopied: "Copied",
@@ -760,7 +760,7 @@ function showToast(message, type = "info") {
   const el = $("#toast");
   el.textContent = message;
   el.classList.remove("hidden");
-  setTimeout(() => el.classList.add("hidden"), 3000);
+  setTimeout(() => el.classList.add("hidden"), 5000);
 }
 
 function formatItems(items) {
