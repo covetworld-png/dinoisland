@@ -146,6 +146,10 @@ const translations = {
     toastLoginSuccess: "Đăng nhập thành công",
     toastRegisterSuccess: "Đăng ký thành công",
     toastAppSubmitted: "Đã gửi đơn, đang chờ quản trị viên phê duyệt",
+    submitSuccessTitle: "Đã gửi đơn",
+    submitSuccessHint: "Đơn của bạn đã được gửi, đang chờ quản trị viên phê duyệt.",
+    continueApply: "Tiếp tục xin",
+    viewHistory: "Xem lịch sử",
     toastStatusUpdated: "Trạng thái đã cập nhật",
     toastProfileUpdated: "Thông tin đã cập nhật",
     toastCopied: "Đã sao chép",
@@ -319,6 +323,10 @@ const translations = {
     toastLoginSuccess: "登录成功",
     toastRegisterSuccess: "注册成功",
     toastAppSubmitted: "申请已提交，等待管理员审批",
+    submitSuccessTitle: "申请已提交",
+    submitSuccessHint: "您的申请已提交，等待管理员审批。",
+    continueApply: "继续申请",
+    viewHistory: "查看历史",
     toastStatusUpdated: "状态已更新",
     toastProfileUpdated: "资料已更新",
     toastCopied: "已复制",
@@ -491,6 +499,10 @@ const translations = {
     toastLoginSuccess: "Login successful",
     toastRegisterSuccess: "Register successful",
     toastAppSubmitted: "Application submitted, pending admin approval",
+    submitSuccessTitle: "Application Submitted",
+    submitSuccessHint: "Your application has been submitted and is pending admin approval.",
+    continueApply: "Continue Applying",
+    viewHistory: "View History",
     toastStatusUpdated: "Status updated",
     toastProfileUpdated: "Profile updated",
     toastCopied: "Copied",
@@ -737,6 +749,12 @@ function applyI18n() {
   $("#copyTranslatedBtn").textContent = t("copyTranslated");
   $("#saveReasonCnBtn").textContent = t("saveReasonCn");
   $("#closeReasonBtn").textContent = t("close");
+
+  // Submit success modal
+  $("#submitSuccessTitle").textContent = t("submitSuccessTitle");
+  $("#submitSuccessHint").textContent = t("submitSuccessHint");
+  $("#continueApplyBtn").textContent = t("continueApply");
+  $("#viewHistoryBtn").textContent = t("viewHistory");
 
   updateVipLevelBadge();
   updatePreview();
@@ -1619,7 +1637,6 @@ $("#applyForm").addEventListener("submit", async (e) => {
       reason: fd.get("reason"),
     });
     const submittedApp = res.data;
-    showToast(t("toastAppSubmitted"));
     // 复制给管理员的固定中文文案，不受界面语言影响
     copyToClipboard(formatApplicationText(submittedApp));
     e.target.reset();
@@ -1634,7 +1651,8 @@ $("#applyForm").addEventListener("submit", async (e) => {
     renderSelectedItems();
     updatePreview();
     updateItemGridState();
-    switchView("history");
+    // 弹出明确的提交成功提示，避免用户以为没提交成功而重复申请
+    showSubmitSuccessModal(submittedApp);
   } catch (err) {
     showToast(err.message);
   }
@@ -1848,6 +1866,22 @@ window.saveReasonCn = async () => {
   } catch (err) {
     showToast(err.message);
   }
+};
+
+// ---------- Submit success modal ----------
+
+function showSubmitSuccessModal(app) {
+  $("#submitSuccessPreview").textContent = formatApplicationText(app);
+  $("#submitSuccessModal").classList.remove("hidden");
+}
+
+window.closeSubmitSuccessModal = () => {
+  $("#submitSuccessModal").classList.add("hidden");
+};
+
+window.closeSubmitSuccessModalAndGoHistory = () => {
+  closeSubmitSuccessModal();
+  switchView("history");
 };
 
 $("#historyFilterBtn").addEventListener("click", loadHistory);

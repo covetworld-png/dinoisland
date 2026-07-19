@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>资源申请工具 | Resource Apply Tool</title>
-  <link rel="stylesheet" href="css/style.css?v=20260717k">
+  <link rel="stylesheet" href="css/style.css?v=20260717l">
 </head>
 <body>
   <div id="app">
@@ -330,6 +330,25 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260717k"></script>
+  <!-- 提交成功提示弹窗 -->
+  <div id="submitSuccessModal" class="modal hidden">
+    <div class="modal-overlay" onclick="closeSubmitSuccessModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="submitSuccessTitle">申请已提交</h3>
+        <button type="button" class="modal-close" onclick="closeSubmitSuccessModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="submitSuccessHint" class="success-hint">您的申请已提交，等待管理员审批。</p>
+        <div id="submitSuccessPreview" class="preview-box"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeSubmitSuccessModal()" id="continueApplyBtn">继续申请</button>
+        <button type="button" class="btn-primary" onclick="closeSubmitSuccessModalAndGoHistory()" id="viewHistoryBtn">查看历史</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js?v=20260717l"></script>
 </body>
 </html>

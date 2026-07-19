@@ -488,6 +488,26 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
+.success-hint {
+  color: var(--success);
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.preview-box {
+  background: #f9fafb;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 .modal-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 .modal-account-item {
   display: grid; grid-template-columns: 1.3fr 1.3fr 1fr auto auto auto; align-items: center;
