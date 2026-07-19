@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>资源申请工具 | Resource Apply Tool</title>
-  <link rel="stylesheet" href="css/style.css?v=20260717g">
+  <link rel="stylesheet" href="css/style.css?v=20260717h">
 </head>
 <body>
   <div id="app">
@@ -317,17 +317,19 @@
         </div>
         <div class="form-row">
           <label id="reasonTranslatedLabel">译文
-            <textarea id="reasonTranslated" rows="3" readonly></textarea>
+            <textarea id="reasonTranslated" rows="3"></textarea>
           </label>
         </div>
       </div>
       <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeReasonModal()" id="closeReasonBtn">关闭</button>
+        <button type="button" class="btn-secondary" onclick="copyReasonOriginal()" id="copyOriginalBtn">复制原文</button>
         <button type="button" class="btn-secondary" onclick="copyReasonTranslated()" id="copyTranslatedBtn">复制译文</button>
-        <button type="button" class="btn-primary" onclick="copyReasonOriginal()" id="copyOriginalBtn">复制原文</button>
+        <button type="button" class="btn-primary" onclick="saveReasonCn()" id="saveReasonCnBtn">保存译文</button>
       </div>
     </div>
   </div>
 
-  <script src="js/app.js?v=20260717g"></script>
+  <script src="js/app.js?v=20260717h"></script>
 </body>
 </html>

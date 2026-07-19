@@ -106,6 +106,8 @@ const translations = {
     copy: "Sao Chép",
     copyOriginal: "Sao chép bản gốc",
     copyTranslated: "Sao chép bản dịch",
+    saveReasonCn: "Lưu bản dịch",
+    close: "Đóng",
     reasonOriginal: "Văn bản gốc",
     reasonTranslated: "Bản dịch tiếng Trung",
     reasonModalTitle: "Lý do xin",
@@ -277,6 +279,8 @@ const translations = {
     copy: "复制",
     copyOriginal: "复制原文",
     copyTranslated: "复制译文",
+    saveReasonCn: "保存译文",
+    close: "关闭",
     reasonOriginal: "原文",
     reasonTranslated: "中文译文",
     reasonModalTitle: "申请原因",
@@ -447,6 +451,8 @@ const translations = {
     copy: "Copy",
     copyOriginal: "Copy Original",
     copyTranslated: "Copy Translation",
+    saveReasonCn: "Save Translation",
+    close: "Close",
     reasonOriginal: "Original Text",
     reasonTranslated: "Chinese Translation",
     reasonModalTitle: "Application Reason",
@@ -729,6 +735,8 @@ function applyI18n() {
   $("#reasonTranslatedLabel").childNodes[0].textContent = t("reasonTranslated");
   $("#copyOriginalBtn").textContent = t("copyOriginal");
   $("#copyTranslatedBtn").textContent = t("copyTranslated");
+  $("#saveReasonCnBtn").textContent = t("saveReasonCn");
+  $("#closeReasonBtn").textContent = t("close");
 
   updateVipLevelBadge();
   updatePreview();
@@ -1805,24 +1813,29 @@ window.rejectApp = async (appId) => {
 
 // ---------- Reason modal ----------
 
+let reasonModalAppId = null;
+
 window.showReasonModal = (appId) => {
   const app = currentApps.find(a => a.id === appId);
   if (!app) return;
+  reasonModalAppId = appId;
   $("#reasonOriginal").value = app.reason || "";
   $("#reasonTranslated").value = app.reason_cn || app.reason || "";
   $("#reasonModal").classList.remove("hidden");
 };
 
-window.closeReasonModal = () => {
-  $("#reasonModal").classList.add("hidden");
-};
-
-window.copyReasonOriginal = () => {
-  copyToClipboard($("#reasonOriginal").value);
-};
-
-window.copyReasonTranslated = () => {
-  copyToClipboard($("#reasonTranslated").value);
+window.saveReasonCn = async () => {
+  if (!reasonModalAppId) return;
+  const reasonCn = $("#reasonTranslated").value;
+  try {
+    await api("PATCH", `/admin/applications/${reasonModalAppId}/reason-cn`, { reason_cn: reasonCn });
+    showToast(t("toastSaved"));
+    closeReasonModal();
+    loadHistory();
+    if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
+  } catch (err) {
+    showToast(err.message);
+  }
 };
 
 $("#historyFilterBtn").addEventListener("click", loadHistory);
