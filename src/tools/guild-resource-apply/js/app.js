@@ -1824,6 +1824,18 @@ window.showReasonModal = (appId) => {
   $("#reasonModal").classList.remove("hidden");
 };
 
+window.closeReasonModal = () => {
+  $("#reasonModal").classList.add("hidden");
+};
+
+window.copyReasonOriginal = () => {
+  copyToClipboard($("#reasonOriginal").value);
+};
+
+window.copyReasonTranslated = () => {
+  copyToClipboard($("#reasonTranslated").value);
+};
+
 window.saveReasonCn = async () => {
   if (!reasonModalAppId) return;
   const reasonCn = $("#reasonTranslated").value;
