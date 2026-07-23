@@ -818,8 +818,10 @@ function formatApplicationText(app) {
   if (vipDelta > 0) {
     const current = parseInt(app.current_vip_points || 0, 10);
     const after = current + vipDelta;
-    const level = parseInt(app.vip_level_after || 0, 10);
-    text += `，VIP积分 ${current} + ${vipDelta} = ${after}（${level}级）`;
+    const levelBefore = parseInt(app.vip_level_before || 0, 10);
+    const levelAfter = parseInt(app.vip_level_after || 0, 10);
+    const levelText = levelBefore < levelAfter ? `${levelBefore}级→${levelAfter}级` : `${levelAfter}级`;
+    text += `，VIP积分 ${current} + ${vipDelta} = ${after}（${levelText}）`;
   }
 
   if (reason) {
