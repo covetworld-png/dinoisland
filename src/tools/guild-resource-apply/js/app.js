@@ -52,6 +52,7 @@ const translations = {
     gameAccount: "Tài Khoản Game",
     gameNickname: "Biệt Danh Game",
     vipPoints: "Điểm VIP",
+    enableVipPoints: "Tính Điểm VIP",
     vipLevel: "Cấp VIP",
     beastCoin: "xu thú",
     selectRole: "Chọn vai trò",
@@ -230,6 +231,7 @@ const translations = {
     gameAccount: "游戏账号",
     gameNickname: "游戏昵称",
     vipPoints: "VIP 积分",
+    enableVipPoints: "计算 VIP 积分",
     vipLevel: "VIP 等级",
     beastCoin: "兽币",
     selectRole: "选择角色",
@@ -407,6 +409,7 @@ const translations = {
     gameAccount: "Game Account",
     gameNickname: "Game Nickname",
     vipPoints: "VIP Points",
+    enableVipPoints: "Calculate VIP Points",
     vipLevel: "VIP Level",
     beastCoin: "beast coins",
     selectRole: "Select Role",
@@ -647,7 +650,8 @@ function applyI18n() {
   $("#roleLabel").childNodes[0].textContent = t("selectRole");
   $("#gameAccountLabel").childNodes[0].textContent = t("gameAccount");
   $("#gameNicknameLabel").childNodes[0].textContent = t("gameNickname");
-  $("#vipPointsLabel").childNodes[0].textContent = t("vipPoints");
+  const enableVipText = $("#enableVipPointsText");
+  if (enableVipText) enableVipText.textContent = t("enableVipPoints");
   $("#selectItemsLabel").childNodes[0].textContent = t("selectItems");
   $("#itemGridHint").textContent = t("itemGridHint");
   $("#skinLabel").childNodes[0].textContent = t("skinCustom");
@@ -1060,11 +1064,24 @@ function getVipLevel(points) {
   return level;
 }
 
+function updateVipInputState() {
+  const checkbox = $("#enableVipPoints");
+  const input = $("#currentVipPoints");
+  if (!checkbox || !input) return;
+  input.disabled = !checkbox.checked;
+  if (!checkbox.checked) {
+    input.value = "";
+  }
+  updateVipLevelBadge();
+  updatePreview();
+}
+
 function updateVipLevelBadge() {
   const input = $("#currentVipPoints");
   const badge = $("#vipLevelBadge");
+  const checkbox = $("#enableVipPoints");
   if (!input || !badge) return;
-  if (input.value === "") {
+  if (!checkbox || !checkbox.checked || input.value === "") {
     badge.textContent = "";
     return;
   }
@@ -1320,16 +1337,15 @@ function applyRoleSelection(value) {
   // 游戏账号由用户选择 / 视图初始化负责设置，此处不再重置
 
   if (value === "manual" && isStaff()) {
-    // 管理员/客服手动输入模式：账号/昵称/服务器均可自由编辑；VIP 积分默认 0 且不计算
+    // 管理员/客服手动输入模式：账号/昵称/服务器均可自由编辑；VIP 积分默认不启用
     gameAccountInput.readOnly = false;
     gameAccountInput.value = "";
     gameNicknameInput.readOnly = false;
     gameNicknameInput.value = "";
     serverSelect.disabled = false;
     const vipLabel = $("#vipPointsLabel");
-    if (vipLabel) vipLabel.classList.add("hidden");
-    $("#currentVipPoints").value = "0";
-    updateVipLevelBadge();
+    if (vipLabel) vipLabel.classList.remove("hidden");
+    updateVipInputState();
   } else if (value.startsWith("role:")) {
     gameAccountInput.readOnly = true;
     const id = parseInt(value.split(":")[1], 10);
@@ -1341,8 +1357,7 @@ function applyRoleSelection(value) {
       serverSelect.disabled = true;
       const vipLabel = $("#vipPointsLabel");
       if (vipLabel) vipLabel.classList.remove("hidden");
-      $("#currentVipPoints").value = "";
-      updateVipLevelBadge();
+      updateVipInputState();
     }
   } else {
     // 未选择或清空：保持只读/禁用，禁止手动输入
@@ -1353,6 +1368,7 @@ function applyRoleSelection(value) {
     serverSelect.disabled = true;
     const vipLabel = $("#vipPointsLabel");
     if (vipLabel) vipLabel.classList.remove("hidden");
+    updateVipInputState();
   }
   updatePreview();
   updateItemGridState();
@@ -1562,10 +1578,10 @@ function updatePreview() {
 
   let text = `${getServerPreviewName(server)} ${account} ${nickname} ${itemsText}`;
 
-  // 管理员/客服手动输入模式不计算 VIP 积分
-  const isManual = $("#roleSelect").value === "manual";
+  // VIP 积分仅在选择"计算 VIP 积分"时纳入预览
+  const enableVip = $("#enableVipPoints") && $("#enableVipPoints").checked;
   const delta = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
-  if (!isManual && delta > 0) {
+  if (enableVip && delta > 0) {
     const currentPoints = parseInt($("#currentVipPoints").value || "0", 10);
     const levelAfter = getVipLevel(currentPoints + delta);
     text += `，VIP 积分 ${currentPoints} + ${delta} = ${currentPoints + delta}（${levelAfter} 级）`;
@@ -1586,6 +1602,14 @@ $$("#gameNicknameInput").forEach(input => {
     clearFieldHighlights();
   });
 });
+const enableVipCheckbox = $("#enableVipPoints");
+if (enableVipCheckbox) {
+  enableVipCheckbox.addEventListener("change", () => {
+    updateVipInputState();
+    updateItemGridState();
+    clearFieldHighlights();
+  });
+}
 $("#currentVipPoints").addEventListener("input", () => {
   updateVipLevelBadge();
   updatePreview();
@@ -1633,10 +1657,10 @@ $("#applyForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  const isManual = $("#roleSelect").value === "manual";
+  const enableVip = $("#enableVipPoints").checked;
   const totalValue = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
-  // 手动输入模式不涉及 VIP 积分计算，跳过含 VIP 等级的高价值确认
-  if (!isManual && totalValue > 300) {
+  // 仅启用 VIP 积分计算时才校验高价值申请
+  if (enableVip && totalValue > 300) {
     const currentPoints = parseInt(fd.get("current_vip_points") || "0", 10);
     const levelBefore = getVipLevel(currentPoints);
     const levelAfter = getVipLevel(currentPoints + totalValue);
@@ -1653,7 +1677,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
       server: $("#serverSelect").value,
       game_account: fd.get("game_account"),
       game_nickname: fd.get("game_nickname"),
-      current_vip_points: isManual ? 0 : parseInt(fd.get("current_vip_points") || "0", 10),
+      current_vip_points: enableVip ? parseInt(fd.get("current_vip_points") || "0", 10) : 0,
       items,
       reason: fd.get("reason"),
     });
@@ -1664,8 +1688,9 @@ $("#applyForm").addEventListener("submit", async (e) => {
     selectedItems = {};
     applyTargetRoles = null;
     $("#gameAccountInput").value = currentUser ? currentUser.username : "";
-    $("#currentVipPoints").value = "";
-    updateVipLevelBadge();
+    const enableVipCheckbox = $("#enableVipPoints");
+    if (enableVipCheckbox) enableVipCheckbox.checked = false;
+    updateVipInputState();
     renderRoleSelect("");
     applyRoleSelection("");
     renderItemGrid();

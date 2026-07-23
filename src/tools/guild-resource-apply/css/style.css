@@ -589,3 +589,8 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
   margin-left: 6px; vertical-align: middle;
 }
 .vip-level-badge:empty { display: none; }
+
+.vip-enable-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-weight: 500; }
+.vip-enable-wrap input[type="checkbox"] { width: 16px; height: 16px; margin: 0; }
+.vip-points-wrap { display: block; margin-bottom: 4px; }
+#vipPointsLabel input[type="number"]:disabled { background: #f3f4f6; color: #9ca3af; cursor: not-allowed; }
