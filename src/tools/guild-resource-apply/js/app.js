@@ -812,7 +812,20 @@ function formatApplicationText(app) {
   const server = serverMap[app.server] || app.server;
   const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${it.name_cn || it.name_vn || it.name_en}`).join("，");
   const reason = app.reason_cn || app.reason || "";
-  return `${server} ${app.game_account} ${app.game_nickname} ${itemsText}${reason ? `（${reason}）` : ""}`;
+  let text = `${server} ${app.game_account} ${app.game_nickname} ${itemsText}`;
+
+  const vipDelta = parseInt(app.vip_delta || 0, 10);
+  if (vipDelta > 0) {
+    const current = parseInt(app.current_vip_points || 0, 10);
+    const after = current + vipDelta;
+    const level = parseInt(app.vip_level_after || 0, 10);
+    text += `，VIP积分 ${current} + ${vipDelta} = ${after}（${level}级）`;
+  }
+
+  if (reason) {
+    text += `（${reason}）`;
+  }
+  return text.trim();
 }
 
 function copyToClipboard(text) {
