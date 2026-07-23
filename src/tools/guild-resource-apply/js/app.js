@@ -1339,6 +1339,8 @@ function applyRoleSelection(value) {
       serverSelect.value = role.server;
       gameNicknameInput.readOnly = true;
       serverSelect.disabled = true;
+      const vipLabel = $("#vipPointsLabel");
+      if (vipLabel) vipLabel.classList.remove("hidden");
       $("#currentVipPoints").value = "";
       updateVipLevelBadge();
     }
