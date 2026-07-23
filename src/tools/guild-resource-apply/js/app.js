@@ -809,10 +809,11 @@ function statusClass(status) {
 // 复制/导出固定使用中文（给管理员看的标准文案），不受界面语言影响
 function formatApplicationText(app) {
   const serverMap = { "Q服 server1": "Q服", "K服 server2": "K服" };
+  const applicant = app.username || app.user_nickname || "未知";
   const server = serverMap[app.server] || app.server;
   const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${it.name_cn || it.name_vn || it.name_en}`).join("，");
   const reason = app.reason_cn || app.reason || "";
-  let text = `${server} ${app.game_account} ${app.game_nickname} ${itemsText}`;
+  let text = `申请人：${applicant} | ${server} ${app.game_account} ${app.game_nickname} ${itemsText}`;
 
   const vipDelta = parseInt(app.vip_delta || 0, 10);
   if (vipDelta > 0) {
