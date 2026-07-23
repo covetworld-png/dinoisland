@@ -1336,6 +1336,7 @@ function applyRoleSelection(value) {
 
   // 游戏账号由用户选择 / 视图初始化负责设置，此处不再重置
 
+  const vipCheckbox = $("#enableVipPoints");
   if (value === "manual" && isStaff()) {
     // 管理员/客服手动输入模式：账号/昵称/服务器均可自由编辑；VIP 积分默认不启用
     gameAccountInput.readOnly = false;
@@ -1345,6 +1346,7 @@ function applyRoleSelection(value) {
     serverSelect.disabled = false;
     const vipLabel = $("#vipPointsLabel");
     if (vipLabel) vipLabel.classList.remove("hidden");
+    if (vipCheckbox) vipCheckbox.checked = false;
     updateVipInputState();
   } else if (value.startsWith("role:")) {
     gameAccountInput.readOnly = true;
@@ -1357,6 +1359,7 @@ function applyRoleSelection(value) {
       serverSelect.disabled = true;
       const vipLabel = $("#vipPointsLabel");
       if (vipLabel) vipLabel.classList.remove("hidden");
+      if (vipCheckbox) vipCheckbox.checked = true;
       updateVipInputState();
     }
   } else {
@@ -1368,6 +1371,7 @@ function applyRoleSelection(value) {
     serverSelect.disabled = true;
     const vipLabel = $("#vipPointsLabel");
     if (vipLabel) vipLabel.classList.remove("hidden");
+    if (vipCheckbox) vipCheckbox.checked = false;
     updateVipInputState();
   }
   updatePreview();
