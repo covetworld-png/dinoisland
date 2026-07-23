@@ -93,6 +93,7 @@ const translations = {
     allServers: "Tất Cả Máy Chủ",
     filter: "Lọc",
     time: "Thởi Gian",
+    applicant: "Ngưởi Gửi",
     account: "Tài Khoản",
     gameAccount: "Tài Khoản Game",
     gameNickname: "Biệt Danh Game",
@@ -270,6 +271,7 @@ const translations = {
     allServers: "全部服务器",
     filter: "筛选",
     time: "时间",
+    applicant: "申请人",
     account: "账号",
     gameAccount: "游戏账号",
     gameNickname: "游戏昵称",
@@ -446,6 +448,7 @@ const translations = {
     allServers: "All Servers",
     filter: "Filter",
     time: "Time",
+    applicant: "Applicant",
     account: "Account",
     gameAccount: "Game Account",
     gameNickname: "Game Nickname",
@@ -665,15 +668,16 @@ function applyI18n() {
   $("#historyServer option[value='']").textContent = t("allServers");
   $("#historyFilterBtn").textContent = t("filter");
   const historyThs = $$("#historyTable th");
-  if (historyThs.length >= 8) {
+  if (historyThs.length >= 9) {
     historyThs[0].textContent = t("time");
-    historyThs[1].textContent = t("gameAccount");
-    historyThs[2].textContent = t("gameNickname");
-    historyThs[3].textContent = t("serverCol");
-    historyThs[4].textContent = t("items");
-    historyThs[5].textContent = t("reasonCol");
-    historyThs[6].textContent = t("status");
-    historyThs[7].textContent = t("action");
+    historyThs[1].textContent = t("applicant");
+    historyThs[2].textContent = t("gameAccount");
+    historyThs[3].textContent = t("gameNickname");
+    historyThs[4].textContent = t("serverCol");
+    historyThs[5].textContent = t("items");
+    historyThs[6].textContent = t("reasonCol");
+    historyThs[7].textContent = t("status");
+    historyThs[8].textContent = t("action");
   }
 
   // Profile
@@ -809,11 +813,10 @@ function statusClass(status) {
 // 复制/导出固定使用中文（给管理员看的标准文案），不受界面语言影响
 function formatApplicationText(app) {
   const serverMap = { "Q服 server1": "Q服", "K服 server2": "K服" };
-  const applicant = app.username || app.user_nickname || "未知";
   const server = serverMap[app.server] || app.server;
   const itemsText = (app.items || []).map(it => `${it.quantity} ${it.unit}${it.name_cn || it.name_vn || it.name_en}`).join("，");
   const reason = app.reason_cn || app.reason || "";
-  let text = `申请人：${applicant} | ${server} ${app.game_account} ${app.game_nickname} ${itemsText}`;
+  let text = `${server} ${app.game_account} ${app.game_nickname} ${itemsText}`;
 
   const vipDelta = parseInt(app.vip_delta || 0, 10);
   if (vipDelta > 0) {
@@ -1776,7 +1779,7 @@ function renderHistoryTable(apps) {
   const isAdmin = currentUser && currentUser.role === "admin";
   tbody.innerHTML = "";
   if (!apps.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center">${t("noRecords")}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center">${t("noRecords")}</td></tr>`;
     return;
   }
   apps.forEach(app => {
@@ -1786,6 +1789,7 @@ function renderHistoryTable(apps) {
       : "";
     tr.innerHTML = `
       <td>${formatDate(app.created_at)}</td>
+      <td>${escapeHtml(app.username || app.user_nickname || "-")}</td>
       <td>${escapeHtml(app.game_account)}</td>
       <td>${escapeHtml(app.game_nickname)}</td>
       <td>${escapeHtml(app.server)}</td>
