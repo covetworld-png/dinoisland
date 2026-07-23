@@ -1678,6 +1678,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
       game_account: fd.get("game_account"),
       game_nickname: fd.get("game_nickname"),
       current_vip_points: enableVip ? parseInt(fd.get("current_vip_points") || "0", 10) : 0,
+      calculate_vip: enableVip,
       items,
       reason: fd.get("reason"),
     });
