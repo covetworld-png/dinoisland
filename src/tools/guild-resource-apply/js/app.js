@@ -1094,15 +1094,18 @@ function renderServerOptions() {
   const histSel = $("#historyServer");
   const regSel = $("#registerServerSelect");
   const roleServerSel = $("#newRoleServer");
+  const adminAppsServerSel = $("#adminAppsServer");
   sel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
   histSel.innerHTML = `<option value="">${t("allServers")}</option>`;
   if (regSel) regSel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
   if (roleServerSel) roleServerSel.innerHTML = `<option value="">${t("pleaseSelectServer")}</option>`;
+  if (adminAppsServerSel) adminAppsServerSel.innerHTML = `<option value="">${t("allServers")}</option>`;
   servers.forEach(s => {
     sel.appendChild(new Option(s, s));
     histSel.appendChild(new Option(s, s));
     if (regSel) regSel.appendChild(new Option(s, s));
     if (roleServerSel) roleServerSel.appendChild(new Option(s, s));
+    if (adminAppsServerSel) adminAppsServerSel.appendChild(new Option(s, s));
   });
 }
 
@@ -1952,6 +1955,17 @@ $$(".admin-tab").forEach(tab => {
   });
 });
 
+const adminAppsFilterBtn = $("#adminAppsFilterBtn");
+if (adminAppsFilterBtn) {
+  adminAppsFilterBtn.addEventListener("click", loadAdminAllApps);
+}
+["adminAppsStart", "adminAppsEnd", "adminAppsApplicant", "adminAppsAccount", "adminAppsNickname", "adminAppsStatus", "adminAppsServer"].forEach(id => {
+  const el = $(`#${id}`);
+  if (el) {
+    el.addEventListener("change", loadAdminAllApps);
+  }
+});
+
 function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 async function loadAdminUsers() {
@@ -2262,7 +2276,23 @@ $("#downloadBackupBtn").addEventListener("click", () => {
 
 async function loadAdminAllApps() {
   try {
-    const res = await api("GET", "/applications");
+    const params = new URLSearchParams();
+    const start = $("#adminAppsStart").value;
+    const end = $("#adminAppsEnd").value;
+    const applicant = $("#adminAppsApplicant").value.trim();
+    const account = $("#adminAppsAccount").value.trim();
+    const nickname = $("#adminAppsNickname").value.trim();
+    const status = $("#adminAppsStatus").value;
+    const server = $("#adminAppsServer").value;
+    if (start) params.set("start", start);
+    if (end) params.set("end", end);
+    if (applicant) params.set("applicant", applicant);
+    if (account) params.set("game_account", account);
+    if (nickname) params.set("game_nickname", nickname);
+    if (status) params.set("status", status);
+    if (server) params.set("server", server);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    const res = await api("GET", `/applications${query}`);
     currentApps = res.data || [];
     const tbody = $("#allAppsTable tbody");
     tbody.innerHTML = "";

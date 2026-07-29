@@ -250,6 +250,24 @@
 
         <div id="adminAllApps" class="admin-panel">
           <h3>全部申请</h3>
+          <div class="filter-bar" id="adminAppsFilterBar">
+            <input type="date" id="adminAppsStart" title="开始日期">
+            <input type="date" id="adminAppsEnd" title="结束日期">
+            <input type="text" id="adminAppsApplicant" placeholder="提交人" class="search-input">
+            <input type="text" id="adminAppsAccount" placeholder="游戏账号" class="search-input">
+            <input type="text" id="adminAppsNickname" placeholder="游戏昵称" class="search-input">
+            <select id="adminAppsStatus">
+              <option value="active" selected>全部（不含已拒绝）</option>
+              <option value="待发送">待发送</option>
+              <option value="已发送待处理">已发送待处理</option>
+              <option value="已处理">已处理</option>
+              <option value="已拒绝">已拒绝</option>
+            </select>
+            <select id="adminAppsServer">
+              <option value="">全部服务器</option>
+            </select>
+            <button id="adminAppsFilterBtn" class="btn">筛选</button>
+          </div>
           <div class="table-wrap">
             <table id="allAppsTable" class="data-table">
               <thead>
@@ -355,6 +373,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260717u"></script>
+  <script src="js/app.js?v=20260717v"></script>
 </body>
 </html>
