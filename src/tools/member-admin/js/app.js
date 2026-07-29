@@ -425,10 +425,12 @@ function getListState(moduleKey) {
 async function switchModule(moduleKey) {
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', logs: '操作日志' };
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', logs: '操作日志' };
   $('#adminModuleTitle').textContent = titles[moduleKey] || '';
   if (moduleKey === 'logs') {
     renderLogsPage();
+  } else if (moduleKey === 'query') {
+    renderQueryPage();
   } else {
     renderListPage(moduleKey);
   }
@@ -981,7 +983,7 @@ async function openGameDataModal(accountId) {
 /* ================= 操作日志页 ================= */
 
 const logsState = { page: 1, entity_type: '', actor: '', date_from: '', date_to: '' };
-const ENTITY_TYPE_LABELS = { employee: '员工', guild: '军团', account: '账号', payment_account: '收款账户' };
+const ENTITY_TYPE_LABELS = { employee: '员工', guild: '军团', account: '账号', payment_account: '收款账户', sql_script: 'SQL脚本', commission: '分成计算' };
 const ACTION_LABELS = { create: '新增', update: '更新', delete: '删除', login: '登录' };
 
 function renderLogsPage() {
@@ -1161,6 +1163,489 @@ function formatVal(v) {
   if (v === null || v === undefined || v === '') return '（空）';
   if (typeof v === 'object') return JSON.stringify(v);
   return String(v);
+}
+
+/* ================= 数据查询页（SQL 脚本 + 月度分成） ================= */
+
+// 金额格式化：仅对明确的金额列调用，避免误格式化普通数字列
+function fmtMoney(v) {
+  if (v === null || v === undefined || v === '') return '';
+  const n = Number(v);
+  return isNaN(n) ? String(v) : n.toLocaleString('zh-CN');
+}
+
+// 前端生成 CSV 并下载（\ufeff 头防中文乱码）
+function exportCSV(filename, headers, rows) {
+  const cell = v => {
+    const s = (v === null || v === undefined) ? '' : String(v);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const lines = [headers.map(cell).join(',')].concat(rows.map(r => r.map(cell).join(',')));
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function makeCsvBtn(filename, headers, rowsGetter) {
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-sm';
+  btn.textContent = '导出 CSV';
+  btn.addEventListener('click', () => exportCSV(filename, headers, rowsGetter()));
+  return btn;
+}
+
+const queryState = { keyword: '' };
+
+function renderQueryPage() {
+  const main = $('#adminMain');
+  main.innerHTML = '';
+
+  // ---------- 区块 1：SQL 脚本 ----------
+  const sec1 = document.createElement('div');
+  sec1.className = 'drawer-section';
+  sec1.innerHTML = '<h4>SQL 脚本</h4>';
+
+  const bar = document.createElement('div');
+  bar.className = 'filter-bar';
+
+  const kwInput = document.createElement('input');
+  kwInput.type = 'text';
+  kwInput.placeholder = '关键字搜索（名称/说明）';
+  kwInput.value = queryState.keyword;
+  let kwTimer = null;
+  kwInput.addEventListener('input', () => {
+    clearTimeout(kwTimer);
+    kwTimer = setTimeout(() => {
+      queryState.keyword = kwInput.value.trim();
+      loadScripts();
+    }, 300);
+  });
+  bar.appendChild(kwInput);
+
+  const spacer = document.createElement('div');
+  spacer.className = 'spacer';
+  bar.appendChild(spacer);
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn btn-primary';
+  addBtn.textContent = '+ 新增脚本';
+  addBtn.addEventListener('click', () => openSqlScriptModal(null));
+  bar.appendChild(addBtn);
+
+  sec1.appendChild(bar);
+
+  const tableWrap = document.createElement('div');
+  tableWrap.className = 'table-wrap';
+  tableWrap.id = 'scriptsTableWrap';
+  sec1.appendChild(tableWrap);
+  main.appendChild(sec1);
+
+  // 执行结果区
+  const resultWrap = document.createElement('div');
+  resultWrap.id = 'queryResultWrap';
+  resultWrap.style.marginTop = '16px';
+  main.appendChild(resultWrap);
+
+  // ---------- 区块 2：月度分成 ----------
+  const sec2 = document.createElement('div');
+  sec2.className = 'drawer-section';
+  sec2.style.marginTop = '28px';
+  sec2.innerHTML = '<h4>月度分成</h4>';
+
+  const bar2 = document.createElement('div');
+  bar2.className = 'filter-bar';
+
+  const monthInput = document.createElement('input');
+  monthInput.type = 'month';
+  monthInput.style.cssText = 'padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;';
+  monthInput.value = new Date().toISOString().slice(0, 7); // 默认当前月
+  bar2.appendChild(monthInput);
+
+  const runBtn = document.createElement('button');
+  runBtn.className = 'btn btn-primary';
+  runBtn.textContent = '计算分成';
+  runBtn.addEventListener('click', () => {
+    if (!monthInput.value) {
+      showToast('请选择月份', 'error');
+      return;
+    }
+    runCommission(monthInput.value);
+  });
+  bar2.appendChild(runBtn);
+
+  sec2.appendChild(bar2);
+
+  const commWrap = document.createElement('div');
+  commWrap.id = 'commissionResultWrap';
+  sec2.appendChild(commWrap);
+  main.appendChild(sec2);
+
+  loadScripts();
+}
+
+/* ---------- SQL 脚本列表 ---------- */
+
+async function loadScripts() {
+  const params = new URLSearchParams({ page: 1, page_size: 100 });
+  if (queryState.keyword) params.set('keyword', queryState.keyword);
+
+  let data;
+  try {
+    data = await api('sql_scripts?' + params.toString());
+  } catch (err) {
+    showToast(err.message, 'error');
+    return;
+  }
+
+  const wrap = $('#scriptsTableWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  table.innerHTML = '<thead><tr><th>名称</th><th>说明</th><th>参数</th><th>修改时间</th><th>操作</th></tr></thead>';
+  const tbody = document.createElement('tbody');
+
+  if (!data.items || !data.items.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-cell">暂无脚本</td></tr>';
+  }
+
+  (data.items || []).forEach(item => {
+    const tr = document.createElement('tr');
+    [item.name, item.description, item.params, item.updated_at].forEach(v => {
+      const td = document.createElement('td');
+      td.textContent = (v === null || v === undefined) ? '' : String(v);
+      td.title = td.textContent;
+      tr.appendChild(td);
+    });
+
+    const tdOp = document.createElement('td');
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+
+    const runBtn = document.createElement('button');
+    runBtn.className = 'btn btn-sm btn-primary';
+    runBtn.textContent = '执行';
+    runBtn.addEventListener('click', () => runScript(item));
+    actions.appendChild(runBtn);
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-sm';
+    editBtn.textContent = '编辑';
+    editBtn.addEventListener('click', () => openSqlScriptModal(item));
+    actions.appendChild(editBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-sm btn-danger';
+    delBtn.textContent = '删除';
+    delBtn.addEventListener('click', async () => {
+      if (!confirm('确认删除脚本「' + (item.name || ('ID ' + item.id)) + '」吗？此操作不可恢复。')) return;
+      try {
+        await api('sql_scripts/' + item.id, { method: 'DELETE' });
+        showToast('已删除', 'success');
+        loadScripts();
+      } catch (err) {
+        showToast('删除失败：' + err.message, 'error');
+      }
+    });
+    actions.appendChild(delBtn);
+
+    tdOp.appendChild(actions);
+    tr.appendChild(tdOp);
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+}
+
+/* ---------- SQL 脚本新增 / 编辑弹窗 ---------- */
+
+let sqlScriptCtx = null; // { item }
+
+function openSqlScriptModal(item) {
+  sqlScriptCtx = { item };
+  $('#sqlScriptModalTitle').textContent = (item ? '编辑' : '新增') + '脚本';
+  $('#ssName').value = item ? (item.name || '') : '';
+  $('#ssDesc').value = item ? (item.description || '') : '';
+  $('#ssParams').value = item ? (item.params || '') : '';
+  $('#ssSql').value = item ? (item.sql_text || '') : '';
+  openModal('sqlScriptModal');
+}
+
+$('#sqlScriptSaveBtn').addEventListener('click', async () => {
+  if (!sqlScriptCtx) return;
+  const payload = {
+    name: $('#ssName').value.trim(),
+    description: $('#ssDesc').value.trim(),
+    params: $('#ssParams').value.trim(),
+    sql_text: $('#ssSql').value,
+  };
+  if (!payload.name) {
+    showToast('请填写：名称', 'error');
+    return;
+  }
+  const isEdit = !!sqlScriptCtx.item;
+  const path = isEdit ? ('sql_scripts/' + sqlScriptCtx.item.id) : 'sql_scripts';
+  try {
+    await api(path, { method: isEdit ? 'PUT' : 'POST', json: payload });
+    showToast(isEdit ? '已保存' : '已创建', 'success');
+    closeModal('sqlScriptModal');
+    loadScripts();
+  } catch (err) {
+    showToast('保存失败：' + err.message, 'error');
+  }
+});
+
+/* ---------- 脚本执行 ---------- */
+
+let runCtx = null; // { script, paramNames, ctrls }
+
+// 日期类参数名（含 date/month/start/end）使用日期/月份输入框
+function paramInputType(name) {
+  const n = name.toLowerCase();
+  if (n.includes('month') && !n.includes('start') && !n.includes('end') && !n.includes('date')) return 'month';
+  if (n.includes('date') || n.includes('month') || n.includes('start') || n.includes('end')) return 'date';
+  return 'text';
+}
+
+function runScript(script) {
+  const paramNames = (script.params || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (!paramNames.length) {
+    doRunScript(script, {});
+    return;
+  }
+  const body = $('#runParamsBody');
+  body.innerHTML = '';
+  $('#runParamsTitle').textContent = '执行参数：' + (script.name || '');
+  const ctrls = {};
+  paramNames.forEach(p => {
+    const label = document.createElement('label');
+    label.className = 'field';
+    const span = document.createElement('span');
+    span.textContent = p;
+    label.appendChild(span);
+    const input = document.createElement('input');
+    input.type = paramInputType(p);
+    label.appendChild(input);
+    body.appendChild(label);
+    ctrls[p] = input;
+  });
+  runCtx = { script, paramNames, ctrls };
+  openModal('runParamsModal');
+}
+
+$('#runParamsRunBtn').addEventListener('click', () => {
+  if (!runCtx) return;
+  const values = {};
+  runCtx.paramNames.forEach(p => { values[p] = runCtx.ctrls[p].value.trim(); });
+  const script = runCtx.script;
+  closeModal('runParamsModal');
+  doRunScript(script, values);
+});
+
+async function doRunScript(script, paramValues) {
+  const wrap = $('#queryResultWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<p style="color:#6b7280">执行中…</p>';
+  let data;
+  try {
+    data = await api('query/run', {
+      method: 'POST',
+      json: { script_id: script.id, name: script.name, sql: script.sql_text, params: paramValues },
+    });
+  } catch (err) {
+    wrap.innerHTML = '<p style="color:#dc2626">' + esc(err.message) + '</p>';
+    return;
+  }
+
+  wrap.innerHTML = '';
+  const columns = data.columns || [];
+  const rows = data.rows || [];
+
+  // 提示行：共 N 行 / 耗时 X ms / 截断说明 + 导出按钮
+  const bar = document.createElement('div');
+  bar.className = 'filter-bar';
+  const info = document.createElement('span');
+  info.style.cssText = 'font-size:13px;color:var(--text-secondary);';
+  info.textContent = '脚本「' + (script.name || '') + '」：共 ' + (data.row_count !== undefined ? data.row_count : rows.length) + ' 行 / 耗时 ' + (data.elapsed_ms !== undefined ? data.elapsed_ms : '-') + ' ms'
+    + (data.truncated ? ' / 已截断（仅前 500 行）' : '');
+  bar.appendChild(info);
+  const spacer = document.createElement('div');
+  spacer.className = 'spacer';
+  bar.appendChild(spacer);
+  bar.appendChild(makeCsvBtn((script.name || 'query_result') + '.csv', columns, () => rows));
+  wrap.appendChild(bar);
+
+  // 结果表格
+  const tableWrap = document.createElement('div');
+  tableWrap.className = 'table-wrap';
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  const thead = document.createElement('thead');
+  const hr = document.createElement('tr');
+  columns.forEach(c => {
+    const th = document.createElement('th');
+    th.textContent = c;
+    hr.appendChild(th);
+  });
+  thead.appendChild(hr);
+  table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  if (!rows.length) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.className = 'empty-cell';
+    td.colSpan = Math.max(columns.length, 1);
+    td.textContent = '无结果';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    r.forEach(v => {
+      const td = document.createElement('td');
+      td.textContent = (v === null || v === undefined) ? '' : String(v);
+      td.title = td.textContent;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  tableWrap.appendChild(table);
+  wrap.appendChild(tableWrap);
+}
+
+/* ---------- 月度分成 ---------- */
+
+// 兼容字段取第一个非空值
+function pick(obj, keys) {
+  for (const k of keys) {
+    if (obj[k] !== null && obj[k] !== undefined && obj[k] !== '') return obj[k];
+  }
+  return '';
+}
+
+async function runCommission(month) {
+  const wrap = $('#commissionResultWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<p style="color:#6b7280">计算中…</p>';
+  let data;
+  try {
+    data = await api('commission/run', { method: 'POST', json: { month } });
+  } catch (err) {
+    wrap.innerHTML = '<p style="color:#dc2626">' + esc(err.message) + '</p>';
+    return;
+  }
+
+  wrap.innerHTML = '';
+
+  // 口径说明（灰色小字）
+  if (data.basis) {
+    const basis = document.createElement('p');
+    basis.style.cssText = 'font-size:12px;color:var(--text-secondary);margin:0 0 12px;';
+    basis.textContent = data.basis
+      + (data.guild_count_with_revenue !== undefined ? '（本月有收入军团数：' + data.guild_count_with_revenue + '）' : '');
+    wrap.appendChild(basis);
+  }
+
+  // ---- 汇总表（按 total 降序，后端已排好） ----
+  const SUMMARY_COLS = [
+    { label: '员工', get: s => pick(s, ['employee', 'nickname', 'employee_name']) },
+    { label: '聘用类型', get: s => s.employment_type },
+    { label: '军团数', get: s => (s.guilds || []).length },
+    { label: '军团收入合计', key: 'revenue', money: true },
+    { label: '分成金额', key: 'commission', money: true },
+    { label: '底薪', key: 'base_salary', money: true },
+    { label: '岗位津贴', key: 'position_allowance', money: true },
+    { label: 'GM津贴', key: 'gm_allowance', money: true },
+    { label: '应发合计', key: 'total', money: true },
+  ];
+  const summary = data.summary || [];
+
+  const sec1 = document.createElement('div');
+  sec1.className = 'drawer-section';
+  sec1.innerHTML = '<h4>汇总</h4>';
+  const bar1 = document.createElement('div');
+  bar1.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:8px;';
+  bar1.appendChild(makeCsvBtn('分成汇总_' + month + '.csv', SUMMARY_COLS.map(c => c.label),
+    () => summary.map(s => SUMMARY_COLS.map(c => c.get ? c.get(s) : s[c.key]))));
+  sec1.appendChild(bar1);
+  sec1.appendChild(buildCommTable(SUMMARY_COLS, summary));
+  wrap.appendChild(sec1);
+
+  // ---- 明细表 ----
+  const ITEM_COLS = [
+    { label: '员工', get: it => pick(it, ['employee', 'nickname', 'employee_name']) },
+    { label: '员工状态', get: it => pick(it, ['employee_status', 'status']) },
+    { label: '军团', get: it => pick(it, ['guild', 'guild_name']) },
+    { label: '军团ID', key: 'guild_game_id' },
+    { label: '服务器', key: 'server' },
+    { label: '运营类型', key: 'operation_type' },
+    { label: '当月收入', key: 'revenue', money: true },
+    { label: '分成比例', key: 'commission_rate' },
+    { label: '分成金额', key: 'commission', money: true },
+    { label: '应发合计', key: 'total', money: true },
+  ];
+  const items = data.items || [];
+
+  const sec2 = document.createElement('div');
+  sec2.className = 'drawer-section';
+  sec2.innerHTML = '<h4>明细</h4>';
+  const bar2 = document.createElement('div');
+  bar2.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:8px;';
+  bar2.appendChild(makeCsvBtn('分成明细_' + month + '.csv', ITEM_COLS.map(c => c.label),
+    () => items.map(it => ITEM_COLS.map(c => c.get ? c.get(it) : it[c.key]))));
+  sec2.appendChild(bar2);
+  sec2.appendChild(buildCommTable(ITEM_COLS, items));
+  wrap.appendChild(sec2);
+}
+
+// 分成表格：金额列右对齐 + 千分位，非金额列原样输出
+function buildCommTable(cols, rows) {
+  const wrap = document.createElement('div');
+  wrap.className = 'table-wrap';
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  const thead = document.createElement('thead');
+  const hr = document.createElement('tr');
+  cols.forEach(c => {
+    const th = document.createElement('th');
+    th.textContent = c.label;
+    if (c.money) th.style.textAlign = 'right';
+    hr.appendChild(th);
+  });
+  thead.appendChild(hr);
+  table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  if (!rows.length) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.className = 'empty-cell';
+    td.colSpan = cols.length;
+    td.textContent = '暂无数据';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    cols.forEach(c => {
+      const raw = c.get ? c.get(row) : row[c.key];
+      const td = document.createElement('td');
+      if (c.money) {
+        td.style.textAlign = 'right';
+        td.textContent = fmtMoney(raw);
+      } else {
+        td.textContent = (raw === null || raw === undefined) ? '' : String(raw);
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  return wrap;
 }
 
 /* ================= 登录 / 入口 / 密码 ================= */

@@ -65,6 +65,7 @@
         <button class="side-btn" data-module="guilds">军团</button>
         <button class="side-btn" data-module="accounts">账号</button>
         <button class="side-btn" data-module="payments">收款账户</button>
+        <button class="side-btn" data-module="query">数据查询</button>
         <button class="side-btn" data-module="logs">操作日志</button>
       </nav>
       <div class="sidebar-footer">
@@ -153,6 +154,55 @@
       <div class="modal-body" id="gameDataBody"></div>
       <div class="modal-footer">
         <button type="button" class="btn" data-close="gameDataModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SQL 脚本新增/编辑弹窗 -->
+  <div id="sqlScriptModal" class="modal hidden">
+    <div class="modal-overlay" data-close="sqlScriptModal"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="sqlScriptModalTitle">新增脚本</h3>
+        <button type="button" class="modal-close" data-close="sqlScriptModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label class="field">
+          <span>名称 *</span>
+          <input type="text" id="ssName" required>
+        </label>
+        <label class="field">
+          <span>说明</span>
+          <input type="text" id="ssDesc">
+        </label>
+        <label class="field">
+          <span>参数</span>
+          <input type="text" id="ssParams" placeholder="逗号分隔，如 month_start,month_end">
+        </label>
+        <label class="field">
+          <span>SQL</span>
+          <textarea id="ssSql" rows="10" style="font-family:Menlo,Consolas,monospace;font-size:13px;"></textarea>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="sqlScriptModal">取消</button>
+        <button type="button" class="btn btn-primary" id="sqlScriptSaveBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 脚本执行参数弹窗 -->
+  <div id="runParamsModal" class="modal hidden">
+    <div class="modal-overlay" data-close="runParamsModal"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3 id="runParamsTitle">执行参数</h3>
+        <button type="button" class="modal-close" data-close="runParamsModal">&times;</button>
+      </div>
+      <div class="modal-body" id="runParamsBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="runParamsModal">取消</button>
+        <button type="button" class="btn btn-primary" id="runParamsRunBtn">执行</button>
       </div>
     </div>
   </div>

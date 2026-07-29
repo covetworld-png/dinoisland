@@ -7,6 +7,7 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS employees (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nickname TEXT NOT NULL,            -- 员工名称（花名）
+    emp_no TEXT DEFAULT '',            -- 员工编号
     real_name TEXT DEFAULT '',         -- 姓名
     cn_name TEXT DEFAULT '',           -- 中文名
     position TEXT DEFAULT '其他',       -- 岗位：GM/军团长/其他
@@ -63,6 +64,16 @@ CREATE TABLE IF NOT EXISTS payment_accounts (
     updated_at TEXT
 );
 
+CREATE TABLE IF NOT EXISTS sql_scripts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    params TEXT DEFAULT '',          -- 参数名逗号分隔，如 month_start,month_end
+    sql_text TEXT NOT NULL,
+    created_at TEXT,
+    updated_at TEXT
+);
+
 CREATE TABLE IF NOT EXISTS admin_users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
@@ -93,7 +104,7 @@ CREATE INDEX IF NOT EXISTS idx_logs_time ON audit_logs(created_at);
 
 # 各表允许写入的字段（API 入参白名单）
 TABLE_FIELDS = {
-    "employees": ["nickname", "real_name", "cn_name", "position", "status",
+    "employees": ["nickname", "emp_no", "real_name", "cn_name", "position", "status",
                   "probation_salary", "formal_salary", "employment_type",
                   "position_allowance", "gm_allowance", "commission_rate",
                   "entry_date", "remark"],
@@ -101,6 +112,7 @@ TABLE_FIELDS = {
     "game_accounts": ["employee_id", "game_uid", "nickname", "guild_id", "status",
                       "tiktok_account", "remark"],
     "payment_accounts": ["employee_id", "account_type", "account_name", "info_html", "remark"],
+    "sql_scripts": ["name", "description", "params", "sql_text"],
 }
 
 ENTITY_LABEL_FIELD = {
@@ -108,6 +120,7 @@ ENTITY_LABEL_FIELD = {
     "guilds": "name",
     "game_accounts": "nickname",
     "payment_accounts": "account_name",
+    "sql_scripts": "name",
 }
 
 

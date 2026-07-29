@@ -12,6 +12,7 @@ from models import (init_db, get_db, get_by_id, insert_row, update_row, delete_r
                     list_rows, TABLE_FIELDS, ENTITY_LABEL_FIELD, now)
 from audit import log_change, list_logs
 from game_data import get_game_data
+from query_engine import run_query, run_commission
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
@@ -111,7 +112,7 @@ def meta():
 # ---------- 通用 CRUD ----------
 
 ENTITY_CONFIG = {
-    "employees": {"keyword_fields": ["nickname", "real_name", "cn_name", "remark"],
+    "employees": {"keyword_fields": ["nickname", "emp_no", "real_name", "cn_name", "remark"],
                   "filter_fields": ["position", "status"],
                   "default_exclude": {"status": "离职"}},
     "guilds": {"keyword_fields": ["name", "game_guild_id", "remark"],
@@ -120,11 +121,14 @@ ENTITY_CONFIG = {
                       "filter_fields": ["status", "employee_id", "guild_id"]},
     "payment_accounts": {"keyword_fields": ["account_name", "remark"],
                          "filter_fields": ["account_type", "employee_id"]},
+    "sql_scripts": {"keyword_fields": ["name", "description"],
+                    "filter_fields": []},
 }
 
 ENTITY_TYPE_MAP = {
     "employees": "employee", "guilds": "guild",
     "game_accounts": "account", "payment_accounts": "payment_account",
+    "sql_scripts": "sql_script",
 }
 
 
@@ -284,6 +288,30 @@ def logs():
     )
     return jsonify({"ok": True, "data": {"items": rows, "total": total,
                                          "page": page, "page_size": page_size}})
+
+
+# ---------- 只读 SQL 查询 + 月度分成 ----------
+
+@app.post("/api/query/run")
+@login_required
+def query_run():
+    data = request.get_json(force=True, silent=True) or {}
+    result = run_query(data.get("sql"), data.get("params") or {})
+    log_change(session["user"], "query", "sql_script", data.get("script_id") or 0,
+               (data.get("name") or "")[:80], after={"sql": (data.get("sql") or "")[:500]},
+               ip=client_ip())
+    return jsonify(result)
+
+
+@app.post("/api/commission/run")
+@login_required
+def commission_run():
+    from config import DATABASE_PATH
+    data = request.get_json(force=True, silent=True) or {}
+    result = run_commission(data.get("month", ""), DATABASE_PATH)
+    log_change(session["user"], "query", "commission", 0, data.get("month", ""),
+               ip=client_ip())
+    return jsonify(result)
 
 
 @app.errorhandler(413)
