@@ -207,6 +207,27 @@
     </div>
   </div>
 
+  <!-- 发放快照备注弹窗（保存 / 编辑备注共用） -->
+  <div id="snapshotRemarkModal" class="modal hidden">
+    <div class="modal-overlay" data-close="snapshotRemarkModal"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3 id="snapshotRemarkTitle">保存为发放记录</h3>
+        <button type="button" class="modal-close" data-close="snapshotRemarkModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label class="field">
+          <span>备注</span>
+          <input type="text" id="snapRemark" placeholder="如 2026-06 发放">
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="snapshotRemarkModal">取消</button>
+        <button type="button" class="btn btn-primary" id="snapRemarkSaveBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast hidden"></div>
   <input type="file" id="imageFileInput" accept="image/*" class="hidden">
 

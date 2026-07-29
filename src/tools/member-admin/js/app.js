@@ -983,7 +983,7 @@ async function openGameDataModal(accountId) {
 /* ================= 操作日志页 ================= */
 
 const logsState = { page: 1, entity_type: '', actor: '', date_from: '', date_to: '' };
-const ENTITY_TYPE_LABELS = { employee: '员工', guild: '军团', account: '账号', payment_account: '收款账户', sql_script: 'SQL脚本', commission: '分成计算' };
+const ENTITY_TYPE_LABELS = { employee: '员工', guild: '军团', account: '账号', payment_account: '收款账户', sql_script: 'SQL脚本', commission: '分成计算', commission_snapshot: '发放快照' };
 const ACTION_LABELS = { create: '新增', update: '更新', delete: '删除', login: '登录' };
 
 function renderLogsPage() {
@@ -1283,7 +1283,19 @@ function renderQueryPage() {
   sec2.appendChild(commWrap);
   main.appendChild(sec2);
 
+  // ---------- 区块 3：发放记录 ----------
+  const sec3 = document.createElement('div');
+  sec3.className = 'drawer-section';
+  sec3.style.marginTop = '28px';
+  sec3.innerHTML = '<h4>发放记录</h4>';
+  const snapWrap = document.createElement('div');
+  snapWrap.className = 'table-wrap';
+  snapWrap.id = 'snapshotsTableWrap';
+  sec3.appendChild(snapWrap);
+  main.appendChild(sec3);
+
   loadScripts();
+  loadSnapshots();
 }
 
 /* ---------- SQL 脚本列表 ---------- */
@@ -1527,6 +1539,8 @@ function pick(obj, keys) {
   return '';
 }
 
+let lastCommission = null; // { month, data } 最近一次实时计算结果（快照视图「关闭」时回显）
+
 async function runCommission(month) {
   const wrap = $('#commissionResultWrap');
   if (!wrap) return;
@@ -1538,8 +1552,26 @@ async function runCommission(month) {
     wrap.innerHTML = '<p style="color:#dc2626">' + esc(err.message) + '</p>';
     return;
   }
+  lastCommission = { month, data };
+  renderLiveCommission(wrap, month, data);
+}
 
+// 实时计算结果：顶部「保存为发放记录」按钮 + 两张表
+function renderLiveCommission(wrap, month, data) {
   wrap.innerHTML = '';
+  const topBar = document.createElement('div');
+  topBar.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:10px;';
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn btn-primary';
+  saveBtn.textContent = '保存为发放记录';
+  saveBtn.addEventListener('click', () => openSnapshotRemarkModal({ mode: 'save', month }));
+  topBar.appendChild(saveBtn);
+  wrap.appendChild(topBar);
+  renderCommissionTables(wrap, data, month);
+}
+
+// 分成结果两张表（实时计算 / 快照查看共用）：口径说明 + 汇总表 + 明细表
+function renderCommissionTables(wrap, data, month) {
 
   // 口径说明（灰色小字）
   if (data.basis) {
@@ -1647,6 +1679,151 @@ function buildCommTable(cols, rows) {
   wrap.appendChild(table);
   return wrap;
 }
+
+/* ---------- 发放快照 ---------- */
+
+async function loadSnapshots() {
+  let data;
+  try {
+    data = await api('commission_snapshots?' + new URLSearchParams({ page: 1, page_size: 100 }).toString());
+  } catch (err) {
+    showToast(err.message, 'error');
+    return;
+  }
+
+  const wrap = $('#snapshotsTableWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  table.innerHTML = '<thead><tr><th>月份</th><th>备注</th><th>保存人</th><th>保存时间</th><th>操作</th></tr></thead>';
+  const tbody = document.createElement('tbody');
+
+  if (!data.items || !data.items.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-cell">暂无发放记录</td></tr>';
+  }
+
+  (data.items || []).forEach(item => {
+    const tr = document.createElement('tr');
+    [item.month, item.remark, item.created_by, item.created_at].forEach(v => {
+      const td = document.createElement('td');
+      td.textContent = (v === null || v === undefined) ? '' : String(v);
+      td.title = td.textContent;
+      tr.appendChild(td);
+    });
+
+    const tdOp = document.createElement('td');
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'btn btn-sm btn-primary';
+    viewBtn.textContent = '查看';
+    viewBtn.addEventListener('click', () => {
+      viewSnapshot(item);
+      const rw = $('#commissionResultWrap');
+      if (rw) rw.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    actions.appendChild(viewBtn);
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-sm';
+    editBtn.textContent = '编辑备注';
+    editBtn.addEventListener('click', () => openSnapshotRemarkModal({ mode: 'edit', item }));
+    actions.appendChild(editBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-sm btn-danger';
+    delBtn.textContent = '删除';
+    delBtn.addEventListener('click', async () => {
+      if (!confirm('确认删除「' + (item.month || '') + (item.remark ? ' ' + item.remark : '') + '」的发放记录吗？此操作不可恢复。')) return;
+      try {
+        await api('commission_snapshots/' + item.id, { method: 'DELETE' });
+        showToast('已删除', 'success');
+        loadSnapshots();
+      } catch (err) {
+        showToast('删除失败：' + err.message, 'error');
+      }
+    });
+    actions.appendChild(delBtn);
+
+    tdOp.appendChild(actions);
+    tr.appendChild(tdOp);
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+}
+
+// 快照查看：渲染冻结的 summary/items，结构与实时计算一致
+function viewSnapshot(snap) {
+  const wrap = $('#commissionResultWrap');
+  if (!wrap) return;
+  let summary = [], items = [];
+  try { summary = JSON.parse(snap.summary_json || '[]'); } catch (e) { /* 忽略 */ }
+  try { items = JSON.parse(snap.items_json || '[]'); } catch (e) { /* 忽略 */ }
+
+  wrap.innerHTML = '';
+
+  // 顶部标注 + 关闭按钮
+  const topBar = document.createElement('div');
+  topBar.className = 'filter-bar';
+  const info = document.createElement('span');
+  info.style.cssText = 'font-size:13px;font-weight:600;';
+  info.textContent = '快照：' + (snap.month || '') + '（保存于 ' + (snap.created_at || '') + '）'
+    + (snap.remark ? ' — ' + snap.remark : '');
+  topBar.appendChild(info);
+  const spacer = document.createElement('div');
+  spacer.className = 'spacer';
+  topBar.appendChild(spacer);
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'btn btn-sm';
+  closeBtn.textContent = '关闭';
+  closeBtn.addEventListener('click', () => {
+    if (lastCommission) {
+      renderLiveCommission(wrap, lastCommission.month, lastCommission.data);
+    } else {
+      wrap.innerHTML = '';
+    }
+  });
+  topBar.appendChild(closeBtn);
+  wrap.appendChild(topBar);
+
+  renderCommissionTables(wrap, {
+    summary,
+    items,
+    basis: snap.basis || '本表为保存时冻结的快照数据，非实时计算结果。',
+  }, snap.month || '');
+}
+
+/* ---------- 快照备注弹窗（保存 / 编辑备注共用） ---------- */
+
+let snapRemarkCtx = null; // { mode:'save', month } | { mode:'edit', item }
+
+function openSnapshotRemarkModal(ctx) {
+  snapRemarkCtx = ctx;
+  $('#snapshotRemarkTitle').textContent = ctx.mode === 'save' ? '保存为发放记录' : '编辑备注';
+  $('#snapRemark').value = ctx.mode === 'save' ? (ctx.month + ' 发放') : (ctx.item.remark || '');
+  openModal('snapshotRemarkModal');
+}
+
+$('#snapRemarkSaveBtn').addEventListener('click', async () => {
+  if (!snapRemarkCtx) return;
+  const remark = $('#snapRemark').value.trim();
+  const isSave = snapRemarkCtx.mode === 'save';
+  try {
+    if (isSave) {
+      await api('commission/save', { method: 'POST', json: { month: snapRemarkCtx.month, remark } });
+    } else {
+      await api('commission_snapshots/' + snapRemarkCtx.item.id, { method: 'PUT', json: { remark } });
+    }
+    showToast(isSave ? '已保存发放记录' : '备注已更新', 'success');
+    closeModal('snapshotRemarkModal');
+    loadSnapshots();
+  } catch (err) {
+    showToast((isSave ? '保存失败：' : '更新失败：') + err.message, 'error');
+  }
+});
 
 /* ================= 登录 / 入口 / 密码 ================= */
 

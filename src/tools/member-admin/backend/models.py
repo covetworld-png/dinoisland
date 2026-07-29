@@ -74,6 +74,17 @@ CREATE TABLE IF NOT EXISTS sql_scripts (
     updated_at TEXT
 );
 
+CREATE TABLE IF NOT EXISTS commission_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    month TEXT NOT NULL,             -- YYYY-MM
+    remark TEXT DEFAULT '',
+    items_json TEXT DEFAULT '[]',    -- 明细快照
+    summary_json TEXT DEFAULT '[]',  -- 汇总快照
+    created_by TEXT DEFAULT '',
+    created_at TEXT,
+    updated_at TEXT
+);
+
 CREATE TABLE IF NOT EXISTS admin_users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
@@ -113,6 +124,7 @@ TABLE_FIELDS = {
                       "tiktok_account", "remark"],
     "payment_accounts": ["employee_id", "account_type", "account_name", "info_html", "remark"],
     "sql_scripts": ["name", "description", "params", "sql_text"],
+    "commission_snapshots": ["month", "remark"],
 }
 
 ENTITY_LABEL_FIELD = {
@@ -121,6 +133,7 @@ ENTITY_LABEL_FIELD = {
     "game_accounts": "nickname",
     "payment_accounts": "account_name",
     "sql_scripts": "name",
+    "commission_snapshots": "month",
 }
 
 

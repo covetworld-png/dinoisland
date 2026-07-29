@@ -1,4 +1,5 @@
 import os
+import json
 import uuid
 from functools import wraps
 
@@ -123,12 +124,15 @@ ENTITY_CONFIG = {
                          "filter_fields": ["account_type", "employee_id"]},
     "sql_scripts": {"keyword_fields": ["name", "description"],
                     "filter_fields": []},
+    "commission_snapshots": {"keyword_fields": ["month", "remark", "created_by"],
+                             "filter_fields": ["month"]},
 }
 
 ENTITY_TYPE_MAP = {
     "employees": "employee", "guilds": "guild",
     "game_accounts": "account", "payment_accounts": "payment_account",
     "sql_scripts": "sql_script",
+    "commission_snapshots": "commission_snapshot",
 }
 
 
@@ -312,6 +316,36 @@ def commission_run():
     log_change(session["user"], "query", "commission", 0, data.get("month", ""),
                ip=client_ip())
     return jsonify(result)
+
+
+@app.post("/api/commission/save")
+@login_required
+def commission_save():
+    from config import DATABASE_PATH
+    data = request.get_json(force=True, silent=True) or {}
+    month = data.get("month", "")
+    result = run_commission(month, DATABASE_PATH)
+    if not result.get("ok"):
+        return jsonify(result)
+    payload = {
+        "month": month,
+        "remark": (data.get("remark") or "").strip(),
+    }
+    row_id = insert_row("commission_snapshots", payload)
+    # 快照内容与创建人单独写入（不在通用白名单内）
+    conn = get_db()
+    conn.execute(
+        "UPDATE commission_snapshots SET items_json = ?, summary_json = ?, created_by = ? WHERE id = ?",
+        (json.dumps(result["data"]["items"], ensure_ascii=False),
+         json.dumps(result["data"]["summary"], ensure_ascii=False),
+         session["user"], row_id))
+    conn.commit()
+    conn.close()
+    after = get_by_id("commission_snapshots", row_id)
+    log_change(session["user"], "create", "commission_snapshot", row_id, month,
+               after={"month": month, "remark": payload["remark"],
+                      "items": len(result["data"]["items"])}, ip=client_ip())
+    return jsonify({"ok": True, "data": after})
 
 
 @app.errorhandler(413)
