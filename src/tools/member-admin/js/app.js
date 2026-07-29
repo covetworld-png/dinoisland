@@ -817,8 +817,8 @@ async function openEmployeeDrawer(employeeId) {
   sec2.className = 'drawer-section';
   sec2.innerHTML = '<h4>名下军团（' + (data.guilds || []).length + '）</h4>';
   sec2.appendChild(buildSimpleTable(
-    ['ID', '名称', '服务器', '状态', '备注'],
-    (data.guilds || []).map(g => [g.id, g.name, g.server, g.status, g.remark])
+    ['ID', '军团 ID', '名称', '服务器', '状态', '备注'],
+    (data.guilds || []).map(g => [g.id, g.game_guild_id, g.name, g.server, g.status, g.remark])
   ));
   body.appendChild(sec2);
 
