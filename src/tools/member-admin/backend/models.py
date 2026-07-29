@@ -11,7 +11,9 @@ CREATE TABLE IF NOT EXISTS employees (
     cn_name TEXT DEFAULT '',           -- 中文名
     position TEXT DEFAULT '其他',       -- 岗位：GM/军团长/其他
     status TEXT DEFAULT '在职',         -- 在职/其他
-    base_salary REAL DEFAULT 0,        -- 底薪
+    probation_salary REAL DEFAULT 0, -- 试用期底薪
+    formal_salary REAL DEFAULT 0,    -- 正式底薪
+    employment_type TEXT DEFAULT '转正', -- 试用期/转正
     position_allowance REAL DEFAULT 0, -- 岗位津贴
     gm_allowance REAL DEFAULT 0,       -- GM津贴
     commission_rate TEXT DEFAULT '',   -- 分成比例
@@ -92,7 +94,8 @@ CREATE INDEX IF NOT EXISTS idx_logs_time ON audit_logs(created_at);
 # 各表允许写入的字段（API 入参白名单）
 TABLE_FIELDS = {
     "employees": ["nickname", "real_name", "cn_name", "position", "status",
-                  "base_salary", "position_allowance", "gm_allowance", "commission_rate",
+                  "probation_salary", "formal_salary", "employment_type",
+                  "position_allowance", "gm_allowance", "commission_rate",
                   "entry_date", "remark"],
     "guilds": ["name", "server", "leader_employee_id", "status", "operation_type", "nickname", "remark"],
     "game_accounts": ["employee_id", "game_uid", "nickname", "guild_id", "status",
