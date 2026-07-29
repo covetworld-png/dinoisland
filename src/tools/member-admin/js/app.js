@@ -307,6 +307,7 @@ const MODULES = {
       { key: 'employment_type', label: '聘用类型' },
       { key: 'status', label: '状态' },
       { key: 'entry_date', label: '入职日期' },
+      { key: 'updated_at', label: '修改时间' },
     ],
     filters: [
       { key: 'position', label: '全部岗位', metaKey: 'positions' },
@@ -342,6 +343,7 @@ const MODULES = {
       { key: 'status', label: '状态' },
       { key: 'operation_type', label: '运营类型' },
       { key: 'remark', label: '备注' },
+      { key: 'updated_at', label: '修改时间' },
     ],
     filters: [
       { key: 'server', label: '全部服务器', metaKey: 'servers' },
@@ -371,6 +373,7 @@ const MODULES = {
       { key: 'status', label: '状态' },
       { key: 'tiktok_account', label: 'TikTok 账号' },
       { key: 'remark', label: '备注' },
+      { key: 'updated_at', label: '修改时间' },
     ],
     filters: [
       { key: 'status', label: '全部状态', metaKey: 'account_statuses', default: '正常' },
@@ -396,6 +399,7 @@ const MODULES = {
       { key: 'account_type', label: '类型' },
       { key: 'account_name', label: '账户名称' },
       { key: 'remark', label: '备注' },
+      { key: 'updated_at', label: '修改时间' },
     ],
     filters: [
       { key: 'account_type', label: '全部类型', metaKey: 'payment_types' },
