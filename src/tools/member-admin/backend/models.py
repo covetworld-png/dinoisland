@@ -7,6 +7,7 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS employees (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nickname TEXT NOT NULL,            -- 员工名称（花名）
+    emp_no TEXT DEFAULT '',            -- 员工编号
     real_name TEXT DEFAULT '',         -- 姓名
     cn_name TEXT DEFAULT '',           -- 中文名
     position TEXT DEFAULT '其他',       -- 岗位：GM/军团长/其他
@@ -93,7 +94,7 @@ CREATE INDEX IF NOT EXISTS idx_logs_time ON audit_logs(created_at);
 
 # 各表允许写入的字段（API 入参白名单）
 TABLE_FIELDS = {
-    "employees": ["nickname", "real_name", "cn_name", "position", "status",
+    "employees": ["nickname", "emp_no", "real_name", "cn_name", "position", "status",
                   "probation_salary", "formal_salary", "employment_type",
                   "position_allowance", "gm_allowance", "commission_rate",
                   "entry_date", "remark"],

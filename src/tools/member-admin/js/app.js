@@ -300,6 +300,7 @@ const MODULES = {
     columns: [
       { key: 'id', label: 'ID' },
       { key: 'nickname', label: '昵称' },
+      { key: 'emp_no', label: '编号' },
       { key: 'real_name', label: '真实姓名' },
       { key: 'cn_name', label: '中文名' },
       { key: 'position', label: '岗位' },
@@ -313,6 +314,7 @@ const MODULES = {
     ],
     fields: [
       { key: 'nickname', label: '昵称', type: 'text', required: true },
+      { key: 'emp_no', label: '编号', type: 'text' },
       { key: 'real_name', label: '真实姓名', type: 'text' },
       { key: 'cn_name', label: '中文名', type: 'text' },
       { key: 'position', label: '岗位', type: 'select', metaKey: 'positions' },
@@ -768,7 +770,7 @@ $('#formModalSaveBtn').addEventListener('click', async () => {
 /* ================= 员工详情抽屉 ================= */
 
 const EMPLOYEE_DETAIL_FIELDS = [
-  ['id', 'ID'], ['nickname', '昵称'], ['real_name', '真实姓名'], ['cn_name', '中文名'],
+  ['id', 'ID'], ['nickname', '昵称'], ['emp_no', '编号'], ['real_name', '真实姓名'], ['cn_name', '中文名'],
   ['position', '岗位'], ['status', '状态'], ['employment_type', '聘用类型'],
   ['probation_salary', '试用期底薪'], ['formal_salary', '正式底薪'], ['position_allowance', '岗位津贴'], ['gm_allowance', 'GM 津贴'],
   ['commission_rate', '分成比例'], ['entry_date', '入职日期'], ['remark', '备注'],

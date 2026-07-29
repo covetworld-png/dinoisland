@@ -111,7 +111,7 @@ def meta():
 # ---------- 通用 CRUD ----------
 
 ENTITY_CONFIG = {
-    "employees": {"keyword_fields": ["nickname", "real_name", "cn_name", "remark"],
+    "employees": {"keyword_fields": ["nickname", "emp_no", "real_name", "cn_name", "remark"],
                   "filter_fields": ["position", "status"],
                   "default_exclude": {"status": "离职"}},
     "guilds": {"keyword_fields": ["name", "game_guild_id", "remark"],
