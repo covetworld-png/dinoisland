@@ -298,7 +298,6 @@ const MODULES = {
     title: '员工',
     table: 'employees',
     columns: [
-      { key: 'id', label: 'ID' },
       { key: 'nickname', label: '昵称' },
       { key: 'emp_no', label: '编号' },
       { key: 'real_name', label: '真实姓名' },
@@ -335,7 +334,6 @@ const MODULES = {
     title: '军团',
     table: 'guilds',
     columns: [
-      { key: 'id', label: 'ID' },
       { key: 'name', label: '军团名称' },
       { key: 'game_guild_id', label: '军团 ID' },
       { key: 'server', label: '服务器' },
@@ -365,7 +363,6 @@ const MODULES = {
     title: '账号',
     table: 'game_accounts',
     columns: [
-      { key: 'id', label: 'ID' },
       { key: 'employee_id', label: '所属员工', render: v => esc(optionLabel('employees', v)) },
       { key: 'game_uid', label: '游戏 UID' },
       { key: 'nickname', label: '昵称' },
@@ -394,7 +391,6 @@ const MODULES = {
     title: '收款账户',
     table: 'payment_accounts',
     columns: [
-      { key: 'id', label: 'ID' },
       { key: 'employee_id', label: '所属员工', render: v => esc(optionLabel('employees', v)) },
       { key: 'account_type', label: '类型' },
       { key: 'account_name', label: '账户名称' },
@@ -774,7 +770,7 @@ $('#formModalSaveBtn').addEventListener('click', async () => {
 /* ================= 员工详情抽屉 ================= */
 
 const EMPLOYEE_DETAIL_FIELDS = [
-  ['id', 'ID'], ['nickname', '昵称'], ['emp_no', '编号'], ['real_name', '真实姓名'], ['cn_name', '中文名'],
+  ['nickname', '昵称'], ['emp_no', '编号'], ['real_name', '真实姓名'], ['cn_name', '中文名'],
   ['position', '岗位'], ['status', '状态'], ['employment_type', '聘用类型'],
   ['probation_salary', '试用期底薪'], ['formal_salary', '正式底薪'], ['position_allowance', '岗位津贴'], ['gm_allowance', 'GM 津贴'],
   ['commission_rate', '分成比例'], ['entry_date', '入职日期'], ['remark', '备注'],
@@ -817,8 +813,8 @@ async function openEmployeeDrawer(employeeId) {
   sec2.className = 'drawer-section';
   sec2.innerHTML = '<h4>名下军团（' + (data.guilds || []).length + '）</h4>';
   sec2.appendChild(buildSimpleTable(
-    ['ID', '军团 ID', '名称', '服务器', '状态', '备注'],
-    (data.guilds || []).map(g => [g.id, g.game_guild_id, g.name, g.server, g.status, g.remark])
+    ['军团 ID', '名称', '服务器', '状态', '备注'],
+    (data.guilds || []).map(g => [g.game_guild_id, g.name, g.server, g.status, g.remark])
   ));
   body.appendChild(sec2);
 
@@ -828,14 +824,14 @@ async function openEmployeeDrawer(employeeId) {
   sec3.innerHTML = '<h4>名下账号（' + (data.accounts || []).length + '）</h4>';
   const accTable = document.createElement('table');
   accTable.className = 'data-table';
-  accTable.innerHTML = '<thead><tr><th>ID</th><th>游戏 UID</th><th>昵称</th><th>军团</th><th>状态</th><th>操作</th></tr></thead>';
+  accTable.innerHTML = '<thead><tr><th>游戏 UID</th><th>昵称</th><th>军团</th><th>状态</th><th>操作</th></tr></thead>';
   const accBody = document.createElement('tbody');
   if (!(data.accounts || []).length) {
-    accBody.innerHTML = '<tr><td colspan="6" class="empty-cell">暂无账号</td></tr>';
+    accBody.innerHTML = '<tr><td colspan="5" class="empty-cell">暂无账号</td></tr>';
   }
   (data.accounts || []).forEach(a => {
     const tr = document.createElement('tr');
-    [a.id, a.game_uid, a.nickname, a.guild_name, a.status].forEach(v => {
+    [a.game_uid, a.nickname, a.guild_name, a.status].forEach(v => {
       const td = document.createElement('td');
       td.textContent = (v === null || v === undefined) ? '' : String(v);
       tr.appendChild(td);
