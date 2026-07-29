@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS employees (
     real_name TEXT DEFAULT '',         -- 姓名
     cn_name TEXT DEFAULT '',           -- 中文名
     position TEXT DEFAULT '其他',       -- 岗位：GM/军团长/其他
-    status TEXT DEFAULT '在职',         -- 在职/离职/停薪/其他
+    status TEXT DEFAULT '在职',         -- 在职/其他
     base_salary REAL DEFAULT 0,        -- 底薪
     position_allowance REAL DEFAULT 0, -- 岗位津贴
     gm_allowance REAL DEFAULT 0,       -- GM津贴
