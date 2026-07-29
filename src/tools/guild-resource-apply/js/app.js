@@ -1022,7 +1022,10 @@ function loadCurrentAdminPanel() {
   const tab = activeTab.dataset.adminTab;
   if (tab === "users") loadAdminUsers();
   if (tab === "items") loadAdminItems();
-  if (tab === "allApps") loadAdminAllApps();
+  if (tab === "allApps") {
+    loadAdminAppFilters();
+    loadAdminAllApps();
+  }
 }
 
 // ---------- Apply View ----------
