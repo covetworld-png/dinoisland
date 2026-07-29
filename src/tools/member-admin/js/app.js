@@ -338,7 +338,6 @@ const MODULES = {
       { key: 'leader_employee_id', label: '军团长', render: v => esc(optionLabel('employees', v)) },
       { key: 'status', label: '状态' },
       { key: 'operation_type', label: '运营类型' },
-      { key: 'nickname', label: '昵称' },
       { key: 'remark', label: '备注' },
     ],
     filters: [
@@ -353,7 +352,6 @@ const MODULES = {
       { key: 'leader_employee_id', label: '军团长', type: 'searchselect', optionsKind: 'employees' },
       { key: 'status', label: '状态', type: 'select', metaKey: 'guild_statuses', default: '空缺' },
       { key: 'operation_type', label: '运营类型', type: 'select', metaKey: 'operation_types', default: '自营团' },
-      { key: 'nickname', label: '昵称', type: 'text' },
       { key: 'remark', label: '备注', type: 'textarea', full: true },
     ],
   },

@@ -114,7 +114,7 @@ ENTITY_CONFIG = {
     "employees": {"keyword_fields": ["nickname", "real_name", "cn_name", "remark"],
                   "filter_fields": ["position", "status"],
                   "default_exclude": {"status": "离职"}},
-    "guilds": {"keyword_fields": ["name", "nickname", "remark"],
+    "guilds": {"keyword_fields": ["name", "remark"],
                "filter_fields": ["server", "status", "operation_type", "leader_employee_id"]},
     "game_accounts": {"keyword_fields": ["game_uid", "nickname", "tiktok_account", "remark"],
                       "filter_fields": ["status", "employee_id", "guild_id"]},

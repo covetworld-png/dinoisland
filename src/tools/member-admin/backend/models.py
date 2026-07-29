@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS guilds (
     leader_employee_id INTEGER REFERENCES employees(id) ON DELETE SET NULL,
     status TEXT DEFAULT '空缺',         -- 正常运营/临时接管/空缺/已解散
     operation_type TEXT DEFAULT '自营团', -- 自营团/野生团
-    nickname TEXT DEFAULT '',          -- 游戏内标识/昵称
     remark TEXT DEFAULT '',
     feishu_record_id TEXT DEFAULT '',
     created_at TEXT,
@@ -97,7 +96,7 @@ TABLE_FIELDS = {
                   "probation_salary", "formal_salary", "employment_type",
                   "position_allowance", "gm_allowance", "commission_rate",
                   "entry_date", "remark"],
-    "guilds": ["name", "server", "leader_employee_id", "status", "operation_type", "nickname", "remark"],
+    "guilds": ["name", "server", "leader_employee_id", "status", "operation_type", "remark"],
     "game_accounts": ["employee_id", "game_uid", "nickname", "guild_id", "status",
                       "tiktok_account", "remark"],
     "payment_accounts": ["employee_id", "account_type", "account_name", "info_html", "remark"],
