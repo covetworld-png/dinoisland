@@ -99,6 +99,20 @@ WHERE attributed.guild_id IS NOT NULL
 GROUP BY attributed.guild_id, attributed.server_id
 """
 
+def list_leaders(db_path):
+    """带过团的军团长列表（含离职），供勾选"""
+    import sqlite3
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute("""
+        SELECT e.id, e.nickname, e.status, e.employment_type, COUNT(g.id) AS guild_count
+        FROM employees e JOIN guilds g ON g.leader_employee_id = e.id
+        GROUP BY e.id ORDER BY e.status = '离职', e.nickname
+    """).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
 SERVER_ALIAS = {"Q服": "Q", "K服": "K"}
 
 
@@ -116,8 +130,9 @@ def _parse_rate(s):
         return 0.0
 
 
-def run_commission(month, db_path):
-    """month='YYYY-MM'，返回每团长分成明细。db_path 为 members.db 路径"""
+def run_commission(month, db_path, employee_ids=None):
+    """month='YYYY-MM'，返回每团长分成明细。db_path 为 members.db 路径。
+    employee_ids: 指定统计哪些军团长（None=全部非离职）"""
     import sqlite3
     if not re.match(r"^\d{4}-\d{2}$", month or ""):
         return {"ok": False, "error": "月份格式应为 YYYY-MM"}
@@ -156,8 +171,11 @@ def run_commission(month, db_path):
 
     items = []
     for g in guilds:
-        if g["emp_status"] == "离职":
-            continue  # 离职员工不计算分成
+        if employee_ids is not None:
+            if g["emp_id"] not in employee_ids:
+                continue  # 未勾选的团长不统计
+        elif g["emp_status"] == "离职":
+            continue  # 默认离职员工不计算分成
         alias = SERVER_ALIAS.get(g["server"], "")
         gid_raw = (g["game_guild_id"] or "").strip()
         # 兼容无前缀旧数据：用 server 前缀剥离

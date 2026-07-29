@@ -13,7 +13,7 @@ from models import (init_db, get_db, get_by_id, insert_row, update_row, delete_r
                     list_rows, TABLE_FIELDS, ENTITY_LABEL_FIELD, now)
 from audit import log_change, list_logs
 from game_data import get_game_data
-from query_engine import run_query, run_commission
+from query_engine import run_query, run_commission, list_leaders
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
@@ -307,12 +307,22 @@ def query_run():
     return jsonify(result)
 
 
+@app.get("/api/commission/leaders")
+@login_required
+def commission_leaders():
+    from config import DATABASE_PATH
+    return jsonify({"ok": True, "data": list_leaders(DATABASE_PATH)})
+
+
 @app.post("/api/commission/run")
 @login_required
 def commission_run():
     from config import DATABASE_PATH
     data = request.get_json(force=True, silent=True) or {}
-    result = run_commission(data.get("month", ""), DATABASE_PATH)
+    emp_ids = data.get("employee_ids")
+    if emp_ids is not None:
+        emp_ids = [int(x) for x in emp_ids if str(x).isdigit()]
+    result = run_commission(data.get("month", ""), DATABASE_PATH, employee_ids=emp_ids)
     log_change(session["user"], "query", "commission", 0, data.get("month", ""),
                ip=client_ip())
     return jsonify(result)
@@ -324,7 +334,10 @@ def commission_save():
     from config import DATABASE_PATH
     data = request.get_json(force=True, silent=True) or {}
     month = data.get("month", "")
-    result = run_commission(month, DATABASE_PATH)
+    emp_ids = data.get("employee_ids")
+    if emp_ids is not None:
+        emp_ids = [int(x) for x in emp_ids if str(x).isdigit()]
+    result = run_commission(month, DATABASE_PATH, employee_ids=emp_ids)
     if not result.get("ok"):
         return jsonify(result)
     payload = {

@@ -1278,6 +1278,13 @@ function renderQueryPage() {
 
   sec2.appendChild(bar2);
 
+  // 团长勾选区（可折叠，默认展开）
+  const leaderBox = document.createElement('div');
+  leaderBox.className = 'filter-bar';
+  leaderBox.style.display = 'block';
+  leaderBox.id = 'leaderBoxWrap';
+  sec2.appendChild(leaderBox);
+
   const commWrap = document.createElement('div');
   commWrap.id = 'commissionResultWrap';
   sec2.appendChild(commWrap);
@@ -1296,6 +1303,7 @@ function renderQueryPage() {
 
   loadScripts();
   loadSnapshots();
+  loadLeaders();
 }
 
 /* ---------- SQL 脚本列表 ---------- */
@@ -1539,28 +1547,127 @@ function pick(obj, keys) {
   return '';
 }
 
-let lastCommission = null; // { month, data } 最近一次实时计算结果（快照视图「关闭」时回显）
+let lastCommission = null; // { month, data, employee_ids } 最近一次实时计算结果（快照视图「关闭」时回显）
+
+/* ---------- 军团长勾选 ---------- */
+
+let leadersCache = null;      // [{id,nickname,status,employment_type,guild_count}]
+const leaderChecked = new Set(); // 勾选的团长 id（跨页面切换保留）
+let leaderBoxCollapsed = false;
+
+async function loadLeaders() {
+  if (!leadersCache) {
+    try {
+      leadersCache = await api('commission/leaders');
+    } catch (err) {
+      showToast(err.message, 'error');
+      return;
+    }
+    // 默认勾选所有非离职
+    leaderChecked.clear();
+    leadersCache.forEach(l => { if (l.status !== '离职') leaderChecked.add(l.id); });
+  }
+  renderLeaderBox();
+}
+
+function updateLeaderTitle() {
+  const t = $('#leaderBoxTitle');
+  if (t && leadersCache) t.textContent = '军团长（已选 ' + leaderChecked.size + ' / ' + leadersCache.length + '）';
+}
+
+function renderLeaderBox() {
+  const wrap = $('#leaderBoxWrap');
+  if (!wrap || !leadersCache) return;
+  wrap.innerHTML = '';
+
+  const head = document.createElement('div');
+  head.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;';
+  const title = document.createElement('span');
+  title.style.cssText = 'font-size:13px;color:var(--text-secondary);';
+  title.id = 'leaderBoxTitle';
+  head.appendChild(title);
+
+  const mkBtn = (text, fn) => {
+    const b = document.createElement('button');
+    b.className = 'btn btn-sm';
+    b.textContent = text;
+    b.addEventListener('click', fn);
+    return b;
+  };
+  head.appendChild(mkBtn('全选', () => {
+    leadersCache.forEach(l => leaderChecked.add(l.id));
+    renderLeaderBox();
+  }));
+  head.appendChild(mkBtn('全不选', () => {
+    leaderChecked.clear();
+    renderLeaderBox();
+  }));
+  head.appendChild(mkBtn(leaderBoxCollapsed ? '展开 ▾' : '收起 ▴', () => {
+    leaderBoxCollapsed = !leaderBoxCollapsed;
+    renderLeaderBox();
+  }));
+  wrap.appendChild(head);
+  updateLeaderTitle();
+
+  if (leaderBoxCollapsed) return;
+
+  const body = document.createElement('div');
+  body.style.cssText = 'margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 16px;font-size:13px;';
+  leadersCache.forEach(l => {
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:6px;cursor:pointer;';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = leaderChecked.has(l.id);
+    cb.addEventListener('change', () => {
+      if (cb.checked) leaderChecked.add(l.id); else leaderChecked.delete(l.id);
+      updateLeaderTitle();
+    });
+    label.appendChild(cb);
+    const span = document.createElement('span');
+    span.textContent = (l.nickname || ('#' + l.id)) + '（' + (l.status || '') + '·' + (l.employment_type || '') + '·' + (l.guild_count || 0) + '个团）';
+    if (l.status === '离职') {
+      span.style.cssText = 'color:#9ca3af;text-decoration:line-through;';
+    }
+    label.appendChild(span);
+    body.appendChild(label);
+  });
+  wrap.appendChild(body);
+}
 
 async function runCommission(month) {
   const wrap = $('#commissionResultWrap');
   if (!wrap) return;
+  const employeeIds = Array.from(leaderChecked);
+  if (!employeeIds.length) {
+    showToast('请至少勾选一名军团长', 'error');
+    return;
+  }
   wrap.innerHTML = '<p style="color:#6b7280">计算中…</p>';
   let data;
   try {
-    data = await api('commission/run', { method: 'POST', json: { month } });
+    data = await api('commission/run', { method: 'POST', json: { month, employee_ids: employeeIds } });
   } catch (err) {
     wrap.innerHTML = '<p style="color:#dc2626">' + esc(err.message) + '</p>';
     return;
   }
-  lastCommission = { month, data };
-  renderLiveCommission(wrap, month, data);
+  lastCommission = { month, data, employee_ids: employeeIds };
+  renderLiveCommission(wrap, month, data, employeeIds.length);
 }
 
-// 实时计算结果：顶部「保存为发放记录」按钮 + 两张表
-function renderLiveCommission(wrap, month, data) {
+// 实时计算结果：顶部统计人数 + 「保存为发放记录」按钮 + 两张表
+function renderLiveCommission(wrap, month, data, leaderCount) {
   wrap.innerHTML = '';
   const topBar = document.createElement('div');
-  topBar.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:10px;';
+  topBar.style.cssText = 'display:flex;align-items:center;margin-bottom:10px;gap:10px;';
+  const info = document.createElement('span');
+  info.style.cssText = 'font-size:13px;color:var(--text-secondary);';
+  info.textContent = '统计 ' + leaderCount + ' 名军团长';
+  topBar.appendChild(info);
+  const spacer = document.createElement('div');
+  spacer.className = 'spacer';
+  spacer.style.flex = '1';
+  topBar.appendChild(spacer);
   const saveBtn = document.createElement('button');
   saveBtn.className = 'btn btn-primary';
   saveBtn.textContent = '保存为发放记录';
@@ -1781,7 +1888,7 @@ function viewSnapshot(snap) {
   closeBtn.textContent = '关闭';
   closeBtn.addEventListener('click', () => {
     if (lastCommission) {
-      renderLiveCommission(wrap, lastCommission.month, lastCommission.data);
+      renderLiveCommission(wrap, lastCommission.month, lastCommission.data, lastCommission.employee_ids.length);
     } else {
       wrap.innerHTML = '';
     }
@@ -1813,7 +1920,10 @@ $('#snapRemarkSaveBtn').addEventListener('click', async () => {
   const isSave = snapRemarkCtx.mode === 'save';
   try {
     if (isSave) {
-      await api('commission/save', { method: 'POST', json: { month: snapRemarkCtx.month, remark } });
+      // 与最近一次计算保持一致的勾选范围
+      const payload = { month: snapRemarkCtx.month, remark };
+      if (lastCommission && lastCommission.employee_ids) payload.employee_ids = lastCommission.employee_ids;
+      await api('commission/save', { method: 'POST', json: payload });
     } else {
       await api('commission_snapshots/' + snapRemarkCtx.item.id, { method: 'PUT', json: { remark } });
     }
