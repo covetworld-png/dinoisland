@@ -24,8 +24,8 @@ MONSTER_DB = {
 META = {
     "positions": ["GM", "军团长", "其他"],
     "employee_statuses": ["在职", "其他"],
-    "guild_statuses": ["正常运营", "临时接管", "空缺"],
+    "guild_statuses": ["正常运营", "临时接管", "空缺", "已解散"],
     "operation_types": ["自营团", "野生团"],
-    "account_statuses": ["正常", "封禁", "冻结", "回收"],
+    "account_statuses": ["正常", "封禁", "下野"],
     "payment_types": ["银行", "MoMo", "ZaloPay", "其他"],
 }

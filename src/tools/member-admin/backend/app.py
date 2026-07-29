@@ -112,7 +112,8 @@ def meta():
 
 ENTITY_CONFIG = {
     "employees": {"keyword_fields": ["nickname", "real_name", "cn_name", "remark"],
-                  "filter_fields": ["position", "status"]},
+                  "filter_fields": ["position", "status"],
+                  "default_exclude": {"status": "离职"}},
     "guilds": {"keyword_fields": ["name", "nickname", "remark"],
                "filter_fields": ["server", "status", "operation_type", "leader_employee_id"]},
     "game_accounts": {"keyword_fields": ["game_uid", "nickname", "tiktok_account", "remark"],
@@ -140,9 +141,11 @@ def _register_crud(table):
 
     def list_view():
         filters = {f: request.args.get(f) for f in cfg["filter_fields"]}
+        exclude = {k: v for k, v in (cfg.get("default_exclude") or {}).items()
+                   if not filters.get(k)}
         page, page_size = _page_args()
         rows, total = list_rows(table, filters, request.args.get("keyword", "").strip(),
-                                cfg["keyword_fields"], page, page_size)
+                                cfg["keyword_fields"], page, page_size, exclude=exclude)
         return jsonify({"ok": True, "data": {"items": rows, "total": total,
                                              "page": page, "page_size": page_size}})
 

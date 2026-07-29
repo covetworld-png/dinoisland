@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS guilds (
     name TEXT NOT NULL,                -- 团名
     server TEXT DEFAULT '',            -- 服务器
     leader_employee_id INTEGER REFERENCES employees(id) ON DELETE SET NULL,
-    status TEXT DEFAULT '空缺',         -- 正常运营/临时接管/空缺
+    status TEXT DEFAULT '空缺',         -- 正常运营/临时接管/空缺/已解散
     operation_type TEXT DEFAULT '自营团', -- 自营团/野生团
     nickname TEXT DEFAULT '',          -- 游戏内标识/昵称
     remark TEXT DEFAULT '',
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS game_accounts (
     game_uid TEXT DEFAULT '',
     nickname TEXT DEFAULT '',
     guild_id INTEGER REFERENCES guilds(id) ON DELETE SET NULL,
-    status TEXT DEFAULT '正常',         -- 正常/封禁/冻结/回收
+    status TEXT DEFAULT '正常',         -- 正常/封禁/下野
     tiktok_account TEXT DEFAULT '',
     remark TEXT DEFAULT '',
     feishu_record_id TEXT DEFAULT '',
@@ -172,13 +172,17 @@ def delete_row(table, row_id):
     conn.close()
 
 
-def list_rows(table, filters=None, keyword=None, keyword_fields=None, page=1, page_size=20):
-    """filters: {field: value} 精确匹配；keyword 在 keyword_fields 中模糊搜索"""
+def list_rows(table, filters=None, keyword=None, keyword_fields=None, page=1, page_size=20,
+              exclude=None):
+    """filters: {field: value} 精确匹配；exclude: {field: value} 排除匹配；keyword 模糊搜索"""
     where, params = [], []
     for k, v in (filters or {}).items():
         if v not in (None, "", "all"):
             where.append(f"{k} = ?")
             params.append(v)
+    for k, v in (exclude or {}).items():
+        where.append(f"{k} != ?")
+        params.append(v)
     if keyword and keyword_fields:
         where.append("(" + " OR ".join(f"{f} LIKE ?" for f in keyword_fields) + ")")
         params.extend([f"%{keyword}%"] * len(keyword_fields))

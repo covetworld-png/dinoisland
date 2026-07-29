@@ -341,7 +341,7 @@ const MODULES = {
     filters: [
       { key: 'server', label: '全部服务器', metaKey: 'servers' },
       { key: 'status', label: '全部状态', metaKey: 'guild_statuses' },
-      { key: 'operation_type', label: '全部类型', metaKey: 'operation_types' },
+      { key: 'operation_type', label: '全部类型', metaKey: 'operation_types', default: '自营团' },
       { key: 'leader_employee_id', label: '军团长', type: 'searchselect', optionsKind: 'employees' },
     ],
     fields: [
@@ -368,7 +368,7 @@ const MODULES = {
       { key: 'remark', label: '备注' },
     ],
     filters: [
-      { key: 'status', label: '全部状态', metaKey: 'account_statuses' },
+      { key: 'status', label: '全部状态', metaKey: 'account_statuses', default: '正常' },
       { key: 'employee_id', label: '所属员工', type: 'searchselect', optionsKind: 'employees' },
       { key: 'guild_id', label: '所属军团', type: 'searchselect', optionsKind: 'guilds' },
     ],
@@ -462,7 +462,7 @@ async function renderListPage(moduleKey) {
         o.textContent = v;
         sel.appendChild(o);
       });
-      sel.value = ls.filters[f.key] || '';
+      sel.value = ls.filters[f.key] || f.default || '';
       filterCtrls[f.key] = { getValue: () => sel.value, setValue: v => { sel.value = v; } };
       bar.appendChild(sel);
     }
