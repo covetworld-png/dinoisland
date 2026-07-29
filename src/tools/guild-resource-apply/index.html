@@ -258,7 +258,7 @@
             <input type="text" id="adminAppsNickname" placeholder="游戏昵称" class="search-input">
             <select id="adminAppsStatus">
               <option value="active" selected>全部（不含已拒绝）</option>
-              <option value="待发送">待发送</option>
+              <option value="待发送">待审批</option>
               <option value="已发送待处理">已发送待处理</option>
               <option value="已处理">已处理</option>
               <option value="已拒绝">已拒绝</option>
@@ -267,6 +267,7 @@
               <option value="">全部服务器</option>
             </select>
             <button id="adminAppsFilterBtn" class="btn">筛选</button>
+            <button id="adminAppsResetBtn" class="btn btn-secondary">重置</button>
           </div>
           <div class="table-wrap">
             <table id="allAppsTable" class="data-table">
@@ -373,6 +374,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260717v"></script>
+  <script src="js/app.js?v=20260717w"></script>
 </body>
 </html>

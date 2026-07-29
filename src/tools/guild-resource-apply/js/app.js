@@ -1959,6 +1959,19 @@ const adminAppsFilterBtn = $("#adminAppsFilterBtn");
 if (adminAppsFilterBtn) {
   adminAppsFilterBtn.addEventListener("click", loadAdminAllApps);
 }
+const adminAppsResetBtn = $("#adminAppsResetBtn");
+if (adminAppsResetBtn) {
+  adminAppsResetBtn.addEventListener("click", () => {
+    $("#adminAppsStart").value = "";
+    $("#adminAppsEnd").value = "";
+    $("#adminAppsApplicant").value = "";
+    $("#adminAppsAccount").value = "";
+    $("#adminAppsNickname").value = "";
+    $("#adminAppsStatus").value = "active";
+    $("#adminAppsServer").value = "";
+    loadAdminAllApps();
+  });
+}
 ["adminAppsStart", "adminAppsEnd", "adminAppsApplicant", "adminAppsAccount", "adminAppsNickname", "adminAppsStatus", "adminAppsServer"].forEach(id => {
   const el = $(`#${id}`);
   if (el) {
