@@ -253,9 +253,15 @@
           <div class="filter-bar" id="adminAppsFilterBar">
             <input type="date" id="adminAppsStart" title="开始日期">
             <input type="date" id="adminAppsEnd" title="结束日期">
-            <input type="text" id="adminAppsApplicant" placeholder="提交人" class="search-input">
-            <input type="text" id="adminAppsAccount" placeholder="游戏账号" class="search-input">
-            <input type="text" id="adminAppsNickname" placeholder="游戏昵称" class="search-input">
+            <select id="adminAppsApplicant">
+              <option value="">全部提交人</option>
+            </select>
+            <select id="adminAppsAccount">
+              <option value="">全部游戏账号</option>
+            </select>
+            <select id="adminAppsNickname">
+              <option value="">全部游戏昵称</option>
+            </select>
             <select id="adminAppsStatus">
               <option value="active" selected>全部（不含已拒绝）</option>
               <option value="待发送">待审批</option>
@@ -374,6 +380,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260717w"></script>
+  <script src="js/app.js?v=20260717x"></script>
 </body>
 </html>

@@ -399,8 +399,8 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 }
 .badge:empty { display: none; }
 
-.filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-.filter-bar input, .filter-bar select { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.filter-bar input, .filter-bar select { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; min-width: 120px; max-width: 170px; flex: 0 1 auto; }
 
 /* Admin */
 .admin-tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }

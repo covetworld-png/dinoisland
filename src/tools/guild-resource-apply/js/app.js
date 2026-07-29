@@ -1951,7 +1951,10 @@ $$(".admin-tab").forEach(tab => {
     $(`#admin${capitalize(tab.dataset.adminTab)}`).classList.remove("hidden");
     if (tab.dataset.adminTab === "users") loadAdminUsers();
     if (tab.dataset.adminTab === "items") loadAdminItems();
-    if (tab.dataset.adminTab === "allApps") loadAdminAllApps();
+    if (tab.dataset.adminTab === "allApps") {
+      loadAdminAppFilters();
+      loadAdminAllApps();
+    }
   });
 });
 
@@ -2287,14 +2290,43 @@ $("#downloadBackupBtn").addEventListener("click", () => {
   document.body.removeChild(a);
 });
 
+async function loadAdminAppFilters() {
+  try {
+    const res = await api("GET", "/admin/applications/filters");
+    const data = res.data || {};
+
+    const applicantSel = $("#adminAppsApplicant");
+    const accountSel = $("#adminAppsAccount");
+    const nicknameSel = $("#adminAppsNickname");
+    if (!applicantSel || !accountSel || !nicknameSel) return;
+
+    const preserveApplicant = applicantSel.value;
+    const preserveAccount = accountSel.value;
+    const preserveNickname = nicknameSel.value;
+
+    applicantSel.innerHTML = `<option value="">全部提交人</option>` +
+      (data.applicants || []).map(u => `<option value="${escapeHtml(u.username)}">${escapeHtml(u.username)} (${escapeHtml(u.nickname || "-")})</option>`).join("");
+    accountSel.innerHTML = `<option value="">全部游戏账号</option>` +
+      (data.game_accounts || []).map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
+    nicknameSel.innerHTML = `<option value="">全部游戏昵称</option>` +
+      (data.game_nicknames || []).map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("");
+
+    applicantSel.value = preserveApplicant;
+    accountSel.value = preserveAccount;
+    nicknameSel.value = preserveNickname;
+  } catch (err) {
+    console.error("load admin filters error", err);
+  }
+}
+
 async function loadAdminAllApps() {
   try {
     const params = new URLSearchParams();
     const start = $("#adminAppsStart").value;
     const end = $("#adminAppsEnd").value;
-    const applicant = $("#adminAppsApplicant").value.trim();
-    const account = $("#adminAppsAccount").value.trim();
-    const nickname = $("#adminAppsNickname").value.trim();
+    const applicant = $("#adminAppsApplicant").value;
+    const account = $("#adminAppsAccount").value;
+    const nickname = $("#adminAppsNickname").value;
     const status = $("#adminAppsStatus").value;
     const server = $("#adminAppsServer").value;
     if (start) params.set("start", start);
