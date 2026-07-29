@@ -334,6 +334,7 @@ const MODULES = {
     columns: [
       { key: 'id', label: 'ID' },
       { key: 'name', label: '军团名称' },
+      { key: 'game_guild_id', label: '军团 ID' },
       { key: 'server', label: '服务器' },
       { key: 'leader_employee_id', label: '军团长', render: v => esc(optionLabel('employees', v)) },
       { key: 'status', label: '状态' },
@@ -348,6 +349,7 @@ const MODULES = {
     ],
     fields: [
       { key: 'name', label: '军团名称', type: 'text', required: true },
+      { key: 'game_guild_id', label: '军团 ID', type: 'text' },
       { key: 'server', label: '服务器', type: 'select', metaKey: 'servers' },
       { key: 'leader_employee_id', label: '军团长', type: 'searchselect', optionsKind: 'employees' },
       { key: 'status', label: '状态', type: 'select', metaKey: 'guild_statuses', default: '空缺' },
