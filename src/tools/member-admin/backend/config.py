@@ -23,7 +23,7 @@ MONSTER_DB = {
 
 META = {
     "positions": ["GM", "军团长", "其他"],
-    "employee_statuses": ["在职", "其他"],
+    "employee_statuses": ["在职", "其他", "离职"],
     "employment_types": ["试用期", "转正"],
     "guild_statuses": ["正常运营", "临时接管", "空缺", "已解散"],
     "operation_types": ["自营团", "野生团"],
