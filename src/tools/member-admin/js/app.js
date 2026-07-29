@@ -471,6 +471,13 @@ async function renderListPage(moduleKey) {
     }
   });
 
+  // 筛选默认值同步到查询状态（首次加载/重置后生效）
+  cfg.filters.forEach(f => {
+    if (f.type !== 'searchselect' && f.default && !ls.filters[f.key]) {
+      ls.filters[f.key] = f.default;
+    }
+  });
+
   const kwInput = document.createElement('input');
   kwInput.type = 'text';
   kwInput.placeholder = '关键字搜索';
@@ -493,9 +500,12 @@ async function renderListPage(moduleKey) {
   resetBtn.textContent = '重置';
   resetBtn.addEventListener('click', () => {
     kwInput.value = '';
-    Object.keys(filterCtrls).forEach(k => filterCtrls[k].setValue(''));
     ls.keyword = '';
     ls.filters = {};
+    cfg.filters.forEach(f => {
+      if (f.type !== 'searchselect' && f.default) ls.filters[f.key] = f.default;
+    });
+    Object.keys(filterCtrls).forEach(k => filterCtrls[k].setValue(ls.filters[k] || ''));
     ls.page = 1;
     loadList(moduleKey);
   });
