@@ -112,7 +112,7 @@ def meta():
 
 ENTITY_CONFIG = {
     "employees": {"keyword_fields": ["nickname", "real_name", "cn_name", "remark"],
-                  "filter_fields": ["category", "position", "status"]},
+                  "filter_fields": ["position", "status"]},
     "guilds": {"keyword_fields": ["name", "nickname", "remark"],
                "filter_fields": ["server", "status", "leader_employee_id"]},
     "game_accounts": {"keyword_fields": ["game_uid", "nickname", "tiktok_account", "remark"],

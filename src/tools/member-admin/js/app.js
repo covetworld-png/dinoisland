@@ -302,13 +302,11 @@ const MODULES = {
       { key: 'nickname', label: '昵称' },
       { key: 'real_name', label: '真实姓名' },
       { key: 'cn_name', label: '中文名' },
-      { key: 'category', label: '类别' },
       { key: 'position', label: '岗位' },
       { key: 'status', label: '状态' },
       { key: 'entry_date', label: '入职日期' },
     ],
     filters: [
-      { key: 'category', label: '全部类别', metaKey: 'categories' },
       { key: 'position', label: '全部岗位', metaKey: 'positions' },
       { key: 'status', label: '全部状态', metaKey: 'employee_statuses' },
     ],
@@ -316,7 +314,6 @@ const MODULES = {
       { key: 'nickname', label: '昵称', type: 'text', required: true },
       { key: 'real_name', label: '真实姓名', type: 'text' },
       { key: 'cn_name', label: '中文名', type: 'text' },
-      { key: 'category', label: '类别', type: 'select', metaKey: 'categories' },
       { key: 'position', label: '岗位', type: 'select', metaKey: 'positions' },
       { key: 'status', label: '状态', type: 'select', metaKey: 'employee_statuses' },
       { key: 'base_salary', label: '底薪', type: 'number' },
@@ -756,7 +753,7 @@ $('#formModalSaveBtn').addEventListener('click', async () => {
 
 const EMPLOYEE_DETAIL_FIELDS = [
   ['id', 'ID'], ['nickname', '昵称'], ['real_name', '真实姓名'], ['cn_name', '中文名'],
-  ['category', '类别'], ['position', '岗位'], ['status', '状态'],
+  ['position', '岗位'], ['status', '状态'],
   ['base_salary', '底薪'], ['position_allowance', '岗位津贴'], ['gm_allowance', 'GM 津贴'],
   ['commission_rate', '分成比例'], ['entry_date', '入职日期'], ['remark', '备注'],
   ['created_at', '创建时间'], ['updated_at', '更新时间'],

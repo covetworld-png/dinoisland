@@ -9,8 +9,7 @@ CREATE TABLE IF NOT EXISTS employees (
     nickname TEXT NOT NULL,            -- 员工名称（花名）
     real_name TEXT DEFAULT '',         -- 姓名
     cn_name TEXT DEFAULT '',           -- 中文名
-    category TEXT DEFAULT '游戏',       -- 职能大类：游戏/直播
-    position TEXT DEFAULT '其他',       -- 岗位：GM/军团长/主播/其他
+    position TEXT DEFAULT '其他',       -- 岗位：GM/军团长/其他
     status TEXT DEFAULT '在职',         -- 在职/离职/停薪/其他
     base_salary REAL DEFAULT 0,        -- 底薪
     position_allowance REAL DEFAULT 0, -- 岗位津贴
@@ -91,7 +90,7 @@ CREATE INDEX IF NOT EXISTS idx_logs_time ON audit_logs(created_at);
 
 # 各表允许写入的字段（API 入参白名单）
 TABLE_FIELDS = {
-    "employees": ["nickname", "real_name", "cn_name", "category", "position", "status",
+    "employees": ["nickname", "real_name", "cn_name", "position", "status",
                   "base_salary", "position_allowance", "gm_allowance", "commission_rate",
                   "entry_date", "remark"],
     "guilds": ["name", "server", "leader_employee_id", "status", "nickname", "remark"],
