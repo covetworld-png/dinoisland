@@ -315,7 +315,7 @@ const MODULES = {
       { key: 'real_name', label: '真实姓名', type: 'text' },
       { key: 'cn_name', label: '中文名', type: 'text' },
       { key: 'position', label: '岗位', type: 'select', metaKey: 'positions' },
-      { key: 'status', label: '状态', type: 'select', metaKey: 'employee_statuses' },
+      { key: 'status', label: '状态', type: 'select', metaKey: 'employee_statuses', default: '在职' },
       { key: 'base_salary', label: '底薪', type: 'number' },
       { key: 'position_allowance', label: '岗位津贴', type: 'number' },
       { key: 'gm_allowance', label: 'GM 津贴', type: 'number' },
@@ -681,7 +681,7 @@ async function openFormModal(moduleKey, item) {
         o.textContent = v;
         sel.appendChild(o);
       });
-      sel.value = cur || '';
+      sel.value = cur || f.default || '';
       fieldCtrls[f.key] = { getValue: () => sel.value };
       label.appendChild(sel);
     } else if (f.type === 'searchselect') {
