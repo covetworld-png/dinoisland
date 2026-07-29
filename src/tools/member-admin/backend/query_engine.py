@@ -156,6 +156,8 @@ def run_commission(month, db_path):
 
     items = []
     for g in guilds:
+        if g["emp_status"] == "离职":
+            continue  # 离职员工不计算分成
         alias = SERVER_ALIAS.get(g["server"], "")
         gid_raw = (g["game_guild_id"] or "").strip()
         # 兼容无前缀旧数据：用 server 前缀剥离
