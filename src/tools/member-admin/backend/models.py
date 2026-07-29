@@ -1,0 +1,193 @@
+import sqlite3
+from datetime import datetime
+
+from config import DATABASE_PATH
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS employees (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nickname TEXT NOT NULL,            -- 员工名称（花名）
+    real_name TEXT DEFAULT '',         -- 姓名
+    cn_name TEXT DEFAULT '',           -- 中文名
+    category TEXT DEFAULT '游戏',       -- 职能大类：游戏/直播
+    position TEXT DEFAULT '其他',       -- 岗位：GM/军团长/主播/其他
+    status TEXT DEFAULT '在职',         -- 在职/离职/停薪/其他
+    base_salary REAL DEFAULT 0,        -- 底薪
+    position_allowance REAL DEFAULT 0, -- 岗位津贴
+    gm_allowance REAL DEFAULT 0,       -- GM津贴
+    commission_rate TEXT DEFAULT '',   -- 分成比例
+    entry_date TEXT DEFAULT '',        -- 入职日期 YYYY-MM-DD
+    remark TEXT DEFAULT '',
+    feishu_record_id TEXT DEFAULT '',  -- 飞书导入溯源
+    created_at TEXT,
+    updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS guilds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,                -- 团名
+    server TEXT DEFAULT '',            -- 服务器
+    leader_employee_id INTEGER REFERENCES employees(id) ON DELETE SET NULL,
+    status TEXT DEFAULT '活跃',         -- 活跃/休整/解散/冻结
+    nickname TEXT DEFAULT '',          -- 游戏内标识/昵称
+    remark TEXT DEFAULT '',
+    feishu_record_id TEXT DEFAULT '',
+    created_at TEXT,
+    updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS game_accounts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    employee_id INTEGER REFERENCES employees(id) ON DELETE SET NULL,
+    game_uid TEXT DEFAULT '',
+    nickname TEXT DEFAULT '',
+    guild_id INTEGER REFERENCES guilds(id) ON DELETE SET NULL,
+    status TEXT DEFAULT '正常',         -- 正常/封禁/冻结/回收
+    tiktok_account TEXT DEFAULT '',
+    remark TEXT DEFAULT '',
+    feishu_record_id TEXT DEFAULT '',
+    created_at TEXT,
+    updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS payment_accounts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    employee_id INTEGER NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+    account_type TEXT DEFAULT '其他',   -- 银行/MoMo/ZaloPay/其他
+    account_name TEXT DEFAULT '',      -- 户名
+    info_html TEXT DEFAULT '',         -- 富文本：账号/二维码/说明混排
+    remark TEXT DEFAULT '',
+    created_at TEXT,
+    updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS admin_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    actor TEXT NOT NULL,
+    action TEXT NOT NULL,              -- create/update/delete/login
+    entity_type TEXT NOT NULL,         -- employee/guild/account/payment_account
+    entity_id INTEGER,
+    entity_label TEXT DEFAULT '',
+    changes TEXT DEFAULT '{}',         -- JSON: {field: {before, after}}
+    ip TEXT DEFAULT '',
+    created_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_guilds_leader ON guilds(leader_employee_id);
+CREATE INDEX IF NOT EXISTS idx_accounts_employee ON game_accounts(employee_id);
+CREATE INDEX IF NOT EXISTS idx_accounts_guild ON game_accounts(guild_id);
+CREATE INDEX IF NOT EXISTS idx_accounts_uid ON game_accounts(game_uid);
+CREATE INDEX IF NOT EXISTS idx_payment_employee ON payment_accounts(employee_id);
+CREATE INDEX IF NOT EXISTS idx_logs_entity ON audit_logs(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_logs_time ON audit_logs(created_at);
+"""
+
+# 各表允许写入的字段（API 入参白名单）
+TABLE_FIELDS = {
+    "employees": ["nickname", "real_name", "cn_name", "category", "position", "status",
+                  "base_salary", "position_allowance", "gm_allowance", "commission_rate",
+                  "entry_date", "remark"],
+    "guilds": ["name", "server", "leader_employee_id", "status", "nickname", "remark"],
+    "game_accounts": ["employee_id", "game_uid", "nickname", "guild_id", "status",
+                      "tiktok_account", "remark"],
+    "payment_accounts": ["employee_id", "account_type", "account_name", "info_html", "remark"],
+}
+
+ENTITY_LABEL_FIELD = {
+    "employees": "nickname",
+    "guilds": "name",
+    "game_accounts": "nickname",
+    "payment_accounts": "account_name",
+}
+
+
+def now():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def get_db():
+    conn = sqlite3.connect(DATABASE_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
+
+
+def init_db():
+    conn = get_db()
+    conn.executescript(SCHEMA)
+    conn.commit()
+    conn.close()
+
+
+def row_to_dict(row):
+    return dict(row) if row is not None else None
+
+
+def get_by_id(table, row_id):
+    conn = get_db()
+    row = conn.execute(f"SELECT * FROM {table} WHERE id = ?", (row_id,)).fetchone()
+    conn.close()
+    return row_to_dict(row)
+
+
+def insert_row(table, data):
+    fields = [f for f in TABLE_FIELDS[table] if f in data]
+    data = {f: data[f] for f in fields}
+    data["created_at"] = now()
+    data["updated_at"] = now()
+    cols = ", ".join(data.keys())
+    ph = ", ".join("?" for _ in data)
+    conn = get_db()
+    cur = conn.execute(f"INSERT INTO {table} ({cols}) VALUES ({ph})", list(data.values()))
+    conn.commit()
+    row_id = cur.lastrowid
+    conn.close()
+    return row_id
+
+
+def update_row(table, row_id, data):
+    fields = [f for f in TABLE_FIELDS[table] if f in data]
+    if not fields:
+        return
+    data = {f: data[f] for f in fields}
+    data["updated_at"] = now()
+    sets = ", ".join(f"{k} = ?" for k in data)
+    conn = get_db()
+    conn.execute(f"UPDATE {table} SET {sets} WHERE id = ?", list(data.values()) + [row_id])
+    conn.commit()
+    conn.close()
+
+
+def delete_row(table, row_id):
+    conn = get_db()
+    conn.execute(f"DELETE FROM {table} WHERE id = ?", (row_id,))
+    conn.commit()
+    conn.close()
+
+
+def list_rows(table, filters=None, keyword=None, keyword_fields=None, page=1, page_size=20):
+    """filters: {field: value} 精确匹配；keyword 在 keyword_fields 中模糊搜索"""
+    where, params = [], []
+    for k, v in (filters or {}).items():
+        if v not in (None, "", "all"):
+            where.append(f"{k} = ?")
+            params.append(v)
+    if keyword and keyword_fields:
+        where.append("(" + " OR ".join(f"{f} LIKE ?" for f in keyword_fields) + ")")
+        params.extend([f"%{keyword}%"] * len(keyword_fields))
+    where_sql = ("WHERE " + " AND ".join(where)) if where else ""
+    conn = get_db()
+    total = conn.execute(f"SELECT COUNT(*) c FROM {table} {where_sql}", params).fetchone()["c"]
+    rows = conn.execute(
+        f"SELECT * FROM {table} {where_sql} ORDER BY id DESC LIMIT ? OFFSET ?",
+        params + [page_size, (page - 1) * page_size],
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows], total

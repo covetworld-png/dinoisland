@@ -15,3 +15,7 @@
 *.bak
 __pycache__/
 *.pyc
+
+# member-admin 运行时数据（仅服务器持有）
+projects/004-工具/004-10-member-admin/backend/members.db
+projects/004-工具/004-10-member-admin/backend/uploads/

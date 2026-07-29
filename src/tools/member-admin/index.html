@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>军团员工账号管理后台</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 登录页 -->
+  <div id="loginView" class="login-page hidden">
+    <div class="login-card">
+      <h1 class="login-title">军团员工账号管理</h1>
+      <p class="login-subtitle">Member Admin</p>
+      <form id="loginForm">
+        <label class="field">
+          <span>用户名</span>
+          <input type="text" id="loginUsername" autocomplete="username" required>
+        </label>
+        <label class="field">
+          <span>密码</span>
+          <input type="password" id="loginPassword" autocomplete="current-password" required>
+        </label>
+        <p id="loginError" class="form-error hidden"></p>
+        <button type="submit" class="btn btn-primary btn-block">登 录</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 模块入口页 -->
+  <div id="portalView" class="portal-page hidden">
+    <header class="topbar">
+      <span class="topbar-brand">军团员工账号管理后台</span>
+      <div class="topbar-right">
+        <span class="topbar-user">当前用户：<b id="portalUsername"></b></span>
+        <button class="btn btn-ghost" id="portalChangePwdBtn">修改密码</button>
+        <button class="btn btn-ghost danger" id="portalLogoutBtn">退出登录</button>
+      </div>
+    </header>
+    <main class="portal-main">
+      <h2 class="portal-heading">选择管理模块</h2>
+      <div class="portal-cards">
+        <div class="portal-card" id="gameModuleCard">
+          <div class="portal-card-icon">🎮</div>
+          <h3>游戏管理</h3>
+          <p>员工 / 军团 / 游戏账号 / 收款账户 / 操作日志</p>
+          <span class="portal-card-action">进入 →</span>
+        </div>
+        <div class="portal-card disabled">
+          <div class="portal-card-icon">📺</div>
+          <h3>直播管理</h3>
+          <p>即将上线</p>
+          <span class="portal-card-action muted">敬请期待</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 游戏管理后台 -->
+  <div id="adminView" class="admin-layout hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand">游戏管理</div>
+      <nav class="sidebar-nav">
+        <button class="side-btn" data-module="employees">员工</button>
+        <button class="side-btn" data-module="guilds">军团</button>
+        <button class="side-btn" data-module="accounts">账号</button>
+        <button class="side-btn" data-module="payments">收款账户</button>
+        <button class="side-btn" data-module="logs">操作日志</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="side-btn back" id="backToPortalBtn">← 返回入口</button>
+      </div>
+    </aside>
+    <div class="admin-content">
+      <header class="topbar">
+        <span class="topbar-title" id="adminModuleTitle">员工</span>
+        <div class="topbar-right">
+          <span class="topbar-user">当前用户：<b id="adminUsername"></b></span>
+          <button class="btn btn-ghost" id="adminChangePwdBtn">修改密码</button>
+          <button class="btn btn-ghost danger" id="adminLogoutBtn">退出登录</button>
+        </div>
+      </header>
+      <main class="admin-main" id="adminMain"></main>
+    </div>
+  </div>
+
+  <!-- 通用表单弹窗 -->
+  <div id="formModal" class="modal hidden">
+    <div class="modal-overlay" data-close="formModal"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="formModalTitle">新增</h3>
+        <button type="button" class="modal-close" data-close="formModal">&times;</button>
+      </div>
+      <div class="modal-body" id="formModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="formModal">取消</button>
+        <button type="button" class="btn btn-primary" id="formModalSaveBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修改密码弹窗 -->
+  <div id="pwdModal" class="modal hidden">
+    <div class="modal-overlay" data-close="pwdModal"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3>修改密码</h3>
+        <button type="button" class="modal-close" data-close="pwdModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label class="field">
+          <span>原密码</span>
+          <input type="password" id="oldPassword" autocomplete="current-password">
+        </label>
+        <label class="field">
+          <span>新密码</span>
+          <input type="password" id="newPassword" autocomplete="new-password">
+        </label>
+        <label class="field">
+          <span>确认新密码</span>
+          <input type="password" id="newPassword2" autocomplete="new-password">
+        </label>
+        <p id="pwdError" class="form-error hidden"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="pwdModal">取消</button>
+        <button type="button" class="btn btn-primary" id="pwdSaveBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 员工详情抽屉 -->
+  <div id="drawer" class="drawer hidden">
+    <div class="drawer-overlay" data-close="drawer"></div>
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <h3 id="drawerTitle">员工详情</h3>
+        <button type="button" class="modal-close" data-close="drawer">&times;</button>
+      </div>
+      <div class="drawer-body" id="drawerBody"></div>
+    </div>
+  </div>
+
+  <!-- 游戏数据弹窗 -->
+  <div id="gameDataModal" class="modal hidden">
+    <div class="modal-overlay" data-close="gameDataModal"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>账号游戏数据</h3>
+        <button type="button" class="modal-close" data-close="gameDataModal">&times;</button>
+      </div>
+      <div class="modal-body" id="gameDataBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="gameDataModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <input type="file" id="imageFileInput" accept="image/*" class="hidden">
+
+  <script src="js/app.js"></script>
+</body>
+</html>
