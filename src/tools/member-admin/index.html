@@ -67,6 +67,7 @@
         <button class="side-btn" data-module="payments">收款账户</button>
         <button class="side-btn" data-module="query">数据查询</button>
         <button class="side-btn" data-module="logs">操作日志</button>
+        <button class="side-btn hidden" data-module="users" id="usersNavBtn">用户管理</button>
       </nav>
       <div class="sidebar-footer">
         <button class="side-btn back" id="backToPortalBtn">← 返回入口</button>
@@ -224,6 +225,39 @@
       <div class="modal-footer">
         <button type="button" class="btn" data-close="snapshotRemarkModal">取消</button>
         <button type="button" class="btn btn-primary" id="snapRemarkSaveBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 用户管理弹窗（新增 / 改角色 / 重置密码共用） -->
+  <div id="userModal" class="modal hidden">
+    <div class="modal-overlay" data-close="userModal"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3 id="userModalTitle">新增用户</h3>
+        <button type="button" class="modal-close" data-close="userModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label class="field" id="userFieldUsername">
+          <span>用户名 *</span>
+          <input type="text" id="userUsername" autocomplete="off">
+        </label>
+        <label class="field" id="userFieldPassword">
+          <span>密码 *（至少 6 位）</span>
+          <input type="password" id="userPassword" autocomplete="new-password">
+        </label>
+        <label class="field" id="userFieldRole">
+          <span>角色</span>
+          <select id="userRole">
+            <option value="super">超级管理员</option>
+            <option value="admin">管理员</option>
+            <option value="viewer">普通用户</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="userModal">取消</button>
+        <button type="button" class="btn btn-primary" id="userModalSaveBtn">保存</button>
       </div>
     </div>
   </div>

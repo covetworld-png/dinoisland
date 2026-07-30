@@ -47,6 +47,32 @@ def login_required(f):
     return wrapper
 
 
+ROLES = {"super": "超级管理员", "admin": "管理员", "viewer": "普通用户"}
+
+
+def write_required(f):
+    """写操作：super/admin 可用，viewer 只读"""
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not session.get("user"):
+            return jsonify({"ok": False, "error": "未登录"}), 401
+        if session.get("role") not in ("super", "admin"):
+            return jsonify({"ok": False, "error": "无编辑权限（普通用户只读）"}), 403
+        return f(*args, **kwargs)
+    return wrapper
+
+
+def super_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not session.get("user"):
+            return jsonify({"ok": False, "error": "未登录"}), 401
+        if session.get("role") != "super":
+            return jsonify({"ok": False, "error": "仅超级管理员可操作"}), 403
+        return f(*args, **kwargs)
+    return wrapper
+
+
 def client_ip():
     return request.headers.get("X-Real-IP") or request.remote_addr or ""
 
@@ -61,9 +87,11 @@ def login():
     conn.close()
     if not user or not check_password_hash(user["password_hash"], password):
         return jsonify({"ok": False, "error": "用户名或密码错误"}), 401
+    role = user["role"] if "role" in user.keys() else "admin"
     session["user"] = username
+    session["role"] = role
     log_change(username, "login", "admin_user", user["id"], username, ip=client_ip())
-    return jsonify({"ok": True, "data": {"username": username}})
+    return jsonify({"ok": True, "data": {"username": username, "role": role}})
 
 
 @app.post("/api/logout")
@@ -74,7 +102,8 @@ def logout():
 
 @app.get("/api/me")
 def me():
-    return jsonify({"ok": True, "data": {"username": session.get("user")}})
+    return jsonify({"ok": True, "data": {"username": session.get("user"),
+                                         "role": session.get("role")}})
 
 
 @app.post("/api/change-password")
@@ -187,11 +216,11 @@ def _register_crud(table):
 
     singular = table.rstrip("s")
     app.add_url_rule(f"/api/{table}", f"{table}_list", login_required(list_view), methods=["GET"])
-    app.add_url_rule(f"/api/{table}", f"{table}_create", login_required(create_view), methods=["POST"])
+    app.add_url_rule(f"/api/{table}", f"{table}_create", write_required(create_view), methods=["POST"])
     app.add_url_rule(f"/api/{table}/<int:row_id>", f"{singular}_update",
-                     login_required(update_view), methods=["PUT"])
+                     write_required(update_view), methods=["PUT"])
     app.add_url_rule(f"/api/{table}/<int:row_id>", f"{singular}_delete",
-                     login_required(delete_view), methods=["DELETE"])
+                     write_required(delete_view), methods=["DELETE"])
 
 
 for _table in ENTITY_CONFIG:
@@ -253,7 +282,7 @@ def options(kind):
 # ---------- 图片上传（富文本内嵌） ----------
 
 @app.post("/api/upload/image")
-@login_required
+@write_required
 def upload_image():
     f = request.files.get("file")
     if not f or not f.filename:
@@ -294,6 +323,93 @@ def logs():
                                          "page": page, "page_size": page_size}})
 
 
+# ---------- 用户管理（仅超级管理员） ----------
+
+@app.get("/api/users")
+@super_required
+def users_list():
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT id, username, role, created_at FROM admin_users ORDER BY id").fetchall()
+    conn.close()
+    return jsonify({"ok": True, "data": [dict(r) for r in rows]})
+
+
+@app.post("/api/users")
+@super_required
+def users_create():
+    data = request.get_json(force=True, silent=True) or {}
+    username = (data.get("username") or "").strip()
+    password = data.get("password") or ""
+    role = data.get("role") or "viewer"
+    if not username or len(password) < 6:
+        return jsonify({"ok": False, "error": "用户名必填，密码至少 6 位"}), 400
+    if role not in ROLES:
+        return jsonify({"ok": False, "error": "角色无效"}), 400
+    conn = get_db()
+    if conn.execute("SELECT 1 FROM admin_users WHERE username = ?", (username,)).fetchone():
+        conn.close()
+        return jsonify({"ok": False, "error": "用户名已存在"}), 400
+    cur = conn.execute(
+        "INSERT INTO admin_users (username, password_hash, role, created_at) VALUES (?, ?, ?, ?)",
+        (username, generate_password_hash(password), role, now()))
+    conn.commit()
+    conn.close()
+    log_change(session["user"], "create", "admin_user", cur.lastrowid, username,
+               after={"username": username, "role": role}, ip=client_ip())
+    return jsonify({"ok": True, "data": {"id": cur.lastrowid, "username": username, "role": role}})
+
+
+@app.put("/api/users/<int:uid>")
+@super_required
+def users_update(uid):
+    data = request.get_json(force=True, silent=True) or {}
+    conn = get_db()
+    user = conn.execute("SELECT * FROM admin_users WHERE id = ?", (uid,)).fetchone()
+    if not user:
+        conn.close()
+        return jsonify({"ok": False, "error": "用户不存在"}), 404
+    before = dict(user)
+    new_role = data.get("role")
+    new_pwd = data.get("password")
+    if new_role:
+        if new_role not in ROLES:
+            conn.close()
+            return jsonify({"ok": False, "error": "角色无效"}), 400
+        conn.execute("UPDATE admin_users SET role = ? WHERE id = ?", (new_role, uid))
+    if new_pwd:
+        if len(new_pwd) < 6:
+            conn.close()
+            return jsonify({"ok": False, "error": "密码至少 6 位"}), 400
+        conn.execute("UPDATE admin_users SET password_hash = ? WHERE id = ?",
+                     (generate_password_hash(new_pwd), uid))
+    conn.commit()
+    conn.close()
+    log_change(session["user"], "update", "admin_user", uid, user["username"],
+               before={"role": before.get("role")},
+               after={"role": new_role, "password_reset": bool(new_pwd)}, ip=client_ip())
+    return jsonify({"ok": True})
+
+
+@app.delete("/api/users/<int:uid>")
+@super_required
+def users_delete(uid):
+    conn = get_db()
+    user = conn.execute("SELECT * FROM admin_users WHERE id = ?", (uid,)).fetchone()
+    if not user:
+        conn.close()
+        return jsonify({"ok": False, "error": "用户不存在"}), 404
+    if user["username"] == session["user"]:
+        conn.close()
+        return jsonify({"ok": False, "error": "不能删除当前登录账号"}), 400
+    conn.execute("DELETE FROM admin_users WHERE id = ?", (uid,))
+    conn.commit()
+    conn.close()
+    log_change(session["user"], "delete", "admin_user", uid, user["username"],
+               before={"username": user["username"]}, ip=client_ip())
+    return jsonify({"ok": True})
+
+
 # ---------- 只读 SQL 查询 + 月度分成 ----------
 
 @app.post("/api/query/run")
@@ -329,7 +445,7 @@ def commission_run():
 
 
 @app.post("/api/commission/save")
-@login_required
+@write_required
 def commission_save():
     from config import DATABASE_PATH
     data = request.get_json(force=True, silent=True) or {}

@@ -68,6 +68,7 @@ async function api(path, options) {
 
 const state = {
   username: null,
+  role: null,           // super / admin / viewer
   meta: null,           // api/meta 缓存
   options: {},          // options/employees、options/guilds 缓存
   module: 'employees',  // 当前后台模块
@@ -91,6 +92,10 @@ function optionLabel(kind, id) {
   const hit = list.find(o => String(o.id) === String(id));
   return hit ? hit.label : ('#' + id);
 }
+
+/* ================= 角色 ================= */
+
+const ROLE_LABELS = { super: '超级管理员', admin: '管理员', viewer: '普通用户' };
 
 /* ================= 可搜索下拉组件 ================= */
 
@@ -425,9 +430,12 @@ function getListState(moduleKey) {
 async function switchModule(moduleKey) {
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', logs: '操作日志' };
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', logs: '操作日志', users: '用户管理' };
   $('#adminModuleTitle').textContent = titles[moduleKey] || '';
-  if (moduleKey === 'logs') {
+  if (moduleKey === 'users') {
+    if (state.role !== 'super') return; // 用户管理仅 super
+    renderUsersPage();
+  } else if (moduleKey === 'logs') {
     renderLogsPage();
   } else if (moduleKey === 'query') {
     renderQueryPage();
@@ -520,7 +528,7 @@ async function renderListPage(moduleKey) {
   bar.appendChild(spacer);
 
   const addBtn = document.createElement('button');
-  addBtn.className = 'btn btn-primary';
+  addBtn.className = 'btn btn-primary btn-write';
   addBtn.textContent = '+ 新增' + cfg.title;
   addBtn.addEventListener('click', () => openFormModal(moduleKey, null));
   bar.appendChild(addBtn);
@@ -612,13 +620,13 @@ async function loadList(moduleKey) {
     actions.className = 'row-actions';
 
     const editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-sm';
+    editBtn.className = 'btn btn-sm btn-write';
     editBtn.textContent = '编辑';
     editBtn.addEventListener('click', () => openFormModal(moduleKey, item));
     actions.appendChild(editBtn);
 
     const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-sm btn-danger';
+    delBtn.className = 'btn btn-sm btn-danger btn-write';
     delBtn.textContent = '删除';
     delBtn.addEventListener('click', async () => {
       const name = item.nickname || item.name || item.account_name || ('ID ' + item.id);
@@ -1230,7 +1238,7 @@ function renderQueryPage() {
   bar.appendChild(spacer);
 
   const addBtn = document.createElement('button');
-  addBtn.className = 'btn btn-primary';
+  addBtn.className = 'btn btn-primary btn-write';
   addBtn.textContent = '+ 新增脚本';
   addBtn.addEventListener('click', () => openSqlScriptModal(null));
   bar.appendChild(addBtn);
@@ -1352,13 +1360,13 @@ async function loadScripts() {
     actions.appendChild(runBtn);
 
     const editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-sm';
+    editBtn.className = 'btn btn-sm btn-write';
     editBtn.textContent = '编辑';
     editBtn.addEventListener('click', () => openSqlScriptModal(item));
     actions.appendChild(editBtn);
 
     const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-sm btn-danger';
+    delBtn.className = 'btn btn-sm btn-danger btn-write';
     delBtn.textContent = '删除';
     delBtn.addEventListener('click', async () => {
       if (!confirm('确认删除脚本「' + (item.name || ('ID ' + item.id)) + '」吗？此操作不可恢复。')) return;
@@ -1669,7 +1677,7 @@ function renderLiveCommission(wrap, month, data, leaderCount) {
   spacer.style.flex = '1';
   topBar.appendChild(spacer);
   const saveBtn = document.createElement('button');
-  saveBtn.className = 'btn btn-primary';
+  saveBtn.className = 'btn btn-primary btn-write';
   saveBtn.textContent = '保存为发放记录';
   saveBtn.addEventListener('click', () => openSnapshotRemarkModal({ mode: 'save', month }));
   topBar.appendChild(saveBtn);
@@ -1834,13 +1842,13 @@ async function loadSnapshots() {
     actions.appendChild(viewBtn);
 
     const editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-sm';
+    editBtn.className = 'btn btn-sm btn-write';
     editBtn.textContent = '编辑备注';
     editBtn.addEventListener('click', () => openSnapshotRemarkModal({ mode: 'edit', item }));
     actions.appendChild(editBtn);
 
     const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-sm btn-danger';
+    delBtn.className = 'btn btn-sm btn-danger btn-write';
     delBtn.textContent = '删除';
     delBtn.addEventListener('click', async () => {
       if (!confirm('确认删除「' + (item.month || '') + (item.remark ? ' ' + item.remark : '') + '」的发放记录吗？此操作不可恢复。')) return;
@@ -1935,6 +1943,156 @@ $('#snapRemarkSaveBtn').addEventListener('click', async () => {
   }
 });
 
+/* ================= 用户管理（仅 super） ================= */
+
+function renderUsersPage() {
+  const main = $('#adminMain');
+  main.innerHTML = '';
+
+  const bar = document.createElement('div');
+  bar.className = 'filter-bar';
+  const spacer = document.createElement('div');
+  spacer.className = 'spacer';
+  bar.appendChild(spacer);
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn btn-primary';
+  addBtn.textContent = '+ 新增用户';
+  addBtn.addEventListener('click', () => openUserModal({ mode: 'create' }));
+  bar.appendChild(addBtn);
+  main.appendChild(bar);
+
+  const tableWrap = document.createElement('div');
+  tableWrap.className = 'table-wrap';
+  tableWrap.id = 'usersTableWrap';
+  main.appendChild(tableWrap);
+
+  loadUsers();
+}
+
+async function loadUsers() {
+  let data;
+  try {
+    data = await api('users');
+  } catch (err) {
+    showToast(err.message, 'error');
+    return;
+  }
+
+  const wrap = $('#usersTableWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  table.innerHTML = '<thead><tr><th>用户名</th><th>角色</th><th>创建时间</th><th>操作</th></tr></thead>';
+  const tbody = document.createElement('tbody');
+
+  if (!data || !data.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-cell">暂无用户</td></tr>';
+  }
+
+  (data || []).forEach(u => {
+    const tr = document.createElement('tr');
+    [u.username, ROLE_LABELS[u.role] || u.role, u.created_at].forEach(v => {
+      const td = document.createElement('td');
+      td.textContent = (v === null || v === undefined) ? '' : String(v);
+      tr.appendChild(td);
+    });
+
+    const tdOp = document.createElement('td');
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+
+    const roleBtn = document.createElement('button');
+    roleBtn.className = 'btn btn-sm';
+    roleBtn.textContent = '改角色';
+    roleBtn.addEventListener('click', () => openUserModal({ mode: 'role', item: u }));
+    actions.appendChild(roleBtn);
+
+    const pwdBtn = document.createElement('button');
+    pwdBtn.className = 'btn btn-sm';
+    pwdBtn.textContent = '重置密码';
+    pwdBtn.addEventListener('click', () => openUserModal({ mode: 'pwd', item: u }));
+    actions.appendChild(pwdBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-sm btn-danger';
+    delBtn.textContent = '删除';
+    if (u.username === state.username) {
+      delBtn.disabled = true;
+      delBtn.title = '不能删除当前登录账号';
+    }
+    delBtn.addEventListener('click', async () => {
+      if (!confirm('确认删除用户「' + u.username + '」吗？此操作不可恢复。')) return;
+      try {
+        await api('users/' + u.id, { method: 'DELETE' });
+        showToast('已删除', 'success');
+        loadUsers();
+      } catch (err) {
+        showToast('删除失败：' + err.message, 'error');
+      }
+    });
+    actions.appendChild(delBtn);
+
+    tdOp.appendChild(actions);
+    tr.appendChild(tdOp);
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+}
+
+/* ---------- 用户弹窗（新增 / 改角色 / 重置密码共用） ---------- */
+
+let userCtx = null; // { mode:'create' } | { mode:'role'|'pwd', item }
+
+function openUserModal(ctx) {
+  userCtx = ctx;
+  const titles = { create: '新增用户', role: '修改角色：', pwd: '重置密码：' };
+  $('#userModalTitle').textContent = titles[ctx.mode] + (ctx.item ? ctx.item.username : '');
+  $('#userFieldUsername').classList.toggle('hidden', ctx.mode !== 'create');
+  $('#userFieldPassword').classList.toggle('hidden', ctx.mode === 'role');
+  $('#userFieldRole').classList.toggle('hidden', ctx.mode === 'pwd');
+  $('#userUsername').value = '';
+  $('#userPassword').value = '';
+  $('#userRole').value = ctx.item ? ctx.item.role : 'viewer';
+  openModal('userModal');
+}
+
+$('#userModalSaveBtn').addEventListener('click', async () => {
+  if (!userCtx) return;
+  try {
+    if (userCtx.mode === 'create') {
+      const username = $('#userUsername').value.trim();
+      const password = $('#userPassword').value;
+      if (!username) {
+        showToast('请填写：用户名', 'error');
+        return;
+      }
+      if (password.length < 6) {
+        showToast('密码至少 6 位', 'error');
+        return;
+      }
+      await api('users', { method: 'POST', json: { username, password, role: $('#userRole').value } });
+      showToast('已创建', 'success');
+    } else if (userCtx.mode === 'role') {
+      await api('users/' + userCtx.item.id, { method: 'PUT', json: { role: $('#userRole').value } });
+      showToast('角色已更新', 'success');
+    } else {
+      const password = $('#userPassword').value;
+      if (password.length < 6) {
+        showToast('密码至少 6 位', 'error');
+        return;
+      }
+      await api('users/' + userCtx.item.id, { method: 'PUT', json: { password } });
+      showToast('密码已重置', 'success');
+    }
+    closeModal('userModal');
+    loadUsers();
+  } catch (err) {
+    showToast('操作失败：' + err.message, 'error');
+  }
+});
+
 /* ================= 登录 / 入口 / 密码 ================= */
 
 $('#loginForm').addEventListener('submit', async e => {
@@ -1947,6 +2105,7 @@ $('#loginForm').addEventListener('submit', async e => {
       json: { username: $('#loginUsername').value.trim(), password: $('#loginPassword').value },
     });
     state.username = data.username;
+    state.role = data.role || '';
     $('#loginPassword').value = '';
     enterPortal();
   } catch (err) {
@@ -1958,6 +2117,8 @@ $('#loginForm').addEventListener('submit', async e => {
 async function doLogout() {
   try { await api('logout', { method: 'POST' }); } catch (e) { /* 忽略 */ }
   state.username = null;
+  state.role = null;
+  document.body.classList.remove('role-viewer');
   showView('loginView');
 }
 $('#portalLogoutBtn').addEventListener('click', doLogout);
@@ -1966,6 +2127,22 @@ $('#adminLogoutBtn').addEventListener('click', doLogout);
 function enterPortal() {
   $('#portalUsername').textContent = state.username || '';
   $('#adminUsername').textContent = state.username || '';
+  // 顶栏用户名后的角色标签
+  ['portalUsername', 'adminUsername'].forEach(id => {
+    const b = $('#' + id);
+    let tag = b.parentElement.querySelector('.role-tag');
+    if (!tag) {
+      tag = document.createElement('span');
+      tag.className = 'tag role-tag';
+      tag.style.marginLeft = '6px';
+      b.after(tag);
+    }
+    tag.textContent = ROLE_LABELS[state.role] || '';
+  });
+  // viewer 只读模式：隐藏一切写入口
+  document.body.classList.toggle('role-viewer', state.role === 'viewer');
+  // 用户管理入口仅 super 可见
+  $('#usersNavBtn').classList.toggle('hidden', state.role !== 'super');
   showView('portalView');
 }
 
@@ -2023,6 +2200,7 @@ $$('.sidebar-nav .side-btn').forEach(btn => {
     const data = await api('me');
     if (data && data.username) {
       state.username = data.username;
+      state.role = data.role || '';
       enterPortal();
       return;
     }

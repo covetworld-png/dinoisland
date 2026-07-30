@@ -401,6 +401,9 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; }
   color: var(--text-secondary);
 }
 
+/* ---------- 角色：viewer 只读模式 ---------- */
+.role-viewer .btn-write { display: none; }
+
 /* ---------- Toast ---------- */
 .toast {
   position: fixed;
