@@ -247,7 +247,7 @@ def employee_detail(emp_id):
     guilds = [dict(r) for r in conn.execute(
         "SELECT * FROM guilds WHERE leader_employee_id = ? ORDER BY id DESC", (emp_id,)).fetchall()]
     accounts = [dict(r) for r in conn.execute(
-        "SELECT a.*, g.name AS guild_name FROM game_accounts a "
+        "SELECT a.*, g.name AS guild_name, g.game_guild_id AS guild_game_id FROM game_accounts a "
         "LEFT JOIN guilds g ON a.guild_id = g.id WHERE a.employee_id = ? ORDER BY a.id DESC",
         (emp_id,)).fetchall()]
     payments = [dict(r) for r in conn.execute(
@@ -278,8 +278,8 @@ def options(kind):
             "SELECT id, nickname, position, status FROM employees ORDER BY nickname").fetchall()
         items = [{"id": r["id"], "label": f'{r["nickname"]}（{r["position"]}·{r["status"]}）'} for r in rows]
     elif kind == "guilds":
-        rows = conn.execute("SELECT id, name, server, status FROM guilds ORDER BY name").fetchall()
-        items = [{"id": r["id"], "label": f'{r["name"]}（{r["server"]}·{r["status"]}）'} for r in rows]
+        rows = conn.execute("SELECT id, name, game_guild_id, server, status FROM guilds ORDER BY name").fetchall()
+        items = [{"id": r["id"], "label": f'{r["name"]}（ID:{r["game_guild_id"] or "-"}·{r["server"]}·{r["status"]}）'} for r in rows]
     else:
         conn.close()
         abort(404)

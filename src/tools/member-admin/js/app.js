@@ -843,7 +843,7 @@ async function openEmployeeDrawer(employeeId) {
   }
   (data.accounts || []).forEach(a => {
     const tr = document.createElement('tr');
-    [a.game_uid, a.nickname, a.guild_name, a.status].forEach(v => {
+    [a.game_uid, a.nickname, a.guild_name ? a.guild_name + (a.guild_game_id ? '（ID:' + a.guild_game_id + '）' : '') : '', a.status].forEach(v => {
       const td = document.createElement('td');
       td.textContent = (v === null || v === undefined) ? '' : String(v);
       tr.appendChild(td);
