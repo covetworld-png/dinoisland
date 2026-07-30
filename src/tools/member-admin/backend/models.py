@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS employees (
 CREATE TABLE IF NOT EXISTS guilds (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,                -- 团名
+    cn_name TEXT DEFAULT '',           -- 中文名（翻译）
     game_guild_id TEXT DEFAULT '',     -- 游戏内军团 ID
     server TEXT DEFAULT '',            -- 服务器
     leader_employee_id INTEGER REFERENCES employees(id) ON DELETE SET NULL,
@@ -120,7 +121,7 @@ TABLE_FIELDS = {
                   "probation_salary", "formal_salary", "employment_type",
                   "position_allowance", "gm_allowance", "commission_rate",
                   "entry_date", "remark"],
-    "guilds": ["name", "game_guild_id", "server", "leader_employee_id", "status", "operation_type", "remark"],
+    "guilds": ["name", "cn_name", "game_guild_id", "server", "leader_employee_id", "status", "operation_type", "remark"],
     "game_accounts": ["employee_id", "game_uid", "nickname", "guild_id", "status",
                       "tiktok_account", "remark"],
     "payment_accounts": ["employee_id", "account_type", "account_name", "info_html", "remark"],

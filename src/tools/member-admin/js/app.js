@@ -340,6 +340,7 @@ const MODULES = {
     table: 'guilds',
     columns: [
       { key: 'name', label: '军团名称' },
+      { key: 'cn_name', label: '中文名' },
       { key: 'game_guild_id', label: '军团 ID' },
       { key: 'server', label: '服务器' },
       { key: 'leader_employee_id', label: '军团长', render: v => esc(optionLabel('employees', v)) },
@@ -356,6 +357,7 @@ const MODULES = {
     ],
     fields: [
       { key: 'name', label: '军团名称', type: 'text', required: true },
+      { key: 'cn_name', label: '中文名', type: 'text' },
       { key: 'game_guild_id', label: '军团 ID', type: 'text' },
       { key: 'server', label: '服务器', type: 'select', metaKey: 'servers' },
       { key: 'leader_employee_id', label: '军团长', type: 'searchselect', optionsKind: 'employees' },
@@ -1671,7 +1673,7 @@ function renderLeaderBox() {
       });
       label.appendChild(cb);
       const span = document.createElement('span');
-      span.textContent = (g.name || ('#' + g.id)) + '（' + (g.server || '') + '·' + (g.operation_type || '') + '·' + (g.status || '') + '）';
+      span.textContent = (g.name || ('#' + g.id)) + '（ID:' + (g.game_guild_id || g.id) + '·' + (g.server || '') + '·' + (g.operation_type || '') + '·' + (g.status || '') + '）';
       label.appendChild(span);
       gWrap.appendChild(label);
     });

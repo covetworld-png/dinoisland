@@ -106,7 +106,7 @@ def list_leaders(db_path):
     conn.row_factory = sqlite3.Row
     rows = conn.execute("""
         SELECT e.id AS emp_id, e.nickname, e.status, e.employment_type,
-               g.id AS guild_id, g.name AS guild_name, g.server, g.operation_type, g.status AS guild_status
+               g.id AS guild_id, g.name AS guild_name, g.game_guild_id, g.server, g.operation_type, g.status AS guild_status
         FROM employees e JOIN guilds g ON g.leader_employee_id = e.id
         ORDER BY e.status = '离职', e.nickname, g.id
     """).fetchall()
@@ -117,6 +117,7 @@ def list_leaders(db_path):
             "id": r["emp_id"], "nickname": r["nickname"], "status": r["status"],
             "employment_type": r["employment_type"], "guilds": []})
         l["guilds"].append({"id": r["guild_id"], "name": r["guild_name"],
+                            "game_guild_id": r["game_guild_id"],
                             "server": r["server"], "operation_type": r["operation_type"],
                             "status": r["guild_status"]})
     return list(leaders.values())
