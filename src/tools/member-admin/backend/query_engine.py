@@ -112,7 +112,7 @@ BASIS = {
 }
 
 def list_leaders(db_path):
-    """带过团的军团长列表（含离职）及其名下军团，供两级勾选"""
+    """带过团的军团长（含离职）+ GM 列表，供两级勾选"""
     import sqlite3
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
@@ -127,12 +127,24 @@ def list_leaders(db_path):
     for r in rows:
         l = leaders.setdefault(r["emp_id"], {
             "id": r["emp_id"], "nickname": r["nickname"], "status": r["status"],
-            "employment_type": r["employment_type"], "guilds": []})
+            "employment_type": r["employment_type"], "position": "军团长", "guilds": []})
         l["guilds"].append({"id": r["guild_id"], "name": r["guild_name"],
                             "game_guild_id": r["game_guild_id"],
                             "server": r["server"], "operation_type": r["operation_type"],
                             "status": r["guild_status"]})
-    return list(leaders.values())
+    result = list(leaders.values())
+    # GM（不带团）
+    gms = conn2 = None
+    import sqlite3 as _sq
+    conn2 = _sq.connect(db_path)
+    conn2.row_factory = _sq.Row
+    for e in conn2.execute(
+            "SELECT id, nickname, status, employment_type FROM employees WHERE position = 'GM'"
+            " ORDER BY status = '离职', nickname").fetchall():
+        result.append({"id": e["id"], "nickname": e["nickname"], "status": e["status"],
+                       "employment_type": e["employment_type"], "position": "GM", "guilds": []})
+    conn2.close()
+    return result
 
 
 SERVER_ALIAS = {"Q服": "Q", "K服": "K"}
@@ -152,10 +164,12 @@ def _parse_rate(s):
         return 0.0
 
 
-def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="paid"):
+def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="paid",
+                   gm_ids=None):
     """month='YYYY-MM'，返回每团长分成明细。db_path 为 members.db 路径。
     guild_ids: 指定统计哪些军团（优先）；employee_ids: 指定哪些团长；
-    都不传=全部非离职团长的团。basis: paid|shipped 收入口径"""
+    都不传=全部非离职团长的团。basis: paid|shipped 收入口径。
+    gm_ids: 指定统计哪些 GM（None=默认全部非离职 GM）"""
     import sqlite3
     if not re.match(r"^\d{4}-\d{2}$", month or ""):
         return {"ok": False, "error": "月份格式应为 YYYY-MM"}
@@ -235,6 +249,35 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "gm_allowance": g["gm_allowance"] or 0,
             "total": total,
             "unmatched": not matched_sid and gid_raw == "",
+        })
+
+    # GM：无军团收入，只发底薪+津贴
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    gm_rows = conn.execute(
+        "SELECT * FROM employees WHERE position = 'GM'").fetchall()
+    conn.close()
+    default_mode = guild_ids is None and employee_ids is None
+    for e in gm_rows:
+        if gm_ids is not None:
+            if e["id"] not in gm_ids:
+                continue
+        elif not default_mode:
+            continue  # 手动勾选模式下 GM 只在 gm_ids 中勾选才计入
+        elif e["status"] == "离职":
+            continue
+        base = e["probation_salary"] if e["employment_type"] == "试用期" else e["formal_salary"]
+        total = (base or 0) + (e["position_allowance"] or 0) + (e["gm_allowance"] or 0)
+        items.append({
+            "employee": e["nickname"], "employee_status": e["status"],
+            "guild": "（GM 无军团）", "guild_game_id": "", "server": "",
+            "operation_type": "",
+            "revenue": 0.0, "commission_rate": "", "commission": 0,
+            "employment_type": e["employment_type"],
+            "base_salary": base or 0,
+            "position_allowance": e["position_allowance"] or 0,
+            "gm_allowance": e["gm_allowance"] or 0,
+            "total": total, "unmatched": False, "is_gm": True,
         })
 
     # 无军团收入的团长也列出（amount=0），按员工分组排序
