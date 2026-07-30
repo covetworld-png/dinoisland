@@ -1274,6 +1274,10 @@ function renderQueryPage() {
   monthInput.value = new Date().toISOString().slice(0, 7); // 默认当前月
   bar2.appendChild(monthInput);
 
+  const basisSel = document.createElement('select');
+  basisSel.innerHTML = '<option value="paid">口径A 已付款</option><option value="shipped">口径B 已发货即计入</option>';
+  bar2.appendChild(basisSel);
+
   const runBtn = document.createElement('button');
   runBtn.className = 'btn btn-primary';
   runBtn.textContent = '计算分成';
@@ -1282,7 +1286,7 @@ function renderQueryPage() {
       showToast('请选择月份', 'error');
       return;
     }
-    runCommission(monthInput.value);
+    runCommission(monthInput.value, basisSel.value);
   });
   bar2.appendChild(runBtn);
 
@@ -1557,7 +1561,11 @@ function pick(obj, keys) {
   return '';
 }
 
-let lastCommission = null; // { month, data, guild_ids } 最近一次实时计算结果（快照视图「关闭」时回显）
+let lastCommission = null; // { month, data, guild_ids, basis } 最近一次实时计算结果（快照视图「关闭」时回显）
+
+// 收入口径映射：key → 短标签 / 说明文本
+const BASIS_SHORT = { paid: '口径A', shipped: '口径B' };
+const BASIS_DESC = { paid: '口径A：仅当前已付款', shipped: '口径B：已发货即计入' };
 
 /* ---------- 军团长 → 军团 两级勾选 ---------- */
 
@@ -1689,7 +1697,7 @@ function renderLeaderBox() {
   wrap.appendChild(body);
 }
 
-async function runCommission(month) {
+async function runCommission(month, basis) {
   const wrap = $('#commissionResultWrap');
   if (!wrap) return;
   const guildIds = Array.from(guildChecked);
@@ -1700,23 +1708,24 @@ async function runCommission(month) {
   wrap.innerHTML = '<p style="color:#6b7280">计算中…</p>';
   let data;
   try {
-    data = await api('commission/run', { method: 'POST', json: { month, guild_ids: guildIds } });
+    data = await api('commission/run', { method: 'POST', json: { month, guild_ids: guildIds, basis: basis || 'paid' } });
   } catch (err) {
     wrap.innerHTML = '<p style="color:#dc2626">' + esc(err.message) + '</p>';
     return;
   }
-  lastCommission = { month, data, guild_ids: guildIds };
-  renderLiveCommission(wrap, month, data, guildIds.length);
+  lastCommission = { month, data, guild_ids: guildIds, basis: data.basis_key || basis || 'paid' };
+  renderLiveCommission(wrap, month, data, guildIds.length, lastCommission.basis);
 }
 
-// 实时计算结果：顶部统计军团数 + 「保存为发放记录」按钮 + 两张表
-function renderLiveCommission(wrap, month, data, guildCount) {
+// 实时计算结果：顶部统计军团数·口径 + 「保存为发放记录」按钮 + 两张表
+function renderLiveCommission(wrap, month, data, guildCount, basisKey) {
   wrap.innerHTML = '';
   const topBar = document.createElement('div');
   topBar.style.cssText = 'display:flex;align-items:center;margin-bottom:10px;gap:10px;';
   const info = document.createElement('span');
   info.style.cssText = 'font-size:13px;color:var(--text-secondary);';
-  info.textContent = '统计 ' + guildCount + ' 个军团';
+  info.textContent = '统计 ' + guildCount + ' 个军团'
+    + (BASIS_SHORT[basisKey] ? ' · ' + BASIS_SHORT[basisKey] : '');
   topBar.appendChild(info);
   const spacer = document.createElement('div');
   spacer.className = 'spacer';
@@ -1857,16 +1866,16 @@ async function loadSnapshots() {
   wrap.innerHTML = '';
   const table = document.createElement('table');
   table.className = 'data-table';
-  table.innerHTML = '<thead><tr><th>月份</th><th>备注</th><th>保存人</th><th>保存时间</th><th>操作</th></tr></thead>';
+  table.innerHTML = '<thead><tr><th>月份</th><th>口径</th><th>备注</th><th>保存人</th><th>保存时间</th><th>操作</th></tr></thead>';
   const tbody = document.createElement('tbody');
 
   if (!data.items || !data.items.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-cell">暂无发放记录</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-cell">暂无发放记录</td></tr>';
   }
 
   (data.items || []).forEach(item => {
     const tr = document.createElement('tr');
-    [item.month, item.remark, item.created_by, item.created_at].forEach(v => {
+    [item.month, BASIS_SHORT[item.basis] || '口径A', item.remark, item.created_by, item.created_at].forEach(v => {
       const td = document.createElement('td');
       td.textContent = (v === null || v === undefined) ? '' : String(v);
       td.title = td.textContent;
@@ -1932,6 +1941,7 @@ function viewSnapshot(snap) {
   const info = document.createElement('span');
   info.style.cssText = 'font-size:13px;font-weight:600;';
   info.textContent = '快照：' + (snap.month || '') + '（保存于 ' + (snap.created_at || '') + '）'
+    + ' · ' + (BASIS_SHORT[snap.basis] || '口径A')
     + (snap.remark ? ' — ' + snap.remark : '');
   topBar.appendChild(info);
   const spacer = document.createElement('div');
@@ -1942,7 +1952,7 @@ function viewSnapshot(snap) {
   closeBtn.textContent = '关闭';
   closeBtn.addEventListener('click', () => {
     if (lastCommission) {
-      renderLiveCommission(wrap, lastCommission.month, lastCommission.data, lastCommission.guild_ids.length);
+      renderLiveCommission(wrap, lastCommission.month, lastCommission.data, lastCommission.guild_ids.length, lastCommission.basis);
     } else {
       wrap.innerHTML = '';
     }
@@ -1953,7 +1963,7 @@ function viewSnapshot(snap) {
   renderCommissionTables(wrap, {
     summary,
     items,
-    basis: snap.basis || '本表为保存时冻结的快照数据，非实时计算结果。',
+    basis: BASIS_DESC[snap.basis] || '本表为保存时冻结的快照数据，非实时计算结果。',
   }, snap.month || '');
 }
 
@@ -1977,6 +1987,7 @@ $('#snapRemarkSaveBtn').addEventListener('click', async () => {
       // 与最近一次计算保持一致的勾选范围
       const payload = { month: snapRemarkCtx.month, remark };
       if (lastCommission && lastCommission.guild_ids) payload.guild_ids = lastCommission.guild_ids;
+      if (lastCommission && lastCommission.basis) payload.basis = lastCommission.basis;
       await api('commission/save', { method: 'POST', json: payload });
     } else {
       await api('commission_snapshots/' + snapRemarkCtx.item.id, { method: 'PUT', json: { remark } });

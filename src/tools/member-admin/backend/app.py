@@ -450,7 +450,8 @@ def commission_run():
     if guild_ids is not None:
         guild_ids = [int(x) for x in guild_ids if str(x).isdigit()]
     result = run_commission(data.get("month", ""), DATABASE_PATH,
-                            employee_ids=emp_ids, guild_ids=guild_ids)
+                            employee_ids=emp_ids, guild_ids=guild_ids,
+                            basis=data.get("basis", "paid"))
     log_change(session["user"], "query", "commission", 0, data.get("month", ""),
                ip=client_ip())
     return jsonify(result)
@@ -469,11 +470,12 @@ def commission_save():
     if guild_ids is not None:
         guild_ids = [int(x) for x in guild_ids if str(x).isdigit()]
     result = run_commission(month, DATABASE_PATH, employee_ids=emp_ids,
-                            guild_ids=guild_ids)
+                            guild_ids=guild_ids, basis=data.get("basis", "paid"))
     if not result.get("ok"):
         return jsonify(result)
     payload = {
         "month": month,
+        "basis": result["data"].get("basis_key", "paid"),
         "remark": (data.get("remark") or "").strip(),
     }
     row_id = insert_row("commission_snapshots", payload)

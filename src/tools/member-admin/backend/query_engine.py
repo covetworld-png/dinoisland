@@ -79,6 +79,7 @@ def run_query(sql, params=None):
 # ---------- 月度分成（时点归属子查询口径，按月汇总） ----------
 
 # 写法A 子查询（[引用:data/DBSQL/SQL_KNOWLEDGE.md#时点归属SQL]），按 guild_id+server_id 聚合
+# 口径：paid=仅当前 paid/shipped；shipped=已发货即计入（含 shipped_at 非空的单）
 GUILD_MONTH_REVENUE_SQL = """
 SELECT attributed.guild_id AS guild_id,
        attributed.server_id AS server_id,
@@ -91,13 +92,24 @@ FROM (
               AND o.created_at > tb.joined_at
             ORDER BY tb.joined_at DESC LIMIT 1) AS guild_id
     FROM prod_orders o
-    WHERE o.status IN ('paid', 'shipped')
+    WHERE {status_filter}
       AND o.created_at >= %(month_start)s
       AND o.created_at < DATE_ADD(%(month_start)s, INTERVAL 1 MONTH)
 ) attributed
 WHERE attributed.guild_id IS NOT NULL
 GROUP BY attributed.guild_id, attributed.server_id
 """
+
+BASIS = {
+    "paid": {
+        "filter": "o.status IN ('paid', 'shipped')",
+        "label": "口径A：仅当前已付款（status IN paid/shipped）",
+    },
+    "shipped": {
+        "filter": "(o.status IN ('paid', 'shipped') OR o.shipped_at IS NOT NULL)",
+        "label": "口径B：已发货即计入（含状态回退的单）",
+    },
+}
 
 def list_leaders(db_path):
     """带过团的军团长列表（含离职）及其名下军团，供两级勾选"""
@@ -140,15 +152,18 @@ def _parse_rate(s):
         return 0.0
 
 
-def run_commission(month, db_path, employee_ids=None, guild_ids=None):
+def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="paid"):
     """month='YYYY-MM'，返回每团长分成明细。db_path 为 members.db 路径。
     guild_ids: 指定统计哪些军团（优先）；employee_ids: 指定哪些团长；
-    都不传=全部非离职团长的团"""
+    都不传=全部非离职团长的团。basis: paid|shipped 收入口径"""
     import sqlite3
     if not re.match(r"^\d{4}-\d{2}$", month or ""):
         return {"ok": False, "error": "月份格式应为 YYYY-MM"}
+    if basis not in BASIS:
+        basis = "paid"
 
-    rev = run_query(GUILD_MONTH_REVENUE_SQL, {"month_start": month + "-01"})
+    rev = run_query(GUILD_MONTH_REVENUE_SQL.format(status_filter=BASIS[basis]["filter"]),
+                    {"month_start": month + "-01"})
     if not rev.get("ok"):
         return rev
     # (server_alias, guild_id) -> amount
@@ -241,7 +256,8 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None):
 
     return {"ok": True, "data": {
         "month": month,
-        "basis": "时点归属子查询口径（prod_orders，GMT+7，amount 单位 VND）",
+        "basis": f"{BASIS[basis]['label']}｜时点归属子查询（prod_orders，GMT+7，amount 单位 VND）",
+        "basis_key": basis,
         "items": items,
         "summary": sorted(summary.values(), key=lambda x: -x["total"]),
         "guild_count_with_revenue": len(revenue),

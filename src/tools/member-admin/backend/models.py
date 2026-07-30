@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS sql_scripts (
 CREATE TABLE IF NOT EXISTS commission_snapshots (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     month TEXT NOT NULL,             -- YYYY-MM
+    basis TEXT DEFAULT 'paid',       -- 收入口径 paid/shipped
     remark TEXT DEFAULT '',
     items_json TEXT DEFAULT '[]',    -- 明细快照
     summary_json TEXT DEFAULT '[]',  -- 汇总快照
@@ -126,7 +127,7 @@ TABLE_FIELDS = {
                       "tiktok_account", "remark"],
     "payment_accounts": ["employee_id", "account_type", "account_name", "info_html", "remark"],
     "sql_scripts": ["name", "description", "params", "sql_text"],
-    "commission_snapshots": ["month", "remark"],
+    "commission_snapshots": ["month", "basis", "remark"],
 }
 
 ENTITY_LABEL_FIELD = {
