@@ -100,17 +100,26 @@ GROUP BY attributed.guild_id, attributed.server_id
 """
 
 def list_leaders(db_path):
-    """带过团的军团长列表（含离职），供勾选"""
+    """带过团的军团长列表（含离职）及其名下军团，供两级勾选"""
     import sqlite3
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     rows = conn.execute("""
-        SELECT e.id, e.nickname, e.status, e.employment_type, COUNT(g.id) AS guild_count
+        SELECT e.id AS emp_id, e.nickname, e.status, e.employment_type,
+               g.id AS guild_id, g.name AS guild_name, g.server, g.operation_type, g.status AS guild_status
         FROM employees e JOIN guilds g ON g.leader_employee_id = e.id
-        GROUP BY e.id ORDER BY e.status = '离职', e.nickname
+        ORDER BY e.status = '离职', e.nickname, g.id
     """).fetchall()
     conn.close()
-    return [dict(r) for r in rows]
+    leaders = {}
+    for r in rows:
+        l = leaders.setdefault(r["emp_id"], {
+            "id": r["emp_id"], "nickname": r["nickname"], "status": r["status"],
+            "employment_type": r["employment_type"], "guilds": []})
+        l["guilds"].append({"id": r["guild_id"], "name": r["guild_name"],
+                            "server": r["server"], "operation_type": r["operation_type"],
+                            "status": r["guild_status"]})
+    return list(leaders.values())
 
 
 SERVER_ALIAS = {"Q服": "Q", "K服": "K"}
@@ -130,9 +139,10 @@ def _parse_rate(s):
         return 0.0
 
 
-def run_commission(month, db_path, employee_ids=None):
+def run_commission(month, db_path, employee_ids=None, guild_ids=None):
     """month='YYYY-MM'，返回每团长分成明细。db_path 为 members.db 路径。
-    employee_ids: 指定统计哪些军团长（None=全部非离职）"""
+    guild_ids: 指定统计哪些军团（优先）；employee_ids: 指定哪些团长；
+    都不传=全部非离职团长的团"""
     import sqlite3
     if not re.match(r"^\d{4}-\d{2}$", month or ""):
         return {"ok": False, "error": "月份格式应为 YYYY-MM"}
@@ -171,7 +181,10 @@ def run_commission(month, db_path, employee_ids=None):
 
     items = []
     for g in guilds:
-        if employee_ids is not None:
+        if guild_ids is not None:
+            if g["id"] not in guild_ids:
+                continue  # 未勾选的军团不统计
+        elif employee_ids is not None:
             if g["emp_id"] not in employee_ids:
                 continue  # 未勾选的团长不统计
         elif g["emp_status"] == "离职":
