@@ -133,6 +133,22 @@ def change_password():
     return jsonify({"ok": True})
 
 
+def guild_label(g, with_status=False):
+    """军团拼接展示：(Q110)THIÊN HÀ（天河）"""
+    server = g.get("server") or ""
+    letter = server[0] if server else ""
+    gid = g.get("game_guild_id") or ""
+    prefix = f"({letter}{gid})" if gid else ""
+    name = g.get("name") or ""
+    cn = g.get("cn_name") or ""
+    if cn and f"（{cn}）" in name:  # 名称已含中文括号则不重复
+        cn = ""
+    label = f"{prefix}{name}（{cn}）" if cn else f"{prefix}{name}"
+    if with_status and g.get("status"):
+        label += f"（{g['status']}）"
+    return label
+
+
 # ---------- 元数据 ----------
 
 @app.get("/api/meta")
@@ -247,7 +263,8 @@ def employee_detail(emp_id):
     guilds = [dict(r) for r in conn.execute(
         "SELECT * FROM guilds WHERE leader_employee_id = ? ORDER BY id DESC", (emp_id,)).fetchall()]
     accounts = [dict(r) for r in conn.execute(
-        "SELECT a.*, g.name AS guild_name, g.game_guild_id AS guild_game_id FROM game_accounts a "
+        "SELECT a.*, g.name AS guild_name, g.cn_name AS guild_cn_name, g.game_guild_id AS guild_game_id, g.server AS guild_server "
+        "FROM game_accounts a "
         "LEFT JOIN guilds g ON a.guild_id = g.id WHERE a.employee_id = ? ORDER BY a.id DESC",
         (emp_id,)).fetchall()]
     payments = [dict(r) for r in conn.execute(
@@ -278,8 +295,8 @@ def options(kind):
             "SELECT id, nickname, position, status FROM employees ORDER BY nickname").fetchall()
         items = [{"id": r["id"], "label": f'{r["nickname"]}（{r["position"]}·{r["status"]}）'} for r in rows]
     elif kind == "guilds":
-        rows = conn.execute("SELECT id, name, game_guild_id, server, status FROM guilds ORDER BY name").fetchall()
-        items = [{"id": r["id"], "label": f'{r["name"]}（ID:{r["game_guild_id"] or "-"}·{r["server"]}·{r["status"]}）'} for r in rows]
+        rows = conn.execute("SELECT id, name, cn_name, game_guild_id, server, status FROM guilds ORDER BY name").fetchall()
+        items = [{"id": r["id"], "label": guild_label(dict(r))} for r in rows]
     else:
         conn.close()
         abort(404)

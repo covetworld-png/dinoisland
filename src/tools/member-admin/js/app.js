@@ -298,6 +298,14 @@ function createRichEditor(initialHtml) {
 
 /* ================= 资源模块配置 ================= */
 
+// 军团拼接展示：(Q110)THIÊN HÀ（天河）
+function fmtGuild(server, gid, name, cn) {
+  const letter = (server || '')[0] || '';
+  const prefix = gid ? `(${letter}${gid})` : '';
+  const cnPart = (cn && !(name || '').includes(`（${cn}）`)) ? `（${cn}）` : '';
+  return prefix + (name || '') + cnPart;
+}
+
 const MODULES = {
   employees: {
     title: '员工',
@@ -843,7 +851,7 @@ async function openEmployeeDrawer(employeeId) {
   }
   (data.accounts || []).forEach(a => {
     const tr = document.createElement('tr');
-    [a.game_uid, a.nickname, a.guild_name ? a.guild_name + (a.guild_game_id ? '（ID:' + a.guild_game_id + '）' : '') : '', a.status].forEach(v => {
+    [a.game_uid, a.nickname, a.guild_name ? fmtGuild(a.guild_server, a.guild_game_id, a.guild_name, a.guild_cn_name) : '', a.status].forEach(v => {
       const td = document.createElement('td');
       td.textContent = (v === null || v === undefined) ? '' : String(v);
       tr.appendChild(td);
@@ -1698,7 +1706,7 @@ function renderLeaderBox() {
       });
       label.appendChild(cb);
       const span = document.createElement('span');
-      span.textContent = (g.name || ('#' + g.id)) + '（ID:' + (g.game_guild_id || g.id) + '·' + (g.server || '') + '·' + (g.operation_type || '') + '·' + (g.status || '') + '）';
+      span.textContent = fmtGuild(g.server, g.game_guild_id, g.name, g.cn_name) + '（' + (g.operation_type || '') + '·' + (g.status || '') + '）';
       label.appendChild(span);
       gWrap.appendChild(label);
     });
