@@ -102,8 +102,16 @@ def logout():
 
 @app.get("/api/me")
 def me():
-    return jsonify({"ok": True, "data": {"username": session.get("user"),
-                                         "role": session.get("role")}})
+    username = session.get("user")
+    role = session.get("role")
+    if username and not role:  # 旧会话无 role，回源数据库
+        conn = get_db()
+        row = conn.execute("SELECT role FROM admin_users WHERE username = ?",
+                           (username,)).fetchone()
+        conn.close()
+        role = (row["role"] if row and "role" in row.keys() else None) or "admin"
+        session["role"] = role
+    return jsonify({"ok": True, "data": {"username": username, "role": role}})
 
 
 @app.post("/api/change-password")
