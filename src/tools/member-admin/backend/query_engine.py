@@ -307,6 +307,7 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
         total = commission + (base or 0) + (g["position_allowance"] or 0) + (g["gm_allowance"] or 0)
         items.append({
             "employee": g["nickname"], "employee_status": g["emp_status"],
+            "employee_id": g["emp_id"],
             "guild": g["name"], "guild_game_id": gid_raw, "server": g["server"],
             "operation_type": g["operation_type"],
             "revenue": amount, "commission_rate": g["commission_rate"] or "",
@@ -341,6 +342,7 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
         total = (base or 0) + (e["position_allowance"] or 0) + (e["gm_allowance"] or 0)
         items.append({
             "employee": e["nickname"], "employee_status": e["status"],
+            "employee_id": e["id"],
             "guild": "（GM 无军团）", "guild_game_id": "", "server": "",
             "operation_type": "",
             "revenue": 0.0, "commission_rate": "", "commission": 0,
@@ -376,6 +378,7 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
         total = (base or 0) + (e["position_allowance"] or 0) + (e["gm_allowance"] or 0)
         items.append({
             "employee": e["nickname"], "employee_status": e["status"],
+            "employee_id": e["id"],
             "guild": "（无归属军团）", "guild_game_id": "", "server": "",
             "operation_type": "",
             "revenue": 0.0, "commission_rate": "", "commission": 0,
@@ -393,6 +396,7 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
     for it in items:
         s = summary.setdefault(it["employee"], {
             "employee": it["employee"], "employment_type": it["employment_type"],
+            "employee_id": it["employee_id"],
             "revenue": 0.0, "commission": 0, "base_salary": it["base_salary"],
             "base_salary_full": it["base_salary_full"],
             "work_days": it["work_days"], "month_days": it["month_days"],

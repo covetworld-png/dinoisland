@@ -450,7 +450,7 @@ function getListState(moduleKey) {
 async function switchModule(moduleKey) {
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', logs: '操作日志', users: '用户管理' };
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理' };
   $('#adminModuleTitle').textContent = titles[moduleKey] || '';
   if (moduleKey === 'users') {
     if (state.role !== 'super') return; // 用户管理仅 super
@@ -459,6 +459,8 @@ async function switchModule(moduleKey) {
     renderLogsPage();
   } else if (moduleKey === 'query') {
     renderQueryPage();
+  } else if (moduleKey === 'commission') {
+    renderCommissionPage();
   } else {
     renderListPage(moduleKey);
   }
@@ -1349,21 +1351,16 @@ function renderQueryPage() {
   const main = $('#adminMain');
   main.innerHTML = '';
 
-  // viewer：只能查看发放记录
+  // viewer：无查询权限
   if (state.role === 'viewer') {
-    const sec3 = document.createElement('div');
-    sec3.className = 'drawer-section';
-    sec3.innerHTML = '<h4>发放记录</h4>';
-    const snapWrap = document.createElement('div');
-    snapWrap.className = 'table-wrap';
-    snapWrap.id = 'snapshotsTableWrap';
-    sec3.appendChild(snapWrap);
-    main.appendChild(sec3);
-    loadSnapshots();
+    const tip = document.createElement('p');
+    tip.style.cssText = 'color:var(--text-secondary);font-size:13px;';
+    tip.textContent = '数据查询仅管理员可用；发放记录请查看「月度分成」页。';
+    main.appendChild(tip);
     return;
   }
 
-  // ---------- 区块 1：SQL 脚本 ----------
+  // ---------- SQL 脚本 ----------
   const sec1 = document.createElement('div');
   sec1.className = 'drawer-section';
   sec1.innerHTML = '<h4>SQL 脚本</h4>';
@@ -1415,10 +1412,32 @@ function renderQueryPage() {
   resultWrap.style.marginTop = '16px';
   main.appendChild(resultWrap);
 
-  // ---------- 区块 2：月度分成 ----------
+  loadScripts();
+}
+
+/* ================= 月度分成页（分成计算 + 发放记录） ================= */
+
+function renderCommissionPage() {
+  const main = $('#adminMain');
+  main.innerHTML = '';
+
+  // viewer：只能查看发放记录
+  if (state.role === 'viewer') {
+    const sec3 = document.createElement('div');
+    sec3.className = 'drawer-section';
+    sec3.innerHTML = '<h4>发放记录</h4>';
+    const snapWrap = document.createElement('div');
+    snapWrap.className = 'table-wrap';
+    snapWrap.id = 'snapshotsTableWrap';
+    sec3.appendChild(snapWrap);
+    main.appendChild(sec3);
+    loadSnapshots();
+    return;
+  }
+
+  // ---------- 区块 1：月度分成 ----------
   const sec2 = document.createElement('div');
   sec2.className = 'drawer-section';
-  sec2.style.marginTop = '28px';
   sec2.innerHTML = '<h4>月度分成</h4>';
 
   const bar2 = document.createElement('div');
@@ -1460,7 +1479,7 @@ function renderQueryPage() {
   sec2.appendChild(commWrap);
   main.appendChild(sec2);
 
-  // ---------- 区块 3：发放记录 ----------
+  // ---------- 区块 2：发放记录 ----------
   const sec3 = document.createElement('div');
   sec3.className = 'drawer-section';
   sec3.style.marginTop = '28px';
@@ -1471,7 +1490,6 @@ function renderQueryPage() {
   sec3.appendChild(snapWrap);
   main.appendChild(sec3);
 
-  loadScripts();
   loadSnapshots();
   loadLeaders();
 }
@@ -2403,7 +2421,15 @@ function renderCommissionTables(wrap, data, month) {
   bar1.appendChild(makeCsvBtn('分成汇总_' + month + '.csv', SUMMARY_COLS.map(c => c.label),
     () => summary.map(s => SUMMARY_COLS.map(c => c.get ? c.get(s) : s[c.key]))));
   sec1.appendChild(bar1);
-  sec1.appendChild(buildCommTable(SUMMARY_COLS, summary));
+  // 合计行：与 SUMMARY_COLS 对齐
+  const sumMoney = key => summary.reduce((n, s) => n + (Number(s[key]) || 0), 0);
+  const footer = ['合计（' + summary.length + ' 人）', '', '',
+    sumMoney('revenue'), sumMoney('commission'), sumMoney('base_salary'), '',
+    sumMoney('position_allowance'), sumMoney('gm_allowance'), sumMoney('total')];
+  sec1.appendChild(buildCommTable(SUMMARY_COLS, summary, {
+    onRow: s => openEmployeePayments(s.employee_id),
+    footer,
+  }));
   wrap.appendChild(sec1);
 
   // ---- 明细表 ----
@@ -2434,7 +2460,9 @@ function renderCommissionTables(wrap, data, month) {
 }
 
 // 分成表格：金额列右对齐 + 千分位，非金额列原样输出
-function buildCommTable(cols, rows) {
+// opts.onRow(row): 行点击回调；opts.footer: 合计行（数组，与 cols 对齐，money 列给数值）
+function buildCommTable(cols, rows, opts) {
+  opts = opts || {};
   const wrap = document.createElement('div');
   wrap.className = 'table-wrap';
   const table = document.createElement('table');
@@ -2461,6 +2489,11 @@ function buildCommTable(cols, rows) {
   }
   rows.forEach(row => {
     const tr = document.createElement('tr');
+    if (opts.onRow) {
+      tr.style.cursor = 'pointer';
+      tr.title = '点击查看收款账户';
+      tr.addEventListener('click', () => opts.onRow(row));
+    }
     cols.forEach(c => {
       const raw = c.get ? c.get(row) : row[c.key];
       const td = document.createElement('td');
@@ -2474,9 +2507,47 @@ function buildCommTable(cols, rows) {
     });
     tbody.appendChild(tr);
   });
+  if (opts.footer && rows.length) {
+    const tr = document.createElement('tr');
+    tr.style.cssText = 'font-weight:600;border-top:2px solid var(--border);background:#f9fafb;';
+    cols.forEach((c, i) => {
+      const td = document.createElement('td');
+      const v = opts.footer[i];
+      if (c.money) {
+        td.style.textAlign = 'right';
+        td.textContent = fmtMoney(v);
+      } else {
+        td.textContent = (v === null || v === undefined) ? '' : String(v);
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  }
   table.appendChild(tbody);
   wrap.appendChild(table);
   return wrap;
+}
+
+// 汇总行点击 → 该员工收款账户抽屉（多个账户取最近更新的一一展示第一个，弹提示；无账户弹提示）
+async function openEmployeePayments(employeeId) {
+  if (!employeeId) {
+    showToast('该快照无员工关联信息，无法查看收款账户', 'error');
+    return; // 旧快照无 employee_id
+  }
+  let data;
+  try {
+    data = await api('payments?' + new URLSearchParams({ page: 1, page_size: 50, employee_id: employeeId }).toString());
+  } catch (err) {
+    showToast(err.message, 'error');
+    return;
+  }
+  const list = data.items || [];
+  if (!list.length) {
+    showToast('该员工暂无收款账户', 'error');
+    return;
+  }
+  if (list.length > 1) showToast('该员工有 ' + list.length + ' 个收款账户，显示第一个', 'success');
+  openPaymentDrawer(list[0]);
 }
 
 /* ---------- 发放快照 ---------- */
