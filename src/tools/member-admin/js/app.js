@@ -1374,6 +1374,12 @@ function renderQueryPage() {
   spacer.className = 'spacer';
   bar.appendChild(spacer);
 
+  const genBtn = document.createElement('button');
+  genBtn.className = 'btn btn-write';
+  genBtn.textContent = '⚙ 脚本生成器';
+  genBtn.addEventListener('click', openSqlGenModal);
+  bar.appendChild(genBtn);
+
   const addBtn = document.createElement('button');
   addBtn.className = 'btn btn-primary btn-write';
   addBtn.textContent = '+ 新增脚本';
@@ -1529,6 +1535,122 @@ async function loadScripts() {
   wrap.appendChild(table);
 }
 
+/* ---------- SQL 脚本生成器 ---------- */
+
+const SG_CONTROLS = [
+  ['date', 'date 日期'],
+  ['month', 'month 月份'],
+  ['server', 'server 服务器下拉'],
+  ['guild', 'guild 军团下拉'],
+  ['text', 'text 文本'],
+];
+
+let sgSpecs = []; // [{name, control}]
+
+// 控件类型自动预选规则
+function guessControl(name) {
+  const n = name.toLowerCase();
+  if (n === 'server_id') return 'server';
+  if (n === 'guild_id') return 'guild';
+  if (n.includes('month') && !n.includes('start') && !n.includes('end') && !n.includes('date')) return 'month';
+  if (n.includes('day') || n.includes('date') || n.includes('start') || n.includes('end')) return 'date';
+  return 'text';
+}
+
+function openSqlGenModal() {
+  $('#sgName').value = '';
+  $('#sgDesc').value = '';
+  $('#sgSql').value = '';
+  sgSpecs = [];
+  renderSgParams();
+  openModal('sqlGenModal');
+}
+
+// 从 SQL 提取 %(x)s 参数（去重保序）；silent=true 时不弹提示
+function parseSgParams(silent) {
+  const re = /%\((\w+)\)s/g;
+  const names = [];
+  let m;
+  while ((m = re.exec($('#sgSql').value))) {
+    if (!names.includes(m[1])) names.push(m[1]);
+  }
+  if (!names.length) {
+    if (!silent) showToast('未检测到 %(参数名)s 占位符', 'error');
+    sgSpecs = [];
+  } else {
+    // 已配置过的参数保留用户选择的控件类型
+    sgSpecs = names.map(n => {
+      const old = sgSpecs.find(s => s.name === n);
+      return { name: n, control: old ? old.control : guessControl(n) };
+    });
+  }
+}
+
+function renderSgParams() {
+  const area = $('#sgParamsArea');
+  area.innerHTML = '';
+  if (!sgSpecs.length) {
+    area.innerHTML = '<p style="font-size:12px;color:var(--text-secondary);margin:0;">暂无参数（点击「解析参数」从 SQL 提取）</p>';
+    return;
+  }
+  sgSpecs.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:8px;';
+    const name = document.createElement('span');
+    name.style.cssText = 'font-size:13px;font-family:Menlo,Consolas,monospace;min-width:140px;';
+    name.textContent = s.name;
+    row.appendChild(name);
+    const sel = document.createElement('select');
+    sel.style.cssText = 'padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;';
+    SG_CONTROLS.forEach(([v, label]) => {
+      const o = document.createElement('option');
+      o.value = v;
+      o.textContent = label;
+      sel.appendChild(o);
+    });
+    sel.value = s.control;
+    sel.addEventListener('change', () => { sgSpecs[i].control = sel.value; });
+    row.appendChild(sel);
+    area.appendChild(row);
+  });
+}
+
+$('#sgParseBtn').addEventListener('click', () => {
+  parseSgParams(false);
+  renderSgParams();
+});
+
+$('#sgSaveBtn').addEventListener('click', async () => {
+  const name = $('#sgName').value.trim();
+  const sql = $('#sgSql').value;
+  if (!name) {
+    showToast('请填写：脚本名称', 'error');
+    return;
+  }
+  if (!sql.trim()) {
+    showToast('请填写：SQL', 'error');
+    return;
+  }
+  if (!sgSpecs.length) parseSgParams(true); // 未手动解析时静默解析一次（无占位符则 params 为空）
+  try {
+    await api('sql_scripts', {
+      method: 'POST',
+      json: {
+        name,
+        description: $('#sgDesc').value.trim(),
+        params: sgSpecs.map(s => s.name).join(','),
+        param_specs: JSON.stringify(sgSpecs),
+        sql_text: sql,
+      },
+    });
+    showToast('已创建', 'success');
+    closeModal('sqlGenModal');
+    loadScripts();
+  } catch (err) {
+    showToast('保存失败：' + err.message, 'error');
+  }
+});
+
 /* ---------- SQL 脚本新增 / 编辑弹窗 ---------- */
 
 let sqlScriptCtx = null; // { item }
@@ -1579,30 +1701,77 @@ function paramInputType(name) {
   return 'text';
 }
 
-function runScript(script) {
+// 服务器下拉固定选项（server 控件）
+const SERVER_OPTIONS = [
+  { id: '*', label: '全服(*)' },
+  { id: '750748016054341', label: 'Q服' },
+  { id: '768538488131653', label: 'K服' },
+];
+
+async function runScript(script) {
   const paramNames = (script.params || '').split(',').map(s => s.trim()).filter(Boolean);
   if (!paramNames.length) {
     doRunScript(script, {});
     return;
   }
+
+  // 控件类型：优先 param_specs（JSON，容错），回退参数名推断
+  let specs = [];
+  try {
+    const parsed = JSON.parse(script.param_specs || '[]');
+    if (Array.isArray(parsed)) specs = parsed;
+  } catch (e) { /* 忽略，走回退 */ }
+  const specMap = {};
+  specs.forEach(s => { if (s && s.name) specMap[s.name] = s.control; });
+  const controlOf = p => specMap[p] || paramInputType(p);
+
+  // guild 控件需要军团选项（缓存于 state.options.game_guilds）
+  if (paramNames.some(p => controlOf(p) === 'guild')) {
+    try {
+      await loadOptions('game_guilds');
+    } catch (err) {
+      showToast(err.message, 'error');
+      return;
+    }
+  }
+
   const body = $('#runParamsBody');
   body.innerHTML = '';
   $('#runParamsTitle').textContent = '执行参数：' + (script.name || '');
   const ctrls = {};
   paramNames.forEach(p => {
+    const control = controlOf(p);
     const label = document.createElement('label');
     label.className = 'field';
     const span = document.createElement('span');
     span.textContent = p;
     label.appendChild(span);
-    const input = document.createElement('input');
-    input.type = paramInputType(p);
-    // 日期类参数给默认值，省得每次手选
-    if (input.type === 'date') input.value = new Date().toISOString().slice(0, 10);
-    if (input.type === 'month') input.value = new Date().toISOString().slice(0, 7);
-    label.appendChild(input);
+
+    if (control === 'server') {
+      const sel = document.createElement('select');
+      SERVER_OPTIONS.forEach(o => {
+        const op = document.createElement('option');
+        op.value = o.id;
+        op.textContent = o.label;
+        sel.appendChild(op);
+      });
+      sel.value = '*';
+      ctrls[p] = { getValue: () => sel.value };
+      label.appendChild(sel);
+    } else if (control === 'guild') {
+      const ss = createSearchSelect(state.options.game_guilds || [], { placeholder: '搜索选择军团' });
+      ctrls[p] = ss;
+      label.appendChild(ss.el);
+    } else {
+      const input = document.createElement('input');
+      input.type = control === 'date' ? 'date' : control === 'month' ? 'month' : 'text';
+      // 日期类参数给默认值，省得每次手选
+      if (input.type === 'date') input.value = new Date().toISOString().slice(0, 10);
+      if (input.type === 'month') input.value = new Date().toISOString().slice(0, 7);
+      ctrls[p] = { getValue: () => input.value };
+      label.appendChild(input);
+    }
     body.appendChild(label);
-    ctrls[p] = input;
   });
   runCtx = { script, paramNames, ctrls };
   openModal('runParamsModal');
@@ -1611,7 +1780,9 @@ function runScript(script) {
 $('#runParamsRunBtn').addEventListener('click', () => {
   if (!runCtx) return;
   const values = {};
-  runCtx.paramNames.forEach(p => { values[p] = runCtx.ctrls[p].value.trim(); });
+  runCtx.paramNames.forEach(p => {
+    values[p] = String(runCtx.ctrls[p].getValue() || '').trim();
+  });
   const script = runCtx.script;
   closeModal('runParamsModal');
   doRunScript(script, values);

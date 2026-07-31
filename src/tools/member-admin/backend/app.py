@@ -304,6 +304,12 @@ def options(kind):
     elif kind == "guilds":
         rows = conn.execute("SELECT id, name, cn_name, game_guild_id, server, status FROM guilds ORDER BY name").fetchall()
         items = [{"id": r["id"], "label": guild_label(dict(r))} for r in rows]
+    elif kind == "game_guilds":
+        # 以游戏内军团 ID 为值（供 SQL 脚本 guild_id 参数下拉）
+        rows = conn.execute(
+            "SELECT id, name, cn_name, game_guild_id, server, status FROM guilds"
+            " WHERE game_guild_id != '' ORDER BY server, CAST(game_guild_id AS INTEGER)").fetchall()
+        items = [{"id": r["game_guild_id"], "label": guild_label(dict(r))} for r in rows]
     else:
         conn.close()
         abort(404)

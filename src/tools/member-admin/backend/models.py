@@ -75,7 +75,8 @@ CREATE TABLE IF NOT EXISTS sql_scripts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     description TEXT DEFAULT '',
-    params TEXT DEFAULT '',          -- 参数名逗号分隔，如 month_start,month_end
+    params TEXT DEFAULT '',          -- 参数名逗号分隔，如 day,server_id
+    param_specs TEXT DEFAULT '',     -- JSON: [{name, control}] control: date/month/server/guild/text
     sql_text TEXT NOT NULL,
     created_at TEXT,
     updated_at TEXT
@@ -133,7 +134,7 @@ TABLE_FIELDS = {
                       "tiktok_account", "remark"],
     "payment_accounts": ["employee_id", "account_type", "account_name", "account_no",
                          "bank_name", "bank_branch", "phone", "address", "qr_image", "remark"],
-    "sql_scripts": ["name", "description", "params", "sql_text"],
+    "sql_scripts": ["name", "description", "params", "param_specs", "sql_text"],
     "commission_snapshots": ["month", "basis", "remark"],
 }
 

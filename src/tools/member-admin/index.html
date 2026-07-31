@@ -262,6 +262,40 @@
     </div>
   </div>
 
+  <!-- SQL 脚本生成器弹窗 -->
+  <div id="sqlGenModal" class="modal hidden">
+    <div class="modal-overlay" data-close="sqlGenModal"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>脚本生成器</h3>
+        <button type="button" class="modal-close" data-close="sqlGenModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label class="field">
+          <span>脚本名称 *</span>
+          <input type="text" id="sgName">
+        </label>
+        <label class="field">
+          <span>说明</span>
+          <input type="text" id="sgDesc">
+        </label>
+        <label class="field">
+          <span>SQL（参数用 %(参数名)s 占位）</span>
+          <textarea id="sgSql" rows="8" style="font-family:Menlo,Consolas,monospace;font-size:13px;"
+            placeholder="SELECT * FROM orders WHERE server_id = %(server_id)s AND paid_at >= %(day)s"></textarea>
+        </label>
+        <div style="margin-bottom:12px;">
+          <button type="button" class="btn" id="sgParseBtn">解析参数</button>
+        </div>
+        <div id="sgParamsArea"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="sqlGenModal">取消</button>
+        <button type="button" class="btn btn-primary" id="sgSaveBtn">保存脚本</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast hidden"></div>
   <input type="file" id="imageFileInput" accept="image/*" class="hidden">
 
