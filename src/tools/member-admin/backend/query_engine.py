@@ -5,8 +5,11 @@
 - amount 单位为 VND，禁止 /100
 - prod_orders 时间为 GMT+7
 """
+import calendar
 import re
+import sqlite3
 import time
+from datetime import date, datetime
 
 from config import MONSTER_DB
 
@@ -18,6 +21,39 @@ FORBIDDEN = re.compile(
     r"set|use|lock|unlock|call|exec|into\s+outfile|into\s+dumpfile|load_file)\b",
     re.IGNORECASE,
 )
+
+
+def _parse_ymd(s):
+    """'YYYY-MM-DD' → date；空/非法 → None"""
+    try:
+        return datetime.strptime((s or "").strip()[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def _work_days(month, entry_date, leave_date):
+    """在职天数折算：entry_date 晚于月初则起算入职日，leave_date 早于月末则止算离职日。
+    返回 (在职天数, 当月天数)。区间无效（入职晚于月末/离职早于月初）→ 0。"""
+    y, m = int(month[:4]), int(month[5:7])
+    month_days = calendar.monthrange(y, m)[1]
+    start, end = date(y, m, 1), date(y, m, month_days)
+    e, l = _parse_ymd(entry_date), _parse_ymd(leave_date)
+    if e and e > start:
+        start = e
+    if l and l < end:
+        end = l
+    if start > end:
+        return 0, month_days
+    return (end - start).days + 1, month_days
+
+
+def _prorated_base(base_full, month, entry_date, leave_date):
+    """底薪按在职天数/当月实际天数折算；无入离职限制时为全额。返回 (折算底薪, 在职天数, 当月天数)"""
+    wd, md = _work_days(month, entry_date, leave_date)
+    base_full = base_full or 0
+    if wd == md:
+        return base_full, wd, md
+    return round(base_full * wd / md), wd, md
 
 
 def _connect():
@@ -221,13 +257,15 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
         SELECT g.id, g.name, g.game_guild_id, g.server, g.operation_type,
                e.id AS emp_id, e.nickname, e.commission_rate, e.employment_type,
                e.probation_salary, e.formal_salary, e.position_allowance, e.gm_allowance,
-               e.status AS emp_status, e.position AS emp_position
+               e.status AS emp_status, e.position AS emp_position,
+               e.entry_date, e.leave_date
         FROM guilds g JOIN employees e ON g.leader_employee_id = e.id
         UNION ALL
         SELECT g.id, g.name, g.game_guild_id, g.server, g.operation_type,
                e.id AS emp_id, e.nickname, e.commission_rate, e.employment_type,
                e.probation_salary, e.formal_salary, e.position_allowance, e.gm_allowance,
-               e.status AS emp_status, e.position AS emp_position
+               e.status AS emp_status, e.position AS emp_position,
+               e.entry_date, e.leave_date
         FROM employees e JOIN guilds g ON e.guild_id = g.id AND e.position = 'GS'
     """).fetchall()
     conn.close()
@@ -258,7 +296,9 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
                 matched_sid = sid
                 break
         rate = _parse_rate(g["commission_rate"])
-        base = g["probation_salary"] if g["employment_type"] == "试用期" else g["formal_salary"]
+        base_full = g["probation_salary"] if g["employment_type"] == "试用期" else g["formal_salary"]
+        base, work_days, month_days = _prorated_base(
+            base_full, month, g["entry_date"], g["leave_date"])
         commission = round(amount * rate)
         total = commission + (base or 0) + (g["position_allowance"] or 0) + (g["gm_allowance"] or 0)
         items.append({
@@ -267,7 +307,8 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "operation_type": g["operation_type"],
             "revenue": amount, "commission_rate": g["commission_rate"] or "",
             "commission": commission, "employment_type": g["employment_type"],
-            "base_salary": base or 0,
+            "base_salary": base or 0, "base_salary_full": base_full or 0,
+            "work_days": work_days, "month_days": month_days,
             "position_allowance": g["position_allowance"] or 0,
             "gm_allowance": g["gm_allowance"] or 0,
             "total": total,
@@ -290,7 +331,9 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             continue  # 手动勾选模式下 GM 只在 gm_ids 中勾选才计入
         elif e["status"] == "离职":
             continue
-        base = e["probation_salary"] if e["employment_type"] == "试用期" else e["formal_salary"]
+        base_full = e["probation_salary"] if e["employment_type"] == "试用期" else e["formal_salary"]
+        base, work_days, month_days = _prorated_base(
+            base_full, month, e["entry_date"], e["leave_date"])
         total = (base or 0) + (e["position_allowance"] or 0) + (e["gm_allowance"] or 0)
         items.append({
             "employee": e["nickname"], "employee_status": e["status"],
@@ -298,7 +341,8 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "operation_type": "",
             "revenue": 0.0, "commission_rate": "", "commission": 0,
             "employment_type": e["employment_type"],
-            "base_salary": base or 0,
+            "base_salary": base or 0, "base_salary_full": base_full or 0,
+            "work_days": work_days, "month_days": month_days,
             "position_allowance": e["position_allowance"] or 0,
             "gm_allowance": e["gm_allowance"] or 0,
             "total": total, "unmatched": False, "is_gm": True,
@@ -311,6 +355,8 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
         s = summary.setdefault(it["employee"], {
             "employee": it["employee"], "employment_type": it["employment_type"],
             "revenue": 0.0, "commission": 0, "base_salary": it["base_salary"],
+            "base_salary_full": it["base_salary_full"],
+            "work_days": it["work_days"], "month_days": it["month_days"],
             "position_allowance": it["position_allowance"], "gm_allowance": it["gm_allowance"],
             "total": 0, "guilds": []})
         s["revenue"] += it["revenue"]

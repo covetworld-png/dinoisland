@@ -340,6 +340,7 @@ const MODULES = {
       { key: 'commission_rate', label: '分成比例', type: 'text' },
       { key: 'guild_id', label: '从属军团（GS）', type: 'searchselect', optionsKind: 'guilds' },
       { key: 'entry_date', label: '入职日期', type: 'date' },
+      { key: 'leave_date', label: '离职日期', type: 'date' },
       { key: 'remark', label: '备注', type: 'textarea', full: true },
     ],
     rowClick: openEmployeeDrawer,
@@ -859,7 +860,7 @@ const EMPLOYEE_DETAIL_FIELDS = [
   ['nickname', '昵称'], ['emp_no', '编号'], ['real_name', '真实姓名'], ['cn_name', '中文名'],
   ['position', '岗位'], ['status', '状态'], ['employment_type', '聘用类型'],
   ['probation_salary', '试用期底薪'], ['formal_salary', '正式底薪'], ['position_allowance', '岗位津贴'], ['gm_allowance', 'GM 津贴'],
-  ['commission_rate', '分成比例'], ['entry_date', '入职日期'], ['remark', '备注'],
+  ['commission_rate', '分成比例'], ['entry_date', '入职日期'], ['leave_date', '离职日期'], ['remark', '备注'],
   ['created_at', '创建时间'], ['updated_at', '更新时间'],
 ];
 
@@ -2365,6 +2366,7 @@ function renderCommissionTables(wrap, data, month) {
     { label: '军团收入合计', key: 'revenue', money: true },
     { label: '分成金额', key: 'commission', money: true },
     { label: '底薪', key: 'base_salary', money: true },
+    { label: '在职天数', get: s => (s.work_days != null && s.month_days ? (s.work_days < s.month_days ? s.work_days + '/' + s.month_days : '整月') : '') },
     { label: '岗位津贴', key: 'position_allowance', money: true },
     { label: 'GM津贴', key: 'gm_allowance', money: true },
     { label: '应发合计', key: 'total', money: true },
