@@ -11,7 +11,7 @@ import time
 from config import MONSTER_DB
 
 MAX_ROWS = 500
-QUERY_TIMEOUT = 30
+QUERY_TIMEOUT = 180  # 大表月度扫描（dino_op_logs 无有效组合索引）约 45-60s
 
 FORBIDDEN = re.compile(
     r"\b(insert|update|delete|drop|alter|create|truncate|replace|grant|revoke|"
