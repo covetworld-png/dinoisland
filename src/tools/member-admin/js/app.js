@@ -1575,7 +1575,7 @@ let runCtx = null; // { script, paramNames, ctrls }
 function paramInputType(name) {
   const n = name.toLowerCase();
   if (n.includes('month') && !n.includes('start') && !n.includes('end') && !n.includes('date')) return 'month';
-  if (n.includes('date') || n.includes('month') || n.includes('start') || n.includes('end')) return 'date';
+  if (n.includes('date') || n.includes('month') || n.includes('start') || n.includes('end') || n.includes('day')) return 'date';
   return 'text';
 }
 
@@ -1597,6 +1597,9 @@ function runScript(script) {
     label.appendChild(span);
     const input = document.createElement('input');
     input.type = paramInputType(p);
+    // 日期类参数给默认值，省得每次手选
+    if (input.type === 'date') input.value = new Date().toISOString().slice(0, 10);
+    if (input.type === 'month') input.value = new Date().toISOString().slice(0, 7);
     label.appendChild(input);
     body.appendChild(label);
     ctrls[p] = input;
