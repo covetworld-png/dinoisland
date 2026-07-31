@@ -57,9 +57,14 @@ CREATE TABLE IF NOT EXISTS game_accounts (
 CREATE TABLE IF NOT EXISTS payment_accounts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     employee_id INTEGER NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
-    account_type TEXT DEFAULT '其他',   -- 银行/MoMo/ZaloPay/其他
-    account_name TEXT DEFAULT '',      -- 户名
-    info_html TEXT DEFAULT '',         -- 富文本：账号/二维码/说明混排
+    account_type TEXT DEFAULT '其他',   -- 银行账户/MoMo电子钱包/ZaloPay电子钱包/其他
+    account_name TEXT DEFAULT '',      -- 收款人
+    account_no TEXT DEFAULT '',        -- 银行账号/钱包账号
+    bank_name TEXT DEFAULT '',         -- 银行名称
+    bank_branch TEXT DEFAULT '',       -- 开户支行
+    phone TEXT DEFAULT '',             -- 手机号
+    address TEXT DEFAULT '',           -- 地址
+    qr_image TEXT DEFAULT '',          -- 二维码图片路径
     remark TEXT DEFAULT '',
     created_at TEXT,
     updated_at TEXT
@@ -125,7 +130,8 @@ TABLE_FIELDS = {
     "guilds": ["name", "cn_name", "game_guild_id", "server", "leader_employee_id", "status", "operation_type", "remark"],
     "game_accounts": ["employee_id", "game_uid", "nickname", "guild_id", "status",
                       "tiktok_account", "remark"],
-    "payment_accounts": ["employee_id", "account_type", "account_name", "info_html", "remark"],
+    "payment_accounts": ["employee_id", "account_type", "account_name", "account_no",
+                         "bank_name", "bank_branch", "phone", "address", "qr_image", "remark"],
     "sql_scripts": ["name", "description", "params", "sql_text"],
     "commission_snapshots": ["month", "basis", "remark"],
 }

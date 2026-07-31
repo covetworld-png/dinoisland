@@ -173,7 +173,7 @@ ENTITY_CONFIG = {
                "filter_fields": ["server", "status", "operation_type", "leader_employee_id"]},
     "game_accounts": {"keyword_fields": ["game_uid", "nickname", "tiktok_account", "remark"],
                       "filter_fields": ["status", "employee_id", "guild_id"]},
-    "payment_accounts": {"keyword_fields": ["account_name", "remark"],
+    "payment_accounts": {"keyword_fields": ["account_name", "account_no", "bank_name", "remark"],
                          "filter_fields": ["account_type", "employee_id"],
                          "join_filters": {"employee_status": ("employee_id", "employees", "status")}},
     "sql_scripts": {"keyword_fields": ["name", "description"],

@@ -408,20 +408,26 @@ const MODULES = {
     columns: [
       { key: 'employee_id', label: '所属员工', render: v => esc(optionLabel('employees', v)) },
       { key: 'account_type', label: '类型' },
-      { key: 'account_name', label: '账户名称' },
+      { key: 'account_name', label: '收款人' },
+      { key: 'bank_name', label: '银行' },
+      { key: 'account_no', label: '账号' },
       { key: 'remark', label: '备注' },
       { key: 'updated_at', label: '修改时间' },
     ],
     filters: [
       { key: 'account_type', label: '全部类型', metaKey: 'payment_types' },
-      { key: 'employee_id', label: '所属员工', type: 'searchselect', optionsKind: 'employees' },
       { key: 'employee_status', label: '员工状态', metaKey: 'employee_statuses' },
     ],
     fields: [
       { key: 'employee_id', label: '所属员工', type: 'searchselect', optionsKind: 'employees', required: true },
       { key: 'account_type', label: '类型', type: 'select', metaKey: 'payment_types' },
-      { key: 'account_name', label: '账户名称', type: 'text' },
-      { key: 'info_html', label: '收款信息（富文本）', type: 'richtext', full: true },
+      { key: 'account_name', label: '收款人', type: 'text' },
+      { key: 'account_no', label: '账号', type: 'text' },
+      { key: 'bank_name', label: '银行名称', type: 'text' },
+      { key: 'bank_branch', label: '开户支行', type: 'text' },
+      { key: 'phone', label: '手机号', type: 'text' },
+      { key: 'address', label: '地址', type: 'text' },
+      { key: 'qr_image', label: '二维码', type: 'image', full: true },
       { key: 'remark', label: '备注', type: 'textarea', full: true },
     ],
     rowClick: (id, item) => openPaymentDrawer(item),
@@ -733,6 +739,63 @@ async function openFormModal(moduleKey, item) {
       const rte = createRichEditor(cur || '');
       fieldCtrls[f.key] = { getValue: () => rte.getHTML() };
       label.appendChild(rte.el);
+    } else if (f.type === 'image') {
+      // 图片字段：缩略图 + 选择上传（api/upload/image）+ 清除，字段值为图片 url
+      const box = document.createElement('div');
+      let val = cur || '';
+      const thumb = document.createElement('img');
+      thumb.style.cssText = 'max-width:160px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;'
+        + (val ? '' : 'display:none;');
+      if (val) thumb.src = val;
+      box.appendChild(thumb);
+
+      const btnRow = document.createElement('div');
+      btnRow.style.cssText = 'display:flex;gap:8px;';
+      const fi = document.createElement('input');
+      fi.type = 'file';
+      fi.accept = 'image/*';
+      fi.className = 'hidden';
+
+      const pickBtn = document.createElement('button');
+      pickBtn.type = 'button';
+      pickBtn.className = 'btn btn-sm';
+      pickBtn.textContent = '选择图片';
+      pickBtn.addEventListener('click', () => fi.click());
+      btnRow.appendChild(pickBtn);
+
+      const clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'btn btn-sm';
+      clearBtn.textContent = '清除图片';
+      clearBtn.addEventListener('click', () => {
+        val = '';
+        thumb.src = '';
+        thumb.style.display = 'none';
+      });
+      btnRow.appendChild(clearBtn);
+
+      fi.addEventListener('change', async () => {
+        if (!fi.files || !fi.files[0]) return;
+        const fd = new FormData();
+        fd.append('file', fi.files[0]);
+        pickBtn.disabled = true;
+        try {
+          const data = await api('upload/image', { method: 'POST', body: fd });
+          val = data.url;
+          thumb.src = val;
+          thumb.style.display = '';
+          showToast('图片已上传', 'success');
+        } catch (err) {
+          showToast('图片上传失败：' + err.message, 'error');
+        }
+        pickBtn.disabled = false;
+        fi.value = '';
+      });
+
+      box.appendChild(btnRow);
+      box.appendChild(fi);
+      fieldCtrls[f.key] = { getValue: () => val };
+      label.appendChild(box);
     } else if (f.type === 'textarea') {
       const ta = document.createElement('textarea');
       ta.value = cur || '';
@@ -878,32 +941,40 @@ async function openEmployeeDrawer(employeeId) {
   const sec4 = document.createElement('div');
   sec4.className = 'drawer-section';
   sec4.innerHTML = '<h4>收款账户（' + (data.payments || []).length + '）</h4>';
+  const payTable = document.createElement('table');
+  payTable.className = 'data-table';
+  payTable.innerHTML = '<thead><tr><th>类型</th><th>收款人</th><th>银行</th><th>账号</th><th>二维码</th><th>操作</th></tr></thead>';
+  const payBody = document.createElement('tbody');
   if (!(data.payments || []).length) {
-    const p = document.createElement('p');
-    p.style.color = '#6b7280';
-    p.textContent = '暂无收款账户';
-    sec4.appendChild(p);
+    payBody.innerHTML = '<tr><td colspan="6" class="empty-cell">暂无收款账户</td></tr>';
   }
   (data.payments || []).forEach(p => {
-    const card = document.createElement('div');
-    card.style.cssText = 'border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;';
-    const head = document.createElement('div');
-    head.style.cssText = 'margin-bottom:8px;font-size:13px;';
-    head.innerHTML = '<span class="tag">' + esc(p.account_type) + '</span> <b>' + esc(p.account_name) + '</b>'
-      + (p.remark ? ' <span style="color:#6b7280">（' + esc(p.remark) + '）</span>' : '');
-    card.appendChild(head);
-    const info = document.createElement('div');
-    info.className = 'info-html';
-    info.innerHTML = p.info_html || ''; // 后台可信 HTML，直接渲染（含图片）
-    card.appendChild(info);
-    sec4.appendChild(card);
+    const tr = document.createElement('tr');
+    [p.account_type, p.account_name, p.bank_name, p.account_no, p.qr_image ? '有' : '无'].forEach(v => {
+      const td = document.createElement('td');
+      td.textContent = (v === null || v === undefined) ? '' : String(v);
+      tr.appendChild(td);
+    });
+    const tdOp = document.createElement('td');
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'btn btn-sm';
+    viewBtn.textContent = '查看';
+    viewBtn.addEventListener('click', () => openPaymentDrawer(p));
+    tdOp.appendChild(viewBtn);
+    tr.appendChild(tdOp);
+    payBody.appendChild(tr);
   });
+  payTable.appendChild(payBody);
+  const payWrap = document.createElement('div');
+  payWrap.className = 'table-wrap';
+  payWrap.appendChild(payTable);
+  sec4.appendChild(payWrap);
   body.appendChild(sec4);
 }
 
 /* ================= 收款账户详情抽屉 ================= */
 
-// 行数据已含全部字段（含 info_html），直接用，无需额外请求；viewer 也可打开（只读）
+// 行数据已含全部字段，直接用，无需额外请求；viewer 也可打开（只读）
 function openPaymentDrawer(payment) {
   const body = $('#drawerBody');
   body.innerHTML = '';
@@ -919,7 +990,12 @@ function openPaymentDrawer(payment) {
   [
     ['所属员工', optionLabel('employees', payment.employee_id)],
     ['类型', payment.account_type],
-    ['账户名称', payment.account_name],
+    ['收款人', payment.account_name],
+    ['账号', payment.account_no],
+    ['银行名称', payment.bank_name],
+    ['开户支行', payment.bank_branch],
+    ['手机号', payment.phone],
+    ['地址', payment.address],
     ['备注', payment.remark],
     ['创建时间', payment.created_at],
     ['修改时间', payment.updated_at],
@@ -931,14 +1007,21 @@ function openPaymentDrawer(payment) {
   sec1.appendChild(grid);
   body.appendChild(sec1);
 
-  // ---- 收款信息（后台可信 HTML，直接渲染，含表格和二维码图片） ----
+  // ---- 收款二维码 ----
   const sec2 = document.createElement('div');
   sec2.className = 'drawer-section';
-  sec2.innerHTML = '<h4>收款信息</h4>';
-  const info = document.createElement('div');
-  info.className = 'info-html';
-  info.innerHTML = payment.info_html || '<span style="color:#6b7280">（未填写）</span>';
-  sec2.appendChild(info);
+  sec2.innerHTML = '<h4>收款二维码</h4>';
+  if (payment.qr_image) {
+    const img = document.createElement('img');
+    img.src = payment.qr_image;
+    img.style.cssText = 'max-width:260px;border:1px solid var(--border);border-radius:6px;';
+    sec2.appendChild(img);
+  } else {
+    const p = document.createElement('p');
+    p.style.color = '#6b7280';
+    p.textContent = '未上传';
+    sec2.appendChild(p);
+  }
   body.appendChild(sec2);
 }
 
