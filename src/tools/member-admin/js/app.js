@@ -1747,6 +1747,7 @@ function updateLeaderTitle() {
 }
 
 function renderLeaderBox() {
+  if (!renderLeaderBox._leftExpanded) renderLeaderBox._leftExpanded = new Set();
   const wrap = $('#leaderBoxWrap');
   if (!wrap || !leadersCache) return;
   wrap.innerHTML = '';
@@ -1816,10 +1817,26 @@ function renderLeaderBox() {
     headLabel.appendChild(headSpan);
     group.appendChild(headLabel);
 
+    // 离职团长默认收起，点击“展开”才显示名下军团
+    const leftExpanded = renderLeaderBox._leftExpanded;
+    let groupExpanded = true;
+    if (isLeft) {
+      groupExpanded = leftExpanded.has(l.id);
+      const toggle = document.createElement('button');
+      toggle.className = 'btn btn-sm';
+      toggle.style.cssText = 'margin-left:8px;padding:0 8px;font-size:12px;';
+      toggle.textContent = groupExpanded ? '收起 ▴' : '展开 ▾';
+      toggle.addEventListener('click', () => {
+        if (groupExpanded) leftExpanded.delete(l.id); else leftExpanded.add(l.id);
+        renderLeaderBox();
+      });
+      headLabel.appendChild(toggle);
+    }
+
     // ---- 名下军团 ----
     const gWrap = document.createElement('div');
     gWrap.style.cssText = 'margin:4px 0 0 22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:4px 16px;'
-      + (isLeft ? 'text-decoration:line-through;' : '');
+      + (isLeft ? 'text-decoration:line-through;' : '') + (groupExpanded ? '' : 'display:none;');
     guilds.forEach(g => {
       const label = document.createElement('label');
       label.style.cssText = 'display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:400;';
