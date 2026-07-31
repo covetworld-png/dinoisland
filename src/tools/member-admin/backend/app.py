@@ -73,6 +73,18 @@ def super_required(f):
     return wrapper
 
 
+def admin_required(f):
+    """查询类操作：super/admin 可用；viewer 只能查看业务数据和快照"""
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not session.get("user"):
+            return jsonify({"ok": False, "error": "未登录"}), 401
+        if session.get("role") not in ("super", "admin"):
+            return jsonify({"ok": False, "error": "查询权限需管理员及以上"}), 403
+        return f(*args, **kwargs)
+    return wrapper
+
+
 def client_ip():
     return request.headers.get("X-Real-IP") or request.remote_addr or ""
 
@@ -83,13 +95,39 @@ def login():
     username = (data.get("username") or "").strip()
     password = data.get("password") or ""
     conn = get_db()
+    # 登录锁定：失败 3 次锁 2 小时
+    lock = conn.execute("SELECT * FROM login_security WHERE username = ?", (username,)).fetchone()
+    if lock and lock["locked_until"] and lock["locked_until"] > now():
+        conn.close()
+        return jsonify({"ok": False,
+                        "error": f"账号已锁定，请于 {lock['locked_until']} 后再试"}), 423
     user = conn.execute("SELECT * FROM admin_users WHERE username = ?", (username,)).fetchone()
-    conn.close()
     if not user or not check_password_hash(user["password_hash"], password):
-        return jsonify({"ok": False, "error": "用户名或密码错误"}), 401
+        fails = (lock["fail_count"] if lock else 0) + 1
+        locked_until = None
+        if fails >= 3:
+            from datetime import datetime, timedelta
+            locked_until = (datetime.now() + timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")
+            fails = 0
+        conn.execute(
+            "INSERT INTO login_security (username, fail_count, locked_until) VALUES (?, ?, ?)"
+            " ON CONFLICT(username) DO UPDATE SET fail_count = ?, locked_until = ?",
+            (username, fails, locked_until, fails, locked_until))
+        conn.commit()
+        conn.close()
+        if locked_until:
+            return jsonify({"ok": False,
+                            "error": f"连续失败 3 次，账号锁定 2 小时（至 {locked_until}）"}), 423
+        return jsonify({"ok": False, "error": f"用户名或密码错误（{fails}/3 次后锁定）"}), 401
+    conn.execute(
+        "INSERT INTO login_security (username, fail_count, locked_until) VALUES (?, 0, NULL)"
+        " ON CONFLICT(username) DO UPDATE SET fail_count = 0, locked_until = NULL",
+        (username,))
+    conn.commit()
     role = user["role"] if "role" in user.keys() else "admin"
     session["user"] = username
     session["role"] = role
+    conn.close()
     log_change(username, "login", "admin_user", user["id"], username, ip=client_ip())
     return jsonify({"ok": True, "data": {"username": username, "role": role}})
 
@@ -177,7 +215,7 @@ ENTITY_CONFIG = {
                          "filter_fields": ["account_type", "employee_id"],
                          "join_filters": {"employee_status": ("employee_id", "employees", "status")}},
     "sql_scripts": {"keyword_fields": ["name", "description"],
-                    "filter_fields": []},
+                    "filter_fields": [], "list_min_role": "admin"},
     "commission_snapshots": {"keyword_fields": ["month", "remark", "created_by"],
                              "filter_fields": ["month"]},
 }
@@ -202,6 +240,8 @@ def _register_crud(table):
     label_field = ENTITY_LABEL_FIELD[table]
 
     def list_view():
+        if cfg.get("list_min_role") == "admin" and session.get("role") not in ("super", "admin"):
+            return jsonify({"ok": False, "error": "查询权限需管理员及以上"}), 403
         filters = {f: request.args.get(f) for f in cfg["filter_fields"]}
         exclude = {k: v for k, v in (cfg.get("default_exclude") or {}).items()
                    if not filters.get(k)}
@@ -451,7 +491,7 @@ def users_delete(uid):
 # ---------- 只读 SQL 查询 + 月度分成 ----------
 
 @app.post("/api/query/run")
-@login_required
+@admin_required
 def query_run():
     data = request.get_json(force=True, silent=True) or {}
     result = run_query(data.get("sql"), data.get("params") or {})
@@ -462,14 +502,14 @@ def query_run():
 
 
 @app.get("/api/commission/leaders")
-@login_required
+@admin_required
 def commission_leaders():
     from config import DATABASE_PATH
     return jsonify({"ok": True, "data": list_leaders(DATABASE_PATH)})
 
 
 @app.post("/api/commission/run")
-@login_required
+@admin_required
 def commission_run():
     from config import DATABASE_PATH
     data = request.get_json(force=True, silent=True) or {}

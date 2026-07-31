@@ -1348,6 +1348,20 @@ function renderQueryPage() {
   const main = $('#adminMain');
   main.innerHTML = '';
 
+  // viewer：只能查看发放记录
+  if (state.role === 'viewer') {
+    const sec3 = document.createElement('div');
+    sec3.className = 'drawer-section';
+    sec3.innerHTML = '<h4>发放记录</h4>';
+    const snapWrap = document.createElement('div');
+    snapWrap.className = 'table-wrap';
+    snapWrap.id = 'snapshotsTableWrap';
+    sec3.appendChild(snapWrap);
+    main.appendChild(sec3);
+    loadSnapshots();
+    return;
+  }
+
   // ---------- 区块 1：SQL 脚本 ----------
   const sec1 = document.createElement('div');
   sec1.className = 'drawer-section';
