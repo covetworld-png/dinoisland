@@ -1576,6 +1576,8 @@ function openSqlGenModal() {
   $('#sgDesc').value = '';
   $('#sgSql').value = '';
   sgSpecs = [];
+  sgCandidates = [];
+  renderSgSmart();
   renderSgParams();
   openModal('sqlGenModal');
 }
@@ -1628,6 +1630,217 @@ function renderSgParams() {
     area.appendChild(row);
   });
 }
+
+/* ---------- 智能解析（原始 SQL 字面值 → 参数候选） ---------- */
+
+let sgCandidates = []; // [{rule, value, context, name, control, checked, _input}]
+
+// 按规则扫描 SQL，输出候选（唯一规则+值只出一条）
+function smartDetect(sql, guildIds) {
+  const cands = [];
+  const seen = new Set();
+  const push = (rule, value, idx, name, control) => {
+    const key = rule + '|' + value;
+    if (seen.has(key)) return;
+    seen.add(key);
+    const start = Math.max(0, idx - 15);
+    let ctx = sql.slice(start, idx + String(value).length + 15).replace(/\s+/g, ' ');
+    if (start > 0) ctx = '…' + ctx;
+    cands.push({ rule, value, context: ctx, name, control, checked: true, _input: null });
+  };
+  let m;
+
+  // 服务器 ID：带引号字面量 + server_id 上下文中的裸 15 位数字
+  ['750748016054341', '768538488131653'].forEach(id => {
+    const i = sql.indexOf("'" + id + "'");
+    if (i >= 0) push('server', id, i, 'server_id', 'server');
+  });
+  const reSrv = /server_id\s*=\s*(\d{15})(?!\d)/g;
+  while ((m = reSrv.exec(sql))) push('server', m[1], m.index, 'server_id', 'server');
+
+  // 日期 '20XX-XX-XX'：1 个 → day；≥2 个按出现顺序 → date_from, date_to, ...
+  const dates = [];
+  const reDate = /'(20\d\d-\d\d-\d\d)'/g;
+  while ((m = reDate.exec(sql))) { if (!dates.includes(m[1])) dates.push(m[1]); }
+  dates.forEach((d, i) => {
+    const name = dates.length === 1 ? 'day' : (i === 0 ? 'date_from' : i === 1 ? 'date_to' : 'date_' + (i + 1));
+    push('date', d, sql.indexOf("'" + d + "'"), name, 'date');
+  });
+
+  // 月份 '20XX-XX'（引号闭合，不会误中 '20XX-XX-XX'）
+  const reMonth = /'(20\d\d-\d\d)'/g;
+  while ((m = reMonth.exec(sql))) push('month', m[1], m.index, 'month', 'month');
+
+  // 军团 ID：guild_id = 数字，且存在于 options/game_guilds
+  if (guildIds) {
+    const reGuild = /guild_id\s*=\s*'?(\d{1,6})'?(?!\d)/g;
+    while ((m = reGuild.exec(sql))) {
+      if (guildIds.has(m[1])) push('guild', m[1], m.index, 'guild_id', 'guild');
+    }
+  }
+
+  // 玩家 UID：game_uid = 7 位以上数字
+  const reUid = /game_uid\s*=\s*'?(\d{7,})'?/g;
+  while ((m = reUid.exec(sql))) push('uid', m[1], m.index, 'game_uid', 'text');
+
+  // 建议参数名去重（重复追加 _2/_3）
+  const counts = {};
+  cands.forEach(c => {
+    counts[c.name] = (counts[c.name] || 0) + 1;
+    if (counts[c.name] > 1) c.name = c.name + '_' + counts[c.name];
+  });
+  return cands;
+}
+
+function renderSgSmart() {
+  const area = $('#sgSmartArea');
+  if (!area) return;
+  area.innerHTML = '';
+  if (!sgCandidates.length) return;
+
+  const head = document.createElement('p');
+  head.style.cssText = 'font-size:12px;color:var(--text-secondary);margin:0 0 8px;';
+  head.textContent = '识别到 ' + sgCandidates.length + ' 个候选参数（勾选后点「应用转换」）';
+  area.appendChild(head);
+
+  sgCandidates.forEach(c => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;flex-wrap:wrap;';
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = c.checked;
+    cb.addEventListener('change', () => { c.checked = cb.checked; });
+    row.appendChild(cb);
+
+    const val = document.createElement('span');
+    val.style.cssText = 'font-family:Menlo,Consolas,monospace;min-width:110px;';
+    val.textContent = c.value;
+    row.appendChild(val);
+
+    const ctx = document.createElement('span');
+    ctx.style.cssText = 'color:var(--text-secondary);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+    ctx.textContent = c.context;
+    ctx.title = c.context;
+    row.appendChild(ctx);
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = c.name;
+    nameInput.style.cssText = 'width:110px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;';
+    nameInput.addEventListener('input', () => {
+      c.name = nameInput.value.trim();
+      nameInput.style.borderColor = 'var(--border)';
+    });
+    c._input = nameInput;
+    row.appendChild(nameInput);
+
+    const sel = document.createElement('select');
+    sel.style.cssText = 'padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:#fff;';
+    SG_CONTROLS.forEach(([v, label]) => {
+      const o = document.createElement('option');
+      o.value = v;
+      o.textContent = label;
+      sel.appendChild(o);
+    });
+    sel.value = c.control;
+    sel.addEventListener('change', () => { c.control = sel.value; });
+    row.appendChild(sel);
+
+    area.appendChild(row);
+  });
+
+  const applyBtn = document.createElement('button');
+  applyBtn.type = 'button';
+  applyBtn.className = 'btn btn-sm btn-primary';
+  applyBtn.textContent = '应用转换';
+  applyBtn.style.marginTop = '4px';
+  applyBtn.addEventListener('click', applySgSmart);
+  area.appendChild(applyBtn);
+}
+
+function applySgSmart() {
+  const sql = $('#sgSql').value;
+  const picked = sgCandidates.filter(c => c.checked);
+  if (!picked.length) {
+    showToast('请至少勾选一个候选', 'error');
+    return;
+  }
+
+  // 参数名冲突校验：空名 / 彼此重复 / 与 SQL 中已有 %(x)s 重复
+  const existing = new Set();
+  let m;
+  const rePh = /%\((\w+)\)s/g;
+  while ((m = rePh.exec(sql))) existing.add(m[1]);
+  const seen = new Set();
+  let bad = false;
+  picked.forEach(c => {
+    const dup = !c.name || seen.has(c.name) || existing.has(c.name);
+    seen.add(c.name);
+    if (dup) {
+      bad = true;
+      if (c._input) c._input.style.borderColor = '#dc2626';
+    }
+  });
+  if (bad) {
+    showToast('参数名冲突或为空，请修改后重试', 'error');
+    return;
+  }
+
+  // 执行替换：带引号字面量整体换成 %(name)s（去引号，pymysql 自动加引号）；数字保留 = 上下文
+  let out = sql;
+  let count = 0;
+  picked.forEach(c => {
+    const escRe = c.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const before = out;
+    if (c.rule === 'server' || c.rule === 'date' || c.rule === 'month') {
+      out = out.split("'" + c.value + "'").join('%(' + c.name + ')s');
+    }
+    if (c.rule === 'server') {
+      out = out.replace(new RegExp('(server_id\\s*=\\s*)' + escRe + '(?!\\d)', 'g'), '$1%(' + c.name + ')s');
+    } else if (c.rule === 'guild') {
+      out = out.replace(new RegExp('(guild_id\\s*=\\s*)\'?' + escRe + '\'?(?!\\d)', 'g'), '$1%(' + c.name + ')s');
+    } else if (c.rule === 'uid') {
+      out = out.replace(new RegExp('(game_uid\\s*=\\s*)\'?' + escRe + '\'?(?!\\d)', 'g'), '$1%(' + c.name + ')s');
+    }
+    if (out !== before) count++;
+  });
+
+  $('#sgSql').value = out;
+
+  // 重新解析占位符生成 sgSpecs，控件取候选行选择的类型
+  parseSgParams(true);
+  const ctrlMap = {};
+  picked.forEach(c => { ctrlMap[c.name] = c.control; });
+  sgSpecs.forEach(s => { if (ctrlMap[s.name]) s.control = ctrlMap[s.name]; });
+  renderSgParams();
+
+  sgCandidates = [];
+  renderSgSmart();
+  showToast('已转换 ' + count + ' 个参数', 'success');
+}
+
+$('#sgSmartBtn').addEventListener('click', async () => {
+  const sql = $('#sgSql').value;
+  if (!sql.trim()) {
+    showToast('请先粘贴 SQL', 'error');
+    return;
+  }
+  // guild 规则需要军团选项数据
+  let guildIds = null;
+  if (/guild_id\s*=/.test(sql)) {
+    try {
+      const opts = await loadOptions('game_guilds');
+      guildIds = new Set((opts || []).map(o => String(o.id)));
+    } catch (err) {
+      showToast(err.message, 'error');
+      return;
+    }
+  }
+  sgCandidates = smartDetect(sql, guildIds);
+  renderSgSmart();
+  if (!sgCandidates.length) showToast('未识别到可转换的字面值', 'error');
+});
 
 $('#sgParseBtn').addEventListener('click', () => {
   parseSgParams(false);

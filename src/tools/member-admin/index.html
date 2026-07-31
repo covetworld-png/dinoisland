@@ -284,9 +284,11 @@
           <textarea id="sgSql" rows="8" style="font-family:Menlo,Consolas,monospace;font-size:13px;"
             placeholder="SELECT * FROM orders WHERE server_id = %(server_id)s AND paid_at >= %(day)s"></textarea>
         </label>
-        <div style="margin-bottom:12px;">
+        <div style="margin-bottom:12px;display:flex;gap:8px;">
           <button type="button" class="btn" id="sgParseBtn">解析参数</button>
+          <button type="button" class="btn" id="sgSmartBtn">智能解析</button>
         </div>
+        <div id="sgSmartArea" style="margin-bottom:12px;"></div>
         <div id="sgParamsArea"></div>
       </div>
       <div class="modal-footer">
