@@ -28,5 +28,5 @@ META = {
     "guild_statuses": ["正常运营", "临时接管", "空缺", "已解散"],
     "operation_types": ["自营团", "野生团"],
     "account_statuses": ["正常", "封禁", "下野"],
-    "payment_types": ["银行", "MoMo", "ZaloPay", "其他"],
+    "payment_types": ["银行账户", "MoMo 电子钱包", "ZaloPay 电子钱包", "其他"],
 }

@@ -174,7 +174,8 @@ ENTITY_CONFIG = {
     "game_accounts": {"keyword_fields": ["game_uid", "nickname", "tiktok_account", "remark"],
                       "filter_fields": ["status", "employee_id", "guild_id"]},
     "payment_accounts": {"keyword_fields": ["account_name", "remark"],
-                         "filter_fields": ["account_type", "employee_id"]},
+                         "filter_fields": ["account_type", "employee_id"],
+                         "join_filters": {"employee_status": ("employee_id", "employees", "status")}},
     "sql_scripts": {"keyword_fields": ["name", "description"],
                     "filter_fields": []},
     "commission_snapshots": {"keyword_fields": ["month", "remark", "created_by"],
@@ -204,9 +205,15 @@ def _register_crud(table):
         filters = {f: request.args.get(f) for f in cfg["filter_fields"]}
         exclude = {k: v for k, v in (cfg.get("default_exclude") or {}).items()
                    if not filters.get(k)}
+        join_filters = []
+        for param, (fk_col, ref_table, ref_col) in (cfg.get("join_filters") or {}).items():
+            val = request.args.get(param)
+            if val not in (None, "", "all"):
+                join_filters.append((fk_col, ref_table, ref_col, val))
         page, page_size = _page_args()
         rows, total = list_rows(table, filters, request.args.get("keyword", "").strip(),
-                                cfg["keyword_fields"], page, page_size, exclude=exclude)
+                                cfg["keyword_fields"], page, page_size, exclude=exclude,
+                                join_filters=join_filters)
         return jsonify({"ok": True, "data": {"items": rows, "total": total,
                                              "page": page, "page_size": page_size}})
 

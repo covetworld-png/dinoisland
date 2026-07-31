@@ -205,8 +205,9 @@ def delete_row(table, row_id):
 
 
 def list_rows(table, filters=None, keyword=None, keyword_fields=None, page=1, page_size=20,
-              exclude=None):
-    """filters: {field: value} 精确匹配；exclude: {field: value} 排除匹配；keyword 模糊搜索"""
+              exclude=None, join_filters=None):
+    """filters: 精确匹配；exclude: 排除匹配；keyword 模糊搜索；
+    join_filters: [(fk_col, ref_table, ref_col, value)] → fk_col IN (SELECT id FROM ref_table WHERE ref_col = value)"""
     where, params = [], []
     for k, v in (filters or {}).items():
         if v not in (None, "", "all"):
@@ -215,6 +216,9 @@ def list_rows(table, filters=None, keyword=None, keyword_fields=None, page=1, pa
     for k, v in (exclude or {}).items():
         where.append(f"{k} != ?")
         params.append(v)
+    for fk_col, ref_table, ref_col, value in (join_filters or []):
+        where.append(f"{fk_col} IN (SELECT id FROM {ref_table} WHERE {ref_col} = ?)")
+        params.append(value)
     if keyword and keyword_fields:
         where.append("(" + " OR ".join(f"{f} LIKE ?" for f in keyword_fields) + ")")
         params.extend([f"%{keyword}%"] * len(keyword_fields))

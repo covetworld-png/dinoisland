@@ -415,6 +415,7 @@ const MODULES = {
     filters: [
       { key: 'account_type', label: '全部类型', metaKey: 'payment_types' },
       { key: 'employee_id', label: '所属员工', type: 'searchselect', optionsKind: 'employees' },
+      { key: 'employee_status', label: '员工状态', metaKey: 'employee_statuses' },
     ],
     fields: [
       { key: 'employee_id', label: '所属员工', type: 'searchselect', optionsKind: 'employees', required: true },
@@ -423,6 +424,7 @@ const MODULES = {
       { key: 'info_html', label: '收款信息（富文本）', type: 'richtext', full: true },
       { key: 'remark', label: '备注', type: 'textarea', full: true },
     ],
+    rowClick: (id, item) => openPaymentDrawer(item),
   },
 };
 
@@ -612,7 +614,7 @@ async function loadList(moduleKey) {
       tr.className = 'clickable';
       tr.addEventListener('click', e => {
         if (e.target.closest('.row-actions')) return;
-        cfg.rowClick(item.id);
+        cfg.rowClick(item.id, item);
       });
     }
     cfg.columns.forEach(c => {
@@ -897,6 +899,47 @@ async function openEmployeeDrawer(employeeId) {
     sec4.appendChild(card);
   });
   body.appendChild(sec4);
+}
+
+/* ================= 收款账户详情抽屉 ================= */
+
+// 行数据已含全部字段（含 info_html），直接用，无需额外请求；viewer 也可打开（只读）
+function openPaymentDrawer(payment) {
+  const body = $('#drawerBody');
+  body.innerHTML = '';
+  $('#drawerTitle').textContent = '收款账户详情';
+  openModal('drawer');
+
+  // ---- 基本信息 ----
+  const sec1 = document.createElement('div');
+  sec1.className = 'drawer-section';
+  sec1.innerHTML = '<h4>基本信息</h4>';
+  const grid = document.createElement('div');
+  grid.className = 'detail-grid';
+  [
+    ['所属员工', optionLabel('employees', payment.employee_id)],
+    ['类型', payment.account_type],
+    ['账户名称', payment.account_name],
+    ['备注', payment.remark],
+    ['创建时间', payment.created_at],
+    ['修改时间', payment.updated_at],
+  ].forEach(([k, v]) => {
+    const div = document.createElement('div');
+    div.innerHTML = '<span class="k">' + esc(k) + '：</span><span class="v">' + esc(v) + '</span>';
+    grid.appendChild(div);
+  });
+  sec1.appendChild(grid);
+  body.appendChild(sec1);
+
+  // ---- 收款信息（后台可信 HTML，直接渲染，含表格和二维码图片） ----
+  const sec2 = document.createElement('div');
+  sec2.className = 'drawer-section';
+  sec2.innerHTML = '<h4>收款信息</h4>';
+  const info = document.createElement('div');
+  info.className = 'info-html';
+  info.innerHTML = payment.info_html || '<span style="color:#6b7280">（未填写）</span>';
+  sec2.appendChild(info);
+  body.appendChild(sec2);
 }
 
 function buildSimpleTable(headers, rows) {
