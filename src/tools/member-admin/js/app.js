@@ -2109,9 +2109,11 @@ const BASIS_DESC = { paid: '口径A：仅当前已付款', shipped: '口径B：�
 let leadersCache = null;      // [{id,nickname,status,employment_type,position,guilds:[...]}] position='军团长'|'GM'
 const guildChecked = new Set();  // 勾选的军团 id（跨页面切换保留）
 const gmChecked = new Set();     // 勾选的 GM 员工 id
+const leaderChecked = new Set(); // 勾选的名下无军团团长 id（有底薪）
 let leaderBoxCollapsed = false;
 
 function isGm(l) { return l.position === 'GM'; }
+function isGuildlessLeader(l) { return !isGm(l) && !(l.guilds || []).length; }
 
 async function loadLeaders() {
   if (!leadersCache) {
@@ -2121,12 +2123,14 @@ async function loadLeaders() {
       showToast(err.message, 'error');
       return;
     }
-    // 默认勾选所有非离职团长的全部军团 + 所有非离职 GM
+    // 默认勾选所有非离职团长的全部军团 + 无团团长 + 所有非离职 GM
     guildChecked.clear();
     gmChecked.clear();
+    leaderChecked.clear();
     leadersCache.forEach(l => {
       if (l.status === '离职') return;
       if (isGm(l)) gmChecked.add(l.id);
+      else if (isGuildlessLeader(l)) leaderChecked.add(l.id);
       else (l.guilds || []).forEach(g => guildChecked.add(g.id));
     });
   }
@@ -2141,11 +2145,16 @@ function totalGmCount() {
   return (leadersCache || []).filter(isGm).length;
 }
 
+function totalGuildlessLeaderCount() {
+  return (leadersCache || []).filter(isGuildlessLeader).length;
+}
+
 function updateLeaderTitle() {
   const t = $('#leaderBoxTitle');
   if (t && leadersCache) {
     t.textContent = '已选 ' + guildChecked.size + ' / ' + totalGuildCount() + ' 个军团'
-      + ' · ' + gmChecked.size + ' / ' + totalGmCount() + ' 名 GM';
+      + ' · ' + gmChecked.size + ' / ' + totalGmCount() + ' 名 GM'
+      + (totalGuildlessLeaderCount() ? ' · ' + leaderChecked.size + ' / ' + totalGuildlessLeaderCount() + ' 名无团团长' : '');
   }
 }
 
@@ -2172,6 +2181,7 @@ function renderLeaderBox() {
   head.appendChild(mkBtn('全选', () => {
     leadersCache.forEach(l => {
       if (isGm(l)) gmChecked.add(l.id);
+      else if (isGuildlessLeader(l)) leaderChecked.add(l.id);
       else (l.guilds || []).forEach(g => guildChecked.add(g.id));
     });
     renderLeaderBox();
@@ -2179,6 +2189,7 @@ function renderLeaderBox() {
   head.appendChild(mkBtn('全不选', () => {
     guildChecked.clear();
     gmChecked.clear();
+    leaderChecked.clear();
     renderLeaderBox();
   }));
   head.appendChild(mkBtn(leaderBoxCollapsed ? '展开 ▾' : '收起 ▴', () => {
@@ -2205,15 +2216,24 @@ function renderLeaderBox() {
       + (isLeft ? 'text-decoration:line-through;' : '');
     const headCb = document.createElement('input');
     headCb.type = 'checkbox';
-    const checkedCnt = guilds.filter(g => guildChecked.has(g.id)).length;
-    headCb.checked = guilds.length > 0 && checkedCnt === guilds.length;
-    headCb.indeterminate = checkedCnt > 0 && checkedCnt < guilds.length;
-    headCb.addEventListener('change', () => {
-      guilds.forEach(g => {
-        if (headCb.checked) guildChecked.add(g.id); else guildChecked.delete(g.id);
+    if (isGuildlessLeader(l)) {
+      // 名下无军团的团长：勾选=计入底薪
+      headCb.checked = leaderChecked.has(l.id);
+      headCb.addEventListener('change', () => {
+        if (headCb.checked) leaderChecked.add(l.id); else leaderChecked.delete(l.id);
+        renderLeaderBox();
       });
-      renderLeaderBox();
-    });
+    } else {
+      const checkedCnt = guilds.filter(g => guildChecked.has(g.id)).length;
+      headCb.checked = guilds.length > 0 && checkedCnt === guilds.length;
+      headCb.indeterminate = checkedCnt > 0 && checkedCnt < guilds.length;
+      headCb.addEventListener('change', () => {
+        guilds.forEach(g => {
+          if (headCb.checked) guildChecked.add(g.id); else guildChecked.delete(g.id);
+        });
+        renderLeaderBox();
+      });
+    }
     headLabel.appendChild(headCb);
     const headSpan = document.createElement('span');
     headSpan.textContent = (l.nickname || ('#' + l.id)) + '（' + (l.position || '军团长') + '·' + (l.status || '') + '·' + (l.employment_type || '') + '）';
@@ -2307,30 +2327,32 @@ async function runCommission(month, basis) {
   if (!wrap) return;
   const guildIds = Array.from(guildChecked);
   const gmIds = Array.from(gmChecked);
-  if (!guildIds.length && !gmIds.length) {
-    showToast('请至少勾选一个军团或 GM', 'error');
+  const leaderIds = Array.from(leaderChecked);
+  if (!guildIds.length && !gmIds.length && !leaderIds.length) {
+    showToast('请至少勾选一个军团、团长或 GM', 'error');
     return;
   }
   wrap.innerHTML = '<p style="color:#6b7280">计算中…</p>';
   let data;
   try {
-    data = await api('commission/run', { method: 'POST', json: { month, guild_ids: guildIds, gm_ids: gmIds, basis: basis || 'paid' } });
+    data = await api('commission/run', { method: 'POST', json: { month, guild_ids: guildIds, gm_ids: gmIds, leader_ids: leaderIds, basis: basis || 'paid' } });
   } catch (err) {
     wrap.innerHTML = '<p style="color:#dc2626">' + esc(err.message) + '</p>';
     return;
   }
-  lastCommission = { month, data, guild_ids: guildIds, gm_ids: gmIds, basis: data.basis_key || basis || 'paid' };
-  renderLiveCommission(wrap, month, data, guildIds.length, gmIds.length, lastCommission.basis);
+  lastCommission = { month, data, guild_ids: guildIds, gm_ids: gmIds, leader_ids: leaderIds, basis: data.basis_key || basis || 'paid' };
+  renderLiveCommission(wrap, month, data, guildIds.length, gmIds.length, lastCommission.basis, leaderIds.length);
 }
 
 // 实时计算结果：顶部统计军团数·GM数·口径 + 「保存为发放记录」按钮 + 两张表
-function renderLiveCommission(wrap, month, data, guildCount, gmCount, basisKey) {
+function renderLiveCommission(wrap, month, data, guildCount, gmCount, basisKey, leaderCount) {
   wrap.innerHTML = '';
   const topBar = document.createElement('div');
   topBar.style.cssText = 'display:flex;align-items:center;margin-bottom:10px;gap:10px;';
   const info = document.createElement('span');
   info.style.cssText = 'font-size:13px;color:var(--text-secondary);';
   info.textContent = '统计 ' + guildCount + ' 个军团 · ' + gmCount + ' 名 GM'
+    + (leaderCount ? ' · ' + leaderCount + ' 名无团团长' : '')
     + (BASIS_SHORT[basisKey] ? ' · ' + BASIS_SHORT[basisKey] : '');
   topBar.appendChild(info);
   const spacer = document.createElement('div');
@@ -2560,7 +2582,8 @@ function viewSnapshot(snap) {
   closeBtn.addEventListener('click', () => {
     if (lastCommission) {
       renderLiveCommission(wrap, lastCommission.month, lastCommission.data,
-        lastCommission.guild_ids.length, lastCommission.gm_ids.length, lastCommission.basis);
+        lastCommission.guild_ids.length, lastCommission.gm_ids.length, lastCommission.basis,
+        (lastCommission.leader_ids || []).length);
     } else {
       wrap.innerHTML = '';
     }
@@ -2596,6 +2619,7 @@ $('#snapRemarkSaveBtn').addEventListener('click', async () => {
       const payload = { month: snapRemarkCtx.month, remark };
       if (lastCommission && lastCommission.guild_ids) payload.guild_ids = lastCommission.guild_ids;
       if (lastCommission && lastCommission.gm_ids) payload.gm_ids = lastCommission.gm_ids;
+      if (lastCommission && lastCommission.leader_ids) payload.leader_ids = lastCommission.leader_ids;
       if (lastCommission && lastCommission.basis) payload.basis = lastCommission.basis;
       await api('commission/save', { method: 'POST', json: payload });
     } else {
