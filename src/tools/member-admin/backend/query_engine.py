@@ -112,7 +112,7 @@ BASIS = {
 }
 
 def list_leaders(db_path):
-    """带过团的军团长（含离职）+ GM 列表，供两级勾选"""
+    """带过团的军团长（含离职）+ GS（从属军团）+ GM 列表，供两级勾选"""
     import sqlite3
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
@@ -134,11 +134,27 @@ def list_leaders(db_path):
                             "server": r["server"], "operation_type": r["operation_type"],
                             "status": r["guild_status"]})
     result = list(leaders.values())
+    conn2 = sqlite3.connect(db_path)
+    conn2.row_factory = sqlite3.Row
+    # GS（从属军团但非团长）
+    for e in conn2.execute("""
+            SELECT e.id, e.nickname, e.status, e.employment_type,
+                   g.id AS guild_id, g.name AS guild_name, g.cn_name AS guild_cn_name,
+                   g.game_guild_id, g.server, g.operation_type, g.status AS guild_status
+            FROM employees e LEFT JOIN guilds g ON e.guild_id = g.id
+            WHERE e.position = 'GS'
+            ORDER BY e.status = '离职', e.nickname""").fetchall():
+        entry = {"id": e["id"], "nickname": e["nickname"], "status": e["status"],
+                 "employment_type": e["employment_type"], "position": "GS", "guilds": []}
+        if e["guild_id"]:
+            entry["guilds"].append({"id": e["guild_id"], "name": e["guild_name"],
+                                    "cn_name": e["guild_cn_name"],
+                                    "game_guild_id": e["game_guild_id"],
+                                    "server": e["server"],
+                                    "operation_type": e["operation_type"],
+                                    "status": e["guild_status"]})
+        result.append(entry)
     # GM（不带团）
-    gms = conn2 = None
-    import sqlite3 as _sq
-    conn2 = _sq.connect(db_path)
-    conn2.row_factory = _sq.Row
     for e in conn2.execute(
             "SELECT id, nickname, status, employment_type FROM employees WHERE position = 'GM'"
             " ORDER BY status = '离职', nickname").fetchall():
@@ -205,8 +221,14 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
         SELECT g.id, g.name, g.game_guild_id, g.server, g.operation_type,
                e.id AS emp_id, e.nickname, e.commission_rate, e.employment_type,
                e.probation_salary, e.formal_salary, e.position_allowance, e.gm_allowance,
-               e.status AS emp_status
+               e.status AS emp_status, e.position AS emp_position
         FROM guilds g JOIN employees e ON g.leader_employee_id = e.id
+        UNION ALL
+        SELECT g.id, g.name, g.game_guild_id, g.server, g.operation_type,
+               e.id AS emp_id, e.nickname, e.commission_rate, e.employment_type,
+               e.probation_salary, e.formal_salary, e.position_allowance, e.gm_allowance,
+               e.status AS emp_status, e.position AS emp_position
+        FROM employees e JOIN guilds g ON e.guild_id = g.id AND e.position = 'GS'
     """).fetchall()
     conn.close()
 
@@ -250,6 +272,7 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "gm_allowance": g["gm_allowance"] or 0,
             "total": total,
             "unmatched": not matched_sid and gid_raw == "",
+            "emp_position": g["emp_position"],
         })
 
     # GM：无军团收入，只发底薪+津贴

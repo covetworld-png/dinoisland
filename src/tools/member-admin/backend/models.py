@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS employees (
     emp_no TEXT DEFAULT '',            -- 员工编号
     real_name TEXT DEFAULT '',         -- 姓名
     cn_name TEXT DEFAULT '',           -- 中文名
-    position TEXT DEFAULT '其他',       -- 岗位：GM/军团长/其他
+    position TEXT DEFAULT '其他',       -- 岗位：GM/军团长/GS/其他
     status TEXT DEFAULT '在职',         -- 在职/其他
     probation_salary REAL DEFAULT 0, -- 试用期底薪
     formal_salary REAL DEFAULT 0,    -- 正式底薪
@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS employees (
     gm_allowance REAL DEFAULT 0,       -- GM津贴
     commission_rate TEXT DEFAULT '',   -- 分成比例
     entry_date TEXT DEFAULT '',        -- 入职日期 YYYY-MM-DD
+    guild_id INTEGER REFERENCES guilds(id) ON DELETE SET NULL,  -- 从属军团（GS 用，非团长）
     remark TEXT DEFAULT '',
     feishu_record_id TEXT DEFAULT '',  -- 飞书导入溯源
     created_at TEXT,
@@ -126,7 +127,7 @@ TABLE_FIELDS = {
     "employees": ["nickname", "emp_no", "real_name", "cn_name", "position", "status",
                   "probation_salary", "formal_salary", "employment_type",
                   "position_allowance", "gm_allowance", "commission_rate",
-                  "entry_date", "remark"],
+                  "entry_date", "guild_id", "remark"],
     "guilds": ["name", "cn_name", "game_guild_id", "server", "leader_employee_id", "status", "operation_type", "remark"],
     "game_accounts": ["employee_id", "game_uid", "nickname", "guild_id", "status",
                       "tiktok_account", "remark"],

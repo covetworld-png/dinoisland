@@ -338,6 +338,7 @@ const MODULES = {
       { key: 'position_allowance', label: '岗位津贴', type: 'number' },
       { key: 'gm_allowance', label: 'GM 津贴', type: 'number' },
       { key: 'commission_rate', label: '分成比例', type: 'text' },
+      { key: 'guild_id', label: '从属军团（GS）', type: 'searchselect', optionsKind: 'guilds' },
       { key: 'entry_date', label: '入职日期', type: 'date' },
       { key: 'remark', label: '备注', type: 'textarea', full: true },
     ],
@@ -1813,7 +1814,7 @@ function renderLeaderBox() {
     });
     headLabel.appendChild(headCb);
     const headSpan = document.createElement('span');
-    headSpan.textContent = (l.nickname || ('#' + l.id)) + '（' + (l.status || '') + '·' + (l.employment_type || '') + '）';
+    headSpan.textContent = (l.nickname || ('#' + l.id)) + '（' + (l.position || '军团长') + '·' + (l.status || '') + '·' + (l.employment_type || '') + '）';
     headLabel.appendChild(headSpan);
     group.appendChild(headLabel);
 
