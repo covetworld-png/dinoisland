@@ -2548,7 +2548,7 @@ async function openEmployeePayments(employeeId, employeeName) {
   }
   let data;
   try {
-    data = await api('payments?' + new URLSearchParams({ page: 1, page_size: 50, employee_id: employeeId }).toString());
+    data = await api('payment_accounts?' + new URLSearchParams({ page: 1, page_size: 50, employee_id: employeeId }).toString());
   } catch (err) {
     showToast(err.message, 'error');
     return;
