@@ -2427,7 +2427,7 @@ function renderCommissionTables(wrap, data, month) {
     sumMoney('revenue'), sumMoney('commission'), sumMoney('base_salary'), '',
     sumMoney('position_allowance'), sumMoney('gm_allowance'), sumMoney('total')];
   sec1.appendChild(buildCommTable(SUMMARY_COLS, summary, {
-    onRow: s => openEmployeePayments(s.employee_id),
+    onRow: s => openEmployeePayments(s.employee_id, pick(s, ['employee', 'nickname', 'employee_name'])),
     footer,
   }));
   wrap.appendChild(sec1);
@@ -2529,10 +2529,22 @@ function buildCommTable(cols, rows, opts) {
 }
 
 // 汇总行点击 → 该员工收款账户抽屉（多个账户取最近更新的一一展示第一个，弹提示；无账户弹提示）
-async function openEmployeePayments(employeeId) {
+async function openEmployeePayments(employeeId, employeeName) {
+  if (!employeeId && employeeName) {
+    // 旧快照兼底：summary 无 employee_id，按昵称反查（label 格式：昵称（岗位·状态））
+    try {
+      const emps = await loadOptions('employees');
+      const hits = (emps || []).filter(o => String(o.label).split('（')[0] === employeeName);
+      if (hits.length === 1) employeeId = hits[0].id;
+      else if (hits.length > 1) {
+        showToast('存在多个同名员工，无法唯一匹配', 'error');
+        return;
+      }
+    } catch (e) { /* 反查失败走下方提示 */ }
+  }
   if (!employeeId) {
     showToast('该快照无员工关联信息，无法查看收款账户', 'error');
-    return; // 旧快照无 employee_id
+    return;
   }
   let data;
   try {
