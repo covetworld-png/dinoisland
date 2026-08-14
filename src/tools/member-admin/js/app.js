@@ -434,6 +434,84 @@ const MODULES = {
     ],
     rowClick: (id, item) => openPaymentDrawer(item),
   },
+  live_employees: {
+    title: '员工',
+    table: 'live_employees',
+    columns: [
+      { key: 'emp_no', label: '员工编号' },
+      { key: 'nickname', label: '昵称' },
+      { key: 'alias', label: '别名' },
+      { key: 'real_name', label: '真实姓名' },
+      { key: 'cn_name', label: '中文名' },
+      { key: 'domain', label: '业务域' },
+      { key: 'position', label: '岗位' },
+      { key: 'emp_type', label: '雇佣类型' },
+      { key: 'status', label: '状态' },
+      { key: 'sys_role', label: '陪玩角色' },
+      { key: 'salary_mode', label: '薪资结构' },
+      { key: 'account_holder', label: '账户人', render: (v, item) => {
+        if (!v) return '';
+        const self = (item.real_name || '').trim().toUpperCase();
+        const warn = self && v.trim().toUpperCase() !== self;
+        return (warn ? '<span style="color:#d97706">⚠️ ' + esc(v) + '（非本人）</span>' : esc(v));
+      }},
+      { key: 'bank', label: '银行' },
+      { key: 'account', label: '银行账号' },
+      { key: 'entry_date', label: '入职日期' },
+      { key: 'updated_at', label: '修改时间' },
+    ],
+    filters: [
+      { key: 'position', label: '全部岗位', metaKey: 'live_positions' },
+      { key: 'emp_type', label: '全部雇佣类型', metaKey: 'live_emp_types' },
+      { key: 'status', label: '全部状态', metaKey: 'live_statuses', default: '在职' },
+    ],
+    rowClick: (id, item) => openLiveEmployeeDrawer(item),
+    fields: [
+      { key: 'emp_no', label: '员工编号（5位数字）', type: 'text', required: true },
+      { key: 'nickname', label: '昵称（中国团队称呼）', type: 'text' },
+      { key: 'alias', label: '别名（越南自取）', type: 'text' },
+      { key: 'real_name', label: '真实姓名', type: 'text' },
+      { key: 'cn_name', label: '中文名', type: 'text' },
+      { key: 'domain', label: '业务域', type: 'select', metaKey: 'live_domains', default: '直播' },
+      { key: 'position', label: '岗位', type: 'select', metaKey: 'live_positions' },
+      { key: 'emp_type', label: '雇佣类型', type: 'select', metaKey: 'live_emp_types', default: '全职' },
+      { key: 'status', label: '状态', type: 'select', metaKey: 'live_statuses', default: '在职' },
+      { key: 'is_probation', label: '是否已转正', type: 'select', options: [{value:'0',label:'是（已转正）'}, {value:'1',label:'否（试用期内）'}], default: '0' },
+      { key: 'probation_months', label: '试用期月数', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
+      { key: 'probation_salary', label: '试用期底薪 m1（VND）', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
+      { key: 'probation_salary_m2', label: '试用期底薪 m2（VND）', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
+      { key: 'formal_salary', label: '转正底薪（VND）', type: 'number', showWhen: { key: 'salary_mode', in: ['纯底薪', '底薪+分成'] } },
+      { key: 'insurance', label: '保险基数（合同底薪，VND）', type: 'number' },
+      { key: 'meal_allowance', label: '餐补（VND）', type: 'number' },
+      { key: 'housing_allowance', label: '住房补贴（VND）', type: 'number' },
+      { key: 'transport_allowance', label: '交通补贴（VND）', type: 'number' },
+      { key: 'salary_mode', label: '薪资结构', type: 'select', metaKey: 'salary_modes' },
+      { key: 'commission_rate', label: '直播分成比例', type: 'text', placeholder: '如 50%', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['底薪+分成', '纯分成-固定'] }] },
+      { key: 'commission_tiers', label: '分成阶梯（JSON）', type: 'textarea', full: true, placeholder: '[{"kc":150000,"rate":10},{"kc":300000,"rate":20}]', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['纯分成-阶梯', '底薪+阶梯分成'] }] },
+      { key: 'biz_commission_rate', label: '商单分成比例', type: 'text', placeholder: '如 20%', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['底薪+分成', '纯分成-固定', '纯分成-阶梯', '底薪+阶梯分成'] }] },
+      { key: 'youtube_commission_rate', label: 'YouTube 分成比例', type: 'text', placeholder: '如 50%', showWhen: { key: 'position', in: ['主播'] } },
+      { key: 'entry_date', label: '入职日期', type: 'date' },
+      { key: 'leave_date', label: '离职日期', type: 'date' },
+      { key: 'sys_id', label: '陪玩系统ID', type: 'text' },
+      { key: 'sys_role', label: '陪玩角色', type: 'multiselect', options: ['剧本导演', '技术导演', '陪玩'] },
+      { key: 'director_level', label: '导演等级', type: 'select', options: ['S', 'A', 'B'], showWhen: { key: 'sys_role', contains: '剧本导演' } },
+      { key: 'account_holder', label: '账户人', type: 'text' },
+      { key: 'bank', label: '银行', type: 'text' },
+      { key: 'account', label: '银行账号', type: 'text' },
+      { key: 'phone_zalo', label: '联系电话/zalo', type: 'text' },
+      { key: 'tiktok_live', label: 'TikTok 直播账号', type: 'text' },
+      { key: 'tiktok_clip', label: 'TikTok 剪辑账号', type: 'text' },
+      { key: 'tiktok_personal', label: 'TikTok 个人小号', type: 'text' },
+      { key: 'birth_date', label: '出生日期', type: 'date' },
+      { key: 'email', label: '电子邮箱', type: 'text' },
+      { key: 'address', label: '家庭地址', type: 'text' },
+      { key: 'id_card', label: '身份证', type: 'text' },
+      { key: 'emergency_contact', label: '紧急联系人', type: 'text' },
+      { key: 'emergency_relation', label: '联系人关系', type: 'select', options: ['父母', '配偶', '兄弟', '其他'] },
+      { key: 'emergency_phone', label: '紧急联系电话', type: 'text' },
+      { key: 'remark', label: '备注', type: 'textarea', full: true },
+    ],
+  },
 };
 
 const PAGE_SIZE = 20;
@@ -450,12 +528,15 @@ function getListState(moduleKey) {
 async function switchModule(moduleKey) {
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理' };
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工' };
   $('#adminModuleTitle').textContent = titles[moduleKey] || '';
   if (moduleKey === 'users') {
     if (state.role !== 'super') return; // 用户管理仅 super
     renderUsersPage();
   } else if (moduleKey === 'logs') {
+    // 日志按当前模块分组默认过滤：直播组只看直播员工日志
+    logsState.entity_type = state.moduleGroup === 'live' ? 'live_employee' : '';
+    logsState.page = 1;
     renderLogsPage();
   } else if (moduleKey === 'query') {
     renderQueryPage();
@@ -725,14 +806,14 @@ async function openFormModal(moduleKey, item) {
       o0.value = '';
       o0.textContent = '（未选择）';
       sel.appendChild(o0);
-      (meta[f.metaKey] || []).forEach(v => {
+      (f.options || meta[f.metaKey] || []).forEach(v => {
         const o = document.createElement('option');
-        o.value = v;
-        o.textContent = v;
+        if (typeof v === 'object') { o.value = v.value; o.textContent = v.label; }
+        else { o.value = v; o.textContent = v; }
         sel.appendChild(o);
       });
       sel.value = cur || f.default || '';
-      fieldCtrls[f.key] = { getValue: () => sel.value };
+      fieldCtrls[f.key] = { getValue: () => sel.value, el: sel };
       label.appendChild(sel);
     } else if (f.type === 'searchselect') {
       const ss = createSearchSelect(state.options[f.optionsKind] || [], { placeholder: '搜索选择' + f.label });
@@ -800,6 +881,26 @@ async function openFormModal(moduleKey, item) {
       box.appendChild(fi);
       fieldCtrls[f.key] = { getValue: () => val };
       label.appendChild(box);
+    } else if (f.type === 'multiselect') {
+      // 多选勾选框：存储为逗号分隔字符串
+      const box = document.createElement('div');
+      box.className = 'multiselect-box';
+      const selected = new Set((cur || '').split(',').map(s => s.trim()).filter(Boolean));
+      (f.options || []).forEach(opt => {
+        const item = document.createElement('label');
+        item.className = 'multiselect-item';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = opt;
+        cb.checked = selected.has(opt);
+        item.appendChild(cb);
+        item.appendChild(document.createTextNode(' ' + opt));
+        box.appendChild(item);
+      });
+      fieldCtrls[f.key] = { getValue: () =>
+        Array.from(box.querySelectorAll('input:checked')).map(c => c.value).join(','),
+        el: box };
+      label.appendChild(box);
     } else if (f.type === 'textarea') {
       const ta = document.createElement('textarea');
       ta.value = cur || '';
@@ -809,13 +910,39 @@ async function openFormModal(moduleKey, item) {
       const input = document.createElement('input');
       input.type = f.type || 'text';
       if (f.type === 'number') input.step = 'any';
+      if (f.placeholder) input.placeholder = f.placeholder;
       input.value = (cur === null || cur === undefined) ? '' : cur;
       if (f.required) input.required = true;
       fieldCtrls[f.key] = { getValue: () => input.value };
       label.appendChild(input);
     }
     grid.appendChild(label);
+    fieldCtrls[f.key].labelEl = label;
   });
+
+  // 条件联动：showWhen 单条件 { key, in:[] / contains } 或多条件数组（AND）
+  const applyShowWhen = () => {
+    cfg.fields.forEach(f => {
+      if (!f.showWhen) return;
+      const conds = Array.isArray(f.showWhen) ? f.showWhen : [f.showWhen];
+      const show = conds.every(c => {
+        const ctrl = fieldCtrls[c.key];
+        if (!ctrl) return false;
+        const v = ctrl.getValue();
+        return c.contains ? String(v).includes(c.contains) : c.in.includes(v);
+      });
+      fieldCtrls[f.key].labelEl.style.display = show ? '' : 'none';
+    });
+  };
+  cfg.fields.forEach(f => {
+    if (!f.showWhen) return;
+    const conds = Array.isArray(f.showWhen) ? f.showWhen : [f.showWhen];
+    conds.forEach(c => {
+      const ctrl = fieldCtrls[c.key];
+      if (ctrl && ctrl.el) ctrl.el.addEventListener('change', applyShowWhen);
+    });
+  });
+  applyShowWhen();
 
   body.appendChild(grid);
   formCtx = { moduleKey, item, fieldCtrls };
@@ -976,6 +1103,91 @@ async function openEmployeeDrawer(employeeId) {
   body.appendChild(sec4);
 }
 
+/* ================= 直播员工详情抽屉 ================= */
+
+// 行数据已含全部字段，直接用，无需额外请求（同收款账户抽屉模式）
+const LIVE_DRAWER_SECTIONS = [
+  ['基本信息', [
+    ['emp_no', '员工编号'], ['nickname', '昵称'], ['alias', '别名'],
+    ['real_name', '真实姓名'], ['cn_name', '中文名'],
+    ['domain', '业务域', (v, it) => v + (it.domain_code ? '（' + it.domain_code + '）' : '')],
+    ['position', '岗位', (v, it) => v + (it.position_code ? '（' + it.position_code + '）' : '')],
+    ['emp_type', '雇佣类型', (v, it) => v + (it.emp_type_code ? '（' + it.emp_type_code + '）' : '')],
+    ['status', '状态'],
+    ['entry_date', '入职日期'], ['leave_date', '离职日期'],
+  ]],
+  // 第 4 个元素为显示条件（与表单 showWhen 同口径）
+  ['薪资（VND）', [
+    ['is_probation', '是否已转正', v => v == 1 ? '否（试用期内）' : '是'],
+    ['salary_mode', '薪资结构'],
+    ['probation_months', '试用期月数', null, it => it.is_probation == 1],
+    ['probation_salary', '试用期底薪 m1', fmtVND, it => it.is_probation == 1],
+    ['probation_salary_m2', '试用期底薪 m2', fmtVND, it => it.is_probation == 1],
+    ['formal_salary', '转正底薪', fmtVND, it => ['纯底薪', '底薪+分成', '底薪+阶梯分成'].includes(it.salary_mode)],
+    ['insurance', '保险基数（合同底薪）', fmtVND],
+    ['meal_allowance', '餐补', fmtVND],
+    ['housing_allowance', '住房补贴', fmtVND],
+    ['transport_allowance', '交通补贴', fmtVND],
+    ['commission_rate', '直播分成比例', null, it => it.position === '主播' && ['底薪+分成', '纯分成-固定'].includes(it.salary_mode)],
+    ['commission_tiers', '分成阶梯', null, it => it.position === '主播' && ['纯分成-阶梯', '底薪+阶梯分成'].includes(it.salary_mode)],
+    ['biz_commission_rate', '商单分成比例', null, it => it.position === '主播' && ['底薪+分成', '纯分成-固定', '纯分成-阶梯', '底薪+阶梯分成'].includes(it.salary_mode)],
+    ['youtube_commission_rate', 'YouTube 分成比例', null, it => it.position === '主播'],
+  ]],
+  ['陪玩', [
+    ['sys_id', '陪玩系统ID'], ['sys_role', '陪玩角色'],
+    ['director_level', '导演等级', null, it => String(it.sys_role || '').includes('剧本导演')],
+  ]],
+  ['收款信息', [
+    ['account_holder', '账户人'], ['bank', '银行'], ['account', '银行账号'],
+  ]],
+  ['联系与证件', [
+    ['phone_zalo', '联系电话/zalo'], ['tiktok_live', 'TikTok 直播账号'],
+    ['tiktok_clip', 'TikTok 剪辑账号'], ['tiktok_personal', 'TikTok 个人小号'],
+    ['birth_date', '出生日期'], ['email', '电子邮箱'],
+    ['address', '家庭地址'], ['id_card', '身份证'],
+    ['emergency_contact', '紧急联系人'], ['emergency_relation', '联系人关系'],
+    ['emergency_phone', '紧急联系电话'],
+  ]],
+];
+
+function fmtVND(v) {
+  const n = Number(v);
+  if (!n) return '';
+  return n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
+function openLiveEmployeeDrawer(item) {
+  const body = $('#drawerBody');
+  $('#drawerTitle').textContent = '员工详情：' + (item.nickname || ('#' + item.id))
+    + (item.alias ? '（' + item.alias + '）' : '');
+  body.innerHTML = '';
+  LIVE_DRAWER_SECTIONS.forEach(([title, fields]) => {
+    const sec = document.createElement('div');
+    sec.className = 'drawer-section';
+    sec.innerHTML = '<h4>' + title + '</h4>';
+    const grid = document.createElement('div');
+    grid.className = 'detail-grid';
+    fields.forEach(([k, label, fmt, cond]) => {
+      if (cond && !cond(item)) return; // 条件不满足不显示
+      let v = item[k];
+      if (fmt) v = fmt(v, item);
+      const div = document.createElement('div');
+      div.innerHTML = '<span class="k">' + esc(label) + '：</span><span class="v">'
+        + esc(v === null || v === undefined ? '' : String(v)) + '</span>';
+      grid.appendChild(div);
+    });
+    sec.appendChild(grid);
+    body.appendChild(sec);
+  });
+  if (item.remark) {
+    const sec = document.createElement('div');
+    sec.className = 'drawer-section';
+    sec.innerHTML = '<h4>备注</h4><p>' + esc(item.remark) + '</p>';
+    body.appendChild(sec);
+  }
+  openModal('drawer');
+}
+
 /* ================= 收款账户详情抽屉 ================= */
 
 // 行数据已含全部字段，直接用，无需额外请求；viewer 也可打开（只读）
@@ -1131,7 +1343,7 @@ async function openGameDataModal(accountId) {
 /* ================= 操作日志页 ================= */
 
 const logsState = { page: 1, entity_type: '', actor: '', date_from: '', date_to: '' };
-const ENTITY_TYPE_LABELS = { employee: '员工', guild: '军团', account: '账号', payment_account: '收款账户', sql_script: 'SQL脚本', commission: '分成计算', commission_snapshot: '发放快照' };
+const ENTITY_TYPE_LABELS = { employee: '员工', guild: '军团', account: '账号', payment_account: '收款账户', sql_script: 'SQL脚本', commission: '分成计算', commission_snapshot: '发放快照', live_employee: '直播员工' };
 const ACTION_LABELS = { create: '新增', update: '更新', delete: '删除', login: '登录' };
 
 function renderLogsPage() {
@@ -2914,14 +3126,34 @@ function enterPortal() {
   });
   // viewer 只读模式：隐藏一切写入口
   document.body.classList.toggle('role-viewer', state.role === 'viewer');
-  // 用户管理入口仅 super 可见
-  $('#usersNavBtn').classList.toggle('hidden', state.role !== 'super');
+  // 用户管理入口仅 super 可见（游戏/直播组各一个）
+  ['usersNavBtn', 'usersNavBtnLive'].forEach(id =>
+    $('#' + id).classList.toggle('hidden', state.role !== 'super'));
   showView('portalView');
 }
 
-$('#gameModuleCard').addEventListener('click', () => {
+function enterModuleGroup(group) {
+  // 导航分组：game=游戏模块，live=直播模块，互不混显
+  state.moduleGroup = group;
+  $$('.sidebar-nav .side-btn').forEach(b => {
+    const isUsersBtn = b.id === 'usersNavBtn' || b.id === 'usersNavBtnLive';
+    // 用户管理：分组 + 角色（仅 super）双重条件
+    const hide = (b.dataset.group !== group) || (isUsersBtn && state.role !== 'super');
+    b.classList.toggle('hidden', hide);
+  });
+  $('#sidebarBrand').textContent = group === 'live' ? '直播管理' : '游戏管理';
+  document.title = (group === 'live' ? '直播管理' : '游戏管理') + ' - 员工管理后台';
   showView('adminView');
+}
+
+$('#gameModuleCard').addEventListener('click', () => {
+  enterModuleGroup('game');
   switchModule('employees');
+});
+
+$('#liveModuleCard').addEventListener('click', () => {
+  enterModuleGroup('live');
+  switchModule('live_employees');
 });
 
 $('#backToPortalBtn').addEventListener('click', () => showView('portalView'));
