@@ -4416,7 +4416,7 @@ async function renderCheckinPage() {
         html += '<span class="arrow">▼</span>';
         html += '</div>';
         html += '<div class="date-body">';
-        html += '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:8px">';
+        html += '<div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;padding:8px">';
 
         streamerNames.forEach(function(name) {
           var g = streamers[name];
