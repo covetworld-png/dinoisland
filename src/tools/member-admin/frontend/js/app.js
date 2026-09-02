@@ -4117,11 +4117,29 @@ function renderCalendar(byDate) {
 
     h += '<td class="' + classes + '" data-date="' + dateStr + '">';
     h += '<div class="cal-day-badge">' + d + '</div>';
-    // Show compact people count label
+    // Show streamer chips
     var dd = dailyData[dateStr];
     if (dd && dd.streamers.length > 0) {
-      var title = dd.streamers.map(function(item) { return item[0] + ' x' + item[1]; }).join(', ');
-      h += '<span class="cal-chip cal-count-chip" title="' + escHtml(title) + '">' + dd.streamers.length + ' 人</span>';
+      h += '<div class="cal-streamer-chips">';
+      var shown = dd.streamers;  // 全部展示，chips 自动换行（2026-08-22 用户确认：去掉 5 个上限截断）
+      shown.forEach(function(item) {
+        var name = escHtml(item[0]);
+        var count = item[1];
+        // Truncate name to 3 Chinese chars
+        if (name.length > 6) name = name.slice(0, 6) + '.';
+        // Check custom color override, else use hash-based palette
+        var bg = _streamerColors[item[0]];
+        if (!bg) {
+          var palette = ['#e53935','#f4511e','#fb8c00','#43a047','#00897b','#00acc1','#1e88e5','#3949ab','#8e24aa','#d81b60'];
+          var colorIdx = 0;
+          for (var ci = 0; ci < item[0].length; ci++) {
+            colorIdx = (colorIdx * 31 + item[0].charCodeAt(ci)) >>> 0;
+          }
+          bg = palette[colorIdx % palette.length];
+        }
+        h += '<span class="cal-chip" style="background:' + bg + '">' + name + '<span class="cal-chip-count">x' + count + '</span></span>';
+      });
+      h += '</div>';
     }
     h += '</td>';
     if ((firstDay + d) % 7 === 0 && d < daysInMonth) {

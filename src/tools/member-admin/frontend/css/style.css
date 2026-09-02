@@ -487,14 +487,14 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; }
 .cal-th { padding: 6px; text-align: center; color: var(--text-secondary); font-weight: 500; }
 .cal-cell {
   width: 14.28%;
-  min-height: 28px;
+  min-height: 48px;
   height: auto;
   text-align: left;
   vertical-align: top;
   border: 1px solid #eef0f3;
   cursor: pointer;
   position: relative;
-  padding: 3px 2px 2px 4px;
+  padding: 22px 2px 16px 4px;
 }
 .cal-cell:hover { background: #f3f4f6; }
 .cal-cell.cal-empty { background: #f9fafb; cursor: default; }
@@ -502,43 +502,38 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; }
 .cal-cell.selected { background: #dbeafe; }
 .cal-cell.today { background: #fef3c7; }
 .cal-day-badge {
+  position: absolute;
+  top: 3px;
+  left: 3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  background: transparent;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f3f4f6;
   font-size: 11px;
   font-weight: 600;
   color: #374151;
-  margin-right: 2px;
-  vertical-align: top;
 }
-.cal-cell.today .cal-day-badge { background: #fde68a; }
-.cal-cell.selected .cal-day-badge { background: #bfdbfe; }
 .cal-streamer-chips {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
   gap: 1px;
-  vertical-align: top;
+  justify-content: flex-start;
 }
 .cal-chip {
   display: inline-flex;
   align-items: center;
   gap: 1px;
-  padding: 0 2px;
-  border-radius: 2px;
+  padding: 0 3px;
+  border-radius: 3px;
   color: #fff;
   font-size: 9px;
-  line-height: 1.25;
+  line-height: 1.3;
   white-space: nowrap;
 }
 .cal-chip-count { opacity: .9; font-size: 8px; margin-left: 1px; }
-.cal-count-chip {
-  background: #9ca3af;
-  cursor: help;
-}
 
 .date-header {
   display: flex;
