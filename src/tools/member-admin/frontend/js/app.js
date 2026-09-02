@@ -4309,7 +4309,7 @@ async function renderCheckinPage() {
     var h = '<div class="session-card ' + statusClass + '">';
       h += '<div style="display:flex;justify-content:space-between;align-items:center">';
       h += '<div style="font-weight:500;font-size:12px">';
-      h += '<code style="background:#e0e0e0;padding:1px 4px;border-radius:3px;font-size:10px">' + escHtml(s.session_no) + '</code>';
+      h += '<code>' + escHtml(s.session_no) + '</code>';
       h += ' <span style="color:#666;font-size:11px">⏱ ' + durStr + '</span>';
       h += '</div>';
       h += '<div style="display:flex;gap:3px;align-items:center">';

@@ -579,26 +579,32 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; }
 .session-card {
   background: #f9fafb;
   border: none;
-  border-left: 3px solid var(--session-status-color, #e5e7eb);
   border-radius: 10px;
   padding: 10px;
   margin: 8px 10px;
 }
 .session-card:last-child { margin-bottom: 10px; }
-.session-card.active { --session-status-color: #22c55e; }
-.session-card.ended { --session-status-color: #9ca3af; }
-.session-card.cancelled { --session-status-color: #dc2626; opacity: .7; }
 .session-card .btn {
-  border: none;
-  background: transparent;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 2px 4px !important;
+  font-size: 12px !important;
 }
 .session-card code {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: #f3f4f6;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 10px;
   color: #4b5563;
+  font-family: inherit;
 }
+.session-card.active code { background: #dcfce7; color: #166534; }
+.session-card.ended code { background: #f3f4f6; color: #4b5563; }
+.session-card.cancelled code { background: #fee2e2; color: #991b1b; }
 
 .checkin-tag {
   display: inline-flex;
