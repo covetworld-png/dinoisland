@@ -220,18 +220,119 @@ def _parse_rate(s):
         return 0.0
 
 
+def _month_bounds(month):
+    """'YYYY-MM' → (month_start_str 'YYYY-MM-DD', month_end_str 'YYYY-MM-DD')"""
+    y, m = int(month[:4]), int(month[5:7])
+    month_days = calendar.monthrange(y, m)[1]
+    return f"{month}-01", f"{month}-{month_days:02d}"
+
+
+def _fetch_employee_uids(db_path, emp_ids):
+    """返回 {employee_id: [game_uid, ...]}（仅 employees/game_accounts 关联的游戏账号）"""
+    if not emp_ids:
+        return {}
+    placeholders = ",".join("?" * len(emp_ids))
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        f"SELECT employee_id, game_uid FROM game_accounts "
+        f"WHERE employee_id IN ({placeholders}) AND game_uid IS NOT NULL AND game_uid != ''",
+        tuple(emp_ids),
+    ).fetchall()
+    conn.close()
+    result = {}
+    for r in rows:
+        result.setdefault(r["employee_id"], []).append(r["game_uid"])
+    return result
+
+
+def _fetch_activity(uids_by_emp, month):
+    """基于 monster_test.game_dau_hour 计算每个员工的月活跃天数与日均在线小时数。
+    口径：活跃天数 = 各账号去重活跃日期之和；日均在线时长 = 活跃小时行数 / 活跃天数。
+    返回 {employee_id: {'active_days': int, 'avg_online_hours': float}}"""
+    if not uids_by_emp:
+        return {}
+    month_start, month_end = _month_bounds(month)
+    uid_to_emp = {}
+    for emp_id, uids in uids_by_emp.items():
+        for uid in uids:
+            uid_to_emp[str(uid)] = emp_id
+    if not uid_to_emp:
+        return {}
+    uid_list = list(uid_to_emp.keys())
+    # 一次性查询所有账号（MySQL IN 长度通常足够；超过 1000 时分批）
+    batch_size = 800
+    uid_rows = []
+    try:
+        conn = _connect()
+        with conn.cursor() as cur:
+            for i in range(0, len(uid_list), batch_size):
+                batch = uid_list[i:i + batch_size]
+                cur.execute(
+                    """
+                    SELECT game_uid, active_date, COUNT(*) AS active_hours
+                    FROM game_dau_hour
+                    WHERE active_date >= %(ms)s AND active_date <= %(me)s
+                      AND game_uid IN %(uids)s
+                    GROUP BY game_uid, active_date
+                    """,
+                    {"ms": month_start, "me": month_end, "uids": tuple(batch)},
+                )
+                uid_rows.extend(cur.fetchall())
+        conn.close()
+    except Exception:  # noqa: BLE001
+        return {}
+
+    emp_hours = {}
+    emp_dates = {}
+    for r in uid_rows:
+        uid = str(r["game_uid"])
+        emp_id = uid_to_emp.get(uid)
+        if emp_id is None:
+            continue
+        emp_dates.setdefault(emp_id, set()).add(str(r["active_date"]))
+        emp_hours[emp_id] = emp_hours.get(emp_id, 0) + int(r["active_hours"] or 0)
+
+    result = {}
+    for emp_id in uids_by_emp:
+        days = len(emp_dates.get(emp_id, set()))
+        hours = emp_hours.get(emp_id, 0)
+        result[emp_id] = {
+            "active_days": days,
+            "avg_online_hours": round(hours / days, 2) if days else 0.0,
+        }
+    return result
+
+
 def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="paid",
-                   gm_ids=None, leader_ids=None):
+                   gm_ids=None, leader_ids=None, deductions=None):
     """month='YYYY-MM'，返回每团长分成明细。db_path 为 members.db 路径。
     guild_ids: 指定统计哪些军团（优先）；employee_ids: 指定哪些团长；
     都不传=全部非离职团长的团。basis: paid|shipped 收入口径。
     gm_ids: 指定统计哪些 GM（None=默认全部非离职 GM）
-    leader_ids: 指定统计哪些名下无军团的团长（None=默认模式下全部非离职）"""
+    leader_ids: 指定统计哪些名下无军团的团长（None=默认模式下全部非离职）
+    deductions: [{employee_id, amount, remark}] 保存时录入的当月扣除项"""
     import sqlite3
     if not re.match(r"^\d{4}-\d{2}$", month or ""):
         return {"ok": False, "error": "月份格式应为 YYYY-MM"}
     if basis not in BASIS:
         basis = "paid"
+
+    # 扣除项按员工汇总
+    deduction_map = {}
+    deduction_breakdown = {}
+    for d in (deductions or []):
+        eid = d.get("employee_id")
+        if eid is None:
+            continue
+        amt = float(d.get("amount") or 0)
+        if amt <= 0:
+            continue
+        deduction_map[eid] = deduction_map.get(eid, 0) + amt
+        deduction_breakdown.setdefault(eid, []).append({
+            "amount": amt,
+            "remark": (d.get("remark") or "").strip(),
+        })
 
     rev = run_query(GUILD_MONTH_REVENUE_SQL.format(status_filter=BASIS[basis]["filter"]),
                     {"month_start": month + "-01"})
@@ -304,10 +405,12 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
         base, work_days, month_days = _prorated_base(
             base_full, month, g["entry_date"], g["leave_date"])
         commission = round(amount * rate)
-        total = commission + (base or 0) + (g["position_allowance"] or 0) + (g["gm_allowance"] or 0)
+        emp_id = g["emp_id"]
+        deduction = deduction_map.get(emp_id, 0)
+        total = commission + (base or 0) + (g["position_allowance"] or 0) + (g["gm_allowance"] or 0) - deduction
         items.append({
             "employee": g["nickname"], "employee_status": g["emp_status"],
-            "employee_id": g["emp_id"],
+            "employee_id": emp_id,
             "guild": g["name"], "guild_game_id": gid_raw, "server": g["server"],
             "operation_type": g["operation_type"],
             "revenue": amount, "commission_rate": g["commission_rate"] or "",
@@ -316,9 +419,12 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "work_days": work_days, "month_days": month_days,
             "position_allowance": g["position_allowance"] or 0,
             "gm_allowance": g["gm_allowance"] or 0,
+            "deduction": deduction,
+            "deduction_breakdown": deduction_breakdown.get(emp_id, []),
             "total": total,
             "unmatched": not matched_sid and gid_raw == "",
             "emp_position": g["emp_position"],
+            "expectations": "",
         })
 
     # GM：无军团收入，只发底薪+津贴
@@ -339,10 +445,12 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
         base_full = e["probation_salary"] if e["employment_type"] == "试用期" else e["formal_salary"]
         base, work_days, month_days = _prorated_base(
             base_full, month, e["entry_date"], e["leave_date"])
-        total = (base or 0) + (e["position_allowance"] or 0) + (e["gm_allowance"] or 0)
+        emp_id = e["id"]
+        deduction = deduction_map.get(emp_id, 0)
+        total = (base or 0) + (e["position_allowance"] or 0) + (e["gm_allowance"] or 0) - deduction
         items.append({
             "employee": e["nickname"], "employee_status": e["status"],
-            "employee_id": e["id"],
+            "employee_id": emp_id,
             "guild": "（GM 无军团）", "guild_game_id": "", "server": "",
             "operation_type": "",
             "revenue": 0.0, "commission_rate": "", "commission": 0,
@@ -351,7 +459,10 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "work_days": work_days, "month_days": month_days,
             "position_allowance": e["position_allowance"] or 0,
             "gm_allowance": e["gm_allowance"] or 0,
+            "deduction": deduction,
+            "deduction_breakdown": deduction_breakdown.get(emp_id, []),
             "total": total, "unmatched": False, "is_gm": True,
+            "expectations": "",
         })
 
     # 名下无军团的军团长：无军团收入，只发底薪+津贴（有底薪）
@@ -375,10 +486,12 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
         base_full = e["probation_salary"] if e["employment_type"] == "试用期" else e["formal_salary"]
         base, work_days, month_days = _prorated_base(
             base_full, month, e["entry_date"], e["leave_date"])
-        total = (base or 0) + (e["position_allowance"] or 0) + (e["gm_allowance"] or 0)
+        emp_id = e["id"]
+        deduction = deduction_map.get(emp_id, 0)
+        total = (base or 0) + (e["position_allowance"] or 0) + (e["gm_allowance"] or 0) - deduction
         items.append({
             "employee": e["nickname"], "employee_status": e["status"],
-            "employee_id": e["id"],
+            "employee_id": emp_id,
             "guild": "（无归属军团）", "guild_game_id": "", "server": "",
             "operation_type": "",
             "revenue": 0.0, "commission_rate": "", "commission": 0,
@@ -387,11 +500,24 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "work_days": work_days, "month_days": month_days,
             "position_allowance": e["position_allowance"] or 0,
             "gm_allowance": e["gm_allowance"] or 0,
+            "deduction": deduction,
+            "deduction_breakdown": deduction_breakdown.get(emp_id, []),
             "total": total, "unmatched": False,
+            "expectations": "",
         })
 
     # 无军团收入的团长也列出（amount=0），按员工分组排序
     items.sort(key=lambda x: (x["employee"], x["guild"]))
+
+    # 查询游戏活跃数据并附加到明细/汇总
+    emp_ids = list({it["employee_id"] for it in items})
+    uids_by_emp = _fetch_employee_uids(db_path, emp_ids)
+    activity = _fetch_activity(uids_by_emp, month)
+    for it in items:
+        act = activity.get(it["employee_id"], {"active_days": 0, "avg_online_hours": 0.0})
+        it["active_days"] = act["active_days"]
+        it["avg_online_hours"] = act["avg_online_hours"]
+
     summary = {}
     for it in items:
         s = summary.setdefault(it["employee"], {
@@ -401,14 +527,19 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "base_salary_full": it["base_salary_full"],
             "work_days": it["work_days"], "month_days": it["month_days"],
             "position_allowance": it["position_allowance"], "gm_allowance": it["gm_allowance"],
-            "total": 0, "guilds": []})
+            "total": 0, "guilds": [], "expectations": ""})
         s["revenue"] += it["revenue"]
         s["commission"] += it["commission"]
         s["guilds"].append(it["guild"])
     # 合计 = 分成合计 + 底薪/津贴（每人只计一次）
     for s in summary.values():
+        s["deduction"] = deduction_map.get(s["employee_id"], 0)
+        s["deduction_breakdown"] = deduction_breakdown.get(s["employee_id"], [])
         s["total"] = s["commission"] + (s["base_salary"] or 0) + \
-            (s["position_allowance"] or 0) + (s["gm_allowance"] or 0)
+            (s["position_allowance"] or 0) + (s["gm_allowance"] or 0) - s["deduction"]
+        act = activity.get(s["employee_id"], {"active_days": 0, "avg_online_hours": 0.0})
+        s["active_days"] = act["active_days"]
+        s["avg_online_hours"] = act["avg_online_hours"]
 
     return {"ok": True, "data": {
         "month": month,

@@ -86,6 +86,17 @@ async function loadOptions(kind, force) {
   return state.options[kind];
 }
 
+// 加载 live_employees 全量（按 emp_no 索引），供陪玩映射回填 Discord 等
+async function loadLiveEmpMap(force) {
+  if (force || !state.liveEmpByNo) {
+    const res = await api('live_employees?page_size=200');
+    const map = {};
+    (res.items || []).forEach(r => { map[r.emp_no] = r; });
+    state.liveEmpByNo = map;
+  }
+  return state.liveEmpByNo;
+}
+
 function optionLabel(kind, id) {
   if (id === null || id === undefined || id === '') return '';
   const list = state.options[kind] || [];
@@ -145,6 +156,7 @@ function createSearchSelect(options, opts) {
         e.preventDefault();
         setValue(o.id);
         list.classList.add('hidden');
+        if (opts.onSelect) opts.onSelect(o);
       });
       list.appendChild(item);
     });
@@ -437,6 +449,7 @@ const MODULES = {
   live_employees: {
     title: '员工',
     table: 'live_employees',
+    exportUrl: 'api/live_employees/export',
     columns: [
       { key: 'emp_no', label: '员工编号' },
       { key: 'nickname', label: '昵称' },
@@ -448,15 +461,8 @@ const MODULES = {
       { key: 'emp_type', label: '雇佣类型' },
       { key: 'status', label: '状态' },
       { key: 'sys_role', label: '陪玩角色' },
+      { key: 'discord', label: 'Discord' },
       { key: 'salary_mode', label: '薪资结构' },
-      { key: 'account_holder', label: '账户人', render: (v, item) => {
-        if (!v) return '';
-        const self = (item.real_name || '').trim().toUpperCase();
-        const warn = self && v.trim().toUpperCase() !== self;
-        return (warn ? '<span style="color:#d97706">⚠️ ' + esc(v) + '（非本人）</span>' : esc(v));
-      }},
-      { key: 'bank', label: '银行' },
-      { key: 'account', label: '银行账号' },
       { key: 'entry_date', label: '入职日期' },
       { key: 'updated_at', label: '修改时间' },
     ],
@@ -498,7 +504,9 @@ const MODULES = {
       { key: 'account_holder', label: '账户人', type: 'text' },
       { key: 'bank', label: '银行', type: 'text' },
       { key: 'account', label: '银行账号', type: 'text' },
+      { key: 'payee_phone', label: '收款人手机号', type: 'text' },
       { key: 'phone_zalo', label: '联系电话/zalo', type: 'text' },
+      { key: 'discord', label: 'Discord 昵称', type: 'text' },
       { key: 'tiktok_live', label: 'TikTok 直播账号', type: 'text' },
       { key: 'tiktok_clip', label: 'TikTok 剪辑账号', type: 'text' },
       { key: 'tiktok_personal', label: 'TikTok 个人小号', type: 'text' },
@@ -510,6 +518,26 @@ const MODULES = {
       { key: 'emergency_relation', label: '联系人关系', type: 'select', options: ['父母', '配偶', '兄弟', '其他'] },
       { key: 'emergency_phone', label: '紧急联系电话', type: 'text' },
       { key: 'remark', label: '备注', type: 'textarea', full: true },
+    ],
+  },
+  player_mapping: {
+    title: '陪玩映射',
+    table: 'player_mapping',
+    columns: [
+      { key: 'player_name', label: 'play_detail 昵称' },
+      { key: 'emp_no', label: '关联员工', render: v => v ? esc(optionLabel('live_employees', v)) : '<span class="muted">未匹配</span>' },
+      { key: 'discord', label: 'Discord 昵称' },
+      { key: 'discord_id', label: 'Discord ID' },
+      { key: 'remark', label: '备注' },
+      { key: 'updated_at', label: '修改时间' },
+    ],
+    filters: [],
+    fields: [
+      { key: 'player_name', label: 'play_detail 昵称', type: 'text', required: true, placeholder: '直播明细里的人员昵称，如 HENI' },
+      { key: 'emp_no', label: '关联员工', type: 'searchselect', optionsKind: 'live_employees', placeholder: '选择员工后自动带出 Discord' },
+      { key: 'discord', label: 'Discord 昵称', type: 'text' },
+      { key: 'discord_id', label: 'Discord ID', type: 'text' },
+      { key: 'remark', label: '备注', type: 'textarea', full: true, placeholder: '如：外聘导演/临时人员/未匹配原因' },
     ],
   },
 };
@@ -528,7 +556,7 @@ function getListState(moduleKey) {
 async function switchModule(moduleKey) {
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工' };
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', schedule: '排班表' };
   $('#adminModuleTitle').textContent = titles[moduleKey] || '';
   if (moduleKey === 'users') {
     if (state.role !== 'super') return; // 用户管理仅 super
@@ -542,6 +570,11 @@ async function switchModule(moduleKey) {
     renderQueryPage();
   } else if (moduleKey === 'commission') {
     renderCommissionPage();
+  } else if (moduleKey === 'checkin') {
+    renderCheckinPage();
+  } else if (moduleKey === 'schedule') {
+    window.open('https://covetworld-png.github.io/dinoisland/src/tools/streamer-schedule/index.html', '_blank');
+    return;
   } else {
     renderListPage(moduleKey);
   }
@@ -552,7 +585,8 @@ async function renderListPage(moduleKey) {
   const main = $('#adminMain');
   main.innerHTML = '';
 
-  await Promise.all([loadMeta(), loadOptions('employees'), loadOptions('guilds')]);
+  await Promise.all([loadMeta(), loadOptions('employees'), loadOptions('guilds'), loadOptions('live_employees')]);
+  if (moduleKey === 'player_mapping') await loadLiveEmpMap();
   const meta = state.meta;
 
   // ---- 筛选栏 ----
@@ -629,6 +663,14 @@ async function renderListPage(moduleKey) {
   const spacer = document.createElement('div');
   spacer.className = 'spacer';
   bar.appendChild(spacer);
+
+  if (cfg.exportUrl) {
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'btn';
+    exportBtn.textContent = '导出 CSV';
+    exportBtn.addEventListener('click', () => { window.location.href = cfg.exportUrl; });
+    bar.appendChild(exportBtn);
+  }
 
   const addBtn = document.createElement('button');
   addBtn.className = 'btn btn-primary btn-write';
@@ -732,7 +774,7 @@ async function loadList(moduleKey) {
     delBtn.className = 'btn btn-sm btn-danger btn-write';
     delBtn.textContent = '删除';
     delBtn.addEventListener('click', async () => {
-      const name = item.nickname || item.name || item.account_name || ('ID ' + item.id);
+      const name = item.nickname || item.player_name || item.name || item.account_name || ('ID ' + item.id);
       if (!confirm('确认删除「' + name + '」吗？此操作不可恢复。')) return;
       try {
         await api(cfg.table + '/' + item.id, { method: 'DELETE' });
@@ -781,7 +823,8 @@ let formCtx = null; // { moduleKey, item, fieldCtrls }
 
 async function openFormModal(moduleKey, item) {
   const cfg = MODULES[moduleKey];
-  await Promise.all([loadMeta(), loadOptions('employees'), loadOptions('guilds')]);
+  await Promise.all([loadMeta(), loadOptions('employees'), loadOptions('guilds'), loadOptions('live_employees')]);
+  if (moduleKey === 'player_mapping') await loadLiveEmpMap();
   const meta = state.meta;
 
   const body = $('#formModalBody');
@@ -816,7 +859,21 @@ async function openFormModal(moduleKey, item) {
       fieldCtrls[f.key] = { getValue: () => sel.value, el: sel };
       label.appendChild(sel);
     } else if (f.type === 'searchselect') {
-      const ss = createSearchSelect(state.options[f.optionsKind] || [], { placeholder: '搜索选择' + f.label });
+      const ss = createSearchSelect(state.options[f.optionsKind] || [], {
+        placeholder: '搜索选择' + f.label,
+        onSelect: o => {
+          // 陪玩映射：选择员工后带出 Discord 昵称/ID（仅新增时回填，编辑时不覆盖已填值）
+          if (moduleKey === 'player_mapping' && f.key === 'emp_no') {
+            const emp = (state.liveEmpByNo || {})[o.id];
+            if (emp && emp.discord) {
+              const dc = fieldCtrls['discord'];
+              if (dc && dc.setValue && !(item && (item.discord || '').trim())) dc.setValue(emp.discord);
+              const di = fieldCtrls['discord_id'];
+              if (di && di.setValue && emp.discord_id && !(item && (item.discord_id || '').trim())) di.setValue(emp.discord_id);
+            }
+          }
+        }
+      });
       ss.setValue(cur || '');
       fieldCtrls[f.key] = ss;
       label.appendChild(ss.el);
@@ -913,7 +970,7 @@ async function openFormModal(moduleKey, item) {
       if (f.placeholder) input.placeholder = f.placeholder;
       input.value = (cur === null || cur === undefined) ? '' : cur;
       if (f.required) input.required = true;
-      fieldCtrls[f.key] = { getValue: () => input.value };
+      fieldCtrls[f.key] = { getValue: () => input.value, setValue: v => { input.value = v || ''; } };
       label.appendChild(input);
     }
     grid.appendChild(label);
@@ -1139,9 +1196,10 @@ const LIVE_DRAWER_SECTIONS = [
   ]],
   ['收款信息', [
     ['account_holder', '账户人'], ['bank', '银行'], ['account', '银行账号'],
+    ['payee_phone', '收款人手机号'],
   ]],
   ['联系与证件', [
-    ['phone_zalo', '联系电话/zalo'], ['tiktok_live', 'TikTok 直播账号'],
+    ['phone_zalo', '联系电话/zalo'], ['discord', 'Discord 昵称'], ['discord_id', 'Discord ID'], ['tiktok_live', 'TikTok 直播账号'],
     ['tiktok_clip', 'TikTok 剪辑账号'], ['tiktok_personal', 'TikTok 个人小号'],
     ['birth_date', '出生日期'], ['email', '电子邮箱'],
     ['address', '家庭地址'], ['id_card', '身份证'],
@@ -1161,6 +1219,19 @@ function openLiveEmployeeDrawer(item) {
   $('#drawerTitle').textContent = '员工详情：' + (item.nickname || ('#' + item.id))
     + (item.alias ? '（' + item.alias + '）' : '');
   body.innerHTML = '';
+  // 编辑入口（btn-write：viewer 不可见）
+  const editBar = document.createElement('div');
+  editBar.style.marginBottom = '12px';
+  const editBtn = document.createElement('button');
+  editBtn.type = 'button';
+  editBtn.className = 'btn btn-sm btn-primary btn-write';
+  editBtn.textContent = '编辑';
+  editBtn.addEventListener('click', () => {
+    closeModal('drawer');
+    openFormModal('live_employees', item);
+  });
+  editBar.appendChild(editBtn);
+  body.appendChild(editBar);
   LIVE_DRAWER_SECTIONS.forEach(([title, fields]) => {
     const sec = document.createElement('div');
     sec.className = 'drawer-section';
@@ -2552,7 +2623,7 @@ function renderLeaderBox() {
   wrap.appendChild(body);
 }
 
-async function runCommission(month, basis) {
+async function runCommission(month, basis, deductions) {
   const wrap = $('#commissionResultWrap');
   if (!wrap) return;
   const guildIds = Array.from(guildChecked);
@@ -2562,23 +2633,29 @@ async function runCommission(month, basis) {
     showToast('请至少勾选一个军团、团长或 GM', 'error');
     return;
   }
+  deductions = deductions || [];
   wrap.innerHTML = '<p style="color:#6b7280">计算中…</p>';
   let data;
   try {
-    data = await api('commission/run', { method: 'POST', json: { month, guild_ids: guildIds, gm_ids: gmIds, leader_ids: leaderIds, basis: basis || 'paid' } });
+    data = await api('commission/run', { method: 'POST', json: { month, guild_ids: guildIds, gm_ids: gmIds, leader_ids: leaderIds, basis: basis || 'paid', deductions } });
   } catch (err) {
     wrap.innerHTML = '<p style="color:#dc2626">' + esc(err.message) + '</p>';
     return;
   }
-  lastCommission = { month, data, guild_ids: guildIds, gm_ids: gmIds, leader_ids: leaderIds, basis: data.basis_key || basis || 'paid' };
+  lastCommission = { month, data, guild_ids: guildIds, gm_ids: gmIds, leader_ids: leaderIds, basis: data.basis_key || basis || 'paid', deductions };
   renderLiveCommission(wrap, month, data, guildIds.length, gmIds.length, lastCommission.basis, leaderIds.length);
 }
 
 // 实时计算结果：顶部统计军团数·GM数·口径 + 「保存为发放记录」按钮 + 两张表
 function renderLiveCommission(wrap, month, data, guildCount, gmCount, basisKey, leaderCount) {
   wrap.innerHTML = '';
+
+  // 扣除项录入区
+  const dedPanel = buildDeductionPanel(data, month);
+  wrap.appendChild(dedPanel);
+
   const topBar = document.createElement('div');
-  topBar.style.cssText = 'display:flex;align-items:center;margin-bottom:10px;gap:10px;';
+  topBar.style.cssText = 'display:flex;align-items:center;margin:10px 0;gap:10px;';
   const info = document.createElement('span');
   info.style.cssText = 'font-size:13px;color:var(--text-secondary);';
   info.textContent = '统计 ' + guildCount + ' 个军团 · ' + gmCount + ' 名 GM'
@@ -2598,6 +2675,116 @@ function renderLiveCommission(wrap, month, data, guildCount, gmCount, basisKey, 
   renderCommissionTables(wrap, data, month);
 }
 
+// 扣除项录入面板
+function buildDeductionPanel(data, month) {
+  const panel = document.createElement('div');
+  panel.className = 'drawer-section';
+  panel.style.marginBottom = '12px';
+  panel.innerHTML = '<h4>当月扣除项（保存前录入）</h4>';
+
+  const box = document.createElement('div');
+  box.id = 'deductionInputBox';
+  box.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
+
+  const deductions = (lastCommission && lastCommission.deductions) || [];
+  const employees = new Map();
+  (data.summary || []).forEach(s => { if (s.employee_id) employees.set(s.employee_id, pick(s, ['employee', 'nickname', 'employee_name'])); });
+  (data.items || []).forEach(it => { if (it.employee_id) employees.set(it.employee_id, pick(it, ['employee', 'nickname', 'employee_name'])); });
+  const empOptions = Array.from(employees.entries()).map(([id, name]) => ({ id, name }));
+
+  function renderRows() {
+    box.innerHTML = '';
+    deductions.forEach((d, idx) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+
+      const sel = document.createElement('select');
+      sel.style.cssText = 'padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;';
+      const o0 = document.createElement('option');
+      o0.value = '';
+      o0.textContent = '选择员工';
+      sel.appendChild(o0);
+      empOptions.forEach(e => {
+        const o = document.createElement('option');
+        o.value = e.id;
+        o.textContent = e.name;
+        sel.appendChild(o);
+      });
+      sel.value = d.employee_id || '';
+      sel.addEventListener('change', () => { d.employee_id = sel.value ? Number(sel.value) : null; });
+      row.appendChild(sel);
+
+      const amt = document.createElement('input');
+      amt.type = 'number';
+      amt.placeholder = '扣除金额（VND）';
+      amt.style.cssText = 'padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;width:160px;';
+      amt.value = d.amount || '';
+      amt.addEventListener('input', () => { d.amount = amt.value === '' ? 0 : Number(amt.value); });
+      row.appendChild(amt);
+
+      const remark = document.createElement('input');
+      remark.type = 'text';
+      remark.placeholder = '扣除说明（如：违纪）';
+      remark.style.cssText = 'padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;flex:1;';
+      remark.value = d.remark || '';
+      remark.addEventListener('input', () => { d.remark = remark.value; });
+      row.appendChild(remark);
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'btn btn-sm';
+      delBtn.textContent = '删除';
+      delBtn.addEventListener('click', () => {
+        deductions.splice(idx, 1);
+        renderRows();
+        refreshCommissionWithDeductions();
+      });
+      row.appendChild(delBtn);
+
+      box.appendChild(row);
+    });
+  }
+
+  function refreshCommissionWithDeductions() {
+    if (lastCommission) {
+      lastCommission.deductions = deductions;
+      runCommission(lastCommission.month, lastCommission.basis, deductions);
+    }
+  }
+
+  renderRows();
+  panel.appendChild(box);
+
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'margin-top:8px;';
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'btn btn-sm';
+  addBtn.textContent = '+ 添加扣除项';
+  addBtn.addEventListener('click', () => {
+    deductions.push({ employee_id: null, amount: 0, remark: '' });
+    renderRows();
+  });
+  btnRow.appendChild(addBtn);
+
+  const applyBtn = document.createElement('button');
+  applyBtn.type = 'button';
+  applyBtn.className = 'btn btn-sm btn-primary';
+  applyBtn.textContent = '应用扣除并重新计算';
+  applyBtn.style.marginLeft = '8px';
+  applyBtn.addEventListener('click', () => {
+    const valid = deductions.filter(d => d.employee_id && d.amount > 0);
+    if (valid.length !== deductions.length) {
+      showToast('请填写完整的员工和金额', 'error');
+      return;
+    }
+    refreshCommissionWithDeductions();
+  });
+  btnRow.appendChild(applyBtn);
+  panel.appendChild(btnRow);
+
+  return panel;
+}
 // 分成结果两张表（实时计算 / 快照查看共用）：口径说明 + 汇总表 + 明细表
 function renderCommissionTables(wrap, data, month) {
 
@@ -2621,6 +2808,9 @@ function renderCommissionTables(wrap, data, month) {
     { label: '在职天数', get: s => (s.work_days != null && s.month_days ? (s.work_days < s.month_days ? s.work_days + '/' + s.month_days : '整月') : '') },
     { label: '岗位津贴', key: 'position_allowance', money: true },
     { label: 'GM津贴', key: 'gm_allowance', money: true },
+    { label: '活跃天数', key: 'active_days' },
+    { label: '日均在线(小时)', key: 'avg_online_hours' },
+    { label: '扣除', key: 'deduction', money: true },
     { label: '应发合计', key: 'total', money: true },
   ];
   const summary = data.summary || [];
@@ -2637,7 +2827,8 @@ function renderCommissionTables(wrap, data, month) {
   const sumMoney = key => summary.reduce((n, s) => n + (Number(s[key]) || 0), 0);
   const footer = ['合计（' + summary.length + ' 人）', '', '',
     sumMoney('revenue'), sumMoney('commission'), sumMoney('base_salary'), '',
-    sumMoney('position_allowance'), sumMoney('gm_allowance'), sumMoney('total')];
+    sumMoney('position_allowance'), sumMoney('gm_allowance'), '', '',
+    sumMoney('deduction'), sumMoney('total')];
   sec1.appendChild(buildCommTable(SUMMARY_COLS, summary, {
     onRow: s => openEmployeePayments(s.employee_id, pick(s, ['employee', 'nickname', 'employee_name'])),
     footer,
@@ -2820,6 +3011,14 @@ async function loadSnapshots() {
     });
     actions.appendChild(viewBtn);
 
+    const zipBtn = document.createElement('button');
+    zipBtn.className = 'btn btn-sm btn-primary';
+    zipBtn.textContent = '工资单 ZIP';
+    zipBtn.addEventListener('click', () => {
+      downloadFile('api/commission/snapshot/' + item.id + '/payroll.zip', 'payroll-' + (item.month || '') + '.zip');
+    });
+    actions.appendChild(zipBtn);
+
     const editBtn = document.createElement('button');
     editBtn.className = 'btn btn-sm btn-write';
     editBtn.textContent = '编辑备注';
@@ -2871,6 +3070,43 @@ function viewSnapshot(snap) {
   const spacer = document.createElement('div');
   spacer.className = 'spacer';
   topBar.appendChild(spacer);
+  const pdfSelect = document.createElement('select');
+  pdfSelect.className = 'btn btn-sm';
+  pdfSelect.style.marginRight = '4px';
+  pdfSelect.style.padding = '4px 8px';
+  const allOpt = document.createElement('option');
+  allOpt.value = '';
+  allOpt.textContent = '下载工资单：全部';
+  pdfSelect.appendChild(allOpt);
+  (summary || []).forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.employee_id;
+    opt.textContent = '下载：' + (s.employee || s.nickname || s.employee_name || ('#' + s.employee_id));
+    pdfSelect.appendChild(opt);
+  });
+  topBar.appendChild(pdfSelect);
+
+  const pdfBtn = document.createElement('button');
+  pdfBtn.className = 'btn btn-sm btn-primary';
+  pdfBtn.textContent = '下载 PDF';
+  pdfBtn.style.marginRight = '8px';
+  pdfBtn.addEventListener('click', () => {
+    const eid = pdfSelect.value;
+    const url = 'api/commission/snapshot/' + snap.id + '/payroll.pdf' + (eid ? '?employee_id=' + encodeURIComponent(eid) : '');
+    const filename = 'payroll-' + (snap.month || '') + (eid ? '-' + eid : '') + '.pdf';
+    downloadFile(url, filename);
+  });
+  topBar.appendChild(pdfBtn);
+
+  const zipBtn = document.createElement('button');
+  zipBtn.className = 'btn btn-sm';
+  zipBtn.textContent = '下载全部 ZIP';
+  zipBtn.style.marginRight = '8px';
+  zipBtn.addEventListener('click', () => {
+    downloadFile('api/commission/snapshot/' + snap.id + '/payroll.zip', 'payroll-' + (snap.month || '') + '.zip');
+  });
+  topBar.appendChild(zipBtn);
+
   const closeBtn = document.createElement('button');
   closeBtn.className = 'btn btn-sm';
   closeBtn.textContent = '关闭';
@@ -2895,30 +3131,78 @@ function viewSnapshot(snap) {
 
 /* ---------- 快照备注弹窗（保存 / 编辑备注共用） ---------- */
 
-let snapRemarkCtx = null; // { mode:'save', month } | { mode:'edit', item }
+function collectEmployeeExpectations() {
+  const wrap = $('#snapEmpExpectationsWrap');
+  if (!wrap) return {};
+  const result = {};
+  wrap.querySelectorAll('[data-emp-expect]').forEach(el => {
+    const eid = el.dataset.empExpect;
+    if (eid) result[eid] = el.value.trim();
+  });
+  return result;
+}
+
+function renderEmployeeExpectations(ctx) {
+  const wrap = $('#snapEmpExpectationsWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  let employees = [];
+  let existing = {};
+  if (ctx.mode === 'save' && lastCommission && lastCommission.data && lastCommission.data.summary) {
+    employees = lastCommission.data.summary;
+  } else if (ctx.mode === 'edit' && ctx.item) {
+    try {
+      const summary = JSON.parse(ctx.item.summary_json || '[]');
+      employees = summary;
+      existing = JSON.parse(ctx.item.employee_expectations || '{}');
+    } catch (e) { /* 忽略 */ }
+  }
+  if (!employees.length) {
+    wrap.innerHTML = '<p style="color:#6b7280;font-size:12px;">无员工数据，无法录入期望</p>';
+    return;
+  }
+  employees.forEach(emp => {
+    const eid = String(emp.employee_id);
+    const name = pick(emp, ['employee', 'nickname', 'employee_name']) || ('#' + eid);
+    const label = document.createElement('label');
+    label.className = 'field';
+    label.style.marginBottom = '6px';
+    label.innerHTML = '<span>' + esc(name) + '</span>';
+    const ta = document.createElement('textarea');
+    ta.rows = 2;
+    ta.dataset.empExpect = eid;
+    ta.placeholder = '录入该员工本月工作期望（中越双语），留空则不显示';
+    ta.value = existing[eid] || emp.expectations || '';
+    label.appendChild(ta);
+    wrap.appendChild(label);
+  });
+}
 
 function openSnapshotRemarkModal(ctx) {
   snapRemarkCtx = ctx;
-  $('#snapshotRemarkTitle').textContent = ctx.mode === 'save' ? '保存为发放记录' : '编辑备注';
+  $('#snapshotRemarkTitle').textContent = ctx.mode === 'save' ? '保存为发放记录' : '编辑备注与期望';
   $('#snapRemark').value = ctx.mode === 'save' ? (ctx.month + ' 发放') : (ctx.item.remark || '');
+  renderEmployeeExpectations(ctx);
   openModal('snapshotRemarkModal');
 }
 
 $('#snapRemarkSaveBtn').addEventListener('click', async () => {
   if (!snapRemarkCtx) return;
   const remark = $('#snapRemark').value.trim();
+  const employee_expectations = collectEmployeeExpectations();
   const isSave = snapRemarkCtx.mode === 'save';
   try {
     if (isSave) {
       // 与最近一次计算保持一致的勾选范围
-      const payload = { month: snapRemarkCtx.month, remark };
+      const payload = { month: snapRemarkCtx.month, remark, employee_expectations };
       if (lastCommission && lastCommission.guild_ids) payload.guild_ids = lastCommission.guild_ids;
       if (lastCommission && lastCommission.gm_ids) payload.gm_ids = lastCommission.gm_ids;
       if (lastCommission && lastCommission.leader_ids) payload.leader_ids = lastCommission.leader_ids;
       if (lastCommission && lastCommission.basis) payload.basis = lastCommission.basis;
+      if (lastCommission && lastCommission.deductions) payload.deductions = lastCommission.deductions;
       await api('commission/save', { method: 'POST', json: payload });
     } else {
-      await api('commission_snapshots/' + snapRemarkCtx.item.id, { method: 'PUT', json: { remark } });
+      await api('commission_snapshots/' + snapRemarkCtx.item.id, { method: 'PUT', json: { remark, employee_expectations: JSON.stringify(employee_expectations) } });
     }
     showToast(isSave ? '已保存发放记录' : '备注已更新', 'success');
     closeModal('snapshotRemarkModal');
@@ -3194,9 +3478,1252 @@ $('#pwdSaveBtn').addEventListener('click', async () => {
 });
 
 // 侧边栏导航
+
+
+// ---------- 打卡日报 ----------
+
+function escHtml(s) {
+  if (s == null) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+var checkinSettings = null;
+var _checkinFilterDate = null;  // 日历筛选日期 YYYY-MM-DD，null=全部
+var _checkinCalMonth = null;    // 日历显示的月份 YYYY-MM，null=当前月
+var _streamerColors = {};       // 主播自定义颜色 { name: '#hex' }
+try {
+  var saved = localStorage.getItem('streamerColors');
+  if (saved) _streamerColors = JSON.parse(saved);
+} catch(e) {}
+
+
+
+// Open settings modal
+async function openCheckinSettings() {
+  // Use cache if available, otherwise fetch from server
+  var settings = checkinSettings;
+  if (!settings || Object.keys(settings).length === 0) {
+    try {
+      settings = await api('checkin/settings');
+      if (settings) checkinSettings = settings;
+    } catch (e) {
+      showToast('无法加载设置: ' + e.message, 'error');
+      return;
+    }
+  }
+  var html = '<div class="modal-overlay" onclick="closeCheckinSettings()"></div>';
+  html += '<div class="modal-content" style="max-width:420px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300">';
+  html += '<div class="modal-header"><h3>设置</h3><button type="button" class="modal-close" onclick="closeCheckinSettings()">&times;</button></div>';
+  html += '<div class="modal-body">';
+
+  var autoStart = (settings.auto_start_enabled === '1');
+  var pushSessionNotify = (settings.push_session_notify === '1');
+  var pushJoinNotify = (settings.push_join_notify === '1');
+  var excluded = (settings.excluded_users || '');
+
+  html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
+  html += '<span style="flex:1">自动创建场次</span>';
+  html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
+  html += '<input type="checkbox" id="settingAutoStart" ' + (autoStart ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
+  html += '<span class="toggle-slider"></span></label></label>';
+
+  html += '<div style="border-top:1px solid #ddd;margin:6px 0"></div>';
+
+  html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
+  html += '<span style="flex:1">开播推送通知</span>';
+  html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
+  html += '<input type="checkbox" id="settingPushSessionNotify" ' + (pushSessionNotify ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
+  html += '<span class="toggle-slider"></span></label></label>';
+
+  html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
+  html += '<span style="flex:1">加入推送通知</span>';
+  html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
+  html += '<input type="checkbox" id="settingPushJoinNotify" ' + (pushJoinNotify ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
+  html += '<span class="toggle-slider"></span></label></label>';
+
+  html += '<div style="border-top:1px solid #ddd;margin:6px 0"></div>';
+
+  html += '<div class="field" style="margin-bottom:8px">';
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">最少参与人数</div>';
+  html += '<div style="font-size:10px;color:#999;margin-bottom:4px">自动创建场次后，10分钟内不足此人数则自动取消</div>';
+  html += '<input id="settingMinParticipants" type="number" min="1" max="20" value="' + (settings.min_participants || '3') + '" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px">';
+  html += '</div>';
+
+  html += '<div class="field" style="margin-bottom:8px">';
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">冷却期（分钟）</div>';
+  html += '<div style="font-size:10px;color:#999;margin-bottom:4px">场次结束后，同一语音频道在此时间内禁止自动创建新场次</div>';
+  html += '<input id="settingCooldown" type="number" min="1" max="1440" value="' + (settings.auto_create_cooldown_minutes || '60') + '" style="width:80px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px">';
+  html += '</div>';
+
+  html += '<div class="field" style="text-align:left">';
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">排除人员</div><div style="font-size:10px;color:#999;margin-bottom:6px">从缓存列表选择，勾选后不会显示在签到列表中</div>';
+  html += '<input id="excludeSearchInput" type="text" style="width:100%;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-bottom:4px" placeholder="搜索昵称..." oninput="filterExcludeList(this.value)">';
+  html += '<div id="excludeChecklist" style="max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:4px;margin-bottom:4px;padding:4px"></div>';
+  html += '<div id="excludeSelectedTags" style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px"></div>';
+  html += '</div>';
+  html += '<div class="modal-footer">';
+  html += '<button type="button" class="btn" onclick="closeCheckinSettings()">取消</button>';
+  html += '<button type="button" class="btn btn-primary" onclick="saveCheckinSettings()">保存</button>';
+  html += '</div></div>';
+
+  var overlay = document.createElement('div');
+  overlay.id = 'checkinSettingsOverlay';
+  overlay.innerHTML = html;
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:300';
+  document.body.appendChild(overlay);
+
+  // Load cached nicknames for exclude selection
+  _loadExcludeChecklist(excluded);
+  setTimeout(updateExcludeTags, 500);
+}
+
+// 加载排除人员选择列表
+async function _loadExcludeChecklist(selectedStr) {
+  var container = document.getElementById('excludeChecklist');
+  if (!container) return;
+  var selected = {};
+  if (selectedStr) {
+    selectedStr.split(',').forEach(function(s) {
+      selected[s.trim()] = true;
+    });
+  }
+  try {
+    var data = await api('checkin/user-nicknames');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="color:#999;font-size:12px;padding:8px;text-align:center">陪玩列表为空，请先在陪玩列表中同步</div>';
+      return;
+    }
+    var cacheNames = {};
+    data.forEach(function(u) { cacheNames[u.nickname] = true; });
+    container.innerHTML = data.map(function(u) {
+      var checked = selected[u.nickname] ? ' checked' : '';
+      var uidSuffix = u.user_id && /^\d+$/.test(u.user_id) ? '#' + u.user_id.slice(-6) : '';
+      return '<label style="display:flex;align-items:center;gap:4px;padding:2px 4px;cursor:pointer;font-size:12px;border-radius:2px;background:#f5f5f5;width:100%;box-sizing:border-box">' +
+        '<input type="checkbox" value="' + escHtml(u.nickname) + '"' + checked + ' style="flex-shrink:0;width:auto;padding:0;margin:0" onchange="updateExcludeTags()">' +
+        '<span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + escHtml(u.nickname) + ' <span style="font-size:10px;color:#999">' + uidSuffix + '</span></span></label>';
+    }).join('');
+    // Show warning for excluded users not in cache
+    var missing = Object.keys(selected).filter(function(n) { return !cacheNames[n]; });
+    if (missing.length > 0) {
+      container.innerHTML += '<div style="color:#dc2626;font-size:11px;padding:4px;margin-top:4px;border:1px dashed #fca5a5;border-radius:3px;background:#fef2f2">' +
+        '以下排除人员不在陪玩列表中，但已保留：<br>' +
+        missing.map(function(n) { return '<span style="display:inline-block;padding:0 4px;font-weight:600">' + escHtml(n) + '</span>'; }).join(', ') +
+        '</div>';
+    }
+  } catch(e) {
+    container.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:8px">加载失败: ' + e.message + '</div>';
+  }
+}
+
+// 过滤排除人员列表
+function filterExcludeList(query) {
+  var q = query.toLowerCase().trim();
+  document.querySelectorAll('#excludeChecklist label').forEach(function(label) {
+    label.style.display = (!q || label.textContent.toLowerCase().indexOf(q) >= 0) ? '' : 'none';
+  });
+}
+
+
+function closeCheckinSettings() {
+  var el = document.getElementById('checkinSettingsOverlay');
+  if (el) el.remove();
+}
+
+async function saveCheckinSettings() {
+  // Always reload current DB values first, so we never lose data
+  var current = {};
+  try {
+    current = await api('checkin/settings');
+  } catch (e) {
+    current = {};
+  }
+
+  // Read toggle states from DOM
+  var autoStart = document.getElementById('settingAutoStart').checked ? '1' : '0';
+  var pushSessionNotify = document.getElementById('settingPushSessionNotify').checked ? '1' : '0';
+  var pushJoinNotify = document.getElementById('settingPushJoinNotify').checked ? '1' : '0';
+
+  // Merge excluded users: DB values + checkbox selections
+  var currentExcluded = (current.excluded_users || '');
+  var kept = {};
+  currentExcluded.split(',').forEach(function(s) {
+    var t = s.trim();
+    if (t) kept[t] = true;
+  });
+  document.querySelectorAll('#excludeChecklist input[type=checkbox]').forEach(function(cb) {
+    if (cb.checked) {
+      kept[cb.value] = true;
+    } else {
+      delete kept[cb.value];
+    }
+  });
+  var excluded = Object.keys(kept).join(',');
+
+  try {
+    await api('checkin/settings', { method: 'POST', json: { key: 'auto_start_enabled', value: autoStart } });
+    await api('checkin/settings', { method: 'POST', json: { key: 'push_session_notify', value: pushSessionNotify } });
+    await api('checkin/settings', { method: 'POST', json: { key: 'push_join_notify', value: pushJoinNotify } });
+    await api('checkin/settings', { method: 'POST', json: { key: 'min_participants', value: document.getElementById('settingMinParticipants').value || '3' } });
+    await api('checkin/settings', { method: 'POST', json: { key: 'auto_create_cooldown_minutes', value: document.getElementById('settingCooldown').value || '60' } });
+    await api('checkin/settings', { method: 'POST', json: { key: 'excluded_users', value: excluded } });
+    // 更新缓存 + DB 一致
+    checkinSettings = { auto_start_enabled: autoStart, push_session_notify: pushSessionNotify, push_join_notify: pushJoinNotify, min_participants: document.getElementById('settingMinParticipants').value || '3', auto_create_cooldown_minutes: document.getElementById('settingCooldown').value || '60', excluded_users: excluded };
+    closeCheckinSettings();
+    showToast('设置已保存', 'success');
+  } catch (e) {
+    showToast('保存失败: ' + e.message, 'error');
+  }
+}
+
+// Export CSV
+function exportCheckinCSV() {
+  var data = window._checkinExportData;
+  if (!data || data.length === 0) {
+    showToast('没有可导出的数据，请先加载场次列表', 'error');
+    return;
+  }
+  var rows = [];
+  // Header
+  rows.push(['日期', '场次编号', '主播', '昵称', 'ID后6位', '时长(min)', '标签']);
+  data.forEach(function(s) {
+    if (!s.checkins || s.checkins.length === 0) return;
+    s.checkins.forEach(function(c) {
+      var uidSuffix = c.user_id && /^\d+$/.test(c.user_id) ? '#' + c.user_id.slice(-6) : '';
+      var tag = c.is_streamer ? '主播' : (c.checked_in ? '有效' : '无效');
+      // Escape CSV fields
+      function esc(v) {
+        var s = String(v || '');
+        if (s.indexOf(',') >= 0 || s.indexOf('"') >= 0 || s.indexOf('\n') >= 0) {
+          return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+      }
+      var dateStr = s.start_time ? s.start_time.split(' ')[0] : '';
+      rows.push([
+        esc(dateStr),
+        esc(s.session_no),
+        esc(s.streamer_name),
+        esc(c.nickname),
+        esc(uidSuffix),
+        esc(c.duration),
+        esc(tag)
+      ]);
+    });
+  });
+  // Generate CSV content
+  var csv = rows.map(function(row) { return row.join(','); }).join('\n');
+  // Download
+  var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'checkin_export_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Soft delete a session
+async function deleteSession(sessionId, sessionNo, status) {
+  if (status === 'active') {
+    if (!confirm('确定结束场次 ' + sessionNo + ' 吗？已签到数据保留。')) return;
+    if (!confirm('再确认一次：结束场次 ' + sessionNo + ' 后不可撤销。')) return;
+  } else {
+    if (!confirm('确定删除场次 ' + sessionNo + ' 吗？将不再显示在列表中。')) return;
+    if (!confirm('再确认一次：删除场次 ' + sessionNo + ' 不可撤销。')) return;
+  }
+  try {
+    var res = await api('checkin/sessions/' + sessionId, { method: 'DELETE' });
+    var ended = res && res.new_status === 'ended';
+    showToast('场次 ' + sessionNo + (ended ? ' 已结束' : ' 已删除'), 'success');
+    renderCheckinPage();
+  } catch (e) {
+    showToast('操作失败: ' + e.message, 'error');
+  }
+}
+
+// Retroactively fix session start time
+async function retroSession(sessionNo) {
+  if (!confirm('【追溯修正】场次 ' + sessionNo + '\n将根据场次期间首个非滞留成员的语音进入时间修正 start_time。\n注意：仅对 Bot 启动后创建的场次有效，历史场次数据可能不准。\n确定继续吗？')) return;
+  try {
+    var res = await api('checkin/retro/' + sessionNo, { method: 'POST' });
+    if (res.old_start && res.new_start) {
+      showToast('场次 ' + sessionNo + ' start_time 已从 ' + res.old_start + ' 修正为 ' + res.new_start, 'success');
+      renderCheckinPage();
+    } else {
+      showToast(res.error || '追溯失败', 'error');
+    }
+  } catch (e) {
+    showToast('追溯失败: ' + e.message, 'error');
+  }
+}// Open checkin manager modal for a session
+async function openCheckinManager(sessionId, sessionNo, checkins) {
+  if (!checkins && window._checkinData) checkins = window._checkinData[sessionId] || [];
+  var html = '<div class="modal-overlay" onclick="closeCheckinManager()"></div>';
+  html += '<div class="modal-content" style="max-width:500px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300">';
+  html += '<div class="modal-header"><h3>签到管理 - ' + escHtml(sessionNo) + '</h3><button type="button" class="modal-close" onclick="closeCheckinManager()">&times;</button></div>';
+  html += '<div class="modal-body">';
+
+  // Existing checkins
+  html += '<div style="margin-bottom:16px">';
+  html += '<div style="font-weight:600;font-size:14px;margin-bottom:8px">现有签到记录 (' + checkins.length + ')</div>';
+  if (checkins.length === 0) {
+    html += '<div style="color:#999;font-size:13px;padding:8px">暂无签到记录</div>';
+  } else {
+    html += '<div style="max-height:200px;overflow-y:auto">';
+    checkins.forEach(function(c) {
+      var methodEmoji = { slash: '💬', button: '🔘', voice: '🎤', manual: '✏️' };
+      var emoji = methodEmoji[c.method] || '❓';
+      var below = !c.checked_in && (!c.duration || c.duration < 60);
+      var isStr = c.is_streamer;
+      var rowBg = isStr ? ';background:#fef3c7' : (below ? ';background:#fef2f2' : '');
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #f0f0f0;font-size:13px' + rowBg + '">';
+      var _uid2 = c.user_id && /^\d+$/.test(c.user_id) ? '#' + c.user_id.slice(-6) : '';
+      var rowStyle = isStr ? 'color:#92400e' : (below ? 'color:#dc2626' : '');
+      html += '<span style="' + rowStyle + '">';
+      if (isStr) { html += '<i class="fas fa-star" style="font-size:10px;margin-right:3px;color:#d97706"></i> '; }
+      else if (below) { html += '<i class="fas fa-exclamation-triangle" style="font-size:10px;margin-right:3px;color:#dc2626"></i> '; }
+            var meta = window._sessionMeta && window._sessionMeta[sessionId] || {};
+      var sessionDur = meta.duration_minutes || 0;
+      var ratio = sessionDur > 0 && c.duration ? Math.round((c.duration / sessionDur) * 100) : 0;
+      var tier = ratio >= 87.5 ? 100 : (ratio >= 62.5 ? 75 : (ratio >= 37.5 ? 50 : 0));
+      var tierColors = { 100:'#16a34a', 75:'#2563eb', 50:'#ca8a04', 25:'#dc2626', 0:'#6b7280' };
+      var tierBgs = { 100:'#dcfce7', 75:'#dbeafe', 50:'#fef08a', 25:'#fee2e2', 0:'#f3f4f6' };
+      var tierColor = tierColors[tier] || '#999';
+      var tierBg = tierBgs[tier] || '#f5f5f5';
+      html += emoji + ' ' + escHtml(c.nickname) + ' <span style="font-size:10px;color:#999">' + _uid2 + '</span> ' + (c.duration ? c.duration + 'min' : '-') +
+        ' <span style="font-size:10px;font-weight:600;color:' + tierColor + ';background:' + tierBg + ';padding:0 5px;border-radius:3px;display:inline-block">' + tier + '%</span></span>';
+      if (c.checked_in && c.id) {
+        html += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;color:#991b1b;background:#fee2e2;border-color:#fecaca" onclick="deleteSessionCheckin(' + sessionId + ',' + c.id + ',\'' + escHtml(c.nickname) + '\')" title="删除"><i class="fas fa-trash-alt"></i></button>';
+      } else {
+        html += '<span style="font-size:11px;color:#dc2626">未达标</span>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Add new checkins - selection from cache
+  html += '<div style="margin-bottom:8px">';
+  html += '<div style="font-weight:600;font-size:14px;margin-bottom:6px">补签 <span style="font-size:10px;color:#999;font-weight:400">从缓存列表选择，或手动输入</span></div>';
+  html += '<input id="cacheSearchInput" type="text" style="width:100%;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-bottom:4px" placeholder="搜索昵称..." oninput="filterCacheList(this.value)">';
+  html += '<div id="cacheChecklist" style="max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:4px;margin-bottom:6px;padding:4px"></div>';
+  html += '<div id="cacheSelectedTags" style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px"></div>';
+  html += '<div style="display:flex;gap:4px;align-items:center">';
+  html += '<input id="manualNicknameInput" type="text" style="flex:1;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px" placeholder="手动输入昵称（不在缓存中的）">';
+  html += '<button class="btn btn-sm" style="padding:3px 8px;font-size:11px" onclick="addManualNickname()">添加</button>';
+  html += '</div>';
+  html += '<div id="pendingNicknames" style="display:flex;flex-wrap:wrap;gap:3px;margin-top:6px"></div>';
+  html += '</div>';
+  html += '<div style="font-size:11px;color:#999;margin-bottom:8px">补签时间为当前时间，方式标记为 manual。已签到的昵称会自动跳过。</div>';
+
+  html += '</div>';
+  html += '<div class="modal-footer">';
+  html += '<button type="button" class="btn" onclick="closeCheckinManager()">取消</button>';
+  html += '<button type="button" class="btn btn-primary" onclick="batchAddCheckins(' + sessionId + ')">保存补签 (<span id="selectedCount">0</span>)</button>';
+  html += '</div></div>';
+
+  var overlay = document.createElement('div');
+  overlay.id = 'checkinManagerOverlay';
+  overlay.innerHTML = html;
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:300';
+  document.body.appendChild(overlay);
+
+  // Load cached nicknames and render checklist
+  _loadCacheChecklist();
+  setTimeout(updateCacheTags, 500);
+}
+
+// 加载昵称缓存列表到复选框
+async function _loadCacheChecklist() {
+  var container = document.getElementById('cacheChecklist');
+  if (!container) return;
+  try {
+    var data = await api('checkin/user-nicknames');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="color:#999;font-size:12px;padding:8px;text-align:center">缓存为空，<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;margin-left:4px" onclick="syncNicknamesFromCache()"><i class="fas fa-sync"></i> 同步昵称</button></div>';
+      return;
+    }
+    container.innerHTML = data.map(function(u) {
+      var uidSuffix = u.user_id && /^\d+$/.test(u.user_id) ? '#' + u.user_id.slice(-6) : '';
+      return '<label style="display:flex;align-items:center;gap:4px;padding:2px 4px;cursor:pointer;font-size:12px;border-radius:2px;width:100%;box-sizing:border-box" class="cache-list-item">' +
+        '<input type="checkbox" value="' + escHtml(u.nickname) + '" onchange="updateSelectedCount();updateCacheTags()" style="flex-shrink:0;width:auto;padding:0;margin:0">' +
+        '<span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + escHtml(u.nickname) + ' <span style="font-size:10px;color:#999">' + uidSuffix + '</span></span></label>';
+    }).join('');
+    updateSelectedCount();
+  } catch(e) {
+    container.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:8px">加载失败: ' + e.message + '</div>';
+  }
+}
+
+// 过滤缓存列表
+function filterCacheList(query) {
+  var q = query.toLowerCase().trim();
+  document.querySelectorAll('#cacheChecklist label').forEach(function(label) {
+    label.style.display = (!q || label.textContent.toLowerCase().indexOf(q) >= 0) ? '' : 'none';
+  });
+}
+
+// 添加手动输入的昵称
+function addManualNickname() {
+  var input = document.getElementById('manualNicknameInput');
+  if (!input) return;
+  var nick = input.value.trim();
+  if (!nick) { showToast('请输入昵称', 'error'); return; }
+  // Check if already in pending
+  var existing = document.querySelectorAll('#pendingNicknames .pending-tag');
+  for (var i = 0; i < existing.length; i++) {
+    if (existing[i].getAttribute('data-nickname') === nick) {
+      showToast('已在列表中', 'info');
+      input.value = '';
+      return;
+    }
+  }
+  var container = document.getElementById('pendingNicknames');
+  var tag = document.createElement('span');
+  tag.className = 'pending-tag';
+  tag.setAttribute('data-nickname', nick);
+  tag.style.cssText = 'display:inline-flex;align-items:center;gap:2px;padding:1px 6px;font-size:11px;background:#e0e7ff;color:#3730a3;border-radius:3px';
+  tag.innerHTML = escHtml(nick) + ' <span style="cursor:pointer;font-size:10px;margin-left:2px" onclick="this.parentElement.remove();updateSelectedCount()">&times;</span>';
+  container.appendChild(tag);
+  input.value = '';
+  updateSelectedCount();
+}
+
+// 更新选中计数
+// 更新排除人员标签显示
+function updateExcludeTags() {
+  var container = document.getElementById('excludeSelectedTags');
+  if (!container) return;
+  var names = [];
+  document.querySelectorAll('#excludeChecklist input[type=checkbox]:checked').forEach(function(cb) {
+    names.push(cb.value);
+  });
+  if (names.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = names.map(function(n) {
+    return '<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 6px;font-size:11px;background:#fef3c7;color:#92400e;border-radius:3px">' + escHtml(n) + '</span>';
+  }).join('');
+}
+
+// 更新补签缓存列表标签显示
+function updateCacheTags() {
+  var container = document.getElementById('cacheSelectedTags');
+  if (!container) return;
+  var names = [];
+  document.querySelectorAll('#cacheChecklist input[type=checkbox]:checked').forEach(function(cb) {
+    names.push(cb.value);
+  });
+  if (names.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = names.map(function(n) {
+    return '<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 6px;font-size:11px;background:#dbeafe;color:#1e40af;border-radius:3px">' + escHtml(n) + '</span>';
+  }).join('');
+}
+
+
+function updateSelectedCount() {
+  var count = 0;
+  document.querySelectorAll('#cacheChecklist input[type=checkbox]:checked').forEach(function() { count++; });
+  count += document.querySelectorAll('#pendingNicknames .pending-tag').length;
+  var el = document.getElementById('selectedCount');
+  if (el) el.textContent = count;
+}
+
+
+function closeCheckinManager() {
+  var el = document.getElementById('checkinManagerOverlay');
+  if (el) el.remove();
+  renderCheckinPage();
+}
+
+async function batchAddCheckins(sessionId) {
+  var nicknames = [];
+  // Collect from checklist checkboxes
+  document.querySelectorAll('#cacheChecklist input[type=checkbox]:checked').forEach(function(cb) {
+    nicknames.push(cb.value);
+  });
+  // Collect from pending tags
+  document.querySelectorAll('#pendingNicknames .pending-tag').forEach(function(el) {
+    nicknames.push(el.getAttribute('data-nickname'));
+  });
+  // Deduplicate
+  nicknames = nicknames.filter(function(n, i) { return nicknames.indexOf(n) === i; });
+  if (nicknames.length === 0) { showToast('请选择或输入要补签的昵称', 'error'); return; }
+  try {
+    var result = await api('checkin/sessions/' + sessionId + '/checkins', {
+      method: 'POST',
+      json: { nicknames: nicknames }
+    });
+    var data = result.data || {};
+    var added = data.added || [];
+    var skipped = data.skipped || [];
+    var msg = '补签成功: ' + added.length + ' 人';
+    if (skipped.length > 0) msg += '，跳过(已存在): ' + skipped.join(', ');
+    showToast(msg, 'success');
+    closeCheckinManager();
+  } catch (e) {
+    showToast('补签失败: ' + e.message, 'error');
+  }
+}
+
+async function deleteSessionCheckin(sessionId, checkinId, nickname) {
+  if (!confirm('确定删除 ' + nickname + ' 的签到记录吗？')) return;
+  try {
+    await api('checkin/sessions/' + sessionId + '/checkins/' + checkinId, { method: 'DELETE' });
+    showToast('已删除 ' + nickname + ' 的签到', 'success');
+    // Reopen the modal to refresh
+    closeCheckinManager();
+  } catch (e) {
+    showToast('删除失败: ' + e.message, 'error');
+  }
+}
+
+
+// 同步 Discord 昵称到本地缓存
+async function syncNicknames() {
+    if (!confirm('确定从 Discord 同步所有成员昵称到本地缓存？\n\n首次同步可能需要 1-2 分钟。')) return;
+    var btn = document.querySelector('button[onclick="syncNicknamesFromCache()"]');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 同步中...'; }
+    try {
+        var res = await api('checkin/sync-nicknames');
+        if (res && res.synced !== undefined) {
+            alert('同步完成！\n已更新 ' + (res.synced || 0) + ' 条昵称记录');
+        } else {
+            alert('同步失败: ' + (res && res.error || '未知错误'));
+        }
+    } catch(e) {
+        alert('请求失败: ' + e.message);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync"></i> 同步昵称'; }
+    }
+}
+
+
+// 显示本地昵称缓存列表
+async function openNicknameCache() {
+    var data;
+    try {
+        data = await api('checkin/user-nicknames');
+    } catch(e) {
+        showToast('获取缓存列表失败: ' + e.message, 'error');
+        return;
+    }
+    if (!data || data.length === 0) {
+        closeNicknameCache();
+        syncNicknames();
+        return;
+    }
+    var html = '<div class="modal-overlay" onclick="closeNicknameCache()"></div>';
+    html += '<div class="modal-content" style="max-width:500px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300">';
+    html += '<div class="modal-header"><h3>陪玩列表 (' + data.length + ')</h3><div style="display:flex;gap:4px;align-items:center"><button class="btn btn-sm" style="font-size:11px;padding:1px 6px" onclick="syncNicknamesFromCache()"><i class="fas fa-sync"></i> 同步</button><button type="button" class="modal-close" onclick="closeNicknameCache()">&times;</button></div></div>';
+    html += '<div class="modal-body">';
+    html += '<div style="max-height:400px;overflow-y:auto">';
+    data.forEach(function(u) {
+        var uidSuffix = u.user_id && /^\d+$/.test(u.user_id) ? '#' + u.user_id.slice(-6) : '';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #f0f0f0;font-size:13px">';
+        html += '<span><i class="fas fa-user"></i> ' + escHtml(u.nickname) + ' <span style="font-size:10px;color:#999">' + uidSuffix + '</span></span>';
+        html += '<span style="font-size:10px;color:#999">' + (u.updated_at || '') + '</span>';
+        html += '</div>';
+    });
+    html += '</div></div></div></div>';
+
+    var overlay = document.createElement('div');
+    overlay.id = 'nicknameCacheOverlay';
+    overlay.innerHTML = html;
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:300';
+    document.body.appendChild(overlay);
+}
+
+// 从缓存弹窗内同步昵称，完成后刷新列表
+async function syncNicknamesFromCache() {
+    var btn = event && event.target && event.target.closest ? event.target.closest('button') : null;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 同步中...'; }
+    try {
+        var res = await api('checkin/sync-nicknames');
+        if (res && res.synced !== undefined) {
+            showToast('同步完成！已更新 ' + (res.synced || 0) + ' 条', 'success');
+        } else {
+            showToast('同步失败: ' + (res && res.error || '未知错误'), 'error');
+        }
+    } catch(e) {
+        showToast('请求失败: ' + e.message, 'error');
+    } finally {
+        closeNicknameCache();
+        openNicknameCache();
+    }
+}
+
+
+function closeNicknameCache() {
+    var el = document.getElementById('nicknameCacheOverlay');
+    if (el) el.remove();
+}
+
+
+
+// ========== Calendar Navigation ==========
+function renderCalendar(byDate) {
+  var now = new Date();
+  var year = _checkinCalMonth ? parseInt(_checkinCalMonth.split('-')[0]) : now.getFullYear();
+  var month = _checkinCalMonth ? parseInt(_checkinCalMonth.split('-')[1]) : now.getMonth() + 1;
+  var firstDay = new Date(year, month - 1, 1).getDay(); // 0=Sun
+  var daysInMonth = new Date(year, month, 0).getDate();
+  var todayStr = now.toISOString().split('T')[0];
+  var monthKey = year + '-' + String(month).padStart(2, '0');
+
+  // Compute daily data from byDate
+  var dailyData = {};  // { dateKey: { streamers: [[name, sessions], ...], total: N } }
+  Object.keys(byDate).forEach(function(dateKey) {
+    var streamers = byDate[dateKey];
+    var names = Object.keys(streamers).sort();
+    var list = [];
+    var totalSessions = 0;
+    names.forEach(function(name) {
+      var g = streamers[name];
+      var count = (g.active || []).length + (g.ended || []).length;
+      totalSessions += count;
+      list.push([name, count]);
+    });
+    dailyData[dateKey] = { streamers: list, total: totalSessions };
+  });
+
+  var MAX_VISIBLE = 5;  // Max streamers to show in a cell
+  var prevMonth = month === 1 ? (year - 1) + '-12' : year + '-' + String(month - 1).padStart(2, '0');
+  var nextMonth = month === 12 ? (year + 1) + '-01' : year + '-' + String(month + 1).padStart(2, '0');
+
+  var h = '<div class="checkin-calendar">';
+  h += '<div class="cal-nav">';
+  h += '<button class="cal-nav-btn" onclick="calNavMonth(\'' + prevMonth + '\')">\u25C0</button>';
+  h += '<span class="cal-nav-title">' + year + '\u5E74' + month + '\u6708</span>';
+  h += '<button class="cal-nav-btn" onclick="calNavMonth(\'' + nextMonth + '\')">\u25B6</button>';
+  if (_checkinFilterDate !== null && _checkinFilterDate !== '__all__') {
+    h += '<button class="cal-nav-btn cal-clear" onclick="calClearFilter()">\u2716 \u6E05\u9664\u7B5B\u9009</button>';
+  }
+  h += '</div>';
+  h += '<table class="cal-grid"><tr>';
+  ['\u65E5','\u4E00','\u4E8C','\u4E09','\u56DB','\u4E94','\u516D'].forEach(function(d) { h += '<th class="cal-th">' + d + '</th>'; });
+  h += '</tr><tr>';
+
+  // Empty cells before first day
+  for (var i = 0; i < firstDay; i++) {
+    h += '<td class="cal-cell cal-empty"></td>';
+  }
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var dateStr = monthKey + '-' + String(d).padStart(2, '0');
+    var classes = 'cal-cell';
+    if (dateStr === todayStr) classes += ' today';
+    if (dateStr === _checkinFilterDate) classes += ' selected';
+    if (dailyData[dateStr] && dailyData[dateStr].total > 0) classes += ' has-session';
+
+    h += '<td class="' + classes + '" data-date="' + dateStr + '">';
+    h += '<div class="cal-day-badge">' + d + '</div>';
+    // Show streamer chips
+    var dd = dailyData[dateStr];
+    if (dd && dd.streamers.length > 0) {
+      h += '<div class="cal-streamer-chips">';
+      var shown = dd.streamers;  // 全部展示，chips 自动换行（2026-08-22 用户确认：去掉 5 个上限截断）
+      shown.forEach(function(item) {
+        var name = escHtml(item[0]);
+        var count = item[1];
+        // Truncate name to 3 Chinese chars
+        if (name.length > 6) name = name.slice(0, 6) + '.';
+        // Check custom color override, else use hash-based palette
+        var bg = _streamerColors[item[0]];
+        if (!bg) {
+          var palette = ['#e53935','#f4511e','#fb8c00','#43a047','#00897b','#00acc1','#1e88e5','#3949ab','#8e24aa','#d81b60'];
+          var colorIdx = 0;
+          for (var ci = 0; ci < item[0].length; ci++) {
+            colorIdx = (colorIdx * 31 + item[0].charCodeAt(ci)) >>> 0;
+          }
+          bg = palette[colorIdx % palette.length];
+        }
+        h += '<span class="cal-chip" style="background:' + bg + '">' + name + '<span class="cal-chip-count">x' + count + '</span></span>';
+      });
+      h += '</div>';
+    }
+    h += '</td>';
+    if ((firstDay + d) % 7 === 0 && d < daysInMonth) {
+      h += '</tr><tr>';
+    }
+  }
+
+  // Fill remaining cells
+  var totalCells = firstDay + daysInMonth;
+  var remaining = (7 - (totalCells % 7)) % 7;
+  for (var i = 0; i < remaining; i++) {
+    h += '<td class="cal-cell cal-empty"></td>';
+  }
+
+  h += '</tr></table>';
+  h += '</div>';
+  return h;
+}
+
+function calNavMonth(monthKey) {
+  _checkinCalMonth = monthKey;
+  _checkinFilterDate = '__all__';  // Show all when navigating months
+  renderCheckinPage();
+}
+
+function calSelectDate(dateStr) {
+  _checkinFilterDate = dateStr;
+  renderCheckinPage();
+}
+
+function calClearFilter() {
+  _checkinFilterDate = '__all__';  // Show all sessions
+  _checkinCalMonth = null;
+  renderCheckinPage();
+}
+
+// Calendar date click via event delegation
+document.addEventListener('click', function(e) {
+  var calCell = e.target.closest('.cal-cell');
+  if (calCell && !calCell.classList.contains('cal-empty')) {
+    var ds = calCell.dataset.date;
+    if (ds) { calSelectDate(ds); }
+  }
+});
+async function renderCheckinPage() {
+  const main = $('#adminMain');
+  main.innerHTML = '<div class="loading">Loading...</div>';
+
+  try {
+    // Load settings (cache or fetch)
+    if (checkinSettings === null || (typeof checkinSettings === 'object' && Object.keys(checkinSettings).length === 0)) {
+      try { checkinSettings = await api('checkin/settings'); } catch (e) { checkinSettings = null; }
+    }
+
+    // Parse excluded users list
+    var excludedUsers = [];
+    if (checkinSettings && checkinSettings.excluded_users) {
+      excludedUsers = checkinSettings.excluded_users.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+    }
+
+    // 预加载校对报告日期集合（日历单元格徽标 / 卡片 header 提示用，缓存 promise 供多次渲染复用）
+    window._verifyReportDates = window._verifyReportDates || {};
+    if (!window._verifyDatesLoaded) {
+      window._verifyDatesLoaded = api('verify/reports?page=1&page_size=200').then(function(res) {
+        var dates = {};
+        (res && res.items || []).forEach(function(it) { dates[it.report_date] = it.summary; });
+        window._verifyReportDates = dates;
+      }).catch(function() {});
+    }
+
+    // 默认显示当天，点击日历可切换日期
+    if (typeof _checkinFilterDate === 'undefined' || _checkinFilterDate === null) {
+      _checkinFilterDate = new Date().toISOString().split('T')[0];
+    }
+    // 清除筛选时显示全部
+
+    const from = $('#sessionDateFrom') ? $('#sessionDateFrom').value : '';
+    const to = $('#sessionDateTo') ? $('#sessionDateTo').value : '';
+    let params = 'page=1&page_size=200';
+    if (from) params += '&from=' + from;
+    if (to) params += '&to=' + to;
+
+    const data = await api('checkin/sessions?' + params);
+    const items = data.items || [];
+    window._checkinExportData = items;
+    const total = data.total || 0;
+
+    // Filter out excluded users from checkins
+    items.forEach(function(s) {
+      if (s.checkins && excludedUsers.length > 0) {
+        s.checkins = s.checkins.filter(function(c) {
+          return excludedUsers.indexOf(c.nickname) < 0;
+        });
+
+      }
+    });
+
+
+
+    // Group by date -> streamer (unfiltered for calendar, filtered for cards)
+    var byDate = {};
+    items.forEach(function(s) {
+      var dateKey = s.start_time ? s.start_time.split(' ')[0] : 'Unknown';
+      if (!byDate[dateKey]) byDate[dateKey] = {};
+      var name = s.streamer_name || 'Unknown';
+      if (!byDate[dateKey][name]) byDate[dateKey][name] = { active: [], ended: [] };
+      if (s.status === 'active') {
+        byDate[dateKey][name].active.push(s);
+      } else {
+        byDate[dateKey][name].ended.push(s);
+      }
+    });
+
+    var html = '';
+
+    // Render calendar (always uses unfiltered byDate)
+    html += renderCalendar(byDate);
+
+    // Filter byDate for cards if _checkinFilterDate is set (but not '__all__')
+    if (_checkinFilterDate !== null && _checkinFilterDate !== '__all__') {
+      var filteredByDate = {};
+      if (byDate[_checkinFilterDate]) {
+        filteredByDate[_checkinFilterDate] = byDate[_checkinFilterDate];
+      }
+      byDate = filteredByDate;
+    }
+
+    // Filter bar + settings + export
+    html += '<div class="card" style="margin-bottom:20px">';
+    html += '<div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#f8f9fa;border-radius:6px 6px 0 0;font-weight:600">';
+    html += '<span><i class="fas fa-video"></i> 场次签到 <span style="font-size:10px;color:#999;font-weight:400"><span style="color:#92400e;background:#fef3c7;padding:0 3px;border-radius:2px">主播</span> <span style="color:#1e40af;background:#dbeafe;padding:0 3px;border-radius:2px">已签到</span> <span style="color:#991b1b;background:#fee2e2;padding:0 3px;border-radius:2px">未达标</span></span></span>';
+    html += '<div style="display:flex;gap:8px;align-items:center">';
+    html += '<input type="date" id="sessionDateFrom" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px" value="' + escHtml(from) + '">';
+    html += '<span style="color:#999">至</span>';
+    html += '<input type="date" id="sessionDateTo" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px" value="' + escHtml(to) + '">';
+    html += '<button class="btn btn-sm" onclick="renderCheckinPage()">搜索</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="renderCheckinPage()" style="font-size:16px;padding:2px 8px" title="刷新"><i class="fas fa-redo-alt"></i></button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="exportCheckinCSV()" title="导出 CSV"><i class="fas fa-download"></i> 导出</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openCheckinSettings()" title="设置"><i class="fas fa-cog"></i> 设置</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openStreamerColorManager()" title="管理主播列表"><i class="fas fa-palette"></i> 主播列表</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openNicknameCache()" title="查看陪玩列表"><i class="fas fa-address-book"></i> 陪玩列表</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openVerifyReports()" title="数据校对报告"><i class="fas fa-clipboard-check"></i> 数据校对</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openCheckinHelp()" title="查看判断逻辑说明"><i class="fas fa-question-circle"></i> 说明</button>';
+    html += '</div></div></div>';
+
+    // Session card rendering helper
+    function renderSession(s) {
+      var isActive = s.status === 'active';
+      var isCancelled = s.status === 'cancelled';
+      var statusClass = isCancelled ? 'cancelled' : (isActive ? 'active' : 'ended');
+      var badgeClass = isCancelled ? 'badge-cancelled' : (isActive ? 'badge-active' : 'badge-done');
+      var badgeText = isCancelled ? '已取消' : (isActive ? '进行中' : 'End');
+      var startTime = new Date(s.start_time.replace(' ', 'T'));
+      var endStr = '';
+      if (s.end_time) {
+        var endTime = new Date(s.end_time.replace(' ', 'T'));
+        endStr = endTime.toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+      } else {
+        endStr = '🟠 进行中';
+      }
+      var durStr = s.duration_minutes > 0 ? (Math.floor(s.duration_minutes / 60) + 'h ' + (s.duration_minutes % 60) + 'm') : '-';
+
+      if (!window._checkinData) window._checkinData = {};
+      if (!window._sessionMeta) window._sessionMeta = {};
+    window._checkinData[s.id] = s.checkins;
+    window._sessionMeta[s.id] = { duration_minutes: s.duration_minutes || 0 };
+    var h = '<div class="session-card ' + statusClass + '">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:center">';
+      h += '<div style="font-weight:500;font-size:12px">';
+      h += '<code style="background:#e0e0e0;padding:1px 4px;border-radius:3px;font-size:10px">' + escHtml(s.session_no) + '</code>';
+      h += ' <span style="color:#666;font-size:11px">⏱ ' + durStr + '</span>';
+      h += '</div>';
+      h += '<div style="display:flex;gap:3px;align-items:center">';
+            // Compute counts by category
+      var strCount = 0, chkCount = 0, belCount = 0;
+      if (s.checkins) {
+        s.checkins.forEach(function(cc) {
+          if (cc.is_streamer) strCount++;
+          else if (cc.checked_in || (cc.duration && cc.duration >= (s.min_minutes || 60))) chkCount++;
+          else belCount++;
+        });
+      }
+      h += '<span style="font-size:11px;display:inline-flex;gap:4px;align-items:center">';
+      if (strCount > 0) h += '<span style="color:#92400e;background:#fef3c7;padding:0 4px;border-radius:3px;font-weight:600">' + strCount + '</span>';
+      if (chkCount > 0) h += '<span style="color:#1e40af;background:#dbeafe;padding:0 4px;border-radius:3px;font-weight:600">' + chkCount + '</span>';
+      if (belCount > 0) h += '<span style="color:#991b1b;background:#fee2e2;padding:0 4px;border-radius:3px;font-weight:600">' + belCount + '</span>';
+      h += '</span>';
+      h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="openCheckinManager(' + s.id + ',\'' + escHtml(s.session_no) + '\')" title="签到管理"><i class="fas fa-pen"></i></button>';
+      h += '<span class="' + badgeClass + '">' + badgeText + '</span>';
+      // Delete / Force end button (only for ended; cancelled already soft-deleted)
+      if (!isCancelled) {
+        h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;';
+      if (isActive) {
+        h += 'color:#b45309;background:#fef3c7;border-color:#fde68a';
+      } else {
+        h += 'color:#991b1b;background:#fee2e2;border-color:#fecaca';
+      }
+      h += '" onclick="deleteSession(' + s.id + ',\'' + escHtml(s.session_no) + '\',\'' + s.status + '\')" title="';
+      h += isActive ? '强行结束' : '删除场次';
+      h += '">';
+      h += isActive ? '<i class="fas fa-stop-circle"></i>' : '<i class="fas fa-trash-alt"></i>';
+      h += '</button>';
+      h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="retroSession(\'' + escHtml(s.session_no) + '\')" title="追溯修正：根据第二人（非滞留）语音进入时间校准开启时间"><i class="fas fa-history"></i></button>';
+      }
+      h += '</div>';
+      h += '</div>';
+      h += '<div style="font-size:10px;color:#999;margin:2px 0 3px">';
+      h += startTime.toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}) + ' → ' + endStr;
+      if (s.min_minutes) h += ' | 最低 ' + s.min_minutes + ' 分钟';
+      h += '</div>';
+      if (s.checkins && s.checkins.length > 0) {
+        h += '<div style="display:flex;flex-wrap:wrap;gap:2px">';
+        var methodEmoji = { slash: '<i class="fas fa-comment"></i>', button: '<i class="fas fa-circle"></i>', voice: '<i class="fas fa-microphone"></i>' };
+        s.checkins.forEach(function(c) {
+          var emoji = methodEmoji[c.method] || '<i class="fas fa-question-circle"></i>';
+          var dur = c.duration ? c.duration + 'min' : '-';
+          var tagStyle = '';
+          if (c.is_streamer) { tagStyle = 'color:#92400e;background:#fef3c7;border:1px solid #fde68a'; }
+          else if (!c.checked_in) { tagStyle = 'color:#dc2626;background:#fef2f2;border:1px solid #fecaca'; }
+          h += '<span class="checkin-tag" style="' + tagStyle + '">';
+          if (c.is_streamer) { h += '<i class="fas fa-star" style="font-size:10px;margin-right:2px;color:#d97706"></i>'; }
+          else if (!c.checked_in) { h += '<i class="fas fa-exclamation-triangle" style="font-size:10px;margin-right:2px"></i>'; }
+          var _uid = c.user_id && /^\d+$/.test(c.user_id) ? '#' + c.user_id.slice(-6) : '';
+          var _ratio = s.duration_minutes > 0 && c.duration ? Math.round((c.duration / s.duration_minutes) * 100) : 0;
+          var _tier = _ratio >= 87.5 ? 100 : (_ratio >= 62.5 ? 75 : (_ratio >= 37.5 ? 50 : 0));
+          var _tierColors = { 100:'#16a34a', 75:'#2563eb', 50:'#ca8a04', 25:'#dc2626', 0:'#6b7280' };
+          var _tierBgs = { 100:'#dcfce7', 75:'#dbeafe', 50:'#fef08a', 25:'#fee2e2', 0:'#f3f4f6' };
+          h += emoji + ' ' + escHtml(c.nickname) + ' <span style="font-size:9px;color:#999">' + _uid + '</span> ' + dur +
+            ' <span style="font-size:9px;font-weight:600;color:' + _tierColors[_tier] + ';background:' + _tierBgs[_tier] + ';padding:0 4px;border-radius:2px;display:inline-block">' + _tier + '%</span></span>';
+        });
+        h += '</div>';
+      }
+      h += '</div>';
+      return h;
+    }
+
+    // Date-grouped streamer cards
+    var dateKeys = Object.keys(byDate).sort().reverse();
+    if (dateKeys.length === 0) {
+      html += '<div style="padding:40px;text-align:center;color:#999">暂无场次</div>';
+    } else {
+      dateKeys.forEach(function(dateKey) {
+        var streamers = byDate[dateKey];
+        var streamerNames = Object.keys(streamers).sort();
+        var dayTotal = 0, checkedInPeople = {}, checkedInCount = 0;
+        streamerNames.forEach(function(n) {
+          var g = streamers[n];
+          (g.active || []).concat(g.ended || []).forEach(function(s) {
+            dayTotal++;
+            if (s.checkins) {
+              s.checkins.forEach(function(cc) {
+                if (cc.checked_in || (cc.duration && cc.duration >= (s.min_minutes || 60))) {
+                  checkedInCount++;
+                  if (cc.user_id) checkedInPeople[cc.user_id] = true;
+                }
+              });
+            }
+          });
+        });
+        var checkedInPeopleCount = Object.keys(checkedInPeople).length;
+        var todayStr = new Date().toISOString().split('T')[0];
+        var isExpanded = true;
+
+        html += '<div class="card" style="margin-bottom:16px">';
+        html += '<div class="date-header" data-date="' + dateKey + '">';
+        html += '<span><i class="fas fa-calendar-alt"></i> ' + dateKey + ' <span style="font-size:13px;color:#666;font-weight:400">' + dayTotal + ' 场</span>' +
+          '  <span style="font-size:12px;color:#999;margin-left:4px">' + streamerNames.length + ' 主播</span>' +
+          '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:6px">签到 ' + checkedInPeopleCount + ' 人</span>' +
+          '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:3px">' + checkedInCount + ' 人次</span>';
+        if (window._verifyReportDates && window._verifyReportDates[dateKey]) {
+          html += '  <span style="font-size:12px;color:#3f51b5;background:#e8eaf6;padding:0 6px;border-radius:3px;margin-left:6px;cursor:pointer" onclick="event.stopPropagation();openVerifyReports(\'' + dateKey + '\')" title="查看该日校对报告">\uD83D\uDCCA \u6821\u5BF9</span>';
+        }
+        html += '</span>';
+        html += '<span class="arrow">▼</span>';
+        html += '</div>';
+        html += '<div class="date-body">';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:8px">';
+
+        streamerNames.forEach(function(name) {
+          var g = streamers[name];
+          var totalSessions = g.active.length + g.ended.length;
+
+          html += '<div class="streamer-card">';
+          html += '<div class="streamer-header"><i class="fas fa-microphone"></i> ' + escHtml(name) + '</div>';
+          html += '<div style="font-size:11px;color:#999;padding:0 12px 2px">' + totalSessions + ' 场次</div>';
+
+          g.active.forEach(function(s) { html += renderSession(s); });
+          g.ended.forEach(function(s) { html += renderSession(s); });
+
+          html += '</div>';
+        });
+
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+      });
+    }
+
+    main.innerHTML = html;
+    // 报告日期集合就绪后，给日历单元格补「📊 校对」徽标（无报告日期不显示）
+    attachVerifyCalBadges();
+  } catch (e) {
+    main.innerHTML = '<div class="error" style="padding:40px;text-align:center;color:red">加载失败: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+function attachVerifyCalBadges() {
+  if (!window._verifyDatesLoaded) return;
+  Promise.resolve(window._verifyDatesLoaded).then(function() {
+    if (!window._verifyReportDates) return;
+    document.querySelectorAll('.checkin-calendar .cal-cell[data-date]').forEach(function(td) {
+      var date = td.dataset.date;
+      if (!window._verifyReportDates[date]) return;
+      if (td.querySelector('.cal-verify-badge')) return;
+      var b = document.createElement('span');
+      b.className = 'cal-verify-badge';
+      b.title = '数据校对报告已生成，点击查看';
+      b.textContent = '\u6821\u5BF9';  // 校对（纯文字，无 emoji）
+      b.addEventListener('click', function(e) { e.stopPropagation(); openVerifyReports(date); });
+      td.appendChild(b);
+    });
+  });
+}
+
 $$('.sidebar-nav .side-btn').forEach(btn => {
   btn.addEventListener('click', () => switchModule(btn.dataset.module));
 });
+
+
+
+// ── 签到判断逻辑说明 ──
+// ========== 主播列表 ==========
+function openStreamerColorManager() {
+  var streamerMap = {};
+  if (window._checkinExportData) {
+    window._checkinExportData.forEach(function(s) {
+      if (!s.streamer_name) return;
+      if (!streamerMap[s.streamer_name]) {
+        streamerMap[s.streamer_name] = { discordNick: '', sessions: 0 };
+      }
+      streamerMap[s.streamer_name].sessions++;
+      if (s.checkins) {
+        s.checkins.forEach(function(c) {
+          if (c.is_streamer && c.nickname && !streamerMap[s.streamer_name].discordNick) {
+            streamerMap[s.streamer_name].discordNick = c.nickname;
+          }
+        });
+      }
+    });
+  }
+  var names = Object.keys(streamerMap).sort();
+  var palette = ['#e53935','#f4511e','#fb8c00','#43a047','#00897b','#00acc1','#1e88e5','#3949ab','#8e24aa','#d81b60'];
+
+  function getDefaultColor(name) {
+    var idx = 0;
+    for (var ci = 0; ci < name.length; ci++) {
+      idx = (idx * 31 + name.charCodeAt(ci)) >>> 0;
+    }
+    return palette[idx % palette.length];
+  }
+
+  var modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.zIndex = '300';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  modal.appendChild(overlay);
+
+  var content = document.createElement('div');
+  content.style.cssText = 'position:relative;z-index:1;background:#fff;border-radius:8px;max-width:600px;width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.2);max-height:80vh;display:flex;flex-direction:column';
+
+  var h = '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #e5e7eb">';
+  h += '<h3 style="margin:0;font-size:15px"><i class="fas fa-palette"></i> 主播列表</h3>';
+  h += '<button class="btn btn-sm btn-outline" onclick="this.closest(\'.modal\').remove()">✕</button>';
+  h += '</div>';
+
+  h += '<div style="padding:8px 16px;overflow-y:auto;flex:1">';
+  h += '<div style="font-size:11px;color:#888;margin-bottom:6px">点击色块更换主播颜色，修改自动保存。</div>';
+
+  if (names.length === 0) {
+    h += '<div style="padding:30px;text-align:center;color:#bbb;font-size:13px">暂无主播数据，请先加载场次</div>';
+  } else {
+    names.forEach(function(name) {
+      var info = streamerMap[name];
+      var cur = _streamerColors[name] || getDefaultColor(name);
+      h += '<div class="streamer-row" data-name="' + escHtml(name) + '" style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f3f4f6">';
+      h += '<span class="streamer-preview" style="flex-shrink:0;width:24px;height:24px;border-radius:4px;background:' + cur + '"></span>';
+      h += '<div style="flex:1;min-width:0">';
+      h += '<div style="font-size:13px;font-weight:600;color:#1f2937">' + escHtml(name) + '</div>';
+      if (info.discordNick) {
+        h += '<div style="font-size:11px;color:#9ca3af">Discord: ' + escHtml(info.discordNick) + '</div>';
+      }
+      h += '</div>';
+      h += '<div style="display:flex;gap:2px;flex-wrap:wrap;align-items:center;flex-shrink:0">';
+      palette.forEach(function(p) {
+        var sel = p === cur ? 'outline:2px solid #333;outline-offset:1px' : '';
+        h += '<span class="palette-swatch" data-color="' + p + '" style="display:inline-block;width:18px;height:18px;border-radius:3px;background:' + p + ';cursor:pointer' + (sel ? ';' + sel : '') + '" onclick="setStreamerColor(\'' + escHtml(name) + '\',\'' + p + '\')" title="' + p + '"></span>';
+      });
+      h += '<input type="color" value="' + cur + '" style="width:22px;height:18px;padding:0;border:none;cursor:pointer" onchange="setStreamerColor(\'' + escHtml(name) + '\',this.value)">';
+      if (cur !== getDefaultColor(name)) {
+        h += '<span class="streamer-reset" style="font-size:11px;color:#999;cursor:pointer;padding:0 4px" onclick="resetStreamerColor(\'' + escHtml(name) + '\')" title="恢复默认">↺</span>';
+      }
+      h += '</div></div>';
+    });
+  }
+  h += '</div>';
+
+  content.innerHTML = h;
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+}
+
+function setStreamerColor(name, color) {
+  _streamerColors[name] = color;
+  try { localStorage.setItem('streamerColors', JSON.stringify(_streamerColors)); } catch(e) {}
+  // Update modal content in-place instead of recreating
+  var rows = document.querySelectorAll('.streamer-row');
+  rows.forEach(function(row) {
+    if (row.dataset.name === name) {
+      // Update color preview
+      var preview = row.querySelector('.streamer-preview');
+      if (preview) preview.style.background = color;
+      // Update palette selection
+      var swatches = row.querySelectorAll('.palette-swatch');
+      swatches.forEach(function(s) {
+        s.style.outline = s.dataset.color === color ? '2px solid #333' : '';
+        s.style.outlineOffset = s.dataset.color === color ? '1px' : '';
+      });
+    }
+  });
+  renderCheckinPage();
+}
+
+function resetStreamerColor(name) {
+  delete _streamerColors[name];
+  try { localStorage.setItem('streamerColors', JSON.stringify(_streamerColors)); } catch(e) {}
+  var rows = document.querySelectorAll('.streamer-row');
+  rows.forEach(function(row) {
+    if (row.dataset.name === name) {
+      // Recompute default color
+      var palette = ['#e53935','#f4511e','#fb8c00','#43a047','#00897b','#00acc1','#1e88e5','#3949ab','#8e24aa','#d81b60'];
+      var idx = 0;
+      for (var ci = 0; ci < name.length; ci++) {
+        idx = (idx * 31 + name.charCodeAt(ci)) >>> 0;
+      }
+      var defaultColor = palette[idx % palette.length];
+      var preview = row.querySelector('.streamer-preview');
+      if (preview) preview.style.background = defaultColor;
+      var swatches = row.querySelectorAll('.palette-swatch');
+      swatches.forEach(function(s) {
+        s.style.outline = s.dataset.color === defaultColor ? '2px solid #333' : '';
+        s.style.outlineOffset = s.dataset.color === defaultColor ? '1px' : '';
+      });
+      // Hide reset button
+      var resetBtn = row.querySelector('.streamer-reset');
+      if (resetBtn) resetBtn.style.display = 'none';
+    }
+  });
+  renderCheckinPage();
+}
+
+function openCheckinHelp() {
+  var html = '<div class="modal-overlay" onclick="closeCheckinHelp()"></div>';
+  html += '<div class="modal-content" style="max-width:680px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;max-height:90vh;overflow-y:auto">';
+  html += '<div class="modal-header"><h3>签到全自动判断逻辑说明</h3><button type="button" class="modal-close" onclick="closeCheckinHelp()">&times;</button></div>';
+  html += '<div class="modal-body" style="font-size:13px;line-height:1.7">';
+
+  // 1. 场次创建
+  html += '<h4 style="color:#1976d2;margin:12px 0 6px">1. 场次创建</h4>';
+  html += '<ul style="margin:0 0 8px;padding-left:20px">';
+  html += '<li><b>主逻辑：</b>只有当前频道对应的主播本人进入语音频道，延迟 1 分钟确认后自动创建场次（防串频道 / 短暂进出误建）</li>';
+  html += '<li><b>兜底推定（次要）：</b>主播驻留频道一直未退出时，近 10 分钟内非主播成员涌入 ≥ 2 人（陪玩 / 玩家重新进频道），推定主播开播，自动创建场次</li>';
+  html += '<li>冷却期：场次结束后同一频道进入冷却（默认 120 分钟），期间不自动创建；被取消（cancelled）的场次不进入冷却</li>';
+  html += '<li>主播可用 /live start 手动创建场次</li>';
+  html += '</ul>';
+
+  // 2. 自动签到
+  html += '<h4 style="color:#1976d2;margin:12px 0 6px">2. 自动签到</h4>';
+  html += '<ul style="margin:0 0 8px;padding-left:20px">';
+  html += '<li>用户离开语音频道时，Bot 自动检测其语音时长</li>';
+  html += '<li>时长 ≥ 最低要求（默认 60 分钟），自动写入签到记录（method=voice）</li>';
+  html += '<li>时长不足，不写签到记录，但语音数据仍保留</li>';
+  html += '<li>已签到的不重复写入</li>';
+  html += '</ul>';
+
+  // 3. 主播标记
+  html += '<h4 style="color:#1976d2;margin:12px 0 6px">3. 主播标记（4 级优先级）</h4>';
+  html += '<p style="margin:4px 0 8px">每个场次标注一个主播，按以下优先级判断：</p>';
+  html += '<table style="width:100%;border-collapse:collapse;margin:4px 0 8px;font-size:12px">';
+  html += '<tr style="background:#f5f5f5"><th style="padding:4px 8px;border:1px solid #ddd;text-align:left">优先级</th><th style="padding:4px 8px;border:1px solid #ddd;text-align:left">判断方式</th><th style="padding:4px 8px;border:1px solid #ddd;text-align:left">示例</th></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">① 昵称匹配</td><td style="padding:4px 8px;border:1px solid #ddd">签到昵称 == streamer_name（频道名）</td><td style="padding:4px 8px;border:1px solid #ddd">"Heni" 频道 → 签到昵称为 "Heni" 的人</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">② 缓存表</td><td style="padding:4px 8px;border:1px solid #ddd">查 streamer_cache（别名 → user_id）</td><td style="padding:4px 8px;border:1px solid #ddd">"Heni" → 792639136065912862</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">③ 员工库</td><td style="padding:4px 8px;border:1px solid #ddd">查 live_employees，找到后自动写入缓存</td><td style="padding:4px 8px;border:1px solid #ddd">别名 Heni → discord Ngoanxikiu → user_id</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">④ 创建者</td><td style="padding:4px 8px;border:1px solid #ddd">回退到场次创建者（creator_id）</td><td style="padding:4px 8px;border:1px solid #ddd">谁开的场次谁就是主播</td></tr>';
+  html += '</table>';
+
+  // 4. 参与比例
+  html += '<h4 style="color:#1976d2;margin:12px 0 6px">4. 参与比例档位</h4>';
+  html += '<p style="margin:4px 0 8px">每个人的语音时长占场次总时长的百分比：</p>';
+  html += '<table style="width:100%;border-collapse:collapse;margin:4px 0 8px;font-size:12px">';
+  html += '<tr style="background:#f5f5f5"><th style="padding:4px 8px;border:1px solid #ddd;text-align:left">档位</th><th style="padding:4px 8px;border:1px solid #ddd;text-align:left">条件</th><th style="padding:4px 8px;border:1px solid #ddd;text-align:left">颜色</th></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">100%</td><td style="padding:4px 8px;border:1px solid #ddd">比例 ≥ 87.5%</td><td style="padding:4px 8px;border:1px solid #ddd;color:#16a34a">绿色</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">75%</td><td style="padding:4px 8px;border:1px solid #ddd">比例 ≥ 62.5%</td><td style="padding:4px 8px;border:1px solid #ddd;color:#2563eb">蓝色</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">50%</td><td style="padding:4px 8px;border:1px solid #ddd">比例 ≥ 37.5%</td><td style="padding:4px 8px;border:1px solid #ddd;color:#ca8a04">黄色</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">25%</td><td style="padding:4px 8px;border:1px solid #ddd">比例 ≥ 0%</td><td style="padding:4px 8px;border:1px solid #ddd;color:#dc2626">红色</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">0%</td><td style="padding:4px 8px;border:1px solid #ddd">时长不足最低要求</td><td style="padding:4px 8px;border:1px solid #ddd;color:#6b7280">灰色</td></tr>';
+  html += '</table>';
+
+  // 5. 未达标
+  html += '<h4 style="color:#1976d2;margin:12px 0 6px">5. 未达标判定</h4>';
+  html += '<ul style="margin:0 0 8px;padding-left:20px">';
+  html += '<li>在语音频道中，但时长 < 最低要求（默认 60 分钟）→ 未签到，标记为"未达标"</li>';
+  html += '<li>签到管理弹窗中仅显示"未达标"标签，无删除按钮</li>';
+  html += '<li>场次统计计数：主播 / 已签到 / 未达标 三类分别计数</li>';
+  html += '</ul>';
+
+  // 6. 无效场次治理与自动结束
+  html += '<h4 style="color:#1976d2;margin:12px 0 6px">6. 无效场次治理与自动结束</h4>';
+  html += '<p style="margin:4px 0 8px;font-size:12px;color:#555">无效场次（驻留误建 / 空场 / 无达标）会被及时取消，避免占用并阻塞后续真实开播：</p>';
+  html += '<ul style="margin:0 0 8px;padding-left:20px">';
+  html += '<li>建场 10 分钟后，除主播外没有任何人进入过 → 自动取消（no_participants）</li>';
+  html += '<li>主播离开频道持续 10 分钟 → 自动取消（streamer_absent）</li>';
+  html += '<li>场次进行 30 分钟后仍无任何达标成员（含主播 + 1 陪玩未达标）→ 自动取消（invalid）</li>';
+  html += '<li>同一频道 / 同一主播出现多个活跃场次 → 只保留最新，其余自动取消（duplicate）</li>';
+  html += '<li>被取消的场次 30 分钟内不触发兜底推定建场（防循环）</li>';
+  html += '<li>到期自动结束：场次创建时记录 auto_end_at，到时自动结束，飞书推送含全量签到人数、每人在线分钟与参与占比</li>';
+  html += '</ul>';
+
+  // 7. 数据源
+  html += '<h4 style="color:#1976d2;margin:12px 0 6px">7. 数据源</h4>';
+  html += '<table style="width:100%;border-collapse:collapse;margin:4px 0 8px;font-size:12px">';
+  html += '<tr style="background:#f5f5f5"><th style="padding:4px 8px;border:1px solid #ddd;text-align:left">表</th><th style="padding:4px 8px;border:1px solid #ddd;text-align:left">用途</th></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">sessions</td><td style="padding:4px 8px;border:1px solid #ddd">场次信息（频道、主播、时间、状态）</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">checkins</td><td style="padding:4px 8px;border:1px solid #ddd">签到记录（达标用户）</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">voice_sessions</td><td style="padding:4px 8px;border:1px solid #ddd">语音会话（所有进频道的人，含未达标）</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">user_nicknames</td><td style="padding:4px 8px;border:1px solid #ddd">Discord 昵称缓存（user_id → 昵称）</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">streamer_cache</td><td style="padding:4px 8px;border:1px solid #ddd">主播别名映射（别名 → user_id）</td></tr>';
+  html += '<tr><td style="padding:4px 8px;border:1px solid #ddd">live_employees（员工库）</td><td style="padding:4px 8px;border:1px solid #ddd">员工信息，含主播岗位的 Discord 昵称</td></tr>';
+
+  html += '</table>';
+
+
+  // 8. 语音记录初始化
+  html += '<h4 style="color:#1976d2;margin:12px 0 6px">8. 语音记录初始化</h4>';
+  html += '<p style="margin:4px 0 8px;font-size:12px;color:#555">解决的问题：场次正在进行中，Bot 才启动场次记录（如 Bot 崩溃重启、Bot 刚部署等），导致已在语音频道内的人员没有 join_time 记录。追溯修正时需要这些人的进入时间来校准场次开启时间。同时排除上一场次滞留未退出的人员，防止错误校准。</p>';
+  html += '<p style="color:#d32f2f;font-size:12px;margin:4px 0 8px">⚠ 不能真正解决的场景：Bot 崩溃重启后，重启前已存在的场次——成员 join_time 被设为重启时间，不是真实进入时间，追溯修正仍不准。因为 Discord API 不提供成员进入频道的历史时间。</p>';
+  html += '<p style="margin:4px 0 8px;font-size:12px;color:#555">真实解决的场景：Bot 启动后新创建的场次——所有成员的 join_time 从启动/进入时刻开始记录，数据准确，追溯修正有效。</p>';
+  html += '<ul style="margin:0 0 8px;padding-left:20px">';
+  html += '<li>Bot 启动时，遍历所有语音频道所有成员，记录 voice_sessions（join_time = 启动时间）</li>';
+  html += '<li>用户进出频道时，on_voice_state_update 实时记录真实进入/离开时间</li>';
+  html += '<li>主播进入频道时自动创建场次，不再覆盖现有成员的 voice_sessions</li>';
+  html += '<li>启动初始化后创建的场次才具备准确的时间数据，追溯修正才有意义</li>';
+  html += '</ul>';
+
+  // 9. 追溯修正场次开启时间
+  html += '<h4 style="color:#1976d2;margin:12px 0 6px">9. 追溯修正场次开启时间</h4>';
+  html += '<p style="margin:4px 0 8px;font-size:12px;color:#555">解决的问题：场次创建时 start_time 记录的是 Bot 创建时间，但主播/成员可能更早就在频道中。需要根据 voice_sessions 中首个非滞留成员的进入时间校准 start_time，使场次时间反映实际工作时长。</p>';
+  html += '<p style="margin:4px 0 8px">点击场次卡片的 <i class="fas fa-history"></i> 按钮触发：</p>';
+  html += '<ol style="margin:0 0 8px;padding-left:20px">';
+  html += '<li>查询场次期间 voice_sessions 中所有人的首次进入时间</li>';
+  html += '<li>查询本频道上一场次的结束时间（prev_end_time）</li>';
+  html += '<li>跳过主播（creator），跳过滞留用户（join_time < prev_end_time，即上一场次遗留未退出）</li>';
+  html += '<li>取首个非主播、非滞留用户的 join_time 作为 new_start</li>';
+  html += '<li>如果 new_start 早于当前 start_time，则更新</li>';
+  html += '</ol>';
+  html += '<p style="color:#d32f2f;font-size:12px;margin:4px 0 8px">⚠ 局限性：仅对 Bot 正常启动后创建的场次有效。Bot 崩溃重启后、重启前已存在的场次无法修正——join_time 是重启时间，不是真实进入时间。</p>';
+  html += '<p style="margin:4px 0 8px;font-size:12px">滞留用户判定：join_time < 上一场次 end_time → 该用户从上一场次遗留至今，不作为校准依据。</p>';
+
+
+  html += '<p style="color:#999;font-size:11px;border-top:1px solid #eee;padding-top:8px;margin-top:8px">更新于 2026-08-28</p>';
+  html += '</div></div></div>';
+
+  var div = document.createElement('div');
+  div.id = 'checkinHelpModal';
+  div.innerHTML = html;
+  document.body.appendChild(div);
+}
+
+function closeCheckinHelp() {
+  var el = document.getElementById('checkinHelpModal');
+  if (el) el.remove();
+}
 
 /* ================= 启动 ================= */
 
@@ -3212,3 +4739,152 @@ $$('.sidebar-nav .side-btn').forEach(btn => {
   } catch (e) { /* 未登录 */ }
   showView('loginView');
 })();
+
+// ========== 数据校对（verify_reports：play_detail vs 签到 报告） ==========
+async function openVerifyReports(initialDate) {
+    window._verifyPendingDate = initialDate || null;
+    var html = '<div class="modal-overlay" onclick="closeVerifyReports()"></div>';
+    html += '<div class="modal-content" style="max-width:920px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;max-height:85vh;display:flex;flex-direction:column">';
+    html += '<div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8f9fa;border-radius:6px 6px 0 0;font-weight:600"><span><i class="fas fa-clipboard-check"></i> 数据校对</span><div style="display:flex;gap:6px;align-items:center">'
+          + '<input type="date" id="verifyDate" value="' + verifyYesterdayStr() + '" style="padding:3px 6px;border:1px solid #ddd;border-radius:4px;font-size:12px">'
+          + '<button class="btn btn-sm" onclick="runVerifyReport()" style="font-size:11px"><i class="fas fa-play"></i> 生成报告</button>'
+          + '<button class="btn btn-sm" onclick="printVerifyReport()" style="font-size:11px"><i class="fas fa-file-pdf"></i> 下载 PDF</button>'
+          + '<button type="button" class="modal-close" onclick="closeVerifyReports()" style="font-size:18px;background:none;border:none;cursor:pointer">&times;</button></div></div>';
+    html += '<div style="display:flex;flex:1;min-height:0">';
+    html += '<div id="verifyList" style="width:270px;border-right:1px solid #eee;overflow-y:auto;padding:8px;background:#fff"></div>';
+    html += '<div id="verifyDetail" style="flex:1;overflow:auto;padding:12px;background:#fafafa;min-width:0"></div>';
+    html += '</div></div></div>';
+    var overlay = document.createElement('div');
+    overlay.id = 'verifyOverlay';
+    overlay.innerHTML = html;
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:300';
+    document.body.appendChild(overlay);
+    await loadVerifyList();
+    if (window._verifyPendingDate) {
+        var pd = window._verifyPendingDate;
+        window._verifyPendingDate = null;
+        await showVerifyReport(pd);
+    }
+}
+
+function verifyYesterdayStr() {
+    var d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0, 10);
+}
+
+function closeVerifyReports() {
+    var el = document.getElementById('verifyOverlay');
+    if (el) el.remove();
+}
+
+async function loadVerifyList() {
+    var box = document.getElementById('verifyList');
+    if (!box) return;
+    box.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">加载中...</div>';
+    try {
+        var res = await api('verify/reports?page=1&page_size=50');
+        var items = (res && res.items) || [];
+        if (!items.length) { box.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">暂无报告，点击「生成报告」创建</div>'; return; }
+        box.innerHTML = items.map(function(it) {
+            var s = {};
+            try { s = JSON.parse(it.summary || '{}'); } catch(e) {}
+            var line = (s.sessions !== undefined)
+                ? ('场次' + s.sessions + ' | 匹配' + s.matched_persons + '(' + s.match_rate + '%) | 差' + (s.avg_diff != null ? s.avg_diff + 'pp' : '-'))
+                : '';
+            return '<div class="verify-item" data-date="' + it.report_date + '" style="padding:6px 8px;margin-bottom:4px;border-radius:4px;cursor:pointer;font-size:12px;background:#fff;border:1px solid #eee" onclick="showVerifyReport(\'' + it.report_date + '\')">'
+                + '<div style="font-weight:600">' + escHtml(it.report_date) + '</div>'
+                + '<div style="color:#888;font-size:11px">' + escHtml(line) + '</div>'
+                + '</div>';
+        }).join('');
+    } catch(e) {
+        box.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:8px">加载失败: ' + escHtml(e.message) + '</div>';
+    }
+}
+
+async function showVerifyReport(date) {
+    var box = document.getElementById('verifyDetail');
+    if (!box) return;
+    box.innerHTML = '<div style="color:#999;font-size:12px">加载中...</div>';
+    try {
+        var res = await api('verify/reports/' + date);
+        if (!res || !res.report_date) { box.innerHTML = '<div style="color:#dc2626;font-size:12px">未找到报告</div>'; return; }
+        document.querySelectorAll('.verify-item').forEach(function(el) {
+            el.style.background = (el.dataset.date === date) ? '#e3f2fd' : '#fff';
+        });
+        window._verifyContentCache = window._verifyContentCache || {};
+        window._verifyContentCache[date] = res.content;
+        window._verifyCurrentDate = date;
+        box.innerHTML = renderReportMd(res.content || '');
+    } catch(e) {
+        box.innerHTML = '<div style="color:#dc2626;font-size:12px">加载失败: ' + escHtml(e.message) + '</div>';
+    }
+}
+
+async function runVerifyReport() {
+    var date = document.getElementById('verifyDate').value;
+    if (!date) { showToast('请选择日期', 'error'); return; }
+    var btn = event && event.target && event.target.closest ? event.target.closest('button') : null;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...'; }
+    try {
+        var d = await api('verify/reports/run', { method: 'POST', json: { date: date } });
+        if (!d || !d.report_date) {
+            showToast('生成失败: 报告未生成（脚本无输出）', 'error');
+        } else {
+            showToast('报告已生成', 'success');
+            window._verifyReportDates = window._verifyReportDates || {};
+            window._verifyReportDates[d.report_date] = d.summary || '{}';
+            await loadVerifyList();
+            await showVerifyReport(d.report_date);
+        }
+    } catch(e) {
+        showToast('生成失败: ' + e.message, 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-play"></i> 生成报告'; }
+    }
+}
+
+// Markdown → HTML：优先 markdown-it（CDN，与 font-awesome 同源）；CDN 失败时降级为转义纯文本
+function renderReportMd(text) {
+    if (!text) return '';
+    if (window.markdownit) {
+        if (!renderReportMd._md) {
+            renderReportMd._md = window.markdownit({
+                html: false,   // 报告为可信生成内容，但仍禁用原始 HTML 输出
+                linkify: true,
+                typographer: false
+            });
+        }
+        return '<div class="verify-md">' + renderReportMd._md.render(text) + '</div>';
+    }
+    var esc = function(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+    return '<pre style="white-space:pre-wrap;font-size:12px;padding:8px">' + esc(text) + '</pre>';
+}
+
+// 打印样式（下载 PDF 用：浏览器打印 → 另存为 PDF，零依赖）
+var VERIFY_PRINT_CSS = 'body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;margin:24px;color:#333}'
+  + '.verify-md{font-size:12px;line-height:1.6}'
+  + '.verify-md h2{font-size:16px;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid #e5e7eb}'
+  + '.verify-md h3{font-size:14px;margin:12px 0 4px}'
+  + '.verify-md h4{font-size:13px;margin:8px 0 4px}'
+  + '.verify-md table{border-collapse:collapse;width:100%;margin:8px 0}'
+  + '.verify-md th,.verify-md td{border:1px solid #ddd;padding:4px 8px;text-align:left;white-space:nowrap;font-size:11px}'
+  + '.verify-md th{background:#f5f5f5;font-weight:600}'
+  + '.verify-md blockquote{margin:6px 0;padding:6px 10px;background:#f0f4f8;border-left:3px solid #90a4ae;color:#555}'
+  + '.verify-md strong{color:#111}'
+  + '.verify-md ul{margin:4px 0 4px 18px}'
+  + '@media print{body{margin:10mm}.verify-md table{page-break-inside:auto}.verify-md tr{page-break-inside:avoid}.verify-md h2,.verify-md h3{page-break-after:avoid}}';
+
+function printVerifyReport() {
+    var date = window._verifyCurrentDate;
+    if (!date) { showToast('请先打开一份报告再下载 PDF', 'error'); return; }
+    var content = window._verifyContentCache && window._verifyContentCache[date];
+    if (!content) { showToast('报告内容未加载，请先点击打开', 'error'); return; }
+    var bodyHtml = renderReportMd(content);
+    var win = window.open('', '_blank', 'width=980,height=760');
+    if (!win) { showToast('浏览器拦截了弹窗，请允许后重试', 'error'); return; }
+    win.document.write('<html><head><meta charset="utf-8"><title>数据校对报告 ' + date + '</title><style>' + VERIFY_PRINT_CSS + '</style></head>'
+        + '<body>' + bodyHtml
+        + '<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body></html>');
+    win.document.close();
+}

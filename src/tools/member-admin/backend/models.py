@@ -87,7 +87,8 @@ CREATE TABLE IF NOT EXISTS commission_snapshots (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     month TEXT NOT NULL,             -- YYYY-MM
     basis TEXT DEFAULT 'paid',       -- 收入口径 paid/shipped
-    remark TEXT DEFAULT '',
+    remark TEXT DEFAULT '',          -- 备注
+    expectations TEXT DEFAULT '',    -- 工作期望（中越双语文本）
     items_json TEXT DEFAULT '[]',    -- 明细快照
     summary_json TEXT DEFAULT '[]',  -- 汇总快照
     created_by TEXT DEFAULT '',
@@ -122,6 +123,89 @@ CREATE INDEX IF NOT EXISTS idx_accounts_uid ON game_accounts(game_uid);
 CREATE INDEX IF NOT EXISTS idx_payment_employee ON payment_accounts(employee_id);
 CREATE INDEX IF NOT EXISTS idx_logs_entity ON audit_logs(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_logs_time ON audit_logs(created_at);
+
+-- 直播人员（职能隔离：独立于游戏 employees 表；金额单位 VND）
+CREATE TABLE IF NOT EXISTS live_employees (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    emp_no TEXT DEFAULT '',            -- 员工编号（5位数字）
+    nickname TEXT NOT NULL,            -- 昵称（主名）
+    alias TEXT DEFAULT '',             -- 别名（第二身份名）
+    real_name TEXT DEFAULT '',         -- 越南真实姓名
+    cn_name TEXT DEFAULT '',           -- 中文名
+    domain TEXT DEFAULT '直播',        -- 业务域：直播/游戏
+    domain_code TEXT DEFAULT '',       -- 业务域代码（派生）：L/G
+    position TEXT DEFAULT '陪玩',        -- 主播/陪玩/HR/剪辑/直播间管理员
+    position_code TEXT DEFAULT '',     -- 岗位代码（派生）：ST/PW/HR/VE/LM/GL/GS/GM
+    emp_type TEXT DEFAULT '全职',       -- 全职/兼职
+    emp_type_code TEXT DEFAULT '',     -- 雇佣类型代码（派生）：F/P
+    status TEXT DEFAULT '在职',         -- 在职/离职
+    is_probation INTEGER DEFAULT 0,    -- 是否试用期 0/1
+    probation_months INTEGER DEFAULT 0, -- 试用期月数 0/1/2
+    probation_salary REAL DEFAULT 0,   -- 试用期第1个月底薪 VND
+    probation_salary_m2 REAL DEFAULT 0,-- 试用期第2个月底薪 VND（仅2个月试用期）
+    formal_salary REAL DEFAULT 0,      -- 转正底薪 VND（0=不拿工资）
+    insurance REAL DEFAULT 0,          -- 保险基数（合同底薪）VND
+    meal_allowance REAL DEFAULT 0,     -- 餐补 VND
+    housing_allowance REAL DEFAULT 0,  -- 住房补贴 VND
+    transport_allowance REAL DEFAULT 0,-- 交通补贴 VND
+    salary_mode TEXT DEFAULT '',       -- 薪资结构：纯底薪/底薪+分成/纯分成-固定/纯分成-阶梯/计件
+    commission_rate TEXT DEFAULT '',   -- 直播分成比例（固定时），如 50%
+    commission_tiers TEXT DEFAULT '',  -- 分成阶梯 JSON（阶梯时）：[{"kc":150000,"rate":10},...]
+    biz_commission_rate TEXT DEFAULT '', -- 商单分成比例
+    director_level TEXT DEFAULT '',    -- 剧本导演等级：S/A/B（技术导演与陪玩无分级）
+    youtube_commission_rate TEXT DEFAULT '', -- YouTube 收入分成比例
+    entry_date TEXT DEFAULT '',        -- 入职日期 YYYY-MM-DD
+    leave_date TEXT DEFAULT '',        -- 离职日期
+    sys_id TEXT DEFAULT '',            -- 陪玩系统ID
+    sys_role TEXT DEFAULT '',          -- 系统角色（单字段多值，逗号分隔）：剧本导演,技术导演,陪玩
+    account_holder TEXT DEFAULT '',    -- 账户人（留空=本人账户）
+    bank TEXT DEFAULT '',              -- 银行
+    account TEXT DEFAULT '',           -- 银行账号
+    payee_phone TEXT DEFAULT '',       -- 收款人手机号
+    phone_zalo TEXT DEFAULT '',        -- 联系电话/zalo
+    discord TEXT DEFAULT '',           -- Discord 昵称
+    discord_user_id TEXT DEFAULT '',   -- Discord user_id（用于签到机器人精确匹配）
+    tiktok_live TEXT DEFAULT '',       -- TikTok 直播账号
+    tiktok_clip TEXT DEFAULT '',       -- TikTok 剪辑账号
+    tiktok_personal TEXT DEFAULT '',   -- TikTok 个人小号
+    birth_date TEXT DEFAULT '',        -- 出生日期
+    email TEXT DEFAULT '',             -- 电子邮箱
+    address TEXT DEFAULT '',           -- 家庭地址
+    id_card TEXT DEFAULT '',           -- 身份证
+    emergency_contact TEXT DEFAULT '', -- 紧急联系人
+    emergency_relation TEXT DEFAULT '',-- 联系人关系：父母/配偶/兄弟/其他
+    emergency_phone TEXT DEFAULT '',   -- 紧急联系电话
+    remark TEXT DEFAULT '',
+    created_at TEXT,
+    updated_at TEXT
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_live_employees_emp_no ON live_employees(emp_no);
+
+-- 陪玩映射：play_detail 昵称 -> 直播员工（用于签到/数据校对）
+CREATE TABLE IF NOT EXISTS player_mapping (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_name TEXT NOT NULL,         -- play_detail 里出现的昵称
+    emp_no TEXT DEFAULT '',            -- 关联直播员工编号
+    discord TEXT DEFAULT '',           -- Discord 昵称
+    discord_id TEXT DEFAULT '',        -- Discord user_id
+    remark TEXT DEFAULT '',
+    created_at TEXT,
+    updated_at TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_player_mapping_name ON player_mapping(player_name);
+CREATE INDEX IF NOT EXISTS idx_player_mapping_emp_no ON player_mapping(emp_no);
+
+-- 数据校对报告
+CREATE TABLE IF NOT EXISTS verify_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    report_date TEXT NOT NULL UNIQUE,  -- 报告日期 YYYY-MM-DD
+    summary TEXT DEFAULT '{}',         -- JSON：sessions/matched_persons/match_rate/avg_diff
+    content TEXT DEFAULT '',           -- Markdown 报告正文
+    created_at TEXT,
+    updated_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_verify_reports_date ON verify_reports(report_date);
 """
 
 # 各表允许写入的字段（API 入参白名单）
@@ -136,7 +220,22 @@ TABLE_FIELDS = {
     "payment_accounts": ["employee_id", "account_type", "account_name", "account_no",
                          "bank_name", "bank_branch", "phone", "address", "qr_image", "remark"],
     "sql_scripts": ["name", "description", "params", "param_specs", "sql_text"],
-    "commission_snapshots": ["month", "basis", "remark"],
+    "commission_snapshots": ["month", "basis", "remark", "expectations", "employee_expectations"],
+    "live_employees": ["emp_no", "nickname", "alias", "real_name", "cn_name",
+                       "domain", "domain_code", "position", "position_code",
+                       "emp_type", "emp_type_code", "status", "is_probation", "probation_months",
+                       "probation_salary", "probation_salary_m2",
+                       "formal_salary", "insurance",
+                       "meal_allowance", "housing_allowance", "transport_allowance",
+                       "salary_mode", "commission_rate", "commission_tiers", "biz_commission_rate",
+                       "director_level", "youtube_commission_rate",
+                       "entry_date", "leave_date", "sys_id", "sys_role",
+                       "account_holder", "bank", "account", "payee_phone",
+                       "phone_zalo", "discord", "discord_user_id",
+                       "tiktok_live", "tiktok_clip", "tiktok_personal",
+                       "birth_date", "email", "address", "id_card",
+                       "emergency_contact", "emergency_relation", "emergency_phone", "remark"],
+    "player_mapping": ["player_name", "emp_no", "discord", "discord_id", "remark"],
 }
 
 ENTITY_LABEL_FIELD = {
@@ -146,6 +245,8 @@ ENTITY_LABEL_FIELD = {
     "payment_accounts": "account_name",
     "sql_scripts": "name",
     "commission_snapshots": "month",
+    "live_employees": "nickname",
+    "player_mapping": "player_name",
 }
 
 
@@ -214,7 +315,7 @@ def delete_row(table, row_id):
 
 
 def list_rows(table, filters=None, keyword=None, keyword_fields=None, page=1, page_size=20,
-              exclude=None, join_filters=None):
+              exclude=None, join_filters=None, order_by=None):
     """filters: 精确匹配；exclude: 排除匹配；keyword 模糊搜索；
     join_filters: [(fk_col, ref_table, ref_col, value)] → fk_col IN (SELECT id FROM ref_table WHERE ref_col = value)"""
     where, params = [], []
@@ -232,10 +333,11 @@ def list_rows(table, filters=None, keyword=None, keyword_fields=None, page=1, pa
         where.append("(" + " OR ".join(f"{f} LIKE ?" for f in keyword_fields) + ")")
         params.extend([f"%{keyword}%"] * len(keyword_fields))
     where_sql = ("WHERE " + " AND ".join(where)) if where else ""
+    order_sql = order_by or "id DESC"
     conn = get_db()
     total = conn.execute(f"SELECT COUNT(*) c FROM {table} {where_sql}", params).fetchone()["c"]
     rows = conn.execute(
-        f"SELECT * FROM {table} {where_sql} ORDER BY id DESC LIMIT ? OFFSET ?",
+        f"SELECT * FROM {table} {where_sql} ORDER BY {order_sql} LIMIT ? OFFSET ?",
         params + [page_size, (page - 1) * page_size],
     ).fetchall()
     conn.close()
