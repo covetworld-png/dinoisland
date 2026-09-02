@@ -4357,8 +4357,8 @@ async function renderCheckinPage() {
           var emoji = methodEmoji[c.method] || '<i class="fas fa-question-circle"></i>';
           var dur = c.duration ? c.duration + 'min' : '-';
           var tagStyle = '';
-          if (c.is_streamer) { tagStyle = 'color:#92400e;background:#fef3c7;border:1px solid #fde68a'; }
-          else if (!c.checked_in) { tagStyle = 'color:#dc2626;background:#fef2f2;border:1px solid #fecaca'; }
+          if (c.is_streamer) { tagStyle = 'color:#92400e;background:#fef3c7;'; }
+          else if (!c.checked_in) { tagStyle = 'color:#dc2626;background:#fef2f2;'; }
           h += '<span class="checkin-tag" style="' + tagStyle + '">';
           if (c.is_streamer) { h += '<i class="fas fa-star" style="font-size:10px;margin-right:2px;color:#d97706"></i>'; }
           else if (!c.checked_in) { h += '<i class="fas fa-exclamation-triangle" style="font-size:10px;margin-right:2px"></i>'; }
