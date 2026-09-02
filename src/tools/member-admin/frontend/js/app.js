@@ -4422,7 +4422,16 @@ async function renderCheckinPage() {
           var g = streamers[name];
           var totalSessions = g.active.length + g.ended.length;
 
-          html += '<div class="streamer-card">';
+          var streamerColor = _streamerColors[name];
+          if (!streamerColor) {
+            var palette = ['#e53935','#f4511e','#fb8c00','#43a047','#00897b','#00acc1','#1e88e5','#3949ab','#8e24aa','#d81b60'];
+            var colorIdx = 0;
+            for (var ci = 0; ci < name.length; ci++) {
+              colorIdx = (colorIdx * 31 + name.charCodeAt(ci)) >>> 0;
+            }
+            streamerColor = palette[colorIdx % palette.length];
+          }
+          html += '<div class="streamer-card" style="--streamer-color:' + streamerColor + '">';
           html += '<div class="streamer-header"><i class="fas fa-microphone"></i> ' + escHtml(name) + '</div>';
           html += '<div style="font-size:11px;color:#999;padding:0 12px 2px">' + totalSessions + ' 场次</div>';
 
