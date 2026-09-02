@@ -3530,7 +3530,7 @@ async function openCheckinSettings() {
   html += '<div style="border-top:1px solid #ddd;margin:6px 0"></div>';
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-  html += '<span style="flex:1">开播推送通知</span>';
+  html += '<span style="flex:1">开播推送通知 <span style="font-size:11px;color:#999;font-weight:400">（Discord 文字频道）</span></span>';
   html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
   html += '<input type="checkbox" id="settingPushSessionNotify" ' + (pushSessionNotify ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
   html += '<span class="toggle-slider"></span></label></label>';
