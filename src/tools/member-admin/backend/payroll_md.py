@@ -52,51 +52,106 @@ def _money(v):
 
 
 def _today():
-    return datetime.now().strftime("%Y-%m-%d")
+    return datetime.now().strftime("%d/%m/%Y")
 
 
 def _safe(s):
     return str(s or "").strip()
 
 
+def _employee_real_name(employee_id):
+    """查询员工越南真实姓名；无真实姓名时回退到昵称。"""
+    if not employee_id:
+        return ""
+    try:
+        from models import get_db
+        conn = get_db()
+        row = conn.execute(
+            "SELECT real_name, nickname FROM employees WHERE id = ?", (employee_id,)
+        ).fetchone()
+        conn.close()
+        if not row:
+            return ""
+        return _safe(row["real_name"] or row["nickname"])
+    except Exception:
+        return ""
+
+
+def _is_gm(employee_id):
+    """判断员工是否为 GM（GM 不展示军团充值数据）。"""
+    if not employee_id:
+        return False
+    try:
+        from models import get_db
+        conn = get_db()
+        row = conn.execute(
+            "SELECT position FROM employees WHERE id = ?", (employee_id,)
+        ).fetchone()
+        conn.close()
+        return row and str(row["position"]).strip().upper() == "GM"
+    except Exception:
+        return False
+
+
+def _guild_labels(emp_items):
+    """按团名去重，返回 '团名（军团ID）' 字符串。"""
+    seen = {}
+    for it in emp_items:
+        guild = _safe(it.get("guild"))
+        gid = _safe(it.get("guild_game_id"))
+        if not guild:
+            continue
+        if guild not in seen or not seen[guild]:
+            seen[guild] = gid
+    labels = []
+    for guild in sorted(seen.keys()):
+        gid = seen[guild]
+        labels.append(f"{guild}（{gid}）" if gid else guild)
+    return ", ".join(labels) or "—"
+
+
 def generate_employee_md(emp_summary, items, snapshot):
     """生成单个员工的 Markdown 工资单。"""
     month = snapshot["month"]
+    month_vn = f"Tháng {int(month[5:7])}/{month[:4]}"
     month_cn = f"{month[:4]} 年 {int(month[5:7])} 月"
+    month_label = f"{month_vn} / {month_cn}"
     emp_id = emp_summary.get("employee_id")
     emp_items = [it for it in items if it.get("employee_id") == emp_id]
 
     md = []
-    md.append(f"# THÔNG BÁO THANH TOÁN LƯƠNG / {month_cn} 薪资结算单")
+    md.append(f"# THÔNG BÁO THANH TOÁN LƯƠNG {month_label} / 薪资结算单")
     md.append("")
     md.append("| Trường / 字段 | Giá trị / 内容 |")
     md.append("|:--|:--|")
-    md.append(f"| Tên nhân viên / 员工姓名 | **{_safe(emp_summary.get('employee'))}** |")
-    md.append(f"| Vai trò / 聘用类型 | {_safe(emp_summary.get('employment_type'))} |")
-    md.append(f"| Tháng thanh toán / 结算月份 | **{month_cn}** |")
+    emp_id = emp_summary.get("employee_id")
+    md.append(f"| Tên nhân viên / 员工姓名 | **{_employee_real_name(emp_id)}** |")
+    md.append(f"| Tháng thanh toán / 结算月份 | **{month_label}** |")
     md.append(f"| Ngày lập / 制表日期 | {_today()} |")
-    guilds = ", ".join(sorted(set(emp_summary.get("guilds") or []))) or "—"
-    md.append(f"| Đoàn / 所属团队 | {guilds} |")
+    guilds = _guild_labels(emp_items)
+    md.append(f"| Quân Đoàn / 所属军团 | {guilds} |")
     md.append(f"| Số ngày hoạt động / 活跃天数 | {emp_summary.get('active_days', 0)} |")
-    md.append(f"| Thờigian online TB / 日均在线 | {emp_summary.get('avg_online_hours', 0.0)} giờ |")
-    remark = _safe(emp_summary.get("remark") or snapshot.get("remark")) or "—"
-    md.append(f"| Ghi chú / 备注 | {remark} |")
+    md.append(f"| Thờigian online TB / 日均在线时长 | {emp_summary.get('avg_online_hours', 0.0)} giờ / 小时 |")
     md.append("")
 
-    # 团队充值
-    md.append(f"## DỮ LIỆU DOANH THU ĐOÀN / 团队充值数据（{month_cn}）")
-    md.append("")
-    if emp_items:
-        md.append("| Đoàn / 团队 | Server | Doanh thu / 充值额 (VND) | Tỷ lệ / 分成比例 |")
-        md.append("|:--|:--|--:|:--|")
-        total_rev = 0.0
-        for it in emp_items:
-            rev = float(it.get("revenue", 0) or 0)
-            total_rev += rev
-            md.append(f"| {_safe(it.get('guild'))} | {_safe(it.get('server'))} | **{_money(rev)}** | {_safe(it.get('commission_rate'))} |")
-        md.append(f"| **Tổng / 合计** | | **{_money(total_rev)}** | |")
-    else:
-        md.append("_Không có doanh thu đoàn / 无团队收入_")
+    # 军团充值（GM 不展示）
+    if not _is_gm(emp_id):
+        md.append(f"## DỮ LIỆU DOANH THU ĐOÀN / 军团充值数据（{month_label}）")
+        md.append("")
+        if emp_items:
+            md.append("| Quân Đoàn / 军团 | Server | Doanh thu / 充值额 (VND) | Tỷ lệ / 分成比例 |")
+            md.append("|:--|:--|--:|:--|")
+            total_rev = 0.0
+            for it in emp_items:
+                rev = float(it.get("revenue", 0) or 0)
+                total_rev += rev
+                guild_name = _safe(it.get('guild'))
+                guild_id = _safe(it.get('guild_game_id'))
+                guild_label = f"{guild_name}（{guild_id}）" if guild_id else guild_name
+                md.append(f"| {guild_label} | {_safe(it.get('server'))} | **{_money(rev)}** | {_safe(it.get('commission_rate'))} |")
+            md.append(f"| **Tổng / 合计** | | **{_money(total_rev)}** | |")
+        else:
+            md.append("_Không có doanh thu đoàn / 无军团收入_")
     md.append("")
 
     # 薪资计算
@@ -119,7 +174,10 @@ def generate_employee_md(emp_summary, items, snapshot):
     if emp_summary.get("gm_allowance"):
         md.append(f"| Phụ cấp GM / GM 津贴 | | {_money(emp_summary['gm_allowance'])} |")
     if emp_summary.get("deduction"):
-        md.append(f"| Khấu trừ / 扣除 | | -{_money(emp_summary['deduction'])} |")
+        breakdown = emp_summary.get("deduction_breakdown") or []
+        remarks = [str(d.get("remark") or "").strip() for d in breakdown if d.get("remark")]
+        deduction_remark = "；".join(remarks) if remarks else ""
+        md.append(f"| Khấu trừ / 扣除 | {deduction_remark} | -{_money(emp_summary['deduction'])} |")
     md.append(f"| **Tổng thu nhập / 应发合计** | | **{_money(emp_summary.get('total', 0))}** |")
     md.append("")
 
@@ -132,7 +190,7 @@ def generate_employee_md(emp_summary, items, snapshot):
     # 工作期望
     expectations = _safe(emp_summary.get("expectations") or snapshot.get("expectations"))
     if expectations:
-        md.append("## MỤC TIÊU TRỌNG TÂM / 重点工作期望")
+        md.append("## ĐÁNH GIÁ VÀ KỲ VỌNG CÔNG VIỆC THÁNG NÀY / 当月工作评价和期望")
         md.append("")
         md.append(expectations)
         md.append("")

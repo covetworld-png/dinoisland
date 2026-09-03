@@ -55,7 +55,58 @@ def _money(v):
 
 
 def _today():
-    return datetime.now().strftime("%Y-%m-%d")
+    return datetime.now().strftime("%d/%m/%Y")
+
+
+def _employee_real_name(employee_id):
+    """查询员工越南真实姓名；无真实姓名时回退到昵称。"""
+    if not employee_id:
+        return ""
+    try:
+        from models import get_db
+        conn = get_db()
+        row = conn.execute(
+            "SELECT real_name, nickname FROM employees WHERE id = ?", (employee_id,)
+        ).fetchone()
+        conn.close()
+        if not row:
+            return ""
+        return str(row["real_name"] or row["nickname"] or "").strip()
+    except Exception:
+        return ""
+
+
+def _is_gm(employee_id):
+    """判断员工是否为 GM（GM 不展示军团充值数据）。"""
+    if not employee_id:
+        return False
+    try:
+        from models import get_db
+        conn = get_db()
+        row = conn.execute(
+            "SELECT position FROM employees WHERE id = ?", (employee_id,)
+        ).fetchone()
+        conn.close()
+        return row and str(row["position"]).strip().upper() == "GM"
+    except Exception:
+        return False
+
+
+def _guild_labels(emp_items):
+    """按团名去重，返回 '团名（军团ID）' 字符串。"""
+    seen = {}
+    for it in emp_items:
+        guild = str(it.get("guild") or "").strip()
+        gid = str(it.get("guild_game_id") or "").strip()
+        if not guild:
+            continue
+        if guild not in seen or not seen[guild]:
+            seen[guild] = gid
+    labels = []
+    for guild in sorted(seen.keys()):
+        gid = seen[guild]
+        labels.append(f"{guild}（{gid}）" if gid else guild)
+    return ", ".join(labels) or "—"
 
 
 class PayrollPDF(FPDF):
@@ -71,28 +122,27 @@ class PayrollPDF(FPDF):
     def _font(self, size=9, bold=False):
         self.set_font(self.primary_font, "B" if bold else "", size)
 
-    def header_title(self, month_cn):
+    def header_title(self, month_label):
         self._font(13, bold=True)
-        self.cell(0, 7, f"THÔNG BÁO THANH TOÁN LƯƠNG / {month_cn} 薪资结算单", ln=1, align="C")
+        self.cell(0, 7, f"THÔNG BÁO THANH TOÁN LƯƠNG {month_label} / 薪资结算单", ln=1, align="C")
         self.set_draw_color(80, 80, 80)
         self.line(12, self.get_y(), 198, self.get_y())
         self.ln(1.5)
 
-    def info_block(self, emp_summary, snapshot, month_cn):
+    def info_block(self, emp_summary, snapshot, month_cn, emp_items):
         """员工信息：紧凑两列表格。"""
         left_x = self.get_x()
         y = self.get_y()
         col_w = 87
         row_h = 5.3
+        emp_id = emp_summary.get("employee_id")
         fields = [
-            ("Tên nhân viên / 员工姓名", emp_summary.get("employee", "")),
-            ("Vai trò / 聘用类型", emp_summary.get("employment_type", "")),
-            ("Tháng thanh toán / 结算月份", month_cn),
+            ("Tên nhân viên / 员工姓名", _employee_real_name(emp_id)),
+            ("Tháng thanh toán / 结算月份", month_label),
             ("Ngày lập / 制表日期", _today()),
-            ("Đoàn / 所属团队", ", ".join(sorted(set(emp_summary.get("guilds") or []))) or "—"),
+            ("Quân Đoàn / 所属军团", _guild_labels(emp_items)),
             ("Ngày hoạt động / 活跃天数", str(emp_summary.get("active_days", 0))),
-            ("Online TB / 日均在线", f"{emp_summary.get('avg_online_hours', 0.0)} giờ"),
-            ("Ghi chú / 备注", (emp_summary.get("remark") or snapshot.get("remark") or "—")),
+            ("Thờigian online TB / 日均在线时长", f"{emp_summary.get('avg_online_hours', 0.0)} giờ / 小时"),
         ]
         self.set_fill_color(240, 240, 240)
         for i, (label, value) in enumerate(fields):
@@ -114,11 +164,11 @@ class PayrollPDF(FPDF):
         self.cell(max_w, 5.8, title, border=1, fill=True, ln=1)
 
     def revenue_table(self, emp_items, max_w):
-        self.section_header("DỮ LIỆU DOANH THU ĐOÀN / 团队充值数据", max_w)
+        self.section_header("DỮ LIỆU DOANH THU ĐOÀN / 军团充值数据", max_w)
         head_h = 5.2
         self._font(8, bold=True)
         self.set_fill_color(235, 235, 235)
-        self.cell(max_w * 0.45, head_h, "Đoàn / 团队", border=1, fill=True, align="C")
+        self.cell(max_w * 0.45, head_h, "Quân Đoàn / 军团", border=1, fill=True, align="C")
         self.cell(max_w * 0.25, head_h, "Server", border=1, fill=True, align="C")
         self.cell(max_w * 0.30, head_h, "Doanh thu / 充值额", border=1, fill=True, align="C")
         self.ln()
@@ -126,10 +176,12 @@ class PayrollPDF(FPDF):
         total = 0.0
         for it in emp_items:
             guild = it.get("guild", "")
+            guild_id = str(it.get("guild_game_id") or "").strip()
+            guild_label = f"{guild}（{guild_id}）" if guild_id else guild
             server = it.get("server", "")
             revenue = float(it.get("revenue", 0) or 0)
             total += revenue
-            self.cell(max_w * 0.45, 4.8, guild, border=1)
+            self.cell(max_w * 0.45, 4.8, guild_label, border=1)
             self.cell(max_w * 0.25, 4.8, server, border=1, align="C")
             self.cell(max_w * 0.30, 4.8, _money(revenue), border=1, align="R")
             self.ln()
@@ -164,7 +216,10 @@ class PayrollPDF(FPDF):
         if emp_summary.get("gm_allowance"):
             rows.append(("Phụ cấp GM / GM 津贴", "", emp_summary["gm_allowance"]))
         if emp_summary.get("deduction"):
-            rows.append(("Khấu trừ / 扣除", "", -abs(float(emp_summary["deduction"]))))
+            breakdown = emp_summary.get("deduction_breakdown") or []
+            remarks = [str(d.get("remark") or "").strip() for d in breakdown if d.get("remark")]
+            deduction_remark = "；".join(remarks)
+            rows.append(("Khấu trừ / 扣除", deduction_remark, -abs(float(emp_summary["deduction"]))))
         total = emp_summary.get("total", 0) or 0
         for label, formula, amount in rows:
             self.cell(max_w * 0.38, 4.8, label, border=1)
@@ -193,7 +248,7 @@ class PayrollPDF(FPDF):
             return
         self._font(9, bold=True)
         self.set_fill_color(225, 225, 225)
-        self.cell(0, 5.5, "MỤC TIÊU TRỌNG TÂM / 重点工作期望", border=1, fill=True, ln=1)
+        self.cell(0, 5.5, "ĐÁNH GIÁ VÀ KỲ VỌNG CÔNG VIỆC THÁNG NÀY / 当月工作评价和期望", border=1, fill=True, ln=1)
         self._font(8.5)
         self.multi_cell(0, 4.3, expectations)
         self.ln(0.5)
@@ -214,26 +269,33 @@ class PayrollPDF(FPDF):
     def render_employee(self, emp_summary, items, snapshot):
         self.add_page()
         month = snapshot["month"]
+        month_vn = f"Tháng {int(month[5:7])}/{month[:4]}"
         month_cn = f"{month[:4]} 年 {int(month[5:7])} 月"
-        self.header_title(month_cn)
-        self.info_block(emp_summary, snapshot, month_cn)
-
-        left_x = 12
-        right_x = 102
-        top_y = self.get_y()
-        max_w = 88
+        month_label = f"{month_vn} / {month_cn}"
         emp_id = emp_summary.get("employee_id")
         emp_items = [it for it in items if it.get("employee_id") == emp_id]
+        is_gm = _is_gm(emp_id)
+        self.header_title(month_label)
+        self.info_block(emp_summary, snapshot, month_label, emp_items)
 
-        self.set_xy(left_x, top_y)
-        self.revenue_table(emp_items, max_w)
-        left_bottom = self.get_y()
+        if is_gm:
+            # GM 无分成，不展示军团充值数据，薪资计算占满整行
+            self.salary_table(emp_summary, 186)
+        else:
+            left_x = 12
+            right_x = 102
+            top_y = self.get_y()
+            max_w = 88
 
-        self.set_xy(right_x, top_y)
-        self.salary_table(emp_summary, max_w)
-        right_bottom = self.get_y()
+            self.set_xy(left_x, top_y)
+            self.revenue_table(emp_items, max_w)
+            left_bottom = self.get_y()
 
-        self.set_y(max(left_bottom, right_bottom) + 1)
+            self.set_xy(right_x, top_y)
+            self.salary_table(emp_summary, max_w)
+            right_bottom = self.get_y()
+
+            self.set_y(max(left_bottom, right_bottom) + 1)
         self.total_box(emp_summary)
         self.expectations_block(emp_summary, snapshot)
         self.signature_block()

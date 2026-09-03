@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import uuid
 import sqlite3
@@ -742,7 +743,13 @@ def commission_payroll_pdf(snapshot_id):
     except RuntimeError as e:
         return jsonify({"ok": False, "error": str(e)}), 500
     month = row.get("month", "payroll")
-    filename = f"payroll-{month}.pdf"
+    if employee_id:
+        emp = get_by_id("employees", employee_id)
+        nickname = emp.get("nickname") or emp.get("real_name") or str(employee_id) if emp else str(employee_id)
+        safe = re.sub(r'[\\/:*?"<>|\s]+', '_', str(nickname)).strip('_')
+        filename = f"payroll-{month}-{safe}.pdf"
+    else:
+        filename = f"payroll-{month}.pdf"
     return send_file(
         BytesIO(pdf_bytes),
         mimetype="application/pdf",

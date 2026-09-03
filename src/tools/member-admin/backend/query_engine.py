@@ -227,18 +227,24 @@ def _month_bounds(month):
     return f"{month}-01", f"{month}-{month_days:02d}"
 
 
-def _fetch_employee_uids(db_path, emp_ids):
-    """返回 {employee_id: [game_uid, ...]}（仅 employees/game_accounts 关联的游戏账号）"""
+def _fetch_employee_uids(db_path, emp_ids, guild_ids=None):
+    """返回 {employee_id: [game_uid, ...]}（仅 employees/game_accounts 关联的游戏账号）。
+    guild_ids 不为 None 时，只返回所属军团在该列表内的账号（用于手动勾选军团模式）。"""
     if not emp_ids:
         return {}
     placeholders = ",".join("?" * len(emp_ids))
+    params = list(emp_ids)
+    sql = (
+        f"SELECT employee_id, game_uid FROM game_accounts "
+        f"WHERE employee_id IN ({placeholders}) AND game_uid IS NOT NULL AND game_uid != ''"
+    )
+    if guild_ids:
+        g_placeholders = ",".join("?" * len(guild_ids))
+        sql += f" AND guild_id IN ({g_placeholders})"
+        params.extend(guild_ids)
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
-    rows = conn.execute(
-        f"SELECT employee_id, game_uid FROM game_accounts "
-        f"WHERE employee_id IN ({placeholders}) AND game_uid IS NOT NULL AND game_uid != ''",
-        tuple(emp_ids),
-    ).fetchall()
+    rows = conn.execute(sql, tuple(params)).fetchall()
     conn.close()
     result = {}
     for r in rows:
@@ -510,8 +516,13 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
     items.sort(key=lambda x: (x["employee"], x["guild"]))
 
     # 查询游戏活跃数据并附加到明细/汇总
-    emp_ids = list({it["employee_id"] for it in items})
-    uids_by_emp = _fetch_employee_uids(db_path, emp_ids)
+    # 军团长：按勾选军团筛选 game_uid；GM / 无军团团长：统计所有账号
+    leader_emp_ids = list({it["employee_id"] for it in items
+                           if not it.get("is_gm") and it.get("guild") != "（无归属军团）"})
+    other_emp_ids = list({it["employee_id"] for it in items
+                          if it.get("is_gm") or it.get("guild") == "（无归属军团）"})
+    uids_by_emp = _fetch_employee_uids(db_path, leader_emp_ids, guild_ids=guild_ids)
+    uids_by_emp.update(_fetch_employee_uids(db_path, other_emp_ids))
     activity = _fetch_activity(uids_by_emp, month)
     for it in items:
         act = activity.get(it["employee_id"], {"active_days": 0, "avg_online_hours": 0.0})

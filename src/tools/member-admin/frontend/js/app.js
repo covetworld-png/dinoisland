@@ -16,12 +16,16 @@ function esc(s) {
     .replace(/'/g, '&#39;');
 }
 
-function showToast(msg, type) {
+function safeFilename(s) {
+  return String(s || '').trim().replace(/[\\/:*?"<>|\s]+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+function showToast(msg, type, durationMs) {
   const t = $('#toast');
   t.textContent = msg;
   t.className = 'toast ' + (type || '');
   clearTimeout(showToast._timer);
-  showToast._timer = setTimeout(() => t.classList.add('hidden'), 2600);
+  showToast._timer = setTimeout(() => t.classList.add('hidden'), durationMs || 2600);
 }
 
 function showView(name) {
@@ -62,6 +66,38 @@ async function api(path, options) {
     throw new Error(data.error || ('请求失败（HTTP ' + res.status + '）'));
   }
   return data.data;
+}
+
+async function downloadFile(url, filename, loadingMsg) {
+  if (loadingMsg) showToast(loadingMsg, '', 60000);
+  try {
+    const res = await fetch(url, { credentials: 'same-origin' });
+    if (res.status === 401) {
+      state.username = null;
+      showView('loginView');
+      throw new Error('登录已失效，请重新登录');
+    }
+    if (!res.ok) {
+      let msg = '下载失败（HTTP ' + res.status + '）';
+      try {
+        const data = await res.json();
+        if (data.error) msg = data.error;
+      } catch (e) { /* 后端返回二进制时忽略 JSON 解析 */ }
+      throw new Error(msg);
+    }
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename || 'download';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showToast('下载已开始', 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+    throw err;
+  }
 }
 
 /* ================= 全局状态 ================= */
@@ -2812,6 +2848,7 @@ function renderCommissionTables(wrap, data, month) {
     { label: '日均在线(小时)', key: 'avg_online_hours' },
     { label: '扣除', key: 'deduction', money: true },
     { label: '应发合计', key: 'total', money: true },
+    { label: '下月期望', get: s => (s.expectations && String(s.expectations).trim()) ? '已录入' : '' },
   ];
   const summary = data.summary || [];
 
@@ -2828,7 +2865,7 @@ function renderCommissionTables(wrap, data, month) {
   const footer = ['合计（' + summary.length + ' 人）', '', '',
     sumMoney('revenue'), sumMoney('commission'), sumMoney('base_salary'), '',
     sumMoney('position_allowance'), sumMoney('gm_allowance'), '', '',
-    sumMoney('deduction'), sumMoney('total')];
+    sumMoney('deduction'), sumMoney('total'), ''];
   sec1.appendChild(buildCommTable(SUMMARY_COLS, summary, {
     onRow: s => openEmployeePayments(s.employee_id, pick(s, ['employee', 'nickname', 'employee_name'])),
     footer,
@@ -3015,13 +3052,13 @@ async function loadSnapshots() {
     zipBtn.className = 'btn btn-sm btn-primary';
     zipBtn.textContent = '工资单 ZIP';
     zipBtn.addEventListener('click', () => {
-      downloadFile('api/commission/snapshot/' + item.id + '/payroll.zip', 'payroll-' + (item.month || '') + '.zip');
+      downloadFile('api/commission/snapshot/' + item.id + '/payroll.zip', 'payroll-' + (item.month || '') + '.zip', '正在生成工资单压缩包，请稍候...');
     });
     actions.appendChild(zipBtn);
 
     const editBtn = document.createElement('button');
     editBtn.className = 'btn btn-sm btn-write';
-    editBtn.textContent = '编辑备注';
+    editBtn.textContent = '编辑备注与期望';
     editBtn.addEventListener('click', () => openSnapshotRemarkModal({ mode: 'edit', item }));
     actions.appendChild(editBtn);
 
@@ -3092,9 +3129,11 @@ function viewSnapshot(snap) {
   pdfBtn.style.marginRight = '8px';
   pdfBtn.addEventListener('click', () => {
     const eid = pdfSelect.value;
+    const selected = eid ? summary.find(s => String(s.employee_id) === eid) : null;
+    const nickname = selected ? safeFilename(pick(selected, ['employee', 'nickname', 'employee_name']) || ('#' + eid)) : '';
     const url = 'api/commission/snapshot/' + snap.id + '/payroll.pdf' + (eid ? '?employee_id=' + encodeURIComponent(eid) : '');
-    const filename = 'payroll-' + (snap.month || '') + (eid ? '-' + eid : '') + '.pdf';
-    downloadFile(url, filename);
+    const filename = 'payroll-' + (snap.month || '') + (nickname ? '-' + nickname : '') + '.pdf';
+    downloadFile(url, filename, '正在生成工资单 PDF，请稍候...');
   });
   topBar.appendChild(pdfBtn);
 
@@ -3103,7 +3142,7 @@ function viewSnapshot(snap) {
   zipBtn.textContent = '下载全部 ZIP';
   zipBtn.style.marginRight = '8px';
   zipBtn.addEventListener('click', () => {
-    downloadFile('api/commission/snapshot/' + snap.id + '/payroll.zip', 'payroll-' + (snap.month || '') + '.zip');
+    downloadFile('api/commission/snapshot/' + snap.id + '/payroll.zip', 'payroll-' + (snap.month || '') + '.zip', '正在生成工资单压缩包，请稍候...');
   });
   topBar.appendChild(zipBtn);
 
@@ -3130,6 +3169,8 @@ function viewSnapshot(snap) {
 }
 
 /* ---------- 快照备注弹窗（保存 / 编辑备注共用） ---------- */
+
+let snapRemarkCtx = null; // { mode: 'save'|'edit', month, item }
 
 function collectEmployeeExpectations() {
   const wrap = $('#snapEmpExpectationsWrap');
@@ -3171,7 +3212,7 @@ function renderEmployeeExpectations(ctx) {
     const ta = document.createElement('textarea');
     ta.rows = 2;
     ta.dataset.empExpect = eid;
-    ta.placeholder = '录入该员工本月工作期望（中越双语），留空则不显示';
+    ta.placeholder = '录入该员工下月工作期望（中越双语），留空则不显示';
     ta.value = existing[eid] || emp.expectations || '';
     label.appendChild(ta);
     wrap.appendChild(label);
@@ -3517,8 +3558,9 @@ async function openCheckinSettings() {
   html += '<div class="modal-body">';
 
   var autoStart = (settings.auto_start_enabled === '1');
-  var pushSessionNotify = (settings.push_session_notify === '1');
-  var pushJoinNotify = (settings.push_join_notify === '1');
+  // 推送开关（新键优先，旧键兜底兼容迁移期）
+  var pushFeishu = (settings.push_feishu_notify !== undefined) ? (settings.push_feishu_notify === '1') : (settings.push_session_notify === '1');
+  var pushDiscord = (settings.push_discord_notify !== undefined) ? (settings.push_discord_notify === '1') : (settings.push_join_notify === '1');
   var excluded = (settings.excluded_users || '');
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
@@ -3530,24 +3572,20 @@ async function openCheckinSettings() {
   html += '<div style="border-top:1px solid #ddd;margin:6px 0"></div>';
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-  html += '<span style="flex:1">开播推送通知 <span style="font-size:11px;color:#999;font-weight:400">（Discord 文字频道）</span></span>';
+  html += '<span style="flex:1">飞书推送通知 <span style="font-size:11px;color:#999;font-weight:400">（开播 / 结束 / 取消）</span></span>';
   html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
-  html += '<input type="checkbox" id="settingPushSessionNotify" ' + (pushSessionNotify ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
+  html += '<input type="checkbox" id="settingPushFeishu" ' + (pushFeishu ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
   html += '<span class="toggle-slider"></span></label></label>';
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-  html += '<span style="flex:1">加入推送通知 <span style="font-size:11px;color:#999;font-weight:400">（Discord 文字频道）</span></span>';
+  html += '<span style="flex:1">Discord 频道通知 <span style="font-size:11px;color:#999;font-weight:400">（开播 / 结束 / 加入，语音频道聊天区）</span></span>';
   html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
-  html += '<input type="checkbox" id="settingPushJoinNotify" ' + (pushJoinNotify ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
+  html += '<input type="checkbox" id="settingPushDiscord" ' + (pushDiscord ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
   html += '<span class="toggle-slider"></span></label></label>';
 
   html += '<div style="border-top:1px solid #ddd;margin:6px 0"></div>';
 
-  html += '<div class="field" style="margin-bottom:8px">';
-  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">最少参与人数</div>';
-  html += '<div style="font-size:10px;color:#999;margin-bottom:4px">自动创建场次后，10分钟内不足此人数则自动取消</div>';
-  html += '<input id="settingMinParticipants" type="number" min="1" max="20" value="' + (settings.min_participants || '3') + '" style="width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px">';
-  html += '</div>';
+
 
   html += '<div class="field" style="margin-bottom:8px">';
   html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">冷却期（分钟）</div>';
@@ -3640,8 +3678,8 @@ async function saveCheckinSettings() {
 
   // Read toggle states from DOM
   var autoStart = document.getElementById('settingAutoStart').checked ? '1' : '0';
-  var pushSessionNotify = document.getElementById('settingPushSessionNotify').checked ? '1' : '0';
-  var pushJoinNotify = document.getElementById('settingPushJoinNotify').checked ? '1' : '0';
+  var pushFeishu = document.getElementById('settingPushFeishu').checked ? '1' : '0';
+  var pushDiscord = document.getElementById('settingPushDiscord').checked ? '1' : '0';
 
   // Merge excluded users: DB values + checkbox selections
   var currentExcluded = (current.excluded_users || '');
@@ -3661,13 +3699,12 @@ async function saveCheckinSettings() {
 
   try {
     await api('checkin/settings', { method: 'POST', json: { key: 'auto_start_enabled', value: autoStart } });
-    await api('checkin/settings', { method: 'POST', json: { key: 'push_session_notify', value: pushSessionNotify } });
-    await api('checkin/settings', { method: 'POST', json: { key: 'push_join_notify', value: pushJoinNotify } });
-    await api('checkin/settings', { method: 'POST', json: { key: 'min_participants', value: document.getElementById('settingMinParticipants').value || '3' } });
+    await api('checkin/settings', { method: 'POST', json: { key: 'push_feishu_notify', value: pushFeishu } });
+    await api('checkin/settings', { method: 'POST', json: { key: 'push_discord_notify', value: pushDiscord } });
     await api('checkin/settings', { method: 'POST', json: { key: 'auto_create_cooldown_minutes', value: document.getElementById('settingCooldown').value || '60' } });
     await api('checkin/settings', { method: 'POST', json: { key: 'excluded_users', value: excluded } });
     // 更新缓存 + DB 一致
-    checkinSettings = { auto_start_enabled: autoStart, push_session_notify: pushSessionNotify, push_join_notify: pushJoinNotify, min_participants: document.getElementById('settingMinParticipants').value || '3', auto_create_cooldown_minutes: document.getElementById('settingCooldown').value || '60', excluded_users: excluded };
+    checkinSettings = { auto_start_enabled: autoStart, push_feishu_notify: pushFeishu, push_discord_notify: pushDiscord, auto_create_cooldown_minutes: document.getElementById('settingCooldown').value || '60', excluded_users: excluded };
     closeCheckinSettings();
     showToast('设置已保存', 'success');
   } catch (e) {
