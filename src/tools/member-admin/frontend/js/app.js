@@ -3844,8 +3844,8 @@ async function openCheckinManager(sessionId, sessionNo, checkins) {
 
   // 语音参与者（实算时长，可标记达标修复 bot 宕机/重启导致的时长失真）
   html += '<div style="margin-bottom:16px">';
-  html += '<div style="font-weight:600;font-size:14px;margin-bottom:4px">语音参与者（实算时长）</div>';
-  html += '<div style="font-size:10px;color:#999;margin-bottom:6px">用于修复 bot 宕机/重启导致的时长失真：不修改实际时长，仅补一条达标记录</div>';
+  html += '<div style="font-weight:600;font-size:14px;margin-bottom:4px">在场人员（实算时长）</div>';
+  html += '<div style="font-size:10px;color:#999;margin-bottom:6px">按进出语音频道的记录，实算每个人在本场的在场分钟数（与上方签到记录相互独立）。若时长因 bot 宕机/重启偏短，可「标记达标」补记一条达标签到，不修改实际时长。</div>';
   html += '<div id="participantsList" style="max-height:180px;overflow-y:auto"><div style="color:#999;font-size:12px;padding:8px">加载中…</div></div>';
   html += '</div>';
 
