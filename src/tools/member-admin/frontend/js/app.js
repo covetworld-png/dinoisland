@@ -3564,7 +3564,7 @@ async function openCheckinSettings() {
   var excluded = (settings.excluded_users || '');
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-  html += '<span style="flex:1">自动创建场次</span>';
+  html += '<span style="flex:1">自动创建场次 <span style="font-size:11px;color:#999;font-weight:400">（主播进入专属语音频道后自动创建）</span></span>';
   html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
   html += '<input type="checkbox" id="settingAutoStart" ' + (autoStart ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
   html += '<span class="toggle-slider"></span></label></label>';
@@ -3589,12 +3589,12 @@ async function openCheckinSettings() {
 
   html += '<div class="field" style="margin-bottom:8px">';
   html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">冷却期（分钟）</div>';
-  html += '<div style="font-size:10px;color:#999;margin-bottom:4px">场次结束后，同一语音频道在此时间内禁止自动创建新场次</div>';
+  html += '<div style="font-size:10px;color:#999;margin-bottom:4px">场次结束后，同一语音频道在此时间内不再自动创建新场次（取消场次、不足15分钟短场次不触发）</div>';
   html += '<input id="settingCooldown" type="number" min="1" max="1440" value="' + (settings.auto_create_cooldown_minutes || '60') + '" style="width:80px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px">';
   html += '</div>';
 
   html += '<div class="field" style="text-align:left">';
-  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">排除人员</div><div style="font-size:10px;color:#999;margin-bottom:6px">从缓存列表选择，勾选后不会显示在签到列表中</div>';
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">排除人员</div><div style="font-size:10px;color:#999;margin-bottom:6px">从缓存列表选择，勾选后不计入语音时长统计、不生成自动打卡，且在签到列表中隐藏</div>';
   html += '<input id="excludeSearchInput" type="text" style="width:100%;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-bottom:4px" placeholder="搜索昵称..." oninput="filterExcludeList(this.value)">';
   html += '<div id="excludeChecklist" style="max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:4px;margin-bottom:4px;padding:4px"></div>';
   html += '<div id="excludeSelectedTags" style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px"></div>';
