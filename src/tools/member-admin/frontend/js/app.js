@@ -3886,8 +3886,8 @@ async function _loadSessionParticipants(sessionId) {
   var container = document.getElementById('participantsList');
   if (!container) return;
   try {
-    var result = await api('checkin/sessions/' + sessionId + '/participants');
-    var list = (result && result.data) || [];
+    // 注意：api() 已解包返回 body.data 本身，勿再取 .data
+    var list = (await api('checkin/sessions/' + sessionId + '/participants')) || [];
     var excludedUsers = [];
     if (checkinSettings && checkinSettings.excluded_users) {
       excludedUsers = checkinSettings.excluded_users.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
