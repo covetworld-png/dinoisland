@@ -3794,6 +3794,8 @@ async function retroSession(sessionNo) {
   }
 }// Open checkin manager modal for a session
 async function openCheckinManager(sessionId, sessionNo, checkins) {
+  window._mgrSessionId = sessionId;
+  window._mgrSessionNo = sessionNo;
   if (!checkins && window._checkinData) checkins = window._checkinData[sessionId] || [];
   var html = '<div class="modal-overlay" onclick="closeCheckinManager()"></div>';
   html += '<div class="modal-content" style="max-width:500px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300">';
@@ -3840,6 +3842,13 @@ async function openCheckinManager(sessionId, sessionNo, checkins) {
   }
   html += '</div>';
 
+  // 语音参与者（实算时长，可标记达标修复 bot 宕机/重启导致的时长失真）
+  html += '<div style="margin-bottom:16px">';
+  html += '<div style="font-weight:600;font-size:14px;margin-bottom:4px">语音参与者（实算时长）</div>';
+  html += '<div style="font-size:10px;color:#999;margin-bottom:6px">用于修复 bot 宕机/重启导致的时长失真：不修改实际时长，仅补一条达标记录</div>';
+  html += '<div id="participantsList" style="max-height:180px;overflow-y:auto"><div style="color:#999;font-size:12px;padding:8px">加载中…</div></div>';
+  html += '</div>';
+
   // Add new checkins - selection from cache
   html += '<div style="margin-bottom:8px">';
   html += '<div style="font-weight:600;font-size:14px;margin-bottom:6px">补签 <span style="font-size:10px;color:#999;font-weight:400">从缓存列表选择，或手动输入</span></div>';
@@ -3869,6 +3878,58 @@ async function openCheckinManager(sessionId, sessionNo, checkins) {
   // Load cached nicknames and render checklist
   _loadCacheChecklist();
   setTimeout(updateCacheTags, 500);
+  _loadSessionParticipants(sessionId);
+}
+
+// 加载语音参与者（实算时长）列表
+async function _loadSessionParticipants(sessionId) {
+  var container = document.getElementById('participantsList');
+  if (!container) return;
+  try {
+    var result = await api('checkin/sessions/' + sessionId + '/participants');
+    var list = (result && result.data) || [];
+    var excludedUsers = [];
+    if (checkinSettings && checkinSettings.excluded_users) {
+      excludedUsers = checkinSettings.excluded_users.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    }
+    var html = '';
+    list.forEach(function(p) {
+      if (excludedUsers.indexOf(p.nickname) >= 0) return; // 与主列表一致剔除排除人员
+      var uidSuffix = p.user_id && /^\d+$/.test(p.user_id) ? '#' + p.user_id.slice(-6) : '';
+      var nickAttr = String(p.nickname).replace(/'/g, "\\'");
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #f0f0f0;font-size:13px">';
+      html += '<span>';
+      if (p.is_streamer) html += '<i class="fas fa-star" style="font-size:10px;margin-right:3px;color:#d97706"></i> ';
+      html += escHtml(p.nickname) + ' <span style="font-size:10px;color:#999">' + uidSuffix + '</span> ';
+      html += '<span style="font-size:11px;color:#666">' + p.minutes + 'min</span>';
+      html += '</span>';
+      if (p.is_streamer) {
+        html += '<span style="font-size:11px;color:#92400e">主播</span>';
+      } else if (p.checked_in) {
+        html += '<span style="font-size:11px;color:#16a34a"><i class="fas fa-check" style="font-size:10px"></i> 已达标</span>';
+      } else {
+        html += '<button class="btn btn-sm" style="font-size:11px;padding:1px 8px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="markQualified(' + sessionId + ',\'' + p.user_id + '\',\'' + nickAttr + '\')" title="生成 manual 达标记录，不修改实际时长"><i class="fas fa-check"></i> 标记达标</button>';
+      }
+      html += '</div>';
+    });
+    container.innerHTML = html || '<div style="color:#999;font-size:12px;padding:8px">无语音参与记录</div>';
+  } catch(e) {
+    container.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:8px">加载失败: ' + e.message + '</div>';
+  }
+}
+
+// 手动标记达标：生成 manual 签到记录（修复时长失真，幂等）
+async function markQualified(sessionId, userId, nickname) {
+  if (!confirm('将 ' + nickname + ' 标记为达标？\n\n将生成一条 manual 签到记录（不修改实际时长），用于修复 bot 宕机/重启导致的时长失真。')) return;
+  try {
+    await api('checkin/sessions/' + sessionId + '/mark-qualified', { method: 'POST', json: { user_id: userId } });
+    showToast('已标记达标: ' + nickname, 'success');
+    closeCheckinManager();
+    if (typeof renderCheckinPage === 'function') { await renderCheckinPage(); }
+    openCheckinManager(sessionId, window._mgrSessionNo);
+  } catch (e) {
+    showToast('标记失败: ' + e.message, 'error');
+  }
 }
 
 // 加载昵称缓存列表到复选框

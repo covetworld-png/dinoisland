@@ -1246,6 +1246,109 @@ def delete_session_checkin(session_id, checkin_id):
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+@app.route("/api/checkin/sessions/<int:session_id>/participants")
+def get_session_participants(session_id):
+    """语音参与者实算时长（含未达标者），供手动标记达标修复使用。
+    时长口径与 bot 的 get_voice_durations_in_range 一致：各语音会话与场次时段取交集。"""
+    import sqlite3
+    from datetime import datetime
+    try:
+        conn = sqlite3.connect(CHECKIN_DB_PATH)
+        conn.row_factory = sqlite3.Row
+        session = conn.execute("SELECT * FROM sessions WHERE id = ?", (session_id,)).fetchone()
+        if not session:
+            conn.close()
+            return jsonify({"ok": False, "error": "Session not found"}), 404
+        if not session["voice_channel_id"]:
+            conn.close()
+            return jsonify({"ok": True, "data": []})
+        since = (session["start_time"] or "").replace(" ", "T")
+        until = (session["end_time"] or datetime.now().isoformat(sep=" ", timespec="seconds")).replace(" ", "T")
+        since_dt = datetime.fromisoformat(since)
+        until_dt = datetime.fromisoformat(until)
+        rows = conn.execute(
+            """SELECT user_id, join_time, leave_time FROM voice_sessions
+               WHERE channel_id = ? AND join_time < ? AND (leave_time IS NULL OR leave_time > ?)""",
+            (session["voice_channel_id"], until, since),
+        ).fetchall()
+        totals = {}
+        for r in rows:
+            join_dt = datetime.fromisoformat(r["join_time"].replace(" ", "T"))
+            leave_dt = datetime.fromisoformat(r["leave_time"].replace(" ", "T")) if r["leave_time"] else datetime.now()
+            start = max(join_dt, since_dt)
+            end = min(leave_dt, until_dt)
+            mins = (end - start).total_seconds() / 60
+            if mins > 0:
+                totals[r["user_id"]] = totals.get(r["user_id"], 0) + mins
+        creator = str(session["creator_id"] or "")
+        participants = []
+        for uid, mins in totals.items():
+            nick_row = conn.execute("SELECT nickname FROM user_nicknames WHERE user_id = ?", (uid,)).fetchone()
+            nickname = nick_row["nickname"] if nick_row else ("#" + uid[-6:] if str(uid).isdigit() else str(uid))
+            checked = conn.execute(
+                "SELECT 1 FROM checkins WHERE user_id = ? AND session_id = ?", (uid, session_id)
+            ).fetchone()
+            participants.append({
+                "user_id": str(uid),
+                "nickname": nickname,
+                "minutes": int(round(mins)),
+                "checked_in": bool(checked),
+                "is_streamer": str(uid) == creator,
+            })
+        participants.sort(key=lambda x: -x["minutes"])
+        conn.close()
+        return jsonify({"ok": True, "data": participants})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"[MA] get_session_participants error: {e}", flush=True)
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.post("/api/checkin/sessions/<int:session_id>/mark-qualified")
+@write_required
+def mark_participant_qualified(session_id):
+    """手动将某位语音参与者标记为达标（生成 method=manual 的签到记录）。
+    用于修复 bot 宕机/重启导致的时长失真；不修改实际时长，幂等（已存在则跳过）。"""
+    import sqlite3
+    from datetime import datetime, date
+    data = request.get_json(force=True, silent=True) or {}
+    user_id = str(data.get("user_id") or "").strip()
+    if not user_id:
+        return jsonify({"ok": False, "error": "缺少 user_id 参数"}), 400
+    try:
+        conn = sqlite3.connect(CHECKIN_DB_PATH)
+        conn.row_factory = sqlite3.Row
+        session = conn.execute("SELECT * FROM sessions WHERE id = ?", (session_id,)).fetchone()
+        if not session:
+            conn.close()
+            return jsonify({"ok": False, "error": "Session not found"}), 404
+        existing = conn.execute(
+            "SELECT id FROM checkins WHERE user_id = ? AND session_id = ?", (user_id, session_id)
+        ).fetchone()
+        if existing:
+            conn.close()
+            return jsonify({"ok": True, "data": {"added": False, "reason": "already_checked_in"}})
+        nick_row = conn.execute("SELECT nickname FROM user_nicknames WHERE user_id = ?", (user_id,)).fetchone()
+        nickname = nick_row["nickname"] if nick_row else ("#" + user_id[-6:] if user_id.isdigit() else user_id)
+        now = datetime.now().isoformat(sep=" ", timespec="seconds")
+        session_date = (session["start_time"] or "")[:10] or date.today().isoformat()
+        conn.execute(
+            """INSERT INTO checkins
+               (user_id, nickname, guild_id, channel_id, checkin_time, method, date, session_id)
+               VALUES (?, ?, ?, ?, ?, 'manual', ?, ?)""",
+            (user_id, nickname, session["guild_id"], session["channel_id"] or "", now, session_date, session_id),
+        )
+        conn.commit()
+        conn.close()
+        return jsonify({"ok": True, "data": {"added": True, "nickname": nickname}})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"[MA] mark_participant_qualified error: {e}", flush=True)
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 
 
 
