@@ -1660,6 +1660,8 @@ $("#selectedItemsPanel").addEventListener("click", (e) => {
 
 $("#applyForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+  const submitBtn = e.target.querySelector("button[type='submit']");
+  if (submitBtn && submitBtn.disabled) return;
   const fd = new FormData(e.target);
   const items = getSelectedItems();
   if (!items.length) {
@@ -1682,6 +1684,10 @@ $("#applyForm").addEventListener("submit", async (e) => {
     if (!confirm(msg)) return;
   }
 
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "提交中...";
+  }
   try {
     const res = await api("POST", "/applications", {
       server: $("#serverSelect").value,
@@ -1712,6 +1718,11 @@ $("#applyForm").addEventListener("submit", async (e) => {
     showSubmitSuccessModal(submittedApp);
   } catch (err) {
     showToast(err.message);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = t("submit");
+    }
   }
 });
 
