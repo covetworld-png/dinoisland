@@ -1262,14 +1262,15 @@ def get_session_participants(session_id):
         if not session["voice_channel_id"]:
             conn.close()
             return jsonify({"ok": True, "data": []})
-        since = (session["start_time"] or "").replace(" ", "T")
-        until = (session["end_time"] or datetime.now().isoformat(sep=" ", timespec="seconds")).replace(" ", "T")
-        since_dt = datetime.fromisoformat(since)
-        until_dt = datetime.fromisoformat(until)
+        # 注意：SQL 比较必须用与库内一致的 'YYYY-MM-DD HH:MM:SS' 格式（空格），T 格式会导致字符串比较恒假
+        since_raw = session["start_time"] or ""
+        until_raw = session["end_time"] or datetime.now().isoformat(sep=" ", timespec="seconds")
+        since_dt = datetime.fromisoformat(since_raw.replace(" ", "T"))
+        until_dt = datetime.fromisoformat(until_raw.replace(" ", "T"))
         rows = conn.execute(
             """SELECT user_id, join_time, leave_time FROM voice_sessions
                WHERE channel_id = ? AND join_time < ? AND (leave_time IS NULL OR leave_time > ?)""",
-            (session["voice_channel_id"], until, since),
+            (session["voice_channel_id"], until_raw, since_raw),
         ).fetchall()
         totals = {}
         for r in rows:
