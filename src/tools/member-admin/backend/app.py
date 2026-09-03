@@ -1286,8 +1286,10 @@ def get_session_participants(session_id):
         for uid, mins in totals.items():
             nick_row = conn.execute("SELECT nickname FROM user_nicknames WHERE user_id = ?", (uid,)).fetchone()
             nickname = nick_row["nickname"] if nick_row else ("#" + uid[-6:] if str(uid).isdigit() else str(uid))
+            # 兼容旧补签（user_id 存的是昵称）：按 user_id 或昵称任一命中即视为已签到
             checked = conn.execute(
-                "SELECT 1 FROM checkins WHERE user_id = ? AND session_id = ?", (uid, session_id)
+                "SELECT 1 FROM checkins WHERE session_id = ? AND (user_id = ? OR nickname = ?)",
+                (session_id, uid, nickname),
             ).fetchone()
             participants.append({
                 "user_id": str(uid),
@@ -1324,14 +1326,17 @@ def mark_participant_qualified(session_id):
         if not session:
             conn.close()
             return jsonify({"ok": False, "error": "Session not found"}), 404
+        nick_row0 = conn.execute("SELECT nickname FROM user_nicknames WHERE user_id = ?", (user_id,)).fetchone()
+        nick0 = nick_row0["nickname"] if nick_row0 else ("#" + user_id[-6:] if user_id.isdigit() else user_id)
+        # 兼容旧补签：user_id 或昵称任一命中即视为已签到（幂等）
         existing = conn.execute(
-            "SELECT id FROM checkins WHERE user_id = ? AND session_id = ?", (user_id, session_id)
+            "SELECT id FROM checkins WHERE session_id = ? AND (user_id = ? OR nickname = ?)",
+            (session_id, user_id, nick0),
         ).fetchone()
         if existing:
             conn.close()
             return jsonify({"ok": True, "data": {"added": False, "reason": "already_checked_in"}})
-        nick_row = conn.execute("SELECT nickname FROM user_nicknames WHERE user_id = ?", (user_id,)).fetchone()
-        nickname = nick_row["nickname"] if nick_row else ("#" + user_id[-6:] if user_id.isdigit() else user_id)
+        nickname = nick0
         now = datetime.now().isoformat(sep=" ", timespec="seconds")
         session_date = (session["start_time"] or "")[:10] or date.today().isoformat()
         conn.execute(
