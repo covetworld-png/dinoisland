@@ -3845,7 +3845,7 @@ async function openCheckinManager(sessionId, sessionNo, checkins) {
   // 语音参与者（实算时长，可标记达标修复 bot 宕机/重启导致的时长失真）
   html += '<div style="margin-bottom:16px">';
   html += '<div style="font-weight:600;font-size:14px;margin-bottom:4px">在场人员（实算时长）</div>';
-  html += '<div style="font-size:10px;color:#999;margin-bottom:6px">按进出语音频道的记录，实算每个人在本场的在场分钟数（与上方签到记录相互独立）。若时长因 bot 宕机/重启偏短，可「标记达标」补记一条达标签到，不修改实际时长。</div>';
+  html += '<div style="font-size:10px;color:#999;margin-bottom:6px">按进出语音频道的记录，实算每个人在本场的在场分钟数（与上方签到记录相互独立）。若时长因 bot 宕机/重启偏短，可「标记达标」补记一条达标签到，不修改实际时长。排除人员置灰展示，不可标记。</div>';
   html += '<div id="participantsList" style="max-height:180px;overflow-y:auto"><div style="color:#999;font-size:12px;padding:8px">加载中…</div></div>';
   html += '</div>';
 
@@ -3894,17 +3894,21 @@ async function _loadSessionParticipants(sessionId) {
     }
     var html = '';
     list.forEach(function(p) {
-      if (excludedUsers.indexOf(p.nickname) >= 0) return; // 与主列表一致剔除排除人员
+      // 排除人员置灰展示（不给标记按钮），不再整条隐藏，避免审计时误会为无记录
+      var isExcluded = excludedUsers.indexOf(p.nickname) >= 0;
       var uidSuffix = p.user_id && /^\d+$/.test(p.user_id) ? '#' + p.user_id.slice(-6) : '';
       var nickAttr = String(p.nickname).replace(/'/g, "\\'");
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #f0f0f0;font-size:13px">';
+      var grayStyle = isExcluded ? ';color:#9ca3af' : '';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #f0f0f0;font-size:13px' + grayStyle + '">';
       html += '<span>';
       if (p.is_streamer) html += '<i class="fas fa-star" style="font-size:10px;margin-right:3px;color:#d97706"></i> ';
       html += escHtml(p.nickname) + ' <span style="font-size:10px;color:#999">' + uidSuffix + '</span> ';
-      html += '<span style="font-size:11px;color:#666">' + p.minutes + 'min</span>';
+      html += '<span style="font-size:11px;color:' + (isExcluded ? '#9ca3af' : '#666') + '">' + p.minutes + 'min</span>';
       html += '</span>';
       if (p.is_streamer) {
         html += '<span style="font-size:11px;color:#92400e">主播</span>';
+      } else if (isExcluded) {
+        html += '<span style="font-size:11px;color:#9ca3af">已排除</span>';
       } else if (p.checked_in) {
         html += '<span style="font-size:11px;color:#16a34a"><i class="fas fa-check" style="font-size:10px"></i> 已达标</span>';
       } else {
