@@ -4286,6 +4286,48 @@ document.addEventListener('click', function(e) {
     if (ds) { calSelectDate(ds); }
   }
 });
+// ---------- 主播卡片瀑布流（保持从左到右阅读顺序，卡片填入当前最短的列） ----------
+var MASONRY_CARD_W = 320, MASONRY_GAP = 8, MASONRY_PAD = 8;
+var _masonryObservers = [];
+
+function layoutMasonryGrid(el) {
+  if (!el || !el.isConnected) return;
+  var cards = el.querySelectorAll('.streamer-card');
+  if (!cards.length) { el.style.height = ''; return; }
+  var W = el.clientWidth;
+  if (W < 10) return; // 容器隐藏（如日期组折叠）时跳过，展开后由 ResizeObserver 触发
+  var cols = Math.max(1, Math.floor((W - MASONRY_PAD * 2 + MASONRY_GAP) / (MASONRY_CARD_W + MASONRY_GAP)));
+  var heights = [];
+  for (var i = 0; i < cols; i++) heights.push(0);
+  for (var k = 0; k < cards.length; k++) {
+    var c = cards[k];
+    var col = 0;
+    for (var j = 1; j < cols; j++) if (heights[j] < heights[col]) col = j;
+    c.style.left = (MASONRY_PAD + col * (MASONRY_CARD_W + MASONRY_GAP)) + 'px';
+    c.style.top = (MASONRY_PAD + heights[col]) + 'px';
+    heights[col] += c.offsetHeight + MASONRY_GAP;
+  }
+  el.style.height = (MASONRY_PAD * 2 + Math.max.apply(null, heights) - MASONRY_GAP) + 'px';
+}
+
+function initMasonryObservers() {
+  _masonryObservers.forEach(function(o) { o.disconnect(); });
+  _masonryObservers = [];
+  document.querySelectorAll('.masonry-grid').forEach(function(el) {
+    var lastW = -1;
+    var ro = new ResizeObserver(function(entries) {
+      var w = entries[0].contentRect.width;
+      if (w < 10) { lastW = -1; return; }
+      // 只响应宽度变化；布局导致的容器高度变化不触发重排（防 ResizeObserver 循环）
+      if (lastW >= 0 && Math.abs(w - lastW) < 2) return;
+      lastW = w;
+      layoutMasonryGrid(el);
+    });
+    ro.observe(el);
+    _masonryObservers.push(ro);
+  });
+}
+
 async function renderCheckinPage() {
   const main = $('#adminMain');
   main.innerHTML = '<div class="loading">Loading...</div>';
@@ -4518,7 +4560,7 @@ async function renderCheckinPage() {
         html += '<span class="arrow">▼</span>';
         html += '</div>';
         html += '<div class="date-body">';
-        html += '<div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;padding:8px">';
+        html += '<div class="masonry-grid">';
 
         streamerNames.forEach(function(name) {
           var g = streamers[name];
@@ -4550,6 +4592,9 @@ async function renderCheckinPage() {
     }
 
     main.innerHTML = html;
+    // 瀑布流：先同步布局一帧避免闪烁，再挂 ResizeObserver 监听容器宽度变化
+    document.querySelectorAll('.masonry-grid').forEach(layoutMasonryGrid);
+    initMasonryObservers();
     // 报告日期集合就绪后，给日历单元格补「📊 校对」徽标（无报告日期不显示）
     attachVerifyCalBadges();
   } catch (e) {
