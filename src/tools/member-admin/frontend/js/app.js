@@ -4286,6 +4286,17 @@ document.addEventListener('click', function(e) {
     if (ds) { calSelectDate(ds); }
   }
 });
+function fmtGmt7(t) {
+  // 库存为 UTC+8 naive；固定按 GMT+7 显示（与 play_detail 同刻度），不随查看者浏览器时区变化
+  if (!t) return '';
+  var m = String(t).match(/(\d{1,2}):(\d{2})/);
+  if (!m) return String(t);
+  var mins = parseInt(m[1], 10) * 60 + parseInt(m[2], 10) - 60;
+  if (mins < 0) mins += 1440;
+  var hh = Math.floor(mins / 60), mm = mins % 60;
+  return (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm;
+}
+
 // ---------- 主播卡片瀑布流（保持从左到右阅读顺序，卡片填入当前最短的列） ----------
 var MASONRY_CARD_W = 320, MASONRY_GAP = 8, MASONRY_PAD = 8;
 var _masonryObservers = [];
@@ -4414,7 +4425,7 @@ async function renderCheckinPage() {
     // Filter bar + settings + export
     html += '<div class="card" style="margin-bottom:20px">';
     html += '<div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#f8f9fa;border-radius:6px 6px 0 0;font-weight:600">';
-    html += '<span><i class="fas fa-video"></i> 场次签到 <span style="font-size:10px;color:#999;font-weight:400"><span style="color:#92400e;background:#fef3c7;padding:0 3px;border-radius:2px">主播</span> <span style="color:#1e40af;background:#dbeafe;padding:0 3px;border-radius:2px">已签到</span> <span style="color:#991b1b;background:#fee2e2;padding:0 3px;border-radius:2px">未达标</span></span></span>';
+    html += '<span><i class="fas fa-video"></i> 场次签到 <span style="font-size:10px;color:#999;font-weight:400">时间均为 GMT+7（越南） <span style="color:#92400e;background:#fef3c7;padding:0 3px;border-radius:2px">主播</span> <span style="color:#1e40af;background:#dbeafe;padding:0 3px;border-radius:2px">已签到</span> <span style="color:#991b1b;background:#fee2e2;padding:0 3px;border-radius:2px">未达标</span></span></span>';
     html += '<div style="display:flex;gap:8px;align-items:center">';
     html += '<input type="date" id="sessionDateFrom" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px" value="' + escHtml(from) + '">';
     html += '<span style="color:#999">至</span>';
@@ -4436,14 +4447,7 @@ async function renderCheckinPage() {
       var statusClass = isCancelled ? 'cancelled' : (isActive ? 'active' : 'ended');
       var badgeClass = isCancelled ? 'badge-cancelled' : (isActive ? 'badge-active' : 'badge-done');
       var badgeText = isCancelled ? '已取消' : (isActive ? '进行中' : 'End');
-      var startTime = new Date(s.start_time.replace(' ', 'T'));
-      var endStr = '';
-      if (s.end_time) {
-        var endTime = new Date(s.end_time.replace(' ', 'T'));
-        endStr = endTime.toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
-      } else {
-        endStr = '🟠 进行中';
-      }
+      var endStr = s.end_time ? fmtGmt7(s.end_time) : '🟠 进行中';
       var durStr = s.duration_minutes > 0 ? (Math.floor(s.duration_minutes / 60) + 'h ' + (s.duration_minutes % 60) + 'm') : '-';
 
       if (!window._checkinData) window._checkinData = {};
@@ -4491,7 +4495,7 @@ async function renderCheckinPage() {
       h += '</div>';
       h += '</div>';
       h += '<div style="font-size:10px;color:#999;margin:2px 0 3px">';
-      h += startTime.toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}) + ' → ' + endStr;
+      h += fmtGmt7(s.start_time) + ' → ' + endStr;
       if (s.min_minutes) h += ' | 最低 ' + s.min_minutes + ' 分钟';
       h += '</div>';
       if (s.checkins && s.checkins.length > 0) {
