@@ -3812,19 +3812,21 @@ async function openCheckinManager(sessionId, sessionNo, checkins) {
     checkins.forEach(function(c) {
       var methodEmoji = { slash: '💬', button: '🔘', voice: '🎤', manual: '✏️' };
       var emoji = methodEmoji[c.method] || '❓';
-      var below = !c.checked_in && (!c.duration || c.duration < 60);
       var isStr = c.is_streamer;
-      var rowBg = isStr ? ';background:#fef3c7' : (below ? ';background:#fef2f2' : '');
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #f0f0f0;font-size:13px' + rowBg + '">';
-      var _uid2 = c.user_id && /^\d+$/.test(c.user_id) ? '#' + c.user_id.slice(-6) : '';
-      var rowStyle = isStr ? 'color:#92400e' : (below ? 'color:#dc2626' : '');
-      html += '<span style="' + rowStyle + '">';
-      if (isStr) { html += '<i class="fas fa-star" style="font-size:10px;margin-right:3px;color:#d97706"></i> '; }
-      else if (below) { html += '<i class="fas fa-exclamation-triangle" style="font-size:10px;margin-right:3px;color:#dc2626"></i> '; }
-            var meta = window._sessionMeta && window._sessionMeta[sessionId] || {};
+      var meta = window._sessionMeta && window._sessionMeta[sessionId] || {};
       var sessionDur = meta.duration_minutes || 0;
       var ratio = sessionDur > 0 && c.duration ? Math.round((c.duration / sessionDur) * 100) : 0;
-      var tier = ratio >= 87.5 ? 100 : (ratio >= 62.5 ? 75 : (ratio >= 37.5 ? 50 : 0));
+      var tier = ratio >= 87.5 ? 100 : (ratio >= 62.5 ? 75 : (ratio >= 37.5 ? 50 : (ratio >= 12.5 ? 25 : 0)));
+      var below = !c.checked_in && (!c.duration || c.duration < 60);
+      var isInvalid = !isStr && tier === 0;
+      var rowBg = isStr ? ';background:#fef3c7' : (isInvalid ? ';background:#f3f4f6' : (below ? ';background:#fef2f2' : ''));
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid #f0f0f0;font-size:13px' + rowBg + '">';
+      var _uid2 = c.user_id && /^\d+$/.test(c.user_id) ? '#' + c.user_id.slice(-6) : '';
+      var rowStyle = isStr ? 'color:#92400e' : (isInvalid ? 'color:#9ca3af' : (below ? 'color:#dc2626' : ''));
+      html += '<span style="' + rowStyle + '">';
+      if (isStr) { html += '<i class="fas fa-star" style="font-size:10px;margin-right:3px;color:#d97706"></i> '; }
+      else if (isInvalid) { html += '<i class="fas fa-minus-circle" style="font-size:10px;margin-right:3px;color:#9ca3af"></i> '; }
+      else if (below) { html += '<i class="fas fa-exclamation-triangle" style="font-size:10px;margin-right:3px;color:#dc2626"></i> '; }
       var tierColors = { 100:'#16a34a', 75:'#2563eb', 50:'#ca8a04', 25:'#dc2626', 0:'#6b7280' };
       var tierBgs = { 100:'#dcfce7', 75:'#dbeafe', 50:'#fef08a', 25:'#fee2e2', 0:'#f3f4f6' };
       var tierColor = tierColors[tier] || '#999';
@@ -3833,6 +3835,8 @@ async function openCheckinManager(sessionId, sessionNo, checkins) {
         ' <span style="font-size:10px;font-weight:600;color:' + tierColor + ';background:' + tierBg + ';padding:0 5px;border-radius:3px;display:inline-block">' + tier + '%</span></span>';
       if (c.checked_in && c.id) {
         html += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;color:#991b1b;background:#fee2e2;border-color:#fecaca" onclick="deleteSessionCheckin(' + sessionId + ',' + c.id + ',\'' + escHtml(c.nickname) + '\')" title="删除"><i class="fas fa-trash-alt"></i></button>';
+      } else if (isInvalid) {
+        html += '<span style="font-size:11px;color:#9ca3af">无效</span>';
       } else {
         html += '<span style="font-size:11px;color:#dc2626">未达标</span>';
       }
@@ -4425,7 +4429,7 @@ async function renderCheckinPage() {
     // Filter bar + settings + export
     html += '<div class="card" style="margin-bottom:20px">';
     html += '<div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#f8f9fa;border-radius:6px 6px 0 0;font-weight:600">';
-    html += '<span><i class="fas fa-video"></i> 场次签到 <span style="font-size:10px;color:#999;font-weight:400">时间均为 GMT+7（越南） <span style="color:#92400e;background:#fef3c7;padding:0 3px;border-radius:2px">主播</span> <span style="color:#1e40af;background:#dbeafe;padding:0 3px;border-radius:2px">已签到</span> <span style="color:#991b1b;background:#fee2e2;padding:0 3px;border-radius:2px">未达标</span></span></span>';
+    html += '<span><i class="fas fa-video"></i> 场次签到 <span style="font-size:10px;color:#999;font-weight:400">时间均为 GMT+7（越南） <span style="color:#92400e;background:#fef3c7;padding:0 3px;border-radius:2px">主播</span> <span style="color:#1e40af;background:#dbeafe;padding:0 3px;border-radius:2px">已签到</span> <span style="color:#991b1b;background:#fee2e2;padding:0 3px;border-radius:2px">未达标</span> <span style="color:#6b7280;background:#e5e7eb;padding:0 3px;border-radius:2px">无效</span></span></span>';
     html += '<div style="display:flex;gap:8px;align-items:center">';
     html += '<input type="date" id="sessionDateFrom" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px" value="' + escHtml(from) + '">';
     html += '<span style="color:#999">至</span>';
@@ -4461,12 +4465,15 @@ async function renderCheckinPage() {
       h += ' <span style="color:#666;font-size:11px">⏱ ' + durStr + '</span>';
       h += '</div>';
       h += '<div style="display:flex;gap:3px;align-items:center">';
-            // Compute counts by category
-      var strCount = 0, chkCount = 0, belCount = 0;
+            // Compute counts by category（无效 = 场次签到占比吸附 0%，字体/背景置灰）
+      var strCount = 0, chkCount = 0, belCount = 0, invCount = 0;
       if (s.checkins) {
         s.checkins.forEach(function(cc) {
-          if (cc.is_streamer) strCount++;
-          else if (cc.checked_in || (cc.duration && cc.duration >= (s.min_minutes || 60))) chkCount++;
+          if (cc.is_streamer) { strCount++; return; }
+          var ccRatio = s.duration_minutes > 0 && cc.duration ? Math.round((cc.duration / s.duration_minutes) * 100) : 0;
+          var ccTier = ccRatio >= 87.5 ? 100 : (ccRatio >= 62.5 ? 75 : (ccRatio >= 37.5 ? 50 : (ccRatio >= 12.5 ? 25 : 0)));
+          if (ccTier === 0) invCount++;
+          else if (cc.checked_in || cc.duration >= (s.min_minutes || 60)) chkCount++;
           else belCount++;
         });
       }
@@ -4474,6 +4481,7 @@ async function renderCheckinPage() {
       if (strCount > 0) h += '<span style="color:#92400e;background:#fef3c7;padding:0 4px;border-radius:3px;font-weight:600">' + strCount + '</span>';
       if (chkCount > 0) h += '<span style="color:#1e40af;background:#dbeafe;padding:0 4px;border-radius:3px;font-weight:600">' + chkCount + '</span>';
       if (belCount > 0) h += '<span style="color:#991b1b;background:#fee2e2;padding:0 4px;border-radius:3px;font-weight:600">' + belCount + '</span>';
+      if (invCount > 0) h += '<span style="color:#6b7280;background:#e5e7eb;padding:0 4px;border-radius:3px;font-weight:600">' + invCount + '</span>';
       h += '</span>';
       h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="openCheckinManager(' + s.id + ',\'' + escHtml(s.session_no) + '\')" title="签到管理"><i class="fas fa-pen"></i></button>';
       h += '<span class="' + badgeClass + '">' + badgeText + '</span>';
@@ -4504,15 +4512,17 @@ async function renderCheckinPage() {
         s.checkins.forEach(function(c) {
           var emoji = methodEmoji[c.method] || '<i class="fas fa-question-circle"></i>';
           var dur = c.duration ? c.duration + 'min' : '-';
+          var _uid = c.user_id && /^\d+$/.test(c.user_id) ? '#' + c.user_id.slice(-6) : '';
+          var _ratio = s.duration_minutes > 0 && c.duration ? Math.round((c.duration / s.duration_minutes) * 100) : 0;
+          var _tier = _ratio >= 87.5 ? 100 : (_ratio >= 62.5 ? 75 : (_ratio >= 37.5 ? 50 : (_ratio >= 12.5 ? 25 : 0)));
           var tagStyle = '';
           if (c.is_streamer) { tagStyle = 'color:#92400e;background:#fef3c7;'; }
+          else if (_tier === 0) { tagStyle = 'color:#9ca3af;background:#e5e7eb;opacity:.85;'; }
           else if (!c.checked_in) { tagStyle = 'color:#dc2626;background:#fef2f2;'; }
           h += '<span class="checkin-tag" style="' + tagStyle + '">';
           if (c.is_streamer) { h += '<i class="fas fa-star" style="font-size:10px;margin-right:2px;color:#d97706"></i>'; }
+          else if (_tier === 0) { h += '<i class="fas fa-minus-circle" style="font-size:10px;margin-right:2px"></i>'; }
           else if (!c.checked_in) { h += '<i class="fas fa-exclamation-triangle" style="font-size:10px;margin-right:2px"></i>'; }
-          var _uid = c.user_id && /^\d+$/.test(c.user_id) ? '#' + c.user_id.slice(-6) : '';
-          var _ratio = s.duration_minutes > 0 && c.duration ? Math.round((c.duration / s.duration_minutes) * 100) : 0;
-          var _tier = _ratio >= 87.5 ? 100 : (_ratio >= 62.5 ? 75 : (_ratio >= 37.5 ? 50 : 0));
           var _tierColors = { 100:'#16a34a', 75:'#2563eb', 50:'#ca8a04', 25:'#dc2626', 0:'#6b7280' };
           var _tierBgs = { 100:'#dcfce7', 75:'#dbeafe', 50:'#fef08a', 25:'#fee2e2', 0:'#f3f4f6' };
           h += emoji + ' ' + escHtml(c.nickname) + ' <span style="font-size:9px;color:#999">' + _uid + '</span> ' + dur +
@@ -4815,7 +4825,7 @@ function openCheckinHelp() {
   html += '<ul style="margin:0 0 8px;padding-left:20px">';
   html += '<li>在语音频道中，但时长 < 最低要求（默认 60 分钟）→ 未签到，标记为"未达标"</li>';
   html += '<li>签到管理弹窗中仅显示"未达标"标签，无删除按钮</li>';
-  html += '<li>场次统计计数：主播 / 已签到 / 未达标 三类分别计数</li>';
+  html += '<li>场次统计计数：主播 / 已签到 / 未达标 / 无效 四类分别计数；场次签到占比吸附为 0% 的人员计入「无效」，字体与背景置灰展示</li>';
   html += '</ul>';
 
   // 6. 无效场次治理与自动结束
