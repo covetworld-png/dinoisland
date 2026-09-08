@@ -804,7 +804,7 @@ def get_checkin_sessions():
 
         conn = sqlite3.connect(CHECKIN_DB_PATH)
         conn.row_factory = sqlite3.Row
-        conditions = ["s.guild_id = ?"]  # cancelled 场次不再隐藏：灰显「已取消」+ 签到照常展现
+        conditions = ["s.guild_id = ?", "s.status != 'cancelled'"]  # cancelled=判定准确的虚假/空场，静默隐藏不 review
         params = [guild_id]
 
         if from_date:
@@ -1530,7 +1530,7 @@ def get_checkin_history():
 
         conn = sqlite3.connect(CHECKIN_DB_PATH)
         conn.row_factory = sqlite3.Row
-        conditions = ["s.guild_id = ?"]  # cancelled 不再隐藏：签到历史照常展现
+        conditions = ["s.guild_id = ?", "s.status != 'cancelled'"]  # cancelled 隐藏：判定准确即无需 review
         params = [guild_id]
         if from_date:
             conditions.append("c.date >= ?")

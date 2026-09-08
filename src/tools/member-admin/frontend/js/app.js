@@ -4496,11 +4496,7 @@ async function renderCheckinPage() {
       h += '</span>';
       h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="openCheckinManager(' + s.id + ',\'' + escHtml(s.session_no) + '\')" title="签到管理"><i class="fas fa-pen"></i></button>';
       h += '<span class="' + badgeClass + '">' + badgeText + '</span>';
-      // 恢复按钮（A' 策略·审计化恢复）：仅 cancelled 且有签到（有参与历史）的场次可恢复；空场永不出现此按钮
-      if (isCancelled && s.checkins && s.checkins.length > 0) {
-        h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;color:#065f46;background:#d1fae5;border-color:#a7f3d0" onclick="restoreSession(' + s.id + ',\'' + escHtml(s.session_no) + '\')" title="恢复为正常结束（仅误判场次；操作记审计）"><i class="fas fa-undo"></i></button>';
-      }
-      // Delete / Force end button (only for ended; cancelled already soft-deleted)
+      // Delete / Force end button (only for ended; cancelled 已由后端过滤，前端不可见)
       if (!isCancelled) {
         h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;';
       if (isActive) {
@@ -4575,12 +4571,10 @@ async function renderCheckinPage() {
       dateKeys.forEach(function(dateKey) {
         var streamers = byDate[dateKey];
         var streamerNames = Object.keys(streamers).sort();
-        var dayTotal = 0, checkedInPeople = {}, checkedInCount = 0, voidTotal = 0;
+        var dayTotal = 0, checkedInPeople = {}, checkedInCount = 0;
         streamerNames.forEach(function(n) {
           var g = streamers[n];
           (g.active || []).concat(g.ended || []).forEach(function(s) {
-            // 空场（cancelled 且无签到）= 未成立场次：不计入场次数/签到统计，仅折叠展示
-            if (s.status === 'cancelled' && (!s.checkins || s.checkins.length === 0)) { voidTotal++; return; }
             dayTotal++;
             if (s.checkins) {
               s.checkins.forEach(function(cc) {
@@ -4602,9 +4596,6 @@ async function renderCheckinPage() {
           '  <span style="font-size:12px;color:#999;margin-left:4px">' + streamerNames.length + ' 主播</span>' +
           '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:6px">签到 ' + checkedInPeopleCount + ' 人</span>' +
           '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:3px">' + checkedInCount + ' 人次</span>';
-        if (voidTotal > 0) {
-          html += '  <span style="font-size:12px;color:#9ca3af;background:#f3f4f6;padding:0 5px;border-radius:3px;margin-left:3px" title="主播独自在场、无人参与而未成立的场次，不计入场次">空场 ' + voidTotal + ' 场</span>';
-        }
         if (window._verifyReportDates && window._verifyReportDates[dateKey]) {
           html += '  <span style="font-size:12px;color:#3f51b5;background:#e8eaf6;padding:0 6px;border-radius:3px;margin-left:6px;cursor:pointer" onclick="event.stopPropagation();openVerifyReports(\'' + dateKey + '\')" title="查看该日校对报告">\uD83D\uDCCA \u6821\u5BF9</span>';
         }
@@ -4616,13 +4607,7 @@ async function renderCheckinPage() {
 
         streamerNames.forEach(function(name) {
           var g = streamers[name];
-          // A' 策略：空场（cancelled 且无签到）从正式场次剥离，折叠为「空场 N 场」
-          var normalEnded = [], voidSessions = [];
-          (g.ended || []).forEach(function(s) {
-            if (s.status === 'cancelled' && (!s.checkins || s.checkins.length === 0)) voidSessions.push(s);
-            else normalEnded.push(s);
-          });
-          var totalSessions = g.active.length + normalEnded.length;
+          var totalSessions = g.active.length + g.ended.length;
 
           var streamerColor = _streamerColors[name];
           if (!streamerColor) {
@@ -4638,20 +4623,7 @@ async function renderCheckinPage() {
           html += '<div style="font-size:11px;color:#999;padding:0 12px 2px">' + totalSessions + ' 场次</div>';
 
           g.active.forEach(function(s) { html += renderSession(s); });
-          normalEnded.forEach(function(s) { html += renderSession(s); });
-
-          if (voidSessions.length > 0) {
-            var voidId = 'voidSess_' + dateKey + '_' + name.replace(/[^\w\u00c0-\u1fff]/g, '_');
-            html += '<div style="margin:2px 0 4px">';
-            html += '<span onclick="toggleVoidSessions(\'' + voidId + '\', this)" title="主播独自在场、无人参与，场次未成立（点击展开明细）" style="cursor:pointer;color:#9ca3af;font-size:10px;padding:0 5px;border-radius:3px;background:#f3f4f6;font-weight:600">空场 ' + voidSessions.length + ' 场（未成立） <i class="fas fa-caret-down" style="font-size:9px"></i></span>';
-            html += '<div id="' + voidId + '" style="display:none;margin-top:2px">';
-            voidSessions.forEach(function(s) {
-              var reasonTxt = s.end_reason === 'no_participants' ? '无人参与' : (s.end_reason || '');
-              html += '<div style="font-size:10px;color:#b0b6bf;padding:1px 0"><code>' + escHtml(s.session_no) + '</code> ' +
-                fmtGmt7(s.start_time) + ' → ' + (s.end_time ? fmtGmt7(s.end_time) : '-') + ' · ' + escHtml(reasonTxt) + '</div>';
-            });
-            html += '</div></div>';
-          }
+          g.ended.forEach(function(s) { html += renderSession(s); });
 
           html += '</div>';
         });
@@ -4670,27 +4642,6 @@ async function renderCheckinPage() {
     attachVerifyCalBadges();
   } catch (e) {
     main.innerHTML = '<div class="error" style="padding:40px;text-align:center;color:red">加载失败: ' + escHtml(e.message) + '</div>';
-  }
-}
-
-function toggleVoidSessions(id, el) {
-  var d = document.getElementById(id);
-  if (!d) return;
-  var show = d.style.display === 'none';
-  d.style.display = show ? 'block' : 'none';
-  var icon = el.querySelector('i');
-  if (icon) icon.className = 'fas fa-caret-' + (show ? 'up' : 'down');
-}
-
-// A' 策略·审计化恢复：误取消场次的唯一恢复入口（后端校验参与历史+记审计）
-async function restoreSession(id, sessionNo) {
-  if (!confirm('恢复场次 ' + sessionNo + ' 为正常结束？\n\n仅适用于被误取消的场次（有参与历史）；操作记审计日志。')) return;
-  try {
-    await api('checkin/sessions/' + id + '/restore', { method: 'POST' });
-    alert('已恢复：' + sessionNo);
-    renderCheckinPage();
-  } catch (e) {
-    alert('恢复失败：' + (e.message || e));
   }
 }
 
