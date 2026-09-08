@@ -543,6 +543,7 @@ const MODULES = {
       { key: 'payee_phone', label: '收款人手机号', type: 'text' },
       { key: 'phone_zalo', label: '联系电话/zalo', type: 'text' },
       { key: 'discord', label: 'Discord 昵称', type: 'text' },
+      { key: 'discord_user_id', label: 'Discord ID（多 UID 逗号分隔，只增不删）', type: 'text' },
       { key: 'tiktok_live', label: 'TikTok 直播账号', type: 'text' },
       { key: 'tiktok_clip', label: 'TikTok 剪辑账号', type: 'text' },
       { key: 'tiktok_personal', label: 'TikTok 个人小号', type: 'text' },
