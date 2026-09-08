@@ -5014,7 +5014,7 @@ function renderClaimList(data, empList) {
     html += '<div style="color:#999;font-size:11px;margin-bottom:8px">无</div>';
   }
 
-  html += '<div style="font-weight:600;margin:8px 0 6px;color:#6b7280">⚪ 疑似过期 ID（' + stale.length + '）<span style="font-weight:400;font-size:10px;color:#999">映射在库但 14 天无活动，确认换号后在员工表移除旧 uid</span></div>';
+  html += '<div style="font-weight:600;margin:8px 0 6px;color:#6b7280">⚪ 疑似过期 ID（' + stale.length + '）<span style="font-weight:400;font-size:10px;color:#999">映射在库但 14 天无活动。确认换号后把【新 uid 追加】到该员工（待认领区绑定），旧 uid 必须保留——历史签到/语音记录靠它识别</span></div>';
   if (stale.length) {
     stale.forEach(function(u) {
       html += '<div style="padding:3px 6px;border-bottom:1px solid #f0f0f0;font-size:11px">#' + escHtml(String(u.user_id).slice(-6)) + ' → ' + escHtml(u.mapped_to) + ' <span style="color:#999">最近活动 ' + escHtml(u.last_seen || '无') + '</span></div>';
