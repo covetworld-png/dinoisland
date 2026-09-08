@@ -4963,14 +4963,12 @@ async function loadClaimPending() {
   if (!box) return;
   box.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">加载中...</div>';
   try {
-    var res = await api('claim/pending');
-    if (!res || !res.ok) { box.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:8px">加载失败: ' + escHtml((res && res.error) || '未知错误') + '</div>'; return; }
+    var data = await api('claim/pending');
     var empList = [];
     try {
-      var optRes = await api('options/live_employees');
-      empList = (optRes && optRes.data) || [];
+      empList = await api('options/live_employees') || [];
     } catch (e) { /* 下拉为空时仅影响绑定操作 */ }
-    renderClaimList(res.data || {}, empList);
+    renderClaimList(data || {}, empList);
   } catch (e) {
     box.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:8px">加载失败: ' + escHtml(e.message) + '</div>';
   }
@@ -5033,8 +5031,7 @@ async function claimBind(uid, nickname) {
   if (!empNo) { showToast('请先选择员工', 'error'); return; }
   if (!confirm('将 #' + String(uid).slice(-6) + ' ' + (nickname || '') + ' 绑定到员工 ' + empNo + '？\n\n写入 live_employees.discord_user_id（只增不改），记审计。')) return;
   try {
-    var r = await api('claim/bind', { method: 'POST', json: { user_id: uid, emp_no: empNo, nickname: nickname } });
-    if (!r || !r.ok) { showToast('绑定失败: ' + ((r && r.error) || '未知'), 'error'); return; }
+    await api('claim/bind', { method: 'POST', json: { user_id: uid, emp_no: empNo, nickname: nickname } });
     showToast('已绑定 ' + empNo, 'success');
     await loadClaimPending();
   } catch (e) { showToast('绑定失败: ' + e.message, 'error'); }
@@ -5044,8 +5041,7 @@ async function claimForeign(uid, nickname) {
   if (!nickname) { showToast('该 uid 无昵称，无法以外聘入映射表', 'error'); return; }
   if (!confirm('将 #' + String(uid).slice(-6) + ' ' + nickname + ' 标记为外聘/临时？\n\nplayer_mapping 补一行（无员工编号），对账不再告警。')) return;
   try {
-    var r = await api('claim/foreign', { method: 'POST', json: { user_id: uid, nickname: nickname } });
-    if (!r || !r.ok) { showToast('标记失败: ' + ((r && r.error) || '未知'), 'error'); return; }
+    await api('claim/foreign', { method: 'POST', json: { user_id: uid, nickname: nickname } });
     showToast('已标记外聘', 'success');
     await loadClaimPending();
   } catch (e) { showToast('标记失败: ' + e.message, 'error'); }
@@ -5054,8 +5050,7 @@ async function claimForeign(uid, nickname) {
 async function claimExclude(uid, nickname) {
   if (!confirm('将 #' + String(uid).slice(-6) + ' ' + (nickname || '') + ' 加入排除名单？\n\n对账与展示均不再出现（写入 excluded_user_ids）。')) return;
   try {
-    var r = await api('claim/exclude', { method: 'POST', json: { user_id: uid } });
-    if (!r || !r.ok) { showToast('排除失败: ' + ((r && r.error) || '未知'), 'error'); return; }
+    await api('claim/exclude', { method: 'POST', json: { user_id: uid } });
     showToast('已排除', 'success');
     await loadClaimPending();
   } catch (e) { showToast('排除失败: ' + e.message, 'error'); }
