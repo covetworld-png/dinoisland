@@ -983,6 +983,45 @@ def get_checkin_sessions():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+@app.post("/api/checkin/sessions/<int:session_id>/restore")
+@write_required
+def restore_checkin_session(session_id):
+    """A' 策略·审计化恢复入口：恢复被误取消的场次。
+    铁律：只允许恢复「有参与历史」的场（checkins ≥1 或 voice_sessions 除主播外 ≥1 人）；
+    空场（从未有人参与）不可恢复——它不成立，只能保持取消。
+    恢复 = status cancelled → ended（end_time/end_reason 保留作追溯），审计留痕。
+    """
+    import sqlite3
+    try:
+        conn = sqlite3.connect(CHECKIN_DB_PATH)
+        conn.row_factory = sqlite3.Row
+        row = conn.execute("SELECT * FROM sessions WHERE id = ?", (session_id,)).fetchone()
+        if not row:
+            conn.close()
+            return jsonify({"ok": False, "error": "Session not found"}), 404
+        if row["status"] != "cancelled":
+            conn.close()
+            return jsonify({"ok": False, "error": "仅 cancelled 场次可恢复"}), 400
+        chk = conn.execute("SELECT COUNT(*) c FROM checkins WHERE session_id = ?", (session_id,)).fetchone()["c"]
+        part = conn.execute("SELECT COUNT(DISTINCT user_id) c FROM voice_sessions WHERE session_id = ? AND user_id != ?",
+                            (session_id, str(row["creator_id"]))).fetchone()["c"]
+        if chk == 0 and part == 0:
+            conn.close()
+            return jsonify({"ok": False, "error": "空场无参与历史，不可恢复（未成立的场次保持取消）"}), 409
+        before = {"status": row["status"], "end_reason": row["end_reason"], "checkins": chk, "participants": part}
+        conn.execute("UPDATE sessions SET status = 'ended' WHERE id = ?", (session_id,))
+        conn.commit()
+        conn.close()
+        log_change(session["user"], "restore", "checkin_session", session_id,
+                   row["session_no"], before=before,
+                   after={"status": "ended", "note": "A'策略·误判恢复，end_reason 保留追溯"})
+        return jsonify({"ok": True, "data": {"session_no": row["session_no"], "status": "ended", "checkins": chk, "participants": part}})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 @app.delete("/api/checkin/sessions/<int:session_id>")
 @write_required
 def delete_checkin_session(session_id):
