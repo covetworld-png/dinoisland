@@ -1236,7 +1236,7 @@ const LIVE_DRAWER_SECTIONS = [
     ['payee_phone', '收款人手机号'],
   ]],
   ['联系与证件', [
-    ['phone_zalo', '联系电话/zalo'], ['discord', 'Discord 昵称'], ['discord_id', 'Discord ID'], ['tiktok_live', 'TikTok 直播账号'],
+    ['phone_zalo', '联系电话/zalo'], ['discord', 'Discord 昵称'], ['discord_user_id', 'Discord ID'], ['tiktok_live', 'TikTok 直播账号'],
     ['tiktok_clip', 'TikTok 剪辑账号'], ['tiktok_personal', 'TikTok 个人小号'],
     ['birth_date', '出生日期'], ['email', '电子邮箱'],
     ['address', '家庭地址'], ['id_card', '身份证'],
