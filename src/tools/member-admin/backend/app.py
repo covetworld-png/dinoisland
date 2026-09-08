@@ -1570,6 +1570,155 @@ def export_checkin_csv():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+# ---------- 待认领人员（C' 方案③修复层：与 bot reconcile.py 共用同一口径源） ----------
+
+def _reconcile_mod():
+    """引入 bot 侧对账模块（MA 与 bot 共用未认领判定，保证两端清单一致）。"""
+    import sys as _sys
+    bot_path = "/opt/discord-checkin/backend"
+    if bot_path not in _sys.path:
+        _sys.path.insert(0, bot_path)
+    import reconcile
+    return reconcile
+
+
+def _split_ids(raw):
+    return [x.strip() for x in str(raw or '').split(',') if x.strip().isdigit()]
+
+
+@app.get("/api/claim/pending")
+@write_required
+def claim_pending():
+    """未认领 uid / 改名告警 / 疑似过期 ID 清单（口径 = 每日对账推送）。"""
+    try:
+        rc = _reconcile_mod()
+        res = rc.scan(checkins_db=CHECKIN_DB_PATH, members_db=MEMBER_ADMIN_DB,
+                      days=7, stale_days=14)
+        return jsonify({"ok": True, "data": res})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.post("/api/claim/bind")
+@write_required
+def claim_bind():
+    """绑定未认领 uid 到员工：追加进 live_employees.discord_user_id（只增不改，审计留痕）。
+
+    防错：uid 已绑定其他员工 → 409 拒绝；同员工重复绑定 → 409 幂等提示。
+    """
+    data = request.get_json(force=True, silent=True) or {}
+    user_id = str(data.get("user_id") or "").strip()
+    emp_no = str(data.get("emp_no") or "").strip()
+    nickname = str(data.get("nickname") or "").strip()
+    if not user_id.isdigit() or not emp_no:
+        return jsonify({"ok": False, "error": "user_id/emp_no 无效"}), 400
+    try:
+        rc = _reconcile_mod()
+        known = rc.load_known(MEMBER_ADMIN_DB)
+        cur_label = known["uids"].get(user_id)
+        if cur_label and not str(cur_label).startswith(emp_no):
+            return jsonify({"ok": False, "error": f"该 uid 已绑定 {cur_label}，请先解绑"}), 409
+        db = get_db()
+        emp = db.execute("SELECT * FROM live_employees WHERE emp_no = ?", (emp_no,)).fetchone()
+        if not emp:
+            return jsonify({"ok": False, "error": f"员工 {emp_no} 不存在"}), 404
+        ids = _split_ids(emp["discord_user_id"]) + _split_ids(emp["discord_id"])
+        if user_id in ids:
+            return jsonify({"ok": False, "error": "该 uid 已在此员工映射中"}), 409
+        new_val = (emp["discord_user_id"] or "").strip()
+        new_val = f"{new_val},{user_id}" if new_val else user_id
+        before = dict(emp)
+        db.execute("UPDATE live_employees SET discord_user_id = ?, updated_at = ? WHERE id = ?",
+                   (new_val, now(), emp["id"]))
+        db.commit()
+        after = dict(db.execute("SELECT * FROM live_employees WHERE id = ?", (emp["id"],)).fetchone())
+        log_change(session["user"], "update", "live_employee", emp["id"],
+                   f"{emp_no} 绑定 uid #{user_id[-6:]}", before=before, after=after, ip=client_ip())
+        # 昵称侧兜底：同昵称 player_mapping 行缺 discord_id 则补（保持签到侧一致）
+        if nickname:
+            row = db.execute("SELECT id, discord_id FROM player_mapping WHERE player_name = ?",
+                             (nickname,)).fetchone()
+            if row and user_id not in _split_ids(row["discord_id"]):
+                pv = (row["discord_id"] or "").strip()
+                pv = f"{pv},{user_id}" if pv else user_id
+                db.execute("UPDATE player_mapping SET discord_id = ?, updated_at = ? WHERE id = ?",
+                           (pv, now(), row["id"]))
+                db.commit()
+        return jsonify({"ok": True, "data": {"emp_no": emp_no, "discord_user_id": new_val}})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.post("/api/claim/foreign")
+@write_required
+def claim_foreign():
+    """标记外聘/临时：player_mapping 补行（emp_no 空 + discord_id），对账不再告警；只增不改。"""
+    data = request.get_json(force=True, silent=True) or {}
+    user_id = str(data.get("user_id") or "").strip()
+    nickname = str(data.get("nickname") or "").strip()
+    if not user_id.isdigit() or not nickname:
+        return jsonify({"ok": False, "error": "user_id/nickname 无效"}), 400
+    try:
+        db = get_db()
+        row = db.execute("SELECT * FROM player_mapping WHERE player_name = ?", (nickname,)).fetchone()
+        if row:
+            if user_id in _split_ids(row["discord_id"]):
+                return jsonify({"ok": False, "error": "该昵称行已含此 uid"}), 409
+            new_val = (row["discord_id"] or "").strip()
+            new_val = f"{new_val},{user_id}" if new_val else user_id
+            before = dict(row)
+            db.execute("UPDATE player_mapping SET discord_id = ?, updated_at = ? WHERE id = ?",
+                       (new_val, now(), row["id"]))
+            db.commit()
+            after = dict(db.execute("SELECT * FROM player_mapping WHERE id = ?", (row["id"],)).fetchone())
+            log_change(session["user"], "update", "player_mapping", row["id"],
+                       f"{nickname} 标记外聘 uid #{user_id[-6:]}", before=before, after=after, ip=client_ip())
+        else:
+            cur = db.execute(
+                "INSERT INTO player_mapping (player_name, emp_no, discord, discord_id, remark, created_at, updated_at)"
+                " VALUES (?, '', '', ?, ?, ?, ?)",
+                (nickname, user_id, "外聘/临时（待认领页标记）", now(), now()))
+            db.commit()
+            log_change(session["user"], "create", "player_mapping", cur.lastrowid,
+                       nickname, before={}, after={"player_name": nickname, "discord_id": user_id},
+                       ip=client_ip())
+        return jsonify({"ok": True})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.post("/api/claim/exclude")
+@write_required
+def claim_exclude():
+    """排除 uid：写入 checkins.db settings.excluded_user_ids（对账/展示均不再出现）。"""
+    data = request.get_json(force=True, silent=True) or {}
+    user_id = str(data.get("user_id") or "").strip()
+    if not user_id.isdigit():
+        return jsonify({"ok": False, "error": "user_id 无效"}), 400
+    try:
+        conn = sqlite3.connect(CHECKIN_DB_PATH)
+        row = conn.execute("SELECT value FROM settings WHERE key = 'excluded_user_ids'").fetchone()
+        before_v = row[0] if row else ""
+        ids = _split_ids(before_v)
+        if user_id not in ids:
+            ids.append(user_id)
+            conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('excluded_user_ids', ?)",
+                         (",".join(ids),))
+            conn.commit()
+        conn.close()
+        log_change(session["user"], "update", "checkin_setting", 0,
+                   f"排除 uid #{user_id[-6:]}",
+                   before={"excluded_user_ids": before_v}, after={"excluded_user_ids": ",".join(ids)},
+                   ip=client_ip())
+        return jsonify({"ok": True})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 # ---------- 数据校对报告 ----------
 
 @app.route("/api/verify/reports", methods=["GET"])

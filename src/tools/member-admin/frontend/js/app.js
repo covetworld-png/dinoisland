@@ -3792,7 +3792,16 @@ async function retroSession(sessionNo) {
   } catch (e) {
     showToast('追溯失败: ' + e.message, 'error');
   }
-}// Open checkin manager modal for a session
+}// 场次卡片：无效人员（场次签到 0%）折叠区展开/收起切换
+function toggleInvalidTags(sessionId, el) {
+  var box = document.getElementById('invTags' + sessionId);
+  if (!box) return;
+  var open = box.style.display !== 'none';
+  box.style.display = open ? 'none' : 'flex';
+  if (el) el.innerHTML = '无效 ' + box.childElementCount + ' 人 <i class="fas fa-caret-' + (open ? 'down' : 'up') + '" style="font-size:9px"></i>';
+}
+
+// Open checkin manager modal for a session
 async function openCheckinManager(sessionId, sessionNo, checkins) {
   window._mgrSessionId = sessionId;
   window._mgrSessionNo = sessionNo;
@@ -4440,6 +4449,7 @@ async function renderCheckinPage() {
     html += '<button class="btn btn-sm btn-outline" onclick="openCheckinSettings()" title="设置"><i class="fas fa-cog"></i> 设置</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="openStreamerColorManager()" title="管理主播列表"><i class="fas fa-palette"></i> 主播列表</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="openNicknameCache()" title="查看陪玩列表"><i class="fas fa-address-book"></i> 陪玩列表</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openClaimManager()" title="未认领 uid / 疑似过期 ID 处理（与每日对账推送同口径）"><i class="fas fa-user-tag"></i> 待认领</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="openVerifyReports()" title="数据校对报告"><i class="fas fa-clipboard-check"></i> 数据校对</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="openCheckinHelp()" title="查看判断逻辑说明"><i class="fas fa-question-circle"></i> 说明</button>';
     html += '</div></div></div>';
@@ -4507,9 +4517,9 @@ async function renderCheckinPage() {
       if (s.min_minutes) h += ' | 最低 ' + s.min_minutes + ' 分钟';
       h += '</div>';
       if (s.checkins && s.checkins.length > 0) {
-        h += '<div style="display:flex;flex-wrap:wrap;gap:2px">';
         var methodEmoji = { slash: '<i class="fas fa-comment"></i>', button: '<i class="fas fa-circle"></i>', voice: '<i class="fas fa-microphone"></i>' };
-        s.checkins.forEach(function(c) {
+        // 单人标签构建（无效 = 非主播且场次签到占比吸附 0%，灰显）
+        var buildTag = function(c) {
           var emoji = methodEmoji[c.method] || '<i class="fas fa-question-circle"></i>';
           var dur = c.duration ? c.duration + 'min' : '-';
           var _uid = c.user_id && /^\d+$/.test(c.user_id) ? '#' + c.user_id.slice(-6) : '';
@@ -4519,16 +4529,34 @@ async function renderCheckinPage() {
           if (c.is_streamer) { tagStyle = 'color:#92400e;background:#fef3c7;'; }
           else if (_tier === 0) { tagStyle = 'color:#9ca3af;background:#e5e7eb;opacity:.85;'; }
           else if (!c.checked_in) { tagStyle = 'color:#dc2626;background:#fef2f2;'; }
-          h += '<span class="checkin-tag" style="' + tagStyle + '">';
-          if (c.is_streamer) { h += '<i class="fas fa-star" style="font-size:10px;margin-right:2px;color:#d97706"></i>'; }
-          else if (_tier === 0) { h += '<i class="fas fa-minus-circle" style="font-size:10px;margin-right:2px"></i>'; }
-          else if (!c.checked_in) { h += '<i class="fas fa-exclamation-triangle" style="font-size:10px;margin-right:2px"></i>'; }
+          var t = '<span class="checkin-tag" style="' + tagStyle + '">';
+          if (c.is_streamer) { t += '<i class="fas fa-star" style="font-size:10px;margin-right:2px;color:#d97706"></i>'; }
+          else if (_tier === 0) { t += '<i class="fas fa-minus-circle" style="font-size:10px;margin-right:2px"></i>'; }
+          else if (!c.checked_in) { t += '<i class="fas fa-exclamation-triangle" style="font-size:10px;margin-right:2px"></i>'; }
           var _tierColors = { 100:'#16a34a', 75:'#2563eb', 50:'#ca8a04', 25:'#dc2626', 0:'#6b7280' };
           var _tierBgs = { 100:'#dcfce7', 75:'#dbeafe', 50:'#fef08a', 25:'#fee2e2', 0:'#f3f4f6' };
-          h += emoji + ' ' + escHtml(c.nickname) + ' <span style="font-size:9px;color:#999">' + _uid + '</span> ' + dur +
+          t += emoji + ' ' + escHtml(c.nickname) + ' <span style="font-size:9px;color:#999">' + _uid + '</span> ' + dur +
             ' <span style="font-size:9px;font-weight:600;color:' + _tierColors[_tier] + ';background:' + _tierBgs[_tier] + ';padding:0 4px;border-radius:2px;display:inline-block">' + _tier + '%</span></span>';
+          return t;
+        };
+        // 无效人员折叠：默认收起为「无效 N 人」，点击就地展开
+        var validTags = [], invalidTags = [];
+        s.checkins.forEach(function(c) {
+          var r = s.duration_minutes > 0 && c.duration ? Math.round((c.duration / s.duration_minutes) * 100) : 0;
+          var t = r >= 87.5 ? 100 : (r >= 62.5 ? 75 : (r >= 37.5 ? 50 : (r >= 12.5 ? 25 : 0)));
+          if (!c.is_streamer && t === 0) invalidTags.push(c); else validTags.push(c);
         });
+        h += '<div style="display:flex;flex-wrap:wrap;gap:2px">';
+        validTags.forEach(function(c) { h += buildTag(c); });
+        if (invalidTags.length > 0) {
+          h += '<span onclick="toggleInvalidTags(' + s.id + ',this)" title="点击展开/收起无效人员（场次签到 0%）" style="cursor:pointer;color:#9ca3af;background:#e5e7eb;font-size:10px;padding:0 5px;border-radius:3px;align-self:center;font-weight:600">无效 ' + invalidTags.length + ' 人 <i class="fas fa-caret-down" style="font-size:9px"></i></span>';
+        }
         h += '</div>';
+        if (invalidTags.length > 0) {
+          h += '<div id="invTags' + s.id + '" style="display:none;flex;flex-wrap:wrap;gap:2px;margin-top:2px">';
+          invalidTags.forEach(function(c) { h += buildTag(c); });
+          h += '</div>';
+        }
       }
       h += '</div>';
       return h;
@@ -4909,6 +4937,129 @@ function closeCheckinHelp() {
   } catch (e) { /* 未登录 */ }
   showView('loginView');
 })();
+
+// ========== 待认领人员（C' 方案③修复层：绑定/外聘/排除，与每日对账推送同口径） ==========
+async function openClaimManager() {
+  var html = '<div class="modal-overlay" onclick="closeClaimManager()"></div>';
+  html += '<div class="modal-content" style="max-width:760px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;max-height:85vh;display:flex;flex-direction:column">';
+  html += '<div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8f9fa;border-radius:6px 6px 0 0;font-weight:600"><span><i class="fas fa-user-tag"></i> 待认领人员 <span style="font-size:10px;color:#999;font-weight:400">口径与每日对账推送一致；操作即时生效并记审计</span></span><button type="button" class="modal-close" onclick="closeClaimManager()" style="font-size:18px;background:none;border:none;cursor:pointer">&times;</button></div>';
+  html += '<div id="claimBody" style="flex:1;overflow-y:auto;padding:12px;background:#fafafa;font-size:12px"><div style="color:#999">加载中...</div></div>';
+  html += '</div>';
+  var overlay = document.createElement('div');
+  overlay.id = 'claimOverlay';
+  overlay.innerHTML = html;
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:300';
+  document.body.appendChild(overlay);
+  await loadClaimPending();
+}
+
+function closeClaimManager() {
+  var el = document.getElementById('claimOverlay');
+  if (el) el.remove();
+}
+
+async function loadClaimPending() {
+  var box = document.getElementById('claimBody');
+  if (!box) return;
+  box.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">加载中...</div>';
+  try {
+    var res = await api('claim/pending');
+    if (!res || !res.ok) { box.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:8px">加载失败: ' + escHtml((res && res.error) || '未知错误') + '</div>'; return; }
+    var empList = [];
+    try {
+      var optRes = await api('options/live_employees');
+      empList = (optRes && optRes.data) || [];
+    } catch (e) { /* 下拉为空时仅影响绑定操作 */ }
+    renderClaimList(res.data || {}, empList);
+  } catch (e) {
+    box.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:8px">加载失败: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+function renderClaimList(data, empList) {
+  var box = document.getElementById('claimBody');
+  if (!box) return;
+  var html = '';
+  var unclaimed = data.unclaimed || [], renamed = data.renamed || [], stale = data.stale || [];
+
+  html += '<div style="font-weight:600;margin-bottom:6px;color:#991b1b">🔴 未认领 uid（' + unclaimed.length + '）</div>';
+  if (!unclaimed.length) {
+    html += '<div style="color:#16a34a;font-size:12px;margin-bottom:12px">✅ 近 7 天无未认领 uid</div>';
+  } else {
+    html += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px">';
+    html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">最近昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">活动</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
+    unclaimed.forEach(function(u) {
+      var uid6 = String(u.user_id).slice(-6);
+      html += '<tr>';
+      html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">#' + escHtml(uid6) + '</td>';
+      html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(u.nickname || '（无昵称）') + '<br><span style="color:#999;font-size:10px">最近 ' + escHtml(u.last_seen || '') + '</span></td>';
+      html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">签到' + u.checkins + '次<br>语音' + u.voice_minutes + 'min</td>';
+      html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
+      html += '<select id="claimEmp_' + u.user_id + '" style="font-size:11px;padding:1px 2px;max-width:150px">';
+      html += '<option value="">绑定到员工...</option>';
+      empList.forEach(function(e) { html += '<option value="' + escHtml(e.id) + '">' + escHtml(e.label) + '</option>'; });
+      html += '</select>';
+      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="claimBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">绑定</button>';
+      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#92400e;background:#fef3c7;border-color:#fde68a" onclick="claimForeign(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">外聘</button>';
+      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="claimExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">排除</button>';
+      html += '</td></tr>';
+    });
+    html += '</table>';
+  }
+
+  html += '<div style="font-weight:600;margin:8px 0 6px;color:#92400e">🟡 改名/新昵称（' + renamed.length + '）<span style="font-weight:400;font-size:10px;color:#999">已知 uid 使用了映射表外的名字，仅需留意</span></div>';
+  if (renamed.length) {
+    renamed.forEach(function(u) {
+      html += '<div style="padding:3px 6px;border-bottom:1px solid #f0f0f0;font-size:11px">#' + escHtml(String(u.user_id).slice(-6)) + ' ' + escHtml(u.nickname) + ' <span style="color:#999">（映射：' + escHtml(u.mapped_to) + '）</span></div>';
+    });
+  } else {
+    html += '<div style="color:#999;font-size:11px;margin-bottom:8px">无</div>';
+  }
+
+  html += '<div style="font-weight:600;margin:8px 0 6px;color:#6b7280">⚪ 疑似过期 ID（' + stale.length + '）<span style="font-weight:400;font-size:10px;color:#999">映射在库但 14 天无活动，确认换号后在员工表移除旧 uid</span></div>';
+  if (stale.length) {
+    stale.forEach(function(u) {
+      html += '<div style="padding:3px 6px;border-bottom:1px solid #f0f0f0;font-size:11px">#' + escHtml(String(u.user_id).slice(-6)) + ' → ' + escHtml(u.mapped_to) + ' <span style="color:#999">最近活动 ' + escHtml(u.last_seen || '无') + '</span></div>';
+    });
+  } else {
+    html += '<div style="color:#999;font-size:11px">无</div>';
+  }
+  box.innerHTML = html;
+}
+
+async function claimBind(uid, nickname) {
+  var sel = document.getElementById('claimEmp_' + uid);
+  var empNo = sel ? sel.value : '';
+  if (!empNo) { showToast('请先选择员工', 'error'); return; }
+  if (!confirm('将 #' + String(uid).slice(-6) + ' ' + (nickname || '') + ' 绑定到员工 ' + empNo + '？\n\n写入 live_employees.discord_user_id（只增不改），记审计。')) return;
+  try {
+    var r = await api('claim/bind', { method: 'POST', json: { user_id: uid, emp_no: empNo, nickname: nickname } });
+    if (!r || !r.ok) { showToast('绑定失败: ' + ((r && r.error) || '未知'), 'error'); return; }
+    showToast('已绑定 ' + empNo, 'success');
+    await loadClaimPending();
+  } catch (e) { showToast('绑定失败: ' + e.message, 'error'); }
+}
+
+async function claimForeign(uid, nickname) {
+  if (!nickname) { showToast('该 uid 无昵称，无法以外聘入映射表', 'error'); return; }
+  if (!confirm('将 #' + String(uid).slice(-6) + ' ' + nickname + ' 标记为外聘/临时？\n\nplayer_mapping 补一行（无员工编号），对账不再告警。')) return;
+  try {
+    var r = await api('claim/foreign', { method: 'POST', json: { user_id: uid, nickname: nickname } });
+    if (!r || !r.ok) { showToast('标记失败: ' + ((r && r.error) || '未知'), 'error'); return; }
+    showToast('已标记外聘', 'success');
+    await loadClaimPending();
+  } catch (e) { showToast('标记失败: ' + e.message, 'error'); }
+}
+
+async function claimExclude(uid, nickname) {
+  if (!confirm('将 #' + String(uid).slice(-6) + ' ' + (nickname || '') + ' 加入排除名单？\n\n对账与展示均不再出现（写入 excluded_user_ids）。')) return;
+  try {
+    var r = await api('claim/exclude', { method: 'POST', json: { user_id: uid } });
+    if (!r || !r.ok) { showToast('排除失败: ' + ((r && r.error) || '未知'), 'error'); return; }
+    showToast('已排除', 'success');
+    await loadClaimPending();
+  } catch (e) { showToast('排除失败: ' + e.message, 'error'); }
+}
 
 // ========== 数据校对（verify_reports：play_detail vs 签到 报告） ==========
 async function openVerifyReports(initialDate) {
