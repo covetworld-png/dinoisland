@@ -1254,13 +1254,12 @@ class TranslatorApp:
         dir_frame = tk.Frame(root, bg='#1e1e1e')
         dir_frame.pack(fill=tk.X, padx=12, pady=(4, 8))
         tk.Label(dir_frame, text='翻译方向:', bg='#1e1e1e', fg='#aaa').pack(side=tk.LEFT, padx=4)
-        dir_combo = ttk.Combobox(dir_frame, textvariable=self.direction, state='readonly', width=18)
-        dir_combo['values'] = list(DIRECTION_LABELS.keys())
-        dir_combo.set('v2z')
+        self.dir_combo_var = tk.StringVar(value=DIRECTION_LABELS['v2z'])
+        dir_combo = ttk.Combobox(dir_frame, textvariable=self.dir_combo_var, state='readonly', width=13)
+        dir_combo['values'] = list(DIRECTION_LABELS.values())
+        dir_combo.set(DIRECTION_LABELS['v2z'])
         dir_combo.pack(side=tk.LEFT, padx=4)
-        self.dir_label_var = tk.StringVar(value=DIRECTION_LABELS['v2z'])
-        tk.Label(dir_frame, textvariable=self.dir_label_var, bg='#1e1e1e', fg='white').pack(side=tk.LEFT, padx=8)
-        dir_combo.bind('<<ComboboxSelected>>', lambda e: self.on_direction_changed())
+        dir_combo.bind('<<ComboboxSelected>>', self._on_dir_combo_selected)
 
         FlatButton(dir_frame, text='⇄ 换方向', command=self.do_swap,
                    bg_color='#8b5cf6', fg_color='white',
@@ -1424,13 +1423,21 @@ class TranslatorApp:
         engine = self.engines.get(self.engine.get(), self.engines['ollama'])
         return f'术语表: {len(self.glossary)} 条 | {engine["label"]}: {engine["model"]}'
 
+    def _on_dir_combo_selected(self, event=None):
+        """下拉显示中文标签，映射回内部方向 key。"""
+        label_to_key = {v: k for k, v in DIRECTION_LABELS.items()}
+        key = label_to_key.get(self.dir_combo_var.get())
+        if key:
+            self.direction.set(key)
+            self.on_direction_changed()
+
     def on_engine_changed(self):
         key = self.engine.get()
         self.engine_label_var.set(self.engines[key]['label'])
         self.status_var.set(self._status_text())
 
     def on_direction_changed(self):
-        self.dir_label_var.set(DIRECTION_LABELS[self.direction.get()])
+        self.dir_combo_var.set(DIRECTION_LABELS[self.direction.get()])
 
     def _reload_glossary(self):
         """重新加载基础+自定义术语并合并，更新状态栏。"""
