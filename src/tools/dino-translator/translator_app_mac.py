@@ -54,7 +54,7 @@ CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.jso
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.2.4'
+APP_VERSION = '1.2.5'
 
 
 def ollama_openai_base(host):
@@ -193,8 +193,8 @@ def merge_glossary(base, custom):
 # ---------- 翻译方向（选项表达源语言；外语固定译中文，换方向后中文译出） ----------
 
 DIRECTION_LABELS = {
-    'v2z': '越南语',
-    'e2z': '英语',
+    'v2z': '越南语→中文',
+    'e2z': '英语→中文',
     'z2v': '中文→越南语',
     'z2e': '中文→英语',
 }
@@ -1118,9 +1118,13 @@ class RegionSelector:
 
         self.window = tk.Toplevel(parent)
         self.window.withdraw()
-        self.window.attributes('-topmost', True)
-        self.window.attributes('-fullscreen', True)
         self.window.overrideredirect(True)
+        # ⚠️ 不可用 attributes('-fullscreen', True)：macOS 上会触发系统空间切换
+        # （自动跳到第二屏/新桌面）。改用无边框窗口覆盖主屏，不产生 Space 切换。
+        sw = self.parent.winfo_screenwidth()
+        sh = self.parent.winfo_screenheight()
+        self.window.geometry(f'{sw}x{sh}+0+0')
+        self.window.attributes('-topmost', True)  # 主窗口置顶，选择器需更高层
         self.window.configure(cursor='crosshair', bg='black')
         self.window.bind('<Escape>', lambda e: self.cancel())
 
