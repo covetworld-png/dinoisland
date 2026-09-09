@@ -26,6 +26,7 @@ import json
 import re
 import ssl
 import time
+import threading
 import subprocess
 import urllib.request
 import tkinter as tk
@@ -54,7 +55,7 @@ CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.jso
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.2.5'
+APP_VERSION = '1.2.6'
 
 
 def ollama_openai_base(host):
@@ -1222,6 +1223,7 @@ class TranslatorApp:
         self.capture_region = self.config.get('captureRegion')
         self.auto_ocr_timer = None
         self.is_auto_ocr_running = False
+        self._busy = False  # 后台网络任务进行中标志，防止并发触发
         self.root._translator_app = self  # 供 HistoryWindow 回填原文使用
 
         self.engines = self._build_engines()
@@ -1456,6 +1458,21 @@ class TranslatorApp:
         self.on_direction_changed()
         self.status_var.set(f'已换方向: {DIRECTION_LABELS[new_dir]}，点击「翻译」继续')
 
+    def _run_async(self, fn, on_done, on_error=None):
+        """在后台线程执行网络请求，完成后回主线程更新 UI，避免阻塞 Tk 主循环。
+        线程为 daemon：应用退出时不等待在途请求。"""
+        def worker():
+            try:
+                res = fn()
+            except Exception as e:
+                if on_error:
+                    self.root.after(0, lambda err=e: on_error(err))
+                else:
+                    print('后台任务失败:', e)
+            else:
+                self.root.after(0, lambda r=res: on_done(r))
+        threading.Thread(target=worker, daemon=True).start()
+
     def do_back_translate(self):
         """回译验证：把译文按镜像方向翻回，输出到回译结果区。
         对比输入原文与回译结果，即可判断翻译是否准确表达了原意。"""
@@ -1463,12 +1480,17 @@ class TranslatorApp:
         if not result_text:
             show_topmost(self.root, '提示', '请先完成一次翻译，再进行回译验证', 'warning')
             return
+        if self._busy:
+            self.status_var.set('有任务正在后台执行，请稍候...')
+            return
+        self._busy = True
         back_dir = MIRROR_DIRECTION.get(self.direction.get(), self.direction.get())
-        self.status_var.set(f'回译中（{DIRECTION_LABELS[back_dir]}）...')
-        self.root.update()
-        try:
-            engine = self.engines.get(self.engine.get(), self.engines['ollama'])
-            back, _replaced = engine['fn'](result_text, back_dir)
+        self.status_var.set(f'回译中（{DIRECTION_LABELS[back_dir]}，后台执行）...')
+        engine = self.engines.get(self.engine.get(), self.engines['ollama'])
+
+        def on_done(res):
+            self._busy = False
+            back, _replaced = res
             self.back_text.delete('1.0', tk.END)
             self.back_text.insert(tk.END, back)
             # 首次回译时展示回译区
@@ -1476,9 +1498,13 @@ class TranslatorApp:
                 self.back_label.pack(anchor=tk.W, padx=12)
                 self.back_text.pack(fill=tk.X, padx=12, pady=(0, 4))
             self.status_var.set('回译完成：对比「输入原文」与「回译结果」验证准确性')
-        except Exception as e:
+
+        def on_error(e):
+            self._busy = False
             show_topmost(self.root, '回译失败', str(e), 'error')
             self.status_var.set('回译失败')
+
+        self._run_async(lambda: engine['fn'](result_text, back_dir), on_done, on_error)
 
     def _save_history(self, source, translated):
         """翻译成功后记录历史。"""
@@ -1489,11 +1515,17 @@ class TranslatorApp:
         text = self.input_text.get('1.0', tk.END).strip()
         if not text:
             return
-        self.status_var.set('正在翻译...')
-        self.root.update()
-        try:
-            engine = self.engines.get(self.engine.get(), self.engines['ollama'])
-            result, replaced = engine['fn'](text, self.direction.get())
+        if self._busy:
+            self.status_var.set('有任务正在后台执行，请稍候...')
+            return
+        self._busy = True
+        self.status_var.set('正在翻译...（后台执行，界面可操作）')
+        engine = self.engines.get(self.engine.get(), self.engines['ollama'])
+        direction = self.direction.get()
+
+        def on_done(res):
+            self._busy = False
+            result, replaced = res
             self.output_text.delete('1.0', tk.END)
             self.output_text.insert(tk.END, result)
             self._save_history(text, result)
@@ -1510,9 +1542,13 @@ class TranslatorApp:
                     self.status_var.set('翻译完成，自动复制失败')
             else:
                 self.status_var.set(self._status_text())
-        except Exception as e:
+
+        def on_error(e):
+            self._busy = False
             show_topmost(self.root, '翻译失败', str(e), 'error')
             self.status_var.set('翻译失败')
+
+        self._run_async(lambda: engine['fn'](text, direction), on_done, on_error)
 
     def do_copy(self):
         text = self.output_text.get('1.0', tk.END).strip()
@@ -1614,60 +1650,73 @@ class TranslatorApp:
         os.makedirs(temp_dir, exist_ok=True)
         image_path = os.path.join(temp_dir, f'ocr_{int(time.time() * 1000)}.jpg')
 
-        self.status_var.set('正在截图识别...')
-        self.root.update()
+        self.status_var.set('正在截图识别...（后台执行，界面可操作）')
+        engine = self.engines.get(self.engine.get(), self.engines['ollama'])
+        direction = self.direction.get()
+        api_key = self.config.get('bailianApiKey')
+        base_url = self.config.get('bailianBaseUrl')
+        ocr_model = self.config.get('bailianOcrModel') or 'qwen-vl-plus'
+        ignored_channels = self.config.get('ignoredChannels', [])
+        auto_copy = self.auto_copy.get()
 
-        try:
-            capture_screen_region(region, image_path)
-            api_key = self.config.get('bailianApiKey')
-            base_url = self.config.get('bailianBaseUrl')
-
-            if mode == 'bailian-vision':
-                ocr_model = self.config.get('bailianOcrModel') or 'qwen-vl-plus'
-                result = translate_image_with_bailian(
-                    image_path, self.direction.get(), api_key, base_url, ocr_model,
-                    self.config.get('ignoredChannels', [])
-                )
-                self.input_text.delete('1.0', tk.END)
-                self.input_text.insert(tk.END, f'[百炼 Vision]\n{result}')
-                self.output_text.delete('1.0', tk.END)
-                self.output_text.insert(tk.END, result)
-                self._save_history(f'[截图Vision]', result)
-            else:
-                ocr_model = self.config.get('bailianOcrModel') or 'qwen-vl-plus'
+        def worker():
+            # 全程后台线程：截图 + OCR + 翻译均不阻塞 Tk 主循环
+            try:
+                capture_screen_region(region, image_path)
+                if mode == 'bailian-vision':
+                    result = translate_image_with_bailian(
+                        image_path, direction, api_key, base_url, ocr_model,
+                        ignored_channels)
+                    return mode, f'[百炼 Vision]\n{result}', result, [], None
                 text = ocr_with_bailian(image_path, api_key, base_url, ocr_model)
-                self.input_text.delete('1.0', tk.END)
-                self.input_text.insert(tk.END, text)
-                # 自动调用当前翻译引擎翻译
-                engine = self.engines.get(self.engine.get(), self.engines['ollama'])
-                result, replaced = engine['fn'](text, self.direction.get())
-                self.output_text.delete('1.0', tk.END)
-                self.output_text.insert(tk.END, result)
+                result, replaced = engine['fn'](text, direction)
+                return mode, text, result, replaced, None
+            except Exception as e:
+                return mode, None, None, [], e
+            finally:
+                # 清理旧截图
+                try:
+                    if os.path.exists(image_path):
+                        os.remove(image_path)
+                except Exception:
+                    pass
+
+        def schedule_next():
+            if self.is_auto_ocr_running:
+                interval = self.config.get('autoCaptureInterval', 3000)
+                self.auto_ocr_timer = self.root.after(interval, self.do_auto_ocr)
+
+        def on_done(res):
+            m, text, result, replaced, err = res
+            # 用户已点停止：丢弃本次结果，不再排下一轮
+            if not self.is_auto_ocr_running:
+                return
+            if err is not None:
+                show_topmost(self.root, 'OCR 失败', str(err), 'error')
+                self.status_var.set('OCR 失败，将继续下一轮')
+                schedule_next()
+                return
+            self.input_text.delete('1.0', tk.END)
+            self.input_text.insert(tk.END, text)
+            self.output_text.delete('1.0', tk.END)
+            self.output_text.insert(tk.END, result)
+            if m == 'bailian-vision':
+                self._save_history('[截图Vision]', result)
+            else:
                 self._save_history(f'[OCR] {text}', result)
                 if replaced:
                     self.replaced_var.set('术语替换: ' + ' | '.join(replaced[:5]) + ('...' if len(replaced) > 5 else ''))
                 else:
                     self.replaced_var.set('')
 
-            if self.auto_copy.get() and result:
+            if auto_copy and result:
                 copy_to_clipboard(self.root, result)
                 self.status_var.set('OCR 翻译完成，已自动复制')
             else:
                 self.status_var.set('OCR 翻译完成')
-        except Exception as e:
-            show_topmost(self.root, 'OCR 失败', str(e), 'error')
-            self.status_var.set('OCR 失败')
+            schedule_next()
 
-        # 清理旧截图
-        try:
-            if os.path.exists(image_path):
-                os.remove(image_path)
-        except Exception:
-            pass
-
-        if self.is_auto_ocr_running:
-            interval = self.config.get('autoCaptureInterval', 3000)
-            self.auto_ocr_timer = self.root.after(interval, self.do_auto_ocr)
+        self._run_async(worker, on_done)
 
 
 def main():
