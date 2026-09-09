@@ -54,7 +54,7 @@ CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.jso
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.2.2'
+APP_VERSION = '1.2.3'
 
 
 def ollama_openai_base(host):
@@ -190,13 +190,30 @@ def merge_glossary(base, custom):
     return list(merged.values())
 
 
-# ---------- 反向方向映射（交换 / 回译共用） ----------
+# ---------- 目标语言（模型自动识别源语言，只需指定目标） ----------
 
-REVERSE_DIRECTION = {
-    'vn2zh': 'zh2vn', 'zh2vn': 'vn2zh',
-    'en2zh': 'zh2en', 'zh2en': 'en2zh',
-    'en2vn': 'vn2en', 'vn2en': 'en2vn',
+DIRECTION_LABELS = {
+    'to_zh': '翻译成中文',
+    'to_vn': '翻译成越南语',
+    'to_en': '翻译成英文',
 }
+DIRECTION_CYCLE = ['to_zh', 'to_vn', 'to_en']
+
+VN_CHARS_RE = re.compile(
+    r'[ăâđêôơưáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]',
+    re.IGNORECASE)
+
+
+def detect_target(text):
+    """启发式检测文本语言，返回目标语言 key（用于回译）。
+    含汉字 → 中文；含越南语特征字符 → 越南语；否则 → 英文。"""
+    if not text:
+        return 'to_zh'
+    if re.search(r'[\u4e00-\u9fff]', text):
+        return 'to_zh'
+    if VN_CHARS_RE.search(text):
+        return 'to_vn'
+    return 'to_en'
 
 
 # ---------- 翻译历史 ----------
@@ -241,12 +258,12 @@ def escape_regex(s):
 
 
 def preprocess_text(text, direction, glossary):
-    """仅对 zh2vn 做术语替换，避免污染源文本；其他方向只做参考提示。"""
+    """目标为越南语时做中文术语替换；源语言若非中文则词条不命中，无副作用。"""
     if not text or not glossary:
         return text, []
     replaced = []
     result = text
-    if direction == 'zh2vn':
+    if direction == 'to_vn':
         items = sorted([item for item in glossary if item.get('zh')], key=lambda x: -len(x['zh']))
         for item in items:
             zh = item['zh']
@@ -283,30 +300,12 @@ def extract_relevant_terms(text, direction, glossary, max_terms=20):
 
 # ---------- Prompt 构建 ----------
 
-DIRECTION_LABELS = {
-    'vn2zh': '越南语 → 中文',
-    'zh2vn': '中文 → 越南语',
-    'en2zh': '英文 → 中文',
-    'en2vn': '英文 → 越南语',
-    'vn2en': '越南语 → 英文',
-    'zh2en': '中文 → 英文',
-}
-
-
 def build_prompt(text, direction, relevant_terms):
-    target_map = {
-        'vn2zh': '中文',
-        'zh2vn': '越南语',
-        'en2zh': '中文',
-        'en2vn': '越南语',
-        'vn2en': '英文',
-        'zh2en': '英文',
-    }
-    target = target_map.get(direction, '中文')
+    target = DIRECTION_LABELS.get(direction, '中文').replace('翻译成', '')
     prompt = ''
     if relevant_terms:
         prompt += '参考下面的翻译：\n' + '\n'.join(relevant_terms) + '\n\n'
-    prompt += f'将以下文本翻译为{target}，注意只需要输出翻译后的结果，不要额外解释：\n\n{text}'
+    prompt += f'自动识别文本语言，将以下文本翻译为{target}，注意只需要输出翻译后的结果，不要额外解释：\n\n{text}'
     return prompt
 
 
@@ -436,8 +435,8 @@ def translate_image_with_bailian(image_path, direction, api_key, base_url=None,
                                  ocr_model='qwen-vl-plus', ignored_channels=None):
     ignored_channels = ignored_channels or []
     mime, b64 = encode_image_base64(image_path)
-    target = '中文' if direction != 'zh2vn' else '越南语'
-    source = '越南语或英文' if direction != 'zh2vn' else '中文'
+    target = DIRECTION_LABELS.get(direction, '翻译成中文').replace('翻译成', '')
+    source = '中文' if direction == 'to_vn' else '越南语或英文'
     ignored_hint = '不需要翻译的频道（直接忽略）: ' + '、'.join(ignored_channels) if ignored_channels else ''
 
     system_prompt = f'''你是恐龙岛游戏聊天窗口的实时翻译助手。请识别图片中玩家发送的聊天消息并翻译成{target}。
@@ -1218,7 +1217,7 @@ class TranslatorApp:
 
         self.glossary = merge_glossary(load_glossary(), load_custom_glossary())
         self.config = load_config()
-        self.direction = tk.StringVar(value='vn2zh')
+        self.direction = tk.StringVar(value='to_zh')  # 默认外语→中文
         self.engine = tk.StringVar(value='ollama')
         self.auto_copy = tk.BooleanVar(value=self.config.get('autoCopy', True))
         self.ocr_mode = tk.StringVar(value=self.config.get('ocrMode', 'manual'))
@@ -1263,9 +1262,9 @@ class TranslatorApp:
         tk.Label(dir_frame, text='翻译方向:', bg='#1e1e1e', fg='#aaa').pack(side=tk.LEFT, padx=4)
         dir_combo = ttk.Combobox(dir_frame, textvariable=self.direction, state='readonly', width=18)
         dir_combo['values'] = list(DIRECTION_LABELS.keys())
-        dir_combo.set('vn2zh')
+        dir_combo.set('to_zh')
         dir_combo.pack(side=tk.LEFT, padx=4)
-        self.dir_label_var = tk.StringVar(value=DIRECTION_LABELS['vn2zh'])
+        self.dir_label_var = tk.StringVar(value=DIRECTION_LABELS['to_zh'])
         tk.Label(dir_frame, textvariable=self.dir_label_var, bg='#1e1e1e', fg='white').pack(side=tk.LEFT, padx=8)
         dir_combo.bind('<<ComboboxSelected>>', lambda e: self.on_direction_changed())
 
@@ -1445,21 +1444,26 @@ class TranslatorApp:
         self.status_var.set(self._status_text())
 
     def do_swap(self):
-        """仅切换到反向翻译方向，不改动输入/输出框内容。"""
+        """循环切换目标语言：中文 → 越南语 → 英文 → 中文。"""
         current = self.direction.get()
-        new_dir = REVERSE_DIRECTION.get(current, current)
+        idx = DIRECTION_CYCLE.index(current) if current in DIRECTION_CYCLE else 0
+        new_dir = DIRECTION_CYCLE[(idx + 1) % len(DIRECTION_CYCLE)]
         self.direction.set(new_dir)
         self.on_direction_changed()
-        self.status_var.set(f'已切换方向: {DIRECTION_LABELS[new_dir]}，点击「翻译」继续')
+        self.status_var.set(f'目标语言: {DIRECTION_LABELS[new_dir]}（源语言自动识别），点击「翻译」继续')
 
     def do_back_translate(self):
-        """回译验证：把当前结果按反向方向译回，输出到回译结果区。
-        对比输入原文与回译结果，即可判断翻译是否准确表达了原意。"""
+        """回译验证：检测原文语言，把译文翻回原文语言，对比核对语义。"""
         result_text = self.output_text.get('1.0', tk.END).strip()
         if not result_text:
             show_topmost(self.root, '提示', '请先完成一次翻译，再进行回译验证', 'warning')
             return
-        back_dir = REVERSE_DIRECTION.get(self.direction.get(), self.direction.get())
+        src_text = self.input_text.get('1.0', tk.END).strip()
+        if src_text:
+            back_dir = detect_target(src_text)
+        else:
+            # 原文缺失（如截图翻译）：按当前目标之外的语言回译
+            back_dir = 'to_zh' if self.direction.get() != 'to_zh' else 'to_vn'
         self.status_var.set(f'回译中（{DIRECTION_LABELS[back_dir]}）...')
         self.root.update()
         try:
