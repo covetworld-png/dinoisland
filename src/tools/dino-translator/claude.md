@@ -10,7 +10,7 @@
 | 名称 | dino-translator |
 | 中文名称 | 恐龙岛翻译器（Mac 桌面版） |
 | 用途 | Mac 置顶窗口中/越/英互译工具，供运营/客服日常翻译使用 |
-| 当前版本 | v1.3.0（已部署 `/Applications/恐龙岛翻译器.app`；框选先隐藏主窗 + 扩展屏；后台线程修复；默认 OCR=paddle-ocr 免费跳板） |
+| 当前版本 | v1.3.1（已部署；旧 ocrMode 残留自动回退 + 模式切换持久化；OCR 轮次/耗时/绿色状态栏；框选先隐藏主窗+扩展屏；queue 泵后台线程） |
 
 ## 功能
 
@@ -126,3 +126,4 @@ Bundle ID 固定为 `info.yuemei.dinoisland.translator`（setup.py plist 段）�
 | 2026-09-10 | v1.2.8：① 框选支持扩展屏：CoreGraphics（ctypes 零依赖）枚举显示器 + 鼠标所在屏定位遮罩（`mac_displays()` / `mac_mouse_location()`），框选/截图/背景全程全局坐标系（跨屏负坐标兼容，左侧扩展屏 -1920 实测）；② 修 TCC 授权失效：固定 BundleID `info.yuemei.dinoisland.translator` + `NSScreenCaptureUsageDescription` + 打包后 ad-hoc codesign（写入打包流程）；已知限制：无证书签名的包每次重打包 cdhash 变化，可能需重新勾选录屏授权 |
 | 2026-09-10 | v1.2.9：① 框选流程重整：先隐藏主窗口（withdraw，置顶临时解除）→ 鼠标所在屏遮罩框选（跨屏）→ 完成/取消/拖拽过小均恢复主窗口；② 授权死条目占坑：部署流程固化 `tccutil reset ScreenCapture <bundleid>`，自动清旧条目，替代手动删除；RegionSelector 加 `on_cancel` 回调防主窗口丢失；自签证书方案（授权跨升级保持）列为待办 |
 | 2026-09-10 | v1.3.0：**修严重 bug：v1.2.6 起后台任务结果全部丢失**——`_run_async` 在 worker 线程直接调 `root.after()`，Tcl/Tk 非线程安全，跨线程 after 静默丢失（不报错不执行）→ 翻译/回译/OCR 结果永不回显、自动 OCR 循环永不排程、状态卡在「正在执行」。改为标准 tkinter 线程模式：结果入 `queue.Queue`，主线程 `_pump_ui_queue` 每 80ms 泵出回调。12 项状态机冒烟测试（/tmp/test_auto_ocr.py，mock 全依赖）全过：启动拒绝分支/循环/停止/重启按钮全链路 |
+| 2026-09-10 | v1.3.1：修「点自动 OCR 无反应」真因：config 残留旧 LangPlugin `ocrMode='remote'`，每次启动前置检查拒绝。① 启动时非法 ocrMode 自动回退 `paddle-ocr` 并写回 config（`_valid_ocr_mode`）；② 模式切换下拉时持久化（`_persist_ocr_mode`，此前切换不保存）；③ 运行状态显性化：轮次计数 + 每轮耗时 + 绿色状态栏（运行期 fg=#4ade80）+ 下一轮倒计提示 |

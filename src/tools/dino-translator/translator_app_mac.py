@@ -59,7 +59,8 @@ CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.jso
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.3.0'
+APP_VERSION = '1.3.1'
+VALID_OCR_MODES = ('manual', 'paddle-ocr', 'bailian-ocr', 'bailian-vision')
 
 
 def ollama_openai_base(host):
@@ -1334,7 +1335,7 @@ class TranslatorApp:
         self.direction = tk.StringVar(value='v2z')  # 默认外语→中文
         self.engine = tk.StringVar(value='ollama')
         self.auto_copy = tk.BooleanVar(value=self.config.get('autoCopy', True))
-        self.ocr_mode = tk.StringVar(value=self.config.get('ocrMode', 'paddle-ocr'))
+        self.ocr_mode = tk.StringVar(value=self._valid_ocr_mode(self.config.get('ocrMode')))
         self.capture_region = self.config.get('captureRegion')
         self.auto_ocr_timer = None
         self.is_auto_ocr_running = False
@@ -1362,9 +1363,11 @@ class TranslatorApp:
         ocr_frame.pack(fill=tk.X, padx=12, pady=(4, 4))
         tk.Label(ocr_frame, text='OCR 模式:', bg='#1e1e1e', fg='#aaa').pack(side=tk.LEFT, padx=4)
         ocr_combo = ttk.Combobox(ocr_frame, textvariable=self.ocr_mode, state='readonly', width=20)
-        ocr_combo['values'] = ['manual', 'paddle-ocr', 'bailian-ocr', 'bailian-vision']
+        ocr_combo['values'] = list(VALID_OCR_MODES)
         ocr_combo.set(self.ocr_mode.get())
         ocr_combo.pack(side=tk.LEFT, padx=4)
+        # 切换模式后持久化（v1.3.1 前不保存，导致每次启动回退旧值）
+        ocr_combo.bind('<<ComboboxSelected>>', lambda e: self._persist_ocr_mode())
         FlatButton(ocr_frame, text='🎯 框选区域', command=self.select_region,
                    bg_color='#4b5563', fg_color='white', font=('Arial', 11), padx=8).pack(side=tk.LEFT, padx=4)
         self.btn_auto_ocr = FlatButton(ocr_frame, text='▶ 自动 OCR', command=self.toggle_auto_ocr,
@@ -1439,7 +1442,8 @@ class TranslatorApp:
                    font=('Arial', 11), padx=8).pack(side=tk.LEFT, padx=2)
 
         self.status_var = tk.StringVar(value=self._status_text())
-        tk.Label(fn_frame, textvariable=self.status_var, bg='#1e1e1e', fg='#888').pack(side=tk.RIGHT)
+        self.status_label = tk.Label(fn_frame, textvariable=self.status_var, bg='#1e1e1e', fg='#888')
+        self.status_label.pack(side=tk.RIGHT)
 
         # 输出
         tk.Label(root, text='翻译结果', bg='#1e1e1e', fg='#aaa').pack(anchor=tk.W, padx=12)
@@ -1468,6 +1472,19 @@ class TranslatorApp:
         self.output_text.bind('<Button-2>', self._show_context_menu)
         self.output_text.bind('<Button-3>', self._show_context_menu)
         self.output_text.bind('<Control-1>', self._show_context_menu)
+
+    def _persist_ocr_mode(self):
+        """OCR 模式切换后持久化，避免重启回退。"""
+        self.config['ocrMode'] = self.ocr_mode.get()
+        save_config_external(self.config)
+
+    def _valid_ocr_mode(self, mode):
+        """兼容旧配置：非法值（如旧 LangPlugin 残留 'remote'）回退默认并写回。"""
+        if mode not in VALID_OCR_MODES:
+            mode = 'paddle-ocr'
+            self.config['ocrMode'] = mode
+            save_config_external(self.config)
+        return mode
 
     def _build_engines(self):
         cfg = self.config
@@ -1780,8 +1797,10 @@ class TranslatorApp:
                          '未安装 Pillow，无法截图。请在 Mac mini 上执行: pip3 install Pillow', 'error')
             return
         self.is_auto_ocr_running = True
+        self._ocr_round = 0
+        self.status_label.configure(fg='#4ade80')  # 运行期状态栏变绿，视觉可辨识
         self.btn_auto_ocr.label.configure(text='⏹ 停止 OCR')
-        self.status_var.set('自动 OCR 已启动')
+        self.status_var.set('自动 OCR 已启动（第 1 轮开始）')
         self.do_auto_ocr()
 
     def stop_auto_ocr(self):
@@ -1790,18 +1809,21 @@ class TranslatorApp:
             self.root.after_cancel(self.auto_ocr_timer)
             self.auto_ocr_timer = None
         self.btn_auto_ocr.label.configure(text='▶ 自动 OCR')
+        self.status_label.configure(fg='#888')
         self.status_var.set('自动 OCR 已停止')
 
     def do_auto_ocr(self):
         if not self.is_auto_ocr_running:
             return
+        self._ocr_round += 1
+        rnd = self._ocr_round
         mode = self.ocr_mode.get()
         region = self.capture_region
         temp_dir = os.path.expanduser('~/LangPlugin/temp')
         os.makedirs(temp_dir, exist_ok=True)
         image_path = os.path.join(temp_dir, f'ocr_{int(time.time() * 1000)}.jpg')
 
-        self.status_var.set('正在截图识别...（后台执行，界面可操作）')
+        self.status_var.set(f'OCR 第 {rnd} 轮：截图与识别中...')
         engine = self.engines.get(self.engine.get(), self.engines['ollama'])
         direction = self.direction.get()
         api_key = self.config.get('bailianApiKey')
@@ -1812,13 +1834,14 @@ class TranslatorApp:
 
         def worker():
             # 全程后台线程：截图 + OCR + 翻译均不阻塞 Tk 主循环
+            t0 = time.time()
             try:
                 capture_screen_region(region, image_path)
                 if mode == 'bailian-vision':
                     result = translate_image_with_bailian(
                         image_path, direction, api_key, base_url, ocr_model,
                         ignored_channels)
-                    return mode, f'[百炼 Vision]\n{result}', result, [], None
+                    return mode, f'[百炼 Vision]\n{result}', result, [], None, time.time() - t0
                 if mode == 'paddle-ocr':
                     # 内置免费 OCR：跳板 → mini PaddleOCR-VL（无需 Key）
                     text, _mime, _b64 = ocr_with_paddle(
@@ -1826,9 +1849,9 @@ class TranslatorApp:
                 else:  # bailian-ocr
                     text = ocr_with_bailian(image_path, api_key, base_url, ocr_model)
                 result, replaced = engine['fn'](text, direction)
-                return mode, text, result, replaced, None
+                return mode, text, result, replaced, None, time.time() - t0
             except Exception as e:
-                return mode, None, None, [], e
+                return mode, None, None, [], e, time.time() - t0
             finally:
                 # 清理旧截图
                 try:
@@ -1840,16 +1863,17 @@ class TranslatorApp:
         def schedule_next():
             if self.is_auto_ocr_running:
                 interval = self.config.get('autoCaptureInterval', 3000)
+                self.status_var.set(f'第 {rnd} 轮完成，{interval // 1000} 秒后第 {rnd + 1} 轮')
                 self.auto_ocr_timer = self.root.after(interval, self.do_auto_ocr)
 
         def on_done(res):
-            m, text, result, replaced, err = res
+            m, text, result, replaced, err, elapsed = res
             # 用户已点停止：丢弃本次结果，不再排下一轮
             if not self.is_auto_ocr_running:
                 return
             if err is not None:
                 show_topmost(self.root, 'OCR 失败', str(err), 'error')
-                self.status_var.set('OCR 失败，将继续下一轮')
+                self.status_var.set(f'OCR 第 {rnd} 轮失败（耗时 {elapsed:.0f}s），将继续下一轮')
                 schedule_next()
                 return
             self.input_text.delete('1.0', tk.END)
@@ -1867,9 +1891,9 @@ class TranslatorApp:
 
             if auto_copy and result:
                 copy_to_clipboard(self.root, result)
-                self.status_var.set('OCR 翻译完成，已自动复制')
+                self.status_var.set(f'第 {rnd} 轮完成（耗时 {elapsed:.0f}s），已复制译文')
             else:
-                self.status_var.set('OCR 翻译完成')
+                self.status_var.set(f'第 {rnd} 轮完成（耗时 {elapsed:.0f}s）')
             schedule_next()
 
         self._run_async(worker, on_done)
