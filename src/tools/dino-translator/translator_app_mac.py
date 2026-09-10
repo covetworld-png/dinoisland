@@ -59,7 +59,7 @@ CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.jso
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.3.1'
+APP_VERSION = '1.3.2'
 VALID_OCR_MODES = ('manual', 'paddle-ocr', 'bailian-ocr', 'bailian-vision')
 
 
@@ -1798,6 +1798,7 @@ class TranslatorApp:
             return
         self.is_auto_ocr_running = True
         self._ocr_round = 0
+        self._ocr_active_round = None
         self.status_label.configure(fg='#4ade80')  # 运行期状态栏变绿，视觉可辨识
         self.btn_auto_ocr.label.configure(text='⏹ 停止 OCR')
         self.status_var.set('自动 OCR 已启动（第 1 轮开始）')
@@ -1805,12 +1806,21 @@ class TranslatorApp:
 
     def stop_auto_ocr(self):
         self.is_auto_ocr_running = False
+        self._ocr_active_round = None
         if self.auto_ocr_timer:
             self.root.after_cancel(self.auto_ocr_timer)
             self.auto_ocr_timer = None
         self.btn_auto_ocr.label.configure(text='▶ 自动 OCR')
         self.status_label.configure(fg='#888')
         self.status_var.set('自动 OCR 已停止')
+
+    def _ocr_ticker(self, rnd):
+        """每秒刷新状态栏耗时，长 OCR 轮次不显示成卡死。"""
+        if not self.is_auto_ocr_running or self._ocr_active_round != rnd:
+            return
+        elapsed = time.time() - self._ocr_t0
+        self.status_var.set(f'OCR 第 {rnd} 轮：识别中... 已 {elapsed:.0f}s')
+        self.root.after(1000, lambda: self._ocr_ticker(rnd))
 
     def do_auto_ocr(self):
         if not self.is_auto_ocr_running:
@@ -1824,6 +1834,9 @@ class TranslatorApp:
         image_path = os.path.join(temp_dir, f'ocr_{int(time.time() * 1000)}.jpg')
 
         self.status_var.set(f'OCR 第 {rnd} 轮：截图与识别中...')
+        self._ocr_t0 = time.time()
+        self._ocr_active_round = rnd
+        self._ocr_ticker(rnd)
         engine = self.engines.get(self.engine.get(), self.engines['ollama'])
         direction = self.direction.get()
         api_key = self.config.get('bailianApiKey')
@@ -1867,6 +1880,7 @@ class TranslatorApp:
                 self.auto_ocr_timer = self.root.after(interval, self.do_auto_ocr)
 
         def on_done(res):
+            self._ocr_active_round = None
             m, text, result, replaced, err, elapsed = res
             # 用户已点停止：丢弃本次结果，不再排下一轮
             if not self.is_auto_ocr_running:
