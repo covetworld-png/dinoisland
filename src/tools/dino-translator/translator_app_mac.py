@@ -49,13 +49,15 @@ except Exception:
 # 内置默认引擎：阿里云跳板 → EasyTier 内网 Ollama（免配置免费用，OpenAI 兼容端点）
 # 注意：不读 OLLAMA_HOST 环境变量，避免目标机器残留环境变量劫持内置默认值
 OLLAMA_HOST = 'http://139.196.23.48/ollama-5e672ce1a3481d6905753a4e3fb809dc/v1'
+# 内置免费 OCR：跳板 → mini PaddleOCR-VL 1.6（无需 Key，OpenAI 无关，自建 HTTP 服务）
+PADDLE_OCR_URL = 'http://139.196.23.48/ocr-819e6e57b39495423ba7da6a7a61bf2a'
 OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'hy-mt1.5-7b-q4:latest')
 GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/glossary.json')
 CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.json')
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.2.6'
+APP_VERSION = '1.2.7'
 
 
 def ollama_openai_base(host):
@@ -426,10 +428,35 @@ def ocr_with_bailian(image_path, api_key, base_url=None, model='qwen-vl-plus'):
     ])
 
 
-def translate_image_with_bailian(image_path, direction, api_key, base_url=None,
-                                 ocr_model='qwen-vl-plus', ignored_channels=None):
-    ignored_channels = ignored_channels or []
+def ocr_with_paddle(image_path, base_url=None):
+    """内置免费 OCR：跳板 → mini PaddleOCR-VL 1.6（/ocr_b64，无需 Key）。
+    返回 (text, mime, b64)——b64 一并返回供视觉翻译复用，避免重复编码。"""
     mime, b64 = encode_image_base64(image_path)
+    url = (base_url or PADDLE_OCR_URL).rstrip('/') + '/ocr_b64'
+    req = urllib.request.Request(
+        url,
+        data=json.dumps({'image': b64, 'task': 'ocr'}).encode('utf-8'),
+        headers={'Content-Type': 'application/json'},
+        method='POST'
+    )
+    try:
+        with urllib.request.urlopen(req, context=SSL_CONTEXT, timeout=300) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            text = (data.get('text') or '').strip()
+            if not text:
+                raise Exception(f'OCR 服务返回空结果: {data}')
+            return text, mime, b64
+    except urllib.error.HTTPError as e:
+        body = e.read().decode('utf-8', errors='replace')
+        raise Exception(f'OCR 服务请求失败 ({e.code}): {body}')
+    except Exception as e:
+        raise Exception(f'OCR 服务调用失败: {e}')
+
+
+def translate_image_with_bailian_b64(mime, b64, direction, api_key, base_url=None,
+                                     ocr_model='qwen-vl-plus', ignored_channels=None):
+    """百炼视觉翻译（接收已编码图片，配合 ocr_with_paddle 复用同一张图）。"""
+    ignored_channels = ignored_channels or []
     target = DIRECTION_TARGET.get(direction, '中文')
     source = '中文' if direction in ('z2v', 'z2e') else '越南语或英文'
     ignored_hint = '不需要翻译的频道（直接忽略）: ' + '、'.join(ignored_channels) if ignored_channels else ''
@@ -452,6 +479,14 @@ def translate_image_with_bailian(image_path, direction, api_key, base_url=None,
             ]
         }
     ])
+
+
+def translate_image_with_bailian(image_path, direction, api_key, base_url=None,
+                                 ocr_model='qwen-vl-plus', ignored_channels=None):
+    """百炼视觉翻译（从图片文件开始，一步到位）。"""
+    mime, b64 = encode_image_base64(image_path)
+    return translate_image_with_bailian_b64(
+        mime, b64, direction, api_key, base_url, ocr_model, ignored_channels)
 
 
 # ---------- 截图 ----------
@@ -1041,6 +1076,9 @@ class SettingsWindow:
                 ('ollamaHost', '服务地址'),
                 ('ollamaModel', '模型名'),
             ], '#8b5cf6'),
+            ('免费 OCR (Paddle)', [
+                ('paddleOcrUrl', '服务地址'),
+            ], '#64748b'),
         ]
 
         canvas = tk.Canvas(self.window, bg='#1e1e1e', highlightthickness=0)
@@ -1219,7 +1257,7 @@ class TranslatorApp:
         self.direction = tk.StringVar(value='v2z')  # 默认外语→中文
         self.engine = tk.StringVar(value='ollama')
         self.auto_copy = tk.BooleanVar(value=self.config.get('autoCopy', True))
-        self.ocr_mode = tk.StringVar(value=self.config.get('ocrMode', 'manual'))
+        self.ocr_mode = tk.StringVar(value=self.config.get('ocrMode', 'paddle-ocr'))
         self.capture_region = self.config.get('captureRegion')
         self.auto_ocr_timer = None
         self.is_auto_ocr_running = False
@@ -1245,7 +1283,7 @@ class TranslatorApp:
         ocr_frame.pack(fill=tk.X, padx=12, pady=(4, 4))
         tk.Label(ocr_frame, text='OCR 模式:', bg='#1e1e1e', fg='#aaa').pack(side=tk.LEFT, padx=4)
         ocr_combo = ttk.Combobox(ocr_frame, textvariable=self.ocr_mode, state='readonly', width=20)
-        ocr_combo['values'] = ['manual', 'bailian-ocr', 'bailian-vision']
+        ocr_combo['values'] = ['manual', 'paddle-ocr', 'bailian-ocr', 'bailian-vision']
         ocr_combo.set(self.ocr_mode.get())
         ocr_combo.pack(side=tk.LEFT, padx=4)
         FlatButton(ocr_frame, text='🎯 框选区域', command=self.select_region,
@@ -1618,11 +1656,11 @@ class TranslatorApp:
             show_topmost(self.root, '提示', '请先框选聊天区域', 'warning')
             return
         mode = self.ocr_mode.get()
-        if mode not in ('bailian-ocr', 'bailian-vision'):
-            show_topmost(self.root, '提示', '请先选择百炼 OCR 或百炼 Vision 模式', 'warning')
+        if mode not in ('paddle-ocr', 'bailian-ocr', 'bailian-vision'):
+            show_topmost(self.root, '提示', '请先选择 OCR 模式（paddle-ocr / bailian-ocr / bailian-vision）', 'warning')
             return
-        if not self.config.get('bailianApiKey'):
-            show_topmost(self.root, '提示', '请先设置百炼 API Key', 'warning')
+        if mode in ('bailian-ocr', 'bailian-vision') and not self.config.get('bailianApiKey'):
+            show_topmost(self.root, '提示', '百炼模式需先设置百炼 API Key，或改用免费 paddle-ocr 模式', 'warning')
             return
         if not HAS_PILLOW:
             show_topmost(self.root, '错误',
@@ -1668,7 +1706,12 @@ class TranslatorApp:
                         image_path, direction, api_key, base_url, ocr_model,
                         ignored_channels)
                     return mode, f'[百炼 Vision]\n{result}', result, [], None
-                text = ocr_with_bailian(image_path, api_key, base_url, ocr_model)
+                if mode == 'paddle-ocr':
+                    # 内置免费 OCR：跳板 → mini PaddleOCR-VL（无需 Key）
+                    text, _mime, _b64 = ocr_with_paddle(
+                        image_path, self.config.get('paddleOcrUrl'))
+                else:  # bailian-ocr
+                    text = ocr_with_bailian(image_path, api_key, base_url, ocr_model)
                 result, replaced = engine['fn'](text, direction)
                 return mode, text, result, replaced, None
             except Exception as e:

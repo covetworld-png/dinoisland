@@ -10,7 +10,7 @@
 | 名称 | dino-translator |
 | 中文名称 | 恐龙岛翻译器（Mac 桌面版） |
 | 用途 | Mac 置顶窗口中/越/英互译工具，供运营/客服日常翻译使用 |
-| 当前版本 | v1.2.6（已部署 `/Applications/恐龙岛翻译器.app`；方向=「源→目标」表述 4 项；默认引擎=阿里云跳板 Ollama，分发零 key） |
+| 当前版本 | v1.2.7（已部署 `/Applications/恐龙岛翻译器.app`；默认 OCR=paddle-ocr 免费跳板；默认翻译=跳板 Ollama，全链路零 Key 零费用） |
 
 ## 功能
 
@@ -80,8 +80,8 @@ md 更新后需重新执行同步脚本；JSON 为派生物，不手工编辑。
 | 关键文件 | 服务 `/Volumes/TQP4000/AI/scripts/ocr_server.py`（`--model` 切 1.0/1.6）；权重 `/Volumes/TQP4000/AI/PaddleOCR-VL-1.6/`（1.8GB）；plist `~/Library/LaunchAgents/com.local.paddleocr-vl-server.plist`；日志 `~/Library/Logs/ocr_server.{log,err.log}`（launchd 无法写外接卷，故在本地盘） |
 | 运维 | 重启 `launchctl kickstart -k gui/$(id -u)/com.local.paddleocr-vl-server`；停 `launchctl bootout ...`；注意 **外接卷未挂载则服务起不来** |
 | 性能 | 与文字量线性相关：1 行 ≈9s，3 行 ≈44s（对照百炼 qwen-vl-plus ≈2-5s） |
-| 安全 | 无鉴权无 HTTPS，仅 VPN 内可用；可加 API Token/HTTPS（待定） |
-| App 状态 | 未接入（待做 v1.2.7：OCR 模式加 `local-paddle`，设置加 `remoteOcrUrl`，走 `/ocr_b64`）；百炼仍为默认 |
+| 跳板 | `http://139.196.23.48/ocr-819e6e57b39495423ba7da6a7a61bf2a`（2026-09-10 建，`/etc/nginx/sites-available/paddle-ocr-proxy`，include 于 guild-resource-apply；放行 GET /health + POST /ocr、/ocr_b64，body≤512k，读超时 300s） |
+| App 状态 | ✅ v1.2.7 已接入：OCR 模式 `paddle-ocr`（**默认**），跳板 token URL 硬编码为 `PADDLE_OCR_URL`，设置窗口「免费 OCR (Paddle)」可改 `paddleOcrUrl` |
 
 ## 打包
 
@@ -111,3 +111,4 @@ cd build && python3.11 setup.py py2app
 | 2026-09-10 | v1.2.4：方向语义改为按**源语言**表达（用户澄清）：4 项 v2z/e2z/z2v/z2e，⇄ 镜像互换，prompt 加源语言消歧，术语替换仅 z2v 生效，回译用镜像方向；废弃 detect_target；fix: 下拉框显示中文标签（原显示内部 key） |
 | 2026-09-10 | v1.2.5：① 方向标签改为「越南语→中文」式箭头表述；② 修复 OCR 框选 bug：去除 `-fullscreen` 属性（macOS 上触发系统 Space 切换自动跳第二屏），改无边框窗口覆盖主屏 + topmost |
 | 2026-09-10 | v1.2.6：修复网络请求阻塞 UI（框选自动 OCR 后 App 无响应）：翻译/回译/OCR 请求全部移入后台 daemon 线程（`_run_async` + `root.after` 回主线程），界面不再卡死；OCR 循环遇错弹窗后继续下一轮；停止 OCR 在途请求结果丢弃；加 `_busy` 标志防并发触发；注：HTTP timeout 120s 原本已存在，根因是主线程同步调用 |
+| 2026-09-10 | v1.2.7：接入 mini 本地 PaddleOCR-VL 1.6 作为**默认 OCR**（`paddle-ocr` 模式，跳板 token URL → `10.241.11.11:8000/ocr_b64`），翻译仍走跳板 Ollama → **截图翻译全链路零 Key 零费用**；百炼 OCR/Vision 保留为可选项（需 Key）；新增 `ocr_with_paddle()`（返回 text+mime+b64 供复用）与 `translate_image_with_bailian_b64()`；设置窗口加「免费 OCR (Paddle)」`paddleOcrUrl` 项；跳板 nginx 新增 `paddle-ocr-proxy`（GET /health + POST /ocr、/ocr_b64，body≤512k，read_timeout 300s） |
