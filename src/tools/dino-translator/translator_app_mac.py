@@ -26,6 +26,7 @@ import json
 import re
 import ssl
 import time
+import ctypes
 import threading
 import subprocess
 import urllib.request
@@ -57,7 +58,7 @@ CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.jso
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.2.7'
+APP_VERSION = '1.2.8'
 
 
 def ollama_openai_base(host):
@@ -492,7 +493,7 @@ def translate_image_with_bailian(image_path, direction, api_key, base_url=None,
 # ---------- 截图 ----------
 
 def capture_screen_region(region, save_path):
-    """使用 Pillow 截取屏幕指定区域。"""
+    """使用 Pillow 截取屏幕指定区域（全局坐标，兼容多显示器/负坐标）。"""
     if not HAS_PILLOW:
         raise Exception('未安装 Pillow，无法截图。请在 Mac mini 上执行: pip3 install Pillow')
     try:
@@ -501,6 +502,65 @@ def capture_screen_region(region, save_path):
         return save_path
     except Exception as e:
         raise Exception(f'截图失败: {e}')
+
+
+# ---------- 多显示器支持（CoreGraphics，零依赖） ----------
+
+class _CGRect(ctypes.Structure):
+    _fields_ = [('x', ctypes.c_double), ('y', ctypes.c_double),
+                ('w', ctypes.c_double), ('h', ctypes.c_double)]
+
+
+def _load_coregraphics():
+    try:
+        import ctypes.util
+        return ctypes.CDLL(ctypes.util.find_library('CoreGraphics') or 'CoreGraphics')
+    except Exception:
+        return None
+
+
+def mac_displays():
+    """枚举所有活跃显示器的全局坐标边界 [(x, y, w, h)]（CG 点坐标，
+    主屏左上角为原点，左/上侧扩展屏为负坐标）。失败返回 []。"""
+    cg = _load_coregraphics()
+    if not cg:
+        return []
+    try:
+        maxd = 8
+        ids = (ctypes.c_uint32 * maxd)()
+        cnt = ctypes.c_uint32()
+        if cg.CGGetActiveDisplayList(maxd, ids, ctypes.byref(cnt)) != 0 or cnt.value == 0:
+            return []
+        cg.CGDisplayBounds.restype = _CGRect
+        cg.CGDisplayBounds.argtypes = [ctypes.c_uint32]
+        out = []
+        for i in range(cnt.value):
+            r = cg.CGDisplayBounds(ids[i])
+            out.append((int(r.x), int(r.y), int(r.w), int(r.h)))
+        return out
+    except Exception:
+        return []
+
+
+def mac_mouse_location():
+    """鼠标全局坐标 (x, y)（CG 点坐标），失败返回 None。"""
+    cg = _load_coregraphics()
+    if not cg:
+        return None
+    try:
+        class _CGPoint(ctypes.Structure):
+            _fields_ = [('x', ctypes.c_double), ('y', ctypes.c_double)]
+        cg.CGEventCreate.restype = ctypes.c_void_p
+        cg.CGEventCreate.argtypes = [ctypes.c_void_p]
+        ev = cg.CGEventCreate(None)
+        if not ev:
+            return None
+        cg.CGEventGetLocation.restype = _CGPoint
+        cg.CGEventGetLocation.argtypes = [ctypes.c_void_p]
+        p = cg.CGEventGetLocation(ev)
+        return int(p.x), int(p.y)
+    except Exception:
+        return None
 
 
 # ---------- 剪贴板 ----------
@@ -1145,7 +1205,8 @@ class SettingsWindow:
 
 
 class RegionSelector:
-    """全屏区域选择器，截取当前屏幕作为背景，避免黑屏遮挡。"""
+    """全屏区域选择器：覆盖鼠标所在显示器（支持扩展屏），截取该屏作为背景。
+    框选坐标全程使用全局坐标系（主屏左上角为原点，跨屏/负坐标兼容）。"""
     def __init__(self, parent, on_selected):
         self.parent = parent
         self.on_selected = on_selected
@@ -1155,14 +1216,23 @@ class RegionSelector:
         self.region = None
         self.photo = None
 
+        # 选定遮罩覆盖的显示器：鼠标所在屏优先，失败退回主屏
+        displays = mac_displays()
+        mouse = mac_mouse_location()
+        main = (0, 0, parent.winfo_screenwidth(), parent.winfo_screenheight())
+        self.display = main
+        if displays:
+            hit = next((d for d in displays if mouse and
+                        d[0] <= mouse[0] < d[0] + d[2] and d[1] <= mouse[1] < d[1] + d[3]), None)
+            self.display = hit or displays[0]
+        self.dx, self.dy, self.dw, self.dh = self.display
+
         self.window = tk.Toplevel(parent)
         self.window.withdraw()
         self.window.overrideredirect(True)
-        # ⚠️ 不可用 attributes('-fullscreen', True)：macOS 上会触发系统空间切换
-        # （自动跳到第二屏/新桌面）。改用无边框窗口覆盖主屏，不产生 Space 切换。
-        sw = self.parent.winfo_screenwidth()
-        sh = self.parent.winfo_screenheight()
-        self.window.geometry(f'{sw}x{sh}+0+0')
+        # ⚠️ 不可用 attributes('-fullscreen', True)：macOS 上会触发系统空间切换。
+        # 用无边框窗口覆盖目标屏（支持负坐标定位到左侧扩展屏）。
+        self.window.geometry(f'{self.dw}x{self.dh}+{self.dx}+{self.dy}')
         self.window.attributes('-topmost', True)  # 主窗口置顶，选择器需更高层
         self.window.configure(cursor='crosshair', bg='black')
         self.window.bind('<Escape>', lambda e: self.cancel())
@@ -1181,29 +1251,28 @@ class RegionSelector:
         self.window.focus_force()
 
     def _setup_background(self):
-        """尝试截取屏幕作为背景；失败则回退到半透明黑屏。"""
+        """截取目标屏（全局坐标）作为背景；失败则回退到半透明黑屏。"""
         if not HAS_PILLOW:
             self.window.attributes('-alpha', 0.4)
             return
         try:
-            screenshot = ImageGrab.grab()
-            # macOS Retina 下截图是物理像素，Tk 全屏窗口使用逻辑坐标点，
+            # 按目标屏全局坐标截取，扩展屏（负坐标）同样有效
+            screenshot = ImageGrab.grab(bbox=(self.dx, self.dy, self.dx + self.dw, self.dy + self.dh))
+            # macOS Retina 下截图是物理像素，Tk 窗口使用逻辑坐标点，
             # 需要把图片缩放到屏幕逻辑尺寸，否则会出现“放大/位置失真”。
-            sw = self.parent.winfo_screenwidth()
-            sh = self.parent.winfo_screenheight()
-            if screenshot.size != (sw, sh):
+            if screenshot.size != (self.dw, self.dh):
                 try:
                     resample = Image.Resampling.LANCZOS
                 except AttributeError:
                     resample = Image.LANCZOS
-                screenshot = screenshot.resize((sw, sh), resample)
+                screenshot = screenshot.resize((self.dw, self.dh), resample)
 
             try:
                 dim = ImageEnhance.Brightness(screenshot).enhance(0.55)
             except Exception:
                 dim = screenshot
             self.photo = ImageTk.PhotoImage(image=dim)
-            self.canvas.config(scrollregion=(0, 0, sw, sh))
+            self.canvas.config(scrollregion=(0, 0, self.dw, self.dh))
             self.canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
         except Exception as e:
             print('区域选择器截取屏幕背景失败:', e)
@@ -1224,15 +1293,16 @@ class RegionSelector:
             self.canvas.coords(self.rect, self.start_x, self.start_y, event.x, event.y)
 
     def on_release(self, event):
-        x1 = min(self.start_x, event.x)
-        y1 = min(self.start_y, event.y)
-        x2 = max(self.start_x, event.x)
-        y2 = max(self.start_y, event.y)
+        # 画布局部坐标 → 全局坐标（主屏原点，跨屏兼容）
+        gx1 = min(self.start_x, event.x) + self.dx
+        gy1 = min(self.start_y, event.y) + self.dy
+        gx2 = max(self.start_x, event.x) + self.dx
+        gy2 = max(self.start_y, event.y) + self.dy
         self.region = {
-            'x': int(x1),
-            'y': int(y1),
-            'width': int(x2 - x1),
-            'height': int(y2 - y1)
+            'x': int(gx1),
+            'y': int(gy1),
+            'width': int(gx2 - gx1),
+            'height': int(gy2 - gy1)
         }
         self.window.destroy()
         if self.on_selected and self.region['width'] > 10 and self.region['height'] > 10:

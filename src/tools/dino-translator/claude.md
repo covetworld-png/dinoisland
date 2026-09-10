@@ -10,7 +10,7 @@
 | 名称 | dino-translator |
 | 中文名称 | 恐龙岛翻译器（Mac 桌面版） |
 | 用途 | Mac 置顶窗口中/越/英互译工具，供运营/客服日常翻译使用 |
-| 当前版本 | v1.2.7（已部署 `/Applications/恐龙岛翻译器.app`；默认 OCR=paddle-ocr 免费跳板；默认翻译=跳板 Ollama，全链路零 Key 零费用） |
+| 当前版本 | v1.2.8（已部署 `/Applications/恐龙岛翻译器.app`；框选支持扩展屏（鼠标所在屏）；默认 OCR=paddle-ocr 免费跳板；默认翻译=跳板 Ollama） |
 
 ## 功能
 
@@ -117,3 +117,4 @@ Bundle ID 固定为 `info.yuemei.dinoisland.translator`（setup.py plist 段）�
 | 2026-09-10 | v1.2.5：① 方向标签改为「越南语→中文」式箭头表述；② 修复 OCR 框选 bug：去除 `-fullscreen` 属性（macOS 上触发系统 Space 切换自动跳第二屏），改无边框窗口覆盖主屏 + topmost |
 | 2026-09-10 | v1.2.6：修复网络请求阻塞 UI（框选自动 OCR 后 App 无响应）：翻译/回译/OCR 请求全部移入后台 daemon 线程（`_run_async` + `root.after` 回主线程），界面不再卡死；OCR 循环遇错弹窗后继续下一轮；停止 OCR 在途请求结果丢弃；加 `_busy` 标志防并发触发；注：HTTP timeout 120s 原本已存在，根因是主线程同步调用 |
 | 2026-09-10 | v1.2.7：接入 mini 本地 PaddleOCR-VL 1.6 作为**默认 OCR**（`paddle-ocr` 模式，跳板 token URL → `10.241.11.11:8000/ocr_b64`），翻译仍走跳板 Ollama → **截图翻译全链路零 Key 零费用**；百炼 OCR/Vision 保留为可选项（需 Key）；新增 `ocr_with_paddle()`（返回 text+mime+b64 供复用）与 `translate_image_with_bailian_b64()`；设置窗口加「免费 OCR (Paddle)」`paddleOcrUrl` 项；跳板 nginx 新增 `paddle-ocr-proxy`（GET /health + POST /ocr、/ocr_b64，body≤512k，read_timeout 300s） |
+| 2026-09-10 | v1.2.8：① 框选支持扩展屏：CoreGraphics（ctypes 零依赖）枚举显示器 + 鼠标所在屏定位遮罩（`mac_displays()` / `mac_mouse_location()`），框选/截图/背景全程全局坐标系（跨屏负坐标兼容，左侧扩展屏 -1920 实测）；② 修 TCC 授权失效：固定 BundleID `info.yuemei.dinoisland.translator` + `NSScreenCaptureUsageDescription` + 打包后 ad-hoc codesign（写入打包流程）；已知限制：无证书签名的包每次重打包 cdhash 变化，可能需重新勾选录屏授权 |
