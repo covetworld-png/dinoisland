@@ -77,8 +77,20 @@ md 更新后需重新执行同步脚本；JSON 为派生物，不手工编辑。
 | 接口 | `POST /ocr`（multipart: `file`+`task`）/ `POST /ocr_b64`（JSON: `image`=base64）→ 返回 `{"text": "..."}`；`GET /health` |
 | task | `ocr` / `formula` / `table` / `chart` |
 | 部署 | launchd 常驻 `com.local.paddleocr-vl-server`（KeepAlive 自启/自拉），pid 见 `launchctl` |
-| 关键文件 | 服务 `/Volumes/TQP4000/AI/scripts/ocr_server.py`（`--model` 切 1.0/1.6）；权重 `/Volumes/TQP4000/AI/PaddleOCR-VL-1.6/`（1.8GB）；plist `~/Library/LaunchAgents/com.local.paddleocr-vl-server.plist`；日志 `~/Library/Logs/ocr_server.{log,err.log}`（launchd 无法写外接卷，故在本地盘） |
+| 关键文件 | 服务 `/Volumes/TQP4000/AI/scripts/ocr_server.py`（`--model` 切 1.0/1.6）；权重 `/Volumes/TQP4000/AI/PaddleOCR-VL-1.6/`（1.8GB）；plist `~/Library/LaunchAgents/com.local.paddleocr-vl-server.plist`；日志 `~/Library/Logs/ocr_server.{log,err.log}`（launchd 无法写外接卷，故在本地盘）。**SSH 访问外置卷受 macOS TCC 限制（Operation not permitted）**，仅服务进程/本地终端可访问 |
 | 运维 | 重启 `launchctl kickstart -k gui/$(id -u)/com.local.paddleocr-vl-server`；停 `launchctl bootout ...`；注意 **外接卷未挂载则服务起不来** |
+
+### PP-OCRv5 快速 OCR 服务（v1.3.3 起，默认）
+
+| 项 | 说明 |
+|---|---|
+| 地址 | `http://10.241.11.11:8001`（跳板 `http://139.196.23.48/ocr2-819e…/ocr_b64`） |
+| 模型 | PP-OCRv5_mobile_det + latin_PP-OCRv5_mobile_rec（经典 CNN，非生成式） |
+| 性能 | 24 行聊天图整图 **4.75s**（VL 同图 >280s，加速 ~60×） |
+| 环境 | 独立 venv `~/venv-ppocr`（python3.9 + paddleocr 3.7.0 + paddle 3.3.1，与 ComfyUI venv 隔离） |
+| 文件 | 服务 `~/scripts/ocr_fast_server.py`；plist `~/Library/LaunchAgents/com.local.ppocr-fast-server.plist`；日志 `~/Library/Logs/ppocr_fast.{log,err.log}` |
+| 运维 | 重启 `launchctl kickstart -k gui/$(id -u)/com.local.ppocr-fast-server`；语言坑：paddleocr 3.7 **无 PP-OCRv4/v5 + latin 组合**，需显式指定 `latin_PP-OCRv5_mobile_rec` 或 `lang='vi'` |
+| 回退 VL | App config `paddleOcrUrl` 填 `http://139.196.23.48/ocr-819e…`（VL 8000 端口原地址） |
 | 性能 | 与文字量线性相关：1 行 ≈9s，3 行 ≈44s（对照百炼 qwen-vl-plus ≈2-5s） |
 | 跳板 | `http://139.196.23.48/ocr-819e6e57b39495423ba7da6a7a61bf2a`（2026-09-10 建，`/etc/nginx/sites-available/paddle-ocr-proxy`，include 于 guild-resource-apply；放行 GET /health + POST /ocr、/ocr_b64，body≤512k，读超时 300s） |
 | App 状态 | ✅ v1.2.7 已接入：OCR 模式 `paddle-ocr`（**默认**），跳板 token URL 硬编码为 `PADDLE_OCR_URL`，设置窗口「免费 OCR (Paddle)」可改 `paddleOcrUrl` |
@@ -122,3 +134,4 @@ cd build && python3.11 setup.py py2app
 | 2026-09-10 | 签名体系升级：自签证书 `DinoTranslator Local Dev` 导入钥匙串并信任；踩坑：① `--deep` 签 py2app 产物报 `invalid or unsupported format for signature`（.cstemp 子组件冲突），必须逐组件签（dylib→Python.framework→主体）；② 私钥 ACL 未放行时 codesign 报 `errSecInternalComponent` 或挂起等弹窗，首次弹窗输登录密码点「始终允许」后永久放行；deploy.sh v2 落地逐组件签名，TCC 授权自此跨升级保持 |
 | 2026-09-10 | v1.3.2：① **修自签证书 TCC 反复失效根因**：openssl 生成证书时缺 `basicConstraints CA:TRUE`，自签非 CA 证书不能作信任锚点 → tccd 匹配 TCC 记录失败（log：`Failed to match existing code requirement ... certificate root`）→ 授权作废反复弹窗、且 ScreenCapture 不允许现场 prompt 直接 denied → 截图 API 返回纯壁纸图（用户误以为「窗口全消失回到桌面」）。重签证书补 `basicConstraints=critical,CA:TRUE` + `keyCertSign`，`tccutil reset` 后重新授权一次即稳定；② OCR 轮次状态栏每秒刷新实时耗时（`_ocr_ticker`），长 OCR 轮次不再显示成卡死 |
 | 2026-09-10 | 排障记录：PaddleOCR-VL 多行图实测 ~12s/行、24 行图 >4m40s（单 worker 服务被占死，health 超时需 `launchctl kickstart -k gui/$(id -u)/com.local.paddleocr-vl-server` 重启）。根因是 Paddle 在 macOS 仅 CPU（不支持 Metal），VL 自回归生成架构在 CPU 上天然慢；同机 Ollama 7B 翻译 5.6s 是因 llama.cpp 走 Metal GPU。结论：聊天场景应换经典检测+识别（PP-OCRv4，CPU 整图 <2s），VL 模型保留复杂场景 |
+| 2026-09-10 | v1.3.3：OCR 引擎升级 PP-OCRv5-mobile（默认）。根因确认：PaddleOCR-VL 在 macOS 仅 CPU 且自回归生成，~12s/行、24 行图 >4m40s；新服务 mini:8001（独立 venv ~/venv-ppocr，paddleocr 3.7）整图 4.75s，加速 ~60×。① 新增 `~/scripts/ocr_fast_server.py` + launchd `com.local.ppocr-fast-server`；② 跳板 nginx 新增 `/ocr2-819e…` 代理（include 进 guild-resource-apply server 块，裸 location 不能放 sites-enabled）；③ App 默认 `PADDLE_OCR_URL` 切 8001，VL 8000 保留（config.paddleOcrUrl 手切回退）；④ 顺带修：自动 OCR 轮次错误弹模态窗锁死 App（改为状态栏红字+落盘 error.log）。踩坑：paddleocr 3.7 无 PP-OCRv4/v5+latin 组合，需显式 `text_recognition_model_name='latin_PP-OCRv5_mobile_rec'`；SSH 访问 mini 外置卷受 TCC 限制，服务文件放 home 目录 |

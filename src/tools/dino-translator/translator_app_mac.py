@@ -51,15 +51,17 @@ except Exception:
 # 内置默认引擎：阿里云跳板 → EasyTier 内网 Ollama（免配置免费用，OpenAI 兼容端点）
 # 注意：不读 OLLAMA_HOST 环境变量，避免目标机器残留环境变量劫持内置默认值
 OLLAMA_HOST = 'http://139.196.23.48/ollama-5e672ce1a3481d6905753a4e3fb809dc/v1'
-# 内置免费 OCR：跳板 → mini PaddleOCR-VL 1.6（无需 Key，OpenAI 无关，自建 HTTP 服务）
-PADDLE_OCR_URL = 'http://139.196.23.48/ocr-819e6e57b39495423ba7da6a7a61bf2a'
+# 内置免费 OCR：跳板 → mini PP-OCRv5-mobile（8001，经典 CNN，整图 ~2s，游戏聊天默认）
+PADDLE_OCR_URL = 'http://139.196.23.48/ocr2-819e6e57b39495423ba7da6a7a61bf2a'
+# VL 模型（8000，~12s/行）仅在复杂场景手切：config.paddleOcrUrl 填下方地址
+PADDLE_VL_URL = 'http://139.196.23.48/ocr-819e6e57b39495423ba7da6a7a61bf2a'
 OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'hy-mt1.5-7b-q4:latest')
 GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/glossary.json')
 CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.json')
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.3.2'
+APP_VERSION = '1.3.3'
 VALID_OCR_MODES = ('manual', 'paddle-ocr', 'bailian-ocr', 'bailian-vision')
 
 
