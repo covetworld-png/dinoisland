@@ -562,6 +562,7 @@ const MODULES = {
     table: 'player_mapping',
     columns: [
       { key: 'player_name', label: 'play_detail 昵称' },
+      { key: 'pd_id', label: 'pd ID' },
       { key: 'emp_no', label: '关联员工', render: v => v ? esc(optionLabel('live_employees', v)) : '<span class="muted">未匹配</span>' },
       { key: 'discord', label: 'Discord 昵称' },
       { key: 'discord_id', label: 'Discord ID' },

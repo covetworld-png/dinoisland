@@ -262,6 +262,41 @@ def _derive_live_codes(data, before=None):
     data["emp_type_code"] = EMP_TYPE_CODES.get(src.get("emp_type", ""), "")
 
 
+def _attach_pd_ids(rows):
+    """player_mapping 列表附加 pd 侧玩家 ID（live_player.id，即 live_play_detail.player_id 指向）。
+    展示用只读字段，不入库；按 player_name/nick_name 去音调折叠匹配；MySQL 不可用时静默留空。"""
+    import os
+    import unicodedata as _ud
+    import re as _re
+    def _fold(x):
+        y = _ud.normalize('NFKC', str(x).strip().lower())
+        y = ''.join(c for c in _ud.normalize('NFD', y) if _ud.category(c) != 'Mn')
+        return _re.sub(r'\s+', ' ', y).strip()
+    try:
+        import pymysql
+        conn = pymysql.connect(
+            host=os.environ['LIVE_MYSQL_HOST'], port=int(os.environ['LIVE_MYSQL_PORT']),
+            user=os.environ['LIVE_MYSQL_USER'], password=os.environ['LIVE_MYSQL_PASSWORD'],
+            database=os.environ['LIVE_MYSQL_DB'], charset='utf8mb4',
+            connect_timeout=5, read_timeout=10,
+            cursorclass=pymysql.cursors.DictCursor)
+        cur = conn.cursor()
+        cur.execute("SELECT id, player_name, nick_name FROM live_player")
+        name2id = {}
+        for r in cur.fetchall():
+            for key in (r["player_name"], r["nick_name"]):
+                f = _fold(key) if key else None
+                if f and f not in name2id:
+                    name2id[f] = r["id"]
+        conn.close()
+        for row in rows:
+            row["pd_id"] = name2id.get(_fold(row.get("player_name") or ""), "")
+    except Exception as e:
+        print(f"[MA] attach pd_id failed: {e}", flush=True)
+        for row in rows:
+            row.setdefault("pd_id", "")
+
+
 def _register_crud(table):
     cfg = ENTITY_CONFIG[table]
     entity_type = ENTITY_TYPE_MAP[table]
@@ -282,6 +317,8 @@ def _register_crud(table):
         rows, total = list_rows(table, filters, request.args.get("keyword", "").strip(),
                                 cfg["keyword_fields"], page, page_size, exclude=exclude,
                                 join_filters=join_filters, order_by=cfg.get("order_by"))
+        if table == "player_mapping":
+            _attach_pd_ids(rows)
         return jsonify({"ok": True, "data": {"items": rows, "total": total,
                                              "page": page, "page_size": page_size}})
 
