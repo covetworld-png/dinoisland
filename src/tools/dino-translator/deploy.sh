@@ -23,6 +23,7 @@ cp -R "$APP_SRC" "$APP_DST"
 xattr -dr com.apple.quarantine "$APP_DST" 2>/dev/null || true
 
 echo "[3/5] 真实身份签名 ($SIGN_IDENTITY) ..."
+codesign --force --sign "$SIGN_IDENTITY" "$APP_DST/Contents/MacOS/python"   # py2app 新包此文件未签，必须先签
 codesign --force --sign "$SIGN_IDENTITY" "$APP_DST/Contents/Frameworks/Python.framework"
 find "$APP_DST/Contents/Frameworks" -name "*.dylib" -print0 | xargs -0 -I{} codesign --force --sign "$SIGN_IDENTITY" "{}"
 codesign --force --sign "$SIGN_IDENTITY" "$APP_DST"
