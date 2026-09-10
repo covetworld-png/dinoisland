@@ -10,7 +10,7 @@
 | 名称 | dino-translator |
 | 中文名称 | 恐龙岛翻译器（Mac 桌面版） |
 | 用途 | Mac 置顶窗口中/越/英互译工具，供运营/客服日常翻译使用 |
-| 当前版本 | v1.2.8（已部署 `/Applications/恐龙岛翻译器.app`；框选支持扩展屏（鼠标所在屏）；默认 OCR=paddle-ocr 免费跳板；默认翻译=跳板 Ollama） |
+| 当前版本 | v1.3.0（已部署 `/Applications/恐龙岛翻译器.app`；框选先隐藏主窗 + 扩展屏；后台线程修复；默认 OCR=paddle-ocr 免费跳板） |
 
 ## 功能
 
@@ -125,3 +125,4 @@ Bundle ID 固定为 `info.yuemei.dinoisland.translator`（setup.py plist 段）�
 | 2026-09-10 | v1.2.7：接入 mini 本地 PaddleOCR-VL 1.6 作为**默认 OCR**（`paddle-ocr` 模式，跳板 token URL → `10.241.11.11:8000/ocr_b64`），翻译仍走跳板 Ollama → **截图翻译全链路零 Key 零费用**；百炼 OCR/Vision 保留为可选项（需 Key）；新增 `ocr_with_paddle()`（返回 text+mime+b64 供复用）与 `translate_image_with_bailian_b64()`；设置窗口加「免费 OCR (Paddle)」`paddleOcrUrl` 项；跳板 nginx 新增 `paddle-ocr-proxy`（GET /health + POST /ocr、/ocr_b64，body≤512k，read_timeout 300s） |
 | 2026-09-10 | v1.2.8：① 框选支持扩展屏：CoreGraphics（ctypes 零依赖）枚举显示器 + 鼠标所在屏定位遮罩（`mac_displays()` / `mac_mouse_location()`），框选/截图/背景全程全局坐标系（跨屏负坐标兼容，左侧扩展屏 -1920 实测）；② 修 TCC 授权失效：固定 BundleID `info.yuemei.dinoisland.translator` + `NSScreenCaptureUsageDescription` + 打包后 ad-hoc codesign（写入打包流程）；已知限制：无证书签名的包每次重打包 cdhash 变化，可能需重新勾选录屏授权 |
 | 2026-09-10 | v1.2.9：① 框选流程重整：先隐藏主窗口（withdraw，置顶临时解除）→ 鼠标所在屏遮罩框选（跨屏）→ 完成/取消/拖拽过小均恢复主窗口；② 授权死条目占坑：部署流程固化 `tccutil reset ScreenCapture <bundleid>`，自动清旧条目，替代手动删除；RegionSelector 加 `on_cancel` 回调防主窗口丢失；自签证书方案（授权跨升级保持）列为待办 |
+| 2026-09-10 | v1.3.0：**修严重 bug：v1.2.6 起后台任务结果全部丢失**——`_run_async` 在 worker 线程直接调 `root.after()`，Tcl/Tk 非线程安全，跨线程 after 静默丢失（不报错不执行）→ 翻译/回译/OCR 结果永不回显、自动 OCR 循环永不排程、状态卡在「正在执行」。改为标准 tkinter 线程模式：结果入 `queue.Queue`，主线程 `_pump_ui_queue` 每 80ms 泵出回调。12 项状态机冒烟测试（/tmp/test_auto_ocr.py，mock 全依赖）全过：启动拒绝分支/循环/停止/重启按钮全链路 |

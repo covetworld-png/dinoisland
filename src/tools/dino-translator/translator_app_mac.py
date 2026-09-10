@@ -23,6 +23,7 @@ Mac 轻量翻译应用（无 OCR，只翻译）。
 import os
 import sys
 import json
+import queue
 import re
 import ssl
 import time
@@ -58,7 +59,7 @@ CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.jso
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.2.9'
+APP_VERSION = '1.3.0'
 
 
 def ollama_openai_base(host):
@@ -1338,6 +1339,8 @@ class TranslatorApp:
         self.auto_ocr_timer = None
         self.is_auto_ocr_running = False
         self._busy = False  # 后台网络任务进行中标志，防止并发触发
+        self._ui_queue = queue.Queue()  # 后台线程结果队列（Tk 非线程安全，禁止跨线程直接碰 UI）
+        self.root.after(80, self._pump_ui_queue)  # 主线程定时泵
         self.root._translator_app = self  # 供 HistoryWindow 回填原文使用
 
         self.engines = self._build_engines()
@@ -1573,19 +1576,35 @@ class TranslatorApp:
         self.status_var.set(f'已换方向: {DIRECTION_LABELS[new_dir]}，点击「翻译」继续')
 
     def _run_async(self, fn, on_done, on_error=None):
-        """在后台线程执行网络请求，完成后回主线程更新 UI，避免阻塞 Tk 主循环。
-        线程为 daemon：应用退出时不等待在途请求。"""
+        """在后台线程执行网络请求。
+        ⚠️ 不能在 worker 线程里直接调 root.after()——Tk 非线程安全，跨线程 after 会静默丢失。
+        正确模式：结果放入 queue.Queue，主线程 _pump_ui_queue 定时取出后在主线程回调。"""
         def worker():
             try:
                 res = fn()
             except Exception as e:
-                if on_error:
-                    self.root.after(0, lambda err=e: on_error(err))
-                else:
-                    print('后台任务失败:', e)
+                self._ui_queue.put(('error', e, on_error))
             else:
-                self.root.after(0, lambda r=res: on_done(r))
+                self._ui_queue.put(('done', res, on_done))
         threading.Thread(target=worker, daemon=True).start()
+
+    def _pump_ui_queue(self):
+        """主线程每 80ms 取出后台结果并执行回调（回调内可安全操作所有 UI）。"""
+        try:
+            while True:
+                kind, payload, cb = self._ui_queue.get_nowait()
+                try:
+                    if kind == 'done':
+                        cb(payload)
+                    elif cb:
+                        cb(payload)
+                    else:
+                        print('后台任务失败:', payload)
+                except Exception as e:
+                    print('UI 回调异常:', e)
+        except queue.Empty:
+            pass
+        self.root.after(80, self._pump_ui_queue)
 
     def do_back_translate(self):
         """回译验证：把译文按镜像方向翻回，输出到回译结果区。
