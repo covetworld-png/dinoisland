@@ -1814,6 +1814,15 @@ class TranslatorApp:
         self.status_label.configure(fg='#888')
         self.status_var.set('自动 OCR 已停止')
 
+    def _log_error(self, msg):
+        """错误落盘：自动 OCR 无人值守，错误必须可事后追查，不能只靠弹窗。"""
+        try:
+            path = os.path.expanduser('~/LangPlugin/temp/error.log')
+            with open(path, 'a', encoding='utf-8') as f:
+                f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] v{APP_VERSION} {msg}\n")
+        except Exception:
+            pass
+
     def _ocr_ticker(self, rnd):
         """每秒刷新状态栏耗时，长 OCR 轮次不显示成卡死。"""
         if not self.is_auto_ocr_running or self._ocr_active_round != rnd:
@@ -1886,8 +1895,9 @@ class TranslatorApp:
             if not self.is_auto_ocr_running:
                 return
             if err is not None:
-                show_topmost(self.root, 'OCR 失败', str(err), 'error')
-                self.status_var.set(f'OCR 第 {rnd} 轮失败（耗时 {elapsed:.0f}s），将继续下一轮')
+                self._log_error(f'第 {rnd} 轮 OCR 失败（耗时 {elapsed:.0f}s）: {err}')
+                self.status_label.configure(fg='#ef4444')
+                self.status_var.set(f'第 {rnd} 轮失败（耗时 {elapsed:.0f}s）：{str(err)[:80]}，继续下一轮')
                 schedule_next()
                 return
             self.input_text.delete('1.0', tk.END)
