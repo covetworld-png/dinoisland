@@ -90,11 +90,17 @@ md 更新后需重新执行同步脚本；JSON 为派生物，不手工编辑。
 cd build && python3.11 setup.py py2app
 # 产物: build/dist/恐龙岛翻译器.app
 
-# ⚠️ 部署后必须 ad-hoc 重签（TCC 屏幕录制授权按签名+BundleID 识别应用，不签会导致升级后授权失效）
-codesign --force --deep --sign - /Applications/恐龙岛翻译器.app
+# 部署（三条必做，顺序执行）
+pkill -f 恐龙岛翻译器; rm -rf /Applications/恐龙岛翻译器.app && cp -R "dist/恐龙岛翻译器.app" /Applications/
+codesign --force --deep --sign - /Applications/恐龙岛翻译器.app   # ⚠️ 必须 ad-hoc 重签
+tccutil reset ScreenCapture info.yuemei.dinoisland.translator   # ⚠️ 清旧授权条目（防死条目占坑）
+open -a 恐龙岛翻译器
 ```
 
-Bundle ID 固定为 `info.yuemei.dinoisland.translator`（setup.py plist 段），含 `NSScreenCaptureUsageDescription`；升级换包后若 OCR 提示无权限，先到 系统设置→隐私与安全性→屏幕录制 关掉再打开本 App 勾选。
+Bundle ID 固定为 `info.yuemei.dinoisland.translator`（setup.py plist 段），含 `NSScreenCaptureUsageDescription`。
+
+**升级后授权流程（tccutil reset 已自动清死条目）**：点「🎯 框选区域」→ 系统弹授权窗 → 打开系统设置 → 勾选「恐龙岛翻译器」→ ⌘Q 重启 App → 生效。
+**已知限制**：无签名证书，每次重打包 cdhash 变化需重新勾选一次；若钥匙串创建自签代码签名证书并用其签名，则授权可跨升级保持（待做/需验证）。
 
 ## 约束
 
@@ -118,3 +124,4 @@ Bundle ID 固定为 `info.yuemei.dinoisland.translator`（setup.py plist 段）�
 | 2026-09-10 | v1.2.6：修复网络请求阻塞 UI（框选自动 OCR 后 App 无响应）：翻译/回译/OCR 请求全部移入后台 daemon 线程（`_run_async` + `root.after` 回主线程），界面不再卡死；OCR 循环遇错弹窗后继续下一轮；停止 OCR 在途请求结果丢弃；加 `_busy` 标志防并发触发；注：HTTP timeout 120s 原本已存在，根因是主线程同步调用 |
 | 2026-09-10 | v1.2.7：接入 mini 本地 PaddleOCR-VL 1.6 作为**默认 OCR**（`paddle-ocr` 模式，跳板 token URL → `10.241.11.11:8000/ocr_b64`），翻译仍走跳板 Ollama → **截图翻译全链路零 Key 零费用**；百炼 OCR/Vision 保留为可选项（需 Key）；新增 `ocr_with_paddle()`（返回 text+mime+b64 供复用）与 `translate_image_with_bailian_b64()`；设置窗口加「免费 OCR (Paddle)」`paddleOcrUrl` 项；跳板 nginx 新增 `paddle-ocr-proxy`（GET /health + POST /ocr、/ocr_b64，body≤512k，read_timeout 300s） |
 | 2026-09-10 | v1.2.8：① 框选支持扩展屏：CoreGraphics（ctypes 零依赖）枚举显示器 + 鼠标所在屏定位遮罩（`mac_displays()` / `mac_mouse_location()`），框选/截图/背景全程全局坐标系（跨屏负坐标兼容，左侧扩展屏 -1920 实测）；② 修 TCC 授权失效：固定 BundleID `info.yuemei.dinoisland.translator` + `NSScreenCaptureUsageDescription` + 打包后 ad-hoc codesign（写入打包流程）；已知限制：无证书签名的包每次重打包 cdhash 变化，可能需重新勾选录屏授权 |
+| 2026-09-10 | v1.2.9：① 框选流程重整：先隐藏主窗口（withdraw，置顶临时解除）→ 鼠标所在屏遮罩框选（跨屏）→ 完成/取消/拖拽过小均恢复主窗口；② 授权死条目占坑：部署流程固化 `tccutil reset ScreenCapture <bundleid>`，自动清旧条目，替代手动删除；RegionSelector 加 `on_cancel` 回调防主窗口丢失；自签证书方案（授权跨升级保持）列为待办 |

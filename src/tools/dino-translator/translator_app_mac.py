@@ -58,7 +58,7 @@ CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.jso
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.2.8'
+APP_VERSION = '1.2.9'
 
 
 def ollama_openai_base(host):
@@ -1207,9 +1207,10 @@ class SettingsWindow:
 class RegionSelector:
     """全屏区域选择器：覆盖鼠标所在显示器（支持扩展屏），截取该屏作为背景。
     框选坐标全程使用全局坐标系（主屏左上角为原点，跨屏/负坐标兼容）。"""
-    def __init__(self, parent, on_selected):
+    def __init__(self, parent, on_selected, on_cancel=None):
         self.parent = parent
         self.on_selected = on_selected
+        self.on_cancel = on_cancel
         self.start_x = 0
         self.start_y = 0
         self.rect = None
@@ -1305,11 +1306,16 @@ class RegionSelector:
             'height': int(gy2 - gy1)
         }
         self.window.destroy()
-        if self.on_selected and self.region['width'] > 10 and self.region['height'] > 10:
+        if self.region['width'] > 10 and self.region['height'] > 10 and self.on_selected:
             self.on_selected(self.region)
+        elif self.on_cancel:
+            # 拖拽过小视同取消，确保主窗口恢复
+            self.on_cancel()
 
     def cancel(self):
         self.window.destroy()
+        if self.on_cancel:
+            self.on_cancel()
 
 
 # ---------- UI ----------
@@ -1707,13 +1713,31 @@ class TranslatorApp:
         return f"区域: {r['x']},{r['y']} {r['width']}×{r['height']}"
 
     def select_region(self):
+        # 流程：先隐藏主窗口（避免置顶窗被拍进截图/遮挡目标屏）→ 框选 → 恢复
+        was_pinned = self.is_pinned
+        if was_pinned:
+            self.root.attributes('-topmost', False)
+        self.root.withdraw()
+
+        def restore():
+            self.root.deiconify()
+            self.root.lift()
+            if was_pinned:
+                self.root.attributes('-topmost', True)
+
         def on_selected(region):
+            restore()
             self.capture_region = region
             self.config['captureRegion'] = region
             save_config_external(self.config)
             self.region_var.set(self._region_text())
             self.status_var.set('区域已保存')
-        RegionSelector(self.root, on_selected)
+
+        def on_cancel():
+            restore()
+            self.status_var.set('已取消框选')
+
+        RegionSelector(self.root, on_selected, on_cancel=on_cancel)
 
     def toggle_auto_ocr(self):
         if self.is_auto_ocr_running:
