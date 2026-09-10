@@ -136,3 +136,7 @@ cd build && python3.11 setup.py py2app
 | 2026-09-10 | 排障记录：PaddleOCR-VL 多行图实测 ~12s/行、24 行图 >4m40s（单 worker 服务被占死，health 超时需 `launchctl kickstart -k gui/$(id -u)/com.local.paddleocr-vl-server` 重启）。根因是 Paddle 在 macOS 仅 CPU（不支持 Metal），VL 自回归生成架构在 CPU 上天然慢；同机 Ollama 7B 翻译 5.6s 是因 llama.cpp 走 Metal GPU。结论：聊天场景应换经典检测+识别（PP-OCRv4，CPU 整图 <2s），VL 模型保留复杂场景 |
 | 2026-09-10 | v1.3.3：OCR 引擎升级 PP-OCRv5-mobile（默认）。根因确认：PaddleOCR-VL 在 macOS 仅 CPU 且自回归生成，~12s/行、24 行图 >4m40s；新服务 mini:8001（独立 venv ~/venv-ppocr，paddleocr 3.7）整图 4.75s，加速 ~60×。① 新增 `~/scripts/ocr_fast_server.py` + launchd `com.local.ppocr-fast-server`；② 跳板 nginx 新增 `/ocr2-819e…` 代理（include 进 guild-resource-apply server 块，裸 location 不能放 sites-enabled）；③ App 默认 `PADDLE_OCR_URL` 切 8001，VL 8000 保留（config.paddleOcrUrl 手切回退）；④ 顺带修：自动 OCR 轮次错误弹模态窗锁死 App（改为状态栏红字+落盘 error.log）。踩坑：paddleocr 3.7 无 PP-OCRv4/v5+latin 组合，需显式 `text_recognition_model_name='latin_PP-OCRv5_mobile_rec'`；SSH 访问 mini 外置卷受 TCC 限制，服务文件放 home 目录 |
 | 2026-09-11 | v1.3.4：修多屏布局变化后 OCR 每轮 0s 失败（error.log 首立功）：显示器布局变更后 ImageGrab.grab 返回 RGBA，直接存 JPEG 抛 `cannot write mode RGBA as JPEG`，每轮截图即炸无输出。capture_screen_region 存前统一 convert('RGB') |
+
+## 待办（下次需求一起改）
+
+- [ ] OCR 模式下拉框改中文友好标签：`手动输入（仅文本翻译）` / `免费识别 (PP-OCRv5)` / `百炼 OCR（付费）` / `百炼 Vision（付费）`；内部 key 不变，显示↔值映射 + 兼容旧 config（用户 2026-09-11 拍板：暂不改，下次新需求合并改）
