@@ -303,8 +303,8 @@ def _pd_id_map():
 
 
 def _attach_pd_ids(rows):
-    """player_mapping 列表附加 pd 侧玩家 ID（live_player.id，即 live_play_detail.player_id 指向）。
-    展示用只读字段，不入库；按 player_name/nick_name 去音调折叠匹配；MySQL 不可用时静默留空。"""
+    """player_mapping 列表附加 pd ID：优先读本地列（staff_sync 每日补缺落库）；
+    本地为空的行用 live_player 映射缓存兜底展示（只补缺不覆盖，不写库）。"""
     import unicodedata as _ud
     import re as _re
     def _fold(x):
@@ -313,6 +313,9 @@ def _attach_pd_ids(rows):
         return _re.sub(r'\s+', ' ', y).strip()
     m = _pd_id_map()
     for row in rows:
+        local = row.get("pd_id")
+        if local:
+            continue  # 本地已有值，永不覆盖
         row["pd_id"] = m.get(_fold(row.get("player_name") or ""), "")
 
 

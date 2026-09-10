@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS player_mapping (
     player_name TEXT NOT NULL,         -- play_detail 里出现的昵称
     emp_no TEXT DEFAULT '',            -- 关联直播员工编号
     discord TEXT DEFAULT '',           -- Discord 昵称
-    discord_id TEXT DEFAULT '',        -- Discord user_id
+    pd_id INTEGER DEFAULT 0,           -- pd 侧 live_player.id（server 补缺，只填不改）
     remark TEXT DEFAULT '',
     created_at TEXT,
     updated_at TEXT
@@ -264,6 +264,10 @@ def get_db():
 def init_db():
     conn = get_db()
     conn.executescript(SCHEMA)
+    # 迁移：player_mapping 增加 pd_id（存量库补列；pd 侧 live_player.id，只补缺不覆盖）
+    cols = [r["name"] for r in conn.execute("PRAGMA table_info(player_mapping)")]
+    if "pd_id" not in cols:
+        conn.execute("ALTER TABLE player_mapping ADD COLUMN pd_id INTEGER DEFAULT 0")
     conn.commit()
     conn.close()
 
