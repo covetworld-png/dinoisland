@@ -87,20 +87,12 @@ md 更新后需重新执行同步脚本；JSON 为派生物，不手工编辑。
 
 ```bash
 # 需先安装: python3.11 -m pip install py2app Pillow certifi
+# 一键: bash build/deploy.sh （打包+部署+签名+启动）
 cd build && python3.11 setup.py py2app
 # 产物: build/dist/恐龙岛翻译器.app
-
-# 部署（三条必做，顺序执行）
-pkill -f 恐龙岛翻译器; rm -rf /Applications/恐龙岛翻译器.app && cp -R "dist/恐龙岛翻译器.app" /Applications/
-codesign --force --deep --sign - /Applications/恐龙岛翻译器.app   # ⚠️ 必须 ad-hoc 重签
-tccutil reset ScreenCapture info.yuemei.dinoisland.translator   # ⚠️ 清旧授权条目（防死条目占坑）
-open -a 恐龙岛翻译器
 ```
 
-Bundle ID 固定为 `info.yuemei.dinoisland.translator`（setup.py plist 段），含 `NSScreenCaptureUsageDescription`。
-
-**升级后授权流程（tccutil reset 已自动清死条目）**：点「🎯 框选区域」→ 系统弹授权窗 → 打开系统设置 → 勾选「恐龙岛翻译器」→ ⌘Q 重启 App → 生效。
-**已知限制**：无签名证书，每次重打包 cdhash 变化需重新勾选一次；若钥匙串创建自签代码签名证书并用其签名，则授权可跨升级保持（待做/需验证）。
+**签名（2026-09-10 起）**：钥匙串自签代码签名证书 `DinoTranslator Local Dev`（SHA-1 `394826E0…E91`，10 年期，openssl 生成 + `security import`/`add-trusted-cert -r trustRoot` 导入；首次使用需在弹窗输登录密码点「始终允许」）。**deep 签名对 py2app 产物会报 invalid format，必须逐组件签**：先 Frameworks 下 dylib + Python.framework，再签主体。TCC 按（BundleID+证书）识别，授权跨升级保持，部署不再需要 `tccutil reset`。Bundle ID 固定 `info.yuemei.dinoisland.translator`，含 `NSScreenCaptureUsageDescription`。
 
 ## 约束
 
@@ -127,3 +119,4 @@ Bundle ID 固定为 `info.yuemei.dinoisland.translator`（setup.py plist 段）�
 | 2026-09-10 | v1.2.9：① 框选流程重整：先隐藏主窗口（withdraw，置顶临时解除）→ 鼠标所在屏遮罩框选（跨屏）→ 完成/取消/拖拽过小均恢复主窗口；② 授权死条目占坑：部署流程固化 `tccutil reset ScreenCapture <bundleid>`，自动清旧条目，替代手动删除；RegionSelector 加 `on_cancel` 回调防主窗口丢失；自签证书方案（授权跨升级保持）列为待办 |
 | 2026-09-10 | v1.3.0：**修严重 bug：v1.2.6 起后台任务结果全部丢失**——`_run_async` 在 worker 线程直接调 `root.after()`，Tcl/Tk 非线程安全，跨线程 after 静默丢失（不报错不执行）→ 翻译/回译/OCR 结果永不回显、自动 OCR 循环永不排程、状态卡在「正在执行」。改为标准 tkinter 线程模式：结果入 `queue.Queue`，主线程 `_pump_ui_queue` 每 80ms 泵出回调。12 项状态机冒烟测试（/tmp/test_auto_ocr.py，mock 全依赖）全过：启动拒绝分支/循环/停止/重启按钮全链路 |
 | 2026-09-10 | v1.3.1：修「点自动 OCR 无反应」真因：config 残留旧 LangPlugin `ocrMode='remote'`，每次启动前置检查拒绝。① 启动时非法 ocrMode 自动回退 `paddle-ocr` 并写回 config（`_valid_ocr_mode`）；② 模式切换下拉时持久化（`_persist_ocr_mode`，此前切换不保存）；③ 运行状态显性化：轮次计数 + 每轮耗时 + 绿色状态栏（运行期 fg=#4ade80）+ 下一轮倒计提示 |
+| 2026-09-10 | 签名体系升级：自签证书 `DinoTranslator Local Dev` 导入钥匙串并信任；踩坑：① `--deep` 签 py2app 产物报 `invalid or unsupported format for signature`（.cstemp 子组件冲突），必须逐组件签（dylib→Python.framework→主体）；② 私钥 ACL 未放行时 codesign 报 `errSecInternalComponent` 或挂起等弹窗，首次弹窗输登录密码点「始终允许」后永久放行；deploy.sh v2 落地逐组件签名，TCC 授权自此跨升级保持 |
