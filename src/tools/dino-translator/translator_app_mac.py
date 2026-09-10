@@ -61,7 +61,7 @@ CUSTOM_GLOSSARY_PATH = os.path.expanduser('~/LangPlugin/data/custom_glossary.jso
 CONFIG_PATH = os.path.expanduser('~/LangPlugin/data/config.json')
 HISTORY_PATH = os.path.expanduser('~/LangPlugin/data/history.json')
 HISTORY_LIMIT = 200
-APP_VERSION = '1.3.3'
+APP_VERSION = '1.3.4'
 VALID_OCR_MODES = ('manual', 'paddle-ocr', 'bailian-ocr', 'bailian-vision')
 
 
@@ -502,6 +502,8 @@ def capture_screen_region(region, save_path):
         raise Exception('未安装 Pillow，无法截图。请在 Mac mini 上执行: pip3 install Pillow')
     try:
         img = ImageGrab.grab(bbox=(region['x'], region['y'], region['x'] + region['width'], region['y'] + region['height']))
+        if img.mode != 'RGB':
+            img = img.convert('RGB')   # RGBA（多屏布局下 ImageGrab 可能返回带透明通道）无法存 JPEG
         img.save(save_path, quality=85)
         return save_path
     except Exception as e:
