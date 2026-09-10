@@ -10,7 +10,7 @@
 | 名称 | dino-translator |
 | 中文名称 | 恐龙岛翻译器（Mac 桌面版） |
 | 用途 | Mac 置顶窗口中/越/英互译工具，供运营/客服日常翻译使用 |
-| 当前版本 | v1.2.5（已部署 `/Applications/恐龙岛翻译器.app`；方向=「源→目标」表述 4 项；默认引擎=阿里云跳板 Ollama，分发零 key） |
+| 当前版本 | v1.2.6（已部署 `/Applications/恐龙岛翻译器.app`；方向=「源→目标」表述 4 项；默认引擎=阿里云跳板 Ollama，分发零 key） |
 
 ## 功能
 
@@ -66,6 +66,23 @@ projects/002-内容/002-02-翻译/docs/terminology-glossary.md  (权威源，翻
 
 md 更新后需重新执行同步脚本；JSON 为派生物，不手工编辑。
 
+### 本地 OCR 服务（mini 常驻，免费，App 可选接入）
+
+> 2026-09-10 部署。历史沿革：原 Windows LangPlugin 时代 OCR 跑 EasyOCR（`ocrMode=remote` + `ocrRemoteModel=easyocr`，`10.241.11.11:8002`，已下线）；现升级为 PaddleOCR-VL，端口改 **8000**。
+
+| 项 | 内容 |
+|---|---|
+| 地址 | `http://10.241.11.11:8000`（mini.local，EasyTier VPN 内可直连；Mac 本机不在网内需经跳板） |
+| 模型 | PaddleOCR-VL **1.6**（OmniDocBench 96.33，111 语言；越南语/印尼语/菲律宾语实测精度好） |
+| 接口 | `POST /ocr`（multipart: `file`+`task`）/ `POST /ocr_b64`（JSON: `image`=base64）→ 返回 `{"text": "..."}`；`GET /health` |
+| task | `ocr` / `formula` / `table` / `chart` |
+| 部署 | launchd 常驻 `com.local.paddleocr-vl-server`（KeepAlive 自启/自拉），pid 见 `launchctl` |
+| 关键文件 | 服务 `/Volumes/TQP4000/AI/scripts/ocr_server.py`（`--model` 切 1.0/1.6）；权重 `/Volumes/TQP4000/AI/PaddleOCR-VL-1.6/`（1.8GB）；plist `~/Library/LaunchAgents/com.local.paddleocr-vl-server.plist`；日志 `~/Library/Logs/ocr_server.{log,err.log}`（launchd 无法写外接卷，故在本地盘） |
+| 运维 | 重启 `launchctl kickstart -k gui/$(id -u)/com.local.paddleocr-vl-server`；停 `launchctl bootout ...`；注意 **外接卷未挂载则服务起不来** |
+| 性能 | 与文字量线性相关：1 行 ≈9s，3 行 ≈44s（对照百炼 qwen-vl-plus ≈2-5s） |
+| 安全 | 无鉴权无 HTTPS，仅 VPN 内可用；可加 API Token/HTTPS（待定） |
+| App 状态 | 未接入（待做 v1.2.7：OCR 模式加 `local-paddle`，设置加 `remoteOcrUrl`，走 `/ocr_b64`）；百炼仍为默认 |
+
 ## 打包
 
 ```bash
@@ -93,3 +110,4 @@ cd build && python3.11 setup.py py2app
 | 2026-09-10 | v1.2.3：① 翻译方向简化为 3 项目标语言（→中文默认/→越南语/→英文），源语言由模型自动识别，⇄ 按钮循环切换；② 术语替换改为按目标语言触发（to_vn 时生效）；③ 回译改为启发式语言检测回翻（detect_target） |
 | 2026-09-10 | v1.2.4：方向语义改为按**源语言**表达（用户澄清）：4 项 v2z/e2z/z2v/z2e，⇄ 镜像互换，prompt 加源语言消歧，术语替换仅 z2v 生效，回译用镜像方向；废弃 detect_target；fix: 下拉框显示中文标签（原显示内部 key） |
 | 2026-09-10 | v1.2.5：① 方向标签改为「越南语→中文」式箭头表述；② 修复 OCR 框选 bug：去除 `-fullscreen` 属性（macOS 上触发系统 Space 切换自动跳第二屏），改无边框窗口覆盖主屏 + topmost |
+| 2026-09-10 | v1.2.6：修复网络请求阻塞 UI（框选自动 OCR 后 App 无响应）：翻译/回译/OCR 请求全部移入后台 daemon 线程（`_run_async` + `root.after` 回主线程），界面不再卡死；OCR 循环遇错弹窗后继续下一轮；停止 OCR 在途请求结果丢弃；加 `_busy` 标志防并发触发；注：HTTP timeout 120s 原本已存在，根因是主线程同步调用 |
