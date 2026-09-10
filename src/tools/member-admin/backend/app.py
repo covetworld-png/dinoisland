@@ -262,17 +262,24 @@ def _derive_live_codes(data, before=None):
     data["emp_type_code"] = EMP_TYPE_CODES.get(src.get("emp_type", ""), "")
 
 
-def _attach_pd_ids(rows):
-    """player_mapping 列表附加 pd 侧玩家 ID（live_player.id，即 live_play_detail.player_id 指向）。
-    展示用只读字段，不入库；按 player_name/nick_name 去音调折叠匹配；MySQL 不可用时静默留空。"""
-    import os
+_PD_ID_CACHE = {"ts": 0, "map": {}}
+_PD_ID_CACHE_TTL = 600  # live_player 变动极少，10min 内存缓存避免每次开表都建远程 MySQL 连接
+
+
+def _pd_id_map():
+    """name(nick/player_name, 折叠) -> live_player.id，带 TTL 缓存；查询失败时用旧缓存兜底。"""
+    import time
     import unicodedata as _ud
     import re as _re
     def _fold(x):
         y = _ud.normalize('NFKC', str(x).strip().lower())
         y = ''.join(c for c in _ud.normalize('NFD', y) if _ud.category(c) != 'Mn')
         return _re.sub(r'\s+', ' ', y).strip()
+    now = time.time()
+    if _PD_ID_CACHE["map"] and now - _PD_ID_CACHE["ts"] < _PD_ID_CACHE_TTL:
+        return _PD_ID_CACHE["map"]
     try:
+        import os
         import pymysql
         conn = pymysql.connect(
             host=os.environ['LIVE_MYSQL_HOST'], port=int(os.environ['LIVE_MYSQL_PORT']),
@@ -289,12 +296,24 @@ def _attach_pd_ids(rows):
                 if f and f not in name2id:
                     name2id[f] = r["id"]
         conn.close()
-        for row in rows:
-            row["pd_id"] = name2id.get(_fold(row.get("player_name") or ""), "")
+        _PD_ID_CACHE.update(ts=now, map=name2id)
     except Exception as e:
-        print(f"[MA] attach pd_id failed: {e}", flush=True)
-        for row in rows:
-            row.setdefault("pd_id", "")
+        print(f"[MA] pd_id map refresh failed (用旧缓存): {e}", flush=True)
+    return _PD_ID_CACHE["map"]
+
+
+def _attach_pd_ids(rows):
+    """player_mapping 列表附加 pd 侧玩家 ID（live_player.id，即 live_play_detail.player_id 指向）。
+    展示用只读字段，不入库；按 player_name/nick_name 去音调折叠匹配；MySQL 不可用时静默留空。"""
+    import unicodedata as _ud
+    import re as _re
+    def _fold(x):
+        y = _ud.normalize('NFKC', str(x).strip().lower())
+        y = ''.join(c for c in _ud.normalize('NFD', y) if _ud.category(c) != 'Mn')
+        return _re.sub(r'\s+', ' ', y).strip()
+    m = _pd_id_map()
+    for row in rows:
+        row["pd_id"] = m.get(_fold(row.get("player_name") or ""), "")
 
 
 def _register_crud(table):
