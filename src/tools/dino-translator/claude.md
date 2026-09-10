@@ -88,8 +88,13 @@ md 更新后需重新执行同步脚本；JSON 为派生物，不手工编辑。
 ```bash
 # 需先安装: python3.11 -m pip install py2app Pillow certifi
 cd build && python3.11 setup.py py2app
-# 产物: build/dist/Mac恐龙岛翻译器.app
+# 产物: build/dist/恐龙岛翻译器.app
+
+# ⚠️ 部署后必须 ad-hoc 重签（TCC 屏幕录制授权按签名+BundleID 识别应用，不签会导致升级后授权失效）
+codesign --force --deep --sign - /Applications/恐龙岛翻译器.app
 ```
+
+Bundle ID 固定为 `info.yuemei.dinoisland.translator`（setup.py plist 段），含 `NSScreenCaptureUsageDescription`；升级换包后若 OCR 提示无权限，先到 系统设置→隐私与安全性→屏幕录制 关掉再打开本 App 勾选。
 
 ## 约束
 

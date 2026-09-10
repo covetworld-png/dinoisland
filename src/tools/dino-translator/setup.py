@@ -17,6 +17,13 @@ OPTIONS = {
     'plist': {
         'CFBundleName': '恐龙岛翻译器',
         'CFBundleDisplayName': '恐龙岛翻译器',
+        # 固定 Bundle ID：TCC 屏幕录制授权按 (bundle id + 签名) 识别应用，
+        # 默认值 org.pythonmac.unspecified.* 会导致每次换包授权失效
+        'CFBundleIdentifier': 'info.yuemei.dinoisland.translator',
+        'CFBundleShortVersionString': '1.2.7',
+        'CFBundleVersion': '1.2.7',
+        # 屏幕录制授权弹窗文案（OCR 框选/自动截图需要）
+        'NSScreenCaptureUsageDescription': '恐龙岛翻译器需要截取屏幕指定区域来完成 OCR 翻译。',
     },
     # PIL 含动态加载的插件，需整包打入
     'packages': ['PIL'],
