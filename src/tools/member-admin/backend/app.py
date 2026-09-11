@@ -414,7 +414,7 @@ LIVE_EXPORT_COLUMNS = [
     ("GM津贴(K盾·游戏)", "g_gm_allowance_k", None, False),
     ("分成比例(游戏)", "g_commission_rate", None, False),
     ("转正底薪(K盾·直播)", "l_formal_salary_k", "formal_salary", True),
-    ("保险基数(K盾·直播)", "l_insurance_k", "insurance", True),
+    ("缴纳保险(K盾·直播)", "l_insurance_k", "insurance", True),
     ("餐补(K盾·直播)", "l_meal_allowance_k", "meal_allowance", True),
     ("住房补贴(K盾·直播)", "l_housing_allowance_k", "housing_allowance", True),
     ("交通补贴(K盾·直播)", "l_transport_allowance_k", "transport_allowance", True),

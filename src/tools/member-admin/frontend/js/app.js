@@ -489,18 +489,19 @@ const MODULES = {
     columns: [
       { key: 'emp_no', label: '员工编号' },
       { key: 'nickname', label: '昵称' },
-      { key: 'alias', label: '别名' },
+      { key: 'alias', label: '别名', opt: true },
       { key: 'real_name', label: '真实姓名' },
-      { key: 'cn_name', label: '中文名' },
-      { key: 'domain', label: '业务域' },
+      { key: 'cn_name', label: '中文名', opt: true },
+      { key: 'domain', label: '业务域', opt: true },
       { key: 'position', label: '岗位' },
-      { key: 'emp_type', label: '雇佣类型' },
+      { key: 'emp_type', label: '雇佣类型', opt: true },
+      { key: 'insurance', label: '缴纳保险', opt: true, render: v => v ? fmtVND(v) : '' },
       { key: 'status', label: '状态' },
-      { key: 'sys_role', label: '陪玩角色' },
-      { key: 'discord', label: 'Discord' },
-      { key: 'salary_mode', label: '薪资结构' },
-      { key: 'entry_date', label: '入职日期' },
-      { key: 'updated_at', label: '修改时间' },
+      { key: 'sys_role', label: '陪玩角色', opt: true, hideDefault: true },
+      { key: 'discord', label: 'Discord', opt: true },
+      { key: 'salary_mode', label: '薪资结构', opt: true },
+      { key: 'entry_date', label: '入职日期', opt: true },
+      { key: 'updated_at', label: '修改时间', opt: true },
     ],
     filters: [
       { key: 'position', label: '全部岗位', metaKey: 'live_positions' },
@@ -523,7 +524,7 @@ const MODULES = {
       { key: 'probation_salary', label: '试用期底薪 m1（VND）', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
       { key: 'probation_salary_m2', label: '试用期底薪 m2（VND）', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
       { key: 'formal_salary', label: '转正底薪（VND）', type: 'number', showWhen: { key: 'salary_mode', in: ['纯底薪', '底薪+分成'] } },
-      { key: 'insurance', label: '保险基数（合同底薪，VND）', type: 'number' },
+      { key: 'insurance', label: '缴纳保险', type: 'number' },
       { key: 'meal_allowance', label: '餐补（VND）', type: 'number' },
       { key: 'housing_allowance', label: '住房补贴（VND）', type: 'number' },
       { key: 'transport_allowance', label: '交通补贴（VND）', type: 'number' },
@@ -581,6 +582,67 @@ const MODULES = {
 };
 
 const PAGE_SIZE = 20;
+
+/* ================= 列表列显示配置（localStorage 按模块记忆） ================= */
+
+function getVisibleCols(moduleKey, cfg) {
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem('ma_cols_' + moduleKey)); } catch (e) {}
+  return cfg.columns.filter(function(c) {
+    if (!c.opt) return true; // 核心列永远显示
+    if (Array.isArray(saved)) return saved.indexOf(c.key) >= 0;
+    return !c.hideDefault; // 未配置过 = 默认可见性
+  });
+}
+
+function saveColSelection(moduleKey, cfg, checkedKeys) {
+  var defaults = cfg.columns.filter(function(c) { return c.opt && !c.hideDefault; }).map(function(c) { return c.key; });
+  var same = defaults.length === checkedKeys.length && defaults.every(function(k) { return checkedKeys.indexOf(k) >= 0; });
+  if (same) localStorage.removeItem('ma_cols_' + moduleKey); // 与默认一致则不存
+  else localStorage.setItem('ma_cols_' + moduleKey, JSON.stringify(checkedKeys));
+}
+
+// 列选择器：仅当模块存在 opt 列时出现；勾选即时生效并记忆
+function buildColPicker(moduleKey, cfg, bar) {
+  var optCols = cfg.columns.filter(function(c) { return c.opt; });
+  if (!optCols.length) return;
+  var wrap = document.createElement('div');
+  wrap.style.position = 'relative';
+  var btn = document.createElement('button');
+  btn.className = 'btn';
+  btn.innerHTML = '<i class="fas fa-columns"></i> 列';
+  btn.title = '选择列表显示的字段（本机记忆）';
+  var panel = document.createElement('div');
+  panel.style.cssText = 'display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--border,#ddd);border-radius:6px;padding:8px 10px;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.12);min-width:150px';
+  var visible = getVisibleCols(moduleKey, cfg).map(function(c) { return c.key; });
+  optCols.forEach(function(c) {
+    var lb = document.createElement('label');
+    lb.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:13px;padding:3px 2px;cursor:pointer;white-space:nowrap';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = c.key;
+    cb.checked = visible.indexOf(c.key) >= 0;
+    cb.addEventListener('change', function() {
+      var keys = [];
+      panel.querySelectorAll('input[type=checkbox]').forEach(function(x) { if (x.checked) keys.push(x.value); });
+      saveColSelection(moduleKey, cfg, keys);
+      loadList(moduleKey);
+    });
+    lb.appendChild(cb);
+    lb.appendChild(document.createTextNode(c.label));
+    panel.appendChild(lb);
+  });
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', function(e) {
+    if (!wrap.contains(e.target)) panel.style.display = 'none';
+  });
+  wrap.appendChild(btn);
+  wrap.appendChild(panel);
+  bar.appendChild(wrap);
+}
 
 // 各模块列表状态：{ page, filters:{}, keyword }
 const listState = {};
@@ -698,6 +760,8 @@ async function renderListPage(moduleKey) {
   });
   bar.appendChild(resetBtn);
 
+  buildColPicker(moduleKey, cfg, bar);
+
   const spacer = document.createElement('div');
   spacer.className = 'spacer';
   bar.appendChild(spacer);
@@ -751,14 +815,15 @@ async function loadList(moduleKey) {
     return;
   }
 
-  // ---- 表格 ----
+  // ---- 表格（按列显示配置渲染） ----
   const wrap = $('#listTableWrap');
   wrap.innerHTML = '';
+  const cols = getVisibleCols(moduleKey, cfg);
   const table = document.createElement('table');
   table.className = 'data-table';
   const thead = document.createElement('thead');
   const headRow = document.createElement('tr');
-  cfg.columns.forEach(c => {
+  cols.forEach(c => {
     const th = document.createElement('th');
     th.textContent = c.label;
     headRow.appendChild(th);
@@ -774,7 +839,7 @@ async function loadList(moduleKey) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
     td.className = 'empty-cell';
-    td.colSpan = cfg.columns.length + 1;
+    td.colSpan = cols.length + 1;
     td.textContent = '暂无数据';
     tr.appendChild(td);
     tbody.appendChild(tr);
@@ -788,7 +853,7 @@ async function loadList(moduleKey) {
         cfg.rowClick(item.id, item);
       });
     }
-    cfg.columns.forEach(c => {
+    cols.forEach(c => {
       const td = document.createElement('td');
       if (c.render) {
         td.innerHTML = c.render(item[c.key], item);
@@ -1219,7 +1284,7 @@ const LIVE_DRAWER_SECTIONS = [
     ['probation_salary', '试用期底薪 m1', fmtVND, it => it.is_probation == 1],
     ['probation_salary_m2', '试用期底薪 m2', fmtVND, it => it.is_probation == 1],
     ['formal_salary', '转正底薪', fmtVND, it => ['纯底薪', '底薪+分成', '底薪+阶梯分成'].includes(it.salary_mode)],
-    ['insurance', '保险基数（合同底薪）', fmtVND],
+    ['insurance', '缴纳保险', fmtVND],
     ['meal_allowance', '餐补', fmtVND],
     ['housing_allowance', '住房补贴', fmtVND],
     ['transport_allowance', '交通补贴', fmtVND],
