@@ -3892,6 +3892,10 @@ function toggleInvalidTags(sessionId, el) {
   var open = box.style.display !== 'none';
   box.style.display = open ? 'none' : 'flex';
   if (el) el.innerHTML = '无效 ' + box.childElementCount + ' 人 <i class="fas fa-caret-' + (open ? 'down' : 'up') + '" style="font-size:9px"></i>';
+  // 瀑布流重排：展开/收起改变卡片高度，必须重新定位（否则被 overflow:hidden 裁剪看不到）
+  var card = box.closest('.streamer-card');
+  var grid = card && card.closest('.masonry-grid');
+  if (grid) layoutMasonryGrid(grid);
 }
 
 // Open checkin manager modal for a session
@@ -5238,7 +5242,7 @@ function renderClaimList(data, empList) {
     unclaimed.forEach(function(u) {
       var uid6 = String(u.user_id).slice(-6);
       html += '<tr>';
-      html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">#' + escHtml(uid6) + '</td>';
+      html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(u.user_id) + '</code></td>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(u.nickname || '（无昵称）') + '<br><span style="color:#999;font-size:10px">最近 ' + escHtml(u.last_seen || '') + '</span></td>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">签到' + u.checkins + '次<br>语音' + u.voice_minutes + 'min</td>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
@@ -5257,7 +5261,7 @@ function renderClaimList(data, empList) {
   html += '<div style="font-weight:600;margin:8px 0 6px;color:#92400e">🟡 改名/新昵称（' + renamed.length + '）<span style="font-weight:400;font-size:10px;color:#999">已知 uid 使用了映射表外的名字，仅需留意</span></div>';
   if (renamed.length) {
     renamed.forEach(function(u) {
-      html += '<div style="padding:3px 6px;border-bottom:1px solid #f0f0f0;font-size:11px">#' + escHtml(String(u.user_id).slice(-6)) + ' ' + escHtml(u.nickname) + ' <span style="color:#999">（映射：' + escHtml(u.mapped_to) + '）</span></div>';
+      html += '<div style="padding:3px 6px;border-bottom:1px solid #f0f0f0;font-size:11px">ID <code style="font-size:10px">' + escHtml(u.user_id) + '</code> ' + escHtml(u.nickname) + ' <span style="color:#999">（映射：' + escHtml(u.mapped_to) + '）</span></div>';
     });
   } else {
     html += '<div style="color:#999;font-size:11px;margin-bottom:8px">无</div>';
@@ -5266,10 +5270,28 @@ function renderClaimList(data, empList) {
   html += '<div style="font-weight:600;margin:8px 0 6px;color:#6b7280">⚪ 疑似过期 ID（' + stale.length + '）<span style="font-weight:400;font-size:10px;color:#999">映射在库但 14 天无活动。确认换号后把【新 uid 追加】到该员工（待认领区绑定），旧 uid 必须保留——历史签到/语音记录靠它识别</span></div>';
   if (stale.length) {
     stale.forEach(function(u) {
-      html += '<div style="padding:3px 6px;border-bottom:1px solid #f0f0f0;font-size:11px">#' + escHtml(String(u.user_id).slice(-6)) + ' → ' + escHtml(u.mapped_to) + ' <span style="color:#999">最近活动 ' + escHtml(u.last_seen || '无') + '</span></div>';
+      var nickCur = u.nickname || '（无昵称）';
+      var nickOld = (u.old_nickname && u.old_nickname !== u.nickname) ? ('老昵称：' + u.old_nickname) : '';
+      html += '<div style="padding:3px 6px;border-bottom:1px solid #f0f0f0;font-size:11px">';
+      html += 'ID <code style="font-size:10px">' + escHtml(u.user_id) + '</code>';
+      html += ' 当前昵称：' + escHtml(nickCur);
+      if (nickOld) html += ' <span style="color:#999">（' + escHtml(nickOld) + '）</span>';
+      html += ' → 映射 ' + escHtml(u.mapped_to) + ' <span style="color:#999">最近活动 ' + escHtml(u.last_seen || '无') + '</span>';
+      html += '</div>';
     });
   } else {
     html += '<div style="color:#999;font-size:11px">无</div>';
+  }
+  // 本次会话已绑定记录（绑定后 uid 进入已知集合不再告警，本地保留确认信息）
+  var bound = window._claimBound || [];
+  if (bound.length) {
+    html += '<div style="font-weight:600;margin:8px 0 6px;color:#16a34a">✅ 本次已绑定（' + bound.length + '）</div>';
+    bound.forEach(function(b) {
+      html += '<div style="padding:3px 6px;border-bottom:1px solid #d1fae5;background:#f0fdf4;font-size:11px">';
+      html += 'ID <code style="font-size:10px">' + escHtml(b.uid) + '</code>';
+      html += ' ' + escHtml(b.nickname || '') + ' → ' + escHtml(b.emp_no);
+      html += ' <span style="color:#999">已写入该员工 discord_user_id</span></div>';
+    });
   }
   box.innerHTML = html;
 }
@@ -5278,10 +5300,13 @@ async function claimBind(uid, nickname) {
   var sel = document.getElementById('claimEmp_' + uid);
   var empNo = sel ? sel.value : '';
   if (!empNo) { showToast('请先选择员工', 'error'); return; }
-  if (!confirm('将 #' + String(uid).slice(-6) + ' ' + (nickname || '') + ' 绑定到员工 ' + empNo + '？\n\n写入 live_employees.discord_user_id（只增不改），记审计。')) return;
+  if (!confirm('将 ID ' + uid + ' ' + (nickname || '') + ' 绑定到员工 ' + empNo + '？\n\n写入 live_employees.discord_user_id（只增不改），记审计。')) return;
   try {
     await api('claim/bind', { method: 'POST', json: { user_id: uid, emp_no: empNo, nickname: nickname } });
     showToast('已绑定 ' + empNo, 'success');
+    // 本地保留已绑定记录（uid 已进已知集合，重新拉取将不再出现，但需可见可回溯）
+    if (!window._claimBound) window._claimBound = [];
+    window._claimBound.push({ uid: uid, nickname: nickname || '', emp_no: empNo });
     await loadClaimPending();
   } catch (e) { showToast('绑定失败: ' + e.message, 'error'); }
 }
