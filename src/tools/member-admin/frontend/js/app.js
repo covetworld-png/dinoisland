@@ -1291,10 +1291,6 @@ const LIVE_DRAWER_SECTIONS = [
     ['biz_commission_rate', '商单分成比例', null, it => it.position === '主播' && ['底薪+分成', '纯分成-固定', '纯分成-阶梯', '底薪+阶梯分成'].includes(it.salary_mode)],
     ['youtube_commission_rate', 'YouTube 分成比例', null, it => it.position === '主播'],
   ]],
-  ['陪玩', [
-    ['sys_id', '陪玩系统ID'], ['sys_role', '陪玩角色'],
-    ['director_level', '导演等级', null, it => String(it.sys_role || '').includes('剧本导演')],
-  ]],
   ['补贴（VND）', [
     // 1/2/3 按出勤天数×单价计酬：有/无看存值（0=无，非0=单价）；4 住房补贴=个人固定数
     ['attendance_allowance', '出勤补贴', v => v > 0 ? '有（' + fmtVND(v) + '/天）' : '无'],
@@ -1305,6 +1301,10 @@ const LIVE_DRAWER_SECTIONS = [
       var sum = (Number(it.attendance_allowance) || 0) + (Number(it.meal_allowance) || 0) + (Number(it.transport_allowance) || 0);
       return sum > 0 ? fmtVND(sum) + ' VND/天（不含住房补贴），按出勤天数计算当月补贴' : '无按天补贴';
     }],
+  ]],
+  ['陪玩', [
+    ['sys_id', '陪玩系统ID'], ['sys_role', '陪玩角色'],
+    ['director_level', '导演等级', null, it => String(it.sys_role || '').includes('剧本导演')],
   ]],
   ['收款信息', [
     ['account_holder', '账户人'], ['bank', '银行'], ['account', '银行账号'],
