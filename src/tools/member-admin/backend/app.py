@@ -1695,6 +1695,7 @@ def _staff_watch_mod():
 @write_required
 def sync_staff_watch():
     """手动触发 staff 源头对账 → 写消息中心 inbox（幂等，重复点不重复造消息）。"""
+    import traceback
     try:
         rc = _staff_watch_mod()
         res = rc.scan(members_db=MEMBER_ADMIN_DB)
