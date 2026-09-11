@@ -657,7 +657,7 @@ function getListState(moduleKey) {
 async function switchModule(moduleKey) {
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', schedule: '排班表' };
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表' };
   $('#adminModuleTitle').textContent = titles[moduleKey] || '';
   if (moduleKey === 'users') {
     if (state.role !== 'super') return; // 用户管理仅 super
@@ -673,6 +673,8 @@ async function switchModule(moduleKey) {
     renderCommissionPage();
   } else if (moduleKey === 'checkin') {
     renderCheckinPage();
+  } else if (moduleKey === 'inbox') {
+    renderInboxPage();
   } else if (moduleKey === 'schedule') {
     window.open('https://covetworld-png.github.io/dinoisland/src/tools/streamer-schedule/index.html', '_blank');
     return;
@@ -3548,6 +3550,7 @@ function enterModuleGroup(group) {
   $('#sidebarBrand').textContent = group === 'live' ? '直播管理' : '游戏管理';
   document.title = (group === 'live' ? '直播管理' : '游戏管理') + ' - 员工管理后台';
   showView('adminView');
+  if (group === 'live') refreshInboxBadge();
 }
 
 $('#gameModuleCard').addEventListener('click', () => {
@@ -5001,6 +5004,146 @@ function closeCheckinHelp() {
   var el = document.getElementById('checkinHelpModal');
   if (el) el.remove();
 }
+
+/* ================= 消息中心 inbox（承接 staff_watch/reconcile 同步消息） ================= */
+
+async function refreshInboxBadge() {
+  var el = document.getElementById('inboxBadge');
+  if (!el) return;
+  try {
+    var data = await api('inbox?status=pending');
+    var n = (data && data.pending_count) || 0;
+    el.style.display = n > 0 ? 'inline-block' : 'none';
+    el.textContent = n > 99 ? '99+' : n;
+  } catch (e) { /* 后端未就绪时静默 */ }
+}
+
+async function renderInboxPage() {
+  refreshInboxBadge();
+  var main = $('#adminMain');
+  main.innerHTML = '';
+
+  var bar = document.createElement('div');
+  bar.className = 'filter-bar';
+  var sel = document.createElement('select');
+  sel.style.width = '140px';
+  var opts = [['pending', '待处理'], ['all', '全部'], ['done', '已处理'], ['dismissed', '已忽略']];
+  opts.forEach(function(o) {
+    var op = document.createElement('option');
+    op.value = o[0]; op.textContent = o[1];
+    sel.appendChild(op);
+  });
+  sel.value = 'pending';
+  sel.onchange = function() { loadInboxList(sel.value); };
+  bar.appendChild(sel);
+  bar.appendChild((function() {
+    var sp = document.createElement('span');
+    sp.id = 'inboxHint';
+    sp.style.cssText = 'font-size:11px;color:#999;margin-left:8px';
+    sp.textContent = '每日 04:50 staff 源头对账 + 20:05 uid 对账自动落库；处理后不浮回待办';
+    return sp;
+  })());
+  main.appendChild(bar);
+
+  var wrap = document.createElement('div');
+  wrap.id = 'inboxList';
+  wrap.style.cssText = 'padding:12px;background:#fafafa;border:1px solid #eee;border-radius:6px;min-height:300px';
+  wrap.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">加载中...</div>';
+  main.appendChild(wrap);
+  loadInboxList('pending');
+}
+
+var _inboxStatus = 'pending';
+
+async function loadInboxList(status) {
+  _inboxStatus = status || 'pending';
+  var box = document.getElementById('inboxList');
+  if (!box) return;
+  box.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">加载中...</div>';
+  try {
+    var data = await api('inbox?status=' + encodeURIComponent(_inboxStatus));
+    renderInboxList(data || { items: [], pending_count: 0 });
+  } catch (e) {
+    box.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:8px">加载失败: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+var INBOX_SOURCE_LABEL = { staff_watch: 'staff 源头对账', reconcile: 'uid 对账' };
+var INBOX_CAT_LABEL = {
+  new_employee: '新员工', offboard_suspect: '疑似离职',
+  unclaimed_uid: '未认领 uid', rename: '改名/新昵称', stale_id: '疑似过期 ID'
+};
+
+function inboxLinkHtml(link_hint) {
+  if (link_hint === 'claim_page') {
+    return '<button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="openClaimManager()">去认领</button>';
+  }
+  if (link_hint === 'employee_new') {
+    return '<button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#065f46;background:#d1fae5;border-color:#a7f3d0" onclick="switchModule(\'live_employees\')">去员工表建档</button>';
+  }
+  if (link_hint === 'employee_edit') {
+    return '<button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#92400e;background:#fef3c7;border-color:#fde68a" onclick="switchModule(\'live_employees\')">去员工表核实</button>';
+  }
+  return '';
+}
+
+function renderInboxList(data) {
+  var box = document.getElementById('inboxList');
+  if (!box) return;
+  var items = data.items || [];
+  var html = '';
+  html += '<div style="font-size:12px;margin-bottom:8px">';
+  html += '<b>' + (data.pending_count || 0) + '</b> 条待处理<span style="color:#999">（共 ' + data.total + ' 条）</span></div>';
+  if (!items.length) {
+    html += '<div style="color:#16a34a;font-size:12px;padding:20px;text-align:center">✅ ' +
+      (_inboxStatus === 'pending' ? '没有待处理消息' : '该状态下无消息') + '</div>';
+    box.innerHTML = html;
+    return;
+  }
+  html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  html += '<tr style="background:#f3f4f6">';
+  html += '<th style="padding:6px;border:1px solid #e5e7eb;text-align:left;width:110px">来源</th>';
+  html += '<th style="padding:6px;border:1px solid #e5e7eb;text-align:left;width:70px">类别</th>';
+  html += '<th style="padding:6px;border:1px solid #e5e7eb;text-align:left">内容</th>';
+  html += '<th style="padding:6px;border:1px solid #e5e7eb;text-align:left;width:130px">时间</th>';
+  html += '<th style="padding:6px;border:1px solid #e5e7eb;text-align:left;width:190px">操作</th>';
+  html += '</tr>';
+  items.forEach(function(it) {
+    var isPending = it.status === 'pending';
+    var badge = '';
+    if (it.category === 'new_employee') badge = '<span style="background:#dcfce7;color:#166534;border-radius:3px;padding:0 5px;font-size:10px">待建档</span>';
+    else if (it.category === 'offboard_suspect') badge = '<span style="background:#fef3c7;color:#92400e;border-radius:3px;padding:0 5px;font-size:10px">待确认</span>';
+    else if (isPending) badge = '<span style="background:#fee2e2;color:#991b1b;border-radius:3px;padding:0 5px;font-size:10px">待处理</span>';
+    html += '<tr style="' + (isPending ? 'background:#fff' : 'opacity:.6') + '">';
+    html += '<td style="padding:6px;border:1px solid #eee">' + escHtml(INBOX_SOURCE_LABEL[it.source] || it.source) + '</td>';
+    html += '<td style="padding:6px;border:1px solid #eee">' + escHtml(INBOX_CAT_LABEL[it.category] || it.category) + '<br>' + badge + '</td>';
+    html += '<td style="padding:6px;border:1px solid #eee"><b>' + escHtml(it.title) + '</b><br><span style="color:#666;font-size:11px">' + escHtml(it.detail || '') + '</span></td>';
+    html += '<td style="padding:6px;border:1px solid #eee;font-size:11px;color:#555">' + escHtml(it.created_at || '') + '</td>';
+    html += '<td style="padding:6px;border:1px solid #eee;white-space:nowrap">';
+    html += inboxLinkHtml(it.link_hint);
+    if (isPending) {
+      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#065f46;background:#d1fae5;border-color:#a7f3d0" onclick="inboxMark(' + it.id + ',\'done\')">已完成</button>';
+      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="inboxMark(' + it.id + ',\'dismissed\')">忽略</button>';
+    } else {
+      html += '<span style="color:#999;font-size:10px">' + (it.resolved_by ? (it.resolved_by + ' · ' + (it.resolved_at || '')) : '') + '</span>';
+    }
+    html += '</td></tr>';
+  });
+  html += '</table>';
+  box.innerHTML = html;
+}
+
+async function inboxMark(id, status) {
+  try {
+    await api('inbox/' + id + '/status', { method: 'POST', json: { status: status } });
+    showToast(status === 'done' ? '已标记完成' : '已忽略', 'success');
+    loadInboxList(_inboxStatus);
+    refreshInboxBadge();
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
 
 /* ================= 启动 ================= */
 

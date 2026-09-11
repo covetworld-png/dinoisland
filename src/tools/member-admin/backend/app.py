@@ -1982,5 +1982,66 @@ def too_large(_e):
     return jsonify({"ok": False, "error": f"文件超过 {MAX_UPLOAD_MB}MB 限制"}), 413
 
 
+# ========== 消息中心 inbox（承接 staff_watch/reconcile 同步消息，bot checkins.db） ==========
+
+@app.get("/api/inbox")
+@write_required
+def inbox_list():
+    """消息中心列表。status=all|pending|done|dismissed，默认 pending。"""
+    status = request.args.get("status", "pending") or "pending"
+    limit = min(int(request.args.get("limit", 200) or 200), 500)
+    try:
+        import sqlite3
+        conn = sqlite3.connect(CHECKIN_DB_PATH)
+        conn.row_factory = sqlite3.Row
+        try:
+            tables = [r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")]
+            if "inbox" not in tables:
+                return jsonify({"ok": True, "data": {"items": [], "total": 0, "pending_count": 0}})
+            cond, params = "", []
+            if status != "all":
+                cond = "WHERE status = ?"
+                params = [status]
+            items = conn.execute(
+                f"SELECT * FROM inbox {cond} ORDER BY created_at DESC, id DESC LIMIT ?",
+                params + [limit]).fetchall()
+            total = conn.execute(f"SELECT COUNT(*) c FROM inbox {cond}", params).fetchone()["c"]
+            pc = conn.execute("SELECT COUNT(*) c FROM inbox WHERE status='pending'").fetchone()["c"]
+            return jsonify({"ok": True, "data": {
+                "items": [dict(r) for r in items], "total": total, "pending_count": pc}})
+        finally:
+            conn.close()
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.post("/api/inbox/<int:item_id>/status")
+@write_required
+def inbox_update_status(item_id):
+    """标记消息为 done/dismissed（只进不退：处理后不浮回待办）。"""
+    data = request.get_json(force=True, silent=True) or {}
+    status = str(data.get("status") or "").strip()
+    if status not in ("done", "dismissed"):
+        return jsonify({"ok": False, "error": "status 仅支持 done/dismissed"}), 400
+    try:
+        import sqlite3
+        conn = sqlite3.connect(CHECKIN_DB_PATH)
+        try:
+            cur = conn.execute(
+                "UPDATE inbox SET status=?, resolved_at=datetime('now','localtime'), resolved_by=? "
+                "WHERE id=? AND status='pending'",
+                (status, session["user"], item_id))
+            conn.commit()
+            if cur.rowcount == 0:
+                return jsonify({"ok": False, "error": "消息不存在或已处理"}), 404
+            return jsonify({"ok": True, "data": {"id": item_id, "status": status}})
+        finally:
+            conn.close()
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
