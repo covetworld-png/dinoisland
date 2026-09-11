@@ -523,7 +523,7 @@ const MODULES = {
       { key: 'probation_months', label: '试用期月数', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
       { key: 'probation_salary', label: '试用期底薪 m1（VND）', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
       { key: 'probation_salary_m2', label: '试用期底薪 m2（VND）', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
-      { key: 'formal_salary', label: '转正底薪（VND）', type: 'number', showWhen: { key: 'salary_mode', in: ['纯底薪', '底薪+分成'] } },
+      { key: 'formal_salary', label: '转正底薪（VND）', type: 'number', showWhen: { key: 'salary_mode', in: ['', '纯底薪', '底薪+分成', '底薪+阶梯分成'] } },
       { key: 'insurance', label: '缴纳保险', type: 'number' },
       { key: 'attendance_allowance', label: '出勤补贴', type: 'select', options: [{value:'0',label:'无'}, {value:'96000',label:'有（96,000/天）'}], default: '0' },
       { key: 'meal_allowance', label: '餐补', type: 'select', options: [{value:'0',label:'无'}, {value:'60000',label:'有（60,000/天）'}], default: '0' },
