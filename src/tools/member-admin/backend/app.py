@@ -1762,15 +1762,28 @@ def claim_bind():
         after = dict(db.execute("SELECT * FROM live_employees WHERE id = ?", (emp["id"],)).fetchone())
         log_change(session["user"], "update", "live_employee", emp["id"],
                    f"{emp_no} 绑定 uid #{user_id[-6:]}", before=before, after=after, ip=client_ip())
-        # 昵称侧兜底：同昵称 player_mapping 行缺 discord_id 则补（保持签到侧一致）
+        # 昵称侧兜底：player_mapping 同名行补 discord_id/emp_no；无同名行则新增一行（陪玩映射表可见）
         if nickname:
-            row = db.execute("SELECT id, discord_id FROM player_mapping WHERE player_name = ?",
+            row = db.execute("SELECT id, emp_no, discord_id FROM player_mapping WHERE player_name = ?",
                              (nickname,)).fetchone()
-            if row and user_id not in _split_ids(row["discord_id"]):
-                pv = (row["discord_id"] or "").strip()
-                pv = f"{pv},{user_id}" if pv else user_id
-                db.execute("UPDATE player_mapping SET discord_id = ?, updated_at = ? WHERE id = ?",
-                           (pv, now(), row["id"]))
+            if row:
+                upd = {}
+                if user_id not in _split_ids(row["discord_id"]):
+                    pv = (row["discord_id"] or "").strip()
+                    upd["discord_id"] = f"{pv},{user_id}" if pv else user_id
+                if not (row["emp_no"] or "").strip():
+                    upd["emp_no"] = emp_no  # 空员工才补，已有归属不覆盖（防误改他人）
+                if upd:
+                    db.execute("UPDATE player_mapping SET {}, updated_at=? WHERE id=?".format(
+                        ", ".join(k + "=?" for k in upd)),
+                        list(upd.values()) + [now(), row["id"]])
+                    db.commit()
+            else:
+                db.execute(
+                    "INSERT INTO player_mapping (player_name, emp_no, discord, discord_id, remark, created_at, updated_at)"
+                    " VALUES (?,?,?,?,?,?,?)",
+                    (nickname, emp_no, nickname, user_id,
+                     "绑定来源：待认领绑定", now(), now()))
                 db.commit()
         return jsonify({"ok": True, "data": {"emp_no": emp_no, "discord_user_id": new_val}})
     except Exception as e:
