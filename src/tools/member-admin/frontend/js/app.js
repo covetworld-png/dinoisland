@@ -1292,15 +1292,15 @@ const LIVE_DRAWER_SECTIONS = [
     ['youtube_commission_rate', 'YouTube 分成比例', null, it => it.position === '主播'],
   ]],
   ['补贴（VND）', [
-    // 1/2/3 按出勤天数×单价计酬：有/无看存值（0=无，非0=单价）；4 住房补贴=个人固定数
-    ['attendance_allowance', '出勤补贴', v => v > 0 ? '有（' + fmtVND(v) + '/天）' : '无'],
-    ['meal_allowance', '餐补', v => v > 0 ? '有（' + fmtVND(v) + '/天）' : '无'],
-    ['transport_allowance', '交通补贴', v => v > 0 ? '有（' + fmtVND(v) + '/天）' : '无'],
-    ['housing_allowance', '住房补贴', v => v > 0 ? fmtVND(v) + '（固定）' : '无'],
+    // 1/2/3 按出勤天数×单价计酬：有/无看存值（0=无，非0=单价）；4 住房补贴=个人固定数；无该项不展示
+    ['attendance_allowance', '出勤补贴', v => '有（' + fmtVND(v) + '/天）', it => Number(it.attendance_allowance) > 0],
+    ['meal_allowance', '餐补', v => '有（' + fmtVND(v) + '/天）', it => Number(it.meal_allowance) > 0],
+    ['transport_allowance', '交通补贴', v => '有（' + fmtVND(v) + '/天）', it => Number(it.transport_allowance) > 0],
+    ['housing_allowance', '住房补贴', v => fmtVND(v) + '（固定）', it => Number(it.housing_allowance) > 0],
     ['__daily_sum', '按天补贴合计', (v, it) => {
       var sum = (Number(it.attendance_allowance) || 0) + (Number(it.meal_allowance) || 0) + (Number(it.transport_allowance) || 0);
-      return sum > 0 ? fmtVND(sum) + ' VND/天（不含住房补贴），按出勤天数计算当月补贴' : '无按天补贴';
-    }],
+      return fmtVND(sum) + ' VND/天（不含住房补贴），按出勤天数计算当月补贴';
+    }, it => ((Number(it.attendance_allowance) || 0) + (Number(it.meal_allowance) || 0) + (Number(it.transport_allowance) || 0)) > 0],
   ]],
   ['陪玩', [
     ['sys_id', '陪玩系统ID'], ['sys_role', '陪玩角色'],
@@ -1345,12 +1345,15 @@ function openLiveEmployeeDrawer(item) {
   editBar.appendChild(editBtn);
   body.appendChild(editBar);
   LIVE_DRAWER_SECTIONS.forEach(([title, fields]) => {
+    // 条件过滤后无可见字段的模块整体不渲染（如无补贴员工的「补贴（VND）」）
+    const visibleFields = fields.filter(([, , , cond]) => !cond || cond(item));
+    if (!visibleFields.length) return;
     const sec = document.createElement('div');
     sec.className = 'drawer-section';
     sec.innerHTML = '<h4>' + title + '</h4>';
     const grid = document.createElement('div');
     grid.className = 'detail-grid';
-    fields.forEach(([k, label, fmt, cond]) => {
+    visibleFields.forEach(([k, label, fmt, cond]) => {
       if (cond && !cond(item)) return; // 条件不满足不显示
       let v = item[k];
       if (fmt) v = fmt(v, item);
