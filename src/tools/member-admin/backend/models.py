@@ -145,8 +145,9 @@ CREATE TABLE IF NOT EXISTS live_employees (
     probation_salary_m2 REAL DEFAULT 0,-- 试用期第2个月底薪 VND（仅2个月试用期）
     formal_salary REAL DEFAULT 0,      -- 转正底薪 VND（0=不拿工资）
     insurance REAL DEFAULT 0,          -- 保险基数（合同底薪）VND
-    meal_allowance REAL DEFAULT 0,     -- 餐补 VND
-    housing_allowance REAL DEFAULT 0,  -- 住房补贴 VND
+    meal_allowance REAL DEFAULT 0,     -- 餐补：0=无，非0=有（存单价 VND/天，固定 60000）
+    attendance_allowance REAL DEFAULT 0, -- 出勤补贴：0=无，非0=有（存单价 VND/天，固定 96000）
+    housing_allowance REAL DEFAULT 0,  -- 住房补贴 VND（绝对数）
     transport_allowance REAL DEFAULT 0,-- 交通补贴 VND
     salary_mode TEXT DEFAULT '',       -- 薪资结构：纯底薪/底薪+分成/纯分成-固定/纯分成-阶梯/计件
     commission_rate TEXT DEFAULT '',   -- 直播分成比例（固定时），如 50%
@@ -227,6 +228,7 @@ TABLE_FIELDS = {
                        "probation_salary", "probation_salary_m2",
                        "formal_salary", "insurance",
                        "meal_allowance", "housing_allowance", "transport_allowance",
+                       "attendance_allowance",
                        "salary_mode", "commission_rate", "commission_tiers", "biz_commission_rate",
                        "director_level", "youtube_commission_rate",
                        "entry_date", "leave_date", "sys_id", "sys_role",
@@ -268,6 +270,10 @@ def init_db():
     cols = [r["name"] for r in conn.execute("PRAGMA table_info(player_mapping)")]
     if "pd_id" not in cols:
         conn.execute("ALTER TABLE player_mapping ADD COLUMN pd_id INTEGER DEFAULT 0")
+    # 迁移：live_employees 增加 attendance_allowance（出勤补贴，0=无/非0=单价）
+    le_cols = [r["name"] for r in conn.execute("PRAGMA table_info(live_employees)")]
+    if "attendance_allowance" not in le_cols:
+        conn.execute("ALTER TABLE live_employees ADD COLUMN attendance_allowance REAL DEFAULT 0")
     conn.commit()
     conn.close()
 
