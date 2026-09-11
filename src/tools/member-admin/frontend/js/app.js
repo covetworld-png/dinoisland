@@ -528,7 +528,7 @@ const MODULES = {
       { key: 'attendance_allowance', label: '出勤补贴', type: 'select', options: [{value:'0',label:'无'}, {value:'96000',label:'有（96,000/天）'}], default: '0' },
       { key: 'meal_allowance', label: '餐补', type: 'select', options: [{value:'0',label:'无'}, {value:'60000',label:'有（60,000/天）'}], default: '0' },
       { key: 'transport_allowance', label: '交通补贴', type: 'select', options: [{value:'0',label:'无'}, {value:'40000',label:'有（40,000/天）'}], default: '0' },
-      { key: 'housing_allowance', label: '住房补贴（VND，绝对数）', type: 'number' },
+      { key: 'housing_allowance', label: '住房补贴（VND，固定）', type: 'number' },
       { key: 'salary_mode', label: '薪资结构', type: 'select', metaKey: 'salary_modes' },
       { key: 'commission_rate', label: '直播分成比例', type: 'text', placeholder: '如 50%', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['底薪+分成', '纯分成-固定'] }] },
       { key: 'commission_tiers', label: '分成阶梯（JSON）', type: 'textarea', full: true, placeholder: '[{"kc":150000,"rate":10},{"kc":300000,"rate":20}]', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['纯分成-阶梯', '底薪+阶梯分成'] }] },
@@ -1296,11 +1296,15 @@ const LIVE_DRAWER_SECTIONS = [
     ['director_level', '导演等级', null, it => String(it.sys_role || '').includes('剧本导演')],
   ]],
   ['补贴', [
-    // 1/2/3 按出勤天数×单价计酬：有/无看存值（0=无，非0=单价）；4 住房补贴=个人绝对数
+    // 1/2/3 按出勤天数×单价计酬：有/无看存值（0=无，非0=单价）；4 住房补贴=个人固定数
     ['attendance_allowance', '出勤补贴', v => v > 0 ? '有（' + fmtVND(v) + '/天）' : '无'],
     ['meal_allowance', '餐补', v => v > 0 ? '有（' + fmtVND(v) + '/天）' : '无'],
     ['transport_allowance', '交通补贴', v => v > 0 ? '有（' + fmtVND(v) + '/天）' : '无'],
-    ['housing_allowance', '住房补贴', v => v > 0 ? fmtVND(v) + '（绝对数）' : '无'],
+    ['housing_allowance', '住房补贴', v => v > 0 ? fmtVND(v) + '（固定）' : '无'],
+    ['__daily_sum', '按天补贴合计', (v, it) => {
+      var sum = (Number(it.attendance_allowance) || 0) + (Number(it.meal_allowance) || 0) + (Number(it.transport_allowance) || 0);
+      return sum > 0 ? fmtVND(sum) + ' VND/天（不含住房补贴），按出勤天数计算当月补贴' : '无按天补贴';
+    }],
   ]],
   ['收款信息', [
     ['account_holder', '账户人'], ['bank', '银行'], ['account', '银行账号'],
