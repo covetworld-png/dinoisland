@@ -1295,7 +1295,7 @@ const LIVE_DRAWER_SECTIONS = [
     ['sys_id', '陪玩系统ID'], ['sys_role', '陪玩角色'],
     ['director_level', '导演等级', null, it => String(it.sys_role || '').includes('剧本导演')],
   ]],
-  ['补贴', [
+  ['补贴（VND）', [
     // 1/2/3 按出勤天数×单价计酬：有/无看存值（0=无，非0=单价）；4 住房补贴=个人固定数
     ['attendance_allowance', '出勤补贴', v => v > 0 ? '有（' + fmtVND(v) + '/天）' : '无'],
     ['meal_allowance', '餐补', v => v > 0 ? '有（' + fmtVND(v) + '/天）' : '无'],
