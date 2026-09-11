@@ -1681,6 +1681,33 @@ def _reconcile_mod():
     return reconcile
 
 
+def _staff_watch_mod():
+    """引入 bot 侧 staff 源头对账模块（新员工/疑似离职检测，与 04:50 定时同源）。"""
+    import sys as _sys
+    bot_path = "/opt/discord-checkin/backend"
+    if bot_path not in _sys.path:
+        _sys.path.insert(0, bot_path)
+    import staff_watch
+    return staff_watch
+
+
+@app.post("/api/sync/staff-watch")
+@write_required
+def sync_staff_watch():
+    """手动触发 staff 源头对账 → 写消息中心 inbox（幂等，重复点不重复造消息）。"""
+    try:
+        rc = _staff_watch_mod()
+        res = rc.scan(members_db=MEMBER_ADMIN_DB)
+        n = rc.write_inbox(res)
+        return jsonify({"ok": True, "data": {
+            "new_employees": len(res["new_employees"]),
+            "offboard": len(res["offboard"]),
+            "inbox_added": n}})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 def _split_ids(raw):
     return [x.strip() for x in str(raw or '').split(',') if x.strip().isdigit()]
 

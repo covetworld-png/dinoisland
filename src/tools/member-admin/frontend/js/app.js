@@ -783,6 +783,17 @@ async function renderListPage(moduleKey) {
   addBtn.addEventListener('click', () => openFormModal(moduleKey, null));
   bar.appendChild(addBtn);
 
+  // 员工页：手动触发源头同步（staff_watch → 消息中心 inbox，与每日 04:50 定时同源）
+  if (moduleKey === 'live_employees') {
+    const syncBtn = document.createElement('button');
+    syncBtn.className = 'btn';
+    syncBtn.id = 'staffWatchBtn';
+    syncBtn.title = '从源头（live_player/staff_info）拉取新员工与离职标记 → 消息中心；与每日 04:50 定时同源，幂等';
+    syncBtn.textContent = '⟳ 同步源头';
+    syncBtn.addEventListener('click', triggerStaffWatch);
+    bar.appendChild(syncBtn);
+  }
+
   main.appendChild(bar);
 
   // ---- 表格容器 ----
@@ -5016,6 +5027,22 @@ async function refreshInboxBadge() {
     el.style.display = n > 0 ? 'inline-block' : 'none';
     el.textContent = n > 99 ? '99+' : n;
   } catch (e) { /* 后端未就绪时静默 */ }
+}
+
+async function triggerStaffWatch() {
+  // 员工页「同步源头」按钮：手动触发 staff_watch → 消息中心（幂等）
+  if (!confirm('从源头（live_player/staff_info）同步员工变更？\n\n新员工 → 待建档，离职标记 → 待确认，写入消息中心（每日 04:50 自动跑同款）。')) return;
+  var btn = document.getElementById('staffWatchBtn');
+  if (btn) btn.disabled = true;
+  try {
+    var d = await api('sync/staff-watch', { method: 'POST', json: {} });
+    showToast('同步完成：新员工 ' + d.new_employees + '，疑似离职 ' + d.offboard + '，新增消息 ' + d.inbox_added + ' 条', 'success');
+    refreshInboxBadge();
+  } catch (e) {
+    showToast('同步失败：' + e.message, 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 async function renderInboxPage() {
