@@ -5097,7 +5097,7 @@ async function loadInboxList(status) {
 
 var INBOX_SOURCE_LABEL = { staff_watch: 'staff 源头对账', reconcile: 'uid 对账' };
 var INBOX_CAT_LABEL = {
-  new_employee: '新员工', offboard_suspect: '疑似离职',
+  new_employee: '新员工', offboard_suspect: '疑似离职', transfer_suspect: '待确认转正',
   unclaimed_uid: '未认领 uid', rename: '改名/新昵称', stale_id: '疑似过期 ID'
 };
 
@@ -5139,7 +5139,7 @@ function renderInboxList(data) {
     var isPending = it.status === 'pending';
     var badge = '';
     if (it.category === 'new_employee') badge = '<span style="background:#dcfce7;color:#166534;border-radius:3px;padding:0 5px;font-size:10px">待建档</span>';
-    else if (it.category === 'offboard_suspect') badge = '<span style="background:#fef3c7;color:#92400e;border-radius:3px;padding:0 5px;font-size:10px">待确认</span>';
+    else if (it.category === 'offboard_suspect' || it.category === 'transfer_suspect') badge = '<span style="background:#fef3c7;color:#92400e;border-radius:3px;padding:0 5px;font-size:10px">待确认</span>';
     else if (isPending) badge = '<span style="background:#fee2e2;color:#991b1b;border-radius:3px;padding:0 5px;font-size:10px">待处理</span>';
     html += '<tr style="' + (isPending ? 'background:#fff' : 'opacity:.6') + '">';
     html += '<td style="padding:6px;border:1px solid #eee">' + escHtml(INBOX_SOURCE_LABEL[it.source] || it.source) + '</td>';
