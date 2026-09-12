@@ -1800,6 +1800,45 @@ def _split_ids(raw):
     return [x.strip() for x in str(raw or '').split(',') if x.strip().isdigit()]
 
 
+def _attach_unclaimed_sessions(checkins_db, unclaimed):
+    """为每条未认领 uid 补充近期参与场次（checkins→sessions JOIN，按场次去重，最多 6 场）。
+
+    原地修改 unclaimed 列表元素，追加字段 sessions=[{session_no, streamer_name, date}]。
+    """
+    if not unclaimed:
+        return unclaimed
+    ids = [u['user_id'] for u in unclaimed if u.get('user_id')]
+    if not ids:
+        return unclaimed
+    marks = ','.join('?' * len(ids))
+    try:
+        conn = sqlite3.connect(checkins_db)
+        conn.row_factory = sqlite3.Row
+        try:
+            rows = conn.execute(
+                f"""SELECT c.user_id, s.session_no, s.streamer_name, s.start_time,
+                           MAX(c.checkin_time) AS last_in
+                    FROM checkins c JOIN sessions s ON c.session_id = s.id
+                    WHERE c.user_id IN ({marks})
+                    GROUP BY c.user_id, s.id
+                    ORDER BY last_in DESC""", ids).fetchall()
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"[MA] _attach_unclaimed_sessions error: {e}", flush=True)
+        return unclaimed
+    by_uid = {}
+    for r in rows:
+        by_uid.setdefault(r['user_id'], []).append({
+            'session_no': r['session_no'],
+            'streamer_name': r['streamer_name'],
+            'date': (r['start_time'] or r['last_in'] or '')[:10],
+        })
+    for u in unclaimed:
+        u['sessions'] = (by_uid.get(u['user_id']) or [])[:6]
+    return unclaimed
+
+
 @app.get("/api/claim/pending")
 @write_required
 def claim_pending():
@@ -1808,6 +1847,7 @@ def claim_pending():
         rc = _reconcile_mod()
         res = rc.scan(checkins_db=CHECKIN_DB_PATH, members_db=MEMBER_ADMIN_DB,
                       days=7, stale_days=14)
+        _attach_unclaimed_sessions(CHECKIN_DB_PATH, res.get('unclaimed') or [])
         return jsonify({"ok": True, "data": res})
     except Exception as e:
         traceback.print_exc()

@@ -5522,13 +5522,14 @@ function renderClaimList(data, empList) {
     html += '<div style="color:#16a34a;font-size:12px;margin-bottom:12px">✅ 近 7 天无未认领 uid</div>';
   } else {
     html += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px">';
-    html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">最近昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">活动</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
+    html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">最近昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">活动</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">参与场次</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
     unclaimed.forEach(function(u) {
       var uid6 = String(u.user_id).slice(-6);
       html += '<tr>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(u.user_id) + '</code></td>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(u.nickname || '（无昵称）') + '<br><span style="color:#999;font-size:10px">最近 ' + escHtml(u.last_seen || '') + '</span></td>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">签到' + u.checkins + '次<br>语音' + u.voice_minutes + 'min</td>';
+      html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + sessCell(u.sessions) + '</td>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
       html += '<select id="claimEmp_' + u.user_id + '" style="font-size:11px;padding:1px 2px;max-width:150px">';
       html += '<option value="">绑定到员工...</option>';
@@ -5697,13 +5698,14 @@ function bindingRenderBody() {
       html += '<div style="color:#16a34a;font-size:12px;margin-bottom:10px">✅ 暂无未认领 uid</div>';
     } else {
       html += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px;background:#fff">';
-      html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">活动</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
+      html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">活动</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">参与场次</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
       for (var i=0;i<ul.length;i++) {
         var u = ul[i];
         html += '<tr>';
         html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(u.user_id) + '</code></td>';
         html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(u.nickname || '') + '<br><span style="color:#999;font-size:10px">最近 ' + escHtml(u.last_seen || '') + '</span></td>';
         html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">签' + u.checkins + ' / 语' + u.voice_minutes + 'min</td>';
+        html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + sessCell(u.sessions) + '</td>';
         html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
         var selEmp = _bindingEmpSel[u.user_id];
         var selLabel = selEmp ? empLabelText(selEmp) : '';
@@ -5739,6 +5741,16 @@ function bindingRenderBody() {
 function srcCell(b) {
   var m = { 'live_employees.discord_id':'员工·discord_id', 'live_employees.discord_user_id':'员工·discord_user_id', 'player_mapping.discord_id':'陪玩映射·discord_id' };
   return m[b.source] || b.source || '';
+}
+
+function sessCell(sessions) {
+  if (!sessions || !sessions.length) return '<span style="color:#bbb;font-size:10px">—</span>';
+  return sessions.slice(0,3).map(function(s){
+    var t = escHtml(s.session_no || '');
+    if (s.streamer_name) t += ' · ' + escHtml(s.streamer_name);
+    if (s.date) t += ' <span style="color:#bbb">' + escHtml(s.date) + '</span>';
+    return '<div style="font-size:10px;color:#374151;line-height:1.5">' + t + '</div>';
+  }).join('') + (sessions.length > 3 ? '<span style="color:#999;font-size:10px">+还有 ' + (sessions.length-3) + ' 场</span>' : '');
 }
 
 function empLabelText(empNo) {
