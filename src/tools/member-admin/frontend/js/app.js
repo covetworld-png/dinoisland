@@ -5727,7 +5727,7 @@ function bindingRenderBody() {
       var b = list2[k];
       html2 += '<tr>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(b.user_id) + '</code></td>';
-      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(b.owner) + '</td>';
+      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + ownerLabel(b) + '</td>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(srcCell(b)) + '</td>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
       html2 += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#b91c1c;background:#fee2e2;border-color:#fecaca" onclick="bindingDoUnbind(\'' + b.user_id + '\',\'' + b.source + '\',\'' + escHtml(b.owner_key).replace(/'/g,"\\'") + '\')">解绑</button>';
@@ -5741,6 +5741,40 @@ function bindingRenderBody() {
 function srcCell(b) {
   var m = { 'live_employees.discord_id':'员工·discord_id', 'live_employees.discord_user_id':'员工·discord_user_id', 'player_mapping.discord_id':'陪玩映射·discord_id' };
   return m[b.source] || b.source || '';
+}
+
+// 已绑定全量·归属列富信息：live_employees 来源 owner 仅存编号，这里映射出可读信息；
+// player_mapping 来源直接展示（外聘/编号+昵称）。owner_key 可能含空格需裁剪。
+function ownerLabel(b) {
+  var kw = String(b.owner_key || '').trim();
+  // 员工来源（owner_key = emp_no）：尽可能展开为 编号+昵称+中文名+岗位+状态
+  if (kw && (b.source === 'live_employees.discord_id' || b.source === 'live_employees.discord_user_id')) {
+    var e = _bindingEmp.find(function(x){ return String(x.emp_no) === kw; });
+    if (e) return empRich(e);
+    return escHtml(kw || b.owner || '');
+  }
+  // 陪玩映射来源：owner 已是 编号/昵称 或 昵称，直接展示，并可尝试展开编号部分
+  var o = String(b.owner || '');
+  if (o.indexOf('/') > 0) {
+    var no = o.split('/')[0].trim();
+    var nm = o.replace(o.split('/')[0], '').replace('/', '').trim();
+    if (no) {
+      var e2 = _bindingEmp.find(function(x){ return String(x.emp_no) === no; });
+      if (e2) return empRich(e2, nm);
+    }
+  }
+  return esc(o);
+}
+
+function empRich(e, extra) {
+  var parts = [String(e.emp_no)];
+  if (e.nickname) parts.push(e.nickname);
+  if (e.cn_name) parts.push('（' + e.cn_name + '）');
+  if (e.position) parts.push(e.position);
+  if (e.status === '离职') parts.push('·已离职');
+  var h = esc(parts.join(' '));
+  if (extra) h += '<span style="color:#999"> / ' + esc(extra) + '</span>';
+  return h;
 }
 
 function sessCell(sessions) {
