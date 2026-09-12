@@ -605,7 +605,7 @@ const MODULES = {
       { key: 'emp_no', label: '关联员工', type: 'searchselect', optionsKind: 'live_employees', placeholder: '选择员工后自动带出 Discord' },
       { key: 'discord', label: 'Discord 昵称', type: 'text' },
       { key: 'discord_id', label: 'Discord ID', type: 'text' },
-      { key: 'remark', label: '备注', type: 'textarea', full: true, placeholder: '如：外聘导演/临时人员/未匹配原因' },
+      { key: 'remark', label: '备注', type: 'textarea', full: true, placeholder: '如：导演/临时人员/未匹配原因' },
     ],
   },
 };
@@ -5475,7 +5475,7 @@ async function inboxMark(id, status) {
   showView('loginView');
 })();
 
-// ========== 待认领人员（C' 方案③修复层：绑定/外聘/排除，与每日对账推送同口径） ==========
+// ========== 待认领人员（C' 方案③修复层：绑定/排除，与每日对账推送同口径。无「外聘」概念，全站移除） ==========
 async function openClaimManager() {
   var html = '<div class="modal-overlay" onclick="closeClaimManager()"></div>';
   html += '<div class="modal-content" style="max-width:760px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;max-height:85vh;display:flex;flex-direction:column">';
@@ -5535,7 +5535,6 @@ function renderClaimList(data, empList) {
       empList.forEach(function(e) { html += '<option value="' + escHtml(e.id) + '">' + escHtml(e.label) + '</option>'; });
       html += '</select>';
       html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="claimBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">绑定</button>';
-      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#92400e;background:#fef3c7;border-color:#fde68a" onclick="claimForeign(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">外聘</button>';
       html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="claimExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">排除</button>';
       html += '</td></tr>';
     });
@@ -5595,16 +5594,6 @@ async function claimBind(uid, nickname) {
   } catch (e) { showToast('绑定失败: ' + e.message, 'error'); }
 }
 
-async function claimForeign(uid, nickname) {
-  if (!nickname) { showToast('该 uid 无昵称，无法以外聘入映射表', 'error'); return; }
-  if (!confirm('将 #' + String(uid).slice(-6) + ' ' + nickname + ' 标记为外聘/临时？\n\nplayer_mapping 补一行（无员工编号），对账不再告警。')) return;
-  try {
-    await api('claim/foreign', { method: 'POST', json: { user_id: uid, nickname: nickname } });
-    showToast('已标记外聘', 'success');
-    await loadClaimPending();
-  } catch (e) { showToast('标记失败: ' + e.message, 'error'); }
-}
-
 async function claimExclude(uid, nickname) {
   if (!confirm('将 #' + String(uid).slice(-6) + ' ' + (nickname || '') + ' 加入排除名单？\n\n对账与展示均不再出现（写入 excluded_user_ids）。')) return;
   try {
@@ -5618,7 +5607,8 @@ async function claimExclude(uid, nickname) {
 var _bindingTab = 'tab1';
 var _bindingSearch = '';
 var _bindingCache = null;  // { unclaimed:[], bound:[], empList:[] }
-var _bindingEmp = [];     // options/live_employees 下拉
+var _bindingEmp = [];      // /api/binding/employees 富信息员工列表（选择器数据源）
+var _bindingEmpSel = {};   // uid -> emp_no（Tab1 每行当前选定员工）
 
 async function renderBindingPage() {
   $('#adminModuleTitle').textContent = 'Discord 绑定';
@@ -5669,7 +5659,7 @@ async function bindingLoad() {
   if (hint) hint.textContent = '加载中...';
   try {
     var empList = [];
-    try { empList = await api('options/live_employees') || []; } catch(e) {}
+    try { empList = await api('binding/employees') || []; } catch(e) {}
     var pet = await api('claim/pending');
     var bd = await api('binding/list');
     _bindingEmp = empList;
@@ -5715,11 +5705,11 @@ function bindingRenderBody() {
         html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(u.nickname || '') + '<br><span style="color:#999;font-size:10px">最近 ' + escHtml(u.last_seen || '') + '</span></td>';
         html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">签' + u.checkins + ' / 语' + u.voice_minutes + 'min</td>';
         html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
-        html += '<select id="bindEmp_' + u.user_id + '" style="font-size:11px;padding:1px 2px;max-width:150px"><option value="">绑定到员工...</option>';
-        for (var j=0;j<_bindingEmp.length;j++) html += '<option value="' + escHtml(_bindingEmp[j].id) + '">' + escHtml(_bindingEmp[j].label) + '</option>';
-        html += '</select> ';
-        html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="bindingDoBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">绑定</button>';
-        html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#92400e;background:#fef3c7;border-color:#fde68a" onclick="bindingDoForeign(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">外聘</button>';
+        var selEmp = _bindingEmpSel[u.user_id];
+        var selLabel = selEmp ? empLabelText(selEmp) : '';
+        html += '<span id="bindEmpTag_' + u.user_id + '" style="font-size:10px;display:inline-block;margin-right:4px;color:#1e40af">' + (selLabel ? '已选：' + escHtml(selLabel) : '未选员工') + '</span> ';
+        html += '<button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="openBindingEmpPicker(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">选员工</button>';
+        html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="bindingDoBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">绑定</button>';
         html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="bindingDoExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">排除</button>';
         html += '</td></tr>';
       }
@@ -5751,26 +5741,193 @@ function srcCell(b) {
   return m[b.source] || b.source || '';
 }
 
+function empLabelText(empNo) {
+  if (!empNo) return '';
+  var e = _bindingEmp.find(function(x){ return String(x.emp_no) === String(empNo); });
+  if (!e) return empNo;
+  var parts = [String(e.emp_no)];
+  if (e.nickname) parts.push(e.nickname);
+  if (e.cn_name) parts.push(e.cn_name);
+  if (e.position) parts.push(e.position);
+  return parts.join(' ');
+}
+
+async function openBindingEmpPicker(uid, nickname) {
+  if (!_bindingEmp.length) {
+    try { _bindingEmp = await api('binding/employees') || []; } catch(e) {
+      showToast('员工列表加载失败：' + e.message, 'error'); return;
+    }
+  }
+  var rows = _bindingEmp;
+  var selKey = String(uid);
+  var selectedNo = _bindingEmpSel[selKey] || null;
+
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:1060;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)';
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.remove(); });
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:10px;max-width:760px;width:94%;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.25)';
+
+  var head = document.createElement('div');
+  head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #e5e7eb;background:#f8f9fa;border-radius:10px 10px 0 0';
+  var hTitle = document.createElement('h3');
+  hTitle.style.cssText = 'margin:0;font-size:15px';
+  hTitle.textContent = '选择绑定员工（uid ' + uid + (nickname ? ' · ' + nickname : '') + '）';
+  head.appendChild(hTitle);
+  var closeX = document.createElement('button');
+  closeX.type = 'button';
+  closeX.textContent = '×';
+  closeX.style.cssText = 'background:none;border:none;font-size:20px;cursor:pointer;color:#666';
+  closeX.addEventListener('click', function(){ overlay.remove(); });
+  head.appendChild(closeX);
+  box.appendChild(head);
+
+  var searchRow = document.createElement('div');
+  searchRow.style.cssText = 'padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid #eee';
+  var inp = document.createElement('input');
+  inp.placeholder = '搜索：编号 / 昵称 / 别名 / 中文名 / 真实姓名 / Discord / 岗位';
+  inp.style.cssText = 'flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px';
+  searchRow.appendChild(inp);
+  var searchBtn = document.createElement('button');
+  searchBtn.className = 'btn btn-sm';
+  searchBtn.textContent = '搜索';
+  searchBtn.addEventListener('click', function(){ renderRows(); });
+  inp.addEventListener('keyup', function(e){ if (e.key === 'Enter') renderRows(); });
+  searchRow.appendChild(searchBtn);
+  box.appendChild(searchRow);
+
+  var list = document.createElement('div');
+  list.style.cssText = 'overflow:auto;flex:1;min-height:220px';
+  box.appendChild(list);
+
+  var foot = document.createElement('div');
+  foot.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e5e7eb';
+  var selInfo = document.createElement('span');
+  selInfo.style.cssText = 'font-size:12px;color:#666';
+  foot.appendChild(selInfo);
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px';
+  var cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'btn btn-sm';
+  cancelBtn.textContent = '取消';
+  cancelBtn.addEventListener('click', function(){ overlay.remove(); });
+  btnRow.appendChild(cancelBtn);
+  var confirmBtn = document.createElement('button');
+  confirmBtn.className = 'btn btn-sm btn-primary';
+  confirmBtn.textContent = '确认选中';
+  confirmBtn.disabled = !selectedNo;
+  confirmBtn.style.opacity = selectedNo ? '1' : '0.5';
+  confirmBtn.addEventListener('click', function(){
+    if (!selectedNo) { showToast('请先选择员工', 'error'); return; }
+    _bindingEmpSel[selKey] = selectedNo;
+    applySelectedEmp(selKey);
+    overlay.remove();
+    showToast('已选中员工 ' + selectedNo + '，点击「绑定」完成', 'success');
+  });
+  btnRow.appendChild(confirmBtn);
+  foot.appendChild(btnRow);
+  box.appendChild(foot);
+
+  var updateInfo = function(){
+    confirmBtn.disabled = !selectedNo;
+    confirmBtn.style.opacity = selectedNo ? '1' : '0.5';
+    selInfo.textContent = selectedNo ? '已选中：' + empLabelText(selectedNo) : '请先选择员工';
+  };
+
+  var applySelectedEmp = function(uidKey){
+    var tag = document.getElementById('bindEmpTag_' + uidKey);
+    if (tag) {
+      var no = _bindingEmpSel[uidKey];
+      tag.textContent = no ? '已选：' + empLabelText(no) : '未选员工';
+    }
+  };
+  window._applySelEmp = applySelectedEmp;
+
+  var renderRows = function(){
+    var q = (inp.value || '').trim().toLowerCase();
+    var filtered = rows;
+    if (q) {
+      filtered = rows.filter(function(r){
+        return [r.emp_no, r.nickname, r.alias, r.real_name, r.cn_name, r.position, r.discord]
+          .some(function(v){ return v && String(v).toLowerCase().indexOf(q) >= 0; });
+      });
+    }
+    list.innerHTML = '';
+    if (!filtered.length) {
+      list.innerHTML = '<p style="padding:24px;text-align:center;color:#999">无匹配员工</p>';
+      updateInfo();
+      return;
+    }
+    var table = document.createElement('table');
+    table.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px';
+    var thead = document.createElement('thead');
+    thead.innerHTML = '<tr style="text-align:left;background:#f3f4f6">'
+      + '<th style="padding:8px 10px;width:28px"></th>'
+      + '<th style="padding:8px 10px">编号</th><th style="padding:8px 10px">昵称</th>'
+      + '<th style="padding:8px 10px">中文名</th><th style="padding:8px 10px">真实姓名</th>'
+      + '<th style="padding:8px 10px">Discord</th>'
+      + '<th style="padding:8px 10px">岗位</th><th style="padding:8px 10px">状态</th></tr>';
+    table.appendChild(thead);
+    var tbody = document.createElement('tbody');
+    filtered.forEach(function(r){
+      var tr = document.createElement('tr');
+      tr.style.cssText = 'cursor:pointer;border-bottom:1px solid #f0f0f0';
+      var paintRow = function(){
+        var isSel = String(r.emp_no) === String(selectedNo);
+        tr.style.background = isSel ? '#e8f0fe' : '';
+        var c = tr.querySelector('.sel-check');
+        if (c) c.textContent = isSel ? '✔' : '';
+      };
+      tr.addEventListener('mouseenter', function(){
+        if (String(r.emp_no) !== String(selectedNo)) tr.style.background = '#f5f9ff';
+      });
+      tr.addEventListener('mouseleave', paintRow);
+      tr.addEventListener('click', function(){
+        selectedNo = (selectedNo && String(selectedNo) === String(r.emp_no)) ? null : String(r.emp_no);
+        tbody.querySelectorAll('tr').forEach(function(t){
+          var isSel = t.dataset.no === selectedNo;
+          t.style.background = isSel ? '#e8f0fe' : '';
+          var c = t.querySelector('.sel-check');
+          if (c) c.textContent = isSel ? '✔' : '';
+        });
+        updateInfo();
+      });
+      tr.dataset.no = r.emp_no;
+      tr.innerHTML = '<td class="sel-check" style="padding:8px 10px;width:28px;color:#1a73e8;font-weight:700"></td>'
+        + '<td style="padding:8px 10px;font-weight:600">' + String(empEscape(r.emp_no)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.nickname)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.cn_name)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.real_name)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.discord)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.position)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.status)) + '</td>';
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    list.appendChild(table);
+    updateInfo();
+  };
+  renderRows();
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+function empEscape(s){ return s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 async function bindingDoBind(uid, nickname) {
-  var sel = document.getElementById('bindEmp_' + uid);
-  var empNo = sel ? sel.value : '';
-  if (!empNo) { showToast('请先选择员工', 'error'); return; }
-  if (!confirm('将 ID ' + uid + ' (昵称:' + nickname + ') 绑定到员工 ' + empNo + '？')) return;
+  var empNo = _bindingEmpSel[uid] || '';
+  if (!empNo) { showToast('请先点击「选员工」选择绑定对象', 'error'); return; }
+  if (!confirm('将 ID ' + uid + '（昵称:' + nickname + '）绑定到员工 ' + empLabelText(empNo) + '？')) return;
   try {
     await api('claim/bind', { method:'POST', json:{ user_id: uid, emp_no: empNo, nickname: nickname } });
+    delete _bindingEmpSel[uid];
     showToast('已绑定 ' + empNo, 'success');
     await bindingLoad();
   } catch(e) { showToast('绑定失败: ' + e.message, 'error'); }
-}
-
-async function bindingDoForeign(uid, nickname) {
-  if (!nickname) { showToast('该 uid 无昵称，无法外聘', 'error'); return; }
-  if (!confirm('将 #' + String(uid).slice(-6) + ' 标记为外聘/临时？')) return;
-  try {
-    await api('claim/foreign', { method:'POST', json:{user_id: uid, nickname: nickname} });
-    showToast('已标记外聘', 'success');
-    await bindingLoad();
-  } catch(e) { showToast('标记失败: ' + e.message, 'error'); }
 }
 
 async function bindingDoExclude(uid, nickname) {

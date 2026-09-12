@@ -1948,6 +1948,37 @@ def claim_exclude():
 
 # ---------- Discord 绑定管理（方案 A 独立模块：全量视图 + 解绑，审计留痕） ----------
 
+@app.get("/api/binding/employees")
+@login_required
+def binding_employees():
+    """员工富信息列表（绑定选择器数据源）：返回可选员工的关键参考信息，供前端搜索+展示。"""
+    db = get_db()
+    rows = db.execute(
+        "SELECT emp_no, nickname, alias, real_name, cn_name, gender, position, status,"
+        " domain, discord, discord_id, discord_user_id, entry_date FROM live_employees"
+        " ORDER BY emp_no").fetchall()
+    db.close()
+    items = []
+    gmap = {"1": "男", "2": "女"}
+    for r in rows:
+        items.append({
+            "emp_no": r["emp_no"],
+            "nickname": r["nickname"] or "",
+            "alias": r["alias"] or "",
+            "real_name": r["real_name"] or "",
+            "cn_name": r["cn_name"] or "",
+            "gender": gmap.get(str(r["gender"]), ""),
+            "position": r["position"] or "",
+            "status": r["status"] or "",
+            "domain": r["domain"] or "",
+            "discord": r["discord"] or "",
+            "discord_user_id": r["discord_user_id"] or "",
+            "discord_id": r["discord_id"] or "",
+            "entry_date": r["entry_date"] or "",
+        })
+    return jsonify({"ok": True, "data": items})
+
+
 @app.get("/api/binding/list")
 @login_required
 def binding_list():
