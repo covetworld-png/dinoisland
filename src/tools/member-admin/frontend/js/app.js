@@ -5694,7 +5694,23 @@ function bindingRenderBody() {
   var data = _bindingCache || { unclaimed: [], bound: [] };
   if (_bindingTab === 'tab1') {
     var ul = bindingFilter(data.unclaimed || []);
-    var html = '<div style="font-weight:600;margin:4px 0 6px;color:#991b1b">🔴 待认领 uid（' + (data.unclaimed||[]).length + '）</div>';
+    var html = '';
+    // 改名/新昵称告警（reconcile.renamed：已知 uid 近 7 天昵称不在历史名字集合）
+    var rn = data.renamed || [];
+    if (rn.length) {
+      html += '<div style="font-weight:600;margin:4px 0 6px;color:#92400e">🟡 改名/新昵称（' + rn.length + '）<span style="font-weight:400;font-size:10px;color:#999">已知 uid 使用了映射外的名字，注意可能是改昵称或换人</span></div>';
+      html += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px;background:#fffbeb">';
+      html += '<tr style="background:#fef3c7"><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">当前昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">映射</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">最近活跃</th></tr>';
+      for (var ri=0;ri<rn.length;ri++) {
+        var r0 = rn[ri];
+        html += '<tr><td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px"><code style="font-size:10px">' + escHtml(r0.user_id) + '</code></td>';
+        html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px;font-weight:600">' + escHtml(r0.nickname || '') + '</td>';
+        html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r0.mapped_to || '') + '</td>';
+        html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r0.last_seen || '') + '</td></tr>';
+      }
+      html += '</table>';
+    }
+    html += '<div style="font-weight:600;margin:4px 0 6px;color:#991b1b">🔴 待认领 uid（' + (data.unclaimed||[]).length + '）</div>';
     if (!ul.length) {
       html += '<div style="color:#16a34a;font-size:12px;margin-bottom:10px">✅ 暂无未认领 uid</div>';
     } else {
@@ -5729,7 +5745,23 @@ function bindingRenderBody() {
       if (!grouped[b.user_id].discord_name && b.discord_name) grouped[b.user_id].discord_name = b.discord_name;
     });
     var gArr = Object.keys(grouped).map(function(k){ return grouped[k]; });
-    var html2 = '<div style="font-weight:600;margin:4px 0 6px;color:#1e40af">🔗 已绑定 uid（按 uid 合并，' + data.bound.length + ' 条来源 → ' + gArr.length + ' 个 uid）</div>';
+    var html2 = '';
+    // 改名/新昵称告警（与 Tab1 同口径）
+    var rn2 = data.renamed || [];
+    if (rn2.length) {
+      html2 += '<div style="font-weight:600;margin:4px 0 6px;color:#92400e">🟡 改名/新昵称（' + rn2.length + '）<span style="font-weight:400;font-size:10px;color:#999">已知 uid 使用了映射外的名字，注意可能是改昵称或换人</span></div>';
+      html2 += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px;background:#fffbeb">';
+      html2 += '<tr style="background:#fef3c7"><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">当前昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">映射</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">最近活跃</th></tr>';
+      for (var rj=0;rj<rn2.length;rj++) {
+        var r1 = rn2[rj];
+        html2 += '<tr><td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px"><code style="font-size:10px">' + escHtml(r1.user_id) + '</code></td>';
+        html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px;font-weight:600">' + escHtml(r1.nickname || '') + '</td>';
+        html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r1.mapped_to || '') + '</td>';
+        html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r1.last_seen || '') + '</td></tr>';
+      }
+      html2 += '</table>';
+    }
+    html2 += '<div style="font-weight:600;margin:4px 0 6px;color:#1e40af">🔗 已绑定 uid（按 uid 合并，' + data.bound.length + ' 条来源 → ' + gArr.length + ' 个 uid）</div>';
     html2 += '<table style="width:100%;border-collapse:collapse;background:#fff">';
     html2 += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">Discord昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">归属</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">来源</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
     for (var k=0;k<gArr.length;k++) {
