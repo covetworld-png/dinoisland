@@ -987,7 +987,7 @@ async function openFormModal(moduleKey, item) {
 
   const body = $('#formModalBody');
   body.innerHTML = '';
-  $('#formModalTitle').textContent = (item ? '编辑' : '新增') + cfg.title;
+  $('#formModalTitle').textContent = (item && item.id ? '编辑' : '新增') + cfg.title;
 
   // 新增直播员工：右上角「从源头导入」入口（从源库 staff_info 选员工回填表单）
   const headerBtns = document.getElementById('formModalHeaderBtns');
@@ -1436,7 +1436,7 @@ $('#formModalSaveBtn').addEventListener('click', async () => {
       payload[f.key] = v;
     }
   }
-  const isEdit = !!formCtx.item;
+  const isEdit = !!formCtx.item && !!formCtx.item.id;
   const path = isEdit ? (cfg.table + '/' + formCtx.item.id) : cfg.table;
   try {
     await api(path, { method: isEdit ? 'PUT' : 'POST', json: payload });
@@ -6132,6 +6132,34 @@ function pidsStatusBadge(status) {
   return '<span style="background:' + m.bg + ';color:' + m.fg + ';border:1px solid ' + m.border + ';border-radius:9px;padding:1px 8px;font-size:11px;font-weight:600">' + m.label + '</span>';
 }
 
+function pidsActionCell(x) {
+  var btnStyle = 'font-size:10px;padding:1px 6px';
+  if (x.mapping_id) {
+    return '<button class="btn btn-sm" style="' + btnStyle + ';color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="pidsEditMapping(' + x.mapping_id + ')">编辑映射</button>';
+  }
+  return '<button class="btn btn-sm" style="' + btnStyle + ';color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="pidsAddMapping(\'' + escJs(x.player_name) + '\')">补映射</button>';
+}
+
+function escJs(s) {
+  return String(s == null ? '' : s).replace(/'/g, "\\'");
+}
+
+// 已有映射行 → 跳转陪玩映射编辑表单（通用 openFormModal，item 需含 id + 字段值）
+async function pidsEditMapping(mappingId) {
+  try {
+    var res = await api('player_mapping?page=1&page_size=200');
+    var items = (res && res.items) || [];
+    var it = items.find(function(x){ return String(x.id) === String(mappingId); });
+    if (!it) { showToast('未找到该映射行', 'error'); return; }
+    openFormModal('player_mapping', it);
+  } catch (e) { showToast('加载映射失败: ' + e.message, 'error'); }
+}
+
+// 无映射行 → 打开陪玩映射新增表单并预填 player_name
+async function pidsAddMapping(playerName) {
+  openFormModal('player_mapping', { id: null, player_name: playerName, emp_no: '', discord: '', discord_id: '', remark: '自动补缺：未关联员工' });
+}
+
 function pidsRenderBody() {
   var wrap = document.getElementById('pidsBody');
   if (!wrap) return;
@@ -6146,6 +6174,7 @@ function pidsRenderBody() {
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">源 player_name</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">源 nick</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">映射昵称</th>'
+    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">关联员工</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">Discord</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">备注</th>'
@@ -6158,6 +6187,7 @@ function pidsRenderBody() {
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-weight:600">' + escHtml(x.player_name || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.nick_name || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.mapping_player_name || '<span class="muted">—</span>') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">' + pidsActionCell(x) + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_label ? escHtml(x.emp_label) : '<span class="muted">' + (x.emp_no ? escHtml(x.emp_no) : '—') + '</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.discord || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#6b7280">' + escHtml(x.remark || '') + '</td>';

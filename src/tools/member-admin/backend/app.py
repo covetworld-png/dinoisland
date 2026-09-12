@@ -2085,6 +2085,7 @@ def _pids_panorama_rows():
             "player_name": name,
             "nick_name": nick,
             "status": status,
+            "mapping_id": (mapping or {}).get("id") or 0,
             "mapping_player_name": (mapping or {}).get("player_name") or "",
             "emp_no": emp_no,
             "emp_label": emp_label,
