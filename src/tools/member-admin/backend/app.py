@@ -627,12 +627,13 @@ def options(kind):
             " WHERE game_guild_id != '' ORDER BY server, CAST(game_guild_id AS INTEGER)").fetchall()
         items = [{"id": r["game_guild_id"], "label": guild_label(dict(r))} for r in rows]
     elif kind == "live_employees":
-        # 以 emp_no 为值，供 player_mapping 等按编号关联场景使用
+        # 以 emp_no 为值，供 player_mapping 等按编号关联场景使用；头部追加「已离职」历史遗留选项
         rows = conn.execute(
             "SELECT emp_no, nickname, alias, position, status FROM live_employees"
             " ORDER BY emp_no").fetchall()
         items = [{"id": r["emp_no"],
                   "label": f'{r["nickname"] or r["alias"] or r["emp_no"]}（{r["position"] or "-"}·{r["status"] or "-"}）'} for r in rows]
+        items.insert(0, {"id": "LEFT", "label": "已离职（历史遗留）"})
     else:
         conn.close()
         abort(404)
@@ -2075,9 +2076,13 @@ def _pids_panorama_rows():
             e = le_map[emp_no]
             emp_label = "%s %s" % (emp_no, e.get("nickname") or e.get("cn_name") or "")
         # 状态判定：只由数据事实决定（名字后缀≠身份）
-        # ok=已映射且员工有效 / no_emp=已映射但员工空 / unmapped=无映射行
+        # ok=已映射且员工有效 / no_emp=已映射但员工空 / unmapped=无映射行 / left=已离职历史遗留
         if mapping:
-            status = "ok" if emp_no and emp_label else "no_emp"
+            if emp_no == "LEFT":
+                status = "left"
+                emp_label = "已离职（历史遗留）"
+            else:
+                status = "ok" if emp_no and emp_label else "no_emp"
         else:
             status = "unmapped"
         rows.append({

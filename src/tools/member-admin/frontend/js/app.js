@@ -6066,6 +6066,7 @@ var PIDS_STATUS_META = {
   ok:       { label: '已映射',      bg: '#dcfce7', fg: '#166534', border: '#bbf7d0' },
   no_emp:   { label: '缺员工',      bg: '#fef9c3', fg: '#854d0e', border: '#fef08a' },
   unmapped: { label: '缺映射',      bg: '#fee2e2', fg: '#b91c1c', border: '#fecaca' },
+  left:     { label: '已离职',      bg: '#ede9fe', fg: '#6d28d9', border: '#ddd6fe' },
 };
 
 async function renderPidsPage() {
@@ -6107,7 +6108,7 @@ async function pidsLoad() {
     _pidsItems = (res && res.items) || [];
     if (hint) {
       var c = _pidsItems.reduce(function(a, x){ a[x.status] = (a[x.status]||0) + 1; return a; }, {});
-      hint.textContent = '全量 ' + _pidsItems.length + '｜已映射 ' + (c.ok||0) + '｜缺员工 ' + (c.no_emp||0) + '｜缺映射 ' + (c.unmapped||0);
+      hint.textContent = '全量 ' + _pidsItems.length + '｜已映射 ' + (c.ok||0) + '｜缺员工 ' + (c.no_emp||0) + '｜缺映射 ' + (c.unmapped||0) + '｜已离职 ' + (c.left||0);
     }
     pidsRenderBody();
   } catch (e) {
