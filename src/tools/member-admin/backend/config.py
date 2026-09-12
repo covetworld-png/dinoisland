@@ -34,10 +34,16 @@ META = {
     "account_statuses": ["正常", "封禁", "下野"],
     "payment_types": ["银行账户", "MoMo 电子钱包", "ZaloPay 电子钱包", "其他"],
     "live_domains": ["直播", "游戏"],
+    "genders": [{"value": "1", "label": "男"}, {"value": "2", "label": "女"}],
     "live_positions": ["主播", "陪玩", "HR", "剪辑", "直播间管理员"],
     "live_emp_types": ["全职", "兼职"],
     "live_statuses": ["在职", "离职"],
-    "salary_modes": ["纯底薪", "底薪+分成", "纯分成-固定", "纯分成-阶梯", "底薪+阶梯分成", "计件"],
+    # 薪资结构：MA 存储与源 staff_info.salary_mode 一致的数字编码（2026-09-12 用户裁定）
+    # 1=纯底薪 2=纯分成-固定 3=底薪+分成 4=底薪+阶梯分成 5=计件；无「纯分成-阶梯」（源头无对应）
+    "salary_modes": [{"value": "1", "label": "纯底薪"}, {"value": "2", "label": "纯分成-固定"},
+                      {"value": "3", "label": "底薪+分成"}, {"value": "4", "label": "底薪+阶梯分成"},
+                      {"value": "5", "label": "计件"}],
+    "salary_labels": {"1": "纯底薪", "2": "纯分成-固定", "3": "底薪+分成", "4": "底薪+阶梯分成", "5": "计件"},
 }
 
 # 代码值映射（派生字段 domain_code/position_code/emp_type_code，勿手工维护）

@@ -132,6 +132,7 @@ CREATE TABLE IF NOT EXISTS live_employees (
     alias TEXT DEFAULT '',             -- 别名（第二身份名）
     real_name TEXT DEFAULT '',         -- 越南真实姓名
     cn_name TEXT DEFAULT '',           -- 中文名
+    gender TEXT DEFAULT '',            -- 性别：数字编码（与源头一致）1=男 2=女
     domain TEXT DEFAULT '直播',        -- 业务域：直播/游戏
     domain_code TEXT DEFAULT '',       -- 业务域代码（派生）：L/G
     position TEXT DEFAULT '陪玩',        -- 主播/陪玩/HR/剪辑/直播间管理员
@@ -149,7 +150,7 @@ CREATE TABLE IF NOT EXISTS live_employees (
     attendance_allowance REAL DEFAULT 0, -- 出勤补贴：0=无，非0=有（存单价 VND/天，固定 96000）
     housing_allowance REAL DEFAULT 0,  -- 住房补贴 VND（绝对数）
     transport_allowance REAL DEFAULT 0,-- 交通补贴 VND
-    salary_mode TEXT DEFAULT '',       -- 薪资结构：纯底薪/底薪+分成/纯分成-固定/纯分成-阶梯/计件
+    salary_mode TEXT DEFAULT '',       -- 薪资结构：数字编码（与源头一致）1=纯底薪 2=纯分成-固定 3=底薪+分成 4=底薪+阶梯分成 5=计件
     commission_rate TEXT DEFAULT '',   -- 直播分成比例（固定时），如 50%
     commission_tiers TEXT DEFAULT '',  -- 分成阶梯 JSON（阶梯时）：[{"kc":150000,"rate":10},...]
     biz_commission_rate TEXT DEFAULT '', -- 商单分成比例
@@ -222,7 +223,7 @@ TABLE_FIELDS = {
                          "bank_name", "bank_branch", "phone", "address", "qr_image", "remark"],
     "sql_scripts": ["name", "description", "params", "param_specs", "sql_text"],
     "commission_snapshots": ["month", "basis", "remark", "expectations", "employee_expectations"],
-    "live_employees": ["emp_no", "nickname", "alias", "real_name", "cn_name",
+    "live_employees": ["emp_no", "nickname", "alias", "real_name", "cn_name", "gender",
                        "domain", "domain_code", "position", "position_code",
                        "emp_type", "emp_type_code", "status", "is_probation", "probation_months",
                        "probation_salary", "probation_salary_m2",

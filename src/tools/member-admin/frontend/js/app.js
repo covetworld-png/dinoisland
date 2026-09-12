@@ -20,6 +20,32 @@ function safeFilename(s) {
   return String(s || '').trim().replace(/[\\/:*?"<>|\s]+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '');
 }
 
+// 薪资结构：MA 存储与源头一致的数字编码 1-5（2026-09-12 用户裁定）
+// 1=纯底薪 2=纯分成-固定 3=底薪+分成 4=底薪+阶梯分成 5=计件；无「纯分成-阶梯」
+const SALARY_LABELS = { 1: '纯底薪', 2: '纯分成-固定', 3: '底薪+分成', 4: '底薪+阶梯分成', 5: '计件' };
+const GENDER_LABELS = { 1: '男', 2: '女' };
+function genderLabel(v) {
+  if (v === null || v === undefined || v === '') return '';
+  return GENDER_LABELS[String(v).trim()] || String(v);
+}
+function salaryLabel(v) {
+  if (v === null || v === undefined || v === '') return '';
+  const s = String(v).trim();
+  // 兼容历史中文值（旧数据修复前）
+  const rev = { '纯底薪': '1', '纯分成-固定': '2', '底薪+分成': '3', '底薪+阶梯分成': '4', '计件': '5', '纯分成-阶梯': '' };
+  if (SALARY_LABELS[s]) return SALARY_LABELS[s];
+  if (s in rev && rev[s]) return SALARY_LABELS[rev[s]];
+  return s;
+}
+function salaryKey(v) {
+  // 中文 → 数字编码（导入/编辑时反向兼容）
+  const m = { '纯底薪': '1', '纯分成-固定': '2', '底薪+分成': '3', '底薪+阶梯分成': '4', '计件': '5' };
+  const s = String(v == null ? '' : v).trim();
+  if (SALARY_LABELS[s]) return s;
+  if (s in m) return m[s];
+  return s;
+}
+
 function showToast(msg, type, durationMs) {
   const t = $('#toast');
   t.textContent = msg;
@@ -492,6 +518,7 @@ const MODULES = {
       { key: 'alias', label: '别名', opt: true },
       { key: 'real_name', label: '真实姓名' },
       { key: 'cn_name', label: '中文名', opt: true },
+      { key: 'gender', label: '性别', opt: true, render: v => esc(genderLabel(v)) },
       { key: 'domain', label: '业务域', opt: true },
       { key: 'position', label: '岗位' },
       { key: 'emp_type', label: '雇佣类型', opt: true },
@@ -499,7 +526,7 @@ const MODULES = {
       { key: 'status', label: '状态' },
       { key: 'sys_role', label: '陪玩角色', opt: true, hideDefault: true },
       { key: 'discord', label: 'Discord', opt: true },
-      { key: 'salary_mode', label: '薪资结构', opt: true },
+      { key: 'salary_mode', label: '薪资结构', opt: true, render: v => esc(salaryLabel(v)) },
       { key: 'entry_date', label: '入职日期', opt: true },
       { key: 'updated_at', label: '修改时间', opt: true },
     ],
@@ -515,6 +542,7 @@ const MODULES = {
       { key: 'alias', label: '别名（越南自取）', type: 'text' },
       { key: 'real_name', label: '真实姓名', type: 'text' },
       { key: 'cn_name', label: '中文名', type: 'text' },
+      { key: 'gender', label: '性别', type: 'select', metaKey: 'genders' },
       { key: 'domain', label: '业务域', type: 'select', metaKey: 'live_domains', default: '直播' },
       { key: 'position', label: '岗位', type: 'select', metaKey: 'live_positions' },
       { key: 'emp_type', label: '雇佣类型', type: 'select', metaKey: 'live_emp_types', default: '全职' },
@@ -523,16 +551,16 @@ const MODULES = {
       { key: 'probation_months', label: '试用期月数', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
       { key: 'probation_salary', label: '试用期底薪 m1（VND）', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
       { key: 'probation_salary_m2', label: '试用期底薪 m2（VND）', type: 'number', showWhen: { key: 'is_probation', in: ['1'] } },
-      { key: 'formal_salary', label: '转正底薪（VND）', type: 'number', showWhen: { key: 'salary_mode', in: ['', '纯底薪', '底薪+分成', '底薪+阶梯分成'] } },
+      { key: 'formal_salary', label: '转正底薪（VND）', type: 'number', showWhen: { key: 'salary_mode', in: ['', '1', '3', '4'] } },
       { key: 'insurance', label: '缴纳保险', type: 'number' },
       { key: 'attendance_allowance', label: '出勤补贴', type: 'select', options: [{value:'0',label:'无'}, {value:'96000',label:'有（96,000/天）'}], default: '0' },
       { key: 'meal_allowance', label: '餐补', type: 'select', options: [{value:'0',label:'无'}, {value:'60000',label:'有（60,000/天）'}], default: '0' },
       { key: 'transport_allowance', label: '交通补贴', type: 'select', options: [{value:'0',label:'无'}, {value:'40000',label:'有（40,000/天）'}], default: '0' },
       { key: 'housing_allowance', label: '住房补贴（VND，固定）', type: 'number' },
       { key: 'salary_mode', label: '薪资结构', type: 'select', metaKey: 'salary_modes' },
-      { key: 'commission_rate', label: '直播分成比例', type: 'text', placeholder: '如 50%', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['底薪+分成', '纯分成-固定'] }] },
-      { key: 'commission_tiers', label: '分成阶梯（JSON）', type: 'textarea', full: true, placeholder: '[{"kc":150000,"rate":10},{"kc":300000,"rate":20}]', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['纯分成-阶梯', '底薪+阶梯分成'] }] },
-      { key: 'biz_commission_rate', label: '商单分成比例', type: 'text', placeholder: '如 20%', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['底薪+分成', '纯分成-固定', '纯分成-阶梯', '底薪+阶梯分成'] }] },
+      { key: 'commission_rate', label: '直播分成比例', type: 'text', placeholder: '如 50%', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['3', '2'] }] },
+      { key: 'commission_tiers', label: '分成阶梯（JSON）', type: 'textarea', full: true, placeholder: '[{"kc":150000,"rate":10},{"kc":300000,"rate":20}]', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['4'] }] },
+      { key: 'biz_commission_rate', label: '商单分成比例', type: 'text', placeholder: '如 20%', showWhen: [{ key: 'position', in: ['主播'] }, { key: 'salary_mode', in: ['3', '2', '4'] }] },
       { key: 'youtube_commission_rate', label: 'YouTube 分成比例', type: 'text', placeholder: '如 50%', showWhen: { key: 'position', in: ['主播'] } },
       { key: 'entry_date', label: '入职日期', type: 'date' },
       { key: 'leave_date', label: '离职日期', type: 'date' },
@@ -673,6 +701,8 @@ async function switchModule(moduleKey) {
     renderCommissionPage();
   } else if (moduleKey === 'checkin') {
     renderCheckinPage();
+  } else if (moduleKey === 'binding') {
+    renderBindingPage();
   } else if (moduleKey === 'inbox') {
     renderInboxPage();
   } else if (moduleKey === 'schedule') {
@@ -948,6 +978,22 @@ async function openFormModal(moduleKey, item) {
   body.innerHTML = '';
   $('#formModalTitle').textContent = (item ? '编辑' : '新增') + cfg.title;
 
+  // 新增直播员工：右上角「从源头导入」入口（从源库 staff_info 选员工回填表单）
+  const headerBtns = document.getElementById('formModalHeaderBtns');
+  if (headerBtns) headerBtns.innerHTML = '';
+  if (!item && moduleKey === 'live_employees') {
+    if (headerBtns) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-sm';
+      btn.id = 'sourceImportBtn';
+      btn.title = '从源库 staff_info 选择员工，自动回填表单（只读导入，不建行）';
+      btn.innerHTML = '<i class="fas fa-download"></i> 从源头导入';
+      btn.addEventListener('click', openSourceStaffPicker);
+      headerBtns.appendChild(btn);
+    }
+  }
+
   const grid = document.createElement('div');
   grid.className = 'form-grid';
   const fieldCtrls = {};
@@ -1119,8 +1165,245 @@ async function openFormModal(moduleKey, item) {
   applyShowWhen();
 
   body.appendChild(grid);
-  formCtx = { moduleKey, item, fieldCtrls };
+  formCtx = { moduleKey, item, fieldCtrls, _applyShowWhen: applyShowWhen };
   openModal('formModal');
+}
+
+/* 从源头导入：源库 staff_info 员工选择器 + 回填表单（只读，不建行） */
+let sourceStaffCache = null; // { ts, list }
+const SOURCE_STAFF_TTL = 60000;
+
+async function fetchSourceStaff(kw) {
+  const p = new URLSearchParams();
+  if (kw) p.set('kw', kw);
+  // api() 已解包 data.data，直接返回数组
+  const res = await api('source/staff' + (p.toString() ? '?' + p.toString() : ''));
+  return Array.isArray(res) ? res : [];
+}
+
+async function openSourceStaffPicker() {
+  if (!formCtx || formCtx.item) return;
+  const body = $('#formModalBody');
+  let rows = [];
+  try {
+    rows = await fetchSourceStaff('');
+  } catch (e) {
+    showToast('源库加载失败：' + e.message, 'error');
+    return;
+  }
+  if (!rows.length) {
+    showToast('没有待建档的新员工可导入', 'info');
+    return;
+  }
+
+  let selectedNo = null; // 当前选中员工编号
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:1060;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)';
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:10px;max-width:640px;width:92%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.25)';
+
+  const head = document.createElement('div');
+  head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #e5e7eb';
+  const hTitle = document.createElement('h3');
+  hTitle.style.cssText = 'margin:0;font-size:15px';
+  hTitle.textContent = '从源头导入新员工（源库有、MA 未建档）';
+  head.appendChild(hTitle);
+  const closeX = document.createElement('button');
+  closeX.type = 'button';
+  closeX.textContent = '×';
+  closeX.style.cssText = 'background:none;border:none;font-size:20px;cursor:pointer;color:#666';
+  closeX.addEventListener('click', () => overlay.remove());
+  head.appendChild(closeX);
+  box.appendChild(head);
+
+  const searchRow = document.createElement('div');
+  searchRow.style.cssText = 'padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid #eee';
+  const inp = document.createElement('input');
+  inp.placeholder = '搜索：编号 / 姓名 / 中文名 / 昵称 / Discord';
+  inp.style.cssText = 'flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px';
+  searchRow.appendChild(inp);
+  const searchBtn = document.createElement('button');
+  searchBtn.className = 'btn btn-sm';
+  searchBtn.textContent = '搜索';
+  searchBtn.addEventListener('click', async () => {
+    try {
+      rows = await fetchSourceStaff(inp.value.trim());
+      selectedNo = null;
+      updateImportBtn();
+      renderRows();
+    } catch (e) { showToast('搜索失败：' + e.message, 'error'); }
+  });
+  searchRow.appendChild(searchBtn);
+  box.appendChild(searchRow);
+
+  const list = document.createElement('div');
+  list.style.cssText = 'overflow:auto;flex:1;min-height:200px';
+  box.appendChild(list);
+
+  // 底部操作栏：关闭 + 导入所选
+  const foot = document.createElement('div');
+  foot.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e5e7eb';
+  const selInfo = document.createElement('span');
+  selInfo.style.cssText = 'font-size:12px;color:#666';
+  selInfo.textContent = '请先选择要导入的员工';
+  foot.appendChild(selInfo);
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'btn btn-sm';
+  cancelBtn.textContent = '关闭';
+  cancelBtn.addEventListener('click', () => overlay.remove());
+  btnRow.appendChild(cancelBtn);
+  const importBtn = document.createElement('button');
+  importBtn.type = 'button';
+  importBtn.className = 'btn btn-sm btn-primary';
+  importBtn.textContent = '导入此员工';
+  importBtn.disabled = true;
+  importBtn.style.opacity = '0.5';
+  importBtn.addEventListener('click', () => {
+    if (selectedNo) applySourceStaff(selectedNo);
+  });
+  btnRow.appendChild(importBtn);
+  foot.appendChild(btnRow);
+  box.appendChild(foot);
+
+  const updateImportBtn = () => {
+    const hasSel = !!selectedNo;
+    importBtn.disabled = !hasSel;
+    importBtn.style.opacity = hasSel ? '1' : '0.5';
+    const sel = rows.find(r => r.staff_no === selectedNo);
+    selInfo.textContent = hasSel && sel
+      ? `已选中：${sel.staff_no} ${sel.name_vn || ''}（${sel.name_cn || ''}）`
+      : '请先选择要导入的员工';
+  };
+
+  const renderRows = () => {
+    list.innerHTML = '';
+    if (!rows.length) {
+      list.innerHTML = '<p style="padding:24px;text-align:center;color:#999">无匹配的待建档员工</p>';
+      return;
+    }
+    const table = document.createElement('table');
+    table.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px';
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr style="text-align:left;background:#f8f9fa">'
+      + '<th style="padding:8px 10px;width:30px"></th>'
+      + '<th style="padding:8px 10px">编号</th><th style="padding:8px 10px">姓名</th>'
+      + '<th style="padding:8px 10px">中文名</th><th style="padding:8px 10px">Discord</th>'
+      + '<th style="padding:8px 10px">状态</th></tr>';
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.style.cssText = 'cursor:pointer;border-bottom:1px solid #f0f0f0';
+      const paint = () => {
+        const isSel = r.staff_no === selectedNo;
+        tr.style.background = isSel ? '#e8f0fe' : '';
+        const check = tr.querySelector('.row-check');
+        if (check) check.textContent = isSel ? '✔' : '';
+      };
+      tr.addEventListener('mouseenter', () => {
+        if (r.staff_no !== selectedNo) tr.style.background = '#f5f9ff';
+      });
+      tr.addEventListener('mouseleave', () => paint());
+      tr.addEventListener('click', () => {
+        selectedNo = selectedNo === r.staff_no ? null : r.staff_no;
+        tbody.querySelectorAll('tr').forEach(t => {
+          const isSel = t.dataset.no === selectedNo;
+          t.style.background = isSel ? '#e8f0fe' : '';
+          const c = t.querySelector('.row-check');
+          if (c) c.textContent = isSel ? '✔' : '';
+        });
+        updateImportBtn();
+      });
+      tr.dataset.no = r.staff_no;
+      tr.innerHTML = '<td class="row-check" style="padding:8px 10px;width:30px;color:#1a73e8;font-weight:700"></td>'
+        + `<td style="padding:8px 10px">${esc(r.staff_no)}</td>`
+        + `<td style="padding:8px 10px">${esc(r.name_vn || '')}</td>`
+        + `<td style="padding:8px 10px">${esc(r.name_cn || '')}</td>`
+        + `<td style="padding:8px 10px">${esc(r.discord_name || '')}</td>`
+        + `<td style="padding:8px 10px">${esc(r.staff_status == 1 ? '在职' : '离职')}</td>`;
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    list.appendChild(table);
+  };
+  renderRows();
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+async function applySourceStaff(staffNo) {
+  if (!formCtx) return;
+  let detail;
+  try {
+    // api() 已解包 data.data，直接返回员工详情对象
+    detail = await api('source/staff/' + staffNo);
+  } catch (e) {
+    showToast('获取员工详情失败：' + e.message, 'error');
+    return;
+  }
+  if (!detail) return;
+  const set = (key, val) => {
+    const c = formCtx.fieldCtrls[key];
+    if (c && c.setValue) c.setValue(val == null ? '' : String(val));
+    else if (c) c.el.value = val == null ? '' : String(val);
+  };
+  // 回填映射：源 staff_info → 表单字段
+  set('emp_no', detail.staff_no);
+  set('nickname', detail.nick_name || '');
+  set('alias', detail.nick_name || '');
+  set('real_name', detail.name_vn || '');
+  set('cn_name', detail.name_cn || '');
+  if (detail.staff_gender != null && detail.staff_gender !== '') set('gender', String(detail.staff_gender));
+  set('discord', detail.discord_name || '');
+  if (detail.entry_date) set('entry_date', detail.entry_date);
+  // 岗位/雇佣类型/状态映射（源代码 → MA 中文）
+  const posMap = { 'ST': '主播', 'LA': '陪玩', 'PW': '陪玩', 'HR': 'HR', 'VE': '剪辑', 'LM': '直播间管理员', 'GL': '军团长', 'GM': '军团长', 'GS': 'GS' };
+  const typeMap = { '1': '全职', '2': '兼职' };
+  const statusMap = { '1': '在职', '2': '离职' };
+  if (detail.emp_position) {
+    const pos = posMap[detail.emp_position] || detail.emp_position;
+    set('position', pos);
+  }
+  if (detail.emp_type != null) {
+    const et = typeMap[String(detail.emp_type)] || String(detail.emp_type);
+    set('emp_type', et);
+  }
+  if (detail.staff_status != null) {
+    const st = statusMap[String(detail.staff_status)] || String(detail.staff_status);
+    set('status', st);
+  }
+  // is_probation 语义：源 1=已转正/0=试用中（倒挂），MA 0=已转正/1=试用
+  if (detail.is_probation != null) {
+    set('is_probation', detail.is_probation == 1 ? '0' : '1');
+    if (detail.probation_months) set('probation_months', String(detail.probation_months));
+  }
+  // 薪资结构：MA 存储与源一致的数字编码（1-5），直接回填数字
+  if (detail.salary_mode != null && detail.salary_mode !== '') {
+    set('salary_mode', String(detail.salary_mode));
+  }
+  // 联系方式 / 家庭联系人 / 身份信息（源字段 → 表单字段一一对应，无歧义）
+  if (detail.staff_mobile) set('phone_zalo', detail.staff_mobile);
+  if (detail.staff_email) set('email', detail.staff_email);
+  if (detail.staff_birthday) set('birth_date', String(detail.staff_birthday).slice(0, 10));
+  if (detail.id_card) set('id_card', detail.id_card);
+  if (detail.staff_address) set('address', detail.staff_address);
+  if (detail.emergency_contact) set('emergency_contact', detail.emergency_contact);
+  if (detail.emergency_relation) set('emergency_relation', detail.emergency_relation);
+  if (detail.emergency_phone) set('emergency_phone', detail.emergency_phone);
+  // 触发 showWhen 联动刷新
+  const applyShowWhen = formCtx._applyShowWhen;
+  if (applyShowWhen) applyShowWhen();
+  // 关闭选择器
+  document.querySelectorAll('.modal-overlay[style*="z-index:1060"]').forEach(o => o.remove());
+  showToast('已从源头导入 ' + staffNo + '，请核对后保存', 'success');
 }
 
 $('#formModalSaveBtn').addEventListener('click', async () => {
@@ -1284,6 +1567,7 @@ const LIVE_DRAWER_SECTIONS = [
   ['基本信息', [
     ['emp_no', '员工编号'], ['nickname', '昵称'], ['alias', '别名'],
     ['real_name', '真实姓名'], ['cn_name', '中文名'],
+    ['gender', '性别', (v) => genderLabel(v)],
     ['domain', '业务域', (v, it) => v + (it.domain_code ? '（' + it.domain_code + '）' : '')],
     ['position', '岗位', (v, it) => v + (it.position_code ? '（' + it.position_code + '）' : '')],
     ['emp_type', '雇佣类型', (v, it) => v + (it.emp_type_code ? '（' + it.emp_type_code + '）' : '')],
@@ -1293,15 +1577,15 @@ const LIVE_DRAWER_SECTIONS = [
   // 第 4 个元素为显示条件（与表单 showWhen 同口径）
   ['薪资（VND）', [
     ['is_probation', '是否已转正', v => v == 1 ? '否（试用期内）' : '是'],
-    ['salary_mode', '薪资结构'],
+    ['salary_mode', '薪资结构', (v) => salaryLabel(v)],
     ['probation_months', '试用期月数', null, it => it.is_probation == 1],
     ['probation_salary', '试用期底薪 m1', fmtVND, it => it.is_probation == 1],
     ['probation_salary_m2', '试用期底薪 m2', fmtVND, it => it.is_probation == 1],
-    ['formal_salary', '转正底薪', fmtVND, it => ['纯底薪', '底薪+分成', '底薪+阶梯分成'].includes(it.salary_mode)],
+    ['formal_salary', '转正底薪', fmtVND, it => ['1', '3', '4'].includes(salaryKey(it.salary_mode))],
     ['insurance', '缴纳保险', fmtVND],
-    ['commission_rate', '直播分成比例', null, it => it.position === '主播' && ['底薪+分成', '纯分成-固定'].includes(it.salary_mode)],
-    ['commission_tiers', '分成阶梯', null, it => it.position === '主播' && ['纯分成-阶梯', '底薪+阶梯分成'].includes(it.salary_mode)],
-    ['biz_commission_rate', '商单分成比例', null, it => it.position === '主播' && ['底薪+分成', '纯分成-固定', '纯分成-阶梯', '底薪+阶梯分成'].includes(it.salary_mode)],
+    ['commission_rate', '直播分成比例', null, it => it.position === '主播' && ['3', '2'].includes(salaryKey(it.salary_mode))],
+    ['commission_tiers', '分成阶梯', null, it => it.position === '主播' && ['4'].includes(salaryKey(it.salary_mode))],
+    ['biz_commission_rate', '商单分成比例', null, it => it.position === '主播' && ['3', '2', '4'].includes(salaryKey(it.salary_mode))],
     ['youtube_commission_rate', 'YouTube 分成比例', null, it => it.position === '主播'],
   ]],
   ['补贴（VND）', [
@@ -5330,7 +5614,182 @@ async function claimExclude(uid, nickname) {
   } catch (e) { showToast('排除失败: ' + e.message, 'error'); }
 }
 
-// ========== 数据校对（verify_reports：play_detail vs 签到 报告） ==========
+// ========== Discord 绑定管理（方案 A 独立模块：待绑定 + 已绑定全量） ==========
+var _bindingTab = 'tab1';
+var _bindingSearch = '';
+var _bindingCache = null;  // { unclaimed:[], bound:[], empList:[] }
+var _bindingEmp = [];     // options/live_employees 下拉
+
+async function renderBindingPage() {
+  $('#adminModuleTitle').textContent = 'Discord 绑定';
+  var main = $('#adminMain');
+  main.innerHTML = '';
+  var bar = document.createElement('div');
+  bar.className = 'filter-bar';
+  bar.innerHTML = ''
+    + '<button type="button" class="btn ' + (_bindingTab === 'tab1' ? 'btn-primary' : 'btn-outline') + '" onclick="bindingSwitchTab(\'tab1\')" style="font-size:12px">待绑定</button>'
+    + ' <button type="button" class="btn ' + (_bindingTab === 'tab2' ? 'btn-primary' : 'btn-outline') + '" onclick="bindingSwitchTab(\'tab2\')" style="font-size:12px">已绑定全量</button>'
+    + ' <input id="bindingSearch" placeholder="搜索 uid 尾号 / 昵称 / 归属" value="' + escHtml(_bindingSearch) + '" style="margin-left:10px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:220px" oninput="bindingOnSearch(this.value)">'
+    + ' <button class="btn btn-sm" onclick="bindingReload()" style="font-size:11px"><i class="fas fa-sync"></i> 刷新</button>'
+    + ' <span id="bindingHint" style="font-size:11px;color:#999;margin-left:8px"></span>';
+  main.appendChild(bar);
+  var wrap = document.createElement('div');
+  wrap.id = 'bindingBody';
+  wrap.style.marginTop = '10px';
+  main.appendChild(wrap);
+  await bindingLoad();
+}
+
+function bindingSwitchTab(tab) {
+  _bindingTab = tab;
+  $('#bindingSearch').value = '';
+  _bindingSearch = '';
+  var bar = document.querySelector('#adminMain .filter-bar');
+  if (bar) {
+    var btns = bar.querySelectorAll('button[onclick^="bindingSwitchTab"]');
+    btns.forEach(function(b) {
+      b.className = 'btn ' + (b.getAttribute('onclick').indexOf(tab) >= 0 ? 'btn-primary' : 'btn-outline');
+    });
+  }
+  bindingRenderBody();
+}
+
+function bindingOnSearch(v) {
+  _bindingSearch = (v || '').trim();
+  bindingRenderBody();
+}
+
+function bindingReload() {
+  bindingLoad();
+}
+
+async function bindingLoad() {
+  var box = $('#bindingBody') || $('#bindingBodyFallback');
+  var hint = document.getElementById('bindingHint');
+  if (hint) hint.textContent = '加载中...';
+  try {
+    var empList = [];
+    try { empList = await api('options/live_employees') || []; } catch(e) {}
+    var pet = await api('claim/pending');
+    var bd = await api('binding/list');
+    _bindingEmp = empList;
+    _bindingCache = {
+      unclaimed: (pet && pet.unclaimed) || [],
+      renamed: (pet && pet.renamed) || [],
+      stale: (pet && pet.stale) || [],
+      bound: (bd && bd.bound) || []
+    };
+    if (hint) hint.textContent = '待认领 ' + _bindingCache.unclaimed.length + ' ｜ 已绑定 ' + _bindingCache.bound.length;
+    bindingRenderBody();
+  } catch (e) {
+    if (hint) hint.textContent = '加载失败: ' + e.message;
+  }
+}
+
+function bindingFilter(list) {
+  if (!_bindingSearch) return list;
+  var q = _bindingSearch.toLowerCase();
+  return list.filter(function(x) {
+    return String(x.user_id).toLowerCase().indexOf(q) >= 0
+      || String(x.nickname || '').toLowerCase().indexOf(q) >= 0
+      || String(x.owner || x.mapped_to || '').toLowerCase().indexOf(q) >= 0;
+  });
+}
+
+function bindingRenderBody() {
+  var wrap = document.getElementById('bindingBody');
+  if (!wrap) return;
+  var data = _bindingCache || { unclaimed: [], bound: [] };
+  if (_bindingTab === 'tab1') {
+    var ul = bindingFilter(data.unclaimed || []);
+    var html = '<div style="font-weight:600;margin:4px 0 6px;color:#991b1b">🔴 待认领 uid（' + (data.unclaimed||[]).length + '）</div>';
+    if (!ul.length) {
+      html += '<div style="color:#16a34a;font-size:12px;margin-bottom:10px">✅ 暂无未认领 uid</div>';
+    } else {
+      html += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px;background:#fff">';
+      html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">活动</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
+      for (var i=0;i<ul.length;i++) {
+        var u = ul[i];
+        html += '<tr>';
+        html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(u.user_id) + '</code></td>';
+        html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(u.nickname || '') + '<br><span style="color:#999;font-size:10px">最近 ' + escHtml(u.last_seen || '') + '</span></td>';
+        html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">签' + u.checkins + ' / 语' + u.voice_minutes + 'min</td>';
+        html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
+        html += '<select id="bindEmp_' + u.user_id + '" style="font-size:11px;padding:1px 2px;max-width:150px"><option value="">绑定到员工...</option>';
+        for (var j=0;j<_bindingEmp.length;j++) html += '<option value="' + escHtml(_bindingEmp[j].id) + '">' + escHtml(_bindingEmp[j].label) + '</option>';
+        html += '</select> ';
+        html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="bindingDoBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">绑定</button>';
+        html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#92400e;background:#fef3c7;border-color:#fde68a" onclick="bindingDoForeign(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">外聘</button>';
+        html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="bindingDoExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">排除</button>';
+        html += '</td></tr>';
+      }
+      html += '</table>';
+    }
+    wrap.innerHTML = html;
+  } else {
+    var list2 = bindingFilter(data.bound || []);
+    var html2 = '<div style="font-weight:600;margin:4px 0 6px;color:#1e40af">🔗 已绑定 uid（来源标注） ' + data.bound.length + ' ｜ 显示 ' + list2.length + '</div>';
+    html2 += '<table style="width:100%;border-collapse:collapse;background:#fff">';
+    html2 += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">归属</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">来源</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
+    for (var k=0;k<list2.length;k++) {
+      var b = list2[k];
+      html2 += '<tr>';
+      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(b.user_id) + '</code></td>';
+      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(b.owner) + '</td>';
+      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(srcCell(b)) + '</td>';
+      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
+      html2 += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#b91c1c;background:#fee2e2;border-color:#fecaca" onclick="bindingDoUnbind(\'' + b.user_id + '\',\'' + b.source + '\',\'' + escHtml(b.owner_key).replace(/'/g,"\\'") + '\')">解绑</button>';
+      html2 += '</td></tr>';
+    }
+    html2 += '</table>';
+    wrap.innerHTML = html2;
+  }
+}
+
+function srcCell(b) {
+  var m = { 'live_employees.discord_id':'员工·discord_id', 'live_employees.discord_user_id':'员工·discord_user_id', 'player_mapping.discord_id':'陪玩映射·discord_id' };
+  return m[b.source] || b.source || '';
+}
+
+async function bindingDoBind(uid, nickname) {
+  var sel = document.getElementById('bindEmp_' + uid);
+  var empNo = sel ? sel.value : '';
+  if (!empNo) { showToast('请先选择员工', 'error'); return; }
+  if (!confirm('将 ID ' + uid + ' (昵称:' + nickname + ') 绑定到员工 ' + empNo + '？')) return;
+  try {
+    await api('claim/bind', { method:'POST', json:{ user_id: uid, emp_no: empNo, nickname: nickname } });
+    showToast('已绑定 ' + empNo, 'success');
+    await bindingLoad();
+  } catch(e) { showToast('绑定失败: ' + e.message, 'error'); }
+}
+
+async function bindingDoForeign(uid, nickname) {
+  if (!nickname) { showToast('该 uid 无昵称，无法外聘', 'error'); return; }
+  if (!confirm('将 #' + String(uid).slice(-6) + ' 标记为外聘/临时？')) return;
+  try {
+    await api('claim/foreign', { method:'POST', json:{user_id: uid, nickname: nickname} });
+    showToast('已标记外聘', 'success');
+    await bindingLoad();
+  } catch(e) { showToast('标记失败: ' + e.message, 'error'); }
+}
+
+async function bindingDoExclude(uid, nickname) {
+  if (!confirm('将 #' + String(uid).slice(-6) + ' ' + (nickname||'') + ' 加入排除名单？')) return;
+  try {
+    await api('claim/exclude', { method:'POST', json:{ user_id: uid } });
+    showToast('已排除', 'success');
+    await bindingLoad();
+  } catch(e) { showToast('排除失败: ' + e.message, 'error'); }
+}
+
+async function bindingDoUnbind(user_id, source, owner_key) {
+  if (!confirm('解绑 uid ' + user_id + '（来源 ' + srcCell({source:source}) + '）？\n\n该 uid 将回到「待认领」，可从新员工或映射。')) return;
+  try {
+    await api('binding/unbind', { method:'POST', json:{ user_id: user_id, source: source, owner_key: owner_key } });
+    showToast('已解绑', 'success');
+    await bindingLoad();
+  } catch(e) { showToast('解绑失败: ' + e.message, 'error'); }
+}
 async function openVerifyReports(initialDate) {
     window._verifyPendingDate = initialDate || null;
     var html = '<div class="modal-overlay" onclick="closeVerifyReports()"></div>';

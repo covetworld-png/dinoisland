@@ -319,6 +319,82 @@ def _attach_pd_ids(rows):
         row["pd_id"] = m.get(_fold(row.get("player_name") or ""), "")
 
 
+
+def _source_staff_conn():
+    """源库（live_schema）连接，复用 _pd_id_map 同款凭据来源。"""
+    import os
+    import pymysql
+    return pymysql.connect(
+        host=os.environ['LIVE_MYSQL_HOST'], port=int(os.environ['LIVE_MYSQL_PORT']),
+        user=os.environ['LIVE_MYSQL_USER'], password=os.environ['LIVE_MYSQL_PASSWORD'],
+        database=os.environ['LIVE_MYSQL_DB'], charset='utf8mb4',
+        connect_timeout=5, read_timeout=10,
+        cursorclass=pymysql.cursors.DictCursor)
+
+
+@app.get("/api/source/staff")
+@login_required
+@write_required
+def source_staff_list():
+    """源库待建档员工列表：源 staff_info 有、MA live_employees 未建档（emp_no 不在 MA）。
+    供新增员工表单「从源头导入」选择（只读，不写任何表）。
+    与消息中心「新员工待建档」判定口径一致（源有 MA 无）。"""
+    kw = (request.args.get("kw") or "").strip()
+    try:
+        conn = _source_staff_conn()
+        cur = conn.cursor()
+        sql = ("SELECT staff_no, name_vn, name_cn, nick_name, discord_name, staff_status, "
+               "emp_position, emp_type, entry_date FROM staff_info "
+               "WHERE emp_domain='L' AND staff_no IS NOT NULL AND staff_no != ''")
+        args = []
+        if kw:
+            sql += " AND (staff_no LIKE %s OR name_vn LIKE %s OR name_cn LIKE %s OR nick_name LIKE %s OR discord_name LIKE %s)"
+            like = '%' + kw + '%'
+            args = [like] * 5
+        sql += " ORDER BY staff_no"
+        cur.execute(sql, args)
+        rows = cur.fetchall()
+        conn.close()
+        # 过滤：MA live_employees 已建档的 emp_no 不列出（待建档 = 源有 MA 无）
+        mconn = get_db()
+        try:
+            built = {r[0] for r in mconn.execute(
+                "SELECT emp_no FROM live_employees WHERE emp_no != ''")}
+        finally:
+            mconn.close()
+        pending = [r for r in rows if r["staff_no"] not in built]
+        return jsonify({"ok": True, "data": pending})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": "源库查询失败: " + str(e)}), 500
+
+
+@app.get("/api/source/staff/<staff_no>")
+@login_required
+@write_required
+def source_staff_detail(staff_no):
+    """源库单个员工全字段：供「从源头导入」回填表单。只读。"""
+    try:
+        conn = _source_staff_conn()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM staff_info WHERE emp_domain='L' AND staff_no=%s", (staff_no,))
+        row = cur.fetchone()
+        conn.close()
+        if not row:
+            return jsonify({"ok": False, "error": "源库无此员工"}), 404
+        # 日期/Decimal 序列化
+        import datetime
+        for k, v in list(row.items()):
+            if isinstance(v, (datetime.date, datetime.datetime)):
+                row[k] = v.strftime('%Y-%m-%d')
+        return jsonify({"ok": True, "data": row})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": "源库查询失败: " + str(e)}), 500
+
+
 def _register_crud(table):
     cfg = ENTITY_CONFIG[table]
     entity_type = ENTITY_TYPE_MAP[table]
@@ -398,6 +474,7 @@ LIVE_EXPORT_COLUMNS = [
     ("别名", "alias", "alias", False),
     ("真实姓名", "real_name", "real_name", False),
     ("中文名", "cn_name", "cn_name", False),
+    ("性别", "gender", "gender", False),
     ("业务域", "domain", "domain", False),
     ("业务域代码", "domain_code", "domain_code", False),
     ("岗位", "position", "position", False),
@@ -472,6 +549,14 @@ def live_employees_export():
             v = r[col]
             if is_money:
                 line.append(int(v / 1000) if v else "")
+            elif col == "salary_mode":
+                # 数字编码 → 中文（与源头一致：1纯底薪 2纯分成-固定 3底薪+分成 4底薪+阶梯分成 5计件）
+                sm = {"1": "纯底薪", "2": "纯分成-固定", "3": "底薪+分成", "4": "底薪+阶梯分成", "5": "计件"}
+                line.append(sm.get(str(v), "" if v is None else v))
+            elif col == "gender":
+                # 数字编码 → 中文（1=男 2=女）
+                gd = {"1": "男", "2": "女"}
+                line.append(gd.get(str(v), "" if v is None else v))
             else:
                 line.append("" if v is None else v)
         w.writerow(line)
@@ -1699,7 +1784,9 @@ def sync_staff_watch():
     try:
         rc = _staff_watch_mod()
         res = rc.scan(members_db=MEMBER_ADMIN_DB)
-        n = rc.write_inbox(res)
+        # 显式传 db_path=CHECKIN_DB_PATH：test 环境通过 .env 的 CHECKIN_DB 指向独立 test 库，
+        # 避免 test 触发时写入 prod 共用 checkins.db（2026-09-12 垃圾消息事故）
+        n = rc.write_inbox(res, db_path=CHECKIN_DB_PATH)
         return jsonify({"ok": True, "data": {
             "new_employees": len(res["new_employees"]),
             "offboard": len(res["offboard"]),
@@ -1857,6 +1944,101 @@ def claim_exclude():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"ok": False, "error": str(e)}), 500
+
+
+# ---------- Discord 绑定管理（方案 A 独立模块：全量视图 + 解绑，审计留痕） ----------
+
+@app.get("/api/binding/list")
+@login_required
+def binding_list():
+    """已绑定全量视图：聚合 live_employees.discord_id/discord_user_id + player_mapping.discord_id，标注来源。
+
+    每行 = 一个 uid + 归属（员工编号/陪玩昵称）+ 来源表字段。解绑按 (uid, source, owner) 定位。
+    """
+    db = get_db()
+    rows = []
+    try:
+        for r in db.execute("SELECT emp_no, nickname, alias, discord_id, discord_user_id FROM live_employees"):
+            owner = r["emp_no"] or r["nickname"] or r["alias"] or "?"
+            for uid in _split_ids(r["discord_id"]):
+                rows.append({"user_id": uid, "owner": owner,
+                             "source": "live_employees.discord_id",
+                             "owner_key": r["emp_no"] or ""})
+            for uid in _split_ids(r["discord_user_id"]):
+                rows.append({"user_id": uid, "owner": owner,
+                             "source": "live_employees.discord_user_id",
+                             "owner_key": r["emp_no"] or ""})
+        for r in db.execute("SELECT player_name, emp_no, discord_id FROM player_mapping"):
+            for uid in _split_ids(r["discord_id"]):
+                rows.append({"user_id": uid,
+                             "owner": (r["emp_no"] or "外聘") + "/" + (r["player_name"] or "?"),
+                             "source": "player_mapping.discord_id",
+                             "owner_key": r["player_name"] or ""})
+    finally:
+        db.close()
+    rows.sort(key=lambda x: (x["user_id"], x["source"]))
+    return jsonify({"ok": True, "data": {"bound": rows}})
+
+
+@app.post("/api/binding/unbind")
+@write_required
+def binding_unbind():
+    """解绑 uid：从指定来源的指定行移除该 uid（只删该 uid，不影响其他 uid/字段）。审计留痕。
+
+    source 支持：live_employees.discord_id / live_employees.discord_user_id / player_mapping.discord_id
+    owner_key 定位行：员工用 emp_no，陪玩映射用 player_name。
+    """
+    data = request.get_json(force=True, silent=True) or {}
+    user_id = str(data.get("user_id") or "").strip()
+    source = str(data.get("source") or "").strip()
+    owner_key = str(data.get("owner_key") or "").strip()
+    if not user_id.isdigit() or not source or not owner_key:
+        return jsonify({"ok": False, "error": "user_id/source/owner_key 无效"}), 400
+    db = get_db()
+    try:
+        if source == "live_employees.discord_id" or source == "live_employees.discord_user_id":
+            field = "discord_user_id" if source.endswith("discord_user_id") else "discord_id"
+            row = db.execute("SELECT * FROM live_employees WHERE emp_no = ?", (owner_key,)).fetchone()
+            if not row:
+                return jsonify({"ok": False, "error": f"员工 {owner_key} 不存在"}), 404
+            ids = _split_ids(row[field])
+            if user_id not in ids:
+                return jsonify({"ok": False, "error": "该员工此来源不含此 uid"}), 409
+            before = dict(row)
+            ids.remove(user_id)
+            new_val = ",".join(ids)
+            db.execute("UPDATE live_employees SET {} = ?, updated_at = ? WHERE id = ?".format(field),
+                       (new_val, now(), row["id"]))
+            db.commit()
+            after = dict(db.execute("SELECT * FROM live_employees WHERE id = ?", (row["id"],)).fetchone())
+            log_change(session["user"], "update", "live_employee", row["id"],
+                       f"{owner_key} 解绑 uid #{user_id[-6:]}（{field}）",
+                       before=before, after=after, ip=client_ip())
+        elif source == "player_mapping.discord_id":
+            row = db.execute("SELECT * FROM player_mapping WHERE player_name = ?", (owner_key,)).fetchone()
+            if not row:
+                return jsonify({"ok": False, "error": f"陪玩映射 {owner_key} 不存在"}), 404
+            ids = _split_ids(row["discord_id"])
+            if user_id not in ids:
+                return jsonify({"ok": False, "error": "该映射行不含此 uid"}), 409
+            before = dict(row)
+            ids.remove(user_id)
+            new_val = ",".join(ids)
+            db.execute("UPDATE player_mapping SET discord_id = ?, updated_at = ? WHERE id = ?",
+                       (new_val, now(), row["id"]))
+            db.commit()
+            after = dict(db.execute("SELECT * FROM player_mapping WHERE id = ?", (row["id"],)).fetchone())
+            log_change(session["user"], "update", "player_mapping", row["id"],
+                       f"{owner_key} 解绑 uid #{user_id[-6:]}",
+                       before=before, after=after, ip=client_ip())
+        else:
+            return jsonify({"ok": False, "error": "未知 source"}), 400
+        return jsonify({"ok": True, "data": {"user_id": user_id, "source": source}})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+    finally:
+        db.close()
 
 
 # ---------- 数据校对报告 ----------
