@@ -2052,7 +2052,7 @@ def _live_players():
 
 
 def _pids_panorama_rows():
-    """PID 全景核心：live_player 全量 + player_mapping/live_employees 关联，返回渲染行。只读。"""
+    """PID 全景核心：live_player 全量 + player_mapping/live_employees 关联 + 陪玩明细最后出现时间。只读。"""
     players = _live_players()
     db = get_db()
     try:
@@ -2062,6 +2062,19 @@ def _pids_panorama_rows():
             "SELECT emp_no, nickname, cn_name FROM live_employees")]
     finally:
         db.close()
+    # 陪玩明细最后出现时间（数据依据：MAX(live_date)）；源库连接复用，失败不阻塞全景
+    last_seen_map = {}
+    try:
+        conn = _source_staff_conn()
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT player_id, MAX(live_date) last_date FROM live_play_detail GROUP BY player_id")
+            for r in cur.fetchall():
+                last_seen_map[r["player_id"]] = str(r["last_date"] or "")
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"[MA] pids last_seen load error: {e}", flush=True)
     by_pd = {r["pd_id"]: r for r in pm if r.get("pd_id")}
     le_map = {r["emp_no"]: r for r in le if r.get("emp_no")}
     rows = []
@@ -2097,6 +2110,7 @@ def _pids_panorama_rows():
             "discord": (mapping or {}).get("discord") or "",
             "remark": (mapping or {}).get("remark") or "",
             "updated_at": (mapping or {}).get("updated_at") or "",
+            "last_seen": last_seen_map.get(pid, ""),
         })
     return rows
 
