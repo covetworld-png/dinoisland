@@ -5785,7 +5785,7 @@ function bindingRenderBody() {
     (list2 || []).forEach(function(b){
       if (!grouped[b.user_id]) grouped[b.user_id] = { user_id: b.user_id, sources: [], owners: {}, discord_name: '' };
       grouped[b.user_id].sources.push({ source: b.source, owner_key: b.owner_key, owner: b.owner });
-      grouped[b.user_id].owners[b.owner_key] = 1;
+      grouped[b.user_id].owners[b.norm_owner || b.owner_key] = 1;
       if (!grouped[b.user_id].discord_name && b.discord_name) grouped[b.user_id].discord_name = b.discord_name;
     });
     var gArr = Object.keys(grouped).map(function(k){ return grouped[k]; });

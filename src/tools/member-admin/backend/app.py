@@ -1940,30 +1940,45 @@ def claim_bind():
         after = dict(db.execute("SELECT * FROM live_employees WHERE id = ?", (emp["id"],)).fetchone())
         log_change(session["user"], "update", "live_employee", emp["id"],
                    f"{emp_no} 绑定 uid #{user_id[-6:]}", before=before, after=after, ip=client_ip())
-        # 昵称侧兜底：player_mapping 同名行补 discord_id/emp_no；无同名行则新增一行（陪玩映射表可见）
+        # 昵称侧兜底：把 player_mapping 同名行的归属与本次绑定员工对齐（避免同一 uid 被拆成两个主人）；
+        # 若该昵称已在其他员工名下则不静默追加 uid（避免隐性多归属），收集进 conflicts 交前端提示。
+        conflicts = []
         if nickname:
             row = db.execute("SELECT id, emp_no, discord_id FROM player_mapping WHERE player_name = ?",
                              (nickname,)).fetchone()
             if row:
-                upd = {}
-                if user_id not in _split_ids(row["discord_id"]):
-                    pv = (row["discord_id"] or "").strip()
-                    upd["discord_id"] = f"{pv},{user_id}" if pv else user_id
-                if not (row["emp_no"] or "").strip():
-                    upd["emp_no"] = emp_no  # 空员工才补，已有归属不覆盖（防误改他人）
-                if upd:
-                    db.execute("UPDATE player_mapping SET {}, updated_at=? WHERE id=?".format(
-                        ", ".join(k + "=?" for k in upd)),
-                        list(upd.values()) + [now(), row["id"]])
-                    db.commit()
+                row_emp = (row["emp_no"] or "").strip()
+                if row_emp in ("", emp_no):
+                    upd = {}
+                    if user_id not in _split_ids(row["discord_id"]):
+                        pv = (row["discord_id"] or "").strip()
+                        upd["discord_id"] = f"{pv},{user_id}" if pv else user_id
+                    if row_emp != emp_no:
+                        upd["emp_no"] = emp_no  # 归属空→对齐为本员工，保证与员工侧一致
+                    if upd:
+                        db.execute("UPDATE player_mapping SET {}, updated_at=? WHERE id=?".format(
+                            ", ".join(k + "=?" for k in upd)),
+                            list(upd.values()) + [now(), row["id"]])
+                        db.commit()
+                        log_change(session["user"], "update", "player_mapping", row["id"],
+                                   f"{emp_no} 绑定 uid #{user_id[-6:]}（归属对齐）",
+                                   before={"emp_no": row_emp},
+                                   after=dict(db.execute("SELECT * FROM player_mapping WHERE id=?", (row["id"],)).fetchone()),
+                                   ip=client_ip())
+                else:
+                    # 该昵称已在其他员工名下：不把 uid 塞进去（避免同一 uid 变成两个主人），交前端提示
+                    conflicts.append({"id": row["id"], "player_name": nickname, "emp_no": row_emp})
             else:
-                db.execute(
+                cur = db.execute(
                     "INSERT INTO player_mapping (player_name, emp_no, discord, discord_id, remark, created_at, updated_at)"
                     " VALUES (?,?,?,?,?,?,?)",
-                    (nickname, emp_no, nickname, user_id,
-                     "绑定来源：待认领绑定", now(), now()))
+                    (nickname, emp_no, nickname, user_id, "绑定来源：待认领绑定", now(), now()))
                 db.commit()
-        return jsonify({"ok": True, "data": {"emp_no": emp_no, "discord_user_id": new_val}})
+                log_change(session["user"], "create", "player_mapping", cur.lastrowid,
+                           f"{emp_no} 绑定 uid #{uid[-6:]}（新昵称行）",
+                           after=dict(db.execute("SELECT * FROM player_mapping WHERE id=?", (cur.lastrowid,)).fetchone()),
+                           ip=client_ip())
+        return jsonify({"ok": True, "data": {"emp_no": emp_no, "discord_user_id": new_val, "conflicts": conflicts}})
     except Exception as e:
         traceback.print_exc()
         return jsonify({"ok": False, "error": str(e)}), 500
@@ -2345,18 +2360,21 @@ def binding_list():
             for uid in _split_ids(r["discord_id"]):
                 rows.append({"user_id": uid, "owner": owner, "discord": r["discord"] or "",
                              "source": "live_employees.discord_id",
-                             "owner_key": r["emp_no"] or ""})
+                             "owner_key": r["emp_no"] or "",
+                             "norm_owner": r["emp_no"] or ""})
             for uid in _split_ids(r["discord_user_id"]):
                 rows.append({"user_id": uid, "owner": owner, "discord": r["discord"] or "",
                              "source": "live_employees.discord_user_id",
-                             "owner_key": r["emp_no"] or ""})
+                             "owner_key": r["emp_no"] or "",
+                             "norm_owner": r["emp_no"] or ""})
         for r in db.execute("SELECT player_name, emp_no, discord, discord_id FROM player_mapping"):
             for uid in _split_ids(r["discord_id"]):
                 rows.append({"user_id": uid,
                              "owner": (r["emp_no"] or "外聘") + "/" + (r["player_name"] or "?"),
                              "discord": r["discord"] or "",
                              "source": "player_mapping.discord_id",
-                             "owner_key": r["player_name"] or ""})
+                             "owner_key": r["player_name"] or "",
+                             "norm_owner": (r["emp_no"] or ("外聘/" + (r["player_name"] or "?")))})
     finally:
         db.close()
     # Discord 昵称增强：user_nicknames（checkins 库，对账实时昵称）优先，员工/映射表 discord 列兜底
