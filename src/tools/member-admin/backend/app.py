@@ -2038,8 +2038,6 @@ def claim_exclude():
 
 # ---------- PID 全景（方案 B：live_player 全量 + 映射状态，只读） ----------
 
-_FREE_HINTS = ("FREE", "STREAMER", "VP", "ONL")
-
 
 def _live_players():
     """源库 live_player 全量（id, player_name, nick_name）。连接失败抛异常（调用方处理）。"""
@@ -2076,12 +2074,12 @@ def _pids_panorama_rows():
         if emp_no and emp_no in le_map:
             e = le_map[emp_no]
             emp_label = "%s %s" % (emp_no, e.get("nickname") or e.get("cn_name") or "")
-        # 状态判定：ok 已映射且关联员工 / no_emp 已映射但员工空 / unmapped 缺映射 / free 预计无员工
-        is_free = any(h in name.upper() for h in _FREE_HINTS)
+        # 状态判定：只由数据事实决定（名字后缀≠身份）
+        # ok=已映射且员工有效 / no_emp=已映射但员工空 / unmapped=无映射行
         if mapping:
-            status = "ok" if emp_no and emp_label else ("free" if is_free else "no_emp")
+            status = "ok" if emp_no and emp_label else "no_emp"
         else:
-            status = "free" if is_free else "unmapped"
+            status = "unmapped"
         rows.append({
             "pid": pid,
             "player_name": name,
