@@ -694,7 +694,7 @@ function getListState(moduleKey) {
 async function switchModule(moduleKey) {
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表' };
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景' };
   $('#adminModuleTitle').textContent = titles[moduleKey] || '';
   if (moduleKey === 'users') {
     if (state.role !== 'super') return; // 用户管理仅 super
@@ -712,6 +712,8 @@ async function switchModule(moduleKey) {
     renderCheckinPage();
   } else if (moduleKey === 'binding') {
     renderBindingPage();
+  } else if (moduleKey === 'pids') {
+    renderPidsPage();
   } else if (moduleKey === 'inbox') {
     renderInboxPage();
   } else if (moduleKey === 'schedule') {
@@ -6053,6 +6055,137 @@ async function bindingDoUnbindGroup(user_id, sources) {
     } catch(e) { showToast('解绑 ' + srcCell(s) + ' 失败: ' + e.message, 'error'); }
   }
   if (done) { showToast('已解绑 ' + done + ' 处来源', 'success'); await bindingLoad(); }
+}
+
+/* ================= PID 全景（live_player 全量 + 映射状态，只读 + 同步补缺） ================= */
+var _pidsItems = [];
+var _pidsSearch = '';
+var _pidsBusy = false;
+
+var PIDS_STATUS_META = {
+  ok:       { label: '已映射',      bg: '#dcfce7', fg: '#166534', border: '#bbf7d0' },
+  no_emp:   { label: '缺员工',      bg: '#fef9c3', fg: '#854d0e', border: '#fef08a' },
+  unmapped: { label: '缺映射',      bg: '#fee2e2', fg: '#b91c1c', border: '#fecaca' },
+  free:     { label: 'FREE/外聘',   bg: '#f3f4f6', fg: '#6b7280', border: '#e5e7eb' },
+};
+
+async function renderPidsPage() {
+  $('#adminModuleTitle').textContent = 'PID 全景';
+  var main = $('#adminMain');
+  main.innerHTML = '';
+  var bar = document.createElement('div');
+  bar.className = 'filter-bar';
+  bar.innerHTML = ''
+    + '<input id="pidsSearch" placeholder="搜索 PID / 名称 / 昵称 / 员工编号" value="' + escHtml(_pidsSearch) + '" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:260px" oninput="pidsOnSearch(this.value)">'
+    + ' <button class="btn btn-primary btn-sm" onclick="pidsSyncFill()" style="font-size:11px"><i class="fas fa-sync"></i> 同步补缺</button>'
+    + ' <button class="btn btn-sm" onclick="pidsReload()" style="font-size:11px"><i class="fas fa-refresh"></i> 刷新</button>'
+    + ' <span id="pidsHint" style="font-size:11px;color:#999;margin-left:8px"></span>'
+    + ' <span style="font-size:10px;color:#999;margin-left:6px">缺映射=源库有此 PID 但映射表无行；缺员工=已映射但未关联员工；FREE/外聘=预计无员工</span>';
+  main.appendChild(bar);
+  var wrap = document.createElement('div');
+  wrap.id = 'pidsBody';
+  wrap.style.marginTop = '10px';
+  main.appendChild(wrap);
+  await pidsLoad();
+}
+
+function pidsOnSearch(v) {
+  _pidsSearch = (v || '').trim();
+  pidsRenderBody();
+}
+
+function pidsReload() {
+  pidsLoad();
+}
+
+async function pidsLoad() {
+  var box = document.getElementById('pidsBody');
+  var hint = document.getElementById('pidsHint');
+  if (!box) return;
+  if (hint) hint.textContent = '加载中...';
+  try {
+    var res = await api('pids/panorama');
+    _pidsItems = (res && res.items) || [];
+    if (hint) {
+      var c = _pidsItems.reduce(function(a, x){ a[x.status] = (a[x.status]||0) + 1; return a; }, {});
+      hint.textContent = '全量 ' + _pidsItems.length + '｜已映射 ' + (c.ok||0) + '｜缺员工 ' + (c.no_emp||0) + '｜缺映射 ' + (c.unmapped||0) + '｜FREE/外聘 ' + (c.free||0);
+    }
+    pidsRenderBody();
+  } catch (e) {
+    if (hint) hint.textContent = '加载失败: ' + e.message;
+  }
+}
+
+function pidsFilter(list) {
+  if (!_pidsSearch) return list;
+  var q = _pidsSearch.toLowerCase();
+  return list.filter(function(x) {
+    return String(x.pid).indexOf(q) >= 0
+      || String(x.player_name || '').toLowerCase().indexOf(q) >= 0
+      || String(x.nick_name || '').toLowerCase().indexOf(q) >= 0
+      || String(x.emp_no || '').toLowerCase().indexOf(q) >= 0
+      || String(x.mapping_player_name || '').toLowerCase().indexOf(q) >= 0;
+  });
+}
+
+function pidsStatusBadge(status) {
+  var m = PIDS_STATUS_META[status] || PIDS_STATUS_META.unmapped;
+  return '<span style="background:' + m.bg + ';color:' + m.fg + ';border:1px solid ' + m.border + ';border-radius:9px;padding:1px 8px;font-size:11px;font-weight:600">' + m.label + '</span>';
+}
+
+function pidsRenderBody() {
+  var wrap = document.getElementById('pidsBody');
+  if (!wrap) return;
+  var list = pidsFilter(_pidsItems || []);
+  if (!list.length) {
+    wrap.innerHTML = '<div style="color:#16a34a;font-size:12px">暂无 PID 数据</div>';
+    return;
+  }
+  var html = '<table style="width:100%;border-collapse:collapse;background:#fff">';
+  html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">PID</th>'
+    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">状态</th>'
+    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">源 player_name</th>'
+    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">源 nick</th>'
+    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">映射昵称</th>'
+    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">关联员工</th>'
+    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">Discord</th>'
+    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">备注</th>'
+    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">修改时间</th></tr>';
+  for (var i=0;i<list.length;i++) {
+    var x = list[i];
+    html += '<tr>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(x.pid) + '</code></td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + pidsStatusBadge(x.status) + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-weight:600">' + escHtml(x.player_name || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.nick_name || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.mapping_player_name || '<span class="muted">—</span>') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_label ? escHtml(x.emp_label) : '<span class="muted">' + (x.emp_no ? escHtml(x.emp_no) : '—') + '</span>') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.discord || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#6b7280">' + escHtml(x.remark || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#999">' + escHtml(x.updated_at || '') + '</td>';
+    html += '</tr>';
+  }
+  html += '</table>';
+  wrap.innerHTML = html;
+}
+
+async function pidsSyncFill() {
+  if (_pidsBusy) return;
+  if (!confirm('执行「同步补缺」：\n\n· 已有映射的 PID 跳过（不覆盖）\n· 已存在同名映射行但缺 pd_id → 只补 pd_id\n· 完全无映射行 → 新增空行（备注：自动补缺：未关联员工）\n\n幂等可重跑，确认执行？')) return;
+  _pidsBusy = true;
+  var hint = document.getElementById('pidsHint');
+  if (hint) hint.textContent = '同步中...';
+  try {
+    var res = await api('pids/sync-fill', { method: 'POST' });
+    if (hint) hint.textContent = '✅ 同步完成：新增 ' + (res && res.created) + '，补pd ' + (res && res.updated) + '，跳过 ' + (res && res.skipped);
+    showToast('同步完成：新增 ' + (res && res.created) + ' / 补pd ' + (res && res.updated), 'success');
+    await pidsLoad();
+  } catch (e) {
+    if (hint) hint.textContent = '同步失败: ' + e.message;
+    showToast('同步失败: ' + e.message, 'error');
+  } finally {
+    _pidsBusy = false;
+  }
 }
 async function openVerifyReports(initialDate) {
     window._verifyPendingDate = initialDate || null;

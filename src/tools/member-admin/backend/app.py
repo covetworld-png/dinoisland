@@ -278,17 +278,20 @@ _PD_ID_CACHE = {"ts": 0, "map": {}}
 _PD_ID_CACHE_TTL = 600  # live_player 变动极少，10min 内存缓存避免每次开表都建远程 MySQL 连接
 
 
+def _fold_name(x):
+    """昵称折叠：NFKC 归一 + 去音标 + 压缩空白，用于模糊匹配（越南语昵称大小写/音标差异）。"""
+    import unicodedata as _ud
+    import re as _re
+    y = _ud.normalize('NFKC', str(x or '').strip().lower())
+    y = ''.join(c for c in _ud.normalize('NFD', y) if _ud.category(c) != 'Mn')
+    return _re.sub(r'\s+', ' ', y).strip()
+
+
 def _pd_id_map():
     """name(nick/player_name, 折叠) -> live_player.id，带 TTL 缓存；查询失败时用旧缓存兜底。"""
     import time
-    import unicodedata as _ud
-    import re as _re
-    def _fold(x):
-        y = _ud.normalize('NFKC', str(x).strip().lower())
-        y = ''.join(c for c in _ud.normalize('NFD', y) if _ud.category(c) != 'Mn')
-        return _re.sub(r'\s+', ' ', y).strip()
-    now = time.time()
-    if _PD_ID_CACHE["map"] and now - _PD_ID_CACHE["ts"] < _PD_ID_CACHE_TTL:
+    now_t = time.time()
+    if _PD_ID_CACHE["map"] and now_t - _PD_ID_CACHE["ts"] < _PD_ID_CACHE_TTL:
         return _PD_ID_CACHE["map"]
     try:
         import os
@@ -304,11 +307,11 @@ def _pd_id_map():
         name2id = {}
         for r in cur.fetchall():
             for key in (r["player_name"], r["nick_name"]):
-                f = _fold(key) if key else None
+                f = _fold_name(key) if key else None
                 if f and f not in name2id:
                     name2id[f] = r["id"]
         conn.close()
-        _PD_ID_CACHE.update(ts=now, map=name2id)
+        _PD_ID_CACHE.update(ts=now_t, map=name2id)
     except Exception as e:
         print(f"[MA] pd_id map refresh failed (用旧缓存): {e}", flush=True)
     return _PD_ID_CACHE["map"]
@@ -317,18 +320,12 @@ def _pd_id_map():
 def _attach_pd_ids(rows):
     """player_mapping 列表附加 pd ID：优先读本地列（staff_sync 每日补缺落库）；
     本地为空的行用 live_player 映射缓存兜底展示（只补缺不覆盖，不写库）。"""
-    import unicodedata as _ud
-    import re as _re
-    def _fold(x):
-        y = _ud.normalize('NFKC', str(x).strip().lower())
-        y = ''.join(c for c in _ud.normalize('NFD', y) if _ud.category(c) != 'Mn')
-        return _re.sub(r'\s+', ' ', y).strip()
     m = _pd_id_map()
     for row in rows:
         local = row.get("pd_id")
         if local:
             continue  # 本地已有值，永不覆盖
-        row["pd_id"] = m.get(_fold(row.get("player_name") or ""), "")
+        row["pd_id"] = m.get(_fold_name(row.get("player_name") or ""), "")
 
 
 
@@ -2037,6 +2034,146 @@ def claim_exclude():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"ok": False, "error": str(e)}), 500
+
+
+# ---------- PID 全景（方案 B：live_player 全量 + 映射状态，只读） ----------
+
+_FREE_HINTS = ("FREE", "STREAMER", "VP", "ONL")
+
+
+def _live_players():
+    """源库 live_player 全量（id, player_name, nick_name）。连接失败抛异常（调用方处理）。"""
+    conn = _source_staff_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id, player_name, nick_name FROM live_player ORDER BY id")
+        return list(cur.fetchall())
+    finally:
+        conn.close()
+
+
+def _pids_panorama_rows():
+    """PID 全景核心：live_player 全量 + player_mapping/live_employees 关联，返回渲染行。只读。"""
+    players = _live_players()
+    db = get_db()
+    try:
+        pm = [dict(r) for r in db.execute(
+            "SELECT id, player_name, emp_no, discord, pd_id, remark, updated_at FROM player_mapping")]
+        le = [dict(r) for r in db.execute(
+            "SELECT emp_no, nickname, cn_name FROM live_employees")]
+    finally:
+        db.close()
+    by_pd = {r["pd_id"]: r for r in pm if r.get("pd_id")}
+    le_map = {r["emp_no"]: r for r in le if r.get("emp_no")}
+    rows = []
+    for p in players:
+        pid = p["id"]
+        name = p["player_name"] or ""
+        nick = p["nick_name"] or ""
+        mapping = by_pd.get(pid)
+        emp_no = (mapping or {}).get("emp_no") or ""
+        emp_label = ""
+        if emp_no and emp_no in le_map:
+            e = le_map[emp_no]
+            emp_label = "%s %s" % (emp_no, e.get("nickname") or e.get("cn_name") or "")
+        # 状态判定：ok 已映射且关联员工 / no_emp 已映射但员工空 / unmapped 缺映射 / free 预计无员工
+        is_free = any(h in name.upper() for h in _FREE_HINTS)
+        if mapping:
+            status = "ok" if emp_no and emp_label else ("free" if is_free else "no_emp")
+        else:
+            status = "free" if is_free else "unmapped"
+        rows.append({
+            "pid": pid,
+            "player_name": name,
+            "nick_name": nick,
+            "status": status,
+            "mapping_player_name": (mapping or {}).get("player_name") or "",
+            "emp_no": emp_no,
+            "emp_label": emp_label,
+            "discord": (mapping or {}).get("discord") or "",
+            "remark": (mapping or {}).get("remark") or "",
+            "updated_at": (mapping or {}).get("updated_at") or "",
+        })
+    return rows
+
+
+@app.get("/api/pids/panorama")
+@login_required
+def pids_panorama():
+    """PID 全景：源库 live_player 全量 + 本地映射/员工关联，缺映射标红、无员工标黄、FREE 标灰。只读。"""
+    try:
+        rows = _pids_panorama_rows()
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": "源库读取失败: %s" % e}), 502
+    return jsonify({"ok": True, "data": {"items": rows, "total": len(rows)}})
+
+
+@app.post("/api/pids/sync-fill")
+@write_required
+def pids_sync_fill():
+    """映射同步补缺（只补缺不覆盖，幂等）：
+    对每个 live_player：已映射（pd_id=pid）跳过；否则折叠名匹配空 pd 行则只补 pd_id，
+    无匹配则新增一行（emp_no 空 + remark=自动补缺）。
+    事务内只做数据变更；commit 后再统一写审计日志（避免 audit 新连接撞写锁）。
+    """
+    import traceback
+    try:
+        players = _live_players()
+        db = get_db()
+        updated, created, skipped = 0, 0, 0
+        logs = []  # (action, entity_id, before, after, label) 待 commit 后审计
+        try:
+            pm_rows = [dict(r) for r in db.execute(
+                "SELECT id, player_name, pd_id, emp_no, discord_id FROM player_mapping")]
+            by_pd = {r["pd_id"]: r for r in pm_rows if r.get("pd_id")}
+            cand_map = {_fold_name(r["player_name"]): r for r in pm_rows if not r.get("pd_id")}
+            for p in players:
+                pid = p["id"]
+                if pid in by_pd:
+                    skipped += 1
+                    continue
+                name = p["player_name"] or ""
+                cand = cand_map.get(_fold_name(name))
+                if not cand and p.get("nick_name"):
+                    cand = cand_map.get(_fold_name(p["nick_name"]))
+                if cand:
+                    before = dict(cand)
+                    db.execute("UPDATE player_mapping SET pd_id=?, updated_at=? WHERE id=?",
+                               (pid, now(), cand["id"]))
+                    after = dict(db.execute("SELECT * FROM player_mapping WHERE id=?", (cand["id"],)).fetchone())
+                    logs.append(("update", cand["id"], before, after, f"PID同步补缺 #{pid} ({name})"))
+                    updated += 1
+                else:
+                    cur = db.execute(
+                        "INSERT INTO player_mapping (player_name, emp_no, discord, discord_id, remark, created_at, updated_at, pd_id)"
+                        " VALUES (?,?,?,?,?,?,?,?)",
+                        (name, "", "", "", "自动补缺：未关联员工", now(), now(), pid))
+                    logs.append(("create", cur.lastrowid, None, dict(
+                        db.execute("SELECT * FROM player_mapping WHERE id=?", (cur.lastrowid,)).fetchone()),
+                        f"PID同步补缺 #{pid} ({name})"))
+                    created += 1
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": "同步失败: %s" % e}), 500
+    # commit 成功后统一写审计（新连接，此时无写锁冲突）
+    for action, eid, before, after, label in logs:
+        try:
+            if action == "update":
+                log_change(session["user"], "update", "player_mapping", eid, label,
+                           before=before, after=after, ip=client_ip())
+            else:
+                log_change(session["user"], "create", "player_mapping", eid, label,
+                           after=after, ip=client_ip())
+        except Exception as e:
+            print(f"[MA] pids sync audit fail: {e}", flush=True)
+    return jsonify({"ok": True, "data": {"created": created, "updated": updated, "skipped": skipped}})
 
 
 # ---------- Discord 绑定管理（方案 A 独立模块：全量视图 + 解绑，审计留痕） ----------
