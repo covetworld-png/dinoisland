@@ -2059,7 +2059,7 @@ def _pids_panorama_rows():
         pm = [dict(r) for r in db.execute(
             "SELECT id, player_name, emp_no, discord, pd_id, remark, updated_at FROM player_mapping")]
         le = [dict(r) for r in db.execute(
-            "SELECT emp_no, nickname, cn_name FROM live_employees")]
+            "SELECT emp_no, nickname, cn_name, discord, discord_user_id, discord_id FROM live_employees")]
     finally:
         db.close()
     # 陪玩明细最后出现时间（数据依据：MAX(live_date)）；源库连接复用，失败不阻塞全景
@@ -2085,9 +2085,14 @@ def _pids_panorama_rows():
         mapping = by_pd.get(pid)
         emp_no = (mapping or {}).get("emp_no") or ""
         emp_label = ""
+        emp_discord = ""
+        emp_uid = ""
         if emp_no and emp_no in le_map:
             e = le_map[emp_no]
             emp_label = "%s %s" % (emp_no, e.get("nickname") or e.get("cn_name") or "")
+            # Discord 信息以员工表为准（权威 uid 列优先），映射表 discord 仅兜底
+            emp_disc = e.get("discord") or ""
+            emp_uid = e.get("discord_user_id") or e.get("discord_id") or ""
         # 状态判定：只由数据事实决定（名字后缀≠身份）
         # ok=已映射且员工有效 / no_emp=已映射但员工空 / unmapped=无映射行 / left=已离职历史遗留
         if mapping:
@@ -2107,7 +2112,10 @@ def _pids_panorama_rows():
             "mapping_player_name": (mapping or {}).get("player_name") or "",
             "emp_no": emp_no,
             "emp_label": emp_label,
-            "discord": (mapping or {}).get("discord") or "",
+            "emp_disc": emp_disc,
+            "emp_uid": emp_uid,
+            # 展示优先员工表联动值，映射表 discord 仅作兜底（员工空/LEFT 时仍可见旧快照）
+            "discord": emp_disc or (mapping or {}).get("discord") or "",
             "remark": (mapping or {}).get("remark") or "",
             "updated_at": (mapping or {}).get("updated_at") or "",
             "last_seen": last_seen_map.get(pid, ""),

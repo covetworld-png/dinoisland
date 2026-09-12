@@ -6362,6 +6362,7 @@ function pidsRenderBody() {
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">映射昵称</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">关联员工</th>'
+    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">员工 Discord ID</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">Discord</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">最后出现</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">备注</th>'
@@ -6376,7 +6377,8 @@ function pidsRenderBody() {
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.mapping_player_name || '<span class="muted">—</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">' + pidsActionCell(x) + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_label ? escHtml(x.emp_label) : '<span class="muted">' + (x.emp_no ? escHtml(x.emp_no) : '—') + '</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.discord || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-family:monospace">' + (x.emp_uid ? escHtml(x.emp_uid) : '<span class="muted">—</span>') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_disc ? '<span style="color:#166534;font-weight:600">EMP·' + escHtml(x.emp_disc) + '</span>' : escHtml(x.discord || '')) + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.last_seen ? escHtml(x.last_seen) : '<span class="muted">—</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#6b7280">' + escHtml(x.remark || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#999">' + escHtml(x.updated_at || '') + '</td>';
