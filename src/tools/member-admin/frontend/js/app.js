@@ -5720,17 +5720,26 @@ function bindingRenderBody() {
     wrap.innerHTML = html;
   } else {
     var list2 = bindingFilter(data.bound || []);
-    var html2 = '<div style="font-weight:600;margin:4px 0 6px;color:#1e40af">🔗 已绑定 uid（来源标注） ' + data.bound.length + ' ｜ 显示 ' + list2.length + '</div>';
+    var grouped = {};  // uid -> {user_id, sources:[{source, owner_key, owner}], owners:set}
+    (list2 || []).forEach(function(b){
+      if (!grouped[b.user_id]) grouped[b.user_id] = { user_id: b.user_id, sources: [], owners: {} };
+      grouped[b.user_id].sources.push({ source: b.source, owner_key: b.owner_key, owner: b.owner });
+      grouped[b.user_id].owners[b.owner_key] = 1;
+    });
+    var gArr = Object.keys(grouped).map(function(k){ return grouped[k]; });
+    var html2 = '<div style="font-weight:600;margin:4px 0 6px;color:#1e40af">🔗 已绑定 uid（按 uid 合并，' + data.bound.length + ' 条来源 → ' + gArr.length + ' 个 uid）</div>';
     html2 += '<table style="width:100%;border-collapse:collapse;background:#fff">';
     html2 += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">归属</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">来源</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
-    for (var k=0;k<list2.length;k++) {
-      var b = list2[k];
-      html2 += '<tr>';
-      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(b.user_id) + '</code></td>';
-      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + ownerLabel(b) + '</td>';
-      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(srcCell(b)) + '</td>';
+    for (var k=0;k<gArr.length;k++) {
+      var g = gArr[k];
+      var b0 = g.sources[0];
+      var conflict = Object.keys(g.owners).length > 1;
+      html2 += '<tr' + (conflict ? ' style="background:#fef2f2"' : '') + '>';
+      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(g.user_id) + '</code>' + (conflict ? '<br><span style="color:#b91c1c;font-size:10px;font-weight:700">⚠ 冲突：多归属</span>' : '') + '</td>';
+      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (conflict ? escHtml(g.sources.map(function(s){return s.owner;}).join(' ｜ ')) : ownerLabel(b0)) + '</td>';
+      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + g.sources.map(function(s){ return escHtml(srcCell(s)); }).join('<br>') + '</td>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
-      html2 += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#b91c1c;background:#fee2e2;border-color:#fecaca" onclick="bindingDoUnbind(\'' + b.user_id + '\',\'' + b.source + '\',\'' + escHtml(b.owner_key).replace(/'/g,"\\'") + '\')">解绑</button>';
+      html2 += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#b91c1c;background:#fee2e2;border-color:#fecaca" onclick="bindingDoUnbindGroup(\'' + g.user_id + '\',' + JSON.stringify(g.sources) + ')">解绑</button>';
       html2 += '</td></tr>';
     }
     html2 += '</table>';
@@ -5985,13 +5994,19 @@ async function bindingDoExclude(uid, nickname) {
   } catch(e) { showToast('排除失败: ' + e.message, 'error'); }
 }
 
-async function bindingDoUnbind(user_id, source, owner_key) {
-  if (!confirm('解绑 uid ' + user_id + '（来源 ' + srcCell({source:source}) + '）？\n\n该 uid 将回到「待认领」，可从新员工或映射。')) return;
-  try {
-    await api('binding/unbind', { method:'POST', json:{ user_id: user_id, source: source, owner_key: owner_key } });
-    showToast('已解绑', 'success');
-    await bindingLoad();
-  } catch(e) { showToast('解绑失败: ' + e.message, 'error'); }
+async function bindingDoUnbindGroup(user_id, sources) {
+  if (!sources || !sources.length) { showToast('无可解绑来源', 'error'); return; }
+  var desc = sources.map(function(s){ return srcCell(s) + (s.owner_key ? '（' + s.owner_key + '）' : ''); }).join('、');
+  if (!confirm('解绑 uid ' + user_id + '？\n\n来源：' + desc + '\n\n该 uid 将回到「待认领」。')) return;
+  var done = 0;
+  for (var i=0;i<sources.length;i++) {
+    var s = sources[i];
+    try {
+      await api('binding/unbind', { method:'POST', json:{ user_id: user_id, source: s.source, owner_key: s.owner_key } });
+      done++;
+    } catch(e) { showToast('解绑 ' + srcCell(s) + ' 失败: ' + e.message, 'error'); }
+  }
+  if (done) { showToast('已解绑 ' + done + ' 处来源', 'success'); await bindingLoad(); }
 }
 async function openVerifyReports(initialDate) {
     window._verifyPendingDate = initialDate || null;
