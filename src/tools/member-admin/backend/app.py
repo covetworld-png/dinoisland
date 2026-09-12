@@ -1969,7 +1969,7 @@ def claim_bind():
                     (nickname, emp_no, nickname, user_id, "绑定来源：待认领绑定", now(), now()))
                 db.commit()
                 log_change(session["user"], "create", "player_mapping", cur.lastrowid,
-                           f"{emp_no} 绑定 uid #{uid[-6:]}（新昵称行）",
+                           f"{emp_no} 绑定 uid #{user_id[-6:]}（新昵称行）",
                            after=dict(db.execute("SELECT * FROM player_mapping WHERE id=?", (cur.lastrowid,)).fetchone()),
                            ip=client_ip())
         return jsonify({"ok": True, "data": {"emp_no": emp_no, "discord_user_id": new_val, "conflicts": conflicts}})
