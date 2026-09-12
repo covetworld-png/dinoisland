@@ -5887,7 +5887,161 @@ function empLabelText(empNo) {
   return parts.join(' ');
 }
 
-async function openBindingEmpPicker(uid, nickname) {  if (!_bindingEmp.length) {
+
+// 通用富信息员工选择器：弹层表格（编号/昵称/别名/中文名/真实姓名/Discord/岗位/状态），选中后 callback(emp)
+async function openRichEmpPicker(callback) {
+  var rows = [];
+  try { rows = await api('binding/employees') || []; }
+  catch(e) { showToast('员工列表加载失败：' + e.message, 'error'); return; }
+  var selectedNo = null;
+
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:1070;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)';
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.remove(); });
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:10px;max-width:820px;width:94%;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.25)';
+
+  var head = document.createElement('div');
+  head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #e5e7eb;background:#f8f9fa;border-radius:10px 10px 0 0';
+  var hTitle = document.createElement('h3');
+  hTitle.style.cssText = 'margin:0;font-size:15px';
+  hTitle.textContent = '选择员工';
+  head.appendChild(hTitle);
+  var closeX = document.createElement('button');
+  closeX.type = 'button';
+  closeX.textContent = '×';
+  closeX.style.cssText = 'background:none;border:none;font-size:20px;cursor:pointer;color:#666';
+  closeX.addEventListener('click', function(){ overlay.remove(); });
+  head.appendChild(closeX);
+  box.appendChild(head);
+
+  var searchRow = document.createElement('div');
+  searchRow.style.cssText = 'padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid #eee';
+  var inp = document.createElement('input');
+  inp.placeholder = '搜索：编号 / 昵称 / 别名 / 中文名 / 真实姓名 / Discord / 岗位';
+  inp.style.cssText = 'flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px';
+  searchRow.appendChild(inp);
+  var searchBtn = document.createElement('button');
+  searchBtn.className = 'btn btn-sm';
+  searchBtn.textContent = '搜索';
+  searchBtn.addEventListener('click', function(){ renderRows(); });
+  inp.addEventListener('keyup', function(e){ if (e.key === 'Enter') renderRows(); });
+  searchRow.appendChild(searchBtn);
+  box.appendChild(searchRow);
+
+  var list = document.createElement('div');
+  list.style.cssText = 'overflow:auto;flex:1;min-height:220px';
+  box.appendChild(list);
+
+  var foot = document.createElement('div');
+  foot.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e5e7eb';
+  var selInfo = document.createElement('span');
+  selInfo.style.cssText = 'font-size:12px;color:#666';
+  foot.appendChild(selInfo);
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px';
+  var cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'btn btn-sm';
+  cancelBtn.textContent = '取消';
+  cancelBtn.addEventListener('click', function(){ overlay.remove(); });
+  btnRow.appendChild(cancelBtn);
+  var confirmBtn = document.createElement('button');
+  confirmBtn.className = 'btn btn-sm btn-primary';
+  confirmBtn.textContent = '确认选中';
+  confirmBtn.disabled = true;
+  confirmBtn.style.opacity = '0.5';
+  confirmBtn.addEventListener('click', function(){
+    if (!selectedNo) { showToast('请先选择员工', 'error'); return; }
+    var emp = rows.find(function(x){ return String(x.emp_no) === String(selectedNo); });
+    overlay.remove();
+    if (callback) callback(emp || { emp_no: selectedNo });
+  });
+  btnRow.appendChild(confirmBtn);
+  foot.appendChild(btnRow);
+  box.appendChild(foot);
+
+  var updateInfo = function(){
+    confirmBtn.disabled = !selectedNo;
+    confirmBtn.style.opacity = selectedNo ? '1' : '0.5';
+    selInfo.textContent = selectedNo ? '已选中：' + empLabelText(selectedNo) : '请先选择员工';
+  };
+
+  var renderRows = function(){
+    var q = (inp.value || '').trim().toLowerCase();
+    var filtered = rows;
+    if (q) {
+      filtered = rows.filter(function(r){
+        return [r.emp_no, r.nickname, r.alias, r.real_name, r.cn_name, r.position, r.discord, r.status]
+          .some(function(v){ return v && String(v).toLowerCase().indexOf(q) >= 0; });
+      });
+    }
+    list.innerHTML = '';
+    if (!filtered.length) {
+      list.innerHTML = '<p style="padding:24px;text-align:center;color:#999">无匹配员工</p>';
+      updateInfo();
+      return;
+    }
+    var table = document.createElement('table');
+    table.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px';
+    var thead = document.createElement('thead');
+    thead.innerHTML = '<tr style="text-align:left;background:#f3f4f6">'
+      + '<th style="padding:8px 10px;width:28px"></th>'
+      + '<th style="padding:8px 10px">编号</th><th style="padding:8px 10px">昵称</th>'
+      + '<th style="padding:8px 10px">别名</th><th style="padding:8px 10px">中文名</th><th style="padding:8px 10px">真实姓名</th>'
+      + '<th style="padding:8px 10px">Discord</th>'
+      + '<th style="padding:8px 10px">岗位</th><th style="padding:8px 10px">状态</th></tr>';
+    table.appendChild(thead);
+    var tbody = document.createElement('tbody');
+    filtered.forEach(function(r){
+      var tr = document.createElement('tr');
+      tr.style.cssText = 'cursor:pointer;border-bottom:1px solid #f0f0f0';
+      var paintRow = function(){
+        var isSel = String(r.emp_no) === String(selectedNo);
+        tr.style.background = isSel ? '#e8f0fe' : '';
+        var c = tr.querySelector('.sel-check');
+        if (c) c.textContent = isSel ? '✔' : '';
+      };
+      tr.addEventListener('mouseenter', function(){
+        if (String(r.emp_no) !== String(selectedNo)) tr.style.background = '#f5f9ff';
+      });
+      tr.addEventListener('mouseleave', paintRow);
+      tr.addEventListener('click', function(){
+        selectedNo = (selectedNo && String(selectedNo) === String(r.emp_no)) ? null : String(r.emp_no);
+        tbody.querySelectorAll('tr').forEach(function(t){
+          var isSel = t.dataset.no === selectedNo;
+          t.style.background = isSel ? '#e8f0fe' : '';
+          var c = t.querySelector('.sel-check');
+          if (c) c.textContent = isSel ? '✔' : '';
+        });
+        updateInfo();
+      });
+      tr.dataset.no = r.emp_no;
+      tr.innerHTML = '<td class="sel-check" style="padding:8px 10px;width:28px;color:#1a73e8;font-weight:700"></td>'
+        + '<td style="padding:8px 10px;font-weight:600">' + String(empEscape(r.emp_no)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.nickname)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.alias)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.cn_name)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.real_name)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.discord)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.position)) + '</td>'
+        + '<td style="padding:8px 10px">' + String(empEscape(r.status)) + '</td>';
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    list.appendChild(table);
+    updateInfo();
+  };
+  renderRows();
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+async function openBindingEmpPicker(uid, nickname) {
+  if (!_bindingEmp.length) {
     try { _bindingEmp = await api('binding/employees') || []; } catch(e) {
       showToast('员工列表加载失败：' + e.message, 'error'); return;
     }
