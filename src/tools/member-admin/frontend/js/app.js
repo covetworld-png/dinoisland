@@ -6265,7 +6265,12 @@ async function renderPidsPage() {
     + ' <button class="btn btn-primary btn-sm" onclick="pidsSyncFill()" style="font-size:11px"><i class="fas fa-sync"></i> 同步补缺</button>'
     + ' <button class="btn btn-sm" onclick="pidsReload()" style="font-size:11px"><i class="fas fa-refresh"></i> 刷新</button>'
     + ' <span id="pidsHint" style="font-size:11px;color:#999;margin-left:8px"></span>'
-    + ' <span style="font-size:10px;color:#999;margin-left:6px">缺映射=源库有此 PID 但映射表无行；缺员工=已映射但未关联员工</span>';
+    + ' <span style="font-size:10px;color:#999;margin-left:6px">缺映射=源库有此 PID 但映射表无行；缺员工=已映射但未关联员工</span>'
+    + ' <span style="margin-left:10px;font-size:10px;color:#6b7280">Discord 来源：</span>'
+    + ' <span style="font-size:13px;color:#166534;font-weight:800">● 员工表</span>'
+    + ' <span style="font-size:10px;color:#6b7280">已联动员工表实时值</span>'
+    + ' <span style="margin-left:6px"><span style="font-size:13px;color:#b91c1c;font-weight:800">● 映射快照</span>'
+    + ' <span style="font-size:10px;color:#6b7280">员工表未填，仅映射表历史值</span></span>';
   main.appendChild(bar);
   var wrap = document.createElement('div');
   wrap.id = 'pidsBody';
@@ -6378,7 +6383,7 @@ function pidsRenderBody() {
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">' + pidsActionCell(x) + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_label ? escHtml(x.emp_label) : '<span class="muted">' + (x.emp_no ? escHtml(x.emp_no) : '—') + '</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-family:monospace">' + (x.emp_uid ? escHtml(x.emp_uid) : '<span class="muted">—</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_disc ? '<span style="color:#166534;font-weight:600">' + escHtml(x.emp_disc) + '</span>' : '<span style="color:#6b7280">' + escHtml(x.discord || '') + '</span>') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_disc ? '<span style="color:#166534;font-weight:600">' + escHtml(x.emp_disc) + '</span>' : '<span style="color:#b91c1c;font-weight:600">' + escHtml(x.discord || '—') + '</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.last_seen ? escHtml(x.last_seen) : '<span class="muted">—</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#6b7280">' + escHtml(x.remark || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#999">' + escHtml(x.updated_at || '') + '</td>';
