@@ -1851,6 +1851,46 @@ def _attach_unclaimed_sessions(checkins_db, unclaimed):
     return unclaimed
 
 
+def _attach_renamed_prev(checkins_db, renamed):
+    """为改名告警补 prev_nickname（该 uid 历史最近一次 ≠ 当前 的昵称，来自 checkins）。
+
+    renamed 判定本身依赖 checkins 历史，故原昵称一定存在于 checkins；取最近一条非当前昵称。
+    """
+    if not renamed:
+        return renamed
+    ids = [r['user_id'] for r in renamed if r.get('user_id')]
+    if not ids:
+        return renamed
+    marks = ','.join('?' * len(ids))
+    try:
+        conn = sqlite3.connect(checkins_db)
+        conn.row_factory = sqlite3.Row
+        try:
+            rows = conn.execute(
+                f"""SELECT user_id, nickname, MAX(checkin_time) AS last_t
+                    FROM checkins
+                    WHERE user_id IN ({marks})
+                    GROUP BY user_id, nickname
+                    ORDER BY last_t DESC""", ids).fetchall()
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"[MA] _attach_renamed_prev error: {e}", flush=True)
+        return renamed
+    by_uid = {}
+    for r in rows:
+        by_uid.setdefault(r['user_id'], []).append((r['nickname'], r['last_t']))
+    for r in renamed:
+        cur_nick = (r.get('nickname') or '').strip()
+        prev = None
+        for nick, t in by_uid.get(r['user_id'], []):
+            if nick and nick != cur_nick:
+                prev = nick
+                break
+        r['prev_nickname'] = prev or ''
+    return renamed
+
+
 @app.get("/api/claim/pending")
 @write_required
 def claim_pending():
@@ -1860,6 +1900,7 @@ def claim_pending():
         res = rc.scan(checkins_db=CHECKIN_DB_PATH, members_db=MEMBER_ADMIN_DB,
                       days=7, stale_days=14)
         _attach_unclaimed_sessions(CHECKIN_DB_PATH, res.get('unclaimed') or [])
+        _attach_renamed_prev(CHECKIN_DB_PATH, res.get('renamed') or [])
         return jsonify({"ok": True, "data": res})
     except Exception as e:
         traceback.print_exc()

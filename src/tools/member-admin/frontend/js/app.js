@@ -5709,12 +5709,13 @@ function bindingRenderBody() {
     if (rn.length) {
       html += '<div style="font-weight:600;margin:4px 0 6px;color:#92400e">🟡 改名/新昵称（' + rn.length + '）<span style="font-weight:400;font-size:10px;color:#999">已知 uid 使用了映射外的名字，注意可能是改昵称或换人</span></div>';
       html += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px;background:#fffbeb">';
-      html += '<tr style="background:#fef3c7"><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">当前昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">映射</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">最近活跃</th></tr>';
+      html += '<tr style="background:#fef3c7"><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">当前昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">原昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">归属员工</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">最近活跃</th></tr>';
       for (var ri=0;ri<rn.length;ri++) {
         var r0 = rn[ri];
         html += '<tr><td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px"><code style="font-size:10px">' + escHtml(r0.user_id) + '</code></td>';
         html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px;font-weight:600">' + escHtml(r0.nickname || '') + '</td>';
-        html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r0.mapped_to || '') + '</td>';
+        html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r0.prev_nickname || '—') + '</td>';
+        html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + empLabelText(r0.mapped_to || '') + '</td>';
         html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r0.last_seen || '') + '</td></tr>';
       }
       html += '</table>';
@@ -5760,12 +5761,13 @@ function bindingRenderBody() {
     if (rn2.length) {
       html2 += '<div style="font-weight:600;margin:4px 0 6px;color:#92400e">🟡 改名/新昵称（' + rn2.length + '）<span style="font-weight:400;font-size:10px;color:#999">已知 uid 使用了映射外的名字，注意可能是改昵称或换人</span></div>';
       html2 += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px;background:#fffbeb">';
-      html2 += '<tr style="background:#fef3c7"><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">当前昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">映射</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">最近活跃</th></tr>';
+      html2 += '<tr style="background:#fef3c7"><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">当前昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">原昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">归属员工</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">最近活跃</th></tr>';
       for (var rj=0;rj<rn2.length;rj++) {
         var r1 = rn2[rj];
         html2 += '<tr><td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px"><code style="font-size:10px">' + escHtml(r1.user_id) + '</code></td>';
         html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px;font-weight:600">' + escHtml(r1.nickname || '') + '</td>';
-        html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r1.mapped_to || '') + '</td>';
+        html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r1.prev_nickname || '—') + '</td>';
+        html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + empLabelText(r1.mapped_to || '') + '</td>';
         html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r1.last_seen || '') + '</td></tr>';
       }
       html2 += '</table>';
