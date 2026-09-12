@@ -6264,7 +6264,6 @@ async function renderPidsPage() {
     + '<input id="pidsSearch" placeholder="搜索 PID / 名称 / 昵称 / 员工编号" value="' + escHtml(_pidsSearch) + '" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:260px" oninput="pidsOnSearch(this.value)">'
     + ' <button class="btn btn-primary btn-sm" onclick="pidsSyncFill()" style="font-size:11px"><i class="fas fa-sync"></i> 同步补缺</button>'
     + ' <button class="btn btn-sm" onclick="pidsReload()" style="font-size:11px"><i class="fas fa-refresh"></i> 刷新</button>'
-    + ' <button class="btn btn-sm" onclick="openDiscordPending()" id="pidsDcBtn" style="font-size:11px;color:#92400e;background:#fef3c7;border-color:#fcd34d"><i class="fas fa-bell"></i> Discord 待确认同步 <span id="pidsDcCount" style="font-weight:800">…</span></button>'
     + ' <span id="pidsHint" style="font-size:11px;color:#999;margin-left:8px"></span>'
     + ' <span style="font-size:10px;color:#999;margin-left:6px">缺映射=源库有此 PID 但映射表无行；缺员工=已映射但未关联员工</span>'
     + ' <span style="margin-left:10px;font-size:10px;color:#6b7280">Discord 来源：</span>'
@@ -6302,7 +6301,6 @@ async function pidsLoad() {
       hint.textContent = '全量 ' + _pidsItems.length + '｜已映射 ' + (c.ok||0) + '｜缺员工 ' + (c.no_emp||0) + '｜缺映射 ' + (c.unmapped||0) + '｜已离职 ' + (c.left||0);
     }
     pidsRenderBody();
-    try { await pidsDiscordCount(); } catch (e) {}
   } catch (e) {
     if (hint) hint.textContent = '加载失败: ' + e.message;
   }
@@ -6352,84 +6350,6 @@ async function pidsEditMapping(mappingId) {
 async function pidsAddMapping(playerName) {
   openFormModal('player_mapping', { id: null, player_name: playerName, emp_no: '', discord: '', discord_id: '', remark: '自动补缺：未关联员工' });
 }
-
-async function pidsDiscordCount() {
-  try {
-    var res = await api('pids/discord/pending');
-    var n = (res && res.data && res.data.items) ? res.data.items.length : 0;
-    var el = document.getElementById('pidsDcCount');
-    if (el) el.textContent = n;
-    var btn = document.getElementById('pidsDcBtn');
-    if (btn) btn.style.borderColor = n > 0 ? '#f59e0b' : '#d1d5db';
-  } catch (e) {}
-}
-
-// 待确认同步清单弹层：员工表 vs 映射表 Discord 不一致项，人工确认后才写入映射表
-async function openDiscordPending() {
-  var res;
-  try { res = await api('pids/discord/pending'); }
-  catch (e) { showToast('加载待确认列表失败: ' + e.message, 'error'); return; }
-  var items = (res && res.data && res.data.items) || [];
-  var over = document.createElement('div');
-  over.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center';
-  var h = '';
-  h += '<div style="background:#fff;border-radius:10px;max-width:860px;width:94%;max-height:86vh;overflow:auto;padding:16px">';
-  h += '<div style="font-size:15px;font-weight:700;margin-bottom:4px">员工 Discord → 映射表 待确认同步</div>';
-  h += '<div style="font-size:11px;color:#6b7280;margin-bottom:10px">以下各行员工表（live_employees）Discord 与映射表不一致。点击确认后写入映射表（昵称+ID），审计留痕。</div>';
-  if (!items.length) {
-    h += '<div style="color:#16a34a;font-size:12px;padding:12px 0">✅ 无待确认项，员工表与映射表 Discord 已一致。</div>';
-  } else {
-    h += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
-    h += '<tr style="background:#f3f4f6"><th style="border:1px solid #e5e7eb;padding:5px 6px;text-align:left">员工</th><th style="border:1px solid #e5e7eb;padding:5px 6px;text-align:left">映射昵称</th><th style="border:1px solid #e5e7eb;padding:5px 6px;text-align:left">映射表 Discord（旧）</th><th style="border:1px solid #e5e7eb;padding:5px 6px;text-align:left">映射表 Discord ID（旧）</th><th style="border:1px solid #e5e7eb;padding:5px 6px;text-align:left">员工表 Discord（新）</th><th style="border:1px solid #e5e7eb;padding:5px 6px;text-align:left">员工表 Discord ID（新）</th><th style="border:1px solid #e5e7eb;padding:5px 6px;text-align:left">操作</th></tr>';
-    for (var i=0;i<items.length;i++) {
-      var x = items[i];
-      h += '<tr>';
-      h += '<td style="border:1px solid #eee;padding:5px 6px;font-weight:600">' + escHtml(x.emp_no) + '</td>';
-      h += '<td style="border:1px solid #eee;padding:5px 6px">' + escHtml(x.player_name || '') + '</td>';
-      h += '<td style="border:1px solid #eee;padding:5px 6px">' + (x.map_discord ? escHtml(x.map_discord) : '<span class="muted">—</span>') + '</td>';
-      h += '<td style="border:1px solid #eee;padding:5px 6px;font-family:monospace">' + (x.map_discord_id ? escHtml(x.map_discord_id) : '<span class="muted">—</span>') + '</td>';
-      h += '<td style="border:1px solid #eee;padding:5px 6px;color:#166534;font-weight:600">' + (x.emp_discord ? escHtml(x.emp_discord) : '<span class="muted">—</span>') + '</td>';
-      h += '<td style="border:1px solid #eee;padding:5px 6px;color:#166534;font-weight:600;font-family:monospace">' + (x.emp_discord_id ? escHtml(x.emp_discord_id) : '<span class="muted">—</span>') + '</td>';
-      h += '<td style="border:1px solid #eee;padding:5px 6px;white-space:nowrap"><button class="btn btn-sm btn-primary" onclick="confirmDiscordPending(' + x.mapping_id + ', this)" style="font-size:10px">确认同步</button></td>';
-      h += '</tr>';
-    }
-    h += '</table>';
-  }
-  h += '<div style="margin-top:14px;display:flex;gap:8px">';
-  if (items.length) h += '<button class="btn btn-primary btn-sm" onclick="confirmDiscordSyncAll(this)" style="font-size:11px"><i class="fas fa-check-double"></i> 全部确认同步</button>';
-  h += '<button class="btn btn-sm" onclick="closeDiscordPending()" style="font-size:11px">关闭</button>';
-  h += '</div></div>';
-  over.innerHTML = h;
-  over.onclick = function(ev) { if (ev.target === over) { over.remove(); window._dcOver = null; } };
-  window._dcOver = over;
-  document.body.appendChild(over);
-}
-
-function closeDiscordPending() {
-  if (window._dcOver) { window._dcOver.remove(); window._dcOver = null; }
-}
-
-// 单个确认同步
-async function confirmDiscordPending(mappingId, btn) {
-  if (btn) btn.disabled = true;
-  try {
-    var res = await api('pids/discord/confirm', { method: 'POST', json: { ids: [mappingId] } });
-    showToast('已同步 ' + (res && res.data && res.data.updated ? res.data.updated : 0) + ' 条', 'success');
-    openDiscordPending(); pidsReload();
-  } catch (e) { showToast('确认失败: ' + e.message, 'error'); if (btn) btn.disabled = false; }
-}
-
-// 全部确认同步
-async function confirmDiscordSyncAll(btn) {
-  if (!confirm('将把全部待确认项的员工 Discord 值（昵称+ID）写入映射表，确认执行？')) return;
-  if (btn) btn.disabled = true;
-  try {
-    var res = await api('pids/discord/confirm', { method: 'POST', json: { all: true } });
-    showToast('已同步 ' + (res && res.data && res.data.updated ? res.data.updated : 0) + ' 条', 'success');
-    openDiscordPending(); pidsReload();
-  } catch (e) { showToast('确认失败: ' + e.message, 'error'); if (btn) btn.disabled = false; }
-}
-
 
 function pidsRenderBody() {
   var wrap = document.getElementById('pidsBody');
@@ -6638,3 +6558,4 @@ function printVerifyReport() {
         + '<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body></html>');
     win.document.close();
 }
+
