@@ -5683,6 +5683,7 @@ function bindingFilter(list) {
   return list.filter(function(x) {
     return String(x.user_id).toLowerCase().indexOf(q) >= 0
       || String(x.nickname || '').toLowerCase().indexOf(q) >= 0
+      || String(x.discord_name || '').toLowerCase().indexOf(q) >= 0
       || String(x.owner || x.mapped_to || '').toLowerCase().indexOf(q) >= 0;
   });
 }
@@ -5720,22 +5721,24 @@ function bindingRenderBody() {
     wrap.innerHTML = html;
   } else {
     var list2 = bindingFilter(data.bound || []);
-    var grouped = {};  // uid -> {user_id, sources:[{source, owner_key, owner}], owners:set}
+    var grouped = {};  // uid -> {user_id, sources:[...], owners:set, discord_name}
     (list2 || []).forEach(function(b){
-      if (!grouped[b.user_id]) grouped[b.user_id] = { user_id: b.user_id, sources: [], owners: {} };
+      if (!grouped[b.user_id]) grouped[b.user_id] = { user_id: b.user_id, sources: [], owners: {}, discord_name: '' };
       grouped[b.user_id].sources.push({ source: b.source, owner_key: b.owner_key, owner: b.owner });
       grouped[b.user_id].owners[b.owner_key] = 1;
+      if (!grouped[b.user_id].discord_name && b.discord_name) grouped[b.user_id].discord_name = b.discord_name;
     });
     var gArr = Object.keys(grouped).map(function(k){ return grouped[k]; });
     var html2 = '<div style="font-weight:600;margin:4px 0 6px;color:#1e40af">🔗 已绑定 uid（按 uid 合并，' + data.bound.length + ' 条来源 → ' + gArr.length + ' 个 uid）</div>';
     html2 += '<table style="width:100%;border-collapse:collapse;background:#fff">';
-    html2 += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">归属</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">来源</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
+    html2 += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">Discord昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">归属</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">来源</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
     for (var k=0;k<gArr.length;k++) {
       var g = gArr[k];
       var b0 = g.sources[0];
       var conflict = Object.keys(g.owners).length > 1;
       html2 += '<tr' + (conflict ? ' style="background:#fef2f2"' : '') + '>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(g.user_id) + '</code>' + (conflict ? '<br><span style="color:#b91c1c;font-size:10px;font-weight:700">⚠ 冲突：多归属</span>' : '') + '</td>';
+      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(g.discord_name || '') + '</td>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (conflict ? escHtml(g.sources.map(function(s){return s.owner;}).join(' ｜ ')) : ownerLabel(b0)) + '</td>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + g.sources.map(function(s){ return escHtml(srcCell(s)); }).join('<br>') + '</td>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';

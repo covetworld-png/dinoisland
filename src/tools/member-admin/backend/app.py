@@ -2024,29 +2024,48 @@ def binding_employees():
 def binding_list():
     """已绑定全量视图：聚合 live_employees.discord_id/discord_user_id + player_mapping.discord_id，标注来源。
 
-    每行 = 一个 uid + 归属（员工编号/陪玩昵称）+ 来源表字段。解绑按 (uid, source, owner) 定位。
+    每行 = 一个 uid + 归属（员工编号/陪玩昵称）+ 来源表字段 + Discord 昵称（checkins.user_nicknames，
+    对账实时昵称，优先；员工表 discord 列兜底）。解绑按 (uid, source, owner) 定位。
     """
     db = get_db()
     rows = []
     try:
-        for r in db.execute("SELECT emp_no, nickname, alias, discord_id, discord_user_id FROM live_employees"):
+        for r in db.execute("SELECT emp_no, nickname, alias, discord, discord_id, discord_user_id FROM live_employees"):
             owner = r["emp_no"] or r["nickname"] or r["alias"] or "?"
             for uid in _split_ids(r["discord_id"]):
-                rows.append({"user_id": uid, "owner": owner,
+                rows.append({"user_id": uid, "owner": owner, "discord": r["discord"] or "",
                              "source": "live_employees.discord_id",
                              "owner_key": r["emp_no"] or ""})
             for uid in _split_ids(r["discord_user_id"]):
-                rows.append({"user_id": uid, "owner": owner,
+                rows.append({"user_id": uid, "owner": owner, "discord": r["discord"] or "",
                              "source": "live_employees.discord_user_id",
                              "owner_key": r["emp_no"] or ""})
-        for r in db.execute("SELECT player_name, emp_no, discord_id FROM player_mapping"):
+        for r in db.execute("SELECT player_name, emp_no, discord, discord_id FROM player_mapping"):
             for uid in _split_ids(r["discord_id"]):
                 rows.append({"user_id": uid,
                              "owner": (r["emp_no"] or "外聘") + "/" + (r["player_name"] or "?"),
+                             "discord": r["discord"] or "",
                              "source": "player_mapping.discord_id",
                              "owner_key": r["player_name"] or ""})
     finally:
         db.close()
+    # Discord 昵称增强：user_nicknames（checkins 库，对账实时昵称）优先，员工/映射表 discord 列兜底
+    try:
+        cdb = sqlite3.connect(CHECKIN_DB_PATH)
+        cdb.row_factory = sqlite3.Row
+        try:
+            nick_map = {r["user_id"]: r["nickname"] for r in cdb.execute(
+                "SELECT user_id, nickname FROM user_nicknames")}
+        finally:
+            cdb.close()
+    except Exception as e:
+        print(f"[MA] binding/list user_nicknames load error: {e}", flush=True)
+        nick_map = {}
+    for x in rows:
+        if x["user_id"] in nick_map and nick_map[x["user_id"]]:
+            x["discord_name"] = nick_map[x["user_id"]]
+        else:
+            x["discord_name"] = x.get("discord") or ""
     rows.sort(key=lambda x: (x["user_id"], x["source"]))
     return jsonify({"ok": True, "data": {"bound": rows}})
 
