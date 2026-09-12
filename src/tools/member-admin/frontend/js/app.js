@@ -611,7 +611,7 @@ const MODULES = {
     filters: [],
     fields: [
       { key: 'player_name', label: 'play_detail 昵称', type: 'text', required: true, placeholder: '直播明细里的人员昵称，如 HENI' },
-      { key: 'emp_no', label: '关联员工', type: 'searchselect', optionsKind: 'live_employees', placeholder: '选择员工后自动带出 Discord' },
+      { key: 'emp_no', label: '关联员工', type: 'picker', optionsKind: 'live_employees', placeholder: '选择员工后自动带出 Discord' },
       { key: 'discord', label: 'Discord 昵称', type: 'text' },
       { key: 'discord_id', label: 'Discord ID', type: 'text' },
       { key: 'remark', label: '备注', type: 'textarea', full: true, placeholder: '如：导演/临时人员/未匹配原因' },
@@ -1051,6 +1051,38 @@ async function openFormModal(moduleKey, item) {
       ss.setValue(cur || '');
       fieldCtrls[f.key] = ss;
       label.appendChild(ss.el);
+    } else if (f.type === 'picker') {
+      // 富信息员工选择器：按钮弹层（编号/昵称/别名/中文名/真实姓名/Discord/岗位/状态），选中回填 emp_no + Discord
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;gap:6px;align-items:center';
+      const show = document.createElement('input');
+      show.type = 'text';
+      show.readOnly = true;
+      show.placeholder = f.placeholder || '点击右侧按钮选择员工';
+      show.style.cssText = 'flex:1;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;background:#f9fafb';
+      let val = cur || '';
+      const pickBtn = document.createElement('button');
+      pickBtn.type = 'button';
+      pickBtn.className = 'btn btn-sm btn-primary';
+      pickBtn.textContent = '选择员工';
+      pickBtn.addEventListener('click', async () => {
+        openRichEmpPicker((emp) => {
+          if (!emp) return;
+          val = String(emp.emp_no || '');
+          show.value = empLabelText(val) || val;
+          // 回填 Discord（仅空时补，不覆盖已填值）
+          const dc = fieldCtrls['discord'];
+          if (dc && dc.setValue && emp.discord && !(item && (item.discord || '').trim())) dc.setValue(emp.discord);
+          const di = fieldCtrls['discord_id'];
+          if (di && di.setValue && emp.discord_id && !(item && (item.discord_id || '').trim())) di.setValue(emp.discord_id);
+        });
+      });
+      wrap.appendChild(show);
+      wrap.appendChild(pickBtn);
+      // 初始显示当前值
+      if (cur) show.value = optionLabel('live_employees', cur) || cur;
+      fieldCtrls[f.key] = { getValue: () => val, setValue: v => { val = v || ''; show.value = v ? (optionLabel('live_employees', v) || v) : ''; } };
+      label.appendChild(wrap);
     } else if (f.type === 'richtext') {
       const rte = createRichEditor(cur || '');
       fieldCtrls[f.key] = { getValue: () => rte.getHTML() };
@@ -5855,8 +5887,7 @@ function empLabelText(empNo) {
   return parts.join(' ');
 }
 
-async function openBindingEmpPicker(uid, nickname) {
-  if (!_bindingEmp.length) {
+async function openBindingEmpPicker(uid, nickname) {  if (!_bindingEmp.length) {
     try { _bindingEmp = await api('binding/employees') || []; } catch(e) {
       showToast('员工列表加载失败：' + e.message, 'error'); return;
     }
