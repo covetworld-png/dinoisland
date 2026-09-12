@@ -2135,6 +2135,100 @@ def pids_panorama():
     return jsonify({"ok": True, "data": {"items": rows, "total": len(rows)}})
 
 
+@app.get("/api/pids/discord/pending")
+@login_required
+def pids_discord_pending():
+    """员工 Discord → 映射表待确认同步清单（只读，实时对比）。
+    对每条已关联员工（emp_no 非空、非 LEFT）的映射行，比对员工表
+    live_employees.discord / discord_user_id 与映射表 player_mapping.discord / discord_id：
+    员工表该字段有值且不一致 → 待确认。员工表为空者不列（避免员工表空时反向清空映射 uid）。
+    """
+    db = get_db()
+    try:
+        mrows = [dict(r) for r in db.execute(
+            "SELECT id, player_name, emp_no, discord, discord_id FROM player_mapping"
+            " WHERE emp_no != '' AND emp_no != 'LEFT'")]
+        le = [dict(r) for r in db.execute(
+            "SELECT emp_no, discord, discord_user_id, discord_id FROM live_employees")]
+    finally:
+        db.close()
+    le_map = {r["emp_no"]: r for r in le if r.get("emp_no")}
+    items = []
+    for m in mrows:
+        emp = le_map.get(m["emp_no"])
+        if not emp:
+            continue
+        emp_disc = emp.get("discord") or ""
+        emp_uid = emp.get("discord_user_id") or emp.get("discord_id") or ""
+        map_disc = m.get("discord") or ""
+        map_did = m.get("discord_id") or ""
+        if (emp_disc and emp_disc != map_disc) or (emp_uid and emp_uid != map_did):
+            items.append({
+                "mapping_id": m["id"],
+                "emp_no": m["emp_no"],
+                "player_name": m.get("player_name") or "",
+                "map_discord": map_disc,
+                "map_discord_id": map_did,
+                "emp_discord": emp_disc,
+                "emp_discord_id": emp_uid,
+            })
+    return jsonify({"ok": True, "data": {"items": items, "total": len(items)}})
+
+
+@app.post("/api/pids/discord/confirm")
+@write_required
+def pids_discord_confirm():
+    """确认同步：把关联员工的 Discord 值（昵称+ID）写入映射表对应行。
+    body: {"ids":[mapping_id,...]} 或 {"all":true}。仅同步已关联员工且员工表有值的行；
+    事务内改数据，commit 后统一审计（避免 audit 新连接撞写锁）。
+    """
+    import traceback
+    body = request.get_json(silent=True) or {}
+    all_flag = bool(body.get("all"))
+    ids = [int(x) for x in (body.get("ids") or []) if str(x).isdigit()]
+    db = get_db()
+    logs = []
+    try:
+        le = {r["emp_no"]: dict(r) for r in db.execute(
+            "SELECT emp_no, discord, discord_user_id, discord_id FROM live_employees")}
+        rows = [dict(r) for r in db.execute(
+            "SELECT * FROM player_mapping WHERE emp_no != '' AND emp_no != 'LEFT'")]
+        targets = [r for r in rows if all_flag or r["id"] in set(ids)]
+        updated = 0
+        for m in targets:
+            emp = le.get(m["emp_no"])
+            if not emp:
+                continue
+            emp_disc = emp.get("discord") or ""
+            emp_uid = emp.get("discord_user_id") or emp.get("discord_id") or ""
+            if not emp_disc and not emp_uid:
+                continue
+            map_disc = m.get("discord") or ""
+            map_did = m.get("discord_id") or ""
+            if emp_disc == map_disc and emp_uid == map_did:
+                continue
+            before = {"discord": map_disc, "discord_id": map_did}
+            db.execute("UPDATE player_mapping SET discord=?, discord_id=?, updated_at=? WHERE id=?",
+                       (emp_disc, emp_uid, now(), m["id"]))
+            after = dict(db.execute("SELECT discord, discord_id FROM player_mapping WHERE id=?", (m["id"],)).fetchone())
+            logs.append((m["id"], before, after, f"Discord 待确认同步 {m['emp_no']}→{m.get('player_name') or ''}"))
+            updated += 1
+        db.commit()
+    except Exception:
+        db.rollback()
+        traceback.print_exc()
+        db.close()
+        return jsonify({"ok": False, "error": "同步失败"}), 500
+    db.close()
+    for eid, before, after, label in logs:
+        try:
+            log_change(session["user"], "update", "player_mapping", eid, label, before=before, after=after, ip=client_ip())
+        except Exception as e:
+            print(f"[MA] pids discord confirm audit fail: {e}", flush=True)
+    return jsonify({"ok": True, "data": {"updated": updated}})
+
+
+
 @app.post("/api/pids/sync-fill")
 @write_required
 def pids_sync_fill():
