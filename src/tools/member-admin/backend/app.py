@@ -28,6 +28,7 @@ from config import (SECRET_KEY, SESSION_COOKIE_NAME, SESSION_COOKIE_PATH,
 import models
 from models import (init_db, get_db, get_by_id, insert_row, update_row, delete_row,
                     list_rows, TABLE_FIELDS, ENTITY_LABEL_FIELD, now)
+import vietqr
 from audit import log_change, list_logs
 from game_data import get_game_data
 from query_engine import run_query, run_commission, list_leaders
@@ -2583,6 +2584,27 @@ def inbox_update_status(item_id):
     except Exception as e:
         traceback.print_exc()
         return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.get("/api/live_employees/<int:row_id>/vietqr")
+@login_required
+def employee_vietqr(row_id):
+    """返回该直播员工的 VietQR 静态收款码 payload（仅账号+银行，无金额）。"""
+    row = get_by_id("live_employees", row_id)
+    if not row:
+        return jsonify({"ok": False, "error": "员工不存在"}), 404
+    account = str(row.get("account") or "").strip()
+    bank = str(row.get("bank") or "").strip()
+    if not account:
+        return jsonify({"ok": False, "error": "该员工未填写收款账号"}), 400
+    bin_code = vietqr.normalize_bank(bank)
+    if not bin_code:
+        return jsonify({"ok": False, "error": f"未识别收款银行：{bank or '(空)'}"}), 400
+    payload = vietqr.build_payload(account, bin_code)
+    return jsonify({"ok": True, "data": {
+        "payload": payload, "account": account, "bank": bank, "bin": bin_code,
+        "note": "静态收款码：仅含账号+收款银行，不含金额"
+    }})
 
 
 if __name__ == "__main__":

@@ -700,8 +700,8 @@ async function switchModule(moduleKey) {
     if (state.role !== 'super') return; // 用户管理仅 super
     renderUsersPage();
   } else if (moduleKey === 'logs') {
-    // 日志按当前模块分组默认过滤：直播组只看直播员工日志
-    logsState.entity_type = state.moduleGroup === 'live' ? 'live_employee' : '';
+    // 操作日志默认全量显示（含登录/用户管理等），直播组不再锁定只显示直播员工日志
+    logsState.entity_type = '';
     logsState.page = 1;
     renderLogsPage();
   } else if (moduleKey === 'query') {
@@ -1705,6 +1705,41 @@ function openLiveEmployeeDrawer(item) {
     sec.appendChild(grid);
     body.appendChild(sec);
   });
+
+  // ---- 收款二维码（VietQR 静态码，仅账号+银行，无金额）----
+  const qrSec = document.createElement('div');
+  qrSec.className = 'drawer-section';
+  qrSec.innerHTML = '<h4>收款二维码（VietQR）</h4>';
+  const qrBox = document.createElement('div');
+  qrBox.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px;';
+  qrBox.innerHTML = '<p style="color:#8b5cf6;font-size:12px;margin:0;">生成中…</p>';
+  qrSec.appendChild(qrBox);
+  body.appendChild(qrSec);
+
+  fetch('/api/live_employees/' + item.id + '/vietqr')
+    .then(r => r.json())
+    .then(res => {
+      if (!res.ok) {
+        qrBox.innerHTML = '<p style="color:#ef4444;font-size:12px;margin:0;">' + esc(res.error || '无法生成') + '</p>';
+        return;
+      }
+      const d = res.data;
+      qrBox.innerHTML = '';
+      const qrEl = document.createElement('div');
+      qrBox.appendChild(qrEl);
+      try {
+        new QRCode(qrEl, { text: d.payload, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+      } catch (e) {
+        qrBox.innerHTML = '<p style="color:#ef4444;font-size:12px;margin:0;">二维码生成失败</p>';
+        return;
+      }
+      const cap = document.createElement('p');
+      cap.style.cssText = 'font-size:12px;color:#6b7280;margin:6px 0 0;text-align:center;line-height:1.5;';
+      cap.textContent = d.payload ? (d.bank + ' · ' + d.account + '\n（静态码：仅含账号+收款银行，不含金额）') : '';
+      qrBox.appendChild(cap);
+    })
+    .catch(() => { qrBox.innerHTML = '<p style="color:#ef4444;font-size:12px;margin:0;">接口异常</p>'; });
+
   if (item.remark) {
     const sec = document.createElement('div');
     sec.className = 'drawer-section';
