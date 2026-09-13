@@ -2611,15 +2611,17 @@ PAY_SPLIT_LIMIT = 100_000_000  # 银行单笔限额：超此金额拆成多笔�
 
 
 def _pay_name(emp, emp_no):
-    """收款人显示名：原名优先，昵称放括号（如有）。"""
+    """收款人显示名：原名优先；括号内容依次回退 昵称 → 中文名（cn_name）。"""
     real = str(emp["real_name"] or "").strip() if emp else ""
     nick = str(emp["nickname"] or "").strip() if emp else ""
-    if real and nick:
-        return real + "（" + nick + "）"
+    cn = str(emp["cn_name"] or "").strip() if emp else ""
+    sub = nick or cn
+    if real and sub:
+        return real + "（" + sub + "）"
     if real:
         return real
-    if nick:
-        return nick
+    if sub:
+        return sub
     return str(emp_no or "")
 
 
@@ -2666,7 +2668,7 @@ def paycode_generate():
                     err_n += 1
                     results.append({"emp_no": emp_no, "ok": False, "error": f"金额须大于0: {amount}"})
                     continue
-                emp = db.execute("SELECT emp_no, nickname, real_name, account, bank FROM live_employees WHERE trim(emp_no)=?", (emp_no,)).fetchone()
+                emp = db.execute("SELECT emp_no, nickname, cn_name, real_name, account, bank FROM live_employees WHERE trim(emp_no)=?", (emp_no,)).fetchone()
                 if not emp:
                     err_n += 1
                     results.append({"emp_no": emp_no, "ok": False, "error": "未找到该员工编号", "amount": amount})
@@ -2759,7 +2761,7 @@ def paycode_batch_detail(batch_id):
                           "WHERE batch_id=? ORDER BY id ASC", (batch_id,)).fetchall()
         items = []
         for r in rows:
-            emp = db.execute("SELECT nickname, real_name, bank FROM live_employees WHERE trim(emp_no)=?", (r["emp_no"],)).fetchone()
+            emp = db.execute("SELECT nickname, cn_name, real_name, bank FROM live_employees WHERE trim(emp_no)=?", (r["emp_no"],)).fetchone()
             items.append(dict(r))
             items[-1]["name"] = _pay_name(emp, r["emp_no"])
             items[-1]["bank"] = emp["bank"] if emp else ""
