@@ -694,11 +694,13 @@ function getListState(moduleKey) {
 async function switchModule(moduleKey) {
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景' };
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景', paycode: '工资代发收款码' };
   $('#adminModuleTitle').textContent = titles[moduleKey] || '';
   if (moduleKey === 'users') {
     if (state.role !== 'super') return; // 用户管理仅 super
     renderUsersPage();
+  } else if (moduleKey === 'paycode') {
+    renderPayCodePage();
   } else if (moduleKey === 'logs') {
     // 操作日志默认全量显示（含登录/用户管理等），直播组不再锁定只显示直播员工日志
     logsState.entity_type = '';
@@ -3926,8 +3928,8 @@ function enterModuleGroup(group) {
   state.moduleGroup = group;
   $$('.sidebar-nav .side-btn').forEach(b => {
     const isUsersBtn = b.id === 'usersNavBtn' || b.id === 'usersNavBtnLive';
-    // 用户管理：分组 + 角色（仅 super）双重条件
-    const hide = (b.dataset.group !== group) || (isUsersBtn && state.role !== 'super');
+    // 用户管理：分组 + 角色（仅 super）双重条件；group=all 的按钮两个分组都显示
+    const hide = (b.dataset.group !== group && b.dataset.group !== 'all') || (isUsersBtn && state.role !== 'super');
     b.classList.toggle('hidden', hide);
   });
   $('#sidebarBrand').textContent = group === 'live' ? '直播管理' : '游戏管理';
@@ -6604,3 +6606,101 @@ function printVerifyReport() {
     win.document.close();
 }
 
+
+/* ================= 工资代发收款码（批量 VietQR 带金额）================= */
+var _paycodeBusy = false;
+
+function renderPayCodePage() {
+  const main = $('#adminMain');
+  main.innerHTML = ''
+    + '<div style="padding:14px 18px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px">'
+    +   '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+    +     '<span style="font-weight:600">上传 Excel/CSV（列：员工编号 + 金额，VND 整数）</span>'
+    +     '<input type="file" id="paycodeFile" accept=".xlsx,.xls,.csv" style="font-size:12px">'
+    +     '<button class="btn btn-primary btn-sm" id="paycodeGenBtn" disabled><i class="fas fa-qrcode"></i> 生成收款码</button>'
+    +     '<button class="btn btn-sm" id="paycodeTplBtn">下载模板</button>'
+    +     '<button class="btn btn-sm" id="paycodePrintBtn" style="display:none">打印本页</button>'
+    +   '</div>'
+    +   '<p style="font-size:12px;color:#6b7280;margin:8px 0 0">每行生成一个「带金额 VietQR」：手机银行/支付 App 扫码后自动带出收款账号+金额，逐张核对后付款；'
+    +        '员工编号须与「直播员工-员工编号」一致，金额为纯整数越南盾（如 3000000）。</p>'
+    + '</div>'
+    + '<div id="paycodeBody"><p style="color:#9ca3af;font-size:13px">上传文件后点击「生成收款码」。</p></div>';
+
+  $('#paycodeFile').addEventListener('change', () => {
+    $('#paycodeGenBtn').disabled = !$('#paycodeFile').files.length;
+  });
+  $('#paycodeGenBtn').addEventListener('click', paycodeGenerate);
+  $('#paycodeTplBtn').addEventListener('click', paycodeDownloadTpl);
+  $('#paycodePrintBtn').addEventListener('click', () => window.print());
+}
+
+function paycodeDownloadTpl() {
+  const csv = '\uFEFF员工编号,金额\n00001,3000000\n00002,4500000\n';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = '工资代发收款码模板.csv';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+
+async function paycodeGenerate() {
+  const input = $('#paycodeFile');
+  if (!input.files || !input.files.length) { showToast('请先选择文件', 'error'); return; }
+  if (_paycodeBusy) return;
+  _paycodeBusy = true;
+  const btn = $('#paycodeGenBtn');
+  btn.disabled = true; btn.textContent = '生成中…';
+  try {
+    const fd = new FormData();
+    fd.append('file', input.files[0]);
+    const res = await fetch('api/paycode/generate', { method: 'POST', body: fd, credentials: 'same-origin' });
+    const j = await res.json();
+    if (!j.ok) { showToast(j.error || '生成失败', 'error'); return; }
+    paycodeRender(j.data);
+  } catch (e) {
+    showToast('接口异常：' + e.message, 'error');
+  } finally {
+    _paycodeBusy = false;
+    btn.disabled = false; btn.textContent = '生成收款码';
+  }
+}
+
+function paycodeRender(d) {
+  const body = $('#paycodeBody');
+  const ok = d.ok_count, err = d.err_count;
+  const sum = d.total_amount || 0;
+  const head = document.createElement('div');
+  head.style.cssText = 'display:flex;gap:16px;align-items:center;margin-bottom:10px;font-size:13px;flex-wrap:wrap';
+  head.innerHTML = '<span>共 <b>' + d.total_rows + '</b> 行</span>'
+    + '<span style="color:#16a34a">成功 <b>' + ok + '</b></span>'
+    + (err ? '<span style="color:#dc2626">失败 <b>' + err + '</b></span>' : '')
+    + '<span>合计 <b style="font-size:15px;color:#1d4ed8">' + fmtVND(sum) + '</b> VND</span>';
+  body.innerHTML = '';
+  body.appendChild(head);
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:14px';
+  (d.items || []).forEach(it => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;width:230px;display:flex;flex-direction:column;align-items:center;gap:6px';
+    if (!it.ok) {
+      card.innerHTML = '<b style="font-size:13px">' + esc(it.emp_no) + '</b>'
+        + (it.name ? '<span style="font-size:12px;color:#6b7280">' + esc(it.name) + '</span>' : '')
+        + '<span style="font-size:12px;color:#dc2626">' + esc(it.error) + '</span>'
+        + (it.amount ? '<span style="font-size:13px;font-weight:600">' + fmtVND(it.amount) + ' VND</span>' : '');
+    } else {
+      const qr = document.createElement('div');
+      card.appendChild(qr);
+      try { new QRCode(qr, { text: it.payload, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M }); }
+      catch (e) { card.appendChild(Object.assign(document.createElement('p'), { textContent: '二维码生成失败' })); }
+      const info = document.createElement('div');
+      info.style.cssText = 'font-size:12px;color:#374151;text-align:center;line-height:1.6';
+      info.innerHTML = '<b>' + esc(it.name || it.emp_no) + '</b>（' + esc(it.emp_no) + '）<br>'
+        + esc(it.bank) + ' · ' + esc(it.account) + '<br>'
+        + '<span style="font-size:16px;color:#1d4ed8;font-weight:700">' + fmtVND(it.amount) + '</span> VND';
+      card.appendChild(info);
+    }
+    grid.appendChild(card);
+  });
+  body.appendChild(grid);
+  $('#paycodePrintBtn').style.display = 'inline-block';
+}

@@ -92,14 +92,16 @@ def _build_tag3801(bin_code: str, account: str) -> str:
     return _tlv("00", bin_code) + _tlv("01", account)
 
 
-def build_payload(account: str, bin_code: str, service_code: str = "QRIBFTTA") -> str:
-    """构造静态 VietQR 串（仅账号+银行，不含金额）。"""
+def build_payload(account: str, bin_code: str, service_code: str = "QRIBFTTA", amount: int = None) -> str:
+    """构造 VietQR 串。amount>0 时嵌入落地金额(Tag54)，否则为无金额静态码。"""
+    init_method = "12" if (amount or 0) > 0 else "11"
     tag38 = (_tlv("00", "A000000727")
              + _tlv("01", _build_tag3801(bin_code, account))
              + _tlv("02", service_code))
     semi = (_tlv("00", "01")
-            + _tlv("01", "11")
+            + _tlv("01", init_method)
             + _tlv("38", tag38)
             + _tlv("53", "704")
+            + (_tlv("54", str(int(amount))) if (amount or 0) > 0 else '')  # 金额(VND 整数)
             + _tlv("58", "VN"))
     return f"{semi}6304{_crc16((semi + '6304').encode())}"

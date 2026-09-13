@@ -2607,6 +2607,102 @@ def employee_vietqr(row_id):
     }})
 
 
+@app.post("/api/paycode/generate")
+@login_required
+def paycode_generate():
+    """Excel/CSV(员工编号+金额) -> 批量生成带金额 VietQR。
+    支持上传文件(file=) 或 JSON rows=[{"emp_no":..,"amount":..}]。"""
+    try:
+        rows = _paycode_read_rows()
+        db = get_db()
+        results, ok_n, err_n, total_amt = [], 0, 0, 0
+        for emp_no, amount in rows:
+            emp_no = str(emp_no or "").strip()
+            if not emp_no:
+                err_n += 1
+                results.append({"emp_no": emp_no, "ok": False, "error": "员工编号为空"})
+                continue
+            try:
+                amount = int(float(str(amount).replace(",", "").strip() or 0))
+            except (ValueError, TypeError):
+                err_n += 1
+                results.append({"emp_no": emp_no, "ok": False, "error": f"金额非法: {amount}"})
+                continue
+            if amount <= 0:
+                err_n += 1
+                results.append({"emp_no": emp_no, "ok": False, "error": f"金额须大于0: {amount}"})
+                continue
+            emp = db.execute("SELECT emp_no, nickname, real_name, account, bank FROM live_employees WHERE trim(emp_no)=?", (emp_no,)).fetchone()
+            if not emp:
+                err_n += 1
+                results.append({"emp_no": emp_no, "ok": False, "error": "未找到该员工编号", "amount": amount})
+                continue
+            account = str(emp["account"] or "").strip()
+            bank = str(emp["bank"] or "").strip()
+            if not account:
+                err_n += 1
+                results.append({"emp_no": emp_no, "name": emp["nickname"] or emp["real_name"] or emp_no, "ok": False, "error": "该员工未填收款账号", "amount": amount})
+                continue
+            bin_code = vietqr.normalize_bank(bank)
+            if not bin_code:
+                err_n += 1
+                results.append({"emp_no": emp_no, "name": emp["nickname"] or emp["real_name"] or emp_no, "ok": False, "error": f"未识别收款银行: {bank}", "amount": amount})
+                continue
+            payload = vietqr.build_payload(account, bin_code, amount=amount)
+            ok_n += 1
+            total_amt += amount
+            results.append({"emp_no": emp_no, "name": emp["nickname"] or emp["real_name"] or emp_no,
+                            "account": account, "bank": bank, "amount": amount, "payload": payload, "ok": True})
+        return jsonify({"ok": True, "data": {
+            "items": results, "ok_count": ok_n, "err_count": err_n,
+            "total_amount": total_amt, "total_rows": len(rows),
+            "note": "扫码即带出收款账号+金额，请逐张核对后付款"}})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+def _paycode_read_rows():
+    """从上传文件或 JSON 读取 [(emp_no, amount), ...]。"""
+    f = request.files.get("file")
+    if f:
+        filename = (f.filename or "").lower()
+        raw = f.read()
+        if filename.endswith(".xlsx") or filename.endswith(".xls"):
+            import openpyxl
+            wb = openpyxl.load_workbook(BytesIO(raw), data_only=True)
+            sh = wb.active
+            grid = [["" if c is None else str(c).strip() for c in row] for row in sh.iter_rows(values_only=True)]
+        else:
+            text = raw.decode("utf-8-sig", errors="replace")
+            sep = "\t" if "\t" in text and ("," not in text or text.count("\t") >= text.count(",")) else ","
+            grid = [[c.strip() for c in line.split(sep)] for line in text.splitlines() if line.strip()]
+        grid = [r for r in grid if any(c for c in r)]
+        if not grid:
+            return []
+        header = [h.lower() for h in grid[0]]
+        EMP_KEYS = ("员工编号", "工号", "员工号", "emp_no", "empno", "编号", "mã nhân viên")
+        AMT_KEYS = ("金额", "工资", "应发", "实发", "amount", "salary", "lương", "tien")
+        ei = next((i for i, h in enumerate(header) if h in EMP_KEYS or h.replace("_", "") == "empno"), None)
+        ai = next((i for i, h in enumerate(header) if h in AMT_KEYS or h == "vnd"), None)
+        if ei is None:
+            ei = 0
+        if ai is None:
+            ai = ei + 1 if ei + 1 < len(header) else 0
+        rows = []
+        for r in grid[1:]:
+            if ei >= len(r):
+                continue
+            emp = r[ei]
+            amt = r[ai] if ai < len(r) else ""
+            if emp == "" and amt == "":
+                continue
+            rows.append((emp, amt))
+        return rows
+    data = request.get_json(force=True, silent=True) or {}
+    return [(str(x.get("emp_no") or "").strip(), x.get("amount")) for x in (data.get("rows") or [])]
+
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
 
