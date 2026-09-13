@@ -6442,7 +6442,7 @@ function pidsRenderBody() {
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-family:monospace">' + (x.emp_uid ? escHtml(x.emp_uid) : '<span class="muted">—</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_disc ? '<span style="color:#166534;font-weight:600">' + escHtml(x.emp_disc) + '</span>' : '<span style="color:#b91c1c;font-weight:600">' + escHtml(x.discord || '—') + '</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.last_seen ? escHtml(x.last_seen) : '<span class="muted">—</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#6b7280">' + escHtml(x.remark || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#6b7280;max-width:24ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(x.remark || '') + '">' + escHtml(x.remark || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#999">' + escHtml(x.updated_at || '') + '</td>';
     html += '</tr>';
   }
