@@ -6373,9 +6373,21 @@ function pidsStatusBadge(status) {
 function pidsActionCell(x) {
   var btnStyle = 'font-size:10px;padding:1px 6px';
   if (x.mapping_id) {
-    return '<button class="btn btn-sm" style="' + btnStyle + ';color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="pidsEditMapping(' + x.mapping_id + ')">编辑映射</button>';
+    return '<button class="btn btn-sm" style="' + btnStyle + ';color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="pidsEditMapping(' + x.mapping_id + ')">编辑映射</button>'
+      + ' <button class="btn btn-sm" style="' + btnStyle + ';color:#991b1b;background:#fee2e2;border-color:#fecaca" onclick="pidsDelMapping(' + x.mapping_id + ',\'' + escJs(x.player_name || '') + '\')">删除映射</button>';
   }
   return '<button class="btn btn-sm" style="' + btnStyle + ';color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="pidsAddMapping(\'' + escJs(x.player_name) + '\')">补映射</button>';
+}
+
+// 删除映射行（并入 PID 全景后由这里统一管理；删除后该 PID 回到「缺映射」）
+async function pidsDelMapping(mappingId, playerName) {
+  if (!mappingId) return;
+  if (!confirm('删除映射行 #' + mappingId + '（' + playerName + '）？\n删除后该 PID 将回到「缺映射」状态，可重新补映射。')) return;
+  try {
+    await api('player_mapping/' + mappingId, { method: 'DELETE' });
+    showToast('映射已删除：' + playerName, 'success');
+    pidsReload();
+  } catch (e) { showToast(e.message, 'error'); }
 }
 
 function escJs(s) {
