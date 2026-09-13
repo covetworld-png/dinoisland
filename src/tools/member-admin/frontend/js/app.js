@@ -6637,7 +6637,7 @@ function renderPayCodePage() {
   });
   $('#paycodeGenBtn').addEventListener('click', paycodeGenerate);
   $('#paycodeTplBtn').addEventListener('click', paycodeDownloadTpl);
-  $('#payTabGen').addEventListener('click', () => { paycodeTab = 'gen'; paycodeBodyPlaceholder(); setPaycodeTabUI(); });
+  $('#payTabGen').addEventListener('click', () => { paycodeTab = 'gen'; setPaycodeTabUI(); $('#paycodeBody').innerHTML = '<p style="color:#9ca3af;font-size:13px">上传文件后点击「生成收款码」。</p>'; });
   $('#payTabHist').addEventListener('click', () => { paycodeTab = 'hist'; setPaycodeTabUI(); paycodeBatches(); });
 }
 
