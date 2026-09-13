@@ -6414,7 +6414,7 @@ function pidsActionCell(x) {
     return '<button class="btn btn-sm" style="' + btnStyle + ';color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="pidsEditMapping(' + x.mapping_id + ')">编辑映射</button>'
       + ' <button class="btn btn-sm" style="' + btnStyle + ';color:#991b1b;background:#fee2e2;border-color:#fecaca" onclick="pidsDelMapping(' + x.mapping_id + ',\'' + escJs(x.player_name || '') + '\')">删除映射</button>';
   }
-  return '<button class="btn btn-sm" style="' + btnStyle + ';color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="pidsAddMapping(\'' + escJs(x.player_name) + '\')">补映射</button>';
+  return '<button class="btn btn-sm" style="' + btnStyle + ';color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="pidsAddMapping(\'' + escJs(x.player_name) + '\',' + x.pid + ')">补映射</button>';
 }
 
 // 删除映射行（并入 PID 全景后由这里统一管理；删除后该 PID 回到「缺映射」）
@@ -6443,9 +6443,42 @@ async function pidsEditMapping(mappingId) {
   } catch (e) { showToast('加载映射失败: ' + e.message, 'error'); }
 }
 
-// 无映射行 → 打开陪玩映射新增表单并预填 player_name
-async function pidsAddMapping(playerName) {
-  openFormModal('player_mapping', { id: null, player_name: playerName, emp_no: '', discord: '', discord_id: '', remark: '自动补缺：未关联员工' });
+// 无映射行 → 打开员工选择弹窗，调专用接口补映射（写 pd_id，幂等不撞唯一约束）
+async function pidsAddMapping(playerName, pid) {
+  await loadLiveEmpMap();
+  var map = state.liveEmpByNo || {};
+  var nos = Object.keys(map).sort();
+  if (!nos.length) { showToast('员工列表为空', 'error'); return; }
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:10000;display:flex;align-items:center;justify-content:center';
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:8px;padding:16px;width:400px;box-shadow:0 4px 16px rgba(0,0,0,.2)';
+  var opts = nos.map(function(n){
+    var r = map[n];
+    var nm = (r && (r.nickname || r.cn_name || r.real_name)) || '';
+    return '<option value="' + escHtml(n) + '">' + escHtml(n + (nm ? ' ' + nm : '')) + '</option>';
+  }).join('');
+  box.innerHTML = '<div style="font-weight:600;margin-bottom:4px;font-size:13px">补映射：' + escHtml(playerName || '') + '</div>'
+    + '<div style="font-size:11px;color:#9ca3af;margin-bottom:10px">PID #' + pid + ' · 选择要关联的直播员工</div>'
+    + '<select id="pidsEmpSel" style="width:100%;padding:5px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-bottom:12px">' + opts + '</select>'
+    + '<div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">'
+    + '<button class="btn btn-sm" id="pidsEmpCancel">取消</button>'
+    + '<button class="btn btn-primary btn-sm" id="pidsEmpOk">关联</button>'
+    + '</div>';
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  var done = false;
+  function close() { if (!done) { done = true; overlay.remove(); } }
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) close(); });
+  box.querySelector('#pidsEmpCancel').addEventListener('click', close);
+  box.querySelector('#pidsEmpOk').addEventListener('click', async function(){
+    var emp = box.querySelector('#pidsEmpSel').value;
+    try {
+      var r = await api('pids/mapping', { method: 'POST', json: { pid: pid, emp_no: emp } });
+      showToast('已关联 ' + emp + '（PID #' + pid + '）', 'success');
+      close(); pidsReload();
+    } catch (e) { showToast(e.message, 'error'); }
+  });
 }
 
 function pidsRenderBody() {

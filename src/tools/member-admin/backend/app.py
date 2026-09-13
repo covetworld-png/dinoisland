@@ -2146,6 +2146,73 @@ def pids_panorama():
     return jsonify({"ok": True, "data": {"items": rows, "total": len(rows)}})
 
 
+@app.post("/api/pids/mapping")
+@write_required
+def pids_set_mapping():
+    """PID 全景补映射/改映射（幂等）：
+    ①已存在 pd_id=pid 的行 → 更新 emp_no；
+    ②否则同名(player_name 精确)且 pd_id 空的行 → 补 pd_id+emp_no；
+    ③否则新建（player_name=源库名, pd_id=pid）。
+    emp_no 传空时保留原归属。修复：通用表单新建缺 pd_id + 同名撞唯一约束 500 的缺陷。"""
+    data = request.get_json(force=True, silent=True) or {}
+    pid = data.get("pid")
+    emp_no = str(data.get("emp_no") or "").strip()
+    try:
+        pid = int(pid)
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "pid 必填且为数字"}), 400
+    if pid <= 0:
+        return jsonify({"ok": False, "error": "pid 非法"}), 400
+    src_name = ""
+    try:
+        for p in _live_players():
+            if p["id"] == pid:
+                src_name = p.get("player_name") or ""
+                break
+    except Exception:
+        pass
+    now_ts = now()
+    db = get_db()
+    try:
+        exist = db.execute("SELECT * FROM player_mapping WHERE pd_id=? ORDER BY id DESC LIMIT 1", (pid,)).fetchone()
+        if exist:
+            row_id, action = exist["id"], "update"
+            if emp_no:
+                db.execute("UPDATE player_mapping SET emp_no=?, remark=?, updated_at=? WHERE id=?",
+                           (emp_no, f"补映射：PID #{pid} ({src_name})", now_ts, row_id))
+            else:
+                db.execute("UPDATE player_mapping SET remark=?, updated_at=? WHERE id=?",
+                           (f"补映射：PID #{pid} ({src_name})", now_ts, row_id))
+        else:
+            cand = None
+            if src_name:
+                cand = db.execute("SELECT * FROM player_mapping WHERE pd_id IN (0, '') AND player_name=? LIMIT 1",
+                                  (src_name,)).fetchone()
+            if cand:
+                row_id, action = cand["id"], "update"
+                if emp_no:
+                    db.execute("UPDATE player_mapping SET pd_id=?, emp_no=?, remark=?, updated_at=? WHERE id=?",
+                               (pid, emp_no, f"补映射：PID #{pid} ({src_name})", now_ts, row_id))
+                else:
+                    db.execute("UPDATE player_mapping SET pd_id=?, remark=?, updated_at=? WHERE id=?",
+                               (pid, f"补映射：PID #{pid} ({src_name})", now_ts, row_id))
+            else:
+                cur = db.execute("INSERT INTO player_mapping (player_name, emp_no, discord, discord_id, remark, created_at, updated_at, pd_id) "
+                                 "VALUES (?,?,?,?,?,?,?,?)",
+                                 (src_name or f"pid{pid}", emp_no, "", "", f"补映射：PID #{pid} ({src_name})", now_ts, now_ts, pid))
+                row_id, action = cur.lastrowid, "create"
+        db.commit()
+        after = dict(db.execute("SELECT * FROM player_mapping WHERE id=?", (row_id,)).fetchone())
+        log_change(session["user"], "update" if action == "update" else "create", "player_mapping", row_id,
+                   f"PID #{pid} ({src_name}) 关联员工 {emp_no or '(保留)'}", after=after, ip=client_ip())
+        return jsonify({"ok": True, "data": {"id": row_id, "action": action, "pd_id": pid, "emp_no": emp_no}})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
+    finally:
+        db.close()
+
+
 @app.post("/api/pids/sync-fill")
 @write_required
 def pids_sync_fill():
