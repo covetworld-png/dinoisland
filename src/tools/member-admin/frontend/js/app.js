@@ -6753,6 +6753,7 @@ async function paycodeRender(d) {
 
   const grid = document.createElement('div');
   grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:14px';
+  let openCard = null;  // 手风琴：同时只展开一张收款码
   items.forEach(it => {
     const card = document.createElement('div');
     card.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;width:230px;display:flex;flex-direction:column;align-items:center;gap:6px';
@@ -6787,12 +6788,21 @@ async function paycodeRender(d) {
       let qrInited = false;
       card.addEventListener('click', () => {
         const isPaid = it.status === 'paid';
-        if (qrWrap.style.display !== 'none') {
+        // 自己已展开 -> 收起
+        if (openCard && openCard.card === card) {
           qrWrap.style.display = 'none'; hint.textContent = '▸ 点击查看收款码';
           if (isPaid) paidBanner.style.display = 'none';
+          openCard = null;
           return;
         }
-        if (isPaid && qrInited) paidBanner.style.display = 'block';
+        // 收起上一张
+        if (openCard) {
+          openCard.qrWrap.style.display = 'none';
+          openCard.hint.textContent = '▸ 点击查看收款码';
+          if (openCard.isPaid) openCard.paidBanner.style.display = 'none';
+        }
+        // 展开当前
+        if (isPaid) paidBanner.style.display = 'block';
         if (!qrInited) {
           qrInited = true;
           try { new QRCode(qrWrap, { text: it.payload, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M }); }
@@ -6800,6 +6810,7 @@ async function paycodeRender(d) {
           if (isPaid) paidBanner.style.display = 'block';
         }
         qrWrap.style.display = 'block'; hint.textContent = '▾ 点击收起';
+        openCard = { card: card, qrWrap: qrWrap, hint: hint, paidBanner: paidBanner, isPaid: isPaid };
       });
       const stRow = document.createElement('div');
       stRow.style.cssText = 'margin-top:4px;font-size:11px;display:flex;align-items:center;gap:6px';
