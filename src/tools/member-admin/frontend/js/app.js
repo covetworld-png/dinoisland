@@ -6688,16 +6688,40 @@ function paycodeRender(d) {
         + '<span style="font-size:12px;color:#dc2626">' + esc(it.error) + '</span>'
         + (it.amount ? '<span style="font-size:13px;font-weight:600">' + fmtVND(it.amount) + ' VND</span>' : '');
     } else {
-      const qr = document.createElement('div');
-      card.appendChild(qr);
-      try { new QRCode(qr, { text: it.payload, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M }); }
-      catch (e) { card.appendChild(Object.assign(document.createElement('p'), { textContent: '二维码生成失败' })); }
+      // 默认只显示姓名+金额；点击卡片才展开该张收款码（避免多码干扰）
+      const qrWrap = document.createElement('div');
+      qrWrap.style.cssText = 'display:none;margin-top:2px';
+      card.appendChild(qrWrap);
       const info = document.createElement('div');
       info.style.cssText = 'font-size:12px;color:#374151;text-align:center;line-height:1.6';
       info.innerHTML = '<b>' + esc(it.name || it.emp_no) + '</b>（' + esc(it.emp_no) + '）<br>'
         + esc(it.bank) + ' · ' + esc(it.account) + '<br>'
         + '<span style="font-size:16px;color:#1d4ed8;font-weight:700">' + fmtVND(it.amount) + '</span> VND';
       card.appendChild(info);
+      const hint = document.createElement('div');
+      hint.style.cssText = 'font-size:11px;color:#8b5cf6;margin-top:2px';
+      hint.textContent = '▸ 点击查看收款码';
+      card.appendChild(hint);
+      card.style.cursor = 'pointer';
+      card.title = '点击展开/收起该收款码';
+      let qrInited = false;
+      card.addEventListener('click', () => {
+        if (qrWrap.style.display !== 'none') {
+          qrWrap.style.display = 'none';
+          hint.textContent = '▸ 点击查看收款码';
+          return;
+        }
+        if (!qrInited) {
+          qrInited = true;
+          try {
+            new QRCode(qrWrap, { text: it.payload, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
+          } catch (e) {
+            qrWrap.innerHTML = '<p style="font-size:11px;color:#ef4444;margin:0">二维码生成失败</p>';
+          }
+        }
+        qrWrap.style.display = 'block';
+        hint.textContent = '▾ 点击收起';
+      });
     }
     grid.appendChild(card);
   });
