@@ -2610,51 +2610,71 @@ def employee_vietqr(row_id):
 @app.post("/api/paycode/generate")
 @login_required
 def paycode_generate():
-    """Excel/CSV(员工编号+金额) -> 批量生成带金额 VietQR。
-    支持上传文件(file=) 或 JSON rows=[{"emp_no":..,"amount":..}]。"""
+    """Excel/CSV(员工编号+金额) -> 批量生成带金额 VietQR，并创建批次快照。
+    成功行写入 pay_records（含 payload 快照），供批次历史重开二维码。"""
     try:
         rows = _paycode_read_rows()
         db = get_db()
-        results, ok_n, err_n, total_amt = [], 0, 0, 0
-        for emp_no, amount in rows:
-            emp_no = str(emp_no or "").strip()
-            if not emp_no:
-                err_n += 1
-                results.append({"emp_no": emp_no, "ok": False, "error": "员工编号为空"})
-                continue
-            try:
-                amount = int(float(str(amount).replace(",", "").strip() or 0))
-            except (ValueError, TypeError):
-                err_n += 1
-                results.append({"emp_no": emp_no, "ok": False, "error": f"金额非法: {amount}"})
-                continue
-            if amount <= 0:
-                err_n += 1
-                results.append({"emp_no": emp_no, "ok": False, "error": f"金额须大于0: {amount}"})
-                continue
-            emp = db.execute("SELECT emp_no, nickname, real_name, account, bank FROM live_employees WHERE trim(emp_no)=?", (emp_no,)).fetchone()
-            if not emp:
-                err_n += 1
-                results.append({"emp_no": emp_no, "ok": False, "error": "未找到该员工编号", "amount": amount})
-                continue
-            account = str(emp["account"] or "").strip()
-            bank = str(emp["bank"] or "").strip()
-            if not account:
-                err_n += 1
-                results.append({"emp_no": emp_no, "name": emp["nickname"] or emp["real_name"] or emp_no, "ok": False, "error": "该员工未填收款账号", "amount": amount})
-                continue
-            bin_code = vietqr.normalize_bank(bank)
-            if not bin_code:
-                err_n += 1
-                results.append({"emp_no": emp_no, "name": emp["nickname"] or emp["real_name"] or emp_no, "ok": False, "error": f"未识别收款银行: {bank}", "amount": amount})
-                continue
-            payload = vietqr.build_payload(account, bin_code, amount=amount)
-            ok_n += 1
-            total_amt += amount
-            results.append({"emp_no": emp_no, "name": emp["nickname"] or emp["real_name"] or emp_no,
-                            "account": account, "bank": bank, "amount": amount, "payload": payload, "ok": True})
+        try:
+            now_ts = now()
+            cur = db.execute(
+                "INSERT INTO pay_batches(created_at, created_by, total_rows, ok_rows, total_amount, remark) "
+                "VALUES(?,?,?,?,?,'')", (now_ts, session["user"], len(rows), 0, 0))
+            batch_id = cur.lastrowid
+            results, ok_n, err_n, total_amt = [], 0, 0, 0
+            for emp_no, amount in rows:
+                emp_no = str(emp_no or "").strip()
+                if not emp_no:
+                    err_n += 1
+                    results.append({"emp_no": emp_no, "ok": False, "error": "员工编号为空"})
+                    continue
+                try:
+                    amount = int(float(str(amount).replace(",", "").strip() or 0))
+                except (ValueError, TypeError):
+                    err_n += 1
+                    results.append({"emp_no": emp_no, "ok": False, "error": f"金额非法: {amount}"})
+                    continue
+                if amount <= 0:
+                    err_n += 1
+                    results.append({"emp_no": emp_no, "ok": False, "error": f"金额须大于0: {amount}"})
+                    continue
+                emp = db.execute("SELECT emp_no, nickname, real_name, account, bank FROM live_employees WHERE trim(emp_no)=?", (emp_no,)).fetchone()
+                if not emp:
+                    err_n += 1
+                    results.append({"emp_no": emp_no, "ok": False, "error": "未找到该员工编号", "amount": amount})
+                    continue
+                account = str(emp["account"] or "").strip()
+                bank = str(emp["bank"] or "").strip()
+                name = emp["nickname"] or emp["real_name"] or emp_no
+                if not account:
+                    err_n += 1
+                    results.append({"emp_no": emp_no, "name": name, "ok": False, "error": "该员工未填收款账号", "amount": amount})
+                    continue
+                bin_code = vietqr.normalize_bank(bank)
+                if not bin_code:
+                    err_n += 1
+                    results.append({"emp_no": emp_no, "name": name, "ok": False, "error": f"未识别收款银行: {bank}", "amount": amount})
+                    continue
+                payload = vietqr.build_payload(account, bin_code, amount=amount)
+                cur2 = db.execute(
+                    "INSERT INTO pay_records(batch_id, emp_no, amount, status, paid_at, paid_by, remark, payload, updated_at) "
+                    "VALUES(?,?,?,'unpaid','','','',?,?)",
+                    (batch_id, emp_no, amount, payload, now_ts))
+                rid = cur2.lastrowid
+                ok_n += 1
+                total_amt += amount
+                results.append({"id": rid, "emp_no": emp_no, "name": name,
+                                "account": account, "bank": bank, "amount": amount, "payload": payload,
+                                "status": "unpaid", "paid_at": "", "paid_by": "", "remark": "", "ok": True})
+            db.execute("UPDATE pay_batches SET ok_rows=?, total_amount=? WHERE id=?", (ok_n, total_amt, batch_id))
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
         return jsonify({"ok": True, "data": {
-            "items": results, "ok_count": ok_n, "err_count": err_n,
+            "batch_id": batch_id, "items": results, "ok_count": ok_n, "err_count": err_n,
             "total_amount": total_amt, "total_rows": len(rows),
             "note": "扫码即带出收款账号+金额，请逐张核对后付款"}})
     except Exception as e:
@@ -2665,11 +2685,67 @@ def paycode_generate():
 @app.get("/api/paycode/records")
 @login_required
 def paycode_records_list():
-    """工资代发「已发」记录（emp_no+amount -> status/paid_at/paid_by）。"""
+    """工资代发「已发」记录（含批次/备注）。"""
     db = get_db()
     try:
-        rows = db.execute("SELECT emp_no, amount, status, paid_at, paid_by, updated_at FROM pay_records ORDER BY updated_at DESC").fetchall()
+        rows = db.execute("SELECT id, batch_id, emp_no, amount, status, paid_at, paid_by, remark, updated_at"
+                          " FROM pay_records ORDER BY batch_id DESC, id ASC").fetchall()
         return jsonify({"ok": True, "data": [dict(r) for r in rows]})
+    finally:
+        db.close()
+
+
+@app.get("/api/paycode/batches")
+@login_required
+def paycode_batches_list():
+    """批次历史列表（含每批已发数）。"""
+    db = get_db()
+    try:
+        rows = db.execute("""
+            SELECT b.id, b.created_at, b.created_by, b.total_rows, b.ok_rows, b.total_amount, b.remark,
+                   (SELECT COUNT(*) FROM pay_records r WHERE r.batch_id=b.id AND r.status='paid') AS paid_rows
+            FROM pay_batches b ORDER BY b.id DESC""").fetchall()
+        return jsonify({"ok": True, "data": [dict(r) for r in rows]})
+    finally:
+        db.close()
+
+
+@app.get("/api/paycode/batches/<int:batch_id>")
+@login_required
+def paycode_batch_detail(batch_id):
+    """某批次详情：批次信息 + 每笔记录（含 payload 快照，可重开二维码）。"""
+    db = get_db()
+    try:
+        batch = db.execute("SELECT * FROM pay_batches WHERE id=?", (batch_id,)).fetchone()
+        if not batch:
+            return jsonify({"ok": False, "error": "批次不存在"}), 404
+        rows = db.execute("SELECT id, emp_no, amount, status, paid_at, paid_by, remark, payload FROM pay_records "
+                          "WHERE batch_id=? ORDER BY id ASC", (batch_id,)).fetchall()
+        items = []
+        for r in rows:
+            emp = db.execute("SELECT nickname, real_name, bank FROM live_employees WHERE trim(emp_no)=?", (r["emp_no"],)).fetchone()
+            items.append(dict(r))
+            items[-1]["name"] = (emp["nickname"] or emp["real_name"] or r["emp_no"]) if emp else r["emp_no"]
+            items[-1]["bank"] = emp["bank"] if emp else ""
+            items[-1]["has_emp"] = bool(emp)
+        return jsonify({"ok": True, "data": {"batch": dict(batch), "items": items}})
+    finally:
+        db.close()
+
+
+@app.post("/api/paycode/batches/<int:batch_id>/remark")
+@write_required
+def paycode_batch_remark(batch_id):
+    """为批次添加/更新备注。"""
+    data = request.get_json(force=True, silent=True) or {}
+    remark = str(data.get("remark") or "").strip()
+    db = get_db()
+    try:
+        cur = db.execute("UPDATE pay_batches SET remark=? WHERE id=?", (remark, batch_id))
+        db.commit()
+        if cur.rowcount == 0:
+            return jsonify({"ok": False, "error": "批次不存在"}), 404
+        return jsonify({"ok": True, "data": {"batch_id": batch_id, "remark": remark}})
     finally:
         db.close()
 
@@ -2677,17 +2753,14 @@ def paycode_records_list():
 @app.post("/api/paycode/records")
 @write_required
 def paycode_records_update():
-    """标记某笔为已发(paid)/未发(unpaid)。"""
+    """按记录 id 标记某笔为已发(paid)/未发(unpaid)。"""
     data = request.get_json(force=True, silent=True) or {}
-    emp_no = str(data.get("emp_no") or "").strip()
-    amount = data.get("amount")
+    rec_id = data.get("id")
     status = str(data.get("status") or "").strip()
-    if not emp_no or amount is None:
-        return jsonify({"ok": False, "error": "emp_no 与 amount 必填"}), 400
     try:
-        amount = int(amount)
+        rec_id = int(rec_id)
     except (TypeError, ValueError):
-        return jsonify({"ok": False, "error": "amount 非法"}), 400
+        return jsonify({"ok": False, "error": "id 必填且为数字"}), 400
     if status not in ("paid", "unpaid"):
         return jsonify({"ok": False, "error": "status 仅支持 paid/unpaid"}), 400
     now_ts = now()
@@ -2695,15 +2768,12 @@ def paycode_records_update():
     paid_by = session["user"] if status == "paid" else ""
     db = get_db()
     try:
-        db.execute(
-            "INSERT INTO pay_records(emp_no, amount, status, paid_at, paid_by, updated_at) "
-            "VALUES(?,?,?,?,?,?) "
-            "ON CONFLICT(emp_no, amount) DO UPDATE SET status=excluded.status, "
-            "paid_at=excluded.paid_at, paid_by=excluded.paid_by, updated_at=excluded.updated_at",
-            (emp_no, amount, status, paid_at, paid_by, now_ts))
+        cur = db.execute("UPDATE pay_records SET status=?, paid_at=?, paid_by=?, updated_at=? WHERE id=?",
+                         (status, paid_at, paid_by, now_ts, rec_id))
         db.commit()
-        return jsonify({"ok": True, "data": {"emp_no": emp_no, "amount": amount,
-                                               "status": status, "paid_at": paid_at, "paid_by": paid_by}})
+        if cur.rowcount == 0:
+            return jsonify({"ok": False, "error": "记录不存在"}), 404
+        return jsonify({"ok": True, "data": {"id": rec_id, "status": status, "paid_at": paid_at, "paid_by": paid_by}})
     finally:
         db.close()
 

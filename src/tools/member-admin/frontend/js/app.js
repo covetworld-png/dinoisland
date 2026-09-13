@@ -6609,35 +6609,53 @@ function printVerifyReport() {
 
 /* ================= 工资代发收款码（批量 VietQR 带金额）================= */
 var _paycodeBusy = false;
+var paycodeTab = 'gen';
+var PAY_TAB_ACTIVE = 'background:#1d4ed8;color:#fff;border-color:#1d4ed8';
 
 function renderPayCodePage() {
   const main = $('#adminMain');
   main.innerHTML = ''
-    + '<div style="padding:14px 18px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px">'
-    +   '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
-    +     '<span style="font-weight:600">上传 Excel/CSV（列：员工编号 + 金额，VND 整数）</span>'
-    +     '<input type="file" id="paycodeFile" accept=".xlsx,.xls,.csv" style="font-size:12px">'
-    +     '<button class="btn btn-primary btn-sm" id="paycodeGenBtn" disabled><i class="fas fa-qrcode"></i> 生成收款码</button>'
-    +     '<button class="btn btn-sm" id="paycodeTplBtn">下载模板</button>'
-    +     '<button class="btn btn-sm" id="paycodePrintBtn" style="display:none">打印本页</button>'
-    +   '</div>'
-    +   '<p style="font-size:12px;color:#6b7280;margin:8px 0 0">每行生成一个「带金额 VietQR」：手机银行/支付 App 扫码后自动带出收款账号+金额，逐张核对后付款；'
-    +        '员工编号须与「直播员工-员工编号」一致，金额为纯整数越南盾（如 3000000）。</p>'
+    + '<div style="display:flex;gap:8px;margin-bottom:12px">'
+    +   '<button class="btn btn-sm" id="payTabGen" style="' + (paycodeTab === 'gen' ? PAY_TAB_ACTIVE : '') + '">生成收款码</button>'
+    +   '<button class="btn btn-sm" id="payTabHist" style="' + (paycodeTab === 'hist' ? PAY_TAB_ACTIVE : '') + '">批次历史</button>'
     + '</div>'
-    + '<div id="paycodeBody"><p style="color:#9ca3af;font-size:13px">上传文件后点击「生成收款码」。</p></div>';
+    + '<div id="payUploadPane" style="' + (paycodeTab === 'gen' ? '' : 'display:none') + '">'
+    +   '<div style="padding:14px 18px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">'
+    +     '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+    +       '<span style="font-weight:600">上传 Excel/CSV（列：员工编号 + 金额，VND 整数）</span>'
+    +       '<input type="file" id="paycodeFile" accept=".xlsx,.xls,.csv" style="font-size:12px">'
+    +       '<button class="btn btn-primary btn-sm" id="paycodeGenBtn" disabled><i class="fas fa-qrcode"></i> 生成收款码</button>'
+    +       '<button class="btn btn-sm" id="paycodeTplBtn">下载模板</button>'
+    +     '</div>'
+    +     '<p style="font-size:12px;color:#6b7280;margin:8px 0 0">每行生成一个「带金额 VietQR」：手机银行/支付 App 扫码后自动带出收款账号+金额；逐张核对后付款，可标记【已发】留痕；每次生成自动归档为一个批次，可到「批次历史」重开。员工编号须与「直播员工-员工编号」一致，金额为纯整数越南盾（如 3000000）。</p>'
+    +   '</div>'
+    + '</div>'
+    + '<div id="paycodeBody"><p style="color:#9ca3af;font-size:13px">上传文件后点击「生成收款码」，或在「批次历史」查看过往批次。</p></div>';
 
   $('#paycodeFile').addEventListener('change', () => {
     $('#paycodeGenBtn').disabled = !$('#paycodeFile').files.length;
   });
   $('#paycodeGenBtn').addEventListener('click', paycodeGenerate);
   $('#paycodeTplBtn').addEventListener('click', paycodeDownloadTpl);
-  $('#paycodePrintBtn').addEventListener('click', () => window.print());
+  $('#payTabGen').addEventListener('click', () => { paycodeTab = 'gen'; paycodeBodyPlaceholder(); setPaycodeTabUI(); });
+  $('#payTabHist').addEventListener('click', () => { paycodeTab = 'hist'; setPaycodeTabUI(); paycodeBatches(); });
+}
+
+function setPaycodeTabUI() {
+  $('#payTabGen').style.cssText = paycodeTab === 'gen' ? PAY_TAB_ACTIVE : '';
+  $('#payTabHist').style.cssText = paycodeTab === 'hist' ? PAY_TAB_ACTIVE : '';
+  $('#payUploadPane').style.display = paycodeTab === 'gen' ? '' : 'none';
+}
+
+function payApplyPaycodeTitle() {
+  const main = $('#adminMain');
+  const h = main.querySelector('.page-title');
+  if (h) h.textContent = '工资代发收款码';
 }
 
 function paycodeDownloadTpl() {
-  const csv = '\uFEFF员工编号,金额\n00001,3000000\n00002,4500000\n';
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.href = URL.createObjectURL(new Blob(['\uFEFF员工编号,金额\n00001,3000000\n00002,4500000\n'], { type: 'text/csv;charset=utf-8' }));
   a.download = '工资代发收款码模板.csv';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 3000);
@@ -6665,41 +6683,85 @@ async function paycodeGenerate() {
   }
 }
 
+/* 渲染收款码卡片（生成结果 / 批次详情通用）。d: {batch_id?, batch?批次信息, items:[{id,emp_no,name,bank,account,amount,payload,status,paid_at,paid_by,remark?,ok?,error?}]} */
 async function paycodeRender(d) {
   const body = $('#paycodeBody');
-  const ok = d.ok_count, err = d.err_count;
-  const sum = d.total_amount || 0;
-  // 加载「是否已发」记录
-  let recMap = {};
-  try {
-    const recs = await api('paycode/records') || [];
-    recs.forEach(r => { recMap[r.emp_no + ':' + r.amount] = r; });
-  } catch (e) { /* 记录加载失败不阻断展示 */ }
-  const paidCount = (d.items || []).filter(it => it.ok && recMap[it.emp_no + ':' + it.amount] && recMap[it.emp_no + ':' + it.amount].status === 'paid').length;
-  const head = document.createElement('div');
-  head.style.cssText = 'display:flex;gap:16px;align-items:center;margin-bottom:10px;font-size:13px;flex-wrap:wrap';
-  head.innerHTML = '<span>共 <b>' + d.total_rows + '</b> 行</span>'
-    + '<span style="color:#16a34a">成功 <b>' + ok + '</b></span>'
-    + (err ? '<span style="color:#dc2626">失败 <b>' + err + '</b></span>' : '')
-    + '<span>合计 <b style="font-size:15px;color:#1d4ed8">' + fmtVND(sum) + '</b> VND</span>'
-    + '<span style="color:#16a34a">已发 <b>' + paidCount + '</b> 笔</span>';
+  const items = d.items || [];
+  const okItems = items.filter(i => i.payload);
+  const errItems = items.filter(i => !i.payload);
+  const sum = okItems.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const paidCount = okItems.filter(i => i.status === 'paid').length;
+  const bBatch = d.batch;
   body.innerHTML = '';
+  // 头部：批次信息 + 备注编辑 + 打印
+  const head = document.createElement('div');
+  head.style.cssText = 'display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:10px;font-size:13px';
+  const headL = document.createElement('div');
+  headL.style.cssText = 'display:flex;gap:14px;align-items:center;flex-wrap:wrap';
+  if (bBatch) {
+    headL.innerHTML = '<span style="color:#6b7280">批次 <b>#' + bBatch.id + '</b> · ' + esc(bBatch.created_at || '') + ' · 操作人 ' + esc(bBatch.created_by || '-') + '</span>'
+      + '<span>共 <b>' + items.length + '</b> 条</span>'
+      + '<span style="color:#16a34a">已发 <b>' + paidCount + '</b> 笔</span>'
+      + '<span>合计 <b style="color:#1d4ed8">' + fmtVND(sum) + '</b> VND</span>';
+  } else if (d.batch_id) {
+    headL.innerHTML = '<span style="color:#6b7280">新批次 <b>#' + d.batch_id + '</b></span>'
+      + '<span>共 <b>' + items.length + '</b> 行</span>'
+      + '<span style="color:#16a34a">成功 <b>' + okItems.length + '</b></span>'
+      + (errItems.length ? '<span style="color:#dc2626">失败 <b>' + errItems.length + '</b></span>' : '')
+      + '<span>合计 <b style="font-size:15px;color:#1d4ed8">' + fmtVND(sum) + '</b> VND</span>'
+      + '<span style="color:#16a34a">已发 <b>' + paidCount + '</b> 笔</span>';
+  }
+  head.appendChild(headL);
+  // 备注（仅批次详情可编辑）
+  if (bBatch) {
+    const rWrap = document.createElement('div');
+    rWrap.style.cssText = 'display:flex;gap:6px;align-items:center';
+    const ri = document.createElement('input');
+    ri.placeholder = '添加批次备注';
+    ri.value = bBatch.remark || '';
+    ri.style.cssText = 'font-size:12px;width:190px;padding:2px 6px';
+    const sBtn = document.createElement('button');
+    sBtn.className = 'btn'; sBtn.textContent = '保存备注'; sBtn.style.cssText = 'font-size:11px;padding:1px 8px';
+    sBtn.addEventListener('click', async () => {
+      try { await api('paycode/batches/' + bBatch.id + '/remark', { method: 'POST', json: { remark: ri.value } }); showToast('备注已保存', 'success'); }
+      catch (e) { showToast(e.message, 'error'); }
+    });
+    rWrap.appendChild(ri); rWrap.appendChild(sBtn);
+    head.appendChild(rWrap);
+  }
+  // 打印 + 返回历史
+  const ops = document.createElement('div');
+  ops.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:auto';
+  const pBtn = document.createElement('button');
+  pBtn.className = 'btn btn-sm'; pBtn.textContent = '打印本页';
+  pBtn.addEventListener('click', () => window.print());
+  ops.appendChild(pBtn);
+  const backBtn = document.createElement('button');
+  backBtn.className = 'btn btn-sm'; backBtn.textContent = '批次历史';
+  backBtn.addEventListener('click', () => { paycodeTab = 'hist'; setPaycodeTabUI(); paycodeBatches(); });
+  ops.appendChild(backBtn);
+  head.appendChild(ops);
   body.appendChild(head);
+
   const grid = document.createElement('div');
   grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:14px';
-  (d.items || []).forEach(it => {
+  items.forEach(it => {
     const card = document.createElement('div');
     card.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;width:230px;display:flex;flex-direction:column;align-items:center;gap:6px';
-    if (!it.ok) {
+    if (!it.payload) {
       card.innerHTML = '<b style="font-size:13px">' + esc(it.emp_no) + '</b>'
         + (it.name ? '<span style="font-size:12px;color:#6b7280">' + esc(it.name) + '</span>' : '')
-        + '<span style="font-size:12px;color:#dc2626">' + esc(it.error) + '</span>'
+        + '<span style="font-size:12px;color:#dc2626">' + esc(it.error || '失败') + '</span>'
         + (it.amount ? '<span style="font-size:13px;font-weight:600">' + fmtVND(it.amount) + ' VND</span>' : '');
     } else {
-      // 默认只显示姓名+金额；点击卡片才展开该张收款码（避免多码干扰）
       const qrWrap = document.createElement('div');
-      qrWrap.style.cssText = 'display:none;margin-top:2px';
+      qrWrap.style.cssText = 'display:none;margin-top:2px;text-align:center';
       card.appendChild(qrWrap);
+      // 已发提示条（展开二维码时若已发则显示）
+      const paidBanner = document.createElement('div');
+      paidBanner.style.cssText = 'display:none;margin-top:2px;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;color:#065f46;background:#d1fae5;border:1px solid #a7f3d0';
+      paidBanner.textContent = '✓ 该笔已标记已发';
+      card.appendChild(paidBanner);
       const info = document.createElement('div');
       info.style.cssText = 'font-size:12px;color:#374151;text-align:center;line-height:1.6';
       info.innerHTML = '<b>' + esc(it.name || it.emp_no) + '</b>（' + esc(it.emp_no) + '）<br>'
@@ -6714,53 +6776,99 @@ async function paycodeRender(d) {
       card.title = '点击展开/收起该收款码';
       let qrInited = false;
       card.addEventListener('click', () => {
+        const isPaid = it.status === 'paid';
         if (qrWrap.style.display !== 'none') {
-          qrWrap.style.display = 'none';
-          hint.textContent = '▸ 点击查看收款码';
+          qrWrap.style.display = 'none'; hint.textContent = '▸ 点击查看收款码';
+          if (isPaid) paidBanner.style.display = 'none';
           return;
         }
+        if (isPaid && qrInited) paidBanner.style.display = 'block';
         if (!qrInited) {
           qrInited = true;
-          try {
-            new QRCode(qrWrap, { text: it.payload, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
-          } catch (e) {
-            qrWrap.innerHTML = '<p style="font-size:11px;color:#ef4444;margin:0">二维码生成失败</p>';
-          }
+          try { new QRCode(qrWrap, { text: it.payload, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M }); }
+          catch (e) { qrWrap.innerHTML = '<p style="font-size:11px;color:#ef4444;margin:0">二维码生成失败</p>'; }
+          if (isPaid) paidBanner.style.display = 'block';
         }
-        qrWrap.style.display = 'block';
-        hint.textContent = '▾ 点击收起';
+        qrWrap.style.display = 'block'; hint.textContent = '▾ 点击收起';
       });
-      // 是否已发（人工标记留痕）
-      const rec = recMap[it.emp_no + ':' + it.amount];
       const stRow = document.createElement('div');
       stRow.style.cssText = 'margin-top:4px;font-size:11px;display:flex;align-items:center;gap:6px';
       const stText = document.createElement('span');
-      stText.style.cssText = (rec && rec.status === 'paid') ? 'color:#16a34a;font-weight:600' : 'color:#9ca3af';
-      stText.textContent = (rec && rec.status === 'paid') ? ('已发 ' + (rec.paid_at || '') + ' · ' + (rec.paid_by || '')) : '未发';
+      stText.style.cssText = it.status === 'paid' ? 'color:#16a34a;font-weight:600' : 'color:#9ca3af';
+      stText.textContent = it.status === 'paid' ? ('已发 ' + (it.paid_at || '') + ' · ' + (it.paid_by || '')) : '未发';
       const stBtn = document.createElement('button');
-      stBtn.type = 'button';
-      stBtn.style.cssText = 'font-size:11px;padding:1px 8px;cursor:pointer';
+      stBtn.type = 'button'; stBtn.style.cssText = 'font-size:11px;padding:1px 8px;cursor:pointer';
       stBtn.className = 'btn btn-xs';
-      stBtn.textContent = (rec && rec.status === 'paid') ? '撤销' : '标记已发';
+      stBtn.textContent = it.status === 'paid' ? '撤销' : '标记已发';
       stBtn.addEventListener('click', async (ev) => {
         ev.stopPropagation();
-        const to = (rec && rec.status === 'paid') ? 'unpaid' : 'paid';
+        const to = it.status === 'paid' ? 'unpaid' : 'paid';
         try {
-          const r = await api('paycode/records', { method: 'POST', json: { emp_no: it.emp_no, amount: it.amount, status: to } });
-          rec.status = r.status; rec.paid_at = r.paid_at || ''; rec.paid_by = r.paid_by || '';
+          const r = await api('paycode/records', { method: 'POST', json: { id: it.id, status: to } });
+          it.status = r.status; it.paid_at = r.paid_at || ''; it.paid_by = r.paid_by || '';
           stText.style.cssText = r.status === 'paid' ? 'color:#16a34a;font-weight:600' : 'color:#9ca3af';
           stText.textContent = r.status === 'paid' ? ('已发 ' + (r.paid_at || '') + ' · ' + (r.paid_by || '')) : '未发';
           stBtn.textContent = r.status === 'paid' ? '撤销' : '标记已发';
-          if (r.status === 'paid') showToast('已标记已发：' + it.emp_no, 'success');
-          else showToast('已撤销标记：' + it.emp_no, 'success');
+          if (r.status === 'paid') { paidBanner.textContent = '✓ 该笔已标记已发'; showToast('已标记已发：' + it.emp_no, 'success'); }
+          else { paidBanner.style.display = 'none'; showToast('已撤销标记：' + it.emp_no, 'success'); }
         } catch (e) { showToast(e.message, 'error'); }
       });
-      stRow.appendChild(stText);
-      stRow.appendChild(stBtn);
+      stRow.appendChild(stText); stRow.appendChild(stBtn);
       card.appendChild(stRow);
     }
     grid.appendChild(card);
   });
   body.appendChild(grid);
-  $('#paycodePrintBtn').style.display = 'inline-block';
+  if (window.matchMedia && window.matchMedia('(min-width:900px)').matches) { /* 便于网格显示 */ }
+}
+
+/* 批次历史列表 */
+async function paycodeBatches() {
+  const body = $('#paycodeBody');
+  body.innerHTML = '<p style="color:#6b7280">加载中…</p>';
+  let list;
+  try { list = await api('paycode/batches'); } catch (e) { body.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
+  if (!list || !list.length) {
+    body.innerHTML = '<p style="color:#9ca3af;margin-bottom:10px">暂无批次记录。</p>'
+      + '<button class="btn btn-sm" onclick="paycodeTab=\'gen\';setPaycodeTabUI()">+ 新建批次</button>';
+    return;
+  }
+  const head = document.createElement('div');
+  head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:10px';
+  head.innerHTML = '<b style="font-size:13px">批次历史（' + list.length + '）</b>';
+  const nb = document.createElement('button');
+  nb.className = 'btn btn-sm'; nb.textContent = '+ 新建批次';
+  nb.addEventListener('click', () => { paycodeTab = 'gen'; setPaycodeTabUI(); });
+  head.appendChild(nb);
+  body.innerHTML = '';
+  body.appendChild(head);
+  const tbl = document.createElement('table');
+  tbl.className = 'tbl';
+  tbl.style.cssText = 'width:100%;border-collapse:collapse;font-size:12px;background:#fff';
+  tbl.innerHTML = '<thead><tr style="background:#f9fafb;text-align:left"><th style="padding:7px">#</th><th>生成时间</th><th>操作人</th><th>行数</th><th>合计</th><th>已发</th><th>备注</th><th></th></tr></thead><tbody></tbody>';
+  const tb = tbl.querySelector('tbody');
+  list.forEach(b => {
+    const hasPaid = (b.paid_rows || 0) > 0;
+    const tr = document.createElement('tr');
+    tr.style.cssText = 'border-bottom:1px solid #f1f3f5';
+    tr.innerHTML = '<td style="padding:7px">#' + b.id + '</td>'
+      + '<td>' + esc(b.created_at || '') + '</td>'
+      + '<td>' + esc(b.created_by || '-') + '</td>'
+      + '<td>' + (b.ok_rows || 0) + '</td>'
+      + '<td><b>' + fmtVND(b.total_amount || 0) + '</b> VND</td>'
+      + '<td style="color:' + (hasPaid ? '#16a34a' : '#9ca3af') + '">' + (b.paid_rows || 0) + '</td>'
+      + '<td>' + (b.remark ? '<span style="color:#374151">' + esc(b.remark) + '</span>' : '<span style="color:#d1d5db">—</span>') + '</td>'
+      + '<td><button class="btn btn-sm" style="font-size:11px" onclick="paycodeBatchOpen(' + b.id + ')">查看</button></td>';
+    tb.appendChild(tr);
+  });
+  body.appendChild(tbl);
+}
+
+/* 打开某个批次（重开二维码） */
+async function paycodeBatchOpen(batchId) {
+  const body = $('#paycodeBody');
+  body.innerHTML = '<p style="color:#6b7280">加载中…</p>';
+  let detail;
+  try { detail = await api('paycode/batches/' + batchId); } catch (e) { body.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
+  paycodeRender({ batch: detail.batch, items: detail.items });
 }

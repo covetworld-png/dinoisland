@@ -275,16 +275,30 @@ def init_db():
     le_cols = [r["name"] for r in conn.execute("PRAGMA table_info(live_employees)")]
     if "attendance_allowance" not in le_cols:
         conn.execute("ALTER TABLE live_employees ADD COLUMN attendance_allowance REAL DEFAULT 0")
-    # 迁移：工资代发「是否已发」记录（emp_no+amount 唯一识别一笔）
-    conn.execute("""CREATE TABLE IF NOT EXISTS pay_records (
+    # 迁移：工资代发「是否已发」记录（v2：批次+payload 快照+备注）
+    pr_cols = [r["name"] for r in conn.execute("PRAGMA table_info(pay_records)")]
+    if "batch_id" not in pr_cols:
+        conn.execute("DROP TABLE IF EXISTS pay_records")
+        conn.execute("""CREATE TABLE pay_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            batch_id INTEGER DEFAULT 0,
+            emp_no TEXT NOT NULL,
+            amount INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'unpaid',
+            paid_at TEXT DEFAULT '',
+            paid_by TEXT DEFAULT '',
+            remark TEXT DEFAULT '',
+            payload TEXT DEFAULT '',
+            updated_at TEXT
+        )""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS pay_batches (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        emp_no TEXT NOT NULL,
-        amount INTEGER NOT NULL,
-        status TEXT NOT NULL DEFAULT 'unpaid',
-        paid_at TEXT DEFAULT '',
-        paid_by TEXT DEFAULT '',
-        updated_at TEXT,
-        UNIQUE(emp_no, amount)
+        created_at TEXT,
+        created_by TEXT,
+        total_rows INTEGER DEFAULT 0,
+        ok_rows INTEGER DEFAULT 0,
+        total_amount INTEGER DEFAULT 0,
+        remark TEXT DEFAULT ''
     )""")
     conn.commit()
     conn.close()
