@@ -2687,10 +2687,12 @@ def paycode_generate():
                 parts = _split_pay_amount(amount)
                 for idx, part in enumerate(parts):
                     payload = vietqr.build_payload(account, bin_code, amount=part)
+                    sp_idx = idx + 1 if len(parts) > 1 else 0
+                    sp_total = len(parts) if len(parts) > 1 else 0
                     cur2 = db.execute(
-                        "INSERT INTO pay_records(batch_id, emp_no, amount, status, paid_at, paid_by, remark, payload, updated_at) "
-                        "VALUES(?,?,?,'unpaid','','','',?,?)",
-                        (batch_id, emp_no, part, payload, now_ts))
+                        "INSERT INTO pay_records(batch_id, emp_no, amount, status, paid_at, paid_by, remark, payload, split_idx, split_total, updated_at) "
+                        "VALUES(?,?,?,'unpaid','','','',?,?,?,?)",
+                        (batch_id, emp_no, part, payload, sp_idx, sp_total, now_ts))
                     rid = cur2.lastrowid
                     items5 = {"id": rid, "emp_no": emp_no, "name": name,
                                "account": account, "bank": bank, "amount": part, "payload": payload,
@@ -2753,7 +2755,7 @@ def paycode_batch_detail(batch_id):
         batch = db.execute("SELECT * FROM pay_batches WHERE id=?", (batch_id,)).fetchone()
         if not batch:
             return jsonify({"ok": False, "error": "批次不存在"}), 404
-        rows = db.execute("SELECT id, emp_no, amount, status, paid_at, paid_by, remark, payload FROM pay_records "
+        rows = db.execute("SELECT id, emp_no, amount, status, paid_at, paid_by, remark, payload, split_idx, split_total FROM pay_records "
                           "WHERE batch_id=? ORDER BY id ASC", (batch_id,)).fetchall()
         items = []
         for r in rows:
@@ -2762,6 +2764,8 @@ def paycode_batch_detail(batch_id):
             items[-1]["name"] = _pay_name(emp, r["emp_no"])
             items[-1]["bank"] = emp["bank"] if emp else ""
             items[-1]["has_emp"] = bool(emp)
+            if r["split_total"] and r["split_total"] > 1:
+                items[-1]["split"] = {"idx": r["split_idx"] or 0, "total": r["split_total"]}
         return jsonify({"ok": True, "data": {"batch": dict(batch), "items": items}})
     finally:
         db.close()

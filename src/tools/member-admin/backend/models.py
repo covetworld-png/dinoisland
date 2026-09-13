@@ -289,8 +289,13 @@ def init_db():
             paid_by TEXT DEFAULT '',
             remark TEXT DEFAULT '',
             payload TEXT DEFAULT '',
+            split_idx INTEGER DEFAULT 0,
+            split_total INTEGER DEFAULT 0,
             updated_at TEXT
         )""")
+    if "split_idx" not in pr_cols:
+        conn.execute("ALTER TABLE pay_records ADD COLUMN split_idx INTEGER DEFAULT 0")
+        conn.execute("ALTER TABLE pay_records ADD COLUMN split_total INTEGER DEFAULT 0")
     conn.execute("""CREATE TABLE IF NOT EXISTS pay_batches (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         created_at TEXT,
