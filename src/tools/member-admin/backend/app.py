@@ -2610,6 +2610,19 @@ def employee_vietqr(row_id):
 PAY_SPLIT_LIMIT = 100_000_000  # 银行单笔限额：超此金额拆成多笔收款码
 
 
+def _pay_name(emp, emp_no):
+    """收款人显示名：原名优先，昵称放括号（如有）。"""
+    real = str(emp["real_name"] or "").strip() if emp else ""
+    nick = str(emp["nickname"] or "").strip() if emp else ""
+    if real and nick:
+        return real + "（" + nick + "）"
+    if real:
+        return real
+    if nick:
+        return nick
+    return str(emp_no or "")
+
+
 def _split_pay_amount(amount):
     """将金额拆成 ≤PAY_SPLIT_LIMIT 的多个分片（每笔限额内）。"""
     if amount <= PAY_SPLIT_LIMIT:
@@ -2660,7 +2673,7 @@ def paycode_generate():
                     continue
                 account = str(emp["account"] or "").strip()
                 bank = str(emp["bank"] or "").strip()
-                name = emp["nickname"] or emp["real_name"] or emp_no
+                name = _pay_name(emp, emp_no)
                 if not account:
                     err_n += 1
                     results.append({"emp_no": emp_no, "name": name, "ok": False, "error": "该员工未填收款账号", "amount": amount})
@@ -2746,7 +2759,7 @@ def paycode_batch_detail(batch_id):
         for r in rows:
             emp = db.execute("SELECT nickname, real_name, bank FROM live_employees WHERE trim(emp_no)=?", (r["emp_no"],)).fetchone()
             items.append(dict(r))
-            items[-1]["name"] = (emp["nickname"] or emp["real_name"] or r["emp_no"]) if emp else r["emp_no"]
+            items[-1]["name"] = _pay_name(emp, r["emp_no"])
             items[-1]["bank"] = emp["bank"] if emp else ""
             items[-1]["has_emp"] = bool(emp)
         return jsonify({"ok": True, "data": {"batch": dict(batch), "items": items}})
