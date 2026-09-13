@@ -2607,6 +2607,21 @@ def employee_vietqr(row_id):
     }})
 
 
+PAY_SPLIT_LIMIT = 100_000_000  # 银行单笔限额：超此金额拆成多笔收款码
+
+
+def _split_pay_amount(amount):
+    """将金额拆成 ≤PAY_SPLIT_LIMIT 的多个分片（每笔限额内）。"""
+    if amount <= PAY_SPLIT_LIMIT:
+        return [amount]
+    parts = []
+    while amount > 0:
+        take = min(PAY_SPLIT_LIMIT, amount)
+        parts.append(take)
+        amount -= take
+    return parts
+
+
 @app.post("/api/paycode/generate")
 @login_required
 def paycode_generate():
@@ -2655,17 +2670,23 @@ def paycode_generate():
                     err_n += 1
                     results.append({"emp_no": emp_no, "name": name, "ok": False, "error": f"未识别收款银行: {bank}", "amount": amount})
                     continue
-                payload = vietqr.build_payload(account, bin_code, amount=amount)
-                cur2 = db.execute(
-                    "INSERT INTO pay_records(batch_id, emp_no, amount, status, paid_at, paid_by, remark, payload, updated_at) "
-                    "VALUES(?,?,?,'unpaid','','','',?,?)",
-                    (batch_id, emp_no, amount, payload, now_ts))
-                rid = cur2.lastrowid
+                # 超单笔限额拆成多片，每片一张收款码
+                parts = _split_pay_amount(amount)
+                for idx, part in enumerate(parts):
+                    payload = vietqr.build_payload(account, bin_code, amount=part)
+                    cur2 = db.execute(
+                        "INSERT INTO pay_records(batch_id, emp_no, amount, status, paid_at, paid_by, remark, payload, updated_at) "
+                        "VALUES(?,?,?,'unpaid','','','',?,?)",
+                        (batch_id, emp_no, part, payload, now_ts))
+                    rid = cur2.lastrowid
+                    items5 = {"id": rid, "emp_no": emp_no, "name": name,
+                               "account": account, "bank": bank, "amount": part, "payload": payload,
+                               "status": "unpaid", "paid_at": "", "paid_by": "", "remark": "", "ok": True}
+                    if len(parts) > 1:
+                        items5["split"] = {"idx": idx + 1, "total": len(parts)}
+                    results.append(items5)
                 ok_n += 1
                 total_amt += amount
-                results.append({"id": rid, "emp_no": emp_no, "name": name,
-                                "account": account, "bank": bank, "amount": amount, "payload": payload,
-                                "status": "unpaid", "paid_at": "", "paid_by": "", "remark": "", "ok": True})
             db.execute("UPDATE pay_batches SET ok_rows=?, total_amount=? WHERE id=?", (ok_n, total_amt, batch_id))
             db.commit()
         except Exception:

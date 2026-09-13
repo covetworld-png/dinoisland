@@ -6764,7 +6764,9 @@ async function paycodeRender(d) {
       card.appendChild(paidBanner);
       const info = document.createElement('div');
       info.style.cssText = 'font-size:12px;color:#374151;text-align:center;line-height:1.6';
-      info.innerHTML = '<b>' + esc(it.name || it.emp_no) + '</b>（' + esc(it.emp_no) + '）<br>'
+      let nameLbl = esc(it.name || it.emp_no);
+      if (it.split) nameLbl += ' <span style="color:#b45309;background:#fef3c7;border-radius:4px;padding:0 4px;font-size:10px">分笔 ' + it.split.idx + '/' + it.split.total + '</span>';
+      info.innerHTML = '<div><b>' + nameLbl + '</b>（' + esc(it.emp_no) + '）</div>'
         + esc(it.bank) + ' · ' + esc(it.account) + '<br>'
         + '<span style="font-size:16px;color:#1d4ed8;font-weight:700">' + fmtVND(it.amount) + '</span> VND';
       card.appendChild(info);
