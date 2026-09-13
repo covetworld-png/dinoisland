@@ -6435,12 +6435,12 @@ function pidsRenderBody() {
     html += '<tr>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(x.pid) + '</code></td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + pidsStatusBadge(x.status) + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-weight:600">' + escHtml(x.player_name || '') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.nick_name || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-weight:600" title="' + escHtml(x.player_name || '') + '">' + escHtml(x.player_name || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px" title="' + escHtml(x.nick_name || '') + '">' + escHtml(x.nick_name || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">' + pidsActionCell(x) + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_label ? escHtml(x.emp_label) : '<span class="muted">' + (x.emp_no ? escHtml(x.emp_no) : '—') + '</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-family:monospace">' + (x.emp_uid ? escHtml(x.emp_uid) : '<span class="muted">—</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_disc ? '<span style="color:#166534;font-weight:600">' + escHtml(x.emp_disc) + '</span>' : '<span style="color:#b91c1c;font-weight:600">' + escHtml(x.discord || '—') + '</span>') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-family:monospace" title="' + escHtml(x.emp_uid || '') + '">' + (x.emp_uid ? escHtml(x.emp_uid) : '<span class="muted">—</span>') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px" title="' + escHtml(x.emp_disc || x.discord || '') + '">' + (x.emp_disc ? '<span style="color:#166534;font-weight:600">' + escHtml(x.emp_disc) + '</span>' : '<span style="color:#b91c1c;font-weight:600">' + escHtml(x.discord || '—') + '</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.last_seen ? escHtml(x.last_seen) : '<span class="muted">—</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#6b7280;max-width:24ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(x.remark || '') + '">' + escHtml(x.remark || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#999">' + escHtml(x.updated_at || '') + '</td>';
