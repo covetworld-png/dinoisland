@@ -6699,15 +6699,23 @@ async function paycodeRender(d) {
   const headL = document.createElement('div');
   headL.style.cssText = 'display:flex;gap:14px;align-items:center;flex-wrap:wrap';
   if (bBatch) {
+    const rowsN = bBatch.total_rows || 0;
+    const split = items.length > rowsN;
     headL.innerHTML = '<span style="color:#6b7280">批次 <b>#' + bBatch.id + '</b> · ' + esc(bBatch.created_at || '') + ' · 操作人 ' + esc(bBatch.created_by || '-') + '</span>'
-      + '<span>共 <b>' + items.length + '</b> 条</span>'
+      + '<span>共 <b>' + rowsN + '</b> 行</span>'
+      + '<span>码 <b>' + items.length + '</b> 张</span>'
+      + (split ? '<span style="color:#b45309">含拆分</span>' : '')
       + '<span style="color:#16a34a">已发 <b>' + paidCount + '</b> 笔</span>'
       + '<span>合计 <b style="color:#1d4ed8">' + fmtVND(sum) + '</b> VND</span>';
   } else if (d.batch_id) {
+    const rowsN = d.total_rows || items.length;
+    const split = okItems.length > (d.ok_count || 0);
     headL.innerHTML = '<span style="color:#6b7280">新批次 <b>#' + d.batch_id + '</b></span>'
-      + '<span>共 <b>' + items.length + '</b> 行</span>'
-      + '<span style="color:#16a34a">成功 <b>' + okItems.length + '</b></span>'
-      + (errItems.length ? '<span style="color:#dc2626">失败 <b>' + errItems.length + '</b></span>' : '')
+      + '<span>共 <b>' + rowsN + '</b> 行</span>'
+      + '<span style="color:#16a34a">成功 <b>' + (d.ok_count || 0) + '</b> 行</span>'
+      + (errItems.length ? '<span style="color:#dc2626">失败 <b>' + errItems.length + '</b> 行</span>' : '')
+      + '<span>码 <b>' + okItems.length + '</b> 张</span>'
+      + (split ? '<span style="color:#b45309">含拆分</span>' : '')
       + '<span>合计 <b style="font-size:15px;color:#1d4ed8">' + fmtVND(sum) + '</b> VND</span>'
       + '<span style="color:#16a34a">已发 <b>' + paidCount + '</b> 笔</span>';
   }
