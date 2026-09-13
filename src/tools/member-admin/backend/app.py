@@ -674,6 +674,7 @@ def logs():
         page_size = 100
     rows, total = list_logs(
         entity_type=request.args.get("entity_type") or None,
+        action=request.args.get("action") or None,
         actor=request.args.get("actor") or None,
         date_from=request.args.get("date_from") or None,
         date_to=request.args.get("date_to") or None,

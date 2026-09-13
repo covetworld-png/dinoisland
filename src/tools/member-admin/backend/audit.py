@@ -31,11 +31,14 @@ def log_change(actor, action, entity_type, entity_id, entity_label="",
     conn.close()
 
 
-def list_logs(entity_type=None, actor=None, date_from=None, date_to=None, page=1, page_size=50):
+def list_logs(entity_type=None, actor=None, date_from=None, date_to=None, page=1, page_size=50, action=None):
     where, params = [], []
     if entity_type:
         where.append("entity_type = ?")
         params.append(entity_type)
+    if action:
+        where.append("action = ?")
+        params.append(action)
     if actor:
         where.append("actor = ?")
         params.append(actor)

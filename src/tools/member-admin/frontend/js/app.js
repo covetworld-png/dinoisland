@@ -1868,8 +1868,8 @@ async function openGameDataModal(accountId) {
 
 /* ================= 操作日志页 ================= */
 
-const logsState = { page: 1, entity_type: '', actor: '', date_from: '', date_to: '' };
-const ENTITY_TYPE_LABELS = { employee: '员工', guild: '军团', account: '账号', payment_account: '收款账户', sql_script: 'SQL脚本', commission: '分成计算', commission_snapshot: '发放快照', live_employee: '直播员工' };
+const logsState = { page: 1, entity_type: '', actor: '', date_from: '', date_to: '', action: '' };
+const ENTITY_TYPE_LABELS = { employee: '员工', guild: '军团', account: '账号', payment_account: '收款账户', sql_script: 'SQL脚本', commission: '分成计算', commission_snapshot: '发放快照', live_employee: '直播员工', admin_user: '登录/用户管理' };
 const ACTION_LABELS = { create: '新增', update: '更新', delete: '删除', login: '登录' };
 
 function renderLogsPage() {
@@ -1884,6 +1884,13 @@ function renderLogsPage() {
     + Object.keys(ENTITY_TYPE_LABELS).map(k => '<option value="' + k + '">' + ENTITY_TYPE_LABELS[k] + '</option>').join('');
   typeSel.value = logsState.entity_type;
   bar.appendChild(typeSel);
+
+  const actionSel = document.createElement('select');
+  actionSel.innerHTML = '<option value="">全部动作</option>'
+    + Object.keys(ACTION_LABELS).map(k => '<option value="' + k + '">' + ACTION_LABELS[k] + '</option>').join('');
+  actionSel.value = logsState.action;
+  actionSel.title = '按动作筛选（含 登录）';
+  bar.appendChild(actionSel);
 
   const actorInput = document.createElement('input');
   actorInput.type = 'text';
@@ -1908,6 +1915,7 @@ function renderLogsPage() {
   searchBtn.textContent = '查询';
   searchBtn.addEventListener('click', () => {
     logsState.entity_type = typeSel.value;
+    logsState.action = actionSel.value;
     logsState.actor = actorInput.value.trim();
     logsState.date_from = fromInput.value;
     logsState.date_to = toInput.value;
@@ -1921,6 +1929,7 @@ function renderLogsPage() {
   resetBtn.textContent = '重置';
   resetBtn.addEventListener('click', () => {
     logsState.entity_type = '';
+    logsState.action = '';
     logsState.actor = '';
     logsState.date_from = '';
     logsState.date_to = '';
@@ -1947,6 +1956,7 @@ function renderLogsPage() {
 async function loadLogs() {
   const params = new URLSearchParams({ page: logsState.page, page_size: PAGE_SIZE });
   if (logsState.entity_type) params.set('entity_type', logsState.entity_type);
+  if (logsState.action) params.set('action', logsState.action);
   if (logsState.actor) params.set('actor', logsState.actor);
   if (logsState.date_from) params.set('date_from', logsState.date_from);
   if (logsState.date_to) params.set('date_to', logsState.date_to);
