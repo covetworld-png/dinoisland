@@ -1716,7 +1716,7 @@ function openLiveEmployeeDrawer(item) {
   qrSec.appendChild(qrBox);
   body.appendChild(qrSec);
 
-  fetch('/api/live_employees/' + item.id + '/vietqr')
+  fetch('api/live_employees/' + item.id + '/vietqr')
     .then(r => r.json())
     .then(res => {
       if (!res.ok) {
