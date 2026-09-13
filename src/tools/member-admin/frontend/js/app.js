@@ -6294,6 +6294,44 @@ var _pidsItems = [];
 var _pidsSearch = '';
 var _pidsBusy = false;
 
+/* ===== 自定义悬浮提示（原生 title 延迟大，改用即时跟随鼠标 tooltip）===== */
+var _maTipEl = null, _maTipCur = null;
+function _maTipEnsure() {
+  if (_maTipEl) return _maTipEl;
+  var el = document.createElement('div');
+  el.id = 'maTip';
+  el.style.cssText = 'position:fixed;z-index:99999;display:none;pointer-events:none;max-width:420px;background:#1f2937;color:#f9fafb;font-size:11px;line-height:1.5;padding:5px 9px;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,.25);white-space:pre-wrap;word-break:break-all';
+  document.body.appendChild(el);
+  _maTipEl = el;
+  return el;
+}
+document.addEventListener('mouseover', function(e){
+  var t = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
+  if (!t || t === _maTipCur) return;
+  _maTipCur = t;
+  var el = _maTipEnsure();
+  el.textContent = t.getAttribute('data-tip') || '';
+  if (!el.textContent) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  _maTipMove(e.clientX, e.clientY);
+});
+document.addEventListener('mousemove', function(e){
+  if (_maTipCur) _maTipMove(e.clientX, e.clientY);
+});
+document.addEventListener('mouseout', function(e){
+  if (_maTipCur && e.relatedTarget && _maTipCur.contains(e.relatedTarget)) return;
+  _maTipCur = null;
+  if (_maTipEl) _maTipEl.style.display = 'none';
+});
+function _maTipMove(x, y) {
+  var el = _maTipEnsure();
+  var pad = 10;
+  var maxX = window.innerWidth - el.offsetWidth - pad;
+  var maxY = window.innerHeight - el.offsetHeight - pad;
+  el.style.left = Math.min(x + pad, Math.max(pad, maxX)) + 'px';
+  el.style.top = Math.min(y + pad + 8, Math.max(pad, maxY)) + 'px';
+}
+
 var PIDS_STATUS_META = {
   ok:       { label: '已映射',      bg: '#dcfce7', fg: '#166534', border: '#bbf7d0' },
   no_emp:   { label: '缺员工',      bg: '#fef9c3', fg: '#854d0e', border: '#fef08a' },
@@ -6435,14 +6473,14 @@ function pidsRenderBody() {
     html += '<tr>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(x.pid) + '</code></td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + pidsStatusBadge(x.status) + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-weight:600" title="' + escHtml(x.player_name || '') + '">' + escHtml(x.player_name || '') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px" title="' + escHtml(x.nick_name || '') + '">' + escHtml(x.nick_name || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-weight:600" data-tip="' + escHtml(x.player_name || '') + '">' + escHtml(x.player_name || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px" data-tip="' + escHtml(x.nick_name || '') + '">' + escHtml(x.nick_name || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">' + pidsActionCell(x) + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_label ? escHtml(x.emp_label) : '<span class="muted">' + (x.emp_no ? escHtml(x.emp_no) : '—') + '</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-family:monospace" title="' + escHtml(x.emp_uid || '') + '">' + (x.emp_uid ? escHtml(x.emp_uid) : '<span class="muted">—</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px" title="' + escHtml(x.emp_disc || x.discord || '') + '">' + (x.emp_disc ? '<span style="color:#166534;font-weight:600">' + escHtml(x.emp_disc) + '</span>' : '<span style="color:#b91c1c;font-weight:600">' + escHtml(x.discord || '—') + '</span>') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-family:monospace" data-tip="' + escHtml(x.emp_uid || '') + '">' + (x.emp_uid ? escHtml(x.emp_uid) : '<span class="muted">—</span>') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px" data-tip="' + escHtml(x.emp_disc || x.discord || '') + '">' + (x.emp_disc ? '<span style="color:#166534;font-weight:600">' + escHtml(x.emp_disc) + '</span>' : '<span style="color:#b91c1c;font-weight:600">' + escHtml(x.discord || '—') + '</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.last_seen ? escHtml(x.last_seen) : '<span class="muted">—</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#6b7280;max-width:24ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(x.remark || '') + '">' + escHtml(x.remark || '') + '</td>';
+    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#6b7280;max-width:24ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-tip="' + escHtml(x.remark || '') + '">' + escHtml(x.remark || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#999">' + escHtml(x.updated_at || '') + '</td>';
     html += '</tr>';
   }
