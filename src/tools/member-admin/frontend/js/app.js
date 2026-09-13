@@ -6423,7 +6423,6 @@ function pidsRenderBody() {
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">状态</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">源 player_name</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">源 nick</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">映射昵称</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">关联员工</th>'
     + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">员工 Discord ID</th>'
@@ -6438,7 +6437,6 @@ function pidsRenderBody() {
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + pidsStatusBadge(x.status) + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-weight:600">' + escHtml(x.player_name || '') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.nick_name || '') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(x.mapping_player_name || '<span class="muted">—</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">' + pidsActionCell(x) + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_label ? escHtml(x.emp_label) : '<span class="muted">' + (x.emp_no ? escHtml(x.emp_no) : '—') + '</span>') + '</td>';
     html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-family:monospace">' + (x.emp_uid ? escHtml(x.emp_uid) : '<span class="muted">—</span>') + '</td>';
