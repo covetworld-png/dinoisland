@@ -275,6 +275,17 @@ def init_db():
     le_cols = [r["name"] for r in conn.execute("PRAGMA table_info(live_employees)")]
     if "attendance_allowance" not in le_cols:
         conn.execute("ALTER TABLE live_employees ADD COLUMN attendance_allowance REAL DEFAULT 0")
+    # 迁移：工资代发「是否已发」记录（emp_no+amount 唯一识别一笔）
+    conn.execute("""CREATE TABLE IF NOT EXISTS pay_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        emp_no TEXT NOT NULL,
+        amount INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'unpaid',
+        paid_at TEXT DEFAULT '',
+        paid_by TEXT DEFAULT '',
+        updated_at TEXT,
+        UNIQUE(emp_no, amount)
+    )""")
     conn.commit()
     conn.close()
 

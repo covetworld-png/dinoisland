@@ -6665,16 +6665,24 @@ async function paycodeGenerate() {
   }
 }
 
-function paycodeRender(d) {
+async function paycodeRender(d) {
   const body = $('#paycodeBody');
   const ok = d.ok_count, err = d.err_count;
   const sum = d.total_amount || 0;
+  // 加载「是否已发」记录
+  let recMap = {};
+  try {
+    const recs = await api('paycode/records') || [];
+    recs.forEach(r => { recMap[r.emp_no + ':' + r.amount] = r; });
+  } catch (e) { /* 记录加载失败不阻断展示 */ }
+  const paidCount = (d.items || []).filter(it => it.ok && recMap[it.emp_no + ':' + it.amount] && recMap[it.emp_no + ':' + it.amount].status === 'paid').length;
   const head = document.createElement('div');
   head.style.cssText = 'display:flex;gap:16px;align-items:center;margin-bottom:10px;font-size:13px;flex-wrap:wrap';
   head.innerHTML = '<span>共 <b>' + d.total_rows + '</b> 行</span>'
     + '<span style="color:#16a34a">成功 <b>' + ok + '</b></span>'
     + (err ? '<span style="color:#dc2626">失败 <b>' + err + '</b></span>' : '')
-    + '<span>合计 <b style="font-size:15px;color:#1d4ed8">' + fmtVND(sum) + '</b> VND</span>';
+    + '<span>合计 <b style="font-size:15px;color:#1d4ed8">' + fmtVND(sum) + '</b> VND</span>'
+    + '<span style="color:#16a34a">已发 <b>' + paidCount + '</b> 笔</span>';
   body.innerHTML = '';
   body.appendChild(head);
   const grid = document.createElement('div');
@@ -6722,6 +6730,34 @@ function paycodeRender(d) {
         qrWrap.style.display = 'block';
         hint.textContent = '▾ 点击收起';
       });
+      // 是否已发（人工标记留痕）
+      const rec = recMap[it.emp_no + ':' + it.amount];
+      const stRow = document.createElement('div');
+      stRow.style.cssText = 'margin-top:4px;font-size:11px;display:flex;align-items:center;gap:6px';
+      const stText = document.createElement('span');
+      stText.style.cssText = (rec && rec.status === 'paid') ? 'color:#16a34a;font-weight:600' : 'color:#9ca3af';
+      stText.textContent = (rec && rec.status === 'paid') ? ('已发 ' + (rec.paid_at || '') + ' · ' + (rec.paid_by || '')) : '未发';
+      const stBtn = document.createElement('button');
+      stBtn.type = 'button';
+      stBtn.style.cssText = 'font-size:11px;padding:1px 8px;cursor:pointer';
+      stBtn.className = 'btn btn-xs';
+      stBtn.textContent = (rec && rec.status === 'paid') ? '撤销' : '标记已发';
+      stBtn.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        const to = (rec && rec.status === 'paid') ? 'unpaid' : 'paid';
+        try {
+          const r = await api('paycode/records', { method: 'POST', json: { emp_no: it.emp_no, amount: it.amount, status: to } });
+          rec.status = r.status; rec.paid_at = r.paid_at || ''; rec.paid_by = r.paid_by || '';
+          stText.style.cssText = r.status === 'paid' ? 'color:#16a34a;font-weight:600' : 'color:#9ca3af';
+          stText.textContent = r.status === 'paid' ? ('已发 ' + (r.paid_at || '') + ' · ' + (r.paid_by || '')) : '未发';
+          stBtn.textContent = r.status === 'paid' ? '撤销' : '标记已发';
+          if (r.status === 'paid') showToast('已标记已发：' + it.emp_no, 'success');
+          else showToast('已撤销标记：' + it.emp_no, 'success');
+        } catch (e) { showToast(e.message, 'error'); }
+      });
+      stRow.appendChild(stText);
+      stRow.appendChild(stBtn);
+      card.appendChild(stRow);
     }
     grid.appendChild(card);
   });

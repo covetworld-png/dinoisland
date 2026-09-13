@@ -2662,6 +2662,52 @@ def paycode_generate():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+@app.get("/api/paycode/records")
+@login_required
+def paycode_records_list():
+    """工资代发「已发」记录（emp_no+amount -> status/paid_at/paid_by）。"""
+    db = get_db()
+    try:
+        rows = db.execute("SELECT emp_no, amount, status, paid_at, paid_by, updated_at FROM pay_records ORDER BY updated_at DESC").fetchall()
+        return jsonify({"ok": True, "data": [dict(r) for r in rows]})
+    finally:
+        db.close()
+
+
+@app.post("/api/paycode/records")
+@write_required
+def paycode_records_update():
+    """标记某笔为已发(paid)/未发(unpaid)。"""
+    data = request.get_json(force=True, silent=True) or {}
+    emp_no = str(data.get("emp_no") or "").strip()
+    amount = data.get("amount")
+    status = str(data.get("status") or "").strip()
+    if not emp_no or amount is None:
+        return jsonify({"ok": False, "error": "emp_no 与 amount 必填"}), 400
+    try:
+        amount = int(amount)
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "amount 非法"}), 400
+    if status not in ("paid", "unpaid"):
+        return jsonify({"ok": False, "error": "status 仅支持 paid/unpaid"}), 400
+    now_ts = now()
+    paid_at = now_ts if status == "paid" else ""
+    paid_by = session["user"] if status == "paid" else ""
+    db = get_db()
+    try:
+        db.execute(
+            "INSERT INTO pay_records(emp_no, amount, status, paid_at, paid_by, updated_at) "
+            "VALUES(?,?,?,?,?,?) "
+            "ON CONFLICT(emp_no, amount) DO UPDATE SET status=excluded.status, "
+            "paid_at=excluded.paid_at, paid_by=excluded.paid_by, updated_at=excluded.updated_at",
+            (emp_no, amount, status, paid_at, paid_by, now_ts))
+        db.commit()
+        return jsonify({"ok": True, "data": {"emp_no": emp_no, "amount": amount,
+                                               "status": status, "paid_at": paid_at, "paid_by": paid_by}})
+    finally:
+        db.close()
+
+
 def _paycode_read_rows():
     """从上传文件或 JSON 读取 [(emp_no, amount), ...]。"""
     f = request.files.get("file")
