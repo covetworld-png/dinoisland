@@ -6811,7 +6811,9 @@ async function paycodeRender(d) {
   let openCard = null;  // 手风琴：同时只展开一张收款码
   items.forEach(it => {
     const card = document.createElement('div');
-    card.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;width:230px;display:flex;flex-direction:column;align-items:center;gap:6px';
+    card.style.cssText = (it.status === 'paid'
+      ? 'background:#f0fdf4;border:2px solid #16a34a;border-radius:10px;padding:12px;width:230px;display:flex;flex-direction:column;align-items:center;gap:6px'
+      : 'background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;width:230px;display:flex;flex-direction:column;align-items:center;gap:6px');
     if (!it.payload) {
       card.innerHTML = '<b style="font-size:13px">' + esc(it.emp_no) + '</b>'
         + (it.name ? '<span style="font-size:12px;color:#6b7280">' + esc(it.name) + '</span>' : '')
@@ -6870,7 +6872,7 @@ async function paycodeRender(d) {
       const stRow = document.createElement('div');
       stRow.style.cssText = 'margin-top:4px;font-size:11px;display:flex;align-items:center;gap:6px';
       const stText = document.createElement('span');
-      stText.style.cssText = it.status === 'paid' ? 'color:#16a34a;font-weight:600' : 'color:#9ca3af';
+      stText.style.cssText = it.status === 'paid' ? 'color:#16a34a;font-weight:700;background:#d1fae5;padding:2px 8px;border-radius:4px' : 'color:#9ca3af';
       stText.textContent = it.status === 'paid' ? ('已发 ' + (it.paid_at || '') + ' · ' + (it.paid_by || '')) : '未发';
       const stBtn = document.createElement('button');
       stBtn.type = 'button'; stBtn.style.cssText = 'font-size:11px;padding:1px 8px;cursor:pointer';
@@ -6882,7 +6884,9 @@ async function paycodeRender(d) {
         try {
           const r = await api('paycode/records', { method: 'POST', json: { id: it.id, status: to } });
           it.status = r.status; it.paid_at = r.paid_at || ''; it.paid_by = r.paid_by || '';
-          stText.style.cssText = r.status === 'paid' ? 'color:#16a34a;font-weight:600' : 'color:#9ca3af';
+          stText.style.cssText = r.status === 'paid' ? 'color:#16a34a;font-weight:700;background:#d1fae5;padding:2px 8px;border-radius:4px' : 'color:#9ca3af';
+          card.style.border = r.status === 'paid' ? '2px solid #16a34a' : '1px solid #e5e7eb';
+          card.style.background = r.status === 'paid' ? '#f0fdf4' : '#fff';
           stText.textContent = r.status === 'paid' ? ('已发 ' + (r.paid_at || '') + ' · ' + (r.paid_by || '')) : '未发';
           stBtn.textContent = r.status === 'paid' ? '撤销' : '标记已发';
           if (r.status === 'paid') { paidBanner.textContent = '✓ 该笔已标记已发'; showToast('已标记已发：' + it.emp_no, 'success'); }
