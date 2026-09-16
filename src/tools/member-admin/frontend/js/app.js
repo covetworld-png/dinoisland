@@ -177,21 +177,22 @@ function optionLabel(kind, id) {
 
 /* ================= 角色 ================= */
 
-const ROLE_LABELS = { super: '超级管理员', admin: '管理员', viewer: '普通用户', operator: '场控' };
-// 角色权限说明（展示在侧边栏底部角落）
+const ROLE_LABELS = { super: '超级管理员', admin: '管理员', viewer: '特殊用户', operator: '场控', hr: 'HR' };
+// 角色权限说明（展示在「用户管理-选择角色」处，供管理员判断）
 const ROLE_HINTS = {
-  super: '超级管理员：全部模块可管理（含用户管理）',
-  admin: '管理员：全部模块可管理',
-  viewer: '普通用户：仅查看 员工 / PID全景 / Discord绑定 / 场次签到 / 排班表（全部只读）',
-  operator: '场控：可管理 场次签到 / Discord绑定；PID全景只读；排班表可看',
+  super: '全部模块可管理（含用户管理）',
+  admin: '全部业务模块可管理（用户管理仅超管）',
+  operator: '场控：场次签到 / Discord绑定 可管理；PID全景只读；排班表可看；其余不可见',
+  hr: 'HR：员工 / PID全景 / 场次签到 / 消息中心 / Discord绑定 可管理；其余不可见',
+  viewer: '特殊用户：全部模块只读（用户管理 / 操作日志 不可见）',
 };
-// 角色可见模块白名单：viewer / operator 限定范围，admin/super 返回 null（全部可见）
-const VIEWER_MODULES = ['live_employees', 'pids', 'binding', 'checkin', 'schedule'];
+// 角色可见模块白名单：viewer=全部（仅隐藏用户管理/操作日志），hr/operator 限定范围，admin/super 返回 null（全部可见）
 const OPERATOR_MODULES = ['pids', 'binding', 'checkin', 'schedule'];
+const HR_MODULES = ['live_employees', 'pids', 'checkin', 'inbox', 'binding'];
 function roleModules(role) {
-  if (role === 'viewer') return VIEWER_MODULES;
   if (role === 'operator') return OPERATOR_MODULES;
-  return null;
+  if (role === 'hr') return HR_MODULES;
+  return null; // viewer/admin/super：全部模块（viewer 另在用户管理/操作日志处隐藏）
 }
 
 /* ================= 可搜索下拉组件 ================= */
@@ -707,9 +708,9 @@ function getListState(moduleKey) {
 /* ================= 后台模块渲染 ================= */
 
 async function switchModule(moduleKey) {
-  // viewer/operator：仅白名单模块可访问，其余入口隐藏且禁止直达
+  // hr/operator：仅白名单模块可访问；viewer（特殊用户）：全部只读，但操作日志不可见；其余禁止直达
   const _allowed = roleModules(state.role);
-  if (_allowed && !_allowed.includes(moduleKey)) {
+  if ((_allowed && !_allowed.includes(moduleKey)) || (state.role === 'viewer' && moduleKey === 'logs')) {
     showToast('当前角色权限：仅可访问限定模块', 'error');
     return;
   }
@@ -3852,6 +3853,12 @@ function openUserModal(ctx) {
   $('#userUsername').value = '';
   $('#userPassword').value = '';
   $('#userRole').value = ctx.item ? ctx.item.role : 'viewer';
+  // 角色权限说明：选择角色时实时展示，供管理员判断
+  var roleHint = document.getElementById('userRoleHint');
+  if (roleHint) {
+    roleHint.textContent = ROLE_HINTS[$('#userRole').value] || '';
+    $('#userRole').onchange = function() { roleHint.textContent = ROLE_HINTS[this.value] || ''; };
+  }
   openModal('userModal');
 }
 
@@ -3943,14 +3950,7 @@ function enterPortal() {
   // 用户管理入口仅 super 可见（游戏/直播组各一个）
   ['usersNavBtn', 'usersNavBtnLive'].forEach(id =>
     $('#' + id).classList.toggle('hidden', state.role !== 'super'));
-  // viewer：隐藏游戏管理入口卡片，自动进入直播组（唯一可用分组）
-  if (state.role === 'viewer') {
-    $('#gameModuleCard').classList.add('hidden');
-    showView('adminView');
-    enterModuleGroup('live');
-    switchModule('live_employees');
-    return;
-  }
+  // operator（场控）/ viewer 均无游戏管理入口需要区分：场控隐藏游戏管理卡片（其模块全在直播组）
   $('#gameModuleCard').classList.toggle('hidden', state.role === 'operator');
   showView('portalView');
 }
@@ -3961,15 +3961,12 @@ function enterModuleGroup(group) {
   $$('.sidebar-nav .side-btn').forEach(b => {
     const isUsersBtn = b.id === 'usersNavBtn' || b.id === 'usersNavBtnLive';
     // 用户管理：分组 + 角色（仅 super）双重条件；group=all 的按钮两个分组都显示
-    // viewer/operator：仅白名单模块（员工/PID全景/Discord绑定/场次签到/排班表 等）可见
+    // hr/operator：仅白名单模块可见；viewer：全部模块但隐藏 用户管理/操作日志
     const _mods = roleModules(state.role);
-    const roleBlocked = !!_mods && !_mods.includes(b.dataset.module);
+    const roleBlocked = (_mods && !_mods.includes(b.dataset.module)) || (state.role === 'viewer' && (b.dataset.module === 'logs' || b.id === 'usersNavBtn' || b.id === 'usersNavBtnLive'));
     const hide = (b.dataset.group !== group && b.dataset.group !== 'all') || (isUsersBtn && state.role !== 'super') || roleBlocked;
     b.classList.toggle('hidden', hide);
   });
-  // 侧边栏底部角落：角色权限说明
-  const _hint = document.getElementById('roleHint');
-  if (_hint) _hint.textContent = ROLE_HINTS[state.role] || '';
   $('#sidebarBrand').textContent = group === 'live' ? '直播管理' : '游戏管理';
   document.title = (group === 'live' ? '直播管理' : '游戏管理') + ' - 员工管理后台';
   showView('adminView');
@@ -6732,6 +6729,13 @@ function renderPayCodePage() {
   $('#paycodeTplBtn').addEventListener('click', paycodeDownloadTpl);
   $('#payTabGen').addEventListener('click', () => { paycodeTab = 'gen'; setPaycodeTabUI(); $('#paycodeBody').innerHTML = '<p style="color:#9ca3af;font-size:13px">上传文件后点击「生成收款码」。</p>'; });
   $('#payTabHist').addEventListener('click', () => { paycodeTab = 'hist'; setPaycodeTabUI(); paycodeBatches(); });
+  // viewer（特殊用户）：工资代发仅可查看批次历史（只读），隐藏生成入口
+  if (state.role === 'viewer') {
+    $('#payTabGen').style.display = 'none';
+    paycodeTab = 'hist';
+    setPaycodeTabUI();
+    paycodeBatches();
+  }
 }
 
 function setPaycodeTabUI() {
@@ -6822,7 +6826,7 @@ async function paycodeRender(d) {
     ri.value = bBatch.remark || '';
     ri.style.cssText = 'font-size:12px;width:190px;padding:2px 6px';
     const sBtn = document.createElement('button');
-    sBtn.className = 'btn'; sBtn.textContent = '保存备注'; sBtn.style.cssText = 'font-size:11px;padding:1px 8px';
+    sBtn.className = 'btn btn-write'; sBtn.textContent = '保存备注'; sBtn.style.cssText = 'font-size:11px;padding:1px 8px';
     sBtn.addEventListener('click', async () => {
       try { await api('paycode/batches/' + bBatch.id + '/remark', { method: 'POST', json: { remark: ri.value } }); showToast('备注已保存', 'success'); }
       catch (e) { showToast(e.message, 'error'); }
@@ -6914,7 +6918,7 @@ async function paycodeRender(d) {
       stText.textContent = it.status === 'paid' ? ('已发 ' + (it.paid_at || '') + ' · ' + (it.paid_by || '')) : '未发';
       const stBtn = document.createElement('button');
       stBtn.type = 'button'; stBtn.style.cssText = 'font-size:11px;padding:1px 8px;cursor:pointer';
-      stBtn.className = 'btn btn-xs';
+      stBtn.className = 'btn btn-xs btn-write';
       stBtn.textContent = it.status === 'paid' ? '撤销' : '标记已发';
       stBtn.addEventListener('click', async (ev) => {
         ev.stopPropagation();

@@ -72,18 +72,26 @@ def login_required(f):
     return wrapper
 
 
-ROLES = {"super": "超级管理员", "admin": "管理员", "viewer": "普通用户"}
+ROLES = {"super": "超级管理员", "admin": "管理员", "viewer": "特殊用户", "operator": "场控", "hr": "HR"}
 
 
 def write_required(f):
-    """写操作：super/admin 可用，viewer 只读"""
+    """写操作：super/admin 全模块可用；viewer（特殊用户）只读；operator（场控）仅签到/绑定/认领可写；
+    hr 可写：签到/绑定/认领/PID映射/员工/消息中心。其余写接口一律 403。"""
     @wraps(f)
     def wrapper(*args, **kwargs):
         if not session.get("user"):
             return jsonify({"ok": False, "error": "未登录"}), 401
-        if session.get("role") not in ("super", "admin"):
-            return jsonify({"ok": False, "error": "无编辑权限（普通用户只读）"}), 403
-        return f(*args, **kwargs)
+        role = session.get("role")
+        if role in ("super", "admin"):
+            return f(*args, **kwargs)
+        if role == "operator" and request.path.startswith(("/api/checkin/", "/api/binding/", "/api/claim/")):
+            return f(*args, **kwargs)
+        if role == "hr" and request.path.startswith((
+                "/api/checkin/", "/api/binding/", "/api/claim/", "/api/pids/",
+                "/api/live_employees", "/api/inbox/")):
+            return f(*args, **kwargs)
+        return jsonify({"ok": False, "error": "无编辑权限（只读或超出角色范围）"}), 403
     return wrapper
 
 
@@ -2705,7 +2713,7 @@ def _split_pay_amount(amount):
 
 
 @app.post("/api/paycode/generate")
-@login_required
+@write_required
 def paycode_generate():
     """Excel/CSV(员工编号+金额) -> 批量生成带金额 VietQR，并创建批次快照。
     成功行写入 pay_records（含 payload 快照），供批次历史重开二维码。"""
