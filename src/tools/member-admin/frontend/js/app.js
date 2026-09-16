@@ -178,6 +178,72 @@ function optionLabel(kind, id) {
 /* ================= 角色 ================= */
 
 const ROLE_LABELS = { super: '超级管理员', admin: '管理员', viewer: '特殊用户', operator: '场控', hr: 'HR' };
+
+/* ================= 双语（中/越南语）：checkin / binding 模块文案 ================= */
+function getLang() { return localStorage.getItem('ma_lang') || 'zh'; }
+function setLang(l) {
+  localStorage.setItem('ma_lang', l);
+  updateLangBtn();
+  if (state.module) switchModule(state.module); // 重渲染当前模块使新语言生效
+}
+function updateLangBtn() {
+  var b = document.getElementById('langToggleBtn');
+  if (b) b.textContent = getLang() === 'zh' ? 'VI' : '中';
+}
+// 越南语映射（key=中文原文；未收录的保持中文）
+const VI_MAP = {
+  '场次签到': 'Điểm danh ca',
+  '时间均为 GMT+7（越南）': 'Múi giờ GMT+7 (Việt Nam)',
+  '主播': 'Streamer',
+  '已签到': 'Đã điểm danh',
+  '未达标': 'Chưa đạt chuẩn',
+  '无效': 'Không hợp lệ',
+  '至': 'đến',
+  '搜索': 'Tìm kiếm',
+  '导出': 'Xuất CSV',
+  '设置': 'Cài đặt',
+  '主播列表': 'DS Streamer',
+  '陪玩列表': 'DS ngưởi chơi',
+  '待认领': 'Chờ nhận',
+  '数据校对': 'Kiểm tra DL',
+  '说明': 'Hướng dẫn',
+  '标记达标': 'Đánh dấu đạt',
+  '已达标': 'Đã đạt chuẩn',
+  '已排除': 'Đã loại trừ',
+  '最低': 'Tối thiểu',
+  '强行结束': 'Kết thúc ngay',
+  '删除场次': 'Xóa ca',
+  '追溯修正': 'Hiệu chỉnh',
+  'Discord 绑定': 'Liên kết Discord',
+  '待绑定': 'Chờ liên kết',
+  '已绑定全量': 'Đã liên kết (all)',
+  '绑定': 'Liên kết',
+  '解绑': 'Hủy liên kết',
+  '排除': 'Loại trừ',
+  '搜索 uid 尾号 / 昵称 / 归属': 'Tìm: cuối UID / nickname / chủ sở hữu',
+  '加载中...': 'Đang tải...',
+  '加载中…': 'Đang tải…',
+  '取消': 'Hủy',
+  '刷新': 'Làm mới',
+  '已取消': 'Đã hủy',
+  '进行中': 'Đang diễn ra',
+  '分钟': 'phút',
+  '保存': 'Lưu',
+  '确认选中': 'Xác nhận',
+  '请先选择员工': 'Vui lòng chọn nhân viên',
+  '无匹配员工': 'Không có nhân viên phù hợp',
+  '选择员工': 'Chọn nhân viên',
+  '编号': 'Mã NV',
+  '别名': 'Tên khác',
+  '中文名': 'Tên Trung',
+  '真实姓名': 'Họ tên thật',
+  '岗位': 'Vị trí',
+  '状态': 'Trạng thái',
+  '暂无 PID 数据': 'Chưa có dữ liệu PID',
+  '请先选择': 'Vui lòng chọn trước',
+  '已选中': 'Đã chọn',
+};
+function t(s) { return getLang() === 'vi' ? (VI_MAP[s] || s) : s; }
 // 角色权限说明（展示在「用户管理-选择角色」处，供管理员判断）
 const ROLE_HINTS = {
   super: '全部模块可管理（含用户管理）',
@@ -1295,7 +1361,7 @@ async function openSourceStaffPicker() {
   searchRow.appendChild(inp);
   const searchBtn = document.createElement('button');
   searchBtn.className = 'btn btn-sm';
-  searchBtn.textContent = '搜索';
+  searchBtn.textContent = t('搜索');
   searchBtn.addEventListener('click', async () => {
     try {
       rows = await fetchSourceStaff(inp.value.trim());
@@ -3994,6 +4060,12 @@ function openPwdModal() {
 }
 $('#portalChangePwdBtn').addEventListener('click', openPwdModal);
 $('#adminChangePwdBtn').addEventListener('click', openPwdModal);
+// 双语切换（中/越南语）：localStorage 记忆，重渲染当前模块
+(function(){
+  var b = document.getElementById('langToggleBtn');
+  if (b) b.addEventListener('click', function(){ setLang(getLang() === 'zh' ? 'vi' : 'zh'); });
+  updateLangBtn();
+})();
 
 $('#pwdSaveBtn').addEventListener('click', async () => {
   const oldPwd = $('#oldPassword').value;
@@ -4425,13 +4497,13 @@ async function _loadSessionParticipants(sessionId) {
       html += '<span style="font-size:11px;color:' + (isExcluded ? '#9ca3af' : '#666') + '">' + p.minutes + 'min</span>';
       html += '</span>';
       if (p.is_streamer) {
-        html += '<span style="font-size:11px;color:#92400e">主播</span>';
+        html += '<span style="font-size:11px;color:#92400e">' + t('主播') + '</span>';
       } else if (isExcluded) {
-        html += '<span style="font-size:11px;color:#9ca3af">已排除</span>';
+        html += '<span style="font-size:11px;color:#9ca3af">' + t('已排除') + '</span>';
       } else if (p.checked_in) {
-        html += '<span style="font-size:11px;color:#16a34a"><i class="fas fa-check" style="font-size:10px"></i> 已达标</span>';
+        html += '<span style="font-size:11px;color:#16a34a"><i class="fas fa-check" style="font-size:10px"></i> ' + t('已达标') + '</span>';
       } else {
-        html += '<button class="btn btn-sm btn-write" style="font-size:11px;padding:1px 8px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="markQualified(' + sessionId + ',\'' + p.user_id + '\',\'' + nickAttr + '\')" title="生成 manual 达标记录，不修改实际时长"><i class="fas fa-check"></i> 标记达标</button>';
+        html += '<button class="btn btn-sm btn-write" style="font-size:11px;padding:1px 8px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="markQualified(' + sessionId + ',\'' + p.user_id + '\',\'' + nickAttr + '\')" title="' + t('标记达标') + '"><i class="fas fa-check"></i> ' + t('标记达标') + '</button>';
       }
       html += '</div>';
     });
@@ -4860,7 +4932,7 @@ function initMasonryObservers() {
 
 async function renderCheckinPage() {
   const main = $('#adminMain');
-  main.innerHTML = '<div class="loading">Loading...</div>';
+  main.innerHTML = '<div class="loading">' + t('加载中...') + '</div>';
 
   try {
     // Load settings (cache or fetch)
@@ -4944,20 +5016,20 @@ async function renderCheckinPage() {
     // Filter bar + settings + export
     html += '<div class="card" style="margin-bottom:20px">';
     html += '<div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#f8f9fa;border-radius:6px 6px 0 0;font-weight:600">';
-    html += '<span><i class="fas fa-video"></i> 场次签到 <span style="font-size:10px;color:#999;font-weight:400">时间均为 GMT+7（越南） <span style="color:#92400e;background:#fef3c7;padding:0 3px;border-radius:2px">主播</span> <span style="color:#1e40af;background:#dbeafe;padding:0 3px;border-radius:2px">已签到</span> <span style="color:#991b1b;background:#fee2e2;padding:0 3px;border-radius:2px">未达标</span> <span style="color:#6b7280;background:#e5e7eb;padding:0 3px;border-radius:2px">无效</span></span></span>';
+    html += '<span><i class="fas fa-video"></i> ' + t('场次签到') + ' <span style="font-size:10px;color:#999;font-weight:400">' + t('时间均为 GMT+7（越南）') + ' <span style="color:#92400e;background:#fef3c7;padding:0 3px;border-radius:2px">' + t('主播') + '</span> <span style="color:#1e40af;background:#dbeafe;padding:0 3px;border-radius:2px">' + t('已签到') + '</span> <span style="color:#991b1b;background:#fee2e2;padding:0 3px;border-radius:2px">' + t('未达标') + '</span> <span style="color:#6b7280;background:#e5e7eb;padding:0 3px;border-radius:2px">' + t('无效') + '</span></span></span>';
     html += '<div style="display:flex;gap:8px;align-items:center">';
     html += '<input type="date" id="sessionDateFrom" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px" value="' + escHtml(from) + '">';
-    html += '<span style="color:#999">至</span>';
+    html += '<span style="color:#999">' + t('至') + '</span>';
     html += '<input type="date" id="sessionDateTo" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px" value="' + escHtml(to) + '">';
-    html += '<button class="btn btn-sm" onclick="renderCheckinPage()">搜索</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="renderCheckinPage()" style="font-size:16px;padding:2px 8px" title="刷新"><i class="fas fa-redo-alt"></i></button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="exportCheckinCSV()" title="导出 CSV"><i class="fas fa-download"></i> 导出</button>';
-    html += '<button class="btn btn-sm btn-outline btn-write" onclick="openCheckinSettings()" title="设置"><i class="fas fa-cog"></i> 设置</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openStreamerColorManager()" title="管理主播列表"><i class="fas fa-palette"></i> 主播列表</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openNicknameCache()" title="查看陪玩列表"><i class="fas fa-address-book"></i> 陪玩列表</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openClaimManager()" title="未认领 uid / 疑似过期 ID 处理（与每日对账推送同口径）"><i class="fas fa-user-tag"></i> 待认领</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openVerifyReports()" title="数据校对报告"><i class="fas fa-clipboard-check"></i> 数据校对</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openCheckinHelp()" title="查看判断逻辑说明"><i class="fas fa-question-circle"></i> 说明</button>';
+    html += '<button class="btn btn-sm" onclick="renderCheckinPage()">' + t('搜索') + '</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="renderCheckinPage()" style="font-size:16px;padding:2px 8px" title="' + t('刷新') + '"><i class="fas fa-redo-alt"></i></button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="exportCheckinCSV()" title="' + t('导出') + ' CSV"><i class="fas fa-download"></i> ' + t('导出') + '</button>';
+    html += '<button class="btn btn-sm btn-outline btn-write" onclick="openCheckinSettings()" title="' + t('设置') + '"><i class="fas fa-cog"></i> ' + t('设置') + '</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openStreamerColorManager()" title="' + t('主播列表') + '"><i class="fas fa-palette"></i> ' + t('主播列表') + '</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openNicknameCache()" title="' + t('陪玩列表') + '"><i class="fas fa-address-book"></i> ' + t('陪玩列表') + '</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openClaimManager()" title="' + t('待认领') + '"><i class="fas fa-user-tag"></i> ' + t('待认领') + '</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openVerifyReports()" title="' + t('数据校对') + '"><i class="fas fa-clipboard-check"></i> ' + t('数据校对') + '</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openCheckinHelp()" title="' + t('说明') + '"><i class="fas fa-question-circle"></i> ' + t('说明') + '</button>';
     html += '</div></div></div>';
 
     // Session card rendering helper
@@ -4966,8 +5038,8 @@ async function renderCheckinPage() {
       var isCancelled = s.status === 'cancelled';
       var statusClass = isCancelled ? 'cancelled' : (isActive ? 'active' : 'ended');
       var badgeClass = isCancelled ? 'badge-cancelled' : (isActive ? 'badge-active' : 'badge-done');
-      var badgeText = isCancelled ? '已取消' : (isActive ? '进行中' : 'End');
-      var endStr = s.end_time ? fmtGmt7(s.end_time) : '🟠 进行中';
+      var badgeText = isCancelled ? t('已取消') : (isActive ? t('进行中') : 'End');
+      var endStr = s.end_time ? fmtGmt7(s.end_time) : '🟠 ' + t('进行中');
       var durStr = s.duration_minutes > 0 ? (Math.floor(s.duration_minutes / 60) + 'h ' + (s.duration_minutes % 60) + 'm') : '-';
 
       if (!window._checkinData) window._checkinData = {};
@@ -5010,17 +5082,17 @@ async function renderCheckinPage() {
         h += 'color:#991b1b;background:#fee2e2;border-color:#fecaca';
       }
       h += '" onclick="deleteSession(' + s.id + ',\'' + escHtml(s.session_no) + '\',\'' + s.status + '\')" title="';
-      h += isActive ? '强行结束' : '删除场次';
+      h += isActive ? t('强行结束') : t('删除场次');
       h += '">';
       h += isActive ? '<i class="fas fa-stop-circle"></i>' : '<i class="fas fa-trash-alt"></i>';
       h += '</button>';
-      h += '<button class="btn btn-sm btn-write" style="font-size:11px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="retroSession(\'' + escHtml(s.session_no) + '\')" title="追溯修正：根据第二人（非滞留）语音进入时间校准开启时间"><i class="fas fa-history"></i></button>';
+      h += '<button class="btn btn-sm btn-write" style="font-size:11px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="retroSession(\'' + escHtml(s.session_no) + '\')" title="' + t('追溯修正') + '"><i class="fas fa-history"></i></button>';
       }
       h += '</div>';
       h += '</div>';
       h += '<div style="font-size:10px;color:#999;margin:2px 0 3px">';
       h += fmtGmt7(s.start_time) + ' → ' + endStr;
-      if (s.min_minutes) h += ' | 最低 ' + s.min_minutes + ' 分钟';
+      if (s.min_minutes) h += ' | ' + t('最低') + ' ' + s.min_minutes + ' ' + t('分钟');
       h += '</div>';
       if (s.checkins && s.checkins.length > 0) {
         var methodEmoji = { slash: '<i class="fas fa-comment"></i>', button: '<i class="fas fa-circle"></i>', voice: '<i class="fas fa-microphone"></i>' };
@@ -5660,8 +5732,8 @@ function renderClaimList(data, empList) {
       html += '<option value="">绑定到员工...</option>';
       empList.forEach(function(e) { html += '<option value="' + escHtml(e.id) + '">' + escHtml(e.label) + '</option>'; });
       html += '</select>';
-      html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="claimBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">绑定</button>';
-      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="claimExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">排除</button>';
+      html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="claimBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">' + t('绑定') + '</button>';
+      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="claimExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">' + t('排除') + '</button>';
       html += '</td></tr>';
     });
     html += '</table>';
@@ -5737,15 +5809,15 @@ var _bindingEmp = [];      // /api/binding/employees 富信息员工列表（选
 var _bindingEmpSel = {};   // uid -> emp_no（Tab1 每行当前选定员工）
 
 async function renderBindingPage() {
-  $('#adminModuleTitle').textContent = 'Discord 绑定';
+  $('#adminModuleTitle').textContent = t('Discord 绑定');
   var main = $('#adminMain');
   main.innerHTML = '';
   var bar = document.createElement('div');
   bar.className = 'filter-bar';
   bar.innerHTML = ''
-    + '<button type="button" class="btn ' + (_bindingTab === 'tab1' ? 'btn-primary' : 'btn-outline') + '" onclick="bindingSwitchTab(\'tab1\')" style="font-size:12px">待绑定</button>'
-    + ' <button type="button" class="btn ' + (_bindingTab === 'tab2' ? 'btn-primary' : 'btn-outline') + '" onclick="bindingSwitchTab(\'tab2\')" style="font-size:12px">已绑定全量</button>'
-    + ' <input id="bindingSearch" placeholder="搜索 uid 尾号 / 昵称 / 归属" value="' + escHtml(_bindingSearch) + '" style="margin-left:10px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:220px" oninput="bindingOnSearch(this.value)">'
+    + '<button type="button" class="btn ' + (_bindingTab === 'tab1' ? 'btn-primary' : 'btn-outline') + '" onclick="bindingSwitchTab(\'tab1\')" style="font-size:12px">' + t('待绑定') + '</button>'
+    + ' <button type="button" class="btn ' + (_bindingTab === 'tab2' ? 'btn-primary' : 'btn-outline') + '" onclick="bindingSwitchTab(\'tab2\')" style="font-size:12px">' + t('已绑定全量') + '</button>'
+    + ' <input id="bindingSearch" placeholder="' + t('搜索 uid 尾号 / 昵称 / 归属') + '" value="' + escHtml(_bindingSearch) + '" style="margin-left:10px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:220px" oninput="bindingOnSearch(this.value)">'
     + ' <button class="btn btn-sm" onclick="bindingReload()" style="font-size:11px"><i class="fas fa-sync"></i> 刷新</button>'
     + ' <span id="bindingHint" style="font-size:11px;color:#999;margin-left:8px"></span>';
   main.appendChild(bar);
@@ -5854,8 +5926,8 @@ function bindingRenderBody() {
         var selLabel = selEmp ? empLabelText(selEmp) : '';
         html += '<span id="bindEmpTag_' + u.user_id + '" style="font-size:10px;display:inline-block;margin-right:4px;color:#1e40af">' + (selLabel ? '已选：' + escHtml(selLabel) : '未选员工') + '</span> ';
         html += '<button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="openBindingEmpPicker(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">选员工</button>';
-        html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="bindingDoBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">绑定</button>';
-        html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="bindingDoExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">排除</button>';
+        html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="bindingDoBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">' + t('绑定') + '</button>';
+        html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="bindingDoExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">' + t('排除') + '</button>';
         html += '</td></tr>';
       }
       html += '</table>';
@@ -5901,7 +5973,7 @@ function bindingRenderBody() {
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (conflict ? escHtml(g.sources.map(function(s){return s.owner;}).join(' ｜ ')) : ownerLabel(b0)) + '</td>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + g.sources.map(function(s){ return escHtml(srcCell(s)); }).join('<br>') + '</td>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
-      html2 += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#b91c1c;background:#fee2e2;border-color:#fecaca" onclick="bindingDoUnbindGroup(\'' + g.user_id + '\',' + JSON.stringify(g.sources) + ')">解绑</button>';
+      html2 += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#b91c1c;background:#fee2e2;border-color:#fecaca" onclick="bindingDoUnbindGroup(\'' + g.user_id + '\',' + JSON.stringify(g.sources) + ')">' + t('解绑') + '</button>';
       html2 += '</td></tr>';
     }
     html2 += '</table>';
@@ -5989,7 +6061,7 @@ async function openRichEmpPicker(callback) {
   head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #e5e7eb;background:#f8f9fa;border-radius:10px 10px 0 0';
   var hTitle = document.createElement('h3');
   hTitle.style.cssText = 'margin:0;font-size:15px';
-  hTitle.textContent = '选择员工';
+  hTitle.textContent = t('选择员工');
   head.appendChild(hTitle);
   var closeX = document.createElement('button');
   closeX.type = 'button';
@@ -6002,12 +6074,12 @@ async function openRichEmpPicker(callback) {
   var searchRow = document.createElement('div');
   searchRow.style.cssText = 'padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid #eee';
   var inp = document.createElement('input');
-  inp.placeholder = '搜索：编号 / 昵称 / 别名 / 中文名 / 真实姓名 / Discord / 岗位';
+  inp.placeholder = t('搜索') + '：' + t('编号') + ' / ' + t('昵称') + ' / ' + t('别名') + ' / ' + t('中文名') + ' / ' + t('真实姓名') + ' / Discord / ' + t('岗位');
   inp.style.cssText = 'flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px';
   searchRow.appendChild(inp);
   var searchBtn = document.createElement('button');
   searchBtn.className = 'btn btn-sm';
-  searchBtn.textContent = '搜索';
+  searchBtn.textContent = t('搜索');
   searchBtn.addEventListener('click', function(){ renderRows(); });
   inp.addEventListener('keyup', function(e){ if (e.key === 'Enter') renderRows(); });
   searchRow.appendChild(searchBtn);
@@ -6027,16 +6099,16 @@ async function openRichEmpPicker(callback) {
   var cancelBtn = document.createElement('button');
   cancelBtn.type = 'button';
   cancelBtn.className = 'btn btn-sm';
-  cancelBtn.textContent = '取消';
+  cancelBtn.textContent = t('取消');
   cancelBtn.addEventListener('click', function(){ overlay.remove(); });
   btnRow.appendChild(cancelBtn);
   var confirmBtn = document.createElement('button');
   confirmBtn.className = 'btn btn-sm btn-primary';
-  confirmBtn.textContent = '确认选中';
+  confirmBtn.textContent = t('确认选中');
   confirmBtn.disabled = true;
   confirmBtn.style.opacity = '0.5';
   confirmBtn.addEventListener('click', function(){
-    if (!selectedNo) { showToast('请先选择员工', 'error'); return; }
+    if (!selectedNo) { showToast(t('请先选择员工'), 'error'); return; }
     var emp = rows.find(function(x){ return String(x.emp_no) === String(selectedNo); });
     overlay.remove();
     if (callback) callback(emp || { emp_no: selectedNo });
@@ -6048,7 +6120,7 @@ async function openRichEmpPicker(callback) {
   var updateInfo = function(){
     confirmBtn.disabled = !selectedNo;
     confirmBtn.style.opacity = selectedNo ? '1' : '0.5';
-    selInfo.textContent = selectedNo ? '已选中：' + empLabelText(selectedNo) : '请先选择员工';
+    selInfo.textContent = selectedNo ? t('已选中') + '：' + empLabelText(selectedNo) : t('请先选择员工');
   };
 
   var renderRows = function(){
@@ -6062,7 +6134,7 @@ async function openRichEmpPicker(callback) {
     }
     list.innerHTML = '';
     if (!filtered.length) {
-      list.innerHTML = '<p style="padding:24px;text-align:center;color:#999">无匹配员工</p>';
+      list.innerHTML = '<p style="padding:24px;text-align:center;color:#999">' + t('无匹配员工') + '</p>';
       updateInfo();
       return;
     }
@@ -6071,10 +6143,10 @@ async function openRichEmpPicker(callback) {
     var thead = document.createElement('thead');
     thead.innerHTML = '<tr style="text-align:left;background:#f3f4f6">'
       + '<th style="padding:8px 10px;width:28px"></th>'
-      + '<th style="padding:8px 10px">编号</th><th style="padding:8px 10px">昵称</th>'
-      + '<th style="padding:8px 10px">别名</th><th style="padding:8px 10px">中文名</th><th style="padding:8px 10px">真实姓名</th>'
+      + '<th style="padding:8px 10px">' + t('编号') + '</th><th style="padding:8px 10px">' + t('昵称') + '</th>'
+      + '<th style="padding:8px 10px">' + t('别名') + '</th><th style="padding:8px 10px">' + t('中文名') + '</th><th style="padding:8px 10px">' + t('真实姓名') + '</th>'
       + '<th style="padding:8px 10px">Discord</th>'
-      + '<th style="padding:8px 10px">岗位</th><th style="padding:8px 10px">状态</th></tr>';
+      + '<th style="padding:8px 10px">' + t('岗位') + '</th><th style="padding:8px 10px">' + t('状态') + '</th></tr>';
     table.appendChild(thead);
     var tbody = document.createElement('tbody');
     filtered.forEach(function(r){
@@ -6157,12 +6229,12 @@ async function openBindingEmpPicker(uid, nickname) {
   var searchRow = document.createElement('div');
   searchRow.style.cssText = 'padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid #eee';
   var inp = document.createElement('input');
-  inp.placeholder = '搜索：编号 / 昵称 / 别名 / 中文名 / 真实姓名 / Discord / 岗位';
+  inp.placeholder = t('搜索') + '：' + t('编号') + ' / ' + t('昵称') + ' / ' + t('别名') + ' / ' + t('中文名') + ' / ' + t('真实姓名') + ' / Discord / ' + t('岗位');
   inp.style.cssText = 'flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px';
   searchRow.appendChild(inp);
   var searchBtn = document.createElement('button');
   searchBtn.className = 'btn btn-sm';
-  searchBtn.textContent = '搜索';
+  searchBtn.textContent = t('搜索');
   searchBtn.addEventListener('click', function(){ renderRows(); });
   inp.addEventListener('keyup', function(e){ if (e.key === 'Enter') renderRows(); });
   searchRow.appendChild(searchBtn);
@@ -6182,16 +6254,16 @@ async function openBindingEmpPicker(uid, nickname) {
   var cancelBtn = document.createElement('button');
   cancelBtn.type = 'button';
   cancelBtn.className = 'btn btn-sm';
-  cancelBtn.textContent = '取消';
+  cancelBtn.textContent = t('取消');
   cancelBtn.addEventListener('click', function(){ overlay.remove(); });
   btnRow.appendChild(cancelBtn);
   var confirmBtn = document.createElement('button');
   confirmBtn.className = 'btn btn-sm btn-primary';
-  confirmBtn.textContent = '确认选中';
+  confirmBtn.textContent = t('确认选中');
   confirmBtn.disabled = !selectedNo;
   confirmBtn.style.opacity = selectedNo ? '1' : '0.5';
   confirmBtn.addEventListener('click', function(){
-    if (!selectedNo) { showToast('请先选择员工', 'error'); return; }
+    if (!selectedNo) { showToast(t('请先选择员工'), 'error'); return; }
     _bindingEmpSel[selKey] = selectedNo;
     applySelectedEmp(selKey);
     overlay.remove();
@@ -6204,7 +6276,7 @@ async function openBindingEmpPicker(uid, nickname) {
   var updateInfo = function(){
     confirmBtn.disabled = !selectedNo;
     confirmBtn.style.opacity = selectedNo ? '1' : '0.5';
-    selInfo.textContent = selectedNo ? '已选中：' + empLabelText(selectedNo) : '请先选择员工';
+    selInfo.textContent = selectedNo ? t('已选中') + '：' + empLabelText(selectedNo) : t('请先选择员工');
   };
 
   var applySelectedEmp = function(uidKey){
@@ -6227,7 +6299,7 @@ async function openBindingEmpPicker(uid, nickname) {
     }
     list.innerHTML = '';
     if (!filtered.length) {
-      list.innerHTML = '<p style="padding:24px;text-align:center;color:#999">无匹配员工</p>';
+      list.innerHTML = '<p style="padding:24px;text-align:center;color:#999">' + t('无匹配员工') + '</p>';
       updateInfo();
       return;
     }
