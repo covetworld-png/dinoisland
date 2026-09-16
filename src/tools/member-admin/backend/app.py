@@ -2517,21 +2517,22 @@ def _generate_verify_report(date):
         (guild_id, date),
     ).fetchall()
 
-    # 收集所有签到人员昵称
-    all_nicknames = set()
+    # 收集所有签到人员昵称 + user_id（uid 稳定，昵称随时会改）
+    all_persons = {}   # nickname -> user_id
     matched_nicknames = set()
     session_rows = []
     for s in sessions:
         sid = s["id"]
         checkins = conn.execute(
-            "SELECT nickname, duration FROM checkins WHERE session_id = ? ORDER BY checkin_time",
+            "SELECT nickname, user_id FROM checkins WHERE session_id = ? ORDER BY checkin_time",
             (sid,),
         ).fetchall()
         persons = []
         for c in checkins:
             nick = c["nickname"] or ""
-            all_nicknames.add(nick)
-            persons.append({"nickname": nick, "duration": c["duration"] or 0})
+            if nick not in all_persons:
+                all_persons[nick] = c["user_id"] or ""
+            persons.append({"nickname": nick, "duration": None})
         session_rows.append({
             "session_no": s["session_no"] or "",
             "streamer": s["streamer_name"] or "",
@@ -2541,10 +2542,25 @@ def _generate_verify_report(date):
         })
     conn.close()
 
-    # 用 player_mapping 匹配
+    # UID 优先匹配（员工绑定 > 映射行），昵称精确匹配兜底
     conn = get_db()
-    mappings = conn.execute("SELECT player_name, emp_no, discord FROM player_mapping").fetchall()
+    mappings = conn.execute("SELECT player_name, emp_no, discord, discord_id FROM player_mapping").fetchall()
+    emps = conn.execute("SELECT emp_no, nickname, discord_user_id, discord_id FROM live_employees").fetchall()
     conn.close()
+
+    uid_to_owner = {}
+    for e in emps:
+        for src in (e["discord_user_id"], e["discord_id"]):
+            for u in str(src or "").split(","):
+                u = u.strip()
+                if u and u not in uid_to_owner:
+                    uid_to_owner[u] = {"emp_no": e["emp_no"], "discord": e["nickname"] or "", "via": "员工"}
+    for m in mappings:
+        for u in str(m["discord_id"] or "").split(","):
+            u = u.strip()
+            if u and u not in uid_to_owner:
+                uid_to_owner[u] = {"emp_no": m["emp_no"], "discord": m["discord"] or "", "via": "映射"}
+
     name_to_emp = {}
     for m in mappings:
         key = (m["player_name"] or "").strip()
@@ -2553,21 +2569,33 @@ def _generate_verify_report(date):
 
     matched = []
     unmatched = []
-    for nick in sorted(all_nicknames):
-        if nick in name_to_emp:
-            matched.append({"nickname": nick, "emp_no": name_to_emp[nick]["emp_no"], "discord": name_to_emp[nick]["discord"]})
+    for nick, uid in sorted(all_persons.items()):
+        owner = uid_to_owner.get(uid) if uid else None
+        if owner:
+            matched.append({"nickname": nick, "emp_no": owner["emp_no"], "discord": owner["discord"]})
+            matched_nicknames.add(nick)
+        elif nick in name_to_emp:
+            m = name_to_emp[nick]
+            matched.append({"nickname": nick, "emp_no": m["emp_no"], "discord": m["discord"]})
             matched_nicknames.add(nick)
         else:
             unmatched.append(nick)
 
-    total_persons = len(all_nicknames)
+    total_persons = len(all_persons)
     match_rate = round(len(matched) / total_persons * 100, 1) if total_persons else 0.0
     summary = {
+        "date": date,
+        "verdict": "ok" if not unmatched else "warn",
+        "verdict_icon": "✅" if not unmatched else "⚠️",
+        "verdict_cn": "数据正常" if not unmatched else "存在未匹配人员",
         "sessions": len(sessions),
+        "persons": total_persons,
         "matched_persons": len(matched),
         "total_persons": total_persons,
         "match_rate": match_rate,
-        "avg_diff": 0,
+        "avg_diff": None,
+        "over_threshold": 0,
+        "unmatched_persons": len(unmatched),
     }
 
     lines = [f"# 数据校对报告 {date}", ""]
@@ -2583,7 +2611,7 @@ def _generate_verify_report(date):
             lines.append("| 昵称 | 语音时长(分钟) |")
             lines.append("|------|----------------|")
             for p in sr["persons"]:
-                lines.append(f"| {p['nickname']} | {p['duration']} |")
+                lines.append(f"| {p['nickname']} | {'-' if p['duration'] is None else p['duration']} |")
         else:
             lines.append("_本场暂无签到记录_")
         lines.append("")
