@@ -691,7 +691,15 @@ function getListState(moduleKey) {
 
 /* ================= 后台模块渲染 ================= */
 
+// viewer（普通员工）可见模块白名单：仅这些模块入口显示且只读，其余隐藏并禁止直达
+const VIEWER_MODULES = ['live_employees', 'pids', 'binding', 'checkin', 'schedule'];
+
 async function switchModule(moduleKey) {
+  // viewer（普通员工）：仅白名单模块可访问，其余入口隐藏且禁止直达
+  if (state.role === 'viewer' && !VIEWER_MODULES.includes(moduleKey)) {
+    showToast('普通员工权限：仅可查看 员工 / PID 全景 / Discord 绑定 / 场次签到 / 排班表', 'error');
+    return;
+  }
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
   const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景', paycode: '工资代发收款码' };
@@ -3920,6 +3928,15 @@ function enterPortal() {
   // 用户管理入口仅 super 可见（游戏/直播组各一个）
   ['usersNavBtn', 'usersNavBtnLive'].forEach(id =>
     $('#' + id).classList.toggle('hidden', state.role !== 'super'));
+  // viewer：隐藏游戏管理入口卡片，自动进入直播组（唯一可用分组）
+  if (state.role === 'viewer') {
+    $('#gameModuleCard').classList.add('hidden');
+    showView('adminView');
+    enterModuleGroup('live');
+    switchModule('live_employees');
+    return;
+  }
+  $('#gameModuleCard').classList.remove('hidden');
   showView('portalView');
 }
 
@@ -3929,7 +3946,9 @@ function enterModuleGroup(group) {
   $$('.sidebar-nav .side-btn').forEach(b => {
     const isUsersBtn = b.id === 'usersNavBtn' || b.id === 'usersNavBtnLive';
     // 用户管理：分组 + 角色（仅 super）双重条件；group=all 的按钮两个分组都显示
-    const hide = (b.dataset.group !== group && b.dataset.group !== 'all') || (isUsersBtn && state.role !== 'super');
+    // viewer：仅白名单模块（员工/PID全景/Discord绑定/场次签到/排班表）可见
+    const viewerBlocked = state.role === 'viewer' && !VIEWER_MODULES.includes(b.dataset.module);
+    const hide = (b.dataset.group !== group && b.dataset.group !== 'all') || (isUsersBtn && state.role !== 'super') || viewerBlocked;
     b.classList.toggle('hidden', hide);
   });
   $('#sidebarBrand').textContent = group === 'live' ? '直播管理' : '游戏管理';
@@ -4396,7 +4415,7 @@ async function _loadSessionParticipants(sessionId) {
       } else if (p.checked_in) {
         html += '<span style="font-size:11px;color:#16a34a"><i class="fas fa-check" style="font-size:10px"></i> 已达标</span>';
       } else {
-        html += '<button class="btn btn-sm" style="font-size:11px;padding:1px 8px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="markQualified(' + sessionId + ',\'' + p.user_id + '\',\'' + nickAttr + '\')" title="生成 manual 达标记录，不修改实际时长"><i class="fas fa-check"></i> 标记达标</button>';
+        html += '<button class="btn btn-sm btn-write" style="font-size:11px;padding:1px 8px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="markQualified(' + sessionId + ',\'' + p.user_id + '\',\'' + nickAttr + '\')" title="生成 manual 达标记录，不修改实际时长"><i class="fas fa-check"></i> 标记达标</button>';
       }
       html += '</div>';
     });
@@ -4917,7 +4936,7 @@ async function renderCheckinPage() {
     html += '<button class="btn btn-sm" onclick="renderCheckinPage()">搜索</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="renderCheckinPage()" style="font-size:16px;padding:2px 8px" title="刷新"><i class="fas fa-redo-alt"></i></button>';
     html += '<button class="btn btn-sm btn-outline" onclick="exportCheckinCSV()" title="导出 CSV"><i class="fas fa-download"></i> 导出</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openCheckinSettings()" title="设置"><i class="fas fa-cog"></i> 设置</button>';
+    html += '<button class="btn btn-sm btn-outline btn-write" onclick="openCheckinSettings()" title="设置"><i class="fas fa-cog"></i> 设置</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="openStreamerColorManager()" title="管理主播列表"><i class="fas fa-palette"></i> 主播列表</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="openNicknameCache()" title="查看陪玩列表"><i class="fas fa-address-book"></i> 陪玩列表</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="openClaimManager()" title="未认领 uid / 疑似过期 ID 处理（与每日对账推送同口径）"><i class="fas fa-user-tag"></i> 待认领</button>';
@@ -4968,7 +4987,7 @@ async function renderCheckinPage() {
       h += '<span class="' + badgeClass + '">' + badgeText + '</span>';
       // Delete / Force end button (only for ended; cancelled 已由后端过滤，前端不可见)
       if (!isCancelled) {
-        h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;';
+        h += '<button class="btn btn-sm btn-write" style="font-size:11px;padding:1px 6px;';
       if (isActive) {
         h += 'color:#b45309;background:#fef3c7;border-color:#fde68a';
       } else {
@@ -4979,7 +4998,7 @@ async function renderCheckinPage() {
       h += '">';
       h += isActive ? '<i class="fas fa-stop-circle"></i>' : '<i class="fas fa-trash-alt"></i>';
       h += '</button>';
-      h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="retroSession(\'' + escHtml(s.session_no) + '\')" title="追溯修正：根据第二人（非滞留）语音进入时间校准开启时间"><i class="fas fa-history"></i></button>';
+      h += '<button class="btn btn-sm btn-write" style="font-size:11px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="retroSession(\'' + escHtml(s.session_no) + '\')" title="追溯修正：根据第二人（非滞留）语音进入时间校准开启时间"><i class="fas fa-history"></i></button>';
       }
       h += '</div>';
       h += '</div>';
@@ -5625,7 +5644,7 @@ function renderClaimList(data, empList) {
       html += '<option value="">绑定到员工...</option>';
       empList.forEach(function(e) { html += '<option value="' + escHtml(e.id) + '">' + escHtml(e.label) + '</option>'; });
       html += '</select>';
-      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="claimBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">绑定</button>';
+      html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="claimBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">绑定</button>';
       html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="claimExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">排除</button>';
       html += '</td></tr>';
     });
@@ -5819,8 +5838,8 @@ function bindingRenderBody() {
         var selLabel = selEmp ? empLabelText(selEmp) : '';
         html += '<span id="bindEmpTag_' + u.user_id + '" style="font-size:10px;display:inline-block;margin-right:4px;color:#1e40af">' + (selLabel ? '已选：' + escHtml(selLabel) : '未选员工') + '</span> ';
         html += '<button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="openBindingEmpPicker(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">选员工</button>';
-        html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="bindingDoBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">绑定</button>';
-        html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="bindingDoExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">排除</button>';
+        html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="bindingDoBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">绑定</button>';
+        html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="bindingDoExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">排除</button>';
         html += '</td></tr>';
       }
       html += '</table>';
@@ -5866,7 +5885,7 @@ function bindingRenderBody() {
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (conflict ? escHtml(g.sources.map(function(s){return s.owner;}).join(' ｜ ')) : ownerLabel(b0)) + '</td>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + g.sources.map(function(s){ return escHtml(srcCell(s)); }).join('<br>') + '</td>';
       html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
-      html2 += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#b91c1c;background:#fee2e2;border-color:#fecaca" onclick="bindingDoUnbindGroup(\'' + g.user_id + '\',' + JSON.stringify(g.sources) + ')">解绑</button>';
+      html2 += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#b91c1c;background:#fee2e2;border-color:#fecaca" onclick="bindingDoUnbindGroup(\'' + g.user_id + '\',' + JSON.stringify(g.sources) + ')">解绑</button>';
       html2 += '</td></tr>';
     }
     html2 += '</table>';
@@ -6347,7 +6366,7 @@ async function renderPidsPage() {
   bar.className = 'filter-bar';
   bar.innerHTML = ''
     + '<input id="pidsSearch" placeholder="搜索 PID / 名称 / 昵称 / 员工编号" value="' + escHtml(_pidsSearch) + '" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:260px" oninput="pidsOnSearch(this.value)">'
-    + ' <button class="btn btn-primary btn-sm" onclick="pidsSyncFill()" style="font-size:11px"><i class="fas fa-sync"></i> 同步补缺</button>'
+    + ' <button class="btn btn-primary btn-sm btn-write" onclick="pidsSyncFill()" style="font-size:11px"><i class="fas fa-sync"></i> 同步补缺</button>'
     + ' <button class="btn btn-sm" onclick="pidsReload()" style="font-size:11px"><i class="fas fa-refresh"></i> 刷新</button>'
     + ' <span id="pidsHint" style="font-size:11px;color:#999;margin-left:8px"></span>'
     + ' <span style="font-size:10px;color:#999;margin-left:6px">缺映射=源库有此 PID 但映射表无行；缺员工=已映射但未关联员工</span>'
@@ -6411,10 +6430,10 @@ function pidsStatusBadge(status) {
 function pidsActionCell(x) {
   var btnStyle = 'font-size:10px;padding:1px 6px';
   if (x.mapping_id) {
-    return '<button class="btn btn-sm" style="' + btnStyle + ';color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="pidsEditMapping(' + x.mapping_id + ')">编辑映射</button>'
-      + ' <button class="btn btn-sm" style="' + btnStyle + ';color:#991b1b;background:#fee2e2;border-color:#fecaca" onclick="pidsDelMapping(' + x.mapping_id + ',\'' + escJs(x.player_name || '') + '\')">删除映射</button>';
+    return '<button class="btn btn-sm btn-write" style="' + btnStyle + ';color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="pidsEditMapping(' + x.mapping_id + ')">编辑映射</button>'
+      + ' <button class="btn btn-sm btn-write" style="' + btnStyle + ';color:#991b1b;background:#fee2e2;border-color:#fecaca" onclick="pidsDelMapping(' + x.mapping_id + ',\'' + escJs(x.player_name || '') + '\')">删除映射</button>';
   }
-  return '<button class="btn btn-sm" style="' + btnStyle + ';color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="pidsAddMapping(\'' + escJs(x.player_name) + '\',' + x.pid + ')">补映射</button>';
+  return '<button class="btn btn-sm btn-write" style="' + btnStyle + ';color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="pidsAddMapping(\'' + escJs(x.player_name) + '\',' + x.pid + ')">补映射</button>';
 }
 
 // 删除映射行（并入 PID 全景后由这里统一管理；删除后该 PID 回到「缺映射」）
