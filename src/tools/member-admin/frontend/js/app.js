@@ -242,6 +242,21 @@ const VI_MAP = {
   '暂无 PID 数据': 'Chưa có dữ liệu PID',
   '请先选择': 'Vui lòng chọn trước',
   '已选中': 'Đã chọn',
+  '清除筛选': 'Xóa lọc',
+  '自动创建场次': 'Tự động tạo ca',
+  '（主播进入专属语音频道后自动创建）': '(Tự tạo khi Streamer vào kênh thoại riêng)',
+  '飞书推送通知': 'Thông báo Feishu',
+  '（开播 / 结束 / 取消）': '(Bắt đầu / Kết thúc / Hủy)',
+  'Discord 频道通知': 'Thông báo kênh Discord',
+  '（开播 / 结束 / 加入，语音频道聊天区）': '(Bắt đầu / Kết thúc / Tham gia, chat kênh thoại)',
+  '冷却期（分钟）': 'Thời gian chờ (phút)',
+  '场次结束后，同一语音频道在此时间内不再自动创建新场次（取消场次、不足15分钟短场次不触发）': 'Sau khi ca kết thúc, kênh không tự tạo ca mới trong khoảng này (ca hủy, ca <15phút không kích hoạt)',
+  '排除人员': 'Người loại trừ',
+  '从缓存列表选择，勾选后不计入语音时长统计、不生成自动打卡，且在签到列表中隐藏': 'Chọn từ danh sách cache: không tính giờ thoại, không tạo điểm danh tự động, ẩn khỏi DS điểm danh',
+  '搜索昵称...': 'Tìm nickname...',
+  '签到管理': 'Quản lý điểm danh',
+  '现有签到记录': 'Bản ghi điểm danh hiện có',
+  '暂无签到记录': 'Chưa có bản ghi điểm danh',
 };
 function t(s) { return getLang() === 'vi' ? (VI_MAP[s] || s) : s; }
 // 角色权限说明（展示在「用户管理-选择角色」处，供管理员判断）
@@ -4128,7 +4143,7 @@ async function openCheckinSettings() {
   }
   var html = '<div class="modal-overlay" onclick="closeCheckinSettings()"></div>';
   html += '<div class="modal-content" style="max-width:420px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300">';
-  html += '<div class="modal-header"><h3>设置</h3><button type="button" class="modal-close" onclick="closeCheckinSettings()">&times;</button></div>';
+  html += '<div class="modal-header"><h3>' + t('设置') + '</h3><button type="button" class="modal-close" onclick="closeCheckinSettings()">&times;</button></div>';
   html += '<div class="modal-body">';
 
   var autoStart = (settings.auto_start_enabled === '1');
@@ -4138,7 +4153,7 @@ async function openCheckinSettings() {
   var excluded = (settings.excluded_users || '');
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-  html += '<span style="flex:1">自动创建场次 <span style="font-size:11px;color:#999;font-weight:400">（主播进入专属语音频道后自动创建）</span></span>';
+  html += '<span style="flex:1">' + t('自动创建场次') + ' <span style="font-size:11px;color:#999;font-weight:400">' + t('（主播进入专属语音频道后自动创建）') + '</span></span>';
   html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
   html += '<input type="checkbox" id="settingAutoStart" ' + (autoStart ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
   html += '<span class="toggle-slider"></span></label></label>';
@@ -4146,13 +4161,13 @@ async function openCheckinSettings() {
   html += '<div style="border-top:1px solid #ddd;margin:6px 0"></div>';
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-  html += '<span style="flex:1">飞书推送通知 <span style="font-size:11px;color:#999;font-weight:400">（开播 / 结束 / 取消）</span></span>';
+  html += '<span style="flex:1">' + t('飞书推送通知') + ' <span style="font-size:11px;color:#999;font-weight:400">' + t('（开播 / 结束 / 取消）') + '</span></span>';
   html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
   html += '<input type="checkbox" id="settingPushFeishu" ' + (pushFeishu ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
   html += '<span class="toggle-slider"></span></label></label>';
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-  html += '<span style="flex:1">Discord 频道通知 <span style="font-size:11px;color:#999;font-weight:400">（开播 / 结束 / 加入，语音频道聊天区）</span></span>';
+  html += '<span style="flex:1">' + t('Discord 频道通知') + ' <span style="font-size:11px;color:#999;font-weight:400">' + t('（开播 / 结束 / 加入，语音频道聊天区）') + '</span></span>';
   html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
   html += '<input type="checkbox" id="settingPushDiscord" ' + (pushDiscord ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
   html += '<span class="toggle-slider"></span></label></label>';
@@ -4162,20 +4177,20 @@ async function openCheckinSettings() {
 
 
   html += '<div class="field" style="margin-bottom:8px">';
-  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">冷却期（分钟）</div>';
-  html += '<div style="font-size:10px;color:#999;margin-bottom:4px">场次结束后，同一语音频道在此时间内不再自动创建新场次（取消场次、不足15分钟短场次不触发）</div>';
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">' + t('冷却期（分钟）') + '</div>';
+  html += '<div style="font-size:10px;color:#999;margin-bottom:4px">' + t('场次结束后，同一语音频道在此时间内不再自动创建新场次（取消场次、不足15分钟短场次不触发）') + '</div>';
   html += '<input id="settingCooldown" type="number" min="1" max="1440" value="' + (settings.auto_create_cooldown_minutes || '60') + '" style="width:80px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px">';
   html += '</div>';
 
   html += '<div class="field" style="text-align:left">';
-  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">排除人员</div><div style="font-size:10px;color:#999;margin-bottom:6px">从缓存列表选择，勾选后不计入语音时长统计、不生成自动打卡，且在签到列表中隐藏</div>';
-  html += '<input id="excludeSearchInput" type="text" style="width:100%;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-bottom:4px" placeholder="搜索昵称..." oninput="filterExcludeList(this.value)">';
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">' + t('排除人员') + '</div><div style="font-size:10px;color:#999;margin-bottom:6px">' + t('从缓存列表选择，勾选后不计入语音时长统计、不生成自动打卡，且在签到列表中隐藏') + '</div>';
+  html += '<input id="excludeSearchInput" type="text" style="width:100%;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-bottom:4px" placeholder="' + t('搜索昵称...') + '" oninput="filterExcludeList(this.value)">';
   html += '<div id="excludeChecklist" style="max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:4px;margin-bottom:4px;padding:4px"></div>';
   html += '<div id="excludeSelectedTags" style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px"></div>';
   html += '</div>';
   html += '<div class="modal-footer">';
-  html += '<button type="button" class="btn" onclick="closeCheckinSettings()">取消</button>';
-  html += '<button type="button" class="btn btn-primary" onclick="saveCheckinSettings()">保存</button>';
+  html += '<button type="button" class="btn" onclick="closeCheckinSettings()">' + t('取消') + '</button>';
+  html += '<button type="button" class="btn btn-primary" onclick="saveCheckinSettings()">' + t('保存') + '</button>';
   html += '</div></div>';
 
   var overlay = document.createElement('div');
@@ -4386,14 +4401,14 @@ async function openCheckinManager(sessionId, sessionNo, checkins) {
   if (!checkins && window._checkinData) checkins = window._checkinData[sessionId] || [];
   var html = '<div class="modal-overlay" onclick="closeCheckinManager()"></div>';
   html += '<div class="modal-content" style="max-width:500px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300">';
-  html += '<div class="modal-header"><h3>签到管理 - ' + escHtml(sessionNo) + '</h3><button type="button" class="modal-close" onclick="closeCheckinManager()">&times;</button></div>';
+  html += '<div class="modal-header"><h3>' + t('签到管理') + ' - ' + escHtml(sessionNo) + '</h3><button type="button" class="modal-close" onclick="closeCheckinManager()">&times;</button></div>';
   html += '<div class="modal-body">';
 
   // Existing checkins
   html += '<div style="margin-bottom:16px">';
-  html += '<div style="font-weight:600;font-size:14px;margin-bottom:8px">现有签到记录 (' + checkins.length + ')</div>';
+  html += '<div style="font-weight:600;font-size:14px;margin-bottom:8px">' + t('现有签到记录') + ' (' + checkins.length + ')</div>';
   if (checkins.length === 0) {
-    html += '<div style="color:#999;font-size:13px;padding:8px">暂无签到记录</div>';
+    html += '<div style="color:#999;font-size:13px;padding:8px">' + t('暂无签到记录') + '</div>';
   } else {
     html += '<div style="max-height:200px;overflow-y:auto">';
     checkins.forEach(function(c) {
@@ -4786,10 +4801,10 @@ function renderCalendar(byDate) {
   var h = '<div class="checkin-calendar">';
   h += '<div class="cal-nav">';
   h += '<button class="cal-nav-btn" onclick="calNavMonth(\'' + prevMonth + '\')">\u25C0</button>';
-  h += '<span class="cal-nav-title">' + year + '\u5E74' + month + '\u6708</span>';
+  h += '<span class="cal-nav-title">' + (getLang() === 'vi' ? (month + '/' + year) : (year + '\u5E74' + month + '\u6708')) + '</span>';
   h += '<button class="cal-nav-btn" onclick="calNavMonth(\'' + nextMonth + '\')">\u25B6</button>';
   if (_checkinFilterDate !== null && _checkinFilterDate !== '__all__') {
-    h += '<button class="cal-nav-btn cal-clear" onclick="calClearFilter()">\u2716 \u6E05\u9664\u7B5B\u9009</button>';
+    h += '<button class="cal-nav-btn cal-clear" onclick="calClearFilter()">\u2716 ' + t('\u6E05\u9664\u7B5B\u9009') + '</button>';
   }
   h += '</div>';
   h += '<table class="cal-grid"><tr>';
@@ -5018,16 +5033,10 @@ async function renderCheckinPage() {
     html += '<div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#f8f9fa;border-radius:6px 6px 0 0;font-weight:600">';
     html += '<span><i class="fas fa-video"></i> ' + t('场次签到') + ' <span style="font-size:10px;color:#999;font-weight:400">' + t('时间均为 GMT+7（越南）') + ' <span style="color:#92400e;background:#fef3c7;padding:0 3px;border-radius:2px">' + t('主播') + '</span> <span style="color:#1e40af;background:#dbeafe;padding:0 3px;border-radius:2px">' + t('已签到') + '</span> <span style="color:#991b1b;background:#fee2e2;padding:0 3px;border-radius:2px">' + t('未达标') + '</span> <span style="color:#6b7280;background:#e5e7eb;padding:0 3px;border-radius:2px">' + t('无效') + '</span></span></span>';
     html += '<div style="display:flex;gap:8px;align-items:center">';
-    html += '<input type="date" id="sessionDateFrom" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px" value="' + escHtml(from) + '">';
-    html += '<span style="color:#999">' + t('至') + '</span>';
-    html += '<input type="date" id="sessionDateTo" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px" value="' + escHtml(to) + '">';
-    html += '<button class="btn btn-sm" onclick="renderCheckinPage()">' + t('搜索') + '</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="renderCheckinPage()" style="font-size:16px;padding:2px 8px" title="' + t('刷新') + '"><i class="fas fa-redo-alt"></i></button>';
     html += '<button class="btn btn-sm btn-outline" onclick="exportCheckinCSV()" title="' + t('导出') + ' CSV"><i class="fas fa-download"></i> ' + t('导出') + '</button>';
     html += '<button class="btn btn-sm btn-outline btn-write" onclick="openCheckinSettings()" title="' + t('设置') + '"><i class="fas fa-cog"></i> ' + t('设置') + '</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="openStreamerColorManager()" title="' + t('主播列表') + '"><i class="fas fa-palette"></i> ' + t('主播列表') + '</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openNicknameCache()" title="' + t('陪玩列表') + '"><i class="fas fa-address-book"></i> ' + t('陪玩列表') + '</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openClaimManager()" title="' + t('待认领') + '"><i class="fas fa-user-tag"></i> ' + t('待认领') + '</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="openVerifyReports()" title="' + t('数据校对') + '"><i class="fas fa-clipboard-check"></i> ' + t('数据校对') + '</button>';
     html += '<button class="btn btn-sm btn-outline" onclick="openCheckinHelp()" title="' + t('说明') + '"><i class="fas fa-question-circle"></i> ' + t('说明') + '</button>';
     html += '</div></div></div>';
