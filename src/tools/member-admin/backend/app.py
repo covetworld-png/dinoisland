@@ -1894,7 +1894,7 @@ def _attach_renamed_prev(checkins_db, renamed):
 
 
 @app.get("/api/claim/pending")
-@write_required
+@login_required
 def claim_pending():
     """未认领 uid / 改名告警 / 疑似过期 ID 清单（口径 = 每日对账推送）。"""
     try:
@@ -2603,7 +2603,7 @@ def too_large(_e):
 # ========== 消息中心 inbox（承接 staff_watch/reconcile 同步消息，bot checkins.db） ==========
 
 @app.get("/api/inbox")
-@write_required
+@login_required
 def inbox_list():
     """消息中心列表。status=all|pending|done|dismissed，默认 pending。"""
     status = request.args.get("status", "pending") or "pending"
