@@ -951,7 +951,7 @@ def _checkin_conn():
     return conn
 
 @app.route("/api/checkin/sessions")
-@write_required
+@login_required
 def get_checkin_sessions():
     """Get sessions list with checkins."""
     import sqlite3
@@ -1585,7 +1585,7 @@ def sync_nicknames():
 
 
 @app.route("/api/checkin/user-nicknames")
-@write_required
+@login_required
 def get_user_nicknames():
     """返回本地缓存的昵称列表。"""
     import sqlite3
@@ -1606,7 +1606,7 @@ def get_user_nicknames():
 
 
 @app.route("/api/checkin/settings")
-@write_required
+@login_required
 def get_checkin_settings():
     """Get all checkin settings."""
     import sqlite3
@@ -1650,7 +1650,7 @@ def update_checkin_settings():
 # --- Checkin daily report API ---
 
 @app.route("/api/checkin/today")
-@write_required
+@login_required
 def get_checkin_today():
     import sqlite3
     from datetime import date, datetime
@@ -1676,7 +1676,7 @@ def get_checkin_today():
 
 
 @app.route("/api/checkin/history")
-@write_required
+@login_required
 def get_checkin_history():
     import sqlite3
     from datetime import datetime
@@ -1721,7 +1721,7 @@ def get_checkin_history():
 
 
 @app.route("/api/checkin/export")
-@write_required
+@login_required
 def export_checkin_csv():
     import sqlite3, csv, io
     from datetime import datetime
