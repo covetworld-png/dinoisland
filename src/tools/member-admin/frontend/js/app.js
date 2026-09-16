@@ -177,7 +177,22 @@ function optionLabel(kind, id) {
 
 /* ================= 角色 ================= */
 
-const ROLE_LABELS = { super: '超级管理员', admin: '管理员', viewer: '普通用户' };
+const ROLE_LABELS = { super: '超级管理员', admin: '管理员', viewer: '普通用户', operator: '场控' };
+// 角色权限说明（展示在侧边栏底部角落）
+const ROLE_HINTS = {
+  super: '超级管理员：全部模块可管理（含用户管理）',
+  admin: '管理员：全部模块可管理',
+  viewer: '普通用户：仅查看 员工 / PID全景 / Discord绑定 / 场次签到 / 排班表（全部只读）',
+  operator: '场控：可管理 场次签到 / Discord绑定；PID全景只读；排班表可看',
+};
+// 角色可见模块白名单：viewer / operator 限定范围，admin/super 返回 null（全部可见）
+const VIEWER_MODULES = ['live_employees', 'pids', 'binding', 'checkin', 'schedule'];
+const OPERATOR_MODULES = ['pids', 'binding', 'checkin', 'schedule'];
+function roleModules(role) {
+  if (role === 'viewer') return VIEWER_MODULES;
+  if (role === 'operator') return OPERATOR_MODULES;
+  return null;
+}
 
 /* ================= 可搜索下拉组件 ================= */
 
@@ -691,13 +706,11 @@ function getListState(moduleKey) {
 
 /* ================= 后台模块渲染 ================= */
 
-// viewer（普通员工）可见模块白名单：仅这些模块入口显示且只读，其余隐藏并禁止直达
-const VIEWER_MODULES = ['live_employees', 'pids', 'binding', 'checkin', 'schedule'];
-
 async function switchModule(moduleKey) {
-  // viewer（普通员工）：仅白名单模块可访问，其余入口隐藏且禁止直达
-  if (state.role === 'viewer' && !VIEWER_MODULES.includes(moduleKey)) {
-    showToast('普通员工权限：仅可查看 员工 / PID 全景 / Discord 绑定 / 场次签到 / 排班表', 'error');
+  // viewer/operator：仅白名单模块可访问，其余入口隐藏且禁止直达
+  const _allowed = roleModules(state.role);
+  if (_allowed && !_allowed.includes(moduleKey)) {
+    showToast('当前角色权限：仅可访问限定模块', 'error');
     return;
   }
   state.module = moduleKey;
@@ -3903,6 +3916,7 @@ async function doLogout() {
   state.username = null;
   state.role = null;
   document.body.classList.remove('role-viewer');
+  document.body.classList.remove('role-operator');
   showView('loginView');
 }
 $('#portalLogoutBtn').addEventListener('click', doLogout);
@@ -3925,6 +3939,7 @@ function enterPortal() {
   });
   // viewer 只读模式：隐藏一切写入口
   document.body.classList.toggle('role-viewer', state.role === 'viewer');
+  document.body.classList.toggle('role-operator', state.role === 'operator');
   // 用户管理入口仅 super 可见（游戏/直播组各一个）
   ['usersNavBtn', 'usersNavBtnLive'].forEach(id =>
     $('#' + id).classList.toggle('hidden', state.role !== 'super'));
@@ -3936,7 +3951,7 @@ function enterPortal() {
     switchModule('live_employees');
     return;
   }
-  $('#gameModuleCard').classList.remove('hidden');
+  $('#gameModuleCard').classList.toggle('hidden', state.role === 'operator');
   showView('portalView');
 }
 
@@ -3946,11 +3961,15 @@ function enterModuleGroup(group) {
   $$('.sidebar-nav .side-btn').forEach(b => {
     const isUsersBtn = b.id === 'usersNavBtn' || b.id === 'usersNavBtnLive';
     // 用户管理：分组 + 角色（仅 super）双重条件；group=all 的按钮两个分组都显示
-    // viewer：仅白名单模块（员工/PID全景/Discord绑定/场次签到/排班表）可见
-    const viewerBlocked = state.role === 'viewer' && !VIEWER_MODULES.includes(b.dataset.module);
-    const hide = (b.dataset.group !== group && b.dataset.group !== 'all') || (isUsersBtn && state.role !== 'super') || viewerBlocked;
+    // viewer/operator：仅白名单模块（员工/PID全景/Discord绑定/场次签到/排班表 等）可见
+    const _mods = roleModules(state.role);
+    const roleBlocked = !!_mods && !_mods.includes(b.dataset.module);
+    const hide = (b.dataset.group !== group && b.dataset.group !== 'all') || (isUsersBtn && state.role !== 'super') || roleBlocked;
     b.classList.toggle('hidden', hide);
   });
+  // 侧边栏底部角落：角色权限说明
+  const _hint = document.getElementById('roleHint');
+  if (_hint) _hint.textContent = ROLE_HINTS[state.role] || '';
   $('#sidebarBrand').textContent = group === 'live' ? '直播管理' : '游戏管理';
   document.title = (group === 'live' ? '直播管理' : '游戏管理') + ' - 员工管理后台';
   showView('adminView');
@@ -6366,7 +6385,7 @@ async function renderPidsPage() {
   bar.className = 'filter-bar';
   bar.innerHTML = ''
     + '<input id="pidsSearch" placeholder="搜索 PID / 名称 / 昵称 / 员工编号" value="' + escHtml(_pidsSearch) + '" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:260px" oninput="pidsOnSearch(this.value)">'
-    + ' <button class="btn btn-primary btn-sm btn-write" onclick="pidsSyncFill()" style="font-size:11px"><i class="fas fa-sync"></i> 同步补缺</button>'
+    + ' <button class="btn btn-primary btn-sm btn-write btn-write-pids" onclick="pidsSyncFill()" style="font-size:11px"><i class="fas fa-sync"></i> 同步补缺</button>'
     + ' <button class="btn btn-sm" onclick="pidsReload()" style="font-size:11px"><i class="fas fa-refresh"></i> 刷新</button>'
     + ' <span id="pidsHint" style="font-size:11px;color:#999;margin-left:8px"></span>'
     + ' <span style="font-size:10px;color:#999;margin-left:6px">缺映射=源库有此 PID 但映射表无行；缺员工=已映射但未关联员工</span>'
@@ -6430,10 +6449,10 @@ function pidsStatusBadge(status) {
 function pidsActionCell(x) {
   var btnStyle = 'font-size:10px;padding:1px 6px';
   if (x.mapping_id) {
-    return '<button class="btn btn-sm btn-write" style="' + btnStyle + ';color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="pidsEditMapping(' + x.mapping_id + ')">编辑映射</button>'
-      + ' <button class="btn btn-sm btn-write" style="' + btnStyle + ';color:#991b1b;background:#fee2e2;border-color:#fecaca" onclick="pidsDelMapping(' + x.mapping_id + ',\'' + escJs(x.player_name || '') + '\')">删除映射</button>';
+    return '<button class="btn btn-sm btn-write btn-write-pids" style="' + btnStyle + ';color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="pidsEditMapping(' + x.mapping_id + ')">编辑映射</button>'
+      + ' <button class="btn btn-sm btn-write btn-write-pids" style="' + btnStyle + ';color:#991b1b;background:#fee2e2;border-color:#fecaca" onclick="pidsDelMapping(' + x.mapping_id + ',\'' + escJs(x.player_name || '') + '\')">删除映射</button>';
   }
-  return '<button class="btn btn-sm btn-write" style="' + btnStyle + ';color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="pidsAddMapping(\'' + escJs(x.player_name) + '\',' + x.pid + ')">补映射</button>';
+  return '<button class="btn btn-sm btn-write btn-write-pids" style="' + btnStyle + ';color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="pidsAddMapping(\'' + escJs(x.player_name) + '\',' + x.pid + ')">补映射</button>';
 }
 
 // 删除映射行（并入 PID 全景后由这里统一管理；删除后该 PID 回到「缺映射」）
