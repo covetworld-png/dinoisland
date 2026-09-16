@@ -189,6 +189,21 @@ function setLang(l) {
 function updateLangBtn() {
   var b = document.getElementById('langToggleBtn');
   if (b) b.textContent = getLang() === 'zh' ? 'VI' : '中';
+  applyNavLang();
+}
+// 导航/顶栏等静态 HTML 元素双语：data-i18n="中文原文"，按当前语言替换首个文本节点
+function applyNavLang() {
+  var vi = getLang() === 'vi';
+  $$('[data-i18n]').forEach(function(el) {
+    var zh = el.getAttribute('data-i18n');
+    var target = vi ? (VI_MAP[zh] || zh) : zh;
+    if (el.childNodes.length && el.childNodes[0].nodeType === 3) {
+      var tail = el.childNodes[0].nodeValue.endsWith(' ') ? ' ' : '';
+      el.childNodes[0].nodeValue = target + tail;
+    } else {
+      el.textContent = target;
+    }
+  });
 }
 // 越南语映射（key=中文原文；未收录的保持中文）
 const VI_MAP = {
@@ -257,6 +272,27 @@ const VI_MAP = {
   '签到管理': 'Quản lý điểm danh',
   '现有签到记录': 'Bản ghi điểm danh hiện có',
   '暂无签到记录': 'Chưa có bản ghi điểm danh',
+  '场次': 'ca',
+  '暂无场次': 'Chưa có ca nào',
+  '游戏管理': 'Quản lý Game',
+  '直播管理': 'Quản lý Livestream',
+  '军团': 'Quân đoàn',
+  '账号': 'Tài khoản',
+  '收款账户': 'TK thu tiền',
+  '数据查询': 'Truy vấn dữ liệu',
+  '月度分成': 'Chia lãi tháng',
+  '操作日志': 'Nhật ký',
+  '用户管理': 'QL người dùng',
+  '消息中心': 'Trung tâm thông báo',
+  '排班表': 'Lịch phân ca',
+  '工资代发收款码': 'Mã QR trả lương',
+  '← 返回入口': '← Quay lại',
+  '当前用户：': 'Người dùng: ',
+  '修改密码': 'Đổi mật khẩu',
+  '退出登录': 'Đăng xuất',
+  'PID 全景': 'Toàn cảnh PID',
+  '员工': 'Nhân viên',
+  '员工管理后台': 'Quản lý nhân viên',
 };
 function t(s) { return getLang() === 'vi' ? (VI_MAP[s] || s) : s; }
 // 角色权限说明（展示在「用户管理-选择角色」处，供管理员判断）
@@ -798,7 +834,7 @@ async function switchModule(moduleKey) {
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
   const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景', paycode: '工资代发收款码' };
-  $('#adminModuleTitle').textContent = titles[moduleKey] || '';
+  $('#adminModuleTitle').textContent = t(titles[moduleKey] || '');
   if (moduleKey === 'users') {
     if (state.role !== 'super') return; // 用户管理仅 super
     renderUsersPage();
@@ -4048,8 +4084,8 @@ function enterModuleGroup(group) {
     const hide = (b.dataset.group !== group && b.dataset.group !== 'all') || (isUsersBtn && state.role !== 'super') || roleBlocked;
     b.classList.toggle('hidden', hide);
   });
-  $('#sidebarBrand').textContent = group === 'live' ? '直播管理' : '游戏管理';
-  document.title = (group === 'live' ? '直播管理' : '游戏管理') + ' - 员工管理后台';
+  $('#sidebarBrand').textContent = t(group === 'live' ? '直播管理' : '游戏管理');
+  document.title = t(group === 'live' ? '直播管理' : '游戏管理') + ' - ' + t('员工管理后台');
   showView('adminView');
   if (group === 'live') refreshInboxBadge();
 }
@@ -5152,7 +5188,7 @@ async function renderCheckinPage() {
     // Date-grouped streamer cards
     var dateKeys = Object.keys(byDate).sort().reverse();
     if (dateKeys.length === 0) {
-      html += '<div style="padding:40px;text-align:center;color:#999">暂无场次</div>';
+      html += '<div style="padding:40px;text-align:center;color:#999">' + t('暂无场次') + '</div>';
     } else {
       dateKeys.forEach(function(dateKey) {
         var streamers = byDate[dateKey];
@@ -5206,7 +5242,7 @@ async function renderCheckinPage() {
           }
           html += '<div class="streamer-card" style="--streamer-color:' + streamerColor + '">';
           html += '<div class="streamer-header"><i class="fas fa-microphone"></i> ' + escHtml(name) + '</div>';
-          html += '<div style="font-size:11px;color:#999;padding:0 12px 2px">' + totalSessions + ' 场次</div>';
+          html += '<div style="font-size:11px;color:#999;padding:0 12px 2px">' + totalSessions + ' ' + t('场次') + '</div>';
 
           g.active.forEach(function(s) { html += renderSession(s); });
           g.ended.forEach(function(s) { html += renderSession(s); });

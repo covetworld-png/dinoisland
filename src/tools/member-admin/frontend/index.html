@@ -62,36 +62,36 @@
     <aside class="sidebar">
       <div class="sidebar-brand" id="sidebarBrand">游戏管理</div>
       <nav class="sidebar-nav">
-        <button class="side-btn" data-module="employees" data-group="game">员工</button>
-        <button class="side-btn" data-module="guilds" data-group="game">军团</button>
-        <button class="side-btn" data-module="accounts" data-group="game">账号</button>
-        <button class="side-btn" data-module="payments" data-group="game">收款账户</button>
-        <button class="side-btn" data-module="query" data-group="game">数据查询</button>
-        <button class="side-btn" data-module="commission" data-group="game">月度分成</button>
-        <button class="side-btn" data-module="logs" data-group="game">操作日志</button>
-        <button class="side-btn hidden" data-module="users" data-group="game" id="usersNavBtn">用户管理</button>
-        <button class="side-btn" data-module="live_employees" data-group="live">员工</button>
-        <button class="side-btn" data-module="pids" data-group="live">PID 全景</button>
-        <button class="side-btn hidden" data-module="users" data-group="live" id="usersNavBtnLive">用户管理</button>
-        <button class="side-btn" data-module="logs" data-group="live">操作日志</button>
-        <button class="side-btn" data-module="binding" data-group="live">Discord绑定</button>
-        <button class="side-btn" data-module="checkin" data-group="live">场次签到</button>
-        <button class="side-btn" data-module="inbox" data-group="live">消息中心 <span id="inboxBadge" style="display:none;background:#dc2626;color:#fff;border-radius:9px;padding:0 6px;font-size:10px;line-height:16px;margin-left:4px"></span></button>
-        <button class="side-btn" data-module="schedule" data-group="live" onclick="window.open('https://covetworld-png.github.io/dinoisland/src/tools/streamer-schedule/index.html','_blank')">排班表</button>
-        <button class="side-btn" data-module="paycode" data-group="all">工资代发收款码</button>
+        <button class="side-btn" data-module="employees" data-group="game" data-i18n="员工">员工</button>
+        <button class="side-btn" data-module="guilds" data-group="game" data-i18n="军团">军团</button>
+        <button class="side-btn" data-module="accounts" data-group="game" data-i18n="账号">账号</button>
+        <button class="side-btn" data-module="payments" data-group="game" data-i18n="收款账户">收款账户</button>
+        <button class="side-btn" data-module="query" data-group="game" data-i18n="数据查询">数据查询</button>
+        <button class="side-btn" data-module="commission" data-group="game" data-i18n="月度分成">月度分成</button>
+        <button class="side-btn" data-module="logs" data-group="game" data-i18n="操作日志">操作日志</button>
+        <button class="side-btn hidden" data-module="users" data-group="game" id="usersNavBtn" data-i18n="用户管理">用户管理</button>
+        <button class="side-btn" data-module="live_employees" data-group="live" data-i18n="员工">员工</button>
+        <button class="side-btn" data-module="pids" data-group="live" data-i18n="PID 全景">PID 全景</button>
+        <button class="side-btn hidden" data-module="users" data-group="live" id="usersNavBtnLive" data-i18n="用户管理">用户管理</button>
+        <button class="side-btn" data-module="logs" data-group="live" data-i18n="操作日志">操作日志</button>
+        <button class="side-btn" data-module="binding" data-group="live" data-i18n="Discord绑定">Discord绑定</button>
+        <button class="side-btn" data-module="checkin" data-group="live" data-i18n="场次签到">场次签到</button>
+        <button class="side-btn" data-module="inbox" data-group="live" data-i18n="消息中心">消息中心 <span id="inboxBadge" style="display:none;background:#dc2626;color:#fff;border-radius:9px;padding:0 6px;font-size:10px;line-height:16px;margin-left:4px"></span></button>
+        <button class="side-btn" data-module="schedule" data-group="live" data-i18n="排班表" onclick="window.open('https://covetworld-png.github.io/dinoisland/src/tools/streamer-schedule/index.html','_blank')">排班表</button>
+        <button class="side-btn" data-module="paycode" data-group="all" data-i18n="工资代发收款码">工资代发收款码</button>
       </nav>
       <div class="sidebar-footer">
-        <button class="side-btn back" id="backToPortalBtn">← 返回入口</button>
+        <button class="side-btn back" id="backToPortalBtn" data-i18n="← 返回入口">← 返回入口</button>
       </div>
     </aside>
     <div class="admin-content">
       <header class="topbar">
         <span class="topbar-title" id="adminModuleTitle">员工</span>
         <div class="topbar-right">
-          <span class="topbar-user">当前用户：<b id="adminUsername"></b></span>
+          <span class="topbar-user" data-i18n="当前用户：">当前用户：<b id="adminUsername"></b></span>
           <button class="btn btn-ghost" id="langToggleBtn" title="Ngôn ngữ / 语言">VI</button>
-          <button class="btn btn-ghost" id="adminChangePwdBtn">修改密码</button>
-          <button class="btn btn-ghost danger" id="adminLogoutBtn">退出登录</button>
+          <button class="btn btn-ghost" id="adminChangePwdBtn" data-i18n="修改密码">修改密码</button>
+          <button class="btn btn-ghost danger" id="adminLogoutBtn" data-i18n="退出登录">退出登录</button>
         </div>
       </header>
       <main class="admin-main" id="adminMain"></main>
