@@ -2504,6 +2504,7 @@ def _generate_verify_report(date):
     """按日期生成签到/陪玩映射校对报告（占位实现，具体规则需用户确认）。"""
     import sqlite3
     import json
+    from datetime import datetime
     guild_id = CHECKIN_GUILD_ID
     conn = sqlite3.connect(CHECKIN_DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -2527,12 +2528,36 @@ def _generate_verify_report(date):
             "SELECT nickname, user_id FROM checkins WHERE session_id = ? ORDER BY checkin_time",
             (sid,),
         ).fetchall()
+        # 实算时长（与 participants 接口同口径：voice_sessions 各会话与场次时段取交集）
+        dur_by_uid = {}
+        if s["voice_channel_id"]:
+            since_raw = s["start_time"] or ""
+            until_raw = s["end_time"] or datetime.now().isoformat(sep=" ", timespec="seconds")
+            try:
+                since_dt = datetime.fromisoformat(since_raw.replace(" ", "T"))
+                until_dt = datetime.fromisoformat(until_raw.replace(" ", "T"))
+                vs_rows = conn.execute(
+                    """SELECT user_id, join_time, leave_time FROM voice_sessions
+                       WHERE channel_id = ? AND join_time < ? AND (leave_time IS NULL OR leave_time > ?)""",
+                    (s["voice_channel_id"], until_raw, since_raw),
+                ).fetchall()
+                for r in vs_rows:
+                    join_dt = datetime.fromisoformat(r["join_time"].replace(" ", "T"))
+                    leave_dt = datetime.fromisoformat(r["leave_time"].replace(" ", "T")) if r["leave_time"] else datetime.now()
+                    start = max(join_dt, since_dt)
+                    end = min(leave_dt, until_dt)
+                    mins = (end - start).total_seconds() / 60
+                    if mins > 0:
+                        dur_by_uid[r["user_id"]] = dur_by_uid.get(r["user_id"], 0) + mins
+            except Exception:
+                pass
         persons = []
         for c in checkins:
             nick = c["nickname"] or ""
             if nick not in all_persons:
                 all_persons[nick] = c["user_id"] or ""
-            persons.append({"nickname": nick, "duration": None})
+            dur = dur_by_uid.get(c["user_id"]) if c["user_id"] else None
+            persons.append({"nickname": nick, "duration": int(round(dur)) if dur is not None else None})
         session_rows.append({
             "session_no": s["session_no"] or "",
             "streamer": s["streamer_name"] or "",
