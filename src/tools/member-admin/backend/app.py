@@ -2474,14 +2474,37 @@ def get_verify_report(date):
 @app.route("/api/verify/reports/run", methods=["POST"])
 @write_required
 def run_verify_report():
+    import traceback
+    import sys
     data = request.get_json(force=True, silent=True) or {}
     date = data.get("date", "").strip()
     if not date:
         return jsonify({"ok": False, "error": "请提供日期"}), 400
+    # 优先调用深度校对脚本（verify_playdetail.py：play_detail vs 签到 三方核对）；
+    # 未配置 VERIFY_SCRIPT 时回退内置简化版。脚本自带写库，这里只负责触发+读回。
+    script = os.environ.get("VERIFY_SCRIPT", "").strip()
+    if script:
+        try:
+            import subprocess
+            proc = subprocess.run(
+                [sys.executable, script, "--date", date, "--no-push"],
+                capture_output=True, text=True, timeout=280,
+                env=dict(os.environ),
+            )
+            if proc.returncode != 0:
+                return jsonify({"ok": False, "error": "校对脚本失败: " + (proc.stderr or proc.stdout or "")[-300:]}), 500
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"ok": False, "error": f"校对脚本执行异常: {e}"}), 500
+        conn = get_db()
+        row = conn.execute("SELECT * FROM verify_reports WHERE report_date = ?", (date,)).fetchone()
+        conn.close()
+        if not row:
+            return jsonify({"ok": False, "error": "脚本执行成功但未写入报告"}), 500
+        return jsonify({"ok": True, "data": dict(row)})
     try:
         report = _generate_verify_report(date)
     except Exception as e:
-        import traceback
         traceback.print_exc()
         return jsonify({"ok": False, "error": str(e)}), 500
     conn = get_db()
