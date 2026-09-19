@@ -2478,16 +2478,20 @@ def run_verify_report():
     import sys
     data = request.get_json(force=True, silent=True) or {}
     date = data.get("date", "").strip()
+    lang = str(data.get("lang") or "zh").strip()
+    if lang not in ("zh", "vi"):
+        lang = "zh"
+    report_key = date + ".vi" if lang == "vi" else date
     if not date:
         return jsonify({"ok": False, "error": "请提供日期"}), 400
-    # 优先调用深度校对脚本（verify_playdetail.py：play_detail vs 签到 三方核对）；
-    # 未配置 VERIFY_SCRIPT 时回退内置简化版。脚本自带写库，这里只负责触发+读回。
+    # 优先调用深度校对脚本（verify_playdetail.py：play_detail vs 签到 三方核对，支持 --lang）；
+    # 未配置 VERIFY_SCRIPT 时回退内置简化版（仅中文）。脚本自带写库，这里只负责触发+读回。
     script = os.environ.get("VERIFY_SCRIPT", "").strip()
     if script:
         try:
             import subprocess
             proc = subprocess.run(
-                [sys.executable, script, "--date", date, "--no-push"],
+                [sys.executable, script, "--date", date, "--lang", lang, "--no-push"],
                 capture_output=True, text=True, timeout=280,
                 env=dict(os.environ),
             )
@@ -2497,7 +2501,7 @@ def run_verify_report():
             traceback.print_exc()
             return jsonify({"ok": False, "error": f"校对脚本执行异常: {e}"}), 500
         conn = get_db()
-        row = conn.execute("SELECT * FROM verify_reports WHERE report_date = ?", (date,)).fetchone()
+        row = conn.execute("SELECT * FROM verify_reports WHERE report_date = ?", (report_key,)).fetchone()
         conn.close()
         if not row:
             return jsonify({"ok": False, "error": "脚本执行成功但未写入报告"}), 500
@@ -2515,10 +2519,10 @@ def run_verify_report():
              summary=excluded.summary,
              content=excluded.content,
              updated_at=excluded.updated_at""",
-        (report["report_date"], report["summary"], report["content"], now(), now()),
+        (report_key, report["summary"], report["content"], now(), now()),
     )
     conn.commit()
-    row = conn.execute("SELECT * FROM verify_reports WHERE report_date = ?", (date,)).fetchone()
+    row = conn.execute("SELECT * FROM verify_reports WHERE report_date = ?", (report_key,)).fetchone()
     conn.close()
     return jsonify({"ok": True, "data": dict(row)})
 

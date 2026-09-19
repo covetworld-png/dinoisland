@@ -6709,15 +6709,18 @@ async function loadVerifyList() {
     try {
         var res = await api('verify/reports?page=1&page_size=50');
         var items = (res && res.items) || [];
-        if (!items.length) { box.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">暂无报告，点击「生成报告」创建</div>'; return; }
+        // 按当前语言过滤报告：zh 显示主键，vi 显示 .vi 键
+        var isVi = getLang() === 'vi';
+        items = items.filter(function(it) { return isVi ? (it.report_date.indexOf('.vi') > 0) : (it.report_date.indexOf('.vi') < 0); });
+        if (!items.length) { box.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">' + (isVi ? 'Chưa có báo cáo (tiếng Việt), bấm「Tạo báo cáo」' : '暂无报告，点击「生成报告」创建') + '</div>'; return; }
         box.innerHTML = items.map(function(it) {
             var s = {};
             try { s = JSON.parse(it.summary || '{}'); } catch(e) {}
             var line = (s.sessions !== undefined)
                 ? ('场次' + s.sessions + ' | 匹配' + s.matched_persons + '(' + s.match_rate + '%) | 差' + (s.avg_diff != null ? s.avg_diff + 'pp' : '-'))
                 : '';
-            return '<div class="verify-item" data-date="' + it.report_date + '" style="padding:6px 8px;margin-bottom:4px;border-radius:4px;cursor:pointer;font-size:12px;background:#fff;border:1px solid #eee" onclick="showVerifyReport(\'' + it.report_date + '\')">'
-                + '<div style="font-weight:600">' + escHtml(it.report_date) + '</div>'
+            return '<div class="verify-item" data-date="' + it.report_date + '" style="padding:6px 8px;margin-bottom:4px;border-radius:4px;cursor:pointer;font-size:12px;background:#fff;border:1px solid #eee" onclick="showVerifyReport(\'' + it.report_date.replace('.vi','') + '\')">'
+                + '<div style="font-weight:600">' + escHtml(it.report_date.replace('.vi','')) + '</div>'
                 + '<div style="color:#888;font-size:11px">' + escHtml(line) + '</div>'
                 + '</div>';
         }).join('');
@@ -6729,16 +6732,17 @@ async function loadVerifyList() {
 async function showVerifyReport(date) {
     var box = document.getElementById('verifyDetail');
     if (!box) return;
+    var key = (getLang() === 'vi') ? date + '.vi' : date;   // 越语版独立存储键
     box.innerHTML = '<div style="color:#999;font-size:12px">加载中...</div>';
     try {
-        var res = await api('verify/reports/' + date);
-        if (!res || !res.report_date) { box.innerHTML = '<div style="color:#dc2626;font-size:12px">未找到报告</div>'; return; }
+        var res = await api('verify/reports/' + key);
+        if (!res || !res.report_date) { box.innerHTML = '<div style="color:#dc2626;font-size:12px">未找到报告（当前语言版本可能未生成）</div>'; return; }
         document.querySelectorAll('.verify-item').forEach(function(el) {
-            el.style.background = (el.dataset.date === date) ? '#e3f2fd' : '#fff';
+            el.style.background = (el.dataset.date === key) ? '#e3f2fd' : '#fff';
         });
         window._verifyContentCache = window._verifyContentCache || {};
-        window._verifyContentCache[date] = res.content;
-        window._verifyCurrentDate = date;
+        window._verifyContentCache[key] = res.content;
+        window._verifyCurrentDate = key;
         box.innerHTML = renderReportMd(res.content || '');
     } catch(e) {
         box.innerHTML = '<div style="color:#dc2626;font-size:12px">加载失败: ' + escHtml(e.message) + '</div>';
@@ -6751,7 +6755,7 @@ async function runVerifyReport() {
     var btn = event && event.target && event.target.closest ? event.target.closest('button') : null;
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...'; }
     try {
-        var d = await api('verify/reports/run', { method: 'POST', json: { date: date } });
+        var d = await api('verify/reports/run', { method: 'POST', json: { date: date, lang: getLang() } });
         if (!d || !d.report_date) {
             showToast('生成失败: 报告未生成（脚本无输出）', 'error');
         } else {
