@@ -1577,7 +1577,7 @@ function updatePreview() {
   // 签到卡自动赠送金币：每张签到卡赠送 218 兽币
   const checkinQty = items.filter(it => it.prop_id === "checkin-card").reduce((sum, it) => sum + it.quantity, 0);
   const previewItems = checkinQty > 0
-    ? [...items, { prop_id: "9001", name_cn: "兽币", name_vn: "Xu Thú", name_en: "Beast Coin", unit: "个", quantity: checkinQty * 218, vip_value: 1, is_skin: false }]
+    ? [...items, { prop_id: "auto-coin", name_cn: "兽币", name_vn: "Xu Thú", name_en: "Beast Coin", unit: "个", quantity: checkinQty * 218, vip_value: 0, is_skin: false }]
     : items;
   const itemsText = previewItems.map(it => {
     if (it.is_skin) return itemName(it);
@@ -1675,9 +1675,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
   }
 
   const enableVip = $("#enableVipPoints").checked;
-  // 签到卡自动赠送金币也计入总价值
-  const checkinQty = items.filter(it => it.prop_id === "checkin-card").reduce((sum, it) => sum + it.quantity, 0);
-  const totalValue = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0) + checkinQty * 218;
+  const totalValue = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
   // 仅启用 VIP 积分计算时才校验高价值申请
   if (enableVip && totalValue > 300) {
     const currentPoints = parseInt(fd.get("current_vip_points") || "0", 10);
