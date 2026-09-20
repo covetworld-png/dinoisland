@@ -293,6 +293,14 @@ const VI_MAP = {
   'PID 全景': 'Toàn cảnh PID',
   '员工': 'Nhân viên',
   '员工管理后台': 'Quản lý nhân viên',
+  '场': 'ca',
+  '签到': 'Điểm danh',
+  '人': 'người',
+  '人次': 'lượt',
+  '校对': 'Đối chiếu',
+  '无效': 'Vô hiệu',
+  '点击展开/收起无效人员（场次签到 0%）': 'Bấm để mở/thu gọn người vô hiệu (tỷ lệ điểm danh 0%)',
+  '查看该日校对报告': 'Xem báo cáo đối chiếu ngày này',
 };
 function t(s) { return getLang() === 'vi' ? (VI_MAP[s] || s) : s; }
 // 角色权限说明（展示在「用户管理-选择角色」处，供管理员判断）
@@ -4423,7 +4431,7 @@ function toggleInvalidTags(sessionId, el) {
   if (!box) return;
   var open = box.style.display !== 'none';
   box.style.display = open ? 'none' : 'flex';
-  if (el) el.innerHTML = '无效 ' + box.childElementCount + ' 人 <i class="fas fa-caret-' + (open ? 'down' : 'up') + '" style="font-size:9px"></i>';
+  if (el) el.innerHTML = t('无效') + ' ' + box.childElementCount + ' ' + t('人') + ' <i class="fas fa-caret-' + (open ? 'down' : 'up') + '" style="font-size:9px"></i>';
   // 瀑布流重排：展开/收起改变卡片高度，必须重新定位（否则被 overflow:hidden 裁剪看不到）
   var card = box.closest('.streamer-card');
   var grid = card && card.closest('.masonry-grid');
@@ -5172,7 +5180,7 @@ async function renderCheckinPage() {
         h += '<div style="display:flex;flex-wrap:wrap;gap:2px">';
         validTags.forEach(function(c) { h += buildTag(c); });
         if (invalidTags.length > 0) {
-          h += '<span onclick="toggleInvalidTags(' + s.id + ',this)" title="点击展开/收起无效人员（场次签到 0%）" style="cursor:pointer;color:#9ca3af;background:#e5e7eb;font-size:10px;padding:0 5px;border-radius:3px;align-self:center;font-weight:600">无效 ' + invalidTags.length + ' 人 <i class="fas fa-caret-down" style="font-size:9px"></i></span>';
+          h += '<span onclick="toggleInvalidTags(' + s.id + ',this)" title="' + t('点击展开/收起无效人员（场次签到 0%）') + '" style="cursor:pointer;color:#9ca3af;background:#e5e7eb;font-size:10px;padding:0 5px;border-radius:3px;align-self:center;font-weight:600">' + t('无效') + ' ' + invalidTags.length + ' ' + t('人') + ' <i class="fas fa-caret-down" style="font-size:9px"></i></span>';
         }
         h += '</div>';
         if (invalidTags.length > 0) {
@@ -5214,12 +5222,12 @@ async function renderCheckinPage() {
 
         html += '<div class="card" style="margin-bottom:16px">';
         html += '<div class="date-header" data-date="' + dateKey + '">';
-        html += '<span><i class="fas fa-calendar-alt"></i> ' + dateKey + ' <span style="font-size:13px;color:#666;font-weight:400">' + dayTotal + ' 场</span>' +
-          '  <span style="font-size:12px;color:#999;margin-left:4px">' + streamerNames.length + ' 主播</span>' +
-          '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:6px">签到 ' + checkedInPeopleCount + ' 人</span>' +
-          '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:3px">' + checkedInCount + ' 人次</span>';
+        html += '<span><i class="fas fa-calendar-alt"></i> ' + dateKey + ' <span style="font-size:13px;color:#666;font-weight:400">' + dayTotal + ' ' + t('场') + '</span>' +
+          '  <span style="font-size:12px;color:#999;margin-left:4px">' + streamerNames.length + ' ' + t('主播') + '</span>' +
+          '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:6px">' + t('签到') + ' ' + checkedInPeopleCount + ' ' + t('人') + '</span>' +
+          '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:3px">' + checkedInCount + ' ' + t('人次') + '</span>';
         if (window._verifyReportDates && window._verifyReportDates[dateKey]) {
-          html += '  <span style="font-size:12px;color:#3f51b5;background:#e8eaf6;padding:0 6px;border-radius:3px;margin-left:6px;cursor:pointer" onclick="event.stopPropagation();openVerifyReports(\'' + dateKey + '\')" title="查看该日校对报告">\uD83D\uDCCA \u6821\u5BF9</span>';
+          html += '  <span style="font-size:12px;color:#3f51b5;background:#e8eaf6;padding:0 6px;border-radius:3px;margin-left:6px;cursor:pointer" onclick="event.stopPropagation();openVerifyReports(\'' + dateKey + '\')" title="' + t('查看该日校对报告') + '">\uD83D\uDCCA ' + t('校对') + '</span>';
         }
         html += '</span>';
         html += '<span class="arrow">▼</span>';
