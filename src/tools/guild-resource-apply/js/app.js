@@ -1574,7 +1574,12 @@ function updatePreview() {
   const nickname = $("#gameNicknameInput").value.trim();
   const reason = $("#applyForm input[name='reason']").value.trim();
   const items = getSelectedItems();
-  const itemsText = items.map(it => {
+  // 签到卡自动赠送金币：每张签到卡赠送 218 兽币
+  const checkinQty = items.filter(it => it.prop_id === "checkin-card").reduce((sum, it) => sum + it.quantity, 0);
+  const previewItems = checkinQty > 0
+    ? [...items, { prop_id: "9001", name_cn: "兽币", name_vn: "Xu Thú", name_en: "Beast Coin", unit: "个", quantity: checkinQty * 218, vip_value: 1, is_skin: false }]
+    : items;
+  const itemsText = previewItems.map(it => {
     if (it.is_skin) return itemName(it);
     return `${it.quantity} ${it.unit}${itemName(it)}`;
   }).join("，");
@@ -1590,7 +1595,7 @@ function updatePreview() {
 
   // VIP 积分仅在选择"计算 VIP 积分"时纳入预览
   const enableVip = $("#enableVipPoints") && $("#enableVipPoints").checked;
-  const delta = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
+  const delta = previewItems.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
   if (enableVip && delta > 0) {
     const currentPoints = parseInt($("#currentVipPoints").value || "0", 10);
     const levelAfter = getVipLevel(currentPoints + delta);
@@ -1670,7 +1675,9 @@ $("#applyForm").addEventListener("submit", async (e) => {
   }
 
   const enableVip = $("#enableVipPoints").checked;
-  const totalValue = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0);
+  // 签到卡自动赠送金币也计入总价值
+  const checkinQty = items.filter(it => it.prop_id === "checkin-card").reduce((sum, it) => sum + it.quantity, 0);
+  const totalValue = items.reduce((sum, it) => sum + ((it.vip_value || 0) * it.quantity), 0) + checkinQty * 218;
   // 仅启用 VIP 积分计算时才校验高价值申请
   if (enableVip && totalValue > 300) {
     const currentPoints = parseInt(fd.get("current_vip_points") || "0", 10);
