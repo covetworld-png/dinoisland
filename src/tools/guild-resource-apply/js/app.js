@@ -1197,7 +1197,15 @@ function renderGiftPackSelect() {
 }
 
 function applyGiftPack(packId) {
-  if (!packId) return;
+  // 改回“不使用礼包”时清空已选道具
+  if (!packId) {
+    selectedItems = {};
+    renderItemGrid();
+    renderSelectedItems();
+    updatePreview();
+    updateItemGridState();
+    return;
+  }
   const pack = giftPacks.find(p => p.id === parseInt(packId, 10));
   if (!pack) return;
   // 清空已选道具，填充礼包明细
