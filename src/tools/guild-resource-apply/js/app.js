@@ -59,6 +59,8 @@ const translations = {
     selectRole: "Chọn vai trò",
     otherRole: "Khác (nhập thủ công)",
     noGiftPack: "Không dùng gói quà",
+    selectGiftPackOptional: "Chọn gói quà (tùy chọn)",
+    giftPackHint: "Chọn gói quà sẽ tự động điền chi tiết vật phẩm, vẫn có thể điều chỉnh số lượng thủ công",
     manageRoles: "Quản lý vai trò",
     roleModalTitle: "Quản lý vai trò",
     addRole: "Thêm vai trò",
@@ -252,6 +254,8 @@ const translations = {
     selectRole: "选择角色",
     otherRole: "其他（手动输入）",
     noGiftPack: "不使用礼包",
+    selectGiftPackOptional: "选择礼包（可选）",
+    giftPackHint: "选择礼包后自动填充道具明细，仍可手动调整数量",
     manageRoles: "管理角色",
     roleModalTitle: "管理角色",
     addRole: "添加角色",
@@ -444,6 +448,8 @@ const translations = {
     selectRole: "Select Role",
     otherRole: "Other (manual)",
     noGiftPack: "No Gift Pack",
+    selectGiftPackOptional: "Select Gift Pack (optional)",
+    giftPackHint: "Selecting a gift pack auto-fills item details; you can still adjust quantities manually",
     manageRoles: "Manage Roles",
     roleModalTitle: "Manage Roles",
     addRole: "Add Role",
@@ -757,6 +763,8 @@ function applyI18n() {
   $("#giftPackLabelSelectItems").textContent = t("selectItemsForPack");
   $("#giftPackCancelBtn").textContent = t("cancel");
   $("#giftPackConfirmBtn").textContent = t("saveBtn");
+  $("#giftPackSelectLabel").textContent = t("selectGiftPackOptional");
+  $("#giftPackHint").textContent = t("giftPackHint");
   $("#profileRolesTitle").textContent = t("profileRolesTitle");
   $("#roleLimitHint").textContent = t("roleLimitHint");
   $("#addRoleBtn").textContent = t("addRole");
