@@ -777,8 +777,10 @@ $$("#langSwitcher button").forEach(btn => {
     applyI18n();
     renderItemGrid();
     renderSelectedItems();
+    renderGiftPackSelect();
     if (!$('#historyView').classList.contains('hidden')) loadHistory();
     if (!$('#adminAllApps').classList.contains('hidden')) loadAdminAllApps();
+    if (!$('#adminGiftPacks').classList.contains('hidden')) renderAdminGiftPacks();
     if (!$('#profileView').classList.contains('hidden')) renderProfileView();
   });
 });
@@ -1117,11 +1119,17 @@ function renderServerOptions() {
   });
 }
 
+function giftPackDisplayName(pack) {
+  if (currentLang === "vi" && pack.name_vn) return pack.name_vn;
+  if (currentLang === "en" && pack.name_en) return pack.name_en;
+  return pack.name;
+}
+
 function renderGiftPackSelect() {
   const sel = $("#giftPackSelect");
   if (!sel) return;
   sel.innerHTML = `<option value="">不使用礼包</option>` +
-    giftPacks.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+    giftPacks.map(p => `<option value="${p.id}">${escapeHtml(giftPackDisplayName(p))}</option>`).join("");
 }
 
 function applyGiftPack(packId) {
@@ -2300,7 +2308,7 @@ function renderAdminGiftPacks() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${pack.id}</td>
-      <td>${escapeHtml(pack.name)}</td>
+      <td>${escapeHtml(giftPackDisplayName(pack))}</td>
       <td>${escapeHtml(itemsText)}</td>
       <td><input type="checkbox" ${pack.enabled ? "checked" : ""} onchange="toggleGiftPack(${pack.id}, this.checked)"></td>
       <td>${formatDate(pack.created_at)}</td>
@@ -2343,6 +2351,8 @@ function openGiftPackModal(pack = null) {
   giftPackModalId = pack ? pack.id : null;
   $("#giftPackModalTitle").textContent = pack ? "编辑礼包" : "新增礼包";
   $("#giftPackName").value = pack ? pack.name : "";
+  $("#giftPackNameVn").value = pack ? (pack.name_vn || "") : "";
+  $("#giftPackNameEn").value = pack ? (pack.name_en || "") : "";
   $("#giftPackEnabled").checked = pack ? pack.enabled : true;
   renderGiftPackItemGrid(pack ? pack.items : []);
   $("#giftPackModal").classList.remove("hidden");
@@ -2390,6 +2400,8 @@ $("#addGiftPackBtn").addEventListener("click", () => openGiftPackModal());
 
 $("#giftPackConfirmBtn").addEventListener("click", async () => {
   const name = $("#giftPackName").value.trim();
+  const name_vn = $("#giftPackNameVn").value.trim();
+  const name_en = $("#giftPackNameEn").value.trim();
   if (!name) {
     showToast("请输入礼包名称");
     return;
@@ -2410,9 +2422,9 @@ $("#giftPackConfirmBtn").addEventListener("click", async () => {
   const enabled = $("#giftPackEnabled").checked;
   try {
     if (giftPackModalId) {
-      await api("PATCH", `/admin/gift-packs/${giftPackModalId}`, { name, items, enabled });
+      await api("PATCH", `/admin/gift-packs/${giftPackModalId}`, { name, name_vn, name_en, items, enabled });
     } else {
-      await api("POST", "/admin/gift-packs", { name, items, enabled });
+      await api("POST", "/admin/gift-packs", { name, name_vn, name_en, items, enabled });
     }
     showToast(t("toastSaved"));
     closeGiftPackModal();
