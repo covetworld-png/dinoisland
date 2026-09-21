@@ -63,6 +63,7 @@ const translations = {
     roleModalTitle: "Quản lý vai trò",
     addRole: "Thêm vai trò",
     editRole: "Lưu",
+    edit: "Sửa",
     deleteRole: "Xóa",
     confirmDeleteRole: "Xóa vai trò này?",
     noSavedRoles: "Chưa có vai trò nào",
@@ -167,6 +168,18 @@ const translations = {
     toastSaved: "Đã lưu",
     toastSelectItemsFirst: "Vui lòng chọn vật phẩm trước",
     toastSelectServer: "Vui lòng chọn máy chủ trước",
+    giftPackManage: "Quản Lý Gói Quà",
+    addGiftPack: "Thêm Gói Quà",
+    editGiftPack: "Sửa Gói Quà",
+    giftPackNameCn: "Tên Gói Quà (CN)",
+    giftPackNameVn: "Tên Gói Quà (VN)",
+    giftPackNameEn: "Tên Gói Quà (EN)",
+    giftPackItems: "Chi Tiết",
+    selectItemsForPack: "Chọn vật phẩm (tích chọn và nhập số lượng)",
+    inputGiftPackName: "Vui lòng nhập tên gói quà",
+    confirmDeleteGiftPack: "Xác nhận xóa gói quà này?",
+    cancel: "Hủy",
+    saveBtn: "Lưu",
     toastSelectRole: "Vui lòng chọn vai trò trước",
     toastRoleSaved: "Đã lưu vai trò",
     toastRoleExists: "Vai trò trong máy chủ này đã tồn tại",
@@ -243,6 +256,7 @@ const translations = {
     roleModalTitle: "管理角色",
     addRole: "添加角色",
     editRole: "保存",
+    edit: "编辑",
     deleteRole: "删除",
     confirmDeleteRole: "确定删除该角色？",
     noSavedRoles: "暂无角色",
@@ -347,6 +361,18 @@ const translations = {
     toastSaved: "已保存",
     toastSelectItemsFirst: "请先选择道具",
     toastSelectServer: "请先选择服务器",
+    giftPackManage: "礼包管理",
+    addGiftPack: "新增礼包",
+    editGiftPack: "编辑礼包",
+    giftPackNameCn: "礼包名称（中文）",
+    giftPackNameVn: "礼包名称（越南语）",
+    giftPackNameEn: "礼包名称（英语）",
+    giftPackItems: "明细",
+    selectItemsForPack: "选择道具（勾选后填写数量）",
+    inputGiftPackName: "请输入礼包名称",
+    confirmDeleteGiftPack: "确认删除该礼包？",
+    cancel: "取消",
+    saveBtn: "保存",
     toastSelectRole: "请先选择角色",
     toastRoleSaved: "角色已保存",
     toastRoleExists: "该服务器下已存在角色",
@@ -422,6 +448,7 @@ const translations = {
     roleModalTitle: "Manage Roles",
     addRole: "Add Role",
     editRole: "Save",
+    edit: "Edit",
     deleteRole: "Delete",
     confirmDeleteRole: "Delete this role?",
     noSavedRoles: "No saved roles",
@@ -527,6 +554,18 @@ const translations = {
     toastSelectItemsFirst: "Please select items first",
     toastSelectServer: "Please select a server first",
     toastSelectRole: "Please select a role first",
+    giftPackManage: "Gift Pack Management",
+    addGiftPack: "Add Gift Pack",
+    editGiftPack: "Edit Gift Pack",
+    giftPackNameCn: "Gift Pack Name (CN)",
+    giftPackNameVn: "Gift Pack Name (VN)",
+    giftPackNameEn: "Gift Pack Name (EN)",
+    giftPackItems: "Items",
+    selectItemsForPack: "Select items (check and enter quantity)",
+    inputGiftPackName: "Please enter gift pack name",
+    confirmDeleteGiftPack: "Delete this gift pack?",
+    cancel: "Cancel",
+    saveBtn: "Save",
     toastRoleSaved: "Role saved",
     toastRoleExists: "Role already exists in this server",
     itemGridHint: "Please select a role before selecting items",
@@ -700,10 +739,24 @@ function applyI18n() {
   // Admin tabs（保留 badge span，只更新文本节点）
   $$(".admin-tab[data-admin-tab='users']")[0].childNodes[0].textContent = t("adminUsers");
   $$(".admin-tab[data-admin-tab='items']")[0].childNodes[0].textContent = t("adminItems");
+  $$(".admin-tab[data-admin-tab='giftPacks']")[0].childNodes[0].textContent = t("giftPackManage");
   $$(".admin-tab[data-admin-tab='allApps']")[0].childNodes[0].textContent = t("adminAllApps");
   $("#adminUsers h3").textContent = t("adminUsers");
   $("#adminItems h3").textContent = t("adminItems");
+  $("#giftPackManageTitle").textContent = t("giftPackManage");
   $("#adminAllApps h3").textContent = t("adminAllApps");
+  $("#addGiftPackBtn").textContent = t("addGiftPack");
+  $("#giftPackThName").textContent = t("giftPackNameCn");
+  $("#giftPackThItems").textContent = t("giftPackItems");
+  $("#giftPackThCreatedAt").textContent = t("createdAt");
+  $("#giftPackThAction").textContent = t("action");
+  $("#giftPackLabelCn").textContent = t("giftPackNameCn");
+  $("#giftPackLabelVn").textContent = t("giftPackNameVn");
+  $("#giftPackLabelEn").textContent = t("giftPackNameEn");
+  $("#giftPackLabelEnabled").textContent = t("enabled");
+  $("#giftPackLabelSelectItems").textContent = t("selectItemsForPack");
+  $("#giftPackCancelBtn").textContent = t("cancel");
+  $("#giftPackConfirmBtn").textContent = t("saveBtn");
   $("#profileRolesTitle").textContent = t("profileRolesTitle");
   $("#roleLimitHint").textContent = t("roleLimitHint");
   $("#addRoleBtn").textContent = t("addRole");
@@ -2299,7 +2352,7 @@ function renderAdminGiftPacks() {
   if (!tbody) return;
   tbody.innerHTML = "";
   if (!adminGiftPacks.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center">暂无礼包</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center">${escapeHtml(t("noRecords"))}</td></tr>`;
     return;
   }
   adminGiftPacks.forEach(pack => {
@@ -2316,8 +2369,8 @@ function renderAdminGiftPacks() {
       <td><input type="checkbox" ${pack.enabled ? "checked" : ""} onchange="toggleGiftPack(${pack.id}, this.checked)"></td>
       <td>${formatDate(pack.created_at)}</td>
       <td>
-        <button class="btn btn-small" onclick="editGiftPack(${pack.id})">编辑</button>
-        <button class="btn btn-small btn-danger" onclick="deleteGiftPack(${pack.id})">删除</button>
+        <button class="btn btn-small" onclick="editGiftPack(${pack.id})">${escapeHtml(t("edit"))}</button>
+        <button class="btn btn-small btn-danger" onclick="deleteGiftPack(${pack.id})">${escapeHtml(t("delete"))}</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -2335,7 +2388,7 @@ window.toggleGiftPack = async (id, enabled) => {
 };
 
 window.deleteGiftPack = async (id) => {
-  if (!confirm("确认删除该礼包？")) return;
+  if (!confirm(t("confirmDeleteGiftPack"))) return;
   try {
     await api("DELETE", `/admin/gift-packs/${id}`);
     showToast(t("toastSaved"));
@@ -2352,7 +2405,7 @@ window.editGiftPack = (id) => {
 
 function openGiftPackModal(pack = null) {
   giftPackModalId = pack ? pack.id : null;
-  $("#giftPackModalTitle").textContent = pack ? "编辑礼包" : "新增礼包";
+  $("#giftPackModalTitle").textContent = pack ? t("editGiftPack") : t("addGiftPack");
   $("#giftPackName").value = pack ? pack.name : "";
   $("#giftPackNameVn").value = pack ? (pack.name_vn || "") : "";
   $("#giftPackNameEn").value = pack ? (pack.name_en || "") : "";
@@ -2406,7 +2459,7 @@ $("#giftPackConfirmBtn").addEventListener("click", async () => {
   const name_vn = $("#giftPackNameVn").value.trim();
   const name_en = $("#giftPackNameEn").value.trim();
   if (!name) {
-    showToast("请输入礼包名称");
+    showToast(t("inputGiftPackName"));
     return;
   }
   const items = [];
@@ -2419,7 +2472,7 @@ $("#giftPackConfirmBtn").addEventListener("click", async () => {
     }
   });
   if (!items.length) {
-    showToast("请至少选择一项道具");
+    showToast(t("toastSelectItemsFirst"));
     return;
   }
   const enabled = $("#giftPackEnabled").checked;

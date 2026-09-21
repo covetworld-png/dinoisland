@@ -204,7 +204,7 @@
         <div class="admin-tabs">
           <button data-admin-tab="users" class="admin-tab">用户管理<span id="adminUsersBadge" class="badge"></span></button>
           <button data-admin-tab="items" class="admin-tab">道具配置</button>
-          <button data-admin-tab="giftPacks" class="admin-tab">礼包管理</button>
+          <button data-admin-tab="giftPacks" class="admin-tab" id="adminTabGiftPacks">礼包管理</button>
           <button data-admin-tab="allApps" class="admin-tab active">全部申请<span id="adminAppsBadge" class="badge"></span></button>
         </div>
 
@@ -260,7 +260,7 @@
         </div>
 
         <div id="adminGiftPacks" class="admin-panel hidden">
-          <h3>礼包管理</h3>
+          <h3 id="giftPackManageTitle">礼包管理</h3>
           <div class="bulk-actions">
             <button id="addGiftPackBtn" class="btn">新增礼包</button>
           </div>
@@ -269,11 +269,11 @@
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>礼包名称</th>
-                  <th>明细</th>
+                  <th id="giftPackThName">礼包名称</th>
+                  <th id="giftPackThItems">明细</th>
                   <th>启用</th>
-                  <th>创建时间</th>
-                  <th>操作</th>
+                  <th id="giftPackThCreatedAt">创建时间</th>
+                  <th id="giftPackThAction">操作</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -423,29 +423,29 @@
       </div>
       <div class="modal-body">
         <div class="form-row">
-          <label>礼包名称（中文） <input type="text" id="giftPackName" placeholder="如：军团长扶植礼包" required></label>
+          <label><span id="giftPackLabelCn">礼包名称（中文）</span> <input type="text" id="giftPackName" placeholder="如：军团长扶植礼包" required></label>
         </div>
         <div class="form-row">
-          <label>礼包名称（越南语） <input type="text" id="giftPackNameVn" placeholder="如：Gói Hỗ Trợ Trưởng Đoàn"></label>
+          <label><span id="giftPackLabelVn">礼包名称（越南语）</span> <input type="text" id="giftPackNameVn" placeholder="如：Gói Hỗ Trợ Trưởng Đoàn"></label>
         </div>
         <div class="form-row">
-          <label>礼包名称（英语） <input type="text" id="giftPackNameEn" placeholder="如：Guild Leader Support Pack"></label>
+          <label><span id="giftPackLabelEn">礼包名称（英语）</span> <input type="text" id="giftPackNameEn" placeholder="如：Guild Leader Support Pack"></label>
         </div>
         <div class="form-row">
-          <label class="inline-label"><input type="checkbox" id="giftPackEnabled" checked> 启用</label>
+          <label class="inline-label"><input type="checkbox" id="giftPackEnabled" checked> <span id="giftPackLabelEnabled">启用</span></label>
         </div>
         <div class="form-row">
-          <label>选择道具（勾选后填写数量）</label>
+          <label id="giftPackLabelSelectItems">选择道具（勾选后填写数量）</label>
           <div id="giftPackItemGrid" class="item-grid"></div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-secondary" onclick="closeGiftPackModal()">取消</button>
+        <button type="button" class="btn-secondary" onclick="closeGiftPackModal()" id="giftPackCancelBtn">取消</button>
         <button type="button" class="btn-primary" id="giftPackConfirmBtn">保存</button>
       </div>
     </div>
   </div>
 
-  <script src="js/app.js?v=20260718f"></script>
+  <script src="js/app.js?v=20260718g"></script>
 </body>
 </html>
