@@ -58,6 +58,7 @@ const translations = {
     beastCoin: "xu thú",
     selectRole: "Chọn vai trò",
     otherRole: "Khác (nhập thủ công)",
+    noGiftPack: "Không dùng gói quà",
     manageRoles: "Quản lý vai trò",
     roleModalTitle: "Quản lý vai trò",
     addRole: "Thêm vai trò",
@@ -237,6 +238,7 @@ const translations = {
     beastCoin: "兽币",
     selectRole: "选择角色",
     otherRole: "其他（手动输入）",
+    noGiftPack: "不使用礼包",
     manageRoles: "管理角色",
     roleModalTitle: "管理角色",
     addRole: "添加角色",
@@ -415,6 +417,7 @@ const translations = {
     beastCoin: "beast coins",
     selectRole: "Select Role",
     otherRole: "Other (manual)",
+    noGiftPack: "No Gift Pack",
     manageRoles: "Manage Roles",
     roleModalTitle: "Manage Roles",
     addRole: "Add Role",
@@ -1128,7 +1131,7 @@ function giftPackDisplayName(pack) {
 function renderGiftPackSelect() {
   const sel = $("#giftPackSelect");
   if (!sel) return;
-  sel.innerHTML = `<option value="">不使用礼包</option>` +
+  sel.innerHTML = `<option value="">${escapeHtml(t("noGiftPack"))}</option>` +
     giftPacks.map(p => `<option value="${p.id}">${escapeHtml(giftPackDisplayName(p))}</option>`).join("");
 }
 
