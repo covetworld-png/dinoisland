@@ -432,6 +432,7 @@ main { max-width: 960px; margin: 28px auto; padding: 0 16px; }
 .modal.hidden { display: none; }
 .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
 .modal-content { position: relative; background: #fff; border-radius: var(--radius); width: 92%; max-width: 520px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+.modal-content.modal-large { max-width: 720px; }
 .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); }
 .modal-header h3 { margin: 0; font-size: 16px; }
 .modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--text-secondary); padding: 0 4px; }

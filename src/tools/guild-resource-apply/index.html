@@ -94,6 +94,15 @@
           </div>
 
           <div class="form-row">
+            <label id="giftPackLabel">选择礼包（可选）
+              <select id="giftPackSelect">
+                <option value="">不使用礼包</option>
+              </select>
+            </label>
+            <p class="hint">选择礼包后自动填充道具明细，仍可手动调整数量</p>
+          </div>
+
+          <div class="form-row">
             <label id="selectItemsLabel">选择道具（勾选后在下方面板填写数量）</label>
             <p id="itemGridHint" class="hint item-grid-hint hidden">请先选择服务器、游戏账号和昵称</p>
             <div id="itemGrid" class="item-grid"></div>
@@ -195,6 +204,7 @@
         <div class="admin-tabs">
           <button data-admin-tab="users" class="admin-tab">用户管理<span id="adminUsersBadge" class="badge"></span></button>
           <button data-admin-tab="items" class="admin-tab">道具配置</button>
+          <button data-admin-tab="giftPacks" class="admin-tab">礼包管理</button>
           <button data-admin-tab="allApps" class="admin-tab active">全部申请<span id="adminAppsBadge" class="badge"></span></button>
         </div>
 
@@ -242,6 +252,28 @@
                   <th>分类</th>
                   <th>启用</th>
                   <th>排序</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adminGiftPacks" class="admin-panel hidden">
+          <h3>礼包管理</h3>
+          <div class="bulk-actions">
+            <button id="addGiftPackBtn" class="btn">新增礼包</button>
+          </div>
+          <div class="table-wrap">
+            <table id="giftPacksTable" class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>礼包名称</th>
+                  <th>明细</th>
+                  <th>启用</th>
+                  <th>创建时间</th>
+                  <th>操作</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -381,6 +413,33 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260718d"></script>
+  <!-- 礼包编辑弹窗 -->
+  <div id="giftPackModal" class="modal hidden">
+    <div class="modal-overlay" onclick="closeGiftPackModal()"></div>
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 id="giftPackModalTitle">新增礼包</h3>
+        <button type="button" class="modal-close" onclick="closeGiftPackModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>礼包名称 <input type="text" id="giftPackName" placeholder="如：军团长扶植礼包" required></label>
+        </div>
+        <div class="form-row">
+          <label class="inline-label"><input type="checkbox" id="giftPackEnabled" checked> 启用</label>
+        </div>
+        <div class="form-row">
+          <label>选择道具（勾选后填写数量）</label>
+          <div id="giftPackItemGrid" class="item-grid"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeGiftPackModal()">取消</button>
+        <button type="button" class="btn-primary" id="giftPackConfirmBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js?v=20260718e"></script>
 </body>
 </html>

@@ -12,6 +12,7 @@ let allItems = [];
 let servers = [];
 let vipLevels = [];
 let allSkins = {}; // prop_id -> {name_cn, price}
+let giftPacks = [];
 let currentApps = [];
 let currentLang = localStorage.getItem("gra_lang") || "vi";
 let selectedItems = {}; // { prop_id: { prop_id, name_cn, name_vn, unit, quantity } }
@@ -1022,6 +1023,7 @@ function loadCurrentAdminPanel() {
   const tab = activeTab.dataset.adminTab;
   if (tab === "users") loadAdminUsers();
   if (tab === "items") loadAdminItems();
+  if (tab === "giftPacks") loadAdminGiftPacks();
   if (tab === "allApps") {
     loadAdminAppFilters();
     loadAdminAllApps();
@@ -1048,11 +1050,14 @@ async function loadItems() {
         price: s.price,
       };
     });
+    const packsRes = await api("GET", "/gift-packs");
+    giftPacks = packsRes.data || [];
   } catch (e) {
     showToast(e.message);
   }
   renderServerOptions();
   renderItemGrid();
+  renderGiftPackSelect();
 }
 
 function getVipLevel(points) {
@@ -1110,6 +1115,39 @@ function renderServerOptions() {
     if (roleServerSel) roleServerSel.appendChild(new Option(s, s));
     if (adminAppsServerSel) adminAppsServerSel.appendChild(new Option(s, s));
   });
+}
+
+function renderGiftPackSelect() {
+  const sel = $("#giftPackSelect");
+  if (!sel) return;
+  sel.innerHTML = `<option value="">不使用礼包</option>` +
+    giftPacks.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+}
+
+function applyGiftPack(packId) {
+  if (!packId) return;
+  const pack = giftPacks.find(p => p.id === parseInt(packId, 10));
+  if (!pack) return;
+  // 清空已选道具，填充礼包明细
+  selectedItems = {};
+  (pack.items || []).forEach(it => {
+    const item = allItems.find(i => i.prop_id === it.prop_id);
+    if (!item) return;
+    selectedItems[it.prop_id] = {
+      prop_id: it.prop_id,
+      name_cn: item.name_cn,
+      name_vn: item.name_vn,
+      name_en: item.name_en,
+      unit: item.unit,
+      quantity: it.quantity,
+      vip_value: item.vip_value,
+      is_skin: false,
+    };
+  });
+  renderItemGrid();
+  renderSelectedItems();
+  updatePreview();
+  updateItemGridState();
 }
 
 function renderItemGrid() {
@@ -1637,6 +1675,10 @@ $("#serverSelect").addEventListener("change", () => {
   clearFieldHighlights();
 });
 $("#roleSelect").addEventListener("change", (e) => applyRoleSelection(e.target.value));
+const giftPackSelect = $("#giftPackSelect");
+if (giftPackSelect) {
+  giftPackSelect.addEventListener("change", (e) => applyGiftPack(e.target.value));
+}
 $("#roleList").addEventListener("click", (e) => {
   const btn = e.target.closest("button");
   if (!btn) return;
@@ -1712,6 +1754,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
     $("#gameAccountInput").value = currentUser ? currentUser.username : "";
     const enableVipCheckbox = $("#enableVipPoints");
     if (enableVipCheckbox) enableVipCheckbox.checked = false;
+    if (giftPackSelect) giftPackSelect.value = "";
     updateVipInputState();
     renderRoleSelect("");
     applyRoleSelection("");
@@ -1970,6 +2013,7 @@ $$(".admin-tab").forEach(tab => {
     $(`#admin${capitalize(tab.dataset.adminTab)}`).classList.remove("hidden");
     if (tab.dataset.adminTab === "users") loadAdminUsers();
     if (tab.dataset.adminTab === "items") loadAdminItems();
+    if (tab.dataset.adminTab === "giftPacks") loadAdminGiftPacks();
     if (tab.dataset.adminTab === "allApps") {
       loadAdminAppFilters();
       loadAdminAllApps();
@@ -2226,6 +2270,157 @@ function stopAdminStatsPolling() {
 }
 
 let adminItems = [];
+let adminGiftPacks = [];
+let giftPackModalId = null;
+
+async function loadAdminGiftPacks() {
+  try {
+    const res = await api("GET", "/admin/gift-packs");
+    adminGiftPacks = res.data || [];
+    renderAdminGiftPacks();
+  } catch (err) {
+    showToast(err.message);
+  }
+}
+
+function renderAdminGiftPacks() {
+  const tbody = $("#giftPacksTable tbody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  if (!adminGiftPacks.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center">暂无礼包</td></tr>`;
+    return;
+  }
+  adminGiftPacks.forEach(pack => {
+    const itemsText = (pack.items || []).map(it => {
+      const item = allItems.find(i => i.prop_id === it.prop_id);
+      const name = item ? (item.name_cn || it.prop_id) : it.prop_id;
+      return `${it.quantity} ${item ? item.unit : ""}${name}`;
+    }).join("，");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${pack.id}</td>
+      <td>${escapeHtml(pack.name)}</td>
+      <td>${escapeHtml(itemsText)}</td>
+      <td><input type="checkbox" ${pack.enabled ? "checked" : ""} onchange="toggleGiftPack(${pack.id}, this.checked)"></td>
+      <td>${formatDate(pack.created_at)}</td>
+      <td>
+        <button class="btn btn-small" onclick="editGiftPack(${pack.id})">编辑</button>
+        <button class="btn btn-small btn-danger" onclick="deleteGiftPack(${pack.id})">删除</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.toggleGiftPack = async (id, enabled) => {
+  try {
+    await api("PATCH", `/admin/gift-packs/${id}`, { enabled });
+    showToast(t("toastSaved"));
+    loadAdminGiftPacks();
+  } catch (err) {
+    showToast(err.message);
+  }
+};
+
+window.deleteGiftPack = async (id) => {
+  if (!confirm("确认删除该礼包？")) return;
+  try {
+    await api("DELETE", `/admin/gift-packs/${id}`);
+    showToast(t("toastSaved"));
+    loadAdminGiftPacks();
+  } catch (err) {
+    showToast(err.message);
+  }
+};
+
+window.editGiftPack = (id) => {
+  const pack = adminGiftPacks.find(p => p.id === id);
+  openGiftPackModal(pack);
+};
+
+function openGiftPackModal(pack = null) {
+  giftPackModalId = pack ? pack.id : null;
+  $("#giftPackModalTitle").textContent = pack ? "编辑礼包" : "新增礼包";
+  $("#giftPackName").value = pack ? pack.name : "";
+  $("#giftPackEnabled").checked = pack ? pack.enabled : true;
+  renderGiftPackItemGrid(pack ? pack.items : []);
+  $("#giftPackModal").classList.remove("hidden");
+}
+
+function closeGiftPackModal() {
+  giftPackModalId = null;
+  $("#giftPackModal").classList.add("hidden");
+}
+
+function renderGiftPackItemGrid(selected = []) {
+  const container = $("#giftPackItemGrid");
+  container.innerHTML = "";
+  const categories = ["恐龙", "功能卡", "货币", "其他"];
+  const grouped = {};
+  allItems.forEach(it => {
+    const cat = it.category || "其他";
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(it);
+  });
+  categories.forEach(cat => {
+    const catItems = grouped[cat] || [];
+    if (!catItems.length) return;
+    const catDiv = document.createElement("div");
+    catDiv.className = "item-category";
+    catDiv.textContent = categoryName(cat);
+    container.appendChild(catDiv);
+    catItems.forEach(it => {
+      const existing = selected.find(s => s.prop_id === it.prop_id);
+      const div = document.createElement("div");
+      div.className = "item-card";
+      div.innerHTML = `
+        <label>
+          <input type="checkbox" class="gift-pack-item-check" data-prop="${it.prop_id}" ${existing ? "checked" : ""}>
+          <span>${escapeHtml(it.name_cn)}</span>
+        </label>
+        <input type="number" class="gift-pack-item-qty" data-prop="${it.prop_id}" min="1" value="${existing ? existing.quantity : ""}" placeholder="数量" style="width:70px;margin-top:4px;">
+      `;
+      container.appendChild(div);
+    });
+  });
+}
+
+$("#addGiftPackBtn").addEventListener("click", () => openGiftPackModal());
+
+$("#giftPackConfirmBtn").addEventListener("click", async () => {
+  const name = $("#giftPackName").value.trim();
+  if (!name) {
+    showToast("请输入礼包名称");
+    return;
+  }
+  const items = [];
+  $$(".gift-pack-item-check:checked").forEach(cb => {
+    const propId = cb.dataset.prop;
+    const qtyInput = $(`.gift-pack-item-qty[data-prop="${propId}"]`);
+    const qty = parseInt(qtyInput.value || "0", 10);
+    if (qty > 0) {
+      items.push({ prop_id: propId, quantity: qty });
+    }
+  });
+  if (!items.length) {
+    showToast("请至少选择一项道具");
+    return;
+  }
+  const enabled = $("#giftPackEnabled").checked;
+  try {
+    if (giftPackModalId) {
+      await api("PATCH", `/admin/gift-packs/${giftPackModalId}`, { name, items, enabled });
+    } else {
+      await api("POST", "/admin/gift-packs", { name, items, enabled });
+    }
+    showToast(t("toastSaved"));
+    closeGiftPackModal();
+    loadAdminGiftPacks();
+  } catch (err) {
+    showToast(err.message);
+  }
+});
 
 async function loadAdminItems() {
   try {
