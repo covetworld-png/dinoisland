@@ -60,6 +60,8 @@ const translations = {
     otherRole: "Khác (nhập thủ công)",
     noGiftPack: "Không dùng gói quà",
     selectGiftPackOptional: "Chọn gói quà (tùy chọn)",
+    recentAccountLabel: "Tài khoản gần đây",
+    selectRecentAccount: "Chọn tài khoản gần đây",
     giftPackHint: "Chọn gói quà sẽ tự động điền chi tiết vật phẩm, vẫn có thể điều chỉnh số lượng thủ công",
     manageRoles: "Quản lý vai trò",
     roleModalTitle: "Quản lý vai trò",
@@ -255,6 +257,8 @@ const translations = {
     otherRole: "其他（手动输入）",
     noGiftPack: "不使用礼包",
     selectGiftPackOptional: "选择礼包（可选）",
+    recentAccountLabel: "最近使用账号",
+    selectRecentAccount: "选择最近使用账号",
     giftPackHint: "选择礼包后自动填充道具明细，仍可手动调整数量",
     manageRoles: "管理角色",
     roleModalTitle: "管理角色",
@@ -449,6 +453,8 @@ const translations = {
     otherRole: "Other (manual)",
     noGiftPack: "No Gift Pack",
     selectGiftPackOptional: "Select Gift Pack (optional)",
+    recentAccountLabel: "Recent Accounts",
+    selectRecentAccount: "Select recent account",
     giftPackHint: "Selecting a gift pack auto-fills item details; you can still adjust quantities manually",
     manageRoles: "Manage Roles",
     roleModalTitle: "Manage Roles",
@@ -765,6 +771,10 @@ function applyI18n() {
   $("#giftPackConfirmBtn").textContent = t("saveBtn");
   $("#giftPackSelectLabel").textContent = t("selectGiftPackOptional");
   $("#giftPackHint").textContent = t("giftPackHint");
+  $("#recentAccountLabel").textContent = t("recentAccountLabel");
+  if (recentAccountSelect && !recentAccountSelect.value) {
+    recentAccountSelect.options[0].textContent = t("selectRecentAccount");
+  }
   $("#profileRolesTitle").textContent = t("profileRolesTitle");
   $("#roleLimitHint").textContent = t("roleLimitHint");
   $("#addRoleBtn").textContent = t("addRole");
@@ -1196,6 +1206,19 @@ function renderGiftPackSelect() {
     giftPacks.map(p => `<option value="${p.id}">${escapeHtml(giftPackDisplayName(p))}</option>`).join("");
 }
 
+async function loadRecentAccounts() {
+  const sel = $("#recentAccountSelect");
+  if (!sel) return;
+  try {
+    const res = await api("GET", "/staff/recent-accounts");
+    const accounts = res.data || [];
+    sel.innerHTML = `<option value="">${escapeHtml(t("selectRecentAccount"))}</option>` +
+      accounts.map(a => `<option value="${escapeHtml(a.account)}|${escapeHtml(a.nickname)}|${escapeHtml(a.server)}">${escapeHtml(a.account)} (${escapeHtml(a.nickname)}) ${escapeHtml(a.server)}</option>`).join("");
+  } catch (e) {
+    // 忽略加载失败
+  }
+}
+
 function applyGiftPack(packId) {
   // 改回“不使用礼包”时清空已选道具
   if (!packId) {
@@ -1461,6 +1484,7 @@ function applyRoleSelection(value) {
   // 游戏账号由用户选择 / 视图初始化负责设置，此处不再重置
 
   const vipCheckbox = $("#enableVipPoints");
+  const recentRow = $("#recentAccountRow");
   if (value === "manual" && isStaff()) {
     // 管理员/客服手动输入模式：账号/昵称/服务器均可自由编辑；VIP 积分默认不启用
     gameAccountInput.readOnly = false;
@@ -1471,6 +1495,10 @@ function applyRoleSelection(value) {
     const vipLabel = $("#vipPointsLabel");
     if (vipLabel) vipLabel.classList.remove("hidden");
     if (vipCheckbox) vipCheckbox.checked = false;
+    if (recentRow) {
+      recentRow.classList.remove("hidden");
+      loadRecentAccounts();
+    }
     updateVipInputState();
   } else if (value.startsWith("role:")) {
     gameAccountInput.readOnly = true;
@@ -1496,6 +1524,7 @@ function applyRoleSelection(value) {
     const vipLabel = $("#vipPointsLabel");
     if (vipLabel) vipLabel.classList.remove("hidden");
     if (vipCheckbox) vipCheckbox.checked = false;
+    if (recentRow) recentRow.classList.add("hidden");
     updateVipInputState();
   }
   updatePreview();
@@ -1759,6 +1788,20 @@ const giftPackSelect = $("#giftPackSelect");
 if (giftPackSelect) {
   giftPackSelect.addEventListener("change", (e) => applyGiftPack(e.target.value));
 }
+const recentAccountSelect = $("#recentAccountSelect");
+if (recentAccountSelect) {
+  recentAccountSelect.addEventListener("change", (e) => {
+    const val = e.target.value;
+    if (!val) return;
+    const [account, nickname, server] = val.split("|");
+    $("#gameAccountInput").value = account || "";
+    $("#gameNicknameInput").value = nickname || "";
+    $("#serverSelect").value = server || "";
+    updatePreview();
+    updateItemGridState();
+    clearFieldHighlights();
+  });
+}
 $("#roleList").addEventListener("click", (e) => {
   const btn = e.target.closest("button");
   if (!btn) return;
@@ -1822,6 +1865,7 @@ $("#applyForm").addEventListener("submit", async (e) => {
       game_nickname: fd.get("game_nickname"),
       current_vip_points: enableVip ? parseInt(fd.get("current_vip_points") || "0", 10) : 0,
       calculate_vip: enableVip,
+      is_manual: $("#roleSelect").value === "manual",
       items,
       reason: fd.get("reason"),
     });
