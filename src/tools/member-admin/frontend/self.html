@@ -20,8 +20,8 @@
           box-shadow:0 1px 3px rgba(15,23,42,.05); }
   .card h2 { font-size:14.5px; color:#1e3a8a; border-left:3px solid var(--primary); padding-left:10px; margin-bottom:14px; }
   .field { display:block; margin-bottom:11px; }
-  .field span { display:block; font-size:12.5px; color:#475569; margin-bottom:5px; font-weight:500; }
-  .field .req { color:var(--danger); }
+  .field > span { display:block; font-size:12.5px; color:#475569; margin-bottom:5px; font-weight:500; }
+  .field .req { color:var(--danger); margin-left:2px; }
   .field input, .field select { width:100%; padding:10px 12px; font-size:14.5px; border:1px solid #d8dee9;
     border-radius:10px; background:#fff; -webkit-appearance:none; appearance:none;
     transition:border-color .15s, box-shadow .15s; }
@@ -31,8 +31,8 @@
   .info { display:flex; gap:8px; align-items:flex-start; background:#f0f7ff; border:1px solid #dbeafe;
     border-radius:12px; padding:10px 12px; font-size:12.5px; color:#1e40af; margin-top:12px; line-height:1.6; }
   .info .ico { font-size:14px; flex-shrink:0; line-height:1.4; }
-  button { width:100%; padding:13px; font-size:15.5px; font-weight:600; border:none; border-radius:12px; cursor:pointer; }
-  .btn-primary { background:linear-gradient(180deg,#3b82f6,#2563eb); color:#fff; margin-top:18px;
+  button { padding:13px; font-size:15.5px; font-weight:600; border:none; border-radius:12px; cursor:pointer; font-family:inherit; }
+  .btn-primary { display:block; width:100%; background:linear-gradient(180deg,#3b82f6,#2563eb); color:#fff; margin-top:18px;
     box-shadow:0 2px 8px rgba(37,99,235,.28); transition:box-shadow .15s, transform .05s; }
   .btn-primary:hover { box-shadow:0 3px 12px rgba(37,99,235,.38); }
   .btn-primary:active { transform:translateY(1px); }
@@ -71,7 +71,7 @@
 
     <div class="card">
       <h2 data-zh="👤 个人信息">👤 Thông tin cá nhân</h2>
-      <label class="field"><span data-zh="姓名">Họ và tên <span class="req">*</span></span>
+      <label class="field"><span><span data-zh="姓名">Họ và tên</span><span class="req">*</span></span>
         <input type="text" id="f_real_name" placeholder="Ví dụ: Nguyễn Văn A" data-zh-placeholder="例如：Nguyễn Văn A"></label>
       <label class="field"><span data-zh="性别">Giới tính</span>
         <select id="f_gender">
@@ -94,9 +94,9 @@
       <label class="field"><span data-zh="收款人（收款账户户名）">Người thụ hưởng</span>
         <input type="text" id="f_account_holder" placeholder="Để trống nếu là tài khoản của chính bạn" data-zh-placeholder="本人账户可留空">
         <span class="hint" data-zh="若工资打入他人账户，请填写该账户户名">Nếu nhận lương qua tài khoản người khác, điền tên người đó</span></label>
-      <label class="field"><span data-zh="开户银行">Ngân hàng <span class="req">*</span></span>
+      <label class="field"><span><span data-zh="开户银行">Ngân hàng</span><span class="req">*</span></span>
         <input type="text" id="f_bank" placeholder="Ví dụ: Vietcombank, MB, Techcombank" data-zh-placeholder="例如：Vietcombank、MB、Techcombank"></label>
-      <label class="field"><span data-zh="银行账号">Số tài khoản <span class="req">*</span></span>
+      <label class="field"><span><span data-zh="银行账号">Số tài khoản</span><span class="req">*</span></span>
         <input type="text" id="f_account" placeholder="Số tài khoản ngân hàng" data-zh-placeholder="银行账号"></label>
       <label class="field"><span data-zh="收款人手机号">SĐT người thụ hưởng</span>
         <input type="tel" id="f_payee_phone" placeholder="Số điện thoại (nếu có)" data-zh-placeholder="手机号（如有）"></label>
