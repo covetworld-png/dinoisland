@@ -7140,12 +7140,12 @@ var selfFormsSelectedEmpNo = '';
 
 const SELF_FORM_LABELS = {
   real_name: '真实姓名', gender: '性别', birth_date: '出生日期', phone_zalo: '手机/Zalo',
-  email: '邮箱', id_card: '身份证', discord: 'Discord',
+  email: '邮箱', id_card: '身份证',
   account_holder: '收款人（留空=本人）', bank: '银行', account: '银行账号', payee_phone: '收款人手机号',
   address: '家庭住址', emergency_contact: '紧急联系人', emergency_relation: '联系人关系', emergency_phone: '紧急联系电话',
 };
 const SELF_FORM_GROUPS = [
-  { title: '👤 个人信息', fields: ['real_name', 'gender', 'birth_date', 'phone_zalo', 'email', 'id_card', 'discord'] },
+  { title: '👤 个人信息', fields: ['real_name', 'gender', 'birth_date', 'phone_zalo', 'email', 'id_card'] },
   { title: '🏦 银行账号', fields: ['account_holder', 'bank', 'account', 'payee_phone'] },
   { title: '🏠 家庭信息', fields: ['address', 'emergency_contact', 'emergency_relation', 'emergency_phone'] },
 ];

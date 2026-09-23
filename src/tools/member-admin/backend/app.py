@@ -3020,7 +3020,7 @@ def _paycode_read_rows():
 # =====================================================================
 SELF_FORM_FIELDS = [
     # 个人信息
-    "real_name", "gender", "birth_date", "phone_zalo", "email", "id_card", "discord",
+    "real_name", "gender", "birth_date", "phone_zalo", "email", "id_card",
     # 银行账号
     "account_holder", "bank", "account", "payee_phone",
     # 家庭信息
@@ -3033,7 +3033,7 @@ SELF_FORM_RELATIONS = ("父母", "配偶", "兄弟", "其他")
 
 SELF_FORM_SELECT_COLS = (
     "e.nickname, e.cn_name, e.real_name, e.alias, e.gender, e.birth_date, e.phone_zalo,"
-    " e.email, e.id_card, e.discord, e.account_holder, e.bank, e.account, e.payee_phone,"
+    " e.email, e.id_card, e.account_holder, e.bank, e.account, e.payee_phone,"
     " e.address, e.emergency_contact, e.emergency_relation, e.emergency_phone")
 
 

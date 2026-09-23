@@ -66,7 +66,7 @@
   function fillForm(d) {
     var map = {
       real_name: 'f_real_name', gender: 'f_gender', birth_date: 'f_birth_date',
-      phone_zalo: 'f_phone_zalo', email: 'f_email', id_card: 'f_id_card', discord: 'f_discord',
+      phone_zalo: 'f_phone_zalo', email: 'f_email', id_card: 'f_id_card',
       account_holder: 'f_account_holder', bank: 'f_bank', account: 'f_account', payee_phone: 'f_payee_phone',
       address: 'f_address', emergency_contact: 'f_emergency_contact',
       emergency_relation: 'f_emergency_relation', emergency_phone: 'f_emergency_phone',
@@ -90,7 +90,6 @@
       phone_zalo: $('f_phone_zalo').value.trim(),
       email: $('f_email').value.trim(),
       id_card: $('f_id_card').value.trim(),
-      discord: $('f_discord').value.trim(),
       account_holder: $('f_account_holder').value.trim(),
       bank: $('f_bank').value.trim(),
       account: $('f_account').value.trim(),
