@@ -69,26 +69,26 @@
   <div id="formView" class="hidden">
     <div class="info">
       <span class="ico">ℹ️</span>
-      <span data-zh="只需填写需要变更的信息；带 * 的为必填。">Chỉ điền phần cần thay đổi; trường có * là bắt buộc.</span>
+      <span data-zh="带 * 为必填项；其余只需填写需要变更的信息。">Trường có dấu * là bắt buộc; các mục khác chỉ điền khi cần thay đổi.</span>
     </div>
 
     <div class="card">
       <h2 data-zh="👤 个人信息">👤 Thông tin cá nhân</h2>
       <label class="field"><span><span data-zh="姓名">Họ và tên</span><span class="req">*</span></span>
         <input type="text" id="f_real_name" placeholder="Ví dụ: Nguyễn Văn A" data-zh-placeholder="例如：Nguyễn Văn A"></label>
-      <label class="field"><span data-zh="性别">Giới tính</span>
+      <label class="field"><span><span data-zh="性别">Giới tính</span><span class="req">*</span></span>
         <select id="f_gender">
           <option value="" data-zh="-- 请选择 --">-- Chọn --</option>
           <option value="1">Nam</option>
           <option value="2">Nữ</option>
         </select></label>
-      <label class="field"><span data-zh="出生日期">Ngày sinh</span>
+      <label class="field"><span><span data-zh="出生日期">Ngày sinh</span><span class="req">*</span></span>
         <input type="date" id="f_birth_date"></label>
-      <label class="field"><span data-zh="手机 / Zalo">SĐT / Zalo</span>
+      <label class="field"><span><span data-zh="手机 / Zalo">SĐT / Zalo</span><span class="req">*</span></span>
         <input type="tel" id="f_phone_zalo" placeholder="Số điện thoại hoặc Zalo" data-zh-placeholder="手机号或 Zalo"></label>
       <label class="field"><span data-zh="邮箱">Email</span>
         <input type="email" id="f_email" placeholder="Email (nếu có)" data-zh-placeholder="邮箱（如有）"></label>
-      <label class="field"><span data-zh="身份证号">Số CCCD / CMND</span>
+      <label class="field"><span><span data-zh="身份证号">Số CCCD / CMND</span><span class="req">*</span></span>
         <input type="text" id="f_id_card" placeholder="Số căn cước công dân" data-zh-placeholder="身份证号"></label>
     </div>
 
@@ -129,6 +129,6 @@
 
   <footer data-zh="员工自助信息更新 · Member Admin">Member Admin · 员工自助信息更新</footer>
 </div>
-<script src="self.js?v=20260924a"></script>
+<script src="self.js?v=20260924b"></script>
 </body>
 </html>

@@ -3026,7 +3026,17 @@ SELF_FORM_FIELDS = [
     # 家庭信息
     "address", "emergency_contact", "emergency_relation", "emergency_phone",
 ]
-SELF_FORM_REQUIRED = ["real_name", "bank", "account"]  # 工资代发关键字段必填
+SELF_FORM_REQUIRED = ["real_name", "gender", "birth_date", "phone_zalo", "id_card", "bank", "account"]
+# 必填字段中越名称（员工侧错误提示用）
+SELF_FORM_REQUIRED_LABELS = {
+    "real_name": ("Họ và tên", "姓名"),
+    "gender": ("Giới tính", "性别"),
+    "birth_date": ("Ngày sinh", "出生日期"),
+    "phone_zalo": ("SĐT / Zalo", "手机/Zalo"),
+    "id_card": ("Số CCCD / CMND", "身份证号"),
+    "bank": ("Ngân hàng", "开户银行"),
+    "account": ("Số tài khoản", "银行账号"),
+}
 SELF_FORM_GENDERS = ("1", "2")
 SELF_FORM_RELATIONS = ("父母", "配偶", "兄弟", "其他")
 
@@ -3172,14 +3182,15 @@ def self_form_submit(token):
         return jsonify({"ok": False, "error": err}), 400
     data = request.get_json(force=True, silent=True) or {}
     form = {f: str(data.get(f) or "").strip() for f in SELF_FORM_FIELDS}
-    for f in SELF_FORM_REQUIRED:
-        if not form[f]:
-            labels = {"real_name": "Họ và tên", "bank": "Ngân hàng", "account": "Số tài khoản"}
-            return jsonify({"ok": False, "error": f"Vui lòng điền {labels[f]}（必填）"}), 400
+    # 白名单清洗在前（否则非法值会绕过必填校验后被清空）
     if form["gender"] not in SELF_FORM_GENDERS:
         form["gender"] = ""
     if form["emergency_relation"] not in SELF_FORM_RELATIONS:
         form["emergency_relation"] = ""
+    for f in SELF_FORM_REQUIRED:
+        if not form[f]:
+            vi, zh = SELF_FORM_REQUIRED_LABELS[f]
+            return jsonify({"ok": False, "error": f"Vui lòng điền {vi}（请填写{zh}）"}), 400
     conn = get_db()
     try:
         now_ts = now()

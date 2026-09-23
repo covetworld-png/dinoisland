@@ -157,11 +157,27 @@
     }
   }
 
+  var SELF_REQ = [
+    ['real_name', 'f_real_name', 'Họ và tên', '姓名'],
+    ['gender', 'f_gender', 'Giới tính', '性别'],
+    ['birth_date', 'f_birth_date', 'Ngày sinh', '出生日期'],
+    ['phone_zalo', 'f_phone_zalo', 'SĐT / Zalo', '手机/Zalo'],
+    ['id_card', 'f_id_card', 'Số CCCD / CMND', '身份证号'],
+    ['bank', 'f_bank', 'Ngân hàng', '开户银行'],
+    ['account', 'f_account', 'Số tài khoản', '银行账号'],
+  ];
+
   async function submit() {
     var form = collect();
-    if (!form.real_name) { showInlineErr('Vui lòng điền Họ và tên', '请填写姓名'); $('f_real_name').focus(); return; }
-    if (!form.bank) { showInlineErr('Vui lòng điền Ngân hàng', '请填写开户银行'); $('f_bank').focus(); return; }
-    if (!form.account) { showInlineErr('Vui lòng điền Số tài khoản', '请填写银行账号'); $('f_account').focus(); return; }
+    for (var i = 0; i < SELF_REQ.length; i++) {
+      var f = SELF_REQ[i];
+      if (!String(form[f[0]] || '').trim()) {
+        showInlineErr('Vui lòng điền ' + f[2], '请填写' + f[3]);
+        var el = $(f[1]);
+        if (el) el.focus();
+        return;
+      }
+    }
     var btn = $('submitBtn');
     hideInlineErr();
     btn.disabled = true;
