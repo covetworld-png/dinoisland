@@ -45,12 +45,11 @@
   function setSubmitBtn() {
     var btn = $('submitBtn');
     if (!btn) return;
-    if (subStatus === 'pending') {
-      btn.textContent = t('Đã gửi, chờ quản lý duyệt ✅', '已提交，等待审核 ✅');
-      btn.disabled = true;
-    } else if (subStatus === 'approved') {
+    // 按钮可用性只取决于 token 是否有效；历史提交状态不得禁用按钮，否则员工无法提交新内容
+    btn.disabled = false;
+    if (subStatus === 'approved') {
       btn.textContent = t('Đã duyệt ✅ (vẫn có thể gửi lại)', '已通过 ✅（可重新提交）');
-    } else if (subStatus === 'rejected') {
+    } else if (subStatus === 'pending' || subStatus === 'rejected') {
       btn.textContent = t('Gửi lại thông tin', '重新提交');
     } else {
       btn.textContent = t('Gửi thông tin', '提交信息');

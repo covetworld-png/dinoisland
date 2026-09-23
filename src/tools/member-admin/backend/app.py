@@ -3155,9 +3155,10 @@ def self_form_get(token):
         emp = None
         if trow["emp_no"]:
             emp = conn.execute("SELECT * FROM live_employees WHERE trim(emp_no)=?", (trow["emp_no"],)).fetchone()
+        # 按 token 查（本链接是否已提交），不能用 emp_no：员工历史提交会把新链接误判为「已提交」
         sub = conn.execute(
-            "SELECT status FROM self_form_submissions WHERE emp_no=? ORDER BY id DESC LIMIT 1",
-            (trow["emp_no"],)).fetchone()
+            "SELECT status FROM self_form_submissions WHERE token=? ORDER BY id DESC LIMIT 1",
+            (token,)).fetchone()
     finally:
         conn.close()
     if not emp:
