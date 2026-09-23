@@ -7393,7 +7393,7 @@ async function selfFormsReview(id, action, empExists) {
     const res = await api('self/submissions/' + id + '/review', { method: 'POST', json: body });
     const changed = (res.changed || []).map(f => SELF_FORM_LABELS[f] || f).join('、');
     if (res.created) {
-      showToast('已通过并建档（编号 ' + res.emp_no + '）', 'success');
+      showToast('已通过并建档（编号 ' + res.emp_no + (res.game_emp_id ? '，已同步游戏员工表' : '') + '）', 'success');
     } else {
       showToast(action === 'approve' ? ('已通过' + (changed ? '，更新：' + changed : '（无变更）')) : '已驳回', 'success');
     }
@@ -7409,6 +7409,13 @@ function selfFormsBuildForm() {
     const today = new Date().toISOString().slice(0, 10);
     const LIVE_POS = (state.meta && state.meta.live_positions) || ['主播', '陪玩', 'HR', '剪辑', '直播间管理员'];
     const GAME_POS = (state.meta && state.meta.positions) || ['GM', '军团长', 'GS', '其他'];
+    const LIVE_ETYPE = (state.meta && state.meta.live_emp_types) || ['全职', '兼职'];
+    const GAME_ETYPE = (state.meta && state.meta.employment_types) || ['试用期', '转正'];
+    // 雇佣类型也随业务域联动：直播=全职/兼职（live_employees.emp_type）；游戏=试用期/转正（employees.employment_type）
+    const typeOptsFor = function (d) {
+      return (d === '游戏' ? GAME_ETYPE : LIVE_ETYPE)
+        .map(function (x) { return '<option value="' + esc(x) + '">' + esc(x) + '</option>'; }).join('');
+    };
     // 岗位随业务域联动：直播域与游戏域岗位体系不同；默认项置首（直播默认陪玩，保持原行为）
     const POS_DEFAULT = { '直播': '陪玩', '游戏': 'GM' };
     const posOptsFor = function (d) {
@@ -7431,7 +7438,7 @@ function selfFormsBuildForm() {
       + '<label class="field"><span>昵称（中国团队称呼）</span><input id="sfbNick" placeholder="留空=真实姓名" ' + inp + '></label>'
       + '<label class="field"><span>业务域</span><select id="sfbDomain" ' + inp + '><option value="直播">直播</option><option value="游戏">游戏</option></select></label>'
       + '<label class="field"><span>岗位</span><select id="sfbPos" ' + inp + '>' + posOptsFor('直播') + '</select></label>'
-      + '<label class="field"><span>雇佣类型</span><select id="sfbType" ' + inp + '><option value="全职">全职</option><option value="兼职">兼职</option></select></label>'
+      + '<label class="field"><span>雇佣类型</span><select id="sfbType" ' + inp + '>' + typeOptsFor('直播') + '</select></label>'
       + '<label class="field"><span>状态</span><select id="sfbStatus" ' + inp + '><option value="在职">在职</option><option value="离职">离职</option></select></label>'
       + '<label class="field"><span>入职日期</span><input type="date" id="sfbEntry" value="' + today + '" ' + inp + '></label>'
       + '</div>'
@@ -7440,18 +7447,25 @@ function selfFormsBuildForm() {
       + '<button class="btn btn-sm btn-primary" id="sfbOk">通过并建档</button></div>';
     document.body.appendChild(overlay);
     overlay.appendChild(box);
-    $('#sfbDomain').addEventListener('change', function () { $('#sfbPos').innerHTML = posOptsFor(this.value); });
+    $('#sfbDomain').addEventListener('change', function () {
+      $('#sfbPos').innerHTML = posOptsFor(this.value);
+      $('#sfbType').innerHTML = typeOptsFor(this.value);
+    });
     $('#sfbCancel').addEventListener('click', function () { overlay.remove(); resolve(null); });
     $('#sfbOk').addEventListener('click', function () {
-      const empNo = $('#sfbEmpNo').value.trim();
+      var empNo = $('#sfbEmpNo').value.trim();
       if (!empNo) { showToast('员工编号必填', 'error'); return; }
       // 先取值再移除弹窗（移除后 DOM 查询返回 null）
+      var dom = $('#sfbDomain').value;
+      var typ = $('#sfbType').value;
       const payload = {
         emp_no: empNo,
         nickname: $('#sfbNick').value.trim(),
+        domain: dom,
         position: $('#sfbPos').value,
-        emp_type: $('#sfbType').value,
-        domain: $('#sfbDomain').value,
+        // emp_type 为直播表语义，employment_type 为游戏员工表语义（域=游戏时同步写入 employees）
+        emp_type: dom === '游戏' ? '全职' : typ,
+        employment_type: dom === '游戏' ? typ : '转正',
         status: $('#sfbStatus').value,
         entry_date: $('#sfbEntry').value,
       };

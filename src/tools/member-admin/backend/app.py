@@ -3239,6 +3239,7 @@ def self_form_submission_review(sub_id):
     if action not in ("approve", "reject"):
         return jsonify({"ok": False, "error": "action 仅支持 approve/reject"}), 400
     conn = get_db()
+    game_emp_id = None  # 游戏域员工同步写入的 employees.id
     try:
         sub = conn.execute("SELECT * FROM self_form_submissions WHERE id=?", (sub_id,)).fetchone()
         if not sub:
@@ -3276,8 +3277,24 @@ def self_form_submission_review(sub_id):
                 _derive_live_codes(data)
                 row_id = insert_row("live_employees", data)
                 after = get_by_id("live_employees", row_id)
+                # 游戏域员工：同步写入游戏员工表（employees），使「游戏管理 → 员工」直接可见
+                # 字段映射：emp_type(全职/兼职) 不适用，游戏域雇佣类型取审核弹窗的 employment_type(试用期/转正)
+                if data.get("domain") == "游戏":
+                    dup = conn.execute("SELECT id FROM employees WHERE trim(emp_no)=?", (emp_no_final,)).fetchone()
+                    if not dup:
+                        gpos = data.get("position") if data.get("position") in META["positions"] else "其他"
+                        game_emp_id = insert_row("employees", {
+                            "emp_no": emp_no_final,
+                            "nickname": data.get("nickname") or emp_no_final,
+                            "real_name": data.get("real_name", ""),
+                            "position": gpos,
+                            "status": data.get("status") or "在职",
+                            "employment_type": str(SUPPLY.get("employment_type") or "转正").strip() or "转正",
+                            "entry_date": data.get("entry_date", ""),
+                        })
                 result = {"id": sub_id, "status": "approved", "created": True,
-                          "emp_no": emp_no_final, "changed": list(data.keys())}
+                          "emp_no": emp_no_final, "changed": list(data.keys()),
+                          "game_emp_id": game_emp_id}
                 created_id = row_id
             else:
                 before = dict(emp)
@@ -3303,6 +3320,10 @@ def self_form_submission_review(sub_id):
         if "created_id" in locals() and created_id:
             log_change(session["user"], "create", "live_employee", created_id, label,
                        after=after, ip=client_ip())
+            if game_emp_id:
+                gafter = get_by_id("employees", game_emp_id)
+                log_change(session["user"], "create", "employee", game_emp_id,
+                           str(gafter.get("nickname") or ""), after=gafter, ip=client_ip())
         else:
             log_change(session["user"], "update", "live_employee", after["id"], label,
                        before=before, after=after, ip=client_ip())
