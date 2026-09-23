@@ -7407,7 +7407,16 @@ function selfFormsBuildForm() {
     let nxt = '00001';
     try { nxt = (await api('self/next-emp-no')).emp_no; } catch (e) {}
     const today = new Date().toISOString().slice(0, 10);
-    const posOpts = ((state.meta && state.meta.live_positions) || []).map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('');
+    const LIVE_POS = (state.meta && state.meta.live_positions) || ['主播', '陪玩', 'HR', '剪辑', '直播间管理员'];
+    const GAME_POS = (state.meta && state.meta.positions) || ['GM', '军团长', 'GS', '其他'];
+    // 岗位随业务域联动：直播域与游戏域岗位体系不同；默认项置首（直播默认陪玩，保持原行为）
+    const POS_DEFAULT = { '直播': '陪玩', '游戏': 'GM' };
+    const posOptsFor = function (d) {
+      const list = (d === '游戏' ? GAME_POS : LIVE_POS).slice();
+      const i = list.indexOf(POS_DEFAULT[d] || '');
+      if (i > 0) { list.splice(i, 1); list.unshift(POS_DEFAULT[d]); }
+      return list.map(function (x) { return '<option value="' + esc(x) + '">' + esc(x) + '</option>'; }).join('');
+    };
     const inp = 'style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"';
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
@@ -7420,9 +7429,9 @@ function selfFormsBuildForm() {
       + '<div style="padding:14px 16px">'
       + '<label class="field"><span>员工编号 *</span><input id="sfbEmpNo" value="' + esc(nxt) + '" ' + inp + '></label>'
       + '<label class="field"><span>昵称（中国团队称呼）</span><input id="sfbNick" placeholder="留空=真实姓名" ' + inp + '></label>'
-      + '<label class="field"><span>岗位</span><select id="sfbPos" ' + inp + '><option value="陪玩">陪玩</option>' + posOpts + '</select></label>'
-      + '<label class="field"><span>雇佣类型</span><select id="sfbType" ' + inp + '><option value="全职">全职</option><option value="兼职">兼职</option></select></label>'
       + '<label class="field"><span>业务域</span><select id="sfbDomain" ' + inp + '><option value="直播">直播</option><option value="游戏">游戏</option></select></label>'
+      + '<label class="field"><span>岗位</span><select id="sfbPos" ' + inp + '>' + posOptsFor('直播') + '</select></label>'
+      + '<label class="field"><span>雇佣类型</span><select id="sfbType" ' + inp + '><option value="全职">全职</option><option value="兼职">兼职</option></select></label>'
       + '<label class="field"><span>状态</span><select id="sfbStatus" ' + inp + '><option value="在职">在职</option><option value="离职">离职</option></select></label>'
       + '<label class="field"><span>入职日期</span><input type="date" id="sfbEntry" value="' + today + '" ' + inp + '></label>'
       + '</div>'
@@ -7431,6 +7440,7 @@ function selfFormsBuildForm() {
       + '<button class="btn btn-sm btn-primary" id="sfbOk">通过并建档</button></div>';
     document.body.appendChild(overlay);
     overlay.appendChild(box);
+    $('#sfbDomain').addEventListener('change', function () { $('#sfbPos').innerHTML = posOptsFor(this.value); });
     $('#sfbCancel').addEventListener('click', function () { overlay.remove(); resolve(null); });
     $('#sfbOk').addEventListener('click', function () {
       const empNo = $('#sfbEmpNo').value.trim();
