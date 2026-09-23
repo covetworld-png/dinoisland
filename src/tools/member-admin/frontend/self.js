@@ -5,6 +5,7 @@
   var token = params.get('token') || '';
   var lang = localStorage.getItem('ma_self_lang') || 'vi'; // vi=越南语(员工默认) zh=中文参照
   var subStatus = '';
+  var isNewForm = false;
   var $ = function (id) { return document.getElementById(id); };
   function t(vi, zh) { return lang === 'vi' ? vi : zh; }
 
@@ -31,7 +32,9 @@
   function setEmpLabel() {
     var el = $('empLabel');
     if (!el) return;
-    if (lang === 'vi') {
+    if (isNewForm) {
+      el.textContent = t('Nhân viên mới — vui lòng điền thông tin để tạo hồ sơ', '新员工 — 请填写以下信息以建立档案');
+    } else if (lang === 'vi') {
       el.textContent = 'Vui lòng điền đầy đủ thông tin dưới đây';
     } else {
       el.textContent = '请完整填写以下信息（参照：' + (stateLabel || '') + '）';
@@ -75,10 +78,16 @@
       var el = $(map[k]);
       if (el && d[k] != null) el.value = d[k];
     }
+    if (d.is_new) {
+      isNewForm = true;
+      var h1 = document.querySelector('header h1');
+      if (h1) { h1.dataset.vi = 'Nhập thông tin nhân viên mới'; h1.dataset.zh = '新员工信息填写'; }
+    }
     var label = d.nickname || d.alias || d.real_name || d.emp_no;
     var cn = d.cn_name ? '（' + d.cn_name + '）' : '';
     stateLabel = label + cn + ' · ' + (d.emp_no || '-');
     setEmpLabel();
+    applyLangUI();
     $('formView').classList.remove('hidden');
   }
 

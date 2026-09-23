@@ -7167,9 +7167,10 @@ function selfFormsSetTab(tab) {
 }
 
 function selfFormsEmpLabel(e) {
+  if (!e.emp_no) return e.nickname || '新员工（无编号）';
   const name = e.nickname || e.real_name || e.emp_no;
   const cn = e.cn_name ? '（' + e.cn_name + '）' : '';
-  return name + cn + '（' + (e.emp_no || '-') + '）';
+  return name + cn + '（' + e.emp_no + '）';
 }
 
 function selfFormsCopyText(text) {
@@ -7212,9 +7213,10 @@ async function selfFormsRenderGen() {
     '<div class="card" style="max-width:760px">'
     + '<h3 style="margin-bottom:10px">为员工生成一次性邀请链接</h3>'
     + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'
-    + '<label class="field" style="flex:1;min-width:240px"><span>选择员工 *</span>'
-    + '<div style="display:flex;gap:8px"><input type="text" id="sfEmpNo" placeholder="点击右侧按钮选择员工" readonly style="flex:1">'
-    + '<button class="btn btn-sm" id="sfPickBtn">选择</button></div></label>'
+    + '<label class="field" style="flex:1;min-width:240px"><span>员工（空=新员工无编号）</span>'
+    + '<div style="display:flex;gap:8px"><input type="text" id="sfEmpNo" placeholder="选择已有员工，或点「新员工」生成无编号链接" readonly style="flex:1">'
+    + '<button class="btn btn-sm" id="sfPickBtn">选择员工</button>'
+    + '<button class="btn btn-sm" id="sfNewEmpBtn" style="background:#059669;color:#fff">新员工</button></div></label>'
     + '<label class="field"><span>有效期</span><select id="sfDays">'
     + '<option value="7">7 天</option><option value="1">1 天</option><option value="3">3 天</option><option value="30">30 天</option>'
     + '</select></label>'
@@ -7232,16 +7234,21 @@ async function selfFormsRenderGen() {
       $('#sfEmpNo').value = selfFormsEmpLabel(emp);
     });
   });
+  $('#sfNewEmpBtn').addEventListener('click', () => {
+    selfFormsSelectedEmpNo = 'NEW';
+    $('#sfEmpNo').value = '新员工（无编号，审核通过后建档）';
+  });
   $('#sfGenBtn').addEventListener('click', selfFormsGenToken);
   selfFormsTokenList();
 }
 
 async function selfFormsGenToken() {
-  if (!selfFormsSelectedEmpNo) { showToast('请先选择员工', 'error'); return; }
+  if (!selfFormsSelectedEmpNo) { showToast('请选择员工或点「新员工」生成无编号链接', 'error'); return; }
   const btn = $('#sfGenBtn');
   btn.disabled = true;
   try {
-    const res = await api('self/forms/tokens', { method: 'POST', json: { emp_no: selfFormsSelectedEmpNo, days: +$('#sfDays').value } });
+    const empNo = selfFormsSelectedEmpNo === 'NEW' ? '' : selfFormsSelectedEmpNo;
+    const res = await api('self/forms/tokens', { method: 'POST', json: { emp_no: empNo, days: +$('#sfDays').value } });
     const d = res.data;
     const _base = location.origin + (location.pathname.indexOf('/ma-test') === 0 ? '/ma-test-self' : '/ma-self');
     d.url = _base + '/?token=' + d.token; // 前端拼员工页链接，与复制链接逻辑一致
@@ -7250,7 +7257,9 @@ async function selfFormsGenToken() {
       + '<div style="font-size:13px;margin-bottom:8px">✅ 已生成 · <b>' + esc(d.label) + '</b> · 有效期至 ' + esc(d.expires_at) + '</div>'
       + '<div style="display:flex;gap:8px"><input type="text" id="sfGenUrl" readonly value="' + esc(d.url) + '" style="flex:1;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px">'
       + '<button class="btn btn-sm" id="sfGenCopyBtn">复制链接</button></div>'
-      + '<div class="muted" style="font-size:12px;margin-top:6px">把链接通过 Zalo / Discord 发给该员工，打开后即填写，提交后链接自动失效。</div>'
+      + '<div class="muted" style="font-size:12px;margin-top:6px">' + (selfFormsSelectedEmpNo === 'NEW'
+          ? '发给新员工填写入职信息，提交审核通过后自动建档（审核时补充编号/岗位/昵称）。'
+          : '把链接通过 Zalo / Discord 发给该员工，打开后即填写，提交后链接自动失效。') + '</div>'
       + '</div>';
     $('#sfGenCopyBtn').addEventListener('click', () => selfFormsCopyText($('#sfGenUrl').value));
     selfFormsTokenList();
@@ -7327,7 +7336,7 @@ async function selfFormsQueueLoad() {
       + '<td style="white-space:nowrap">'
       + '<button class="btn btn-sm" style="font-size:11px" onclick="selfFormsToggleDetail(' + r.id + ')">查看详情</button> '
       + (r.status === 'pending'
-          ? '<button class="btn btn-sm" style="font-size:11px;background:#16a34a;color:#fff" onclick="selfFormsReview(' + r.id + ',\'approve\')">通过</button> '
+          ? '<button class="btn btn-sm" style="font-size:11px;background:#16a34a;color:#fff" onclick="selfFormsReview(' + r.id + ',\'approve\',' + (r.emp_exists ? 1 : 0) + ')">通过</button> '
             + '<button class="btn btn-sm" style="font-size:11px;background:#dc2626;color:#fff" onclick="selfFormsReview(' + r.id + ',\'reject\')">驳回</button>'
           : '')
       + '</td></tr>'
@@ -7345,7 +7354,9 @@ function selfFormsToggleDetail(id) {
 function selfFormsDetailHtml(r) {
   let form = {};
   try { form = JSON.parse(r.form_json || '{}'); } catch (e) {}
-  let html = '<div style="background:#f9fafb;border-radius:8px;padding:10px">';
+  let html = '';
+  if (!r.emp_exists) html += '<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:8px 10px;font-size:13px;margin-bottom:8px">⚠️ 新员工建档：通过后创建新档案，点击「通过」时补充编号/岗位等字段</div>';
+  html += '<div style="background:#f9fafb;border-radius:8px;padding:10px">';
   SELF_FORM_GROUPS.forEach(g => {
     let rowsHtml = '';
     g.fields.forEach(f => {
@@ -7366,17 +7377,74 @@ function selfFormsDetailHtml(r) {
   return html;
 }
 
-async function selfFormsReview(id, action) {
-  let remark = '';
+async function selfFormsReview(id, action, empExists) {
+  let remark = '', supply = {};
   if (action === 'reject') {
     remark = prompt('驳回原因（可选，员工可见）', '') || '';
-  } else {
+  } else if (empExists) {
     if (!confirm('确认通过？提交中的字段将写入员工档案（未填写字段保持原值）。')) return;
+  } else {
+    supply = await selfFormsBuildForm();
+    if (!supply) return; // 取消建档
   }
   try {
-    const res = await api('self/submissions/' + id + '/review', { method: 'POST', json: { action: action, remark: remark } });
+    const body = { action: action, remark: remark };
+    Object.assign(body, supply);
+    const res = await api('self/submissions/' + id + '/review', { method: 'POST', json: body });
     const changed = (res.data.changed || []).map(f => SELF_FORM_LABELS[f] || f).join('、');
-    showToast(action === 'approve' ? ('已通过' + (changed ? '，更新：' + changed : '（无变更）')) : '已驳回', 'success');
+    if (res.data.created) {
+      showToast('已通过并建档（编号 ' + res.data.emp_no + '）', 'success');
+    } else {
+      showToast(action === 'approve' ? ('已通过' + (changed ? '，更新：' + changed : '（无变更）')) : '已驳回', 'success');
+    }
   } catch (e) { showToast(e.message, 'error'); }
   selfFormsQueue();
+}
+
+/* 新员工建档弹窗：补充编号/昵称/岗位/雇佣类型/业务域/状态/入职日期 */
+function selfFormsBuildForm() {
+  return new Promise(async (resolve) => {
+    let nxt = '00001';
+    try { nxt = (await api('next-emp-no')).data.emp_no; } catch (e) {}
+    const today = new Date().toISOString().slice(0, 10);
+    const posOpts = ((state.meta && state.meta.live_positions) || []).map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('');
+    const inp = 'style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"';
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:1070;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)';
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) { overlay.remove(); resolve(null); } });
+    const box = document.createElement('div');
+    box.style.cssText = 'background:#fff;border-radius:10px;max-width:520px;width:94%;max-height:88vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.25)';
+    box.innerHTML =
+      '<div style="padding:12px 16px;border-bottom:1px solid #e5e7eb;background:#fef3c7;border-radius:10px 10px 0 0;font-size:14px"><b>新员工建档</b> — 通过后将创建新档案，请补充：</div>'
+      + '<div style="padding:14px 16px">'
+      + '<label class="field"><span>员工编号 *</span><input id="sfbEmpNo" value="' + esc(nxt) + '" ' + inp + '></label>'
+      + '<label class="field"><span>昵称（中国团队称呼）</span><input id="sfbNick" placeholder="留空=真实姓名" ' + inp + '></label>'
+      + '<label class="field"><span>岗位</span><select id="sfbPos" ' + inp + '><option value="陪玩">陪玩</option>' + posOpts + '</select></label>'
+      + '<label class="field"><span>雇佣类型</span><select id="sfbType" ' + inp + '><option value="全职">全职</option><option value="兼职">兼职</option></select></label>'
+      + '<label class="field"><span>业务域</span><select id="sfbDomain" ' + inp + '><option value="直播">直播</option><option value="游戏">游戏</option></select></label>'
+      + '<label class="field"><span>状态</span><select id="sfbStatus" ' + inp + '><option value="在职">在职</option><option value="离职">离职</option></select></label>'
+      + '<label class="field"><span>入职日期</span><input type="date" id="sfbEntry" value="' + today + '" ' + inp + '></label>'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid #e5e7eb;justify-content:flex-end">'
+      + '<button class="btn btn-sm" id="sfbCancel">取消</button>'
+      + '<button class="btn btn-sm btn-primary" id="sfbOk">通过并建档</button></div>';
+    document.body.appendChild(overlay);
+    overlay.appendChild(box);
+    $('#sfbCancel').addEventListener('click', function () { overlay.remove(); resolve(null); });
+    $('#sfbOk').addEventListener('click', function () {
+      const empNo = $('#sfbEmpNo').value.trim();
+      if (!empNo) { showToast('员工编号必填', 'error'); return; }
+      overlay.remove();
+      resolve({
+        emp_no: empNo,
+        nickname: $('#sfbNick').value.trim(),
+        position: $('#sfbPos').value,
+        emp_type: $('#sfbType').value,
+        domain: $('#sfbDomain').value,
+        status: $('#sfbStatus').value,
+        entry_date: $('#sfbEntry').value,
+      });
+    });
+  });
 }
