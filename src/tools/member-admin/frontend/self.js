@@ -1,17 +1,65 @@
-/* 员工自助信息更新页：token 校验 → 预填 → 提交待审 */
+/* 员工自助信息更新页：token 校验 → 预填 → 提交待审；默认越南语，可切中文参照 */
 (function () {
   'use strict';
   var params = new URLSearchParams(location.search);
   var token = params.get('token') || '';
+  var lang = localStorage.getItem('ma_self_lang') || 'vi'; // vi=越南语(员工默认) zh=中文参照
+  var subStatus = '';
   var $ = function (id) { return document.getElementById(id); };
+  function t(vi, zh) { return lang === 'vi' ? vi : zh; }
 
-  function showMsg(kind, text, sub) {
+  /* ---- 语言切换：data-zh / data-zh-placeholder / data-zh-html ---- */
+  function applyLangUI() {
+    document.querySelectorAll('[data-zh]').forEach(function (el) {
+      if (!el.dataset.vi) el.dataset.vi = el.textContent;
+      el.textContent = lang === 'vi' ? el.dataset.vi : el.dataset.zh;
+    });
+    document.querySelectorAll('[data-zh-html]').forEach(function (el) {
+      if (!el.dataset.viHtml) el.dataset.viHtml = el.innerHTML;
+      el.innerHTML = lang === 'vi' ? el.dataset.viHtml : el.dataset.zhHtml;
+    });
+    document.querySelectorAll('[data-zh-placeholder]').forEach(function (el) {
+      if (!el.dataset.viPh) el.dataset.viPh = el.placeholder;
+      el.placeholder = lang === 'vi' ? el.dataset.viPh : el.dataset.zhPlaceholder;
+    });
+    var lb = $('langBtn');
+    if (lb) lb.textContent = lang === 'vi' ? '中文' : 'VI';
+    setEmpLabel();
+    setSubmitBtn();
+  }
+
+  function setEmpLabel() {
+    var el = $('empLabel');
+    if (!el) return;
+    if (lang === 'vi') {
+      el.textContent = 'Vui lòng điền đầy đủ thông tin dưới đây';
+    } else {
+      el.textContent = '请完整填写以下信息（参照：' + (stateLabel || '') + '）';
+    }
+  }
+  var stateLabel = '';
+
+  function setSubmitBtn() {
+    var btn = $('submitBtn');
+    if (!btn) return;
+    if (subStatus === 'pending') {
+      btn.textContent = t('Đã gửi, chờ quản lý duyệt ✅', '已提交，等待审核 ✅');
+      btn.disabled = true;
+    } else if (subStatus === 'approved') {
+      btn.textContent = t('Đã duyệt ✅ (vẫn có thể gửi lại)', '已通过 ✅（可重新提交）');
+    } else if (subStatus === 'rejected') {
+      btn.textContent = t('Gửi lại thông tin', '重新提交');
+    } else {
+      btn.textContent = t('Gửi thông tin', '提交信息');
+    }
+  }
+
+  function showMsg(kind, vi, zh) {
     $('formView').classList.add('hidden');
     $('msgView').classList.remove('hidden');
     $('msgIcon').textContent = kind === 'ok' ? '✅' : '❌';
-    $('msgText').textContent = text;
+    $('msgText').textContent = t(vi, zh);
     $('msgText').className = 'msg ' + (kind === 'ok' ? 'ok' : 'err');
-    $('msgSub').textContent = sub || '';
   }
 
   function fillForm(d) {
@@ -28,7 +76,8 @@
     }
     var label = d.nickname || d.alias || d.real_name || d.emp_no;
     var cn = d.cn_name ? '（' + d.cn_name + '）' : '';
-    $('empLabel').textContent = 'Nhân viên: ' + label + cn + ' · Mã NV: ' + (d.emp_no || '-');
+    stateLabel = label + cn + ' · ' + (d.emp_no || '-');
+    setEmpLabel();
     $('formView').classList.remove('hidden');
   }
 
@@ -53,29 +102,31 @@
   }
 
   async function init() {
-    if (!token) { showMsg('err', 'Liên kết thiếu mã xác nhận (token)', 'Vui lòng dùng đúng liên kết từ quản lý.'); return; }
-    var btn = $('submitBtn');
+    var lb = $('langBtn');
+    lb.addEventListener('click', function () {
+      lang = lang === 'vi' ? 'zh' : 'vi';
+      localStorage.setItem('ma_self_lang', lang);
+      applyLangUI();
+    });
+    if (!token) { showMsg('err', 'Liên kết thiếu mã xác nhận (token)', '链接缺少校验码（token），请使用管理员发送的完整链接'); return; }
     try {
       var res = await fetch('api/self/form/' + encodeURIComponent(token));
       var j = await res.json();
-      if (!j.ok) { showMsg('err', j.error || 'Không thể tải biểu mẫu'); return; }
-      fillForm(j.data);
-      if (j.data.submission_status === 'pending') {
-        btn.textContent = 'Đã gửi, chờ quản lý duyệt ✅';
-        btn.disabled = true;
-      } else if (j.data.submission_status === 'approved') {
-        btn.textContent = 'Đã duyệt ✅ (vẫn có thể gửi lại)';
-      } else if (j.data.submission_status === 'rejected') {
-        btn.textContent = 'Gửi lại thông tin';
+      if (!j.ok) {
+        showMsg('err', j.error || 'Không thể tải biểu mẫu', '无法加载表单');
+        return;
       }
-    } catch (e) { showMsg('err', 'Lỗi mạng, vui lòng thử lại', String(e && e.message || e)); }
+      subStatus = j.data.submission_status || '';
+      fillForm(j.data);
+      setSubmitBtn();
+    } catch (e) { showMsg('err', 'Lỗi mạng, vui lòng thử lại', '网络错误，请重试'); }
   }
 
   async function submit() {
     var form = collect();
-    if (!form.real_name) { alert('Vui lòng điền Họ và tên'); return; }
-    if (!form.bank) { alert('Vui lòng điền Ngân hàng'); return; }
-    if (!form.account) { alert('Vui lòng điền Số tài khoản'); return; }
+    if (!form.real_name) { alert(t('Vui lòng điền Họ và tên', '请填写姓名')); return; }
+    if (!form.bank) { alert(t('Vui lòng điền Ngân hàng', '请填写开户银行')); return; }
+    if (!form.account) { alert(t('Vui lòng điền Số tài khoản', '请填写银行账号')); return; }
     var btn = $('submitBtn');
     btn.disabled = true;
     try {
@@ -85,17 +136,19 @@
       });
       var j = await res.json();
       if (j.ok) {
-        showMsg('ok', 'Gửi thành công! 🎉', 'Thông tin đã gửi đến quản lý, vui lòng chờ duyệt.');
+        showMsg('ok', 'Gửi thành công! 🎉 Thông tin đã gửi đến quản lý, vui lòng chờ duyệt.',
+          '提交成功！🎉 信息已发送给管理员，请等待审核。');
       } else {
         btn.disabled = false;
-        showMsg('err', j.error || 'Gửi thất bại');
+        showMsg('err', j.error || 'Gửi thất bại', '提交失败');
       }
     } catch (e) {
       btn.disabled = false;
-      showMsg('err', 'Lỗi mạng, vui lòng thử lại', String(e && e.message || e));
+      showMsg('err', 'Lỗi mạng, vui lòng thử lại', '网络错误，请重试');
     }
   }
 
   $('submitBtn').addEventListener('click', submit);
+  applyLangUI();
   init();
 })();

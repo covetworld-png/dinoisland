@@ -10,9 +10,11 @@
   body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
          background:var(--bg); color:#111827; line-height:1.5; }
   .wrap { max-width:640px; margin:0 auto; padding:16px 14px 48px; }
-  header { text-align:center; padding:18px 0 6px; }
+  header { text-align:center; padding:18px 0 6px; position:relative; }
   header h1 { font-size:20px; color:#1e3a8a; }
   header p { font-size:13px; color:#6b7280; margin-top:4px; }
+  .lang-btn { position:absolute; top:10px; right:0; background:#fff; border:1px solid var(--border);
+    border-radius:8px; padding:5px 12px; font-size:13px; cursor:pointer; color:#1e3a8a; }
   .card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; margin-top:14px; }
   .card h2 { font-size:15px; color:#1e3a8a; border-left:4px solid var(--primary); padding-left:8px; margin-bottom:12px; }
   .field { display:block; margin-bottom:12px; }
@@ -33,18 +35,15 @@
   .status .sub { font-size:13px; color:#6b7280; margin-top:6px; }
   .status .err { color:var(--danger); }
   .status .ok { color:var(--ok); }
-  .tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:99px; margin-left:6px; }
-  .tag-pending { background:#fef3c7; color:#92400e; }
-  .tag-approved { background:#dcfce7; color:#166534; }
-  .tag-rejected { background:#fee2e2; color:#991b1b; }
   footer { text-align:center; font-size:12px; color:#9ca3af; margin-top:20px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>Cập nhật thông tin nhân viên</h1>
+    <h1 data-zh="员工信息更新">Cập nhật thông tin nhân viên</h1>
     <p id="empLabel">Vui lòng điền đầy đủ thông tin dưới đây</p>
+    <button type="button" class="lang-btn" id="langBtn">中文</button>
   </header>
 
   <!-- 校验失败 / 已提交 -->
@@ -56,70 +55,70 @@
 
   <!-- 表单 -->
   <div id="formView" class="hidden">
-    <div class="info">
+    <div class="info" data-zh-html="<b>注意：</b>只需填写需要变更的信息，留空字段将保持原值不变。带 <span style='color:#dc2626'>*</span> 的字段为必填。">
       <b>Lưu ý:</b> Chỉ cần điền thông tin thay đổi. Các trường để trống sẽ giữ nguyên thông tin hiện tại.
       Trường có dấu <span style="color:#dc2626">*</span> là bắt buộc.
     </div>
 
     <div class="card">
-      <h2>👤 Thông tin cá nhân</h2>
-      <label class="field"><span>Họ và tên <span class="req">*</span></span>
-        <input type="text" id="f_real_name" placeholder="Ví dụ: Nguyễn Văn A"></label>
-      <label class="field"><span>Giới tính</span>
+      <h2 data-zh="👤 个人信息">👤 Thông tin cá nhân</h2>
+      <label class="field"><span data-zh="姓名">Họ và tên <span class="req">*</span></span>
+        <input type="text" id="f_real_name" placeholder="Ví dụ: Nguyễn Văn A" data-zh-placeholder="例如：Nguyễn Văn A"></label>
+      <label class="field"><span data-zh="性别">Giới tính</span>
         <select id="f_gender">
-          <option value="">-- Chọn --</option>
+          <option value="" data-zh="-- 请选择 --">-- Chọn --</option>
           <option value="1">Nam</option>
           <option value="2">Nữ</option>
         </select></label>
-      <label class="field"><span>Ngày sinh</span>
+      <label class="field"><span data-zh="出生日期">Ngày sinh</span>
         <input type="date" id="f_birth_date"></label>
-      <label class="field"><span>SĐT / Zalo</span>
-        <input type="tel" id="f_phone_zalo" placeholder="Số điện thoại hoặc Zalo"></label>
-      <label class="field"><span>Email</span>
-        <input type="email" id="f_email" placeholder="Email (nếu có)"></label>
-      <label class="field"><span>Số CCCD / CMND</span>
-        <input type="text" id="f_id_card" placeholder="Số căn cước công dân"></label>
-      <label class="field"><span>Discord</span>
-        <input type="text" id="f_discord" placeholder="Nickname Discord (nếu có)">
-        <span class="hint">Dùng để điểm danh ca livestream</span></label>
+      <label class="field"><span data-zh="手机 / Zalo">SĐT / Zalo</span>
+        <input type="tel" id="f_phone_zalo" placeholder="Số điện thoại hoặc Zalo" data-zh-placeholder="手机号或 Zalo"></label>
+      <label class="field"><span data-zh="邮箱">Email</span>
+        <input type="email" id="f_email" placeholder="Email (nếu có)" data-zh-placeholder="邮箱（如有）"></label>
+      <label class="field"><span data-zh="身份证号">Số CCCD / CMND</span>
+        <input type="text" id="f_id_card" placeholder="Số căn cước công dân" data-zh-placeholder="身份证号"></label>
+      <label class="field"><span data-zh="Discord">Discord</span>
+        <input type="text" id="f_discord" placeholder="Nickname Discord (nếu có)" data-zh-placeholder="Discord 昵称（如有）">
+        <span class="hint" data-zh="用于直播场次签到匹配">Dùng để điểm danh ca livestream</span></label>
     </div>
 
     <div class="card">
-      <h2>🏦 Thông tin tài khoản ngân hàng</h2>
-      <label class="field"><span>Người thụ hưởng</span>
-        <input type="text" id="f_account_holder" placeholder="Để trống nếu là tài khoản của chính bạn">
-        <span class="hint">Nếu nhận lương qua tài khoản người khác, điền tên người đó</span></label>
-      <label class="field"><span>Ngân hàng <span class="req">*</span></span>
-        <input type="text" id="f_bank" placeholder="Ví dụ: Vietcombank, MB, Techcombank"></label>
-      <label class="field"><span>Số tài khoản <span class="req">*</span></span>
-        <input type="text" id="f_account" placeholder="Số tài khoản ngân hàng"></label>
-      <label class="field"><span>SĐT người thụ hưởng</span>
-        <input type="tel" id="f_payee_phone" placeholder="Số điện thoại (nếu có)"></label>
+      <h2 data-zh="🏦 银行账户信息">🏦 Thông tin tài khoản ngân hàng</h2>
+      <label class="field"><span data-zh="收款人（收款账户户名）">Người thụ hưởng</span>
+        <input type="text" id="f_account_holder" placeholder="Để trống nếu là tài khoản của chính bạn" data-zh-placeholder="本人账户可留空">
+        <span class="hint" data-zh="若工资打入他人账户，请填写该账户户名">Nếu nhận lương qua tài khoản người khác, điền tên người đó</span></label>
+      <label class="field"><span data-zh="开户银行">Ngân hàng <span class="req">*</span></span>
+        <input type="text" id="f_bank" placeholder="Ví dụ: Vietcombank, MB, Techcombank" data-zh-placeholder="例如：Vietcombank、MB、Techcombank"></label>
+      <label class="field"><span data-zh="银行账号">Số tài khoản <span class="req">*</span></span>
+        <input type="text" id="f_account" placeholder="Số tài khoản ngân hàng" data-zh-placeholder="银行账号"></label>
+      <label class="field"><span data-zh="收款人手机号">SĐT người thụ hưởng</span>
+        <input type="tel" id="f_payee_phone" placeholder="Số điện thoại (nếu có)" data-zh-placeholder="手机号（如有）"></label>
     </div>
 
     <div class="card">
-      <h2>🏠 Thông tin gia đình</h2>
-      <label class="field"><span>Địa chỉ nhà</span>
-        <input type="text" id="f_address" placeholder="Địa chỉ hiện tại"></label>
-      <label class="field"><span>Người liên hệ khẩn cấp</span>
-        <input type="text" id="f_emergency_contact" placeholder="Tên người thân"></label>
-      <label class="field"><span>Quan hệ</span>
+      <h2 data-zh="🏠 家庭信息">🏠 Thông tin gia đình</h2>
+      <label class="field"><span data-zh="家庭住址">Địa chỉ nhà</span>
+        <input type="text" id="f_address" placeholder="Địa chỉ hiện tại" data-zh-placeholder="现居地址"></label>
+      <label class="field"><span data-zh="紧急联系人">Người liên hệ khẩn cấp</span>
+        <input type="text" id="f_emergency_contact" placeholder="Tên người thân" data-zh-placeholder="亲属姓名"></label>
+      <label class="field"><span data-zh="与联系人关系">Quan hệ</span>
         <select id="f_emergency_relation">
-          <option value="">-- Chọn --</option>
+          <option value="" data-zh="-- 请选择 --">-- Chọn --</option>
           <option value="父母">Bố mẹ</option>
           <option value="配偶">Vợ / chồng</option>
           <option value="兄弟">Anh / chị / em</option>
           <option value="其他">Khác</option>
         </select></label>
-      <label class="field"><span>SĐT liên hệ khẩn cấp</span>
-        <input type="tel" id="f_emergency_phone" placeholder="Số điện thoại người thân"></label>
+      <label class="field"><span data-zh="紧急联系电话">SĐT liên hệ khẩn cấp</span>
+        <input type="tel" id="f_emergency_phone" placeholder="Số điện thoại người thân" data-zh-placeholder="亲属手机号"></label>
     </div>
 
     <button class="btn-primary" id="submitBtn">Gửi thông tin</button>
   </div>
 
-  <footer>Member Admin · 员工自助信息更新</footer>
+  <footer data-zh="员工自助信息更新 · Member Admin">Member Admin · 员工自助信息更新</footer>
 </div>
-<script src="self.js?v=20260920a"></script>
+<script src="self.js?v=20260920b"></script>
 </body>
 </html>
