@@ -842,7 +842,7 @@ function getListState(moduleKey) {
 async function switchModule(moduleKey) {
   // hr/operator：仅白名单模块可访问；viewer（特殊用户）：全部只读，但操作日志不可见；其余禁止直达
   const _allowed = roleModules(state.role);
-  if ((_allowed && !_allowed.includes(moduleKey)) || (state.role === 'viewer' && moduleKey === 'logs')) {
+  if ((_allowed && !_allowed.includes(moduleKey)) || (state.role === 'viewer' && (moduleKey === 'logs' || moduleKey === 'self_forms'))) {
     showToast('当前角色权限：仅可访问限定模块', 'error');
     return;
   }
