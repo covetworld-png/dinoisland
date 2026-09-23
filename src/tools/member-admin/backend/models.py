@@ -173,6 +173,7 @@ CREATE TABLE IF NOT EXISTS live_employees (
     phone_zalo TEXT DEFAULT '',        -- 联系电话/zalo
     discord TEXT DEFAULT '',           -- Discord 昵称
     discord_user_id TEXT DEFAULT '',   -- Discord user_id（用于签到机器人精确匹配）
+    discord_id TEXT DEFAULT '',        -- Discord ID（历史兼容列，绑定视图聚合用）
     tiktok_live TEXT DEFAULT '',       -- TikTok 直播账号
     tiktok_clip TEXT DEFAULT '',       -- TikTok 剪辑账号
     tiktok_personal TEXT DEFAULT '',   -- TikTok 个人小号
@@ -310,6 +311,8 @@ def init_db():
     le_cols = [r["name"] for r in conn.execute("PRAGMA table_info(live_employees)")]
     if "attendance_allowance" not in le_cols:
         conn.execute("ALTER TABLE live_employees ADD COLUMN attendance_allowance REAL DEFAULT 0")
+    if "discord_id" not in le_cols:  # 绑定模块（/api/binding/*）读取该列，缺列会导致新库 500
+        conn.execute("ALTER TABLE live_employees ADD COLUMN discord_id TEXT DEFAULT ''")
     # 迁移：工资代发「是否已发」记录（v2：批次+payload 快照+备注）
     pr_cols = [r["name"] for r in conn.execute("PRAGMA table_info(pay_records)")]
     if "batch_id" not in pr_cols:

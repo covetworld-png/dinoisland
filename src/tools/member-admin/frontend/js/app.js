@@ -1881,7 +1881,7 @@ function openLiveEmployeeDrawer(item) {
         qrBox.innerHTML = '<p style="color:#ef4444;font-size:12px;margin:0;">' + esc(res.error || '无法生成') + '</p>';
         return;
       }
-      const d = res.data;
+      const d = res.data;  // 此处为原生 fetch，返回 {ok, data}
       qrBox.innerHTML = '';
       const qrEl = document.createElement('div');
       qrBox.appendChild(qrEl);
@@ -7199,8 +7199,8 @@ async function renderSelfFormsPage() {
     + '</div>'
     + '<div id="sfGenPane"></div>'
     + '<div id="sfQueuePane" style="display:none"></div>';
-  $('#sfTabGen').addEventListener('click', () => selfFormsSetTab('gen'));
-  $('#sfTabQueue').addEventListener('click', () => selfFormsSetTab('queue'));
+  $('#sfTabGen').addEventListener('click', () => { selfFormsSetTab('gen'); selfFormsTokenList(); });
+  $('#sfTabQueue').addEventListener('click', () => { selfFormsSetTab('queue'); selfFormsQueueLoad(); });
   selfFormsSetTab(selfFormsTab);
   selfFormsRenderGen();
   selfFormsQueue();
@@ -7213,14 +7213,14 @@ async function selfFormsRenderGen() {
     '<div class="card" style="max-width:760px;padding:16px 18px">'
     + '<h3 style="margin-bottom:10px">为员工生成一次性邀请链接</h3>'
     + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'
-    + '<label class="field" style="flex:1;min-width:240px"><span>员工（空=新员工无编号）</span>'
-    + '<div style="display:flex;gap:8px"><input type="text" id="sfEmpNo" placeholder="选择已有员工，或点「新员工」生成无编号链接" readonly style="flex:1">'
-    + '<button class="btn btn-sm" id="sfPickBtn">选择员工</button>'
-    + '<button class="btn btn-sm" id="sfNewEmpBtn" style="background:#059669;color:#fff">新员工</button></div></label>'
-    + '<label class="field"><span>有效期</span><select id="sfDays">'
+    + '<label class="field" style="flex:1;min-width:260px;margin-bottom:0"><span>员工（空=新员工无编号）</span>'
+    + '<div style="display:flex;gap:8px"><input type="text" id="sfEmpNo" placeholder="选择已有员工，或点「新员工」生成无编号链接" readonly style="flex:1;height:38px;padding:0 12px">'
+    + '<button class="btn" id="sfPickBtn" style="height:38px">选择员工</button>'
+    + '<button class="btn" id="sfNewEmpBtn" style="height:38px;background:#059669;color:#fff;border-color:#059669">新员工</button></div></label>'
+    + '<label class="field" style="margin-bottom:0"><span>有效期</span><select id="sfDays" style="width:auto;height:38px;padding:0 10px">'
     + '<option value="7">7 天</option><option value="1">1 天</option><option value="3">3 天</option><option value="30">30 天</option>'
     + '</select></label>'
-    + '<button class="btn btn-primary" id="sfGenBtn">生成链接</button>'
+    + '<button class="btn btn-primary" id="sfGenBtn" style="height:38px;padding:0 20px">生成链接</button>'
     + '</div>'
     + '<div id="sfGenResult" style="margin-top:14px"></div>'
     + '</div>'
@@ -7249,7 +7249,7 @@ async function selfFormsGenToken() {
   try {
     const empNo = selfFormsSelectedEmpNo === 'NEW' ? '' : selfFormsSelectedEmpNo;
     const res = await api('self/forms/tokens', { method: 'POST', json: { emp_no: empNo, days: +$('#sfDays').value } });
-    const d = res.data;
+    const d = res;  // api() 已解包 data，直接拿到 {token, url, ...}
     const _base = location.origin + (location.pathname.indexOf('/ma-test') === 0 ? '/ma-test-self' : '/ma-self');
     d.url = _base + '/?token=' + d.token; // 前端拼员工页链接，与复制链接逻辑一致
     $('#sfGenResult').innerHTML =
@@ -7272,7 +7272,7 @@ async function selfFormsTokenList() {
   if (!box) return;
   box.innerHTML = '<p class="muted">加载中...</p>';
   let rows = [];
-  try { rows = (await api('self/forms/tokens')).data || []; } catch (e) { box.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
+  try { rows = (await api('self/forms/tokens')) || []; } catch (e) { box.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
   if (!rows.length) { box.innerHTML = '<p class="muted">暂无链接，先生成一个发给员工。</p>'; return; }
   const stLabel = { unused: '未使用', used: '已提交' };
   let html = '<div class="table-wrap"><table class="data-table"><thead><tr><th>员工</th><th>状态</th><th>有效期至</th><th>创建人</th><th>操作</th></tr></thead><tbody>';
@@ -7290,7 +7290,7 @@ async function selfFormsTokenList() {
 
 async function selfFormsCopyToken(id) {
   let rows = [];
-  try { rows = (await api('self/forms/tokens')).data || []; } catch (e) { showToast(e.message, 'error'); return; }
+  try { rows = (await api('self/forms/tokens')) || []; } catch (e) { showToast(e.message, 'error'); return; }
   const r = rows.find(x => x.id === id);
   if (!r) return;
   const base = location.origin + (location.pathname.indexOf('/ma-test') === 0 ? '/ma-test-self' : '/ma-self');
@@ -7324,7 +7324,7 @@ async function selfFormsQueueLoad() {
   const box = $('#sfQueueList');
   box.innerHTML = '<p class="muted">加载中...</p>';
   let rows = [];
-  try { rows = (await api('self/submissions?status=' + selfFormsQueueFilter)).data || []; } catch (e) { box.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
+  try { rows = (await api('self/submissions?status=' + selfFormsQueueFilter)) || []; } catch (e) { box.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
   if (!rows.length) { box.innerHTML = '<p class="muted">暂无' + ({ pending: '待审', approved: '已通过', rejected: '已驳回' }[selfFormsQueueFilter]) + '提交。</p>'; return; }
   let html = '<div class="table-wrap"><table class="data-table"><thead><tr><th>员工</th><th>提交时间</th><th>状态</th><th>审核</th><th>操作</th></tr></thead><tbody>';
   rows.forEach(r => {
@@ -7391,9 +7391,9 @@ async function selfFormsReview(id, action, empExists) {
     const body = { action: action, remark: remark };
     Object.assign(body, supply);
     const res = await api('self/submissions/' + id + '/review', { method: 'POST', json: body });
-    const changed = (res.data.changed || []).map(f => SELF_FORM_LABELS[f] || f).join('、');
-    if (res.data.created) {
-      showToast('已通过并建档（编号 ' + res.data.emp_no + '）', 'success');
+    const changed = (res.changed || []).map(f => SELF_FORM_LABELS[f] || f).join('、');
+    if (res.created) {
+      showToast('已通过并建档（编号 ' + res.emp_no + '）', 'success');
     } else {
       showToast(action === 'approve' ? ('已通过' + (changed ? '，更新：' + changed : '（无变更）')) : '已驳回', 'success');
     }
@@ -7405,7 +7405,7 @@ async function selfFormsReview(id, action, empExists) {
 function selfFormsBuildForm() {
   return new Promise(async (resolve) => {
     let nxt = '00001';
-    try { nxt = (await api('next-emp-no')).data.emp_no; } catch (e) {}
+    try { nxt = (await api('self/next-emp-no')).emp_no; } catch (e) {}
     const today = new Date().toISOString().slice(0, 10);
     const posOpts = ((state.meta && state.meta.live_positions) || []).map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('');
     const inp = 'style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"';
@@ -7435,8 +7435,8 @@ function selfFormsBuildForm() {
     $('#sfbOk').addEventListener('click', function () {
       const empNo = $('#sfbEmpNo').value.trim();
       if (!empNo) { showToast('员工编号必填', 'error'); return; }
-      overlay.remove();
-      resolve({
+      // 先取值再移除弹窗（移除后 DOM 查询返回 null）
+      const payload = {
         emp_no: empNo,
         nickname: $('#sfbNick').value.trim(),
         position: $('#sfbPos').value,
@@ -7444,7 +7444,9 @@ function selfFormsBuildForm() {
         domain: $('#sfbDomain').value,
         status: $('#sfbStatus').value,
         entry_date: $('#sfbEntry').value,
-      });
+      };
+      overlay.remove();
+      resolve(payload);
     });
   });
 }
