@@ -64,6 +64,24 @@
     $('msgText').textContent = t(vi, zh);
     $('msgText').className = 'msg ' + (kind === 'ok' ? 'ok' : 'err');
     $('msgSub').textContent = t(viSub || '', zhSub || '');
+    // 成功时表单已消失，副标题「请填写以下信息」不再适用
+    var lb = $('empLabel');
+    if (lb) lb.style.display = kind === 'ok' ? 'none' : '';
+    // 提交按钮在页面底部，提示卡片在顶部：必须主动滚回，否则用户看不到结果
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+
+  /* 提交失败：不隐藏表单（避免已填内容丢失），就地显示错误 */
+  function showInlineErr(vi, zh) {
+    var el = $('inlineErr');
+    if (!el) return;
+    el.textContent = t(vi, zh);
+    el.classList.remove('hidden');
+    try { el.scrollIntoView({ block: 'center' }); } catch (e) {}
+  }
+  function hideInlineErr() {
+    var el = $('inlineErr');
+    if (el) { el.classList.add('hidden'); el.textContent = ''; }
   }
 
   function fillForm(d) {
@@ -141,11 +159,13 @@
 
   async function submit() {
     var form = collect();
-    if (!form.real_name) { alert(t('Vui lòng điền Họ và tên', '请填写姓名')); return; }
-    if (!form.bank) { alert(t('Vui lòng điền Ngân hàng', '请填写开户银行')); return; }
-    if (!form.account) { alert(t('Vui lòng điền Số tài khoản', '请填写银行账号')); return; }
+    if (!form.real_name) { showInlineErr('Vui lòng điền Họ và tên', '请填写姓名'); $('f_real_name').focus(); return; }
+    if (!form.bank) { showInlineErr('Vui lòng điền Ngân hàng', '请填写开户银行'); $('f_bank').focus(); return; }
+    if (!form.account) { showInlineErr('Vui lòng điền Số tài khoản', '请填写银行账号'); $('f_account').focus(); return; }
     var btn = $('submitBtn');
+    hideInlineErr();
     btn.disabled = true;
+    btn.textContent = t('Đang gửi...', '提交中...');
     try {
       var res = await fetch('api/self/form/' + encodeURIComponent(token), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -156,12 +176,15 @@
         showMsg('ok', 'Gửi thành công! 🎉 Thông tin đã gửi đến quản lý, vui lòng chờ duyệt.',
           '提交成功！🎉 信息已发送给管理员，请等待审核。');
       } else {
+        // 失败时保留表单，避免已填内容丢失
         btn.disabled = false;
-        showMsg('err', j.error || 'Gửi thất bại', '提交失败');
+        setSubmitBtn();
+        showInlineErr(j.error || 'Gửi thất bại', j.error || '提交失败');
       }
     } catch (e) {
       btn.disabled = false;
-      showMsg('err', 'Lỗi mạng, vui lòng thử lại', '网络错误，请重试');
+      setSubmitBtn();
+      showInlineErr('Lỗi mạng, vui lòng thử lại', '网络错误，请重试');
     }
   }
 

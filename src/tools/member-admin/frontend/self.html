@@ -37,6 +37,9 @@
   .btn-primary:hover { box-shadow:0 3px 12px rgba(37,99,235,.38); }
   .btn-primary:active { transform:translateY(1px); }
   .btn-primary:disabled { background:#bcd3f8; box-shadow:none; cursor:not-allowed; }
+  .hidden { display:none !important; }
+  .inline-err { margin-top:14px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;
+    border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.6; }
   .status { text-align:center; padding:22px 16px; background:#fff; border:1px solid var(--border); border-radius:14px;
     margin-top:12px; box-shadow:0 1px 3px rgba(15,23,42,.05); }
   .status .icon { font-size:46px; }
@@ -120,11 +123,12 @@
         <input type="tel" id="f_emergency_phone" placeholder="Số điện thoại người thân" data-zh-placeholder="亲属手机号"></label>
     </div>
 
+    <div id="inlineErr" class="inline-err hidden"></div>
     <button class="btn-primary" id="submitBtn">Gửi thông tin</button>
   </div>
 
   <footer data-zh="员工自助信息更新 · Member Admin">Member Admin · 员工自助信息更新</footer>
 </div>
-<script src="self.js?v=20260920b"></script>
+<script src="self.js?v=20260924a"></script>
 </body>
 </html>
