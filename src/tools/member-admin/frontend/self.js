@@ -54,12 +54,13 @@
     }
   }
 
-  function showMsg(kind, vi, zh) {
+  function showMsg(kind, vi, zh, viSub, zhSub) {
     $('formView').classList.add('hidden');
     $('msgView').classList.remove('hidden');
     $('msgIcon').textContent = kind === 'ok' ? '✅' : '❌';
     $('msgText').textContent = t(vi, zh);
     $('msgText').className = 'msg ' + (kind === 'ok' ? 'ok' : 'err');
+    $('msgSub').textContent = t(viSub || '', zhSub || '');
   }
 
   function fillForm(d) {
@@ -108,18 +109,26 @@
       localStorage.setItem('ma_self_lang', lang);
       applyLangUI();
     });
-    if (!token) { showMsg('err', 'Liên kết thiếu mã xác nhận (token)', '链接缺少校验码（token），请使用管理员发送的完整链接'); return; }
+    if (!token) {
+      showMsg('err', 'Liên kết thiếu mã xác nhận (token)', '链接缺少校验码（token）',
+        'Vui lòng dùng đúng liên kết từ quản lý.', '请使用管理员发送的完整链接');
+      return;
+    }
     try {
       var res = await fetch('api/self/form/' + encodeURIComponent(token));
       var j = await res.json();
       if (!j.ok) {
-        showMsg('err', j.error || 'Không thể tải biểu mẫu', '无法加载表单');
+        showMsg('err', j.error || 'Không thể tải biểu mẫu', j.error || '无法加载表单',
+          'Vui lòng liên hệ quản lý để nhận link mới.', '请联系管理员重新获取链接');
         return;
       }
       subStatus = j.data.submission_status || '';
       fillForm(j.data);
       setSubmitBtn();
-    } catch (e) { showMsg('err', 'Lỗi mạng, vui lòng thử lại', '网络错误，请重试'); }
+    } catch (e) {
+      showMsg('err', 'Lỗi mạng, vui lòng thử lại', '网络错误，请重试',
+        'Kiểm tra kết nối và mở lại link.', '请检查网络后重新打开链接');
+    }
   }
 
   async function submit() {
