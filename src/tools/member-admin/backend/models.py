@@ -104,6 +104,12 @@ CREATE TABLE IF NOT EXISTS admin_users (
     created_at TEXT
 );
 
+CREATE TABLE IF NOT EXISTS login_security (
+    username TEXT PRIMARY KEY,
+    fail_count INTEGER DEFAULT 0,
+    locked_until TEXT
+);
+
 CREATE TABLE IF NOT EXISTS audit_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     actor TEXT NOT NULL,
@@ -208,6 +214,35 @@ CREATE TABLE IF NOT EXISTS verify_reports (
     updated_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_verify_reports_date ON verify_reports(report_date);
+
+-- 员工自助表单：一次性邀请链接（管理员生成，发 Zalo/Discord 给越南员工自行填写）
+CREATE TABLE IF NOT EXISTS self_form_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    emp_no TEXT NOT NULL,              -- 目标员工编号
+    token TEXT NOT NULL UNIQUE,        -- 一次性链接 token（urlsafe base64，防枚举）
+    expires_at TEXT NOT NULL,          -- 过期时间 YYYY-MM-DD HH:MM:SS
+    status TEXT DEFAULT 'unused',      -- unused/used/expired（expired 由读取时派生）
+    created_by TEXT DEFAULT '',
+    created_at TEXT,
+    used_at TEXT DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_self_tokens_emp ON self_form_tokens(emp_no);
+
+-- 员工自助表单：提交队列（审核通过后写入 live_employees，未提交字段不动）
+CREATE TABLE IF NOT EXISTS self_form_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    emp_no TEXT NOT NULL,
+    token TEXT DEFAULT '',
+    form_json TEXT DEFAULT '{}',       -- 提交字段 JSON（SELF_FORM_FIELDS 白名单内）
+    status TEXT DEFAULT 'pending',     -- pending/approved/rejected
+    review_remark TEXT DEFAULT '',
+    reviewed_by TEXT DEFAULT '',
+    reviewed_at TEXT DEFAULT '',
+    submitted_at TEXT,
+    created_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_self_sub_emp ON self_form_submissions(emp_no);
+CREATE INDEX IF NOT EXISTS idx_self_sub_status ON self_form_submissions(status);
 """
 
 # 各表允许写入的字段（API 入参白名单）
@@ -293,6 +328,7 @@ def init_db():
             split_total INTEGER DEFAULT 0,
             updated_at TEXT
         )""")
+        pr_cols = [r["name"] for r in conn.execute("PRAGMA table_info(pay_records)")]  # 重建后刷新列集，避免下方重复 ALTER
     if "split_idx" not in pr_cols:
         conn.execute("ALTER TABLE pay_records ADD COLUMN split_idx INTEGER DEFAULT 0")
         conn.execute("ALTER TABLE pay_records ADD COLUMN split_total INTEGER DEFAULT 0")

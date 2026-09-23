@@ -301,6 +301,13 @@ const VI_MAP = {
   '无效': 'Vô hiệu',
   '点击展开/收起无效人员（场次签到 0%）': 'Bấm để mở/thu gọn người vô hiệu (tỷ lệ điểm danh 0%)',
   '查看该日校对报告': 'Xem báo cáo đối chiếu ngày này',
+  '员工表单': 'Biểu mẫu NV',
+  '生成链接': 'Tạo link',
+  '审核队列': 'Duyệt đơn',
+  '通过': 'Duyệt',
+  '驳回': 'Từ chối',
+  '复制链接': 'Copy link',
+  '已复制': 'Đã copy',
 };
 function t(s) { return getLang() === 'vi' ? (VI_MAP[s] || s) : s; }
 // 角色权限说明（展示在「用户管理-选择角色」处，供管理员判断）
@@ -313,7 +320,7 @@ const ROLE_HINTS = {
 };
 // 角色可见模块白名单：viewer=全部（仅隐藏用户管理/操作日志），hr/operator 限定范围，admin/super 返回 null（全部可见）
 const OPERATOR_MODULES = ['pids', 'binding', 'checkin', 'schedule'];
-const HR_MODULES = ['live_employees', 'pids', 'checkin', 'inbox', 'binding'];
+const HR_MODULES = ['live_employees', 'pids', 'checkin', 'inbox', 'binding', 'self_forms'];
 function roleModules(role) {
   if (role === 'operator') return OPERATOR_MODULES;
   if (role === 'hr') return HR_MODULES;
@@ -841,13 +848,15 @@ async function switchModule(moduleKey) {
   }
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景', paycode: '工资代发收款码' };
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景', paycode: '工资代发收款码', self_forms: '员工表单' };
   $('#adminModuleTitle').textContent = t(titles[moduleKey] || '');
   if (moduleKey === 'users') {
     if (state.role !== 'super') return; // 用户管理仅 super
     renderUsersPage();
   } else if (moduleKey === 'paycode') {
     renderPayCodePage();
+  } else if (moduleKey === 'self_forms') {
+    renderSelfFormsPage();
   } else if (moduleKey === 'logs') {
     // 操作日志默认全量显示（含登录/用户管理等），直播组不再锁定只显示直播员工日志
     logsState.entity_type = '';
@@ -7122,4 +7131,252 @@ async function paycodeBatchOpen(batchId) {
   let detail;
   try { detail = await api('paycode/batches/' + batchId); } catch (e) { body.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
   paycodeRender({ batch: detail.batch, items: detail.items });
+}
+
+/* ================= 员工表单（self forms）：一次性链接 + 待审核队列 ================= */
+var selfFormsTab = 'gen';
+var selfFormsQueueFilter = 'pending';
+var selfFormsSelectedEmpNo = '';
+
+const SELF_FORM_LABELS = {
+  real_name: '真实姓名', gender: '性别', birth_date: '出生日期', phone_zalo: '手机/Zalo',
+  email: '邮箱', id_card: '身份证', discord: 'Discord',
+  account_holder: '收款人（留空=本人）', bank: '银行', account: '银行账号', payee_phone: '收款人手机号',
+  address: '家庭住址', emergency_contact: '紧急联系人', emergency_relation: '联系人关系', emergency_phone: '紧急联系电话',
+};
+const SELF_FORM_GROUPS = [
+  { title: '👤 个人信息', fields: ['real_name', 'gender', 'birth_date', 'phone_zalo', 'email', 'id_card', 'discord'] },
+  { title: '🏦 银行账号', fields: ['account_holder', 'bank', 'account', 'payee_phone'] },
+  { title: '🏠 家庭信息', fields: ['address', 'emergency_contact', 'emergency_relation', 'emergency_phone'] },
+];
+const SELF_FORM_STATUS_BADGE = {
+  pending: '<span style="background:#fef3c7;color:#92400e;padding:1px 8px;border-radius:99px;font-size:11px">待审</span>',
+  approved: '<span style="background:#dcfce7;color:#166534;padding:1px 8px;border-radius:99px;font-size:11px">已通过</span>',
+  rejected: '<span style="background:#fee2e2;color:#991b1b;padding:1px 8px;border-radius:99px;font-size:11px">已驳回</span>',
+};
+const SELF_FORM_GENDER_TXT = { '1': '男', '2': '女', '': '（空）' };
+
+function selfFormsSetTab(tab) {
+  selfFormsTab = tab;
+  const g = $('#sfTabGen'), q = $('#sfTabQueue');
+  if (g) g.style.cssText = tab === 'gen' ? PAY_TAB_ACTIVE : '';
+  if (q) q.style.cssText = tab === 'queue' ? PAY_TAB_ACTIVE : '';
+  const pg = $('#sfGenPane'), pq = $('#sfQueuePane');
+  if (pg) pg.style.display = tab === 'gen' ? '' : 'none';
+  if (pq) pq.style.display = tab === 'queue' ? '' : 'none';
+}
+
+function selfFormsEmpLabel(e) {
+  const name = e.nickname || e.real_name || e.emp_no;
+  const cn = e.cn_name ? '（' + e.cn_name + '）' : '';
+  return name + cn + '（' + (e.emp_no || '-') + '）';
+}
+
+function selfFormsCopyText(text) {
+  const done = () => showToast(t('已复制'), 'success');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => { selfFormsCopyFallback(text); done(); });
+  } else { selfFormsCopyFallback(text); done(); }
+}
+function selfFormsCopyFallback(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+}
+
+async function renderSelfFormsPage() {
+  const el = $('#adminMain');
+  el.innerHTML =
+    '<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">'
+    + '<button class="btn btn-sm" id="sfTabGen">🔗 生成链接</button>'
+    + '<button class="btn btn-sm" id="sfTabQueue">📋 审核队列</button>'
+    + '<span class="muted" style="font-size:12px">管理员生成一次性链接发 Zalo/Discord，员工自助填写，提交后在此审核写入</span>'
+    + '</div>'
+    + '<div id="sfGenPane"></div>'
+    + '<div id="sfQueuePane" style="display:none"></div>';
+  $('#sfTabGen').addEventListener('click', () => selfFormsSetTab('gen'));
+  $('#sfTabQueue').addEventListener('click', () => selfFormsSetTab('queue'));
+  selfFormsSetTab(selfFormsTab);
+  selfFormsRenderGen();
+  selfFormsQueue();
+}
+
+/* ---- Tab1：生成链接 ---- */
+async function selfFormsRenderGen() {
+  const pane = $('#sfGenPane');
+  pane.innerHTML =
+    '<div class="card" style="max-width:760px">'
+    + '<h3 style="margin-bottom:10px">为员工生成一次性邀请链接</h3>'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'
+    + '<label class="field" style="flex:1;min-width:240px"><span>选择员工 *</span>'
+    + '<div style="display:flex;gap:8px"><input type="text" id="sfEmpNo" placeholder="点击右侧按钮选择员工" readonly style="flex:1">'
+    + '<button class="btn btn-sm" id="sfPickBtn">选择</button></div></label>'
+    + '<label class="field"><span>有效期</span><select id="sfDays">'
+    + '<option value="7">7 天</option><option value="1">1 天</option><option value="3">3 天</option><option value="30">30 天</option>'
+    + '</select></label>'
+    + '<button class="btn btn-primary" id="sfGenBtn">生成链接</button>'
+    + '</div>'
+    + '<div id="sfGenResult" style="margin-top:14px"></div>'
+    + '</div>'
+    + '<div class="card" style="max-width:760px;margin-top:14px">'
+    + '<h3 style="margin-bottom:10px">最近生成的链接</h3>'
+    + '<div id="sfTokenList"><p class="muted">加载中...</p></div>'
+    + '</div>';
+  $('#sfPickBtn').addEventListener('click', () => {
+    openRichEmpPicker(emp => {
+      selfFormsSelectedEmpNo = emp.emp_no || '';
+      $('#sfEmpNo').value = selfFormsEmpLabel(emp);
+    });
+  });
+  $('#sfGenBtn').addEventListener('click', selfFormsGenToken);
+  selfFormsTokenList();
+}
+
+async function selfFormsGenToken() {
+  if (!selfFormsSelectedEmpNo) { showToast('请先选择员工', 'error'); return; }
+  const btn = $('#sfGenBtn');
+  btn.disabled = true;
+  try {
+    const res = await api('self/forms/tokens', { method: 'POST', json: { emp_no: selfFormsSelectedEmpNo, days: +$('#sfDays').value } });
+    const d = res.data;
+    const _base = location.origin + (location.pathname.indexOf('/ma-test') === 0 ? '/ma-test-self' : '/ma-self');
+    d.url = _base + '/?token=' + d.token; // 前端拼员工页链接，与复制链接逻辑一致
+    $('#sfGenResult').innerHTML =
+      '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px">'
+      + '<div style="font-size:13px;margin-bottom:8px">✅ 已生成 · <b>' + esc(d.label) + '</b> · 有效期至 ' + esc(d.expires_at) + '</div>'
+      + '<div style="display:flex;gap:8px"><input type="text" id="sfGenUrl" readonly value="' + esc(d.url) + '" style="flex:1;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px">'
+      + '<button class="btn btn-sm" id="sfGenCopyBtn">复制链接</button></div>'
+      + '<div class="muted" style="font-size:12px;margin-top:6px">把链接通过 Zalo / Discord 发给该员工，打开后即填写，提交后链接自动失效。</div>'
+      + '</div>';
+    $('#sfGenCopyBtn').addEventListener('click', () => selfFormsCopyText($('#sfGenUrl').value));
+    selfFormsTokenList();
+  } catch (e) { showToast(e.message, 'error'); }
+  btn.disabled = false;
+}
+
+async function selfFormsTokenList() {
+  const box = $('#sfTokenList');
+  if (!box) return;
+  box.innerHTML = '<p class="muted">加载中...</p>';
+  let rows = [];
+  try { rows = (await api('self/forms/tokens')).data || []; } catch (e) { box.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
+  if (!rows.length) { box.innerHTML = '<p class="muted">暂无链接，先生成一个发给员工。</p>'; return; }
+  const stLabel = { unused: '未使用', used: '已提交' };
+  let html = '<table class="table"><thead><tr><th>员工</th><th>状态</th><th>有效期至</th><th>创建人</th><th>操作</th></tr></thead><tbody>';
+  rows.forEach(r => {
+    const expired = r.status === 'unused' && r.expires_at && r.expires_at < new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const st = expired ? '<span style="color:#9ca3af">已过期</span>' : (stLabel[r.status] || r.status);
+    const canUse = r.status === 'unused' && !expired;
+    html += '<tr><td>' + esc(selfFormsEmpLabel(r)) + '</td><td>' + st + '</td><td>' + esc(r.expires_at || '') + '</td><td>' + esc(r.created_by || '') + '</td><td>'
+      + (canUse ? '<button class="btn btn-sm" style="font-size:11px" onclick="selfFormsCopyToken(' + r.id + ')">复制链接</button>' : '<span class="muted" style="font-size:12px">' + (r.status === 'used' ? '已失效' : '') + '</span>')
+      + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  box.innerHTML = html;
+}
+
+async function selfFormsCopyToken(id) {
+  let rows = [];
+  try { rows = (await api('self/forms/tokens')).data || []; } catch (e) { showToast(e.message, 'error'); return; }
+  const r = rows.find(x => x.id === id);
+  if (!r) return;
+  const base = location.origin + (location.pathname.indexOf('/ma-test') === 0 ? '/ma-test-self' : '/ma-self');
+  selfFormsCopyText(base + '/?token=' + r.token);
+}
+
+/* ---- Tab2：审核队列 ---- */
+async function selfFormsQueue() {
+  const pane = $('#sfQueuePane');
+  if (!pane) return;
+  pane.innerHTML =
+    '<div class="card" style="max-width:960px">'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">'
+    + '<h3 style="margin:0 8px 0 0">员工提交</h3>'
+    + ['pending', 'approved', 'rejected'].map(s =>
+        '<button class="btn btn-sm" id="sfQf_' + s + '" style="' + (selfFormsQueueFilter === s ? PAY_TAB_ACTIVE : '') + '">'
+        + ({ pending: '待审', approved: '已通过', rejected: '已驳回' }[s]) + '</button>').join('')
+    + '</div>'
+    + '<div id="sfQueueList"><p class="muted">加载中...</p></div>'
+    + '</div>';
+  ['pending', 'approved', 'rejected'].forEach(s => {
+    $('#sfQf_' + s).addEventListener('click', () => {
+      selfFormsQueueFilter = s;
+      selfFormsQueue();
+    });
+  });
+  selfFormsQueueLoad();
+}
+
+async function selfFormsQueueLoad() {
+  const box = $('#sfQueueList');
+  box.innerHTML = '<p class="muted">加载中...</p>';
+  let rows = [];
+  try { rows = (await api('self/submissions?status=' + selfFormsQueueFilter)).data || []; } catch (e) { box.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
+  if (!rows.length) { box.innerHTML = '<p class="muted">暂无' + ({ pending: '待审', approved: '已通过', rejected: '已驳回' }[selfFormsQueueFilter]) + '提交。</p>'; return; }
+  let html = '<table class="table"><thead><tr><th>员工</th><th>提交时间</th><th>状态</th><th>审核</th><th>操作</th></tr></thead><tbody>';
+  rows.forEach(r => {
+    html += '<tr>'
+      + '<td>' + esc(selfFormsEmpLabel(r)) + '</td>'
+      + '<td>' + esc(r.submitted_at || '') + '</td>'
+      + '<td>' + (SELF_FORM_STATUS_BADGE[r.status] || r.status) + '</td>'
+      + '<td style="font-size:12px">' + esc(r.reviewed_by || '-') + (r.review_remark ? '<br><span class="muted">' + esc(r.review_remark) + '</span>' : '') + '</td>'
+      + '<td style="white-space:nowrap">'
+      + '<button class="btn btn-sm" style="font-size:11px" onclick="selfFormsToggleDetail(' + r.id + ')">查看详情</button> '
+      + (r.status === 'pending'
+          ? '<button class="btn btn-sm" style="font-size:11px;background:#16a34a;color:#fff" onclick="selfFormsReview(' + r.id + ',\'approve\')">通过</button> '
+            + '<button class="btn btn-sm" style="font-size:11px;background:#dc2626;color:#fff" onclick="selfFormsReview(' + r.id + ',\'reject\')">驳回</button>'
+          : '')
+      + '</td></tr>'
+      + '<tr id="sfDetail_' + r.id + '" style="display:none"><td colspan="5">' + selfFormsDetailHtml(r) + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  box.innerHTML = html;
+}
+
+function selfFormsToggleDetail(id) {
+  const tr = $('#sfDetail_' + id);
+  if (tr) tr.style.display = tr.style.display === 'none' ? '' : 'none';
+}
+
+function selfFormsDetailHtml(r) {
+  let form = {};
+  try { form = JSON.parse(r.form_json || '{}'); } catch (e) {}
+  let html = '<div style="background:#f9fafb;border-radius:8px;padding:10px">';
+  SELF_FORM_GROUPS.forEach(g => {
+    let rowsHtml = '';
+    g.fields.forEach(f => {
+      const v = String(form[f] || '').trim();
+      if (!v) return; // 只显示员工提交的字段
+      const cur = String(r[f] != null ? r[f] : '').trim();
+      const changed = cur !== v;
+      const disp = f === 'gender' ? (SELF_FORM_GENDER_TXT[v] || v) : v;
+      rowsHtml += '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px dashed #e5e7eb;font-size:13px">'
+        + '<span style="width:130px;color:#6b7280;flex-shrink:0">' + esc(SELF_FORM_LABELS[f]) + '</span>'
+        + '<span style="flex:1">' + esc(disp)
+        + (changed ? ' <span style="color:#b45309;font-size:11px">（原值：' + esc(cur || '空') + '）</span>' : '')
+        + '</span></div>';
+    });
+    if (rowsHtml) html += '<div style="margin-bottom:8px"><b style="font-size:13px">' + g.title + '</b>' + rowsHtml + '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+async function selfFormsReview(id, action) {
+  let remark = '';
+  if (action === 'reject') {
+    remark = prompt('驳回原因（可选，员工可见）', '') || '';
+  } else {
+    if (!confirm('确认通过？提交中的字段将写入员工档案（未填写字段保持原值）。')) return;
+  }
+  try {
+    const res = await api('self/submissions/' + id + '/review', { method: 'POST', json: { action: action, remark: remark } });
+    const changed = (res.data.changed || []).map(f => SELF_FORM_LABELS[f] || f).join('、');
+    showToast(action === 'approve' ? ('已通过' + (changed ? '，更新：' + changed : '（无变更）')) : '已驳回', 'success');
+  } catch (e) { showToast(e.message, 'error'); }
+  selfFormsQueue();
 }

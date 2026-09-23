@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cập nhật thông tin nhân viên</title>
+<style>
+  :root { --primary:#2563eb; --danger:#dc2626; --ok:#16a34a; --border:#d1d5db; --bg:#f3f4f6; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+         background:var(--bg); color:#111827; line-height:1.5; }
+  .wrap { max-width:640px; margin:0 auto; padding:16px 14px 48px; }
+  header { text-align:center; padding:18px 0 6px; }
+  header h1 { font-size:20px; color:#1e3a8a; }
+  header p { font-size:13px; color:#6b7280; margin-top:4px; }
+  .card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; margin-top:14px; }
+  .card h2 { font-size:15px; color:#1e3a8a; border-left:4px solid var(--primary); padding-left:8px; margin-bottom:12px; }
+  .field { display:block; margin-bottom:12px; }
+  .field span { display:block; font-size:13px; color:#374151; margin-bottom:4px; }
+  .field .req { color:var(--danger); }
+  .field input, .field select { width:100%; padding:10px 12px; font-size:15px; border:1px solid var(--border);
+    border-radius:8px; background:#fff; -webkit-appearance:none; appearance:none; }
+  .field input:focus, .field select:focus { outline:2px solid var(--primary); border-color:var(--primary); }
+  .hint { font-size:12px; color:#9ca3af; margin-top:3px; }
+  .info { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 14px; font-size:13px; margin-top:14px; }
+  .info b { color:#1e40af; }
+  button { width:100%; padding:14px; font-size:16px; font-weight:600; border:none; border-radius:10px; cursor:pointer; }
+  .btn-primary { background:var(--primary); color:#fff; margin-top:18px; }
+  .btn-primary:disabled { background:#93c5fd; cursor:not-allowed; }
+  .status { text-align:center; padding:28px 16px; }
+  .status .icon { font-size:48px; }
+  .status .msg { font-size:16px; margin-top:12px; }
+  .status .sub { font-size:13px; color:#6b7280; margin-top:6px; }
+  .status .err { color:var(--danger); }
+  .status .ok { color:var(--ok); }
+  .tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:99px; margin-left:6px; }
+  .tag-pending { background:#fef3c7; color:#92400e; }
+  .tag-approved { background:#dcfce7; color:#166534; }
+  .tag-rejected { background:#fee2e2; color:#991b1b; }
+  footer { text-align:center; font-size:12px; color:#9ca3af; margin-top:20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Cập nhật thông tin nhân viên</h1>
+    <p id="empLabel">Vui lòng điền đầy đủ thông tin dưới đây</p>
+  </header>
+
+  <!-- 校验失败 / 已提交 -->
+  <div id="msgView" class="status hidden">
+    <div class="icon" id="msgIcon"></div>
+    <div class="msg" id="msgText"></div>
+    <div class="sub" id="msgSub"></div>
+  </div>
+
+  <!-- 表单 -->
+  <div id="formView" class="hidden">
+    <div class="info">
+      <b>Lưu ý:</b> Chỉ cần điền thông tin thay đổi. Các trường để trống sẽ giữ nguyên thông tin hiện tại.
+      Trường có dấu <span style="color:#dc2626">*</span> là bắt buộc.
+    </div>
+
+    <div class="card">
+      <h2>👤 Thông tin cá nhân</h2>
+      <label class="field"><span>Họ và tên <span class="req">*</span></span>
+        <input type="text" id="f_real_name" placeholder="Ví dụ: Nguyễn Văn A"></label>
+      <label class="field"><span>Giới tính</span>
+        <select id="f_gender">
+          <option value="">-- Chọn --</option>
+          <option value="1">Nam</option>
+          <option value="2">Nữ</option>
+        </select></label>
+      <label class="field"><span>Ngày sinh</span>
+        <input type="date" id="f_birth_date"></label>
+      <label class="field"><span>SĐT / Zalo</span>
+        <input type="tel" id="f_phone_zalo" placeholder="Số điện thoại hoặc Zalo"></label>
+      <label class="field"><span>Email</span>
+        <input type="email" id="f_email" placeholder="Email (nếu có)"></label>
+      <label class="field"><span>Số CCCD / CMND</span>
+        <input type="text" id="f_id_card" placeholder="Số căn cước công dân"></label>
+      <label class="field"><span>Discord</span>
+        <input type="text" id="f_discord" placeholder="Nickname Discord (nếu có)">
+        <span class="hint">Dùng để điểm danh ca livestream</span></label>
+    </div>
+
+    <div class="card">
+      <h2>🏦 Thông tin tài khoản ngân hàng</h2>
+      <label class="field"><span>Người thụ hưởng</span>
+        <input type="text" id="f_account_holder" placeholder="Để trống nếu là tài khoản của chính bạn">
+        <span class="hint">Nếu nhận lương qua tài khoản người khác, điền tên người đó</span></label>
+      <label class="field"><span>Ngân hàng <span class="req">*</span></span>
+        <input type="text" id="f_bank" placeholder="Ví dụ: Vietcombank, MB, Techcombank"></label>
+      <label class="field"><span>Số tài khoản <span class="req">*</span></span>
+        <input type="text" id="f_account" placeholder="Số tài khoản ngân hàng"></label>
+      <label class="field"><span>SĐT người thụ hưởng</span>
+        <input type="tel" id="f_payee_phone" placeholder="Số điện thoại (nếu có)"></label>
+    </div>
+
+    <div class="card">
+      <h2>🏠 Thông tin gia đình</h2>
+      <label class="field"><span>Địa chỉ nhà</span>
+        <input type="text" id="f_address" placeholder="Địa chỉ hiện tại"></label>
+      <label class="field"><span>Người liên hệ khẩn cấp</span>
+        <input type="text" id="f_emergency_contact" placeholder="Tên người thân"></label>
+      <label class="field"><span>Quan hệ</span>
+        <select id="f_emergency_relation">
+          <option value="">-- Chọn --</option>
+          <option value="父母">Bố mẹ</option>
+          <option value="配偶">Vợ / chồng</option>
+          <option value="兄弟">Anh / chị / em</option>
+          <option value="其他">Khác</option>
+        </select></label>
+      <label class="field"><span>SĐT liên hệ khẩn cấp</span>
+        <input type="tel" id="f_emergency_phone" placeholder="Số điện thoại người thân"></label>
+    </div>
+
+    <button class="btn-primary" id="submitBtn">Gửi thông tin</button>
+  </div>
+
+  <footer>Member Admin · 员工自助信息更新</footer>
+</div>
+<script src="self.js?v=20260920a"></script>
+</body>
+</html>

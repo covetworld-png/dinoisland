@@ -14,6 +14,7 @@ import os
 import re
 import json
 import uuid
+import secrets
 import sqlite3
 from functools import wraps
 from io import BytesIO
@@ -89,7 +90,7 @@ def write_required(f):
             return f(*args, **kwargs)
         if role == "hr" and request.path.startswith((
                 "/api/checkin/", "/api/binding/", "/api/claim/", "/api/pids/",
-                "/api/live_employees", "/api/inbox/")):
+                "/api/live_employees", "/api/inbox/", "/api/self/")):
             return f(*args, **kwargs)
         return jsonify({"ok": False, "error": "无编辑权限（只读或超出角色范围）"}), 403
     return wrapper
@@ -3012,6 +3013,239 @@ def _paycode_read_rows():
         return rows
     data = request.get_json(force=True, silent=True) or {}
     return [(str(x.get("emp_no") or "").strip(), x.get("amount")) for x in (data.get("rows") or [])]
+
+
+# =====================================================================
+# 员工自助表单（self form）：管理员生成一次性邀请链接 → 越南员工自助填写 → 待审核 → 审核写 live_employees
+# =====================================================================
+SELF_FORM_FIELDS = [
+    # 个人信息
+    "real_name", "gender", "birth_date", "phone_zalo", "email", "id_card", "discord",
+    # 银行账号
+    "account_holder", "bank", "account", "payee_phone",
+    # 家庭信息
+    "address", "emergency_contact", "emergency_relation", "emergency_phone",
+]
+SELF_FORM_REQUIRED = ["real_name", "bank", "account"]  # 工资代发关键字段必填
+SELF_FORM_GENDERS = ("1", "2")
+SELF_FORM_RELATIONS = ("父母", "配偶", "兄弟", "其他")
+
+
+SELF_FORM_SELECT_COLS = (
+    "e.nickname, e.cn_name, e.real_name, e.alias, e.gender, e.birth_date, e.phone_zalo,"
+    " e.email, e.id_card, e.discord, e.account_holder, e.bank, e.account, e.payee_phone,"
+    " e.address, e.emergency_contact, e.emergency_relation, e.emergency_phone")
+
+
+def _self_token_check(token):
+    """校验 token：存在、未过期、未使用。返回 (ok, error, row)。"""
+    conn = get_db()
+    try:
+        row = conn.execute("SELECT * FROM self_form_tokens WHERE token=?", (token,)).fetchone()
+    finally:
+        conn.close()
+    if not row:
+        return False, "Liên kết không tồn tại（链接不存在）", None
+    if row["status"] == "used":
+        return False, "Liên kết đã được sử dụng（链接已被使用，如需修改请联系管理员重新生成）", row
+    if row["expires_at"] and row["expires_at"] < now():
+        return False, "Liên kết đã hết hạn（链接已过期，请联系管理员重新获取）", row
+    return True, "", row
+
+
+def _self_form_url(token):
+    """拼员工页完整链接：优先环境变量 SELF_FORM_BASE_URL，回退按 url_root 前缀替换。"""
+    base = os.environ.get("SELF_FORM_BASE_URL", "").strip()
+    if not base:
+        root = request.url_root.rstrip("/")
+        base = root.replace("/ma-test", "/ma-test-self").replace("/ma", "/ma-self")
+        base = base.rstrip("/") + "/"
+    return (base.rstrip("/") + "/?token=" + token) if not base.endswith("=") else base + token
+
+
+@app.post("/api/self/forms/tokens")
+@write_required
+def self_form_token_create():
+    """管理员为员工生成一次性邀请链接（默认 7 天，可选 1/3/7/30 天）。"""
+    data = request.get_json(force=True, silent=True) or {}
+    emp_no = str(data.get("emp_no") or "").strip()
+    days = int(data.get("days") or 7)
+    if not emp_no:
+        return jsonify({"ok": False, "error": "请选择员工"}), 400
+    if days not in (1, 3, 7, 30):
+        days = 7
+    conn = get_db()
+    try:
+        emp = conn.execute(
+            "SELECT id, emp_no, nickname, cn_name, real_name, status FROM live_employees WHERE trim(emp_no)=?",
+            (emp_no,)).fetchone()
+        if not emp:
+            return jsonify({"ok": False, "error": f"员工编号 {emp_no} 不存在"}), 404
+        if emp["status"] == "离职":
+            return jsonify({"ok": False, "error": f"员工 {emp_no} 已离职，不生成链接"}), 400
+        token = secrets.token_urlsafe(24)
+        from datetime import datetime as _dt, timedelta as _td
+        expires_at = (_dt.now() + _td(days=days)).strftime("%Y-%m-%d %H:%M:%S")
+        cur = conn.execute(
+            "INSERT INTO self_form_tokens(emp_no, token, expires_at, status, created_by, created_at)"
+            " VALUES(?,?,?,'unused',?,?)",
+            (emp_no, token, expires_at, session["user"], now()))
+        conn.commit()
+        return jsonify({"ok": True, "data": {
+            "id": cur.lastrowid, "token": token, "url": _self_form_url(token),
+            "expires_at": expires_at, "emp_no": emp_no,
+            "label": f"{emp['nickname'] or emp['real_name'] or emp_no}（{emp_no}）"}})
+    finally:
+        conn.close()
+
+
+@app.get("/api/self/forms/tokens")
+@admin_required
+def self_form_token_list():
+    """链接列表（含员工昵称），支持 status 筛选。"""
+    status = request.args.get("status", "").strip()
+    conn = get_db()
+    try:
+        sql = ("SELECT t.id, t.emp_no, t.token, t.expires_at, t.status, t.created_by, t.created_at, t.used_at,"
+               " e.nickname, e.cn_name, e.real_name"
+               " FROM self_form_tokens t LEFT JOIN live_employees e ON trim(e.emp_no)=t.emp_no")
+        args = []
+        if status in ("unused", "used"):
+            sql += " WHERE t.status=?"
+            args.append(status)
+        sql += " ORDER BY t.id DESC LIMIT 200"
+        rows = conn.execute(sql, args).fetchall()
+        return jsonify({"ok": True, "data": [dict(r) for r in rows]})
+    finally:
+        conn.close()
+
+
+@app.get("/api/self/form/<token>")
+def self_form_get(token):
+    """员工打开链接：校验 token，返回员工基本信息 + 现有字段值（预填，员工可改）。"""
+    ok, err, trow = _self_token_check(token)
+    if not ok:
+        return jsonify({"ok": False, "error": err}), 400
+    conn = get_db()
+    try:
+        emp = conn.execute("SELECT * FROM live_employees WHERE trim(emp_no)=?", (trow["emp_no"],)).fetchone()
+        sub = conn.execute(
+            "SELECT status FROM self_form_submissions WHERE emp_no=? ORDER BY id DESC LIMIT 1",
+            (trow["emp_no"],)).fetchone()
+    finally:
+        conn.close()
+    if not emp:
+        return jsonify({"ok": False, "error": "Không tìm thấy nhân viên liên kết（关联员工不存在）"}), 404
+    data = {f: (emp[f] if f in emp.keys() else "") for f in SELF_FORM_FIELDS}
+    data.update({
+        "emp_no": emp["emp_no"], "nickname": emp["nickname"], "alias": emp["alias"],
+        "cn_name": emp["cn_name"], "expires_at": trow["expires_at"],
+        "submission_status": (sub["status"] if sub else ""),
+    })
+    return jsonify({"ok": True, "data": data})
+
+
+@app.post("/api/self/form/<token>")
+def self_form_submit(token):
+    """员工提交表单：白名单过滤 + 必填校验 → 写入待审队列，token 置 used。"""
+    ok, err, trow = _self_token_check(token)
+    if not ok:
+        return jsonify({"ok": False, "error": err}), 400
+    data = request.get_json(force=True, silent=True) or {}
+    form = {f: str(data.get(f) or "").strip() for f in SELF_FORM_FIELDS}
+    for f in SELF_FORM_REQUIRED:
+        if not form[f]:
+            labels = {"real_name": "Họ và tên", "bank": "Ngân hàng", "account": "Số tài khoản"}
+            return jsonify({"ok": False, "error": f"Vui lòng điền {labels[f]}（必填）"}), 400
+    if form["gender"] not in SELF_FORM_GENDERS:
+        form["gender"] = ""
+    if form["emergency_relation"] not in SELF_FORM_RELATIONS:
+        form["emergency_relation"] = ""
+    conn = get_db()
+    try:
+        now_ts = now()
+        cur = conn.execute(
+            "INSERT INTO self_form_submissions(emp_no, token, form_json, status, submitted_at, created_at)"
+            " VALUES(?,?,?,'pending',?,?)",
+            (trow["emp_no"], token, json.dumps(form, ensure_ascii=False), now_ts, now_ts))
+        conn.execute("UPDATE self_form_tokens SET status='used', used_at=? WHERE id=?", (now_ts, trow["id"]))
+        conn.commit()
+        return jsonify({"ok": True, "data": {"id": cur.lastrowid}})
+    finally:
+        conn.close()
+
+
+@app.get("/api/self/submissions")
+@admin_required
+def self_form_submissions_list():
+    """提交队列（含员工当前值，供中越对照 diff）。"""
+    status = request.args.get("status", "").strip()
+    conn = get_db()
+    try:
+        sql = ("SELECT s.id, s.emp_no, s.token, s.form_json, s.status, s.review_remark,"
+               " s.reviewed_by, s.reviewed_at, s.submitted_at,"
+               + SELF_FORM_SELECT_COLS +
+               " FROM self_form_submissions s LEFT JOIN live_employees e ON trim(e.emp_no)=s.emp_no")
+        args = []
+        if status in ("pending", "approved", "rejected"):
+            sql += " WHERE s.status=?"
+            args.append(status)
+        sql += " ORDER BY s.id DESC LIMIT 200"
+        rows = conn.execute(sql, args).fetchall()
+        return jsonify({"ok": True, "data": [dict(r) for r in rows]})
+    finally:
+        conn.close()
+
+
+@app.post("/api/self/submissions/<int:sub_id>/review")
+@write_required
+def self_form_submission_review(sub_id):
+    """审核：approve 只把提交中非空字段写入 live_employees（未提交字段不动，防覆盖手工维护）；reject 留备注。"""
+    data = request.get_json(force=True, silent=True) or {}
+    action = str(data.get("action") or "").strip()
+    remark = str(data.get("remark") or "").strip()
+    if action not in ("approve", "reject"):
+        return jsonify({"ok": False, "error": "action 仅支持 approve/reject"}), 400
+    conn = get_db()
+    try:
+        sub = conn.execute("SELECT * FROM self_form_submissions WHERE id=?", (sub_id,)).fetchone()
+        if not sub:
+            return jsonify({"ok": False, "error": "提交不存在"}), 404
+        if sub["status"] != "pending":
+            return jsonify({"ok": False, "error": f"该提交已处理（{sub['status']}）"}), 400
+        now_ts = now()
+        if action == "reject":
+            conn.execute("UPDATE self_form_submissions SET status='rejected', review_remark=?, reviewed_by=?, reviewed_at=? WHERE id=?",
+                         (remark, session["user"], now_ts, sub_id))
+            conn.commit()
+            result = {"id": sub_id, "status": "rejected"}
+        else:
+            emp = conn.execute("SELECT * FROM live_employees WHERE trim(emp_no)=?", (sub["emp_no"],)).fetchone()
+            if not emp:
+                return jsonify({"ok": False, "error": f"关联员工 {sub['emp_no']} 不存在"}), 404
+            form = json.loads(sub["form_json"] or "{}")
+            before = dict(emp)
+            changed = {}
+            for f in SELF_FORM_FIELDS:
+                v = str(form.get(f) or "").strip()
+                if v and before.get(f) != v:
+                    changed[f] = v
+            if changed:
+                sets = ", ".join(f"{f} = ?" for f in changed)
+                conn.execute(f"UPDATE live_employees SET {sets}, updated_at=? WHERE id=?",
+                             list(changed.values()) + [now_ts, emp["id"]])
+            conn.execute("UPDATE self_form_submissions SET status='approved', review_remark=?, reviewed_by=?, reviewed_at=? WHERE id=?",
+                         (remark, session["user"], now_ts, sub_id))
+            conn.commit()
+            after = dict(conn.execute("SELECT * FROM live_employees WHERE id=?", (emp["id"],)).fetchone())
+            result = {"id": sub_id, "status": "approved", "changed": list(changed.keys())}
+    finally:
+        conn.close()
+    if action == "approve":
+        label = (after.get("nickname") or after.get("real_name") or sub["emp_no"])
+        log_change(session["user"], "update", "live_employee", emp["id"], label,
+                   before=before, after=after, ip=client_ip())
+    return jsonify({"ok": True, "data": result})
 
 
 if __name__ == "__main__":
