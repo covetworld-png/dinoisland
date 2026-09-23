@@ -427,8 +427,9 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
   color: var(--text-secondary);
 }
 
-/* ---------- è§’è‰²ï¼šviewer åªè¯»æ¨¡å¼ ---------- */
+/* ---------- 角色：viewer 只读 / operator 场控（PID 只读） ---------- */
 .role-viewer .btn-write { display: none; }
+.role-operator .btn-write-pids { display: none; }
 
 /* ---------- Toast ---------- */
 .toast {
@@ -458,6 +459,7 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
 }
 
 /* ---------- 通用辅助 ---------- */
+.muted { color: var(--text-secondary); font-size: 13px; }
 .card {
   background: var(--card);
   border: 1px solid var(--border);

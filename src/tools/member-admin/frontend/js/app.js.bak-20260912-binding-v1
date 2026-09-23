@@ -1,13 +1,4 @@
-/* =====================================================================
- * 军团员工账号管理后台 - 纯前端 SPA（无外部依赖）
- *
- * [部署规范 - 硬性，编辑本文件前必读]
- * 1. prod 部署必须等用户显式指令（"上 prod" / "部署生产"），禁止自主双端同步
- * 2. 所有改动顺序：本地校验 -> 部署 test 验证 -> 用户确认 -> 才可 prod
- * 3. 编码前先备份：cp 本文件 xxx.bak-$(date)
- * 4. 修改后提交 git（push 需用户显式确认）
- * 5. 违例示例（2026-09-12）：昵称列/改名告警未经确认直接上 prod —— 禁止再犯
- * ===================================================================== */
+/* 军团员工账号管理后台 - 纯前端 SPA（无外部依赖） */
 'use strict';
 
 /* ================= 工具 ================= */
@@ -177,155 +168,7 @@ function optionLabel(kind, id) {
 
 /* ================= 角色 ================= */
 
-const ROLE_LABELS = { super: '超级管理员', admin: '管理员', viewer: '特殊用户', operator: '场控', hr: 'HR' };
-
-/* ================= 双语（中/越南语）：checkin / binding 模块文案 ================= */
-function getLang() { return localStorage.getItem('ma_lang') || 'zh'; }
-function setLang(l) {
-  localStorage.setItem('ma_lang', l);
-  updateLangBtn();
-  if (state.module) switchModule(state.module); // 重渲染当前模块使新语言生效
-}
-function updateLangBtn() {
-  var b = document.getElementById('langToggleBtn');
-  if (b) b.textContent = getLang() === 'zh' ? 'VI' : '中';
-  applyNavLang();
-}
-// 导航/顶栏等静态 HTML 元素双语：data-i18n="中文原文"，按当前语言替换首个文本节点
-function applyNavLang() {
-  var vi = getLang() === 'vi';
-  $$('[data-i18n]').forEach(function(el) {
-    var zh = el.getAttribute('data-i18n');
-    var target = vi ? (VI_MAP[zh] || zh) : zh;
-    if (el.childNodes.length && el.childNodes[0].nodeType === 3) {
-      var tail = el.childNodes[0].nodeValue.endsWith(' ') ? ' ' : '';
-      el.childNodes[0].nodeValue = target + tail;
-    } else {
-      el.textContent = target;
-    }
-  });
-}
-// 越南语映射（key=中文原文；未收录的保持中文）
-const VI_MAP = {
-  '场次签到': 'Điểm danh ca',
-  '时间均为 GMT+7（越南）': 'Múi giờ GMT+7 (Việt Nam)',
-  '主播': 'Streamer',
-  '已签到': 'Đã điểm danh',
-  '未达标': 'Chưa đạt chuẩn',
-  '无效': 'Không hợp lệ',
-  '至': 'đến',
-  '搜索': 'Tìm kiếm',
-  '导出': 'Xuất CSV',
-  '设置': 'Cài đặt',
-  '主播列表': 'DS Streamer',
-  '陪玩列表': 'DS ngưởi chơi',
-  '待认领': 'Chờ nhận',
-  '数据校对': 'Kiểm tra DL',
-  '说明': 'Hướng dẫn',
-  '标记达标': 'Đánh dấu đạt',
-  '已达标': 'Đã đạt chuẩn',
-  '已排除': 'Đã loại trừ',
-  '最低': 'Tối thiểu',
-  '强行结束': 'Kết thúc ngay',
-  '删除场次': 'Xóa ca',
-  '追溯修正': 'Hiệu chỉnh',
-  'Discord 绑定': 'Liên kết Discord',
-  '待绑定': 'Chờ liên kết',
-  '已绑定全量': 'Đã liên kết (all)',
-  '绑定': 'Liên kết',
-  '解绑': 'Hủy liên kết',
-  '排除': 'Loại trừ',
-  '搜索 uid 尾号 / 昵称 / 归属': 'Tìm: cuối UID / nickname / chủ sở hữu',
-  '加载中...': 'Đang tải...',
-  '加载中…': 'Đang tải…',
-  '取消': 'Hủy',
-  '刷新': 'Làm mới',
-  '已取消': 'Đã hủy',
-  '进行中': 'Đang diễn ra',
-  '分钟': 'phút',
-  '保存': 'Lưu',
-  '确认选中': 'Xác nhận',
-  '请先选择员工': 'Vui lòng chọn nhân viên',
-  '无匹配员工': 'Không có nhân viên phù hợp',
-  '选择员工': 'Chọn nhân viên',
-  '编号': 'Mã NV',
-  '别名': 'Tên khác',
-  '中文名': 'Tên Trung',
-  '真实姓名': 'Họ tên thật',
-  '岗位': 'Vị trí',
-  '状态': 'Trạng thái',
-  '暂无 PID 数据': 'Chưa có dữ liệu PID',
-  '请先选择': 'Vui lòng chọn trước',
-  '已选中': 'Đã chọn',
-  '清除筛选': 'Xóa lọc',
-  '自动创建场次': 'Tự động tạo ca',
-  '（主播进入专属语音频道后自动创建）': '(Tự tạo khi Streamer vào kênh thoại riêng)',
-  '飞书推送通知': 'Thông báo Feishu',
-  '（开播 / 结束 / 取消）': '(Bắt đầu / Kết thúc / Hủy)',
-  'Discord 频道通知': 'Thông báo kênh Discord',
-  '（开播 / 结束 / 加入，语音频道聊天区）': '(Bắt đầu / Kết thúc / Tham gia, chat kênh thoại)',
-  '冷却期（分钟）': 'Thời gian chờ (phút)',
-  '场次结束后，同一语音频道在此时间内不再自动创建新场次（取消场次、不足15分钟短场次不触发）': 'Sau khi ca kết thúc, kênh không tự tạo ca mới trong khoảng này (ca hủy, ca <15phút không kích hoạt)',
-  '排除人员': 'Người loại trừ',
-  '从缓存列表选择，勾选后不计入语音时长统计、不生成自动打卡，且在签到列表中隐藏': 'Chọn từ danh sách cache: không tính giờ thoại, không tạo điểm danh tự động, ẩn khỏi DS điểm danh',
-  '搜索昵称...': 'Tìm nickname...',
-  '签到管理': 'Quản lý điểm danh',
-  '现有签到记录': 'Bản ghi điểm danh hiện có',
-  '暂无签到记录': 'Chưa có bản ghi điểm danh',
-  '场次': 'ca',
-  '暂无场次': 'Chưa có ca nào',
-  '游戏管理': 'Quản lý Game',
-  '直播管理': 'Quản lý Livestream',
-  '军团': 'Quân đoàn',
-  '账号': 'Tài khoản',
-  '收款账户': 'TK thu tiền',
-  '数据查询': 'Truy vấn dữ liệu',
-  '月度分成': 'Chia lãi tháng',
-  '操作日志': 'Nhật ký',
-  '用户管理': 'QL người dùng',
-  '消息中心': 'Trung tâm thông báo',
-  '排班表': 'Lịch phân ca',
-  '工资代发收款码': 'Mã QR trả lương',
-  '← 返回入口': '← Quay lại',
-  '当前用户：': 'Người dùng: ',
-  '修改密码': 'Đổi mật khẩu',
-  '退出登录': 'Đăng xuất',
-  'PID 全景': 'Toàn cảnh PID',
-  '员工': 'Nhân viên',
-  '员工管理后台': 'Quản lý nhân viên',
-  '场': 'ca',
-  '签到': 'Điểm danh',
-  '人': 'người',
-  '人次': 'lượt',
-  '校对': 'Đối chiếu',
-  '无效': 'Vô hiệu',
-  '点击展开/收起无效人员（场次签到 0%）': 'Bấm để mở/thu gọn người vô hiệu (tỷ lệ điểm danh 0%)',
-  '查看该日校对报告': 'Xem báo cáo đối chiếu ngày này',
-  '员工表单': 'Biểu mẫu NV',
-  '生成链接': 'Tạo link',
-  '审核队列': 'Duyệt đơn',
-  '通过': 'Duyệt',
-  '驳回': 'Từ chối',
-  '复制链接': 'Copy link',
-  '已复制': 'Đã copy',
-};
-function t(s) { return getLang() === 'vi' ? (VI_MAP[s] || s) : s; }
-// 角色权限说明（展示在「用户管理-选择角色」处，供管理员判断）
-const ROLE_HINTS = {
-  super: '全部模块可管理（含用户管理）',
-  admin: '全部业务模块可管理（用户管理仅超管）',
-  operator: '场控：场次签到 / Discord绑定 可管理；PID全景只读；排班表可看；其余不可见',
-  hr: 'HR：员工 / PID全景 / 场次签到 / 消息中心 / Discord绑定 可管理；其余不可见',
-  viewer: '特殊用户：全部模块只读（用户管理 / 操作日志 不可见）',
-};
-// 角色可见模块白名单：viewer=全部（仅隐藏用户管理/操作日志），hr/operator 限定范围，admin/super 返回 null（全部可见）
-const OPERATOR_MODULES = ['pids', 'binding', 'checkin', 'schedule'];
-const HR_MODULES = ['live_employees', 'pids', 'checkin', 'inbox', 'binding', 'self_forms'];
-function roleModules(role) {
-  if (role === 'operator') return OPERATOR_MODULES;
-  if (role === 'hr') return HR_MODULES;
-  return null; // viewer/admin/super：全部模块（viewer 另在用户管理/操作日志处隐藏）
-}
+const ROLE_LABELS = { super: '超级管理员', admin: '管理员', viewer: '普通用户' };
 
 /* ================= 可搜索下拉组件 ================= */
 
@@ -759,10 +602,10 @@ const MODULES = {
     filters: [],
     fields: [
       { key: 'player_name', label: 'play_detail 昵称', type: 'text', required: true, placeholder: '直播明细里的人员昵称，如 HENI' },
-      { key: 'emp_no', label: '关联员工', type: 'picker', optionsKind: 'live_employees', placeholder: '选择员工后自动带出 Discord' },
+      { key: 'emp_no', label: '关联员工', type: 'searchselect', optionsKind: 'live_employees', placeholder: '选择员工后自动带出 Discord' },
       { key: 'discord', label: 'Discord 昵称', type: 'text' },
       { key: 'discord_id', label: 'Discord ID', type: 'text' },
-      { key: 'remark', label: '备注', type: 'textarea', full: true, placeholder: '如：导演/临时人员/未匹配原因' },
+      { key: 'remark', label: '备注', type: 'textarea', full: true, placeholder: '如：外聘导演/临时人员/未匹配原因' },
     ],
   },
 };
@@ -840,26 +683,16 @@ function getListState(moduleKey) {
 /* ================= 后台模块渲染 ================= */
 
 async function switchModule(moduleKey) {
-  // hr/operator：仅白名单模块可访问；viewer（特殊用户）：全部只读，但操作日志不可见；其余禁止直达
-  const _allowed = roleModules(state.role);
-  if ((_allowed && !_allowed.includes(moduleKey)) || (state.role === 'viewer' && (moduleKey === 'logs' || moduleKey === 'self_forms'))) {
-    showToast('当前角色权限：仅可访问限定模块', 'error');
-    return;
-  }
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景', paycode: '工资代发收款码', self_forms: '员工表单' };
-  $('#adminModuleTitle').textContent = t(titles[moduleKey] || '');
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表' };
+  $('#adminModuleTitle').textContent = titles[moduleKey] || '';
   if (moduleKey === 'users') {
     if (state.role !== 'super') return; // 用户管理仅 super
     renderUsersPage();
-  } else if (moduleKey === 'paycode') {
-    renderPayCodePage();
-  } else if (moduleKey === 'self_forms') {
-    renderSelfFormsPage();
   } else if (moduleKey === 'logs') {
-    // 操作日志默认全量显示（含登录/用户管理等），直播组不再锁定只显示直播员工日志
-    logsState.entity_type = '';
+    // 日志按当前模块分组默认过滤：直播组只看直播员工日志
+    logsState.entity_type = state.moduleGroup === 'live' ? 'live_employee' : '';
     logsState.page = 1;
     renderLogsPage();
   } else if (moduleKey === 'query') {
@@ -868,10 +701,6 @@ async function switchModule(moduleKey) {
     renderCommissionPage();
   } else if (moduleKey === 'checkin') {
     renderCheckinPage();
-  } else if (moduleKey === 'binding') {
-    renderBindingPage();
-  } else if (moduleKey === 'pids') {
-    renderPidsPage();
   } else if (moduleKey === 'inbox') {
     renderInboxPage();
   } else if (moduleKey === 'schedule') {
@@ -1145,7 +974,7 @@ async function openFormModal(moduleKey, item) {
 
   const body = $('#formModalBody');
   body.innerHTML = '';
-  $('#formModalTitle').textContent = (item && item.id ? '编辑' : '新增') + cfg.title;
+  $('#formModalTitle').textContent = (item ? '编辑' : '新增') + cfg.title;
 
   // 新增直播员工：右上角「从源头导入」入口（从源库 staff_info 选员工回填表单）
   const headerBtns = document.getElementById('formModalHeaderBtns');
@@ -1209,38 +1038,6 @@ async function openFormModal(moduleKey, item) {
       ss.setValue(cur || '');
       fieldCtrls[f.key] = ss;
       label.appendChild(ss.el);
-    } else if (f.type === 'picker') {
-      // 富信息员工选择器：按钮弹层（编号/昵称/别名/中文名/真实姓名/Discord/岗位/状态），选中回填 emp_no + Discord
-      const wrap = document.createElement('div');
-      wrap.style.cssText = 'display:flex;gap:6px;align-items:center';
-      const show = document.createElement('input');
-      show.type = 'text';
-      show.readOnly = true;
-      show.placeholder = f.placeholder || '点击右侧按钮选择员工';
-      show.style.cssText = 'flex:1;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;background:#f9fafb';
-      let val = cur || '';
-      const pickBtn = document.createElement('button');
-      pickBtn.type = 'button';
-      pickBtn.className = 'btn btn-sm btn-primary';
-      pickBtn.textContent = '选择员工';
-      pickBtn.addEventListener('click', async () => {
-        openRichEmpPicker((emp) => {
-          if (!emp) return;
-          val = String(emp.emp_no || '');
-          show.value = empLabelText(val) || val;
-          // 回填 Discord（仅空时补，不覆盖已填值）
-          const dc = fieldCtrls['discord'];
-          if (dc && dc.setValue && emp.discord && !(item && (item.discord || '').trim())) dc.setValue(emp.discord);
-          const di = fieldCtrls['discord_id'];
-          if (di && di.setValue && emp.discord_id && !(item && (item.discord_id || '').trim())) di.setValue(emp.discord_id);
-        });
-      });
-      wrap.appendChild(show);
-      wrap.appendChild(pickBtn);
-      // 初始显示当前值
-      if (cur) show.value = optionLabel('live_employees', cur) || cur;
-      fieldCtrls[f.key] = { getValue: () => val, setValue: v => { val = v || ''; show.value = v ? (optionLabel('live_employees', v) || v) : ''; } };
-      label.appendChild(wrap);
     } else if (f.type === 'richtext') {
       const rte = createRichEditor(cur || '');
       fieldCtrls[f.key] = { getValue: () => rte.getHTML() };
@@ -1429,7 +1226,7 @@ async function openSourceStaffPicker() {
   searchRow.appendChild(inp);
   const searchBtn = document.createElement('button');
   searchBtn.className = 'btn btn-sm';
-  searchBtn.textContent = t('搜索');
+  searchBtn.textContent = '搜索';
   searchBtn.addEventListener('click', async () => {
     try {
       rows = await fetchSourceStaff(inp.value.trim());
@@ -1626,7 +1423,7 @@ $('#formModalSaveBtn').addEventListener('click', async () => {
       payload[f.key] = v;
     }
   }
-  const isEdit = !!formCtx.item && !!formCtx.item.id;
+  const isEdit = !!formCtx.item;
   const path = isEdit ? (cfg.table + '/' + formCtx.item.id) : cfg.table;
   try {
     await api(path, { method: isEdit ? 'PUT' : 'POST', json: payload });
@@ -1863,41 +1660,6 @@ function openLiveEmployeeDrawer(item) {
     sec.appendChild(grid);
     body.appendChild(sec);
   });
-
-  // ---- 收款二维码（VietQR 静态码，仅账号+银行，无金额）----
-  const qrSec = document.createElement('div');
-  qrSec.className = 'drawer-section';
-  qrSec.innerHTML = '<h4>收款二维码（VietQR）</h4>';
-  const qrBox = document.createElement('div');
-  qrBox.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px;';
-  qrBox.innerHTML = '<p style="color:#8b5cf6;font-size:12px;margin:0;">生成中…</p>';
-  qrSec.appendChild(qrBox);
-  body.appendChild(qrSec);
-
-  fetch('api/live_employees/' + item.id + '/vietqr')
-    .then(r => r.json())
-    .then(res => {
-      if (!res.ok) {
-        qrBox.innerHTML = '<p style="color:#ef4444;font-size:12px;margin:0;">' + esc(res.error || '无法生成') + '</p>';
-        return;
-      }
-      const d = res.data;
-      qrBox.innerHTML = '';
-      const qrEl = document.createElement('div');
-      qrBox.appendChild(qrEl);
-      try {
-        new QRCode(qrEl, { text: d.payload, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
-      } catch (e) {
-        qrBox.innerHTML = '<p style="color:#ef4444;font-size:12px;margin:0;">二维码生成失败</p>';
-        return;
-      }
-      const cap = document.createElement('p');
-      cap.style.cssText = 'font-size:12px;color:#6b7280;margin:6px 0 0;text-align:center;line-height:1.5;';
-      cap.textContent = d.payload ? (d.bank + ' · ' + d.account + '\n（静态码：仅含账号+收款银行，不含金额）') : '';
-      qrBox.appendChild(cap);
-    })
-    .catch(() => { qrBox.innerHTML = '<p style="color:#ef4444;font-size:12px;margin:0;">接口异常</p>'; });
-
   if (item.remark) {
     const sec = document.createElement('div');
     sec.className = 'drawer-section';
@@ -2061,8 +1823,8 @@ async function openGameDataModal(accountId) {
 
 /* ================= 操作日志页 ================= */
 
-const logsState = { page: 1, entity_type: '', actor: '', date_from: '', date_to: '', action: '' };
-const ENTITY_TYPE_LABELS = { employee: '员工', guild: '军团', account: '账号', payment_account: '收款账户', sql_script: 'SQL脚本', commission: '分成计算', commission_snapshot: '发放快照', live_employee: '直播员工', admin_user: '登录/用户管理' };
+const logsState = { page: 1, entity_type: '', actor: '', date_from: '', date_to: '' };
+const ENTITY_TYPE_LABELS = { employee: '员工', guild: '军团', account: '账号', payment_account: '收款账户', sql_script: 'SQL脚本', commission: '分成计算', commission_snapshot: '发放快照', live_employee: '直播员工' };
 const ACTION_LABELS = { create: '新增', update: '更新', delete: '删除', login: '登录' };
 
 function renderLogsPage() {
@@ -2077,13 +1839,6 @@ function renderLogsPage() {
     + Object.keys(ENTITY_TYPE_LABELS).map(k => '<option value="' + k + '">' + ENTITY_TYPE_LABELS[k] + '</option>').join('');
   typeSel.value = logsState.entity_type;
   bar.appendChild(typeSel);
-
-  const actionSel = document.createElement('select');
-  actionSel.innerHTML = '<option value="">全部动作</option>'
-    + Object.keys(ACTION_LABELS).map(k => '<option value="' + k + '">' + ACTION_LABELS[k] + '</option>').join('');
-  actionSel.value = logsState.action;
-  actionSel.title = '按动作筛选（含 登录）';
-  bar.appendChild(actionSel);
 
   const actorInput = document.createElement('input');
   actorInput.type = 'text';
@@ -2108,7 +1863,6 @@ function renderLogsPage() {
   searchBtn.textContent = '查询';
   searchBtn.addEventListener('click', () => {
     logsState.entity_type = typeSel.value;
-    logsState.action = actionSel.value;
     logsState.actor = actorInput.value.trim();
     logsState.date_from = fromInput.value;
     logsState.date_to = toInput.value;
@@ -2122,7 +1876,6 @@ function renderLogsPage() {
   resetBtn.textContent = '重置';
   resetBtn.addEventListener('click', () => {
     logsState.entity_type = '';
-    logsState.action = '';
     logsState.actor = '';
     logsState.date_from = '';
     logsState.date_to = '';
@@ -2149,7 +1902,6 @@ function renderLogsPage() {
 async function loadLogs() {
   const params = new URLSearchParams({ page: logsState.page, page_size: PAGE_SIZE });
   if (logsState.entity_type) params.set('entity_type', logsState.entity_type);
-  if (logsState.action) params.set('action', logsState.action);
   if (logsState.actor) params.set('actor', logsState.actor);
   if (logsState.date_from) params.set('date_from', logsState.date_from);
   if (logsState.date_to) params.set('date_to', logsState.date_to);
@@ -3987,12 +3739,6 @@ function openUserModal(ctx) {
   $('#userUsername').value = '';
   $('#userPassword').value = '';
   $('#userRole').value = ctx.item ? ctx.item.role : 'viewer';
-  // 角色权限说明：选择角色时实时展示，供管理员判断
-  var roleHint = document.getElementById('userRoleHint');
-  if (roleHint) {
-    roleHint.textContent = ROLE_HINTS[$('#userRole').value] || '';
-    $('#userRole').onchange = function() { roleHint.textContent = ROLE_HINTS[this.value] || ''; };
-  }
   openModal('userModal');
 }
 
@@ -4057,7 +3803,6 @@ async function doLogout() {
   state.username = null;
   state.role = null;
   document.body.classList.remove('role-viewer');
-  document.body.classList.remove('role-operator');
   showView('loginView');
 }
 $('#portalLogoutBtn').addEventListener('click', doLogout);
@@ -4080,12 +3825,9 @@ function enterPortal() {
   });
   // viewer 只读模式：隐藏一切写入口
   document.body.classList.toggle('role-viewer', state.role === 'viewer');
-  document.body.classList.toggle('role-operator', state.role === 'operator');
   // 用户管理入口仅 super 可见（游戏/直播组各一个）
   ['usersNavBtn', 'usersNavBtnLive'].forEach(id =>
     $('#' + id).classList.toggle('hidden', state.role !== 'super'));
-  // operator（场控）/ viewer 均无游戏管理入口需要区分：场控隐藏游戏管理卡片（其模块全在直播组）
-  $('#gameModuleCard').classList.toggle('hidden', state.role === 'operator');
   showView('portalView');
 }
 
@@ -4094,15 +3836,12 @@ function enterModuleGroup(group) {
   state.moduleGroup = group;
   $$('.sidebar-nav .side-btn').forEach(b => {
     const isUsersBtn = b.id === 'usersNavBtn' || b.id === 'usersNavBtnLive';
-    // 用户管理：分组 + 角色（仅 super）双重条件；group=all 的按钮两个分组都显示
-    // hr/operator：仅白名单模块可见；viewer：全部模块但隐藏 用户管理/操作日志
-    const _mods = roleModules(state.role);
-    const roleBlocked = (_mods && !_mods.includes(b.dataset.module)) || (state.role === 'viewer' && (b.dataset.module === 'logs' || b.id === 'usersNavBtn' || b.id === 'usersNavBtnLive'));
-    const hide = (b.dataset.group !== group && b.dataset.group !== 'all') || (isUsersBtn && state.role !== 'super') || roleBlocked;
+    // 用户管理：分组 + 角色（仅 super）双重条件
+    const hide = (b.dataset.group !== group) || (isUsersBtn && state.role !== 'super');
     b.classList.toggle('hidden', hide);
   });
-  $('#sidebarBrand').textContent = t(group === 'live' ? '直播管理' : '游戏管理');
-  document.title = t(group === 'live' ? '直播管理' : '游戏管理') + ' - ' + t('员工管理后台');
+  $('#sidebarBrand').textContent = group === 'live' ? '直播管理' : '游戏管理';
+  document.title = (group === 'live' ? '直播管理' : '游戏管理') + ' - 员工管理后台';
   showView('adminView');
   if (group === 'live') refreshInboxBadge();
 }
@@ -4128,12 +3867,6 @@ function openPwdModal() {
 }
 $('#portalChangePwdBtn').addEventListener('click', openPwdModal);
 $('#adminChangePwdBtn').addEventListener('click', openPwdModal);
-// 双语切换（中/越南语）：localStorage 记忆，重渲染当前模块
-(function(){
-  var b = document.getElementById('langToggleBtn');
-  if (b) b.addEventListener('click', function(){ setLang(getLang() === 'zh' ? 'vi' : 'zh'); });
-  updateLangBtn();
-})();
 
 $('#pwdSaveBtn').addEventListener('click', async () => {
   const oldPwd = $('#oldPassword').value;
@@ -4196,7 +3929,7 @@ async function openCheckinSettings() {
   }
   var html = '<div class="modal-overlay" onclick="closeCheckinSettings()"></div>';
   html += '<div class="modal-content" style="max-width:420px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300">';
-  html += '<div class="modal-header"><h3>' + t('设置') + '</h3><button type="button" class="modal-close" onclick="closeCheckinSettings()">&times;</button></div>';
+  html += '<div class="modal-header"><h3>设置</h3><button type="button" class="modal-close" onclick="closeCheckinSettings()">&times;</button></div>';
   html += '<div class="modal-body">';
 
   var autoStart = (settings.auto_start_enabled === '1');
@@ -4206,7 +3939,7 @@ async function openCheckinSettings() {
   var excluded = (settings.excluded_users || '');
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-  html += '<span style="flex:1">' + t('自动创建场次') + ' <span style="font-size:11px;color:#999;font-weight:400">' + t('（主播进入专属语音频道后自动创建）') + '</span></span>';
+  html += '<span style="flex:1">自动创建场次 <span style="font-size:11px;color:#999;font-weight:400">（主播进入专属语音频道后自动创建）</span></span>';
   html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
   html += '<input type="checkbox" id="settingAutoStart" ' + (autoStart ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
   html += '<span class="toggle-slider"></span></label></label>';
@@ -4214,13 +3947,13 @@ async function openCheckinSettings() {
   html += '<div style="border-top:1px solid #ddd;margin:6px 0"></div>';
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-  html += '<span style="flex:1">' + t('飞书推送通知') + ' <span style="font-size:11px;color:#999;font-weight:400">' + t('（开播 / 结束 / 取消）') + '</span></span>';
+  html += '<span style="flex:1">飞书推送通知 <span style="font-size:11px;color:#999;font-weight:400">（开播 / 结束 / 取消）</span></span>';
   html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
   html += '<input type="checkbox" id="settingPushFeishu" ' + (pushFeishu ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
   html += '<span class="toggle-slider"></span></label></label>';
 
   html += '<label class="field" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-  html += '<span style="flex:1">' + t('Discord 频道通知') + ' <span style="font-size:11px;color:#999;font-weight:400">' + t('（开播 / 结束 / 加入，语音频道聊天区）') + '</span></span>';
+  html += '<span style="flex:1">Discord 频道通知 <span style="font-size:11px;color:#999;font-weight:400">（开播 / 结束 / 加入，语音频道聊天区）</span></span>';
   html += '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">';
   html += '<input type="checkbox" id="settingPushDiscord" ' + (pushDiscord ? 'checked' : '') + ' style="opacity:0;width:0;height:0">';
   html += '<span class="toggle-slider"></span></label></label>';
@@ -4230,20 +3963,20 @@ async function openCheckinSettings() {
 
 
   html += '<div class="field" style="margin-bottom:8px">';
-  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">' + t('冷却期（分钟）') + '</div>';
-  html += '<div style="font-size:10px;color:#999;margin-bottom:4px">' + t('场次结束后，同一语音频道在此时间内不再自动创建新场次（取消场次、不足15分钟短场次不触发）') + '</div>';
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">冷却期（分钟）</div>';
+  html += '<div style="font-size:10px;color:#999;margin-bottom:4px">场次结束后，同一语音频道在此时间内不再自动创建新场次（取消场次、不足15分钟短场次不触发）</div>';
   html += '<input id="settingCooldown" type="number" min="1" max="1440" value="' + (settings.auto_create_cooldown_minutes || '60') + '" style="width:80px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px">';
   html += '</div>';
 
   html += '<div class="field" style="text-align:left">';
-  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">' + t('排除人员') + '</div><div style="font-size:10px;color:#999;margin-bottom:6px">' + t('从缓存列表选择，勾选后不计入语音时长统计、不生成自动打卡，且在签到列表中隐藏') + '</div>';
-  html += '<input id="excludeSearchInput" type="text" style="width:100%;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-bottom:4px" placeholder="' + t('搜索昵称...') + '" oninput="filterExcludeList(this.value)">';
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:2px">排除人员</div><div style="font-size:10px;color:#999;margin-bottom:6px">从缓存列表选择，勾选后不计入语音时长统计、不生成自动打卡，且在签到列表中隐藏</div>';
+  html += '<input id="excludeSearchInput" type="text" style="width:100%;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;margin-bottom:4px" placeholder="搜索昵称..." oninput="filterExcludeList(this.value)">';
   html += '<div id="excludeChecklist" style="max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:4px;margin-bottom:4px;padding:4px"></div>';
   html += '<div id="excludeSelectedTags" style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px"></div>';
   html += '</div>';
   html += '<div class="modal-footer">';
-  html += '<button type="button" class="btn" onclick="closeCheckinSettings()">' + t('取消') + '</button>';
-  html += '<button type="button" class="btn btn-primary" onclick="saveCheckinSettings()">' + t('保存') + '</button>';
+  html += '<button type="button" class="btn" onclick="closeCheckinSettings()">取消</button>';
+  html += '<button type="button" class="btn btn-primary" onclick="saveCheckinSettings()">保存</button>';
   html += '</div></div>';
 
   var overlay = document.createElement('div');
@@ -4440,7 +4173,7 @@ function toggleInvalidTags(sessionId, el) {
   if (!box) return;
   var open = box.style.display !== 'none';
   box.style.display = open ? 'none' : 'flex';
-  if (el) el.innerHTML = t('无效') + ' ' + box.childElementCount + ' ' + t('人') + ' <i class="fas fa-caret-' + (open ? 'down' : 'up') + '" style="font-size:9px"></i>';
+  if (el) el.innerHTML = '无效 ' + box.childElementCount + ' 人 <i class="fas fa-caret-' + (open ? 'down' : 'up') + '" style="font-size:9px"></i>';
   // 瀑布流重排：展开/收起改变卡片高度，必须重新定位（否则被 overflow:hidden 裁剪看不到）
   var card = box.closest('.streamer-card');
   var grid = card && card.closest('.masonry-grid');
@@ -4454,14 +4187,14 @@ async function openCheckinManager(sessionId, sessionNo, checkins) {
   if (!checkins && window._checkinData) checkins = window._checkinData[sessionId] || [];
   var html = '<div class="modal-overlay" onclick="closeCheckinManager()"></div>';
   html += '<div class="modal-content" style="max-width:500px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300">';
-  html += '<div class="modal-header"><h3>' + t('签到管理') + ' - ' + escHtml(sessionNo) + '</h3><button type="button" class="modal-close" onclick="closeCheckinManager()">&times;</button></div>';
+  html += '<div class="modal-header"><h3>签到管理 - ' + escHtml(sessionNo) + '</h3><button type="button" class="modal-close" onclick="closeCheckinManager()">&times;</button></div>';
   html += '<div class="modal-body">';
 
   // Existing checkins
   html += '<div style="margin-bottom:16px">';
-  html += '<div style="font-weight:600;font-size:14px;margin-bottom:8px">' + t('现有签到记录') + ' (' + checkins.length + ')</div>';
+  html += '<div style="font-weight:600;font-size:14px;margin-bottom:8px">现有签到记录 (' + checkins.length + ')</div>';
   if (checkins.length === 0) {
-    html += '<div style="color:#999;font-size:13px;padding:8px">' + t('暂无签到记录') + '</div>';
+    html += '<div style="color:#999;font-size:13px;padding:8px">暂无签到记录</div>';
   } else {
     html += '<div style="max-height:200px;overflow-y:auto">';
     checkins.forEach(function(c) {
@@ -4565,13 +4298,13 @@ async function _loadSessionParticipants(sessionId) {
       html += '<span style="font-size:11px;color:' + (isExcluded ? '#9ca3af' : '#666') + '">' + p.minutes + 'min</span>';
       html += '</span>';
       if (p.is_streamer) {
-        html += '<span style="font-size:11px;color:#92400e">' + t('主播') + '</span>';
+        html += '<span style="font-size:11px;color:#92400e">主播</span>';
       } else if (isExcluded) {
-        html += '<span style="font-size:11px;color:#9ca3af">' + t('已排除') + '</span>';
+        html += '<span style="font-size:11px;color:#9ca3af">已排除</span>';
       } else if (p.checked_in) {
-        html += '<span style="font-size:11px;color:#16a34a"><i class="fas fa-check" style="font-size:10px"></i> ' + t('已达标') + '</span>';
+        html += '<span style="font-size:11px;color:#16a34a"><i class="fas fa-check" style="font-size:10px"></i> 已达标</span>';
       } else {
-        html += '<button class="btn btn-sm btn-write" style="font-size:11px;padding:1px 8px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="markQualified(' + sessionId + ',\'' + p.user_id + '\',\'' + nickAttr + '\')" title="' + t('标记达标') + '"><i class="fas fa-check"></i> ' + t('标记达标') + '</button>';
+        html += '<button class="btn btn-sm" style="font-size:11px;padding:1px 8px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="markQualified(' + sessionId + ',\'' + p.user_id + '\',\'' + nickAttr + '\')" title="生成 manual 达标记录，不修改实际时长"><i class="fas fa-check"></i> 标记达标</button>';
       }
       html += '</div>';
     });
@@ -4854,10 +4587,10 @@ function renderCalendar(byDate) {
   var h = '<div class="checkin-calendar">';
   h += '<div class="cal-nav">';
   h += '<button class="cal-nav-btn" onclick="calNavMonth(\'' + prevMonth + '\')">\u25C0</button>';
-  h += '<span class="cal-nav-title">' + (getLang() === 'vi' ? (month + '/' + year) : (year + '\u5E74' + month + '\u6708')) + '</span>';
+  h += '<span class="cal-nav-title">' + year + '\u5E74' + month + '\u6708</span>';
   h += '<button class="cal-nav-btn" onclick="calNavMonth(\'' + nextMonth + '\')">\u25B6</button>';
   if (_checkinFilterDate !== null && _checkinFilterDate !== '__all__') {
-    h += '<button class="cal-nav-btn cal-clear" onclick="calClearFilter()">\u2716 ' + t('\u6E05\u9664\u7B5B\u9009') + '</button>';
+    h += '<button class="cal-nav-btn cal-clear" onclick="calClearFilter()">\u2716 \u6E05\u9664\u7B5B\u9009</button>';
   }
   h += '</div>';
   h += '<table class="cal-grid"><tr>';
@@ -5000,7 +4733,7 @@ function initMasonryObservers() {
 
 async function renderCheckinPage() {
   const main = $('#adminMain');
-  main.innerHTML = '<div class="loading">' + t('加载中...') + '</div>';
+  main.innerHTML = '<div class="loading">Loading...</div>';
 
   try {
     // Load settings (cache or fetch)
@@ -5084,14 +4817,20 @@ async function renderCheckinPage() {
     // Filter bar + settings + export
     html += '<div class="card" style="margin-bottom:20px">';
     html += '<div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#f8f9fa;border-radius:6px 6px 0 0;font-weight:600">';
-    html += '<span><i class="fas fa-video"></i> ' + t('场次签到') + ' <span style="font-size:10px;color:#999;font-weight:400">' + t('时间均为 GMT+7（越南）') + ' <span style="color:#92400e;background:#fef3c7;padding:0 3px;border-radius:2px">' + t('主播') + '</span> <span style="color:#1e40af;background:#dbeafe;padding:0 3px;border-radius:2px">' + t('已签到') + '</span> <span style="color:#991b1b;background:#fee2e2;padding:0 3px;border-radius:2px">' + t('未达标') + '</span> <span style="color:#6b7280;background:#e5e7eb;padding:0 3px;border-radius:2px">' + t('无效') + '</span></span></span>';
+    html += '<span><i class="fas fa-video"></i> 场次签到 <span style="font-size:10px;color:#999;font-weight:400">时间均为 GMT+7（越南） <span style="color:#92400e;background:#fef3c7;padding:0 3px;border-radius:2px">主播</span> <span style="color:#1e40af;background:#dbeafe;padding:0 3px;border-radius:2px">已签到</span> <span style="color:#991b1b;background:#fee2e2;padding:0 3px;border-radius:2px">未达标</span> <span style="color:#6b7280;background:#e5e7eb;padding:0 3px;border-radius:2px">无效</span></span></span>';
     html += '<div style="display:flex;gap:8px;align-items:center">';
-    html += '<button class="btn btn-sm btn-outline" onclick="renderCheckinPage()" style="font-size:16px;padding:2px 8px" title="' + t('刷新') + '"><i class="fas fa-redo-alt"></i></button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="exportCheckinCSV()" title="' + t('导出') + ' CSV"><i class="fas fa-download"></i> ' + t('导出') + '</button>';
-    html += '<button class="btn btn-sm btn-outline btn-write" onclick="openCheckinSettings()" title="' + t('设置') + '"><i class="fas fa-cog"></i> ' + t('设置') + '</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openStreamerColorManager()" title="' + t('主播列表') + '"><i class="fas fa-palette"></i> ' + t('主播列表') + '</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openVerifyReports()" title="' + t('数据校对') + '"><i class="fas fa-clipboard-check"></i> ' + t('数据校对') + '</button>';
-    html += '<button class="btn btn-sm btn-outline" onclick="openCheckinHelp()" title="' + t('说明') + '"><i class="fas fa-question-circle"></i> ' + t('说明') + '</button>';
+    html += '<input type="date" id="sessionDateFrom" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px" value="' + escHtml(from) + '">';
+    html += '<span style="color:#999">至</span>';
+    html += '<input type="date" id="sessionDateTo" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px" value="' + escHtml(to) + '">';
+    html += '<button class="btn btn-sm" onclick="renderCheckinPage()">搜索</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="renderCheckinPage()" style="font-size:16px;padding:2px 8px" title="刷新"><i class="fas fa-redo-alt"></i></button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="exportCheckinCSV()" title="导出 CSV"><i class="fas fa-download"></i> 导出</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openCheckinSettings()" title="设置"><i class="fas fa-cog"></i> 设置</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openStreamerColorManager()" title="管理主播列表"><i class="fas fa-palette"></i> 主播列表</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openNicknameCache()" title="查看陪玩列表"><i class="fas fa-address-book"></i> 陪玩列表</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openClaimManager()" title="未认领 uid / 疑似过期 ID 处理（与每日对账推送同口径）"><i class="fas fa-user-tag"></i> 待认领</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openVerifyReports()" title="数据校对报告"><i class="fas fa-clipboard-check"></i> 数据校对</button>';
+    html += '<button class="btn btn-sm btn-outline" onclick="openCheckinHelp()" title="查看判断逻辑说明"><i class="fas fa-question-circle"></i> 说明</button>';
     html += '</div></div></div>';
 
     // Session card rendering helper
@@ -5100,8 +4839,8 @@ async function renderCheckinPage() {
       var isCancelled = s.status === 'cancelled';
       var statusClass = isCancelled ? 'cancelled' : (isActive ? 'active' : 'ended');
       var badgeClass = isCancelled ? 'badge-cancelled' : (isActive ? 'badge-active' : 'badge-done');
-      var badgeText = isCancelled ? t('已取消') : (isActive ? t('进行中') : 'End');
-      var endStr = s.end_time ? fmtGmt7(s.end_time) : '🟠 ' + t('进行中');
+      var badgeText = isCancelled ? '已取消' : (isActive ? '进行中' : 'End');
+      var endStr = s.end_time ? fmtGmt7(s.end_time) : '🟠 进行中';
       var durStr = s.duration_minutes > 0 ? (Math.floor(s.duration_minutes / 60) + 'h ' + (s.duration_minutes % 60) + 'm') : '-';
 
       if (!window._checkinData) window._checkinData = {};
@@ -5137,24 +4876,24 @@ async function renderCheckinPage() {
       h += '<span class="' + badgeClass + '">' + badgeText + '</span>';
       // Delete / Force end button (only for ended; cancelled 已由后端过滤，前端不可见)
       if (!isCancelled) {
-        h += '<button class="btn btn-sm btn-write" style="font-size:11px;padding:1px 6px;';
+        h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;';
       if (isActive) {
         h += 'color:#b45309;background:#fef3c7;border-color:#fde68a';
       } else {
         h += 'color:#991b1b;background:#fee2e2;border-color:#fecaca';
       }
       h += '" onclick="deleteSession(' + s.id + ',\'' + escHtml(s.session_no) + '\',\'' + s.status + '\')" title="';
-      h += isActive ? t('强行结束') : t('删除场次');
+      h += isActive ? '强行结束' : '删除场次';
       h += '">';
       h += isActive ? '<i class="fas fa-stop-circle"></i>' : '<i class="fas fa-trash-alt"></i>';
       h += '</button>';
-      h += '<button class="btn btn-sm btn-write" style="font-size:11px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="retroSession(\'' + escHtml(s.session_no) + '\')" title="' + t('追溯修正') + '"><i class="fas fa-history"></i></button>';
+      h += '<button class="btn btn-sm" style="font-size:11px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="retroSession(\'' + escHtml(s.session_no) + '\')" title="追溯修正：根据第二人（非滞留）语音进入时间校准开启时间"><i class="fas fa-history"></i></button>';
       }
       h += '</div>';
       h += '</div>';
       h += '<div style="font-size:10px;color:#999;margin:2px 0 3px">';
       h += fmtGmt7(s.start_time) + ' → ' + endStr;
-      if (s.min_minutes) h += ' | ' + t('最低') + ' ' + s.min_minutes + ' ' + t('分钟');
+      if (s.min_minutes) h += ' | 最低 ' + s.min_minutes + ' 分钟';
       h += '</div>';
       if (s.checkins && s.checkins.length > 0) {
         var methodEmoji = { slash: '<i class="fas fa-comment"></i>', button: '<i class="fas fa-circle"></i>', voice: '<i class="fas fa-microphone"></i>' };
@@ -5189,7 +4928,7 @@ async function renderCheckinPage() {
         h += '<div style="display:flex;flex-wrap:wrap;gap:2px">';
         validTags.forEach(function(c) { h += buildTag(c); });
         if (invalidTags.length > 0) {
-          h += '<span onclick="toggleInvalidTags(' + s.id + ',this)" title="' + t('点击展开/收起无效人员（场次签到 0%）') + '" style="cursor:pointer;color:#9ca3af;background:#e5e7eb;font-size:10px;padding:0 5px;border-radius:3px;align-self:center;font-weight:600">' + t('无效') + ' ' + invalidTags.length + ' ' + t('人') + ' <i class="fas fa-caret-down" style="font-size:9px"></i></span>';
+          h += '<span onclick="toggleInvalidTags(' + s.id + ',this)" title="点击展开/收起无效人员（场次签到 0%）" style="cursor:pointer;color:#9ca3af;background:#e5e7eb;font-size:10px;padding:0 5px;border-radius:3px;align-self:center;font-weight:600">无效 ' + invalidTags.length + ' 人 <i class="fas fa-caret-down" style="font-size:9px"></i></span>';
         }
         h += '</div>';
         if (invalidTags.length > 0) {
@@ -5205,7 +4944,7 @@ async function renderCheckinPage() {
     // Date-grouped streamer cards
     var dateKeys = Object.keys(byDate).sort().reverse();
     if (dateKeys.length === 0) {
-      html += '<div style="padding:40px;text-align:center;color:#999">' + t('暂无场次') + '</div>';
+      html += '<div style="padding:40px;text-align:center;color:#999">暂无场次</div>';
     } else {
       dateKeys.forEach(function(dateKey) {
         var streamers = byDate[dateKey];
@@ -5231,12 +4970,12 @@ async function renderCheckinPage() {
 
         html += '<div class="card" style="margin-bottom:16px">';
         html += '<div class="date-header" data-date="' + dateKey + '">';
-        html += '<span><i class="fas fa-calendar-alt"></i> ' + dateKey + ' <span style="font-size:13px;color:#666;font-weight:400">' + dayTotal + ' ' + t('场') + '</span>' +
-          '  <span style="font-size:12px;color:#999;margin-left:4px">' + streamerNames.length + ' ' + t('主播') + '</span>' +
-          '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:6px">' + t('签到') + ' ' + checkedInPeopleCount + ' ' + t('人') + '</span>' +
-          '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:3px">' + checkedInCount + ' ' + t('人次') + '</span>';
+        html += '<span><i class="fas fa-calendar-alt"></i> ' + dateKey + ' <span style="font-size:13px;color:#666;font-weight:400">' + dayTotal + ' 场</span>' +
+          '  <span style="font-size:12px;color:#999;margin-left:4px">' + streamerNames.length + ' 主播</span>' +
+          '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:6px">签到 ' + checkedInPeopleCount + ' 人</span>' +
+          '  <span style="font-size:12px;color:#1e40af;background:#dbeafe;padding:0 5px;border-radius:3px;margin-left:3px">' + checkedInCount + ' 人次</span>';
         if (window._verifyReportDates && window._verifyReportDates[dateKey]) {
-          html += '  <span style="font-size:12px;color:#3f51b5;background:#e8eaf6;padding:0 6px;border-radius:3px;margin-left:6px;cursor:pointer" onclick="event.stopPropagation();openVerifyReports(\'' + dateKey + '\')" title="' + t('查看该日校对报告') + '">\uD83D\uDCCA ' + t('校对') + '</span>';
+          html += '  <span style="font-size:12px;color:#3f51b5;background:#e8eaf6;padding:0 6px;border-radius:3px;margin-left:6px;cursor:pointer" onclick="event.stopPropagation();openVerifyReports(\'' + dateKey + '\')" title="查看该日校对报告">\uD83D\uDCCA \u6821\u5BF9</span>';
         }
         html += '</span>';
         html += '<span class="arrow">▼</span>';
@@ -5259,7 +4998,7 @@ async function renderCheckinPage() {
           }
           html += '<div class="streamer-card" style="--streamer-color:' + streamerColor + '">';
           html += '<div class="streamer-header"><i class="fas fa-microphone"></i> ' + escHtml(name) + '</div>';
-          html += '<div style="font-size:11px;color:#999;padding:0 12px 2px">' + totalSessions + ' ' + t('场次') + '</div>';
+          html += '<div style="font-size:11px;color:#999;padding:0 12px 2px">' + totalSessions + ' 场次</div>';
 
           g.active.forEach(function(s) { html += renderSession(s); });
           g.ended.forEach(function(s) { html += renderSession(s); });
@@ -5734,7 +5473,7 @@ async function inboxMark(id, status) {
   showView('loginView');
 })();
 
-// ========== 待认领人员（C' 方案③修复层：绑定/排除，与每日对账推送同口径。无「外聘」概念，全站移除） ==========
+// ========== 待认领人员（C' 方案③修复层：绑定/外聘/排除，与每日对账推送同口径） ==========
 async function openClaimManager() {
   var html = '<div class="modal-overlay" onclick="closeClaimManager()"></div>';
   html += '<div class="modal-content" style="max-width:760px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;max-height:85vh;display:flex;flex-direction:column">';
@@ -5781,21 +5520,21 @@ function renderClaimList(data, empList) {
     html += '<div style="color:#16a34a;font-size:12px;margin-bottom:12px">✅ 近 7 天无未认领 uid</div>';
   } else {
     html += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px">';
-    html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">最近昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">活动</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">参与场次</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
+    html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">最近昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">活动</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
     unclaimed.forEach(function(u) {
       var uid6 = String(u.user_id).slice(-6);
       html += '<tr>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(u.user_id) + '</code></td>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(u.nickname || '（无昵称）') + '<br><span style="color:#999;font-size:10px">最近 ' + escHtml(u.last_seen || '') + '</span></td>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">签到' + u.checkins + '次<br>语音' + u.voice_minutes + 'min</td>';
-      html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + sessCell(u.sessions) + '</td>';
       html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
       html += '<select id="claimEmp_' + u.user_id + '" style="font-size:11px;padding:1px 2px;max-width:150px">';
       html += '<option value="">绑定到员工...</option>';
       empList.forEach(function(e) { html += '<option value="' + escHtml(e.id) + '">' + escHtml(e.label) + '</option>'; });
       html += '</select>';
-      html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="claimBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">' + t('绑定') + '</button>';
-      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="claimExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">' + t('排除') + '</button>';
+      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="claimBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">绑定</button>';
+      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#92400e;background:#fef3c7;border-color:#fde68a" onclick="claimForeign(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">外聘</button>';
+      html += ' <button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="claimExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname || '').replace(/'/g, "\\'") + '\')">排除</button>';
       html += '</td></tr>';
     });
     html += '</table>';
@@ -5854,6 +5593,16 @@ async function claimBind(uid, nickname) {
   } catch (e) { showToast('绑定失败: ' + e.message, 'error'); }
 }
 
+async function claimForeign(uid, nickname) {
+  if (!nickname) { showToast('该 uid 无昵称，无法以外聘入映射表', 'error'); return; }
+  if (!confirm('将 #' + String(uid).slice(-6) + ' ' + nickname + ' 标记为外聘/临时？\n\nplayer_mapping 补一行（无员工编号），对账不再告警。')) return;
+  try {
+    await api('claim/foreign', { method: 'POST', json: { user_id: uid, nickname: nickname } });
+    showToast('已标记外聘', 'success');
+    await loadClaimPending();
+  } catch (e) { showToast('标记失败: ' + e.message, 'error'); }
+}
+
 async function claimExclude(uid, nickname) {
   if (!confirm('将 #' + String(uid).slice(-6) + ' ' + (nickname || '') + ' 加入排除名单？\n\n对账与展示均不再出现（写入 excluded_user_ids）。')) return;
   try {
@@ -5863,825 +5612,7 @@ async function claimExclude(uid, nickname) {
   } catch (e) { showToast('排除失败: ' + e.message, 'error'); }
 }
 
-// ========== Discord 绑定管理（方案 A 独立模块：待绑定 + 已绑定全量） ==========
-var _bindingTab = 'tab1';
-var _bindingSearch = '';
-var _bindingCache = null;  // { unclaimed:[], bound:[], empList:[] }
-var _bindingEmp = [];      // /api/binding/employees 富信息员工列表（选择器数据源）
-var _bindingEmpSel = {};   // uid -> emp_no（Tab1 每行当前选定员工）
-
-async function renderBindingPage() {
-  $('#adminModuleTitle').textContent = t('Discord 绑定');
-  var main = $('#adminMain');
-  main.innerHTML = '';
-  var bar = document.createElement('div');
-  bar.className = 'filter-bar';
-  bar.innerHTML = ''
-    + '<button type="button" class="btn ' + (_bindingTab === 'tab1' ? 'btn-primary' : 'btn-outline') + '" onclick="bindingSwitchTab(\'tab1\')" style="font-size:12px">' + t('待绑定') + '</button>'
-    + ' <button type="button" class="btn ' + (_bindingTab === 'tab2' ? 'btn-primary' : 'btn-outline') + '" onclick="bindingSwitchTab(\'tab2\')" style="font-size:12px">' + t('已绑定全量') + '</button>'
-    + ' <input id="bindingSearch" placeholder="' + t('搜索 uid 尾号 / 昵称 / 归属') + '" value="' + escHtml(_bindingSearch) + '" style="margin-left:10px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:220px" oninput="bindingOnSearch(this.value)">'
-    + ' <button class="btn btn-sm" onclick="bindingReload()" style="font-size:11px"><i class="fas fa-sync"></i> 刷新</button>'
-    + ' <span id="bindingHint" style="font-size:11px;color:#999;margin-left:8px"></span>';
-  main.appendChild(bar);
-  var wrap = document.createElement('div');
-  wrap.id = 'bindingBody';
-  wrap.style.marginTop = '10px';
-  main.appendChild(wrap);
-  await bindingLoad();
-}
-
-function bindingSwitchTab(tab) {
-  _bindingTab = tab;
-  $('#bindingSearch').value = '';
-  _bindingSearch = '';
-  var bar = document.querySelector('#adminMain .filter-bar');
-  if (bar) {
-    var btns = bar.querySelectorAll('button[onclick^="bindingSwitchTab"]');
-    btns.forEach(function(b) {
-      b.className = 'btn ' + (b.getAttribute('onclick').indexOf(tab) >= 0 ? 'btn-primary' : 'btn-outline');
-    });
-  }
-  bindingRenderBody();
-}
-
-function bindingOnSearch(v) {
-  _bindingSearch = (v || '').trim();
-  bindingRenderBody();
-}
-
-function bindingReload() {
-  bindingLoad();
-}
-
-async function bindingLoad() {
-  var box = $('#bindingBody') || $('#bindingBodyFallback');
-  var hint = document.getElementById('bindingHint');
-  if (hint) hint.textContent = '加载中...';
-  try {
-    var empList = [];
-    try { empList = await api('binding/employees') || []; } catch(e) {}
-    var pet = await api('claim/pending');
-    var bd = await api('binding/list');
-    _bindingEmp = empList;
-    _bindingCache = {
-      unclaimed: (pet && pet.unclaimed) || [],
-      renamed: (pet && pet.renamed) || [],
-      stale: (pet && pet.stale) || [],
-      bound: (bd && bd.bound) || []
-    };
-    if (hint) hint.textContent = '待认领 ' + _bindingCache.unclaimed.length + ' ｜ 已绑定 ' + _bindingCache.bound.length;
-    bindingRenderBody();
-  } catch (e) {
-    if (hint) hint.textContent = '加载失败: ' + e.message;
-  }
-}
-
-function bindingFilter(list) {
-  if (!_bindingSearch) return list;
-  var q = _bindingSearch.toLowerCase();
-  return list.filter(function(x) {
-    return String(x.user_id).toLowerCase().indexOf(q) >= 0
-      || String(x.nickname || '').toLowerCase().indexOf(q) >= 0
-      || String(x.discord_name || '').toLowerCase().indexOf(q) >= 0
-      || String(x.owner || x.mapped_to || '').toLowerCase().indexOf(q) >= 0;
-  });
-}
-
-function bindingRenderBody() {
-  var wrap = document.getElementById('bindingBody');
-  if (!wrap) return;
-  var data = _bindingCache || { unclaimed: [], bound: [] };
-  if (_bindingTab === 'tab1') {
-    var ul = bindingFilter(data.unclaimed || []);
-    var html = '';
-    // 改名/新昵称告警（reconcile.renamed：已知 uid 近 7 天昵称不在历史名字集合）
-    var rn = data.renamed || [];
-    if (rn.length) {
-      html += '<div style="font-weight:600;margin:4px 0 6px;color:#92400e">🟡 改名/新昵称（' + rn.length + '）<span style="font-weight:400;font-size:10px;color:#999">已知 uid 使用了映射外的名字，注意可能是改昵称或换人</span></div>';
-      html += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px;background:#fffbeb">';
-      html += '<tr style="background:#fef3c7"><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">当前昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">原昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">归属员工</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">最近活跃</th></tr>';
-      for (var ri=0;ri<rn.length;ri++) {
-        var r0 = rn[ri];
-        html += '<tr><td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px"><code style="font-size:10px">' + escHtml(r0.user_id) + '</code></td>';
-        html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px;font-weight:600">' + escHtml(r0.nickname || '') + '</td>';
-        html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r0.prev_nickname || '—') + '</td>';
-        html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + empLabelText(r0.mapped_to || '') + '</td>';
-        html += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r0.last_seen || '') + '</td></tr>';
-      }
-      html += '</table>';
-    }
-    html += '<div style="font-weight:600;margin:4px 0 6px;color:#991b1b">🔴 待认领 uid（' + (data.unclaimed||[]).length + '）</div>';
-    if (!ul.length) {
-      html += '<div style="color:#16a34a;font-size:12px;margin-bottom:10px">✅ 暂无未认领 uid</div>';
-    } else {
-      html += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px;background:#fff">';
-      html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">活动</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">参与场次</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
-      for (var i=0;i<ul.length;i++) {
-        var u = ul[i];
-        html += '<tr>';
-        html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(u.user_id) + '</code></td>';
-        html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(u.nickname || '') + '<br><span style="color:#999;font-size:10px">最近 ' + escHtml(u.last_seen || '') + '</span></td>';
-        html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">签' + u.checkins + ' / 语' + u.voice_minutes + 'min</td>';
-        html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + sessCell(u.sessions) + '</td>';
-        html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
-        var selEmp = _bindingEmpSel[u.user_id];
-        var selLabel = selEmp ? empLabelText(selEmp) : '';
-        html += '<span id="bindEmpTag_' + u.user_id + '" style="font-size:10px;display:inline-block;margin-right:4px;color:#1e40af">' + (selLabel ? '已选：' + escHtml(selLabel) : '未选员工') + '</span> ';
-        html += '<button class="btn btn-sm" style="font-size:10px;padding:1px 6px;color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="openBindingEmpPicker(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">选员工</button>';
-        html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="bindingDoBind(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">' + t('绑定') + '</button>';
-        html += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#6b7280;background:#f3f4f6;border-color:#d1d5db" onclick="bindingDoExclude(\'' + u.user_id + '\',\'' + escHtml(u.nickname||'').replace(/'/g,"\\'") + '\')">' + t('排除') + '</button>';
-        html += '</td></tr>';
-      }
-      html += '</table>';
-    }
-    wrap.innerHTML = html;
-  } else {
-    var list2 = bindingFilter(data.bound || []);
-    var grouped = {};  // uid -> {user_id, sources:[...], owners:set, discord_name}
-    (list2 || []).forEach(function(b){
-      if (!grouped[b.user_id]) grouped[b.user_id] = { user_id: b.user_id, sources: [], owners: {}, discord_name: '' };
-      grouped[b.user_id].sources.push({ source: b.source, owner_key: b.owner_key, owner: b.owner });
-      grouped[b.user_id].owners[b.norm_owner || b.owner_key] = 1;
-      if (!grouped[b.user_id].discord_name && b.discord_name) grouped[b.user_id].discord_name = b.discord_name;
-    });
-    var gArr = Object.keys(grouped).map(function(k){ return grouped[k]; });
-    var html2 = '';
-    // 改名/新昵称告警（与 Tab1 同口径）
-    var rn2 = data.renamed || [];
-    if (rn2.length) {
-      html2 += '<div style="font-weight:600;margin:4px 0 6px;color:#92400e">🟡 改名/新昵称（' + rn2.length + '）<span style="font-weight:400;font-size:10px;color:#999">已知 uid 使用了映射外的名字，注意可能是改昵称或换人</span></div>';
-      html2 += '<table style="width:100%;border-collapse:collapse;margin-bottom:12px;background:#fffbeb">';
-      html2 += '<tr style="background:#fef3c7"><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">当前昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">原昵称</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">归属员工</th><th style="padding:4px 6px;border:1px solid #fde68a;text-align:left;font-size:11px">最近活跃</th></tr>';
-      for (var rj=0;rj<rn2.length;rj++) {
-        var r1 = rn2[rj];
-        html2 += '<tr><td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px"><code style="font-size:10px">' + escHtml(r1.user_id) + '</code></td>';
-        html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px;font-weight:600">' + escHtml(r1.nickname || '') + '</td>';
-        html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r1.prev_nickname || '—') + '</td>';
-        html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + empLabelText(r1.mapped_to || '') + '</td>';
-        html2 += '<td style="padding:4px 6px;border:1px solid #fde68a;font-size:11px">' + escHtml(r1.last_seen || '') + '</td></tr>';
-      }
-      html2 += '</table>';
-    }
-    html2 += '<div style="font-weight:600;margin:4px 0 6px;color:#1e40af">🔗 已绑定 uid（按 uid 合并，' + data.bound.length + ' 条来源 → ' + gArr.length + ' 个 uid）</div>';
-    html2 += '<table style="width:100%;border-collapse:collapse;background:#fff">';
-    html2 += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">uid</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">Discord昵称</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">归属</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">来源</th><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th></tr>';
-    for (var k=0;k<gArr.length;k++) {
-      var g = gArr[k];
-      var b0 = g.sources[0];
-      var conflict = Object.keys(g.owners).length > 1;
-      html2 += '<tr' + (conflict ? ' style="background:#fef2f2"' : '') + '>';
-      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(g.user_id) + '</code>' + (conflict ? '<br><span style="color:#b91c1c;font-size:10px;font-weight:700">⚠ 冲突：多归属</span>' : '') + '</td>';
-      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + escHtml(g.discord_name || '') + '</td>';
-      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (conflict ? escHtml(g.sources.map(function(s){return s.owner;}).join(' ｜ ')) : ownerLabel(b0)) + '</td>';
-      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + g.sources.map(function(s){ return escHtml(srcCell(s)); }).join('<br>') + '</td>';
-      html2 += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">';
-      html2 += ' <button class="btn btn-sm btn-write" style="font-size:10px;padding:1px 6px;color:#b91c1c;background:#fee2e2;border-color:#fecaca" onclick="bindingDoUnbindGroup(\'' + g.user_id + '\',' + JSON.stringify(g.sources) + ')">' + t('解绑') + '</button>';
-      html2 += '</td></tr>';
-    }
-    html2 += '</table>';
-    wrap.innerHTML = html2;
-  }
-}
-
-function srcCell(b) {
-  var m = { 'live_employees.discord_id':'员工·discord_id', 'live_employees.discord_user_id':'员工·discord_user_id', 'player_mapping.discord_id':'陪玩映射·discord_id' };
-  return m[b.source] || b.source || '';
-}
-
-// 已绑定全量·归属列富信息：live_employees 来源 owner 仅存编号，这里映射出可读信息；
-// player_mapping 来源直接展示（外聘/编号+昵称）。owner_key 可能含空格需裁剪。
-function ownerLabel(b) {
-  var kw = String(b.owner_key || '').trim();
-  // 员工来源（owner_key = emp_no）：尽可能展开为 编号+昵称+中文名+岗位+状态
-  if (kw && (b.source === 'live_employees.discord_id' || b.source === 'live_employees.discord_user_id')) {
-    var e = _bindingEmp.find(function(x){ return String(x.emp_no) === kw; });
-    if (e) return empRich(e);
-    return escHtml(kw || b.owner || '');
-  }
-  // 陪玩映射来源：owner 已是 编号/昵称 或 昵称，直接展示，并可尝试展开编号部分
-  var o = String(b.owner || '');
-  if (o.indexOf('/') > 0) {
-    var no = o.split('/')[0].trim();
-    var nm = o.replace(o.split('/')[0], '').replace('/', '').trim();
-    if (no) {
-      var e2 = _bindingEmp.find(function(x){ return String(x.emp_no) === no; });
-      if (e2) return empRich(e2, nm);
-    }
-  }
-  return esc(o);
-}
-
-function empRich(e, extra) {
-  var parts = [String(e.emp_no)];
-  if (e.nickname) parts.push(e.nickname);
-  if (e.cn_name) parts.push('（' + e.cn_name + '）');
-  if (e.position) parts.push(e.position);
-  if (e.status === '离职') parts.push('·已离职');
-  var h = esc(parts.join(' '));
-  if (extra) h += '<span style="color:#999"> / ' + esc(extra) + '</span>';
-  return h;
-}
-
-function sessCell(sessions) {
-  if (!sessions || !sessions.length) return '<span style="color:#bbb;font-size:10px">—</span>';
-  return sessions.slice(0,3).map(function(s){
-    var t = escHtml(s.session_no || '');
-    if (s.streamer_name) t += ' · ' + escHtml(s.streamer_name);
-    if (s.date) t += ' <span style="color:#bbb">' + escHtml(s.date) + '</span>';
-    return '<div style="font-size:10px;color:#374151;line-height:1.5">' + t + '</div>';
-  }).join('') + (sessions.length > 3 ? '<span style="color:#999;font-size:10px">+还有 ' + (sessions.length-3) + ' 场</span>' : '');
-}
-
-function empLabelText(empNo) {
-  if (!empNo) return '';
-  var e = _bindingEmp.find(function(x){ return String(x.emp_no) === String(empNo); });
-  if (!e) return empNo;
-  var parts = [String(e.emp_no)];
-  if (e.nickname) parts.push(e.nickname);
-  if (e.cn_name) parts.push(e.cn_name);
-  if (e.position) parts.push(e.position);
-  return parts.join(' ');
-}
-
-
-// 通用富信息员工选择器：弹层表格（编号/昵称/别名/中文名/真实姓名/Discord/岗位/状态），选中后 callback(emp)
-async function openRichEmpPicker(callback) {
-  var rows = [];
-  try { rows = await api('binding/employees') || []; }
-  catch(e) { showToast('员工列表加载失败：' + e.message, 'error'); return; }
-  var selectedNo = null;
-
-  var overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:1070;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)';
-  overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.remove(); });
-
-  var box = document.createElement('div');
-  box.style.cssText = 'background:#fff;border-radius:10px;max-width:820px;width:94%;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.25)';
-
-  var head = document.createElement('div');
-  head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #e5e7eb;background:#f8f9fa;border-radius:10px 10px 0 0';
-  var hTitle = document.createElement('h3');
-  hTitle.style.cssText = 'margin:0;font-size:15px';
-  hTitle.textContent = t('选择员工');
-  head.appendChild(hTitle);
-  var closeX = document.createElement('button');
-  closeX.type = 'button';
-  closeX.textContent = '×';
-  closeX.style.cssText = 'background:none;border:none;font-size:20px;cursor:pointer;color:#666';
-  closeX.addEventListener('click', function(){ overlay.remove(); });
-  head.appendChild(closeX);
-  box.appendChild(head);
-
-  var searchRow = document.createElement('div');
-  searchRow.style.cssText = 'padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid #eee';
-  var inp = document.createElement('input');
-  inp.placeholder = t('搜索') + '：' + t('编号') + ' / ' + t('昵称') + ' / ' + t('别名') + ' / ' + t('中文名') + ' / ' + t('真实姓名') + ' / Discord / ' + t('岗位');
-  inp.style.cssText = 'flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px';
-  searchRow.appendChild(inp);
-  var searchBtn = document.createElement('button');
-  searchBtn.className = 'btn btn-sm';
-  searchBtn.textContent = t('搜索');
-  searchBtn.addEventListener('click', function(){ renderRows(); });
-  inp.addEventListener('keyup', function(e){ if (e.key === 'Enter') renderRows(); });
-  searchRow.appendChild(searchBtn);
-  box.appendChild(searchRow);
-
-  var list = document.createElement('div');
-  list.style.cssText = 'overflow:auto;flex:1;min-height:220px';
-  box.appendChild(list);
-
-  var foot = document.createElement('div');
-  foot.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e5e7eb';
-  var selInfo = document.createElement('span');
-  selInfo.style.cssText = 'font-size:12px;color:#666';
-  foot.appendChild(selInfo);
-  var btnRow = document.createElement('div');
-  btnRow.style.cssText = 'display:flex;gap:8px';
-  var cancelBtn = document.createElement('button');
-  cancelBtn.type = 'button';
-  cancelBtn.className = 'btn btn-sm';
-  cancelBtn.textContent = t('取消');
-  cancelBtn.addEventListener('click', function(){ overlay.remove(); });
-  btnRow.appendChild(cancelBtn);
-  var confirmBtn = document.createElement('button');
-  confirmBtn.className = 'btn btn-sm btn-primary';
-  confirmBtn.textContent = t('确认选中');
-  confirmBtn.disabled = true;
-  confirmBtn.style.opacity = '0.5';
-  confirmBtn.addEventListener('click', function(){
-    if (!selectedNo) { showToast(t('请先选择员工'), 'error'); return; }
-    var emp = rows.find(function(x){ return String(x.emp_no) === String(selectedNo); });
-    overlay.remove();
-    if (callback) callback(emp || { emp_no: selectedNo });
-  });
-  btnRow.appendChild(confirmBtn);
-  foot.appendChild(btnRow);
-  box.appendChild(foot);
-
-  var updateInfo = function(){
-    confirmBtn.disabled = !selectedNo;
-    confirmBtn.style.opacity = selectedNo ? '1' : '0.5';
-    selInfo.textContent = selectedNo ? t('已选中') + '：' + empLabelText(selectedNo) : t('请先选择员工');
-  };
-
-  var renderRows = function(){
-    var q = (inp.value || '').trim().toLowerCase();
-    var filtered = rows;
-    if (q) {
-      filtered = rows.filter(function(r){
-        return [r.emp_no, r.nickname, r.alias, r.real_name, r.cn_name, r.position, r.discord, r.status]
-          .some(function(v){ return v && String(v).toLowerCase().indexOf(q) >= 0; });
-      });
-    }
-    list.innerHTML = '';
-    if (!filtered.length) {
-      list.innerHTML = '<p style="padding:24px;text-align:center;color:#999">' + t('无匹配员工') + '</p>';
-      updateInfo();
-      return;
-    }
-    var table = document.createElement('table');
-    table.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px';
-    var thead = document.createElement('thead');
-    thead.innerHTML = '<tr style="text-align:left;background:#f3f4f6">'
-      + '<th style="padding:8px 10px;width:28px"></th>'
-      + '<th style="padding:8px 10px">' + t('编号') + '</th><th style="padding:8px 10px">' + t('昵称') + '</th>'
-      + '<th style="padding:8px 10px">' + t('别名') + '</th><th style="padding:8px 10px">' + t('中文名') + '</th><th style="padding:8px 10px">' + t('真实姓名') + '</th>'
-      + '<th style="padding:8px 10px">Discord</th>'
-      + '<th style="padding:8px 10px">' + t('岗位') + '</th><th style="padding:8px 10px">' + t('状态') + '</th></tr>';
-    table.appendChild(thead);
-    var tbody = document.createElement('tbody');
-    filtered.forEach(function(r){
-      var tr = document.createElement('tr');
-      tr.style.cssText = 'cursor:pointer;border-bottom:1px solid #f0f0f0';
-      var paintRow = function(){
-        var isSel = String(r.emp_no) === String(selectedNo);
-        tr.style.background = isSel ? '#e8f0fe' : '';
-        var c = tr.querySelector('.sel-check');
-        if (c) c.textContent = isSel ? '✔' : '';
-      };
-      tr.addEventListener('mouseenter', function(){
-        if (String(r.emp_no) !== String(selectedNo)) tr.style.background = '#f5f9ff';
-      });
-      tr.addEventListener('mouseleave', paintRow);
-      tr.addEventListener('click', function(){
-        selectedNo = (selectedNo && String(selectedNo) === String(r.emp_no)) ? null : String(r.emp_no);
-        tbody.querySelectorAll('tr').forEach(function(t){
-          var isSel = t.dataset.no === selectedNo;
-          t.style.background = isSel ? '#e8f0fe' : '';
-          var c = t.querySelector('.sel-check');
-          if (c) c.textContent = isSel ? '✔' : '';
-        });
-        updateInfo();
-      });
-      tr.dataset.no = r.emp_no;
-      tr.innerHTML = '<td class="sel-check" style="padding:8px 10px;width:28px;color:#1a73e8;font-weight:700"></td>'
-        + '<td style="padding:8px 10px;font-weight:600">' + String(empEscape(r.emp_no)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.nickname)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.alias)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.cn_name)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.real_name)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.discord)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.position)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.status)) + '</td>';
-      tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
-    list.appendChild(table);
-    updateInfo();
-  };
-  renderRows();
-
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-}
-
-async function openBindingEmpPicker(uid, nickname) {
-  if (!_bindingEmp.length) {
-    try { _bindingEmp = await api('binding/employees') || []; } catch(e) {
-      showToast('员工列表加载失败：' + e.message, 'error'); return;
-    }
-  }
-  var rows = _bindingEmp;
-  var selKey = String(uid);
-  var selectedNo = _bindingEmpSel[selKey] || null;
-
-  var overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:1060;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)';
-  overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.remove(); });
-
-  var box = document.createElement('div');
-  box.style.cssText = 'background:#fff;border-radius:10px;max-width:760px;width:94%;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.25)';
-
-  var head = document.createElement('div');
-  head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #e5e7eb;background:#f8f9fa;border-radius:10px 10px 0 0';
-  var hTitle = document.createElement('h3');
-  hTitle.style.cssText = 'margin:0;font-size:15px';
-  hTitle.textContent = '选择绑定员工（uid ' + uid + (nickname ? ' · ' + nickname : '') + '）';
-  head.appendChild(hTitle);
-  var closeX = document.createElement('button');
-  closeX.type = 'button';
-  closeX.textContent = '×';
-  closeX.style.cssText = 'background:none;border:none;font-size:20px;cursor:pointer;color:#666';
-  closeX.addEventListener('click', function(){ overlay.remove(); });
-  head.appendChild(closeX);
-  box.appendChild(head);
-
-  var searchRow = document.createElement('div');
-  searchRow.style.cssText = 'padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid #eee';
-  var inp = document.createElement('input');
-  inp.placeholder = t('搜索') + '：' + t('编号') + ' / ' + t('昵称') + ' / ' + t('别名') + ' / ' + t('中文名') + ' / ' + t('真实姓名') + ' / Discord / ' + t('岗位');
-  inp.style.cssText = 'flex:1;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px';
-  searchRow.appendChild(inp);
-  var searchBtn = document.createElement('button');
-  searchBtn.className = 'btn btn-sm';
-  searchBtn.textContent = t('搜索');
-  searchBtn.addEventListener('click', function(){ renderRows(); });
-  inp.addEventListener('keyup', function(e){ if (e.key === 'Enter') renderRows(); });
-  searchRow.appendChild(searchBtn);
-  box.appendChild(searchRow);
-
-  var list = document.createElement('div');
-  list.style.cssText = 'overflow:auto;flex:1;min-height:220px';
-  box.appendChild(list);
-
-  var foot = document.createElement('div');
-  foot.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #e5e7eb';
-  var selInfo = document.createElement('span');
-  selInfo.style.cssText = 'font-size:12px;color:#666';
-  foot.appendChild(selInfo);
-  var btnRow = document.createElement('div');
-  btnRow.style.cssText = 'display:flex;gap:8px';
-  var cancelBtn = document.createElement('button');
-  cancelBtn.type = 'button';
-  cancelBtn.className = 'btn btn-sm';
-  cancelBtn.textContent = t('取消');
-  cancelBtn.addEventListener('click', function(){ overlay.remove(); });
-  btnRow.appendChild(cancelBtn);
-  var confirmBtn = document.createElement('button');
-  confirmBtn.className = 'btn btn-sm btn-primary';
-  confirmBtn.textContent = t('确认选中');
-  confirmBtn.disabled = !selectedNo;
-  confirmBtn.style.opacity = selectedNo ? '1' : '0.5';
-  confirmBtn.addEventListener('click', function(){
-    if (!selectedNo) { showToast(t('请先选择员工'), 'error'); return; }
-    _bindingEmpSel[selKey] = selectedNo;
-    applySelectedEmp(selKey);
-    overlay.remove();
-    showToast('已选中员工 ' + selectedNo + '，点击「绑定」完成', 'success');
-  });
-  btnRow.appendChild(confirmBtn);
-  foot.appendChild(btnRow);
-  box.appendChild(foot);
-
-  var updateInfo = function(){
-    confirmBtn.disabled = !selectedNo;
-    confirmBtn.style.opacity = selectedNo ? '1' : '0.5';
-    selInfo.textContent = selectedNo ? t('已选中') + '：' + empLabelText(selectedNo) : t('请先选择员工');
-  };
-
-  var applySelectedEmp = function(uidKey){
-    var tag = document.getElementById('bindEmpTag_' + uidKey);
-    if (tag) {
-      var no = _bindingEmpSel[uidKey];
-      tag.textContent = no ? '已选：' + empLabelText(no) : '未选员工';
-    }
-  };
-  window._applySelEmp = applySelectedEmp;
-
-  var renderRows = function(){
-    var q = (inp.value || '').trim().toLowerCase();
-    var filtered = rows;
-    if (q) {
-      filtered = rows.filter(function(r){
-        return [r.emp_no, r.nickname, r.alias, r.real_name, r.cn_name, r.position, r.discord]
-          .some(function(v){ return v && String(v).toLowerCase().indexOf(q) >= 0; });
-      });
-    }
-    list.innerHTML = '';
-    if (!filtered.length) {
-      list.innerHTML = '<p style="padding:24px;text-align:center;color:#999">' + t('无匹配员工') + '</p>';
-      updateInfo();
-      return;
-    }
-    var table = document.createElement('table');
-    table.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px';
-    var thead = document.createElement('thead');
-    thead.innerHTML = '<tr style="text-align:left;background:#f3f4f6">'
-      + '<th style="padding:8px 10px;width:28px"></th>'
-      + '<th style="padding:8px 10px">编号</th><th style="padding:8px 10px">昵称</th>'
-      + '<th style="padding:8px 10px">中文名</th><th style="padding:8px 10px">真实姓名</th>'
-      + '<th style="padding:8px 10px">Discord</th>'
-      + '<th style="padding:8px 10px">岗位</th><th style="padding:8px 10px">状态</th></tr>';
-    table.appendChild(thead);
-    var tbody = document.createElement('tbody');
-    filtered.forEach(function(r){
-      var tr = document.createElement('tr');
-      tr.style.cssText = 'cursor:pointer;border-bottom:1px solid #f0f0f0';
-      var paintRow = function(){
-        var isSel = String(r.emp_no) === String(selectedNo);
-        tr.style.background = isSel ? '#e8f0fe' : '';
-        var c = tr.querySelector('.sel-check');
-        if (c) c.textContent = isSel ? '✔' : '';
-      };
-      tr.addEventListener('mouseenter', function(){
-        if (String(r.emp_no) !== String(selectedNo)) tr.style.background = '#f5f9ff';
-      });
-      tr.addEventListener('mouseleave', paintRow);
-      tr.addEventListener('click', function(){
-        selectedNo = (selectedNo && String(selectedNo) === String(r.emp_no)) ? null : String(r.emp_no);
-        tbody.querySelectorAll('tr').forEach(function(t){
-          var isSel = t.dataset.no === selectedNo;
-          t.style.background = isSel ? '#e8f0fe' : '';
-          var c = t.querySelector('.sel-check');
-          if (c) c.textContent = isSel ? '✔' : '';
-        });
-        updateInfo();
-      });
-      tr.dataset.no = r.emp_no;
-      tr.innerHTML = '<td class="sel-check" style="padding:8px 10px;width:28px;color:#1a73e8;font-weight:700"></td>'
-        + '<td style="padding:8px 10px;font-weight:600">' + String(empEscape(r.emp_no)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.nickname)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.cn_name)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.real_name)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.discord)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.position)) + '</td>'
-        + '<td style="padding:8px 10px">' + String(empEscape(r.status)) + '</td>';
-      tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
-    list.appendChild(table);
-    updateInfo();
-  };
-  renderRows();
-
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-}
-
-function empEscape(s){ return s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-async function bindingDoBind(uid, nickname) {
-  var empNo = _bindingEmpSel[uid] || '';
-  if (!empNo) { showToast('请先点击「选员工」选择绑定对象', 'error'); return; }
-  if (!confirm('将 ID ' + uid + '（昵称:' + nickname + '）绑定到员工 ' + empLabelText(empNo) + '？')) return;
-  try {
-    await api('claim/bind', { method:'POST', json:{ user_id: uid, emp_no: empNo, nickname: nickname } });
-    delete _bindingEmpSel[uid];
-    showToast('已绑定 ' + empNo, 'success');
-    await bindingLoad();
-  } catch(e) { showToast('绑定失败: ' + e.message, 'error'); }
-}
-
-async function bindingDoExclude(uid, nickname) {
-  if (!confirm('将 #' + String(uid).slice(-6) + ' ' + (nickname||'') + ' 加入排除名单？')) return;
-  try {
-    await api('claim/exclude', { method:'POST', json:{ user_id: uid } });
-    showToast('已排除', 'success');
-    await bindingLoad();
-  } catch(e) { showToast('排除失败: ' + e.message, 'error'); }
-}
-
-async function bindingDoUnbindGroup(user_id, sources) {
-  if (!sources || !sources.length) { showToast('无可解绑来源', 'error'); return; }
-  var desc = sources.map(function(s){ return srcCell(s) + (s.owner_key ? '（' + s.owner_key + '）' : ''); }).join('、');
-  if (!confirm('解绑 uid ' + user_id + '？\n\n来源：' + desc + '\n\n该 uid 将回到「待认领」。')) return;
-  var done = 0;
-  for (var i=0;i<sources.length;i++) {
-    var s = sources[i];
-    try {
-      await api('binding/unbind', { method:'POST', json:{ user_id: user_id, source: s.source, owner_key: s.owner_key } });
-      done++;
-    } catch(e) { showToast('解绑 ' + srcCell(s) + ' 失败: ' + e.message, 'error'); }
-  }
-  if (done) { showToast('已解绑 ' + done + ' 处来源', 'success'); await bindingLoad(); }
-}
-
-/* ================= PID 全景（live_player 全量 + 映射状态，只读 + 同步补缺） ================= */
-var _pidsItems = [];
-var _pidsSearch = '';
-var _pidsBusy = false;
-
-/* ===== 自定义悬浮提示（原生 title 延迟大，改用即时跟随鼠标 tooltip）===== */
-var _maTipEl = null, _maTipCur = null;
-function _maTipEnsure() {
-  if (_maTipEl) return _maTipEl;
-  var el = document.createElement('div');
-  el.id = 'maTip';
-  el.style.cssText = 'position:fixed;z-index:99999;display:none;pointer-events:none;max-width:420px;background:#1f2937;color:#f9fafb;font-size:11px;line-height:1.5;padding:5px 9px;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,.25);white-space:pre-wrap;word-break:break-all';
-  document.body.appendChild(el);
-  _maTipEl = el;
-  return el;
-}
-document.addEventListener('mouseover', function(e){
-  var t = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
-  if (!t || t === _maTipCur) return;
-  _maTipCur = t;
-  var el = _maTipEnsure();
-  el.textContent = t.getAttribute('data-tip') || '';
-  if (!el.textContent) { el.style.display = 'none'; return; }
-  el.style.display = 'block';
-  _maTipMove(e.clientX, e.clientY);
-});
-document.addEventListener('mousemove', function(e){
-  if (_maTipCur) _maTipMove(e.clientX, e.clientY);
-});
-document.addEventListener('mouseout', function(e){
-  if (_maTipCur && e.relatedTarget && _maTipCur.contains(e.relatedTarget)) return;
-  _maTipCur = null;
-  if (_maTipEl) _maTipEl.style.display = 'none';
-});
-function _maTipMove(x, y) {
-  var el = _maTipEnsure();
-  var pad = 10;
-  var maxX = window.innerWidth - el.offsetWidth - pad;
-  var maxY = window.innerHeight - el.offsetHeight - pad;
-  el.style.left = Math.min(x + pad, Math.max(pad, maxX)) + 'px';
-  el.style.top = Math.min(y + pad + 8, Math.max(pad, maxY)) + 'px';
-}
-
-var PIDS_STATUS_META = {
-  ok:       { label: '已映射',      bg: '#dcfce7', fg: '#166534', border: '#bbf7d0' },
-  no_emp:   { label: '缺员工',      bg: '#fef9c3', fg: '#854d0e', border: '#fef08a' },
-  unmapped: { label: '缺映射',      bg: '#fee2e2', fg: '#b91c1c', border: '#fecaca' },
-  left:     { label: '已离职',      bg: '#ede9fe', fg: '#6d28d9', border: '#ddd6fe' },
-};
-
-async function renderPidsPage() {
-  $('#adminModuleTitle').textContent = 'PID 全景';
-  var main = $('#adminMain');
-  main.innerHTML = '';
-  var bar = document.createElement('div');
-  bar.className = 'filter-bar';
-  bar.innerHTML = ''
-    + '<input id="pidsSearch" placeholder="搜索 PID / 名称 / 昵称 / 员工编号" value="' + escHtml(_pidsSearch) + '" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:260px" oninput="pidsOnSearch(this.value)">'
-    + ' <button class="btn btn-primary btn-sm btn-write btn-write-pids" onclick="pidsSyncFill()" style="font-size:11px"><i class="fas fa-sync"></i> 同步补缺</button>'
-    + ' <button class="btn btn-sm" onclick="pidsReload()" style="font-size:11px"><i class="fas fa-refresh"></i> 刷新</button>'
-    + ' <span id="pidsHint" style="font-size:11px;color:#999;margin-left:8px"></span>'
-    + ' <span style="font-size:10px;color:#999;margin-left:6px">缺映射=源库有此 PID 但映射表无行；缺员工=已映射但未关联员工</span>'
-    + ' <span style="margin-left:10px;font-size:10px;color:#6b7280">Discord 来源：</span>'
-    + ' <span style="font-size:13px;color:#166534;font-weight:800">● 员工表</span>'
-    + ' <span style="font-size:10px;color:#6b7280">已联动员工表实时值</span>'
-    + ' <span style="margin-left:6px"><span style="font-size:13px;color:#b91c1c;font-weight:800">● 映射快照</span>'
-    + ' <span style="font-size:10px;color:#6b7280">员工表未填，仅映射表历史值</span></span>';
-  main.appendChild(bar);
-  var wrap = document.createElement('div');
-  wrap.id = 'pidsBody';
-  wrap.style.marginTop = '10px';
-  main.appendChild(wrap);
-  await pidsLoad();
-}
-
-function pidsOnSearch(v) {
-  _pidsSearch = (v || '').trim();
-  pidsRenderBody();
-}
-
-function pidsReload() {
-  pidsLoad();
-}
-
-async function pidsLoad() {
-  var box = document.getElementById('pidsBody');
-  var hint = document.getElementById('pidsHint');
-  if (!box) return;
-  if (hint) hint.textContent = '加载中...';
-  try {
-    var res = await api('pids/panorama');
-    _pidsItems = (res && res.items) || [];
-    if (hint) {
-      var c = _pidsItems.reduce(function(a, x){ a[x.status] = (a[x.status]||0) + 1; return a; }, {});
-      hint.textContent = '全量 ' + _pidsItems.length + '｜已映射 ' + (c.ok||0) + '｜缺员工 ' + (c.no_emp||0) + '｜缺映射 ' + (c.unmapped||0) + '｜已离职 ' + (c.left||0);
-    }
-    pidsRenderBody();
-  } catch (e) {
-    if (hint) hint.textContent = '加载失败: ' + e.message;
-  }
-}
-
-function pidsFilter(list) {
-  if (!_pidsSearch) return list;
-  var q = _pidsSearch.toLowerCase();
-  return list.filter(function(x) {
-    return String(x.pid).indexOf(q) >= 0
-      || String(x.player_name || '').toLowerCase().indexOf(q) >= 0
-      || String(x.nick_name || '').toLowerCase().indexOf(q) >= 0
-      || String(x.emp_no || '').toLowerCase().indexOf(q) >= 0
-      || String(x.mapping_player_name || '').toLowerCase().indexOf(q) >= 0;
-  });
-}
-
-function pidsStatusBadge(status) {
-  var m = PIDS_STATUS_META[status] || PIDS_STATUS_META.unmapped;
-  return '<span style="background:' + m.bg + ';color:' + m.fg + ';border:1px solid ' + m.border + ';border-radius:9px;padding:1px 8px;font-size:11px;font-weight:600">' + m.label + '</span>';
-}
-
-function pidsActionCell(x) {
-  var btnStyle = 'font-size:10px;padding:1px 6px';
-  if (x.mapping_id) {
-    return '<button class="btn btn-sm btn-write btn-write-pids" style="' + btnStyle + ';color:#1e40af;background:#dbeafe;border-color:#bfdbfe" onclick="pidsEditMapping(' + x.mapping_id + ')">编辑映射</button>'
-      + ' <button class="btn btn-sm btn-write btn-write-pids" style="' + btnStyle + ';color:#991b1b;background:#fee2e2;border-color:#fecaca" onclick="pidsDelMapping(' + x.mapping_id + ',\'' + escJs(x.player_name || '') + '\')">删除映射</button>';
-  }
-  return '<button class="btn btn-sm btn-write btn-write-pids" style="' + btnStyle + ';color:#166534;background:#dcfce7;border-color:#bbf7d0" onclick="pidsAddMapping(\'' + escJs(x.player_name) + '\',' + x.pid + ')">补映射</button>';
-}
-
-// 删除映射行（并入 PID 全景后由这里统一管理；删除后该 PID 回到「缺映射」）
-async function pidsDelMapping(mappingId, playerName) {
-  if (!mappingId) return;
-  if (!confirm('删除映射行 #' + mappingId + '（' + playerName + '）？\n删除后该 PID 将回到「缺映射」状态，可重新补映射。')) return;
-  try {
-    await api('player_mapping/' + mappingId, { method: 'DELETE' });
-    showToast('映射已删除：' + playerName, 'success');
-    pidsReload();
-  } catch (e) { showToast(e.message, 'error'); }
-}
-
-function escJs(s) {
-  return String(s == null ? '' : s).replace(/'/g, "\\'");
-}
-
-// 已有映射行 → 跳转陪玩映射编辑表单（通用 openFormModal，item 需含 id + 字段值）
-async function pidsEditMapping(mappingId) {
-  try {
-    var res = await api('player_mapping?page=1&page_size=200');
-    var items = (res && res.items) || [];
-    var it = items.find(function(x){ return String(x.id) === String(mappingId); });
-    if (!it) { showToast('未找到该映射行', 'error'); return; }
-    openFormModal('player_mapping', it);
-  } catch (e) { showToast('加载映射失败: ' + e.message, 'error'); }
-}
-
-// 无映射行 → 用通用富信息浮层选员工，调专用接口补映射（写 pd_id，幂等不撞唯一约束）
-async function pidsAddMapping(playerName, pid) {
-  openRichEmpPicker(async function(emp){
-    if (!emp || !emp.emp_no) { showToast('未选择员工', 'error'); return; }
-    try {
-      var r = await api('pids/mapping', { method: 'POST', json: { pid: pid, emp_no: emp.emp_no } });
-      showToast('已关联 ' + emp.emp_no + '（PID #' + pid + '）', 'success');
-      pidsReload();
-    } catch (e) { showToast(e.message, 'error'); }
-  });
-}
-
-function pidsRenderBody() {
-  var wrap = document.getElementById('pidsBody');
-  if (!wrap) return;
-  var list = pidsFilter(_pidsItems || []);
-  if (!list.length) {
-    wrap.innerHTML = '<div style="color:#16a34a;font-size:12px">暂无 PID 数据</div>';
-    return;
-  }
-  var html = '<table style="width:100%;border-collapse:collapse;background:#fff">';
-  html += '<tr style="background:#f3f4f6"><th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">PID</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">状态</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">源 player_name</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">源 nick</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">操作</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">关联员工</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">员工 Discord ID</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">Discord</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">最后出现</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">备注</th>'
-    + '<th style="padding:4px 6px;border:1px solid #e5e7eb;text-align:left;font-size:11px">修改时间</th></tr>';
-  for (var i=0;i<list.length;i++) {
-    var x = list[i];
-    html += '<tr>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px"><code style="font-size:10px">' + escHtml(x.pid) + '</code></td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + pidsStatusBadge(x.status) + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-weight:600" data-tip="' + escHtml(x.player_name || '') + '">' + escHtml(x.player_name || '') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px" data-tip="' + escHtml(x.nick_name || '') + '">' + escHtml(x.nick_name || '') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;white-space:nowrap">' + pidsActionCell(x) + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.emp_label ? escHtml(x.emp_label) : '<span class="muted">' + (x.emp_no ? escHtml(x.emp_no) : '—') + '</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;font-family:monospace" data-tip="' + escHtml(x.emp_uid || '') + '">' + (x.emp_uid ? escHtml(x.emp_uid) : '<span class="muted">—</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px" data-tip="' + escHtml(x.emp_disc || x.discord || '') + '">' + (x.emp_disc ? '<span style="color:#166534;font-weight:600">' + escHtml(x.emp_disc) + '</span>' : '<span style="color:#b91c1c;font-weight:600">' + escHtml(x.discord || '—') + '</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px">' + (x.last_seen ? escHtml(x.last_seen) : '<span class="muted">—</span>') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#6b7280;max-width:24ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-tip="' + escHtml(x.remark || '') + '">' + escHtml(x.remark || '') + '</td>';
-    html += '<td style="padding:4px 6px;border:1px solid #eee;font-size:11px;color:#999">' + escHtml(x.updated_at || '') + '</td>';
-    html += '</tr>';
-  }
-  html += '</table>';
-  wrap.innerHTML = html;
-}
-
-async function pidsSyncFill() {
-  if (_pidsBusy) return;
-  if (!confirm('执行「同步补缺」：\n\n· 已有映射的 PID 跳过（不覆盖）\n· 已存在同名映射行但缺 pd_id → 只补 pd_id\n· 完全无映射行 → 新增空行（备注：自动补缺：未关联员工）\n\n幂等可重跑，确认执行？')) return;
-  _pidsBusy = true;
-  var hint = document.getElementById('pidsHint');
-  if (hint) hint.textContent = '同步中...';
-  try {
-    var res = await api('pids/sync-fill', { method: 'POST' });
-    if (hint) hint.textContent = '✅ 同步完成：新增 ' + (res && res.created) + '，补pd ' + (res && res.updated) + '，跳过 ' + (res && res.skipped);
-    showToast('同步完成：新增 ' + (res && res.created) + ' / 补pd ' + (res && res.updated), 'success');
-    await pidsLoad();
-  } catch (e) {
-    if (hint) hint.textContent = '同步失败: ' + e.message;
-    showToast('同步失败: ' + e.message, 'error');
-  } finally {
-    _pidsBusy = false;
-  }
-}
+// ========== 数据校对（verify_reports：play_detail vs 签到 报告） ==========
 async function openVerifyReports(initialDate) {
     window._verifyPendingDate = initialDate || null;
     var html = '<div class="modal-overlay" onclick="closeVerifyReports()"></div>';
@@ -6726,18 +5657,15 @@ async function loadVerifyList() {
     try {
         var res = await api('verify/reports?page=1&page_size=50');
         var items = (res && res.items) || [];
-        // 按当前语言过滤报告：zh 显示主键，vi 显示 .vi 键
-        var isVi = getLang() === 'vi';
-        items = items.filter(function(it) { return isVi ? (it.report_date.indexOf('.vi') > 0) : (it.report_date.indexOf('.vi') < 0); });
-        if (!items.length) { box.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">' + (isVi ? 'Chưa có báo cáo (tiếng Việt), bấm「Tạo báo cáo」' : '暂无报告，点击「生成报告」创建') + '</div>'; return; }
+        if (!items.length) { box.innerHTML = '<div style="color:#999;font-size:12px;padding:8px">暂无报告，点击「生成报告」创建</div>'; return; }
         box.innerHTML = items.map(function(it) {
             var s = {};
             try { s = JSON.parse(it.summary || '{}'); } catch(e) {}
             var line = (s.sessions !== undefined)
                 ? ('场次' + s.sessions + ' | 匹配' + s.matched_persons + '(' + s.match_rate + '%) | 差' + (s.avg_diff != null ? s.avg_diff + 'pp' : '-'))
                 : '';
-            return '<div class="verify-item" data-date="' + it.report_date + '" style="padding:6px 8px;margin-bottom:4px;border-radius:4px;cursor:pointer;font-size:12px;background:#fff;border:1px solid #eee" onclick="showVerifyReport(\'' + it.report_date.replace('.vi','') + '\')">'
-                + '<div style="font-weight:600">' + escHtml(it.report_date.replace('.vi','')) + '</div>'
+            return '<div class="verify-item" data-date="' + it.report_date + '" style="padding:6px 8px;margin-bottom:4px;border-radius:4px;cursor:pointer;font-size:12px;background:#fff;border:1px solid #eee" onclick="showVerifyReport(\'' + it.report_date + '\')">'
+                + '<div style="font-weight:600">' + escHtml(it.report_date) + '</div>'
                 + '<div style="color:#888;font-size:11px">' + escHtml(line) + '</div>'
                 + '</div>';
         }).join('');
@@ -6749,17 +5677,16 @@ async function loadVerifyList() {
 async function showVerifyReport(date) {
     var box = document.getElementById('verifyDetail');
     if (!box) return;
-    var key = (getLang() === 'vi') ? date + '.vi' : date;   // 越语版独立存储键
     box.innerHTML = '<div style="color:#999;font-size:12px">加载中...</div>';
     try {
-        var res = await api('verify/reports/' + key);
-        if (!res || !res.report_date) { box.innerHTML = '<div style="color:#dc2626;font-size:12px">未找到报告（当前语言版本可能未生成）</div>'; return; }
+        var res = await api('verify/reports/' + date);
+        if (!res || !res.report_date) { box.innerHTML = '<div style="color:#dc2626;font-size:12px">未找到报告</div>'; return; }
         document.querySelectorAll('.verify-item').forEach(function(el) {
-            el.style.background = (el.dataset.date === key) ? '#e3f2fd' : '#fff';
+            el.style.background = (el.dataset.date === date) ? '#e3f2fd' : '#fff';
         });
         window._verifyContentCache = window._verifyContentCache || {};
-        window._verifyContentCache[key] = res.content;
-        window._verifyCurrentDate = key;
+        window._verifyContentCache[date] = res.content;
+        window._verifyCurrentDate = date;
         box.innerHTML = renderReportMd(res.content || '');
     } catch(e) {
         box.innerHTML = '<div style="color:#dc2626;font-size:12px">加载失败: ' + escHtml(e.message) + '</div>';
@@ -6772,7 +5699,7 @@ async function runVerifyReport() {
     var btn = event && event.target && event.target.closest ? event.target.closest('button') : null;
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...'; }
     try {
-        var d = await api('verify/reports/run', { method: 'POST', json: { date: date, lang: getLang() } });
+        var d = await api('verify/reports/run', { method: 'POST', json: { date: date } });
         if (!d || !d.report_date) {
             showToast('生成失败: 报告未生成（脚本无输出）', 'error');
         } else {
@@ -6832,619 +5759,4 @@ function printVerifyReport() {
         + '<body>' + bodyHtml
         + '<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script></body></html>');
     win.document.close();
-}
-
-
-/* ================= 工资代发收款码（批量 VietQR 带金额）================= */
-var _paycodeBusy = false;
-var paycodeTab = 'gen';
-var PAY_TAB_ACTIVE = 'background:#1d4ed8;color:#fff;border-color:#1d4ed8';
-
-function renderPayCodePage() {
-  const main = $('#adminMain');
-  main.innerHTML = ''
-    + '<div style="display:flex;gap:8px;margin-bottom:12px">'
-    +   '<button class="btn btn-sm" id="payTabGen" style="' + (paycodeTab === 'gen' ? PAY_TAB_ACTIVE : '') + '">生成收款码</button>'
-    +   '<button class="btn btn-sm" id="payTabHist" style="' + (paycodeTab === 'hist' ? PAY_TAB_ACTIVE : '') + '">批次历史</button>'
-    + '</div>'
-    + '<div id="payUploadPane" style="' + (paycodeTab === 'gen' ? '' : 'display:none') + '">'
-    +   '<div style="padding:14px 18px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">'
-    +     '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
-    +       '<span style="font-weight:600">上传 Excel/CSV（列：员工编号 + 金额，VND 整数）</span>'
-    +       '<input type="file" id="paycodeFile" accept=".xlsx,.xls,.csv" style="font-size:12px">'
-    +       '<button class="btn btn-primary btn-sm" id="paycodeGenBtn" disabled><i class="fas fa-qrcode"></i> 生成收款码</button>'
-    +       '<button class="btn btn-sm" id="paycodeTplBtn">下载模板</button>'
-    +     '</div>'
-    +     '<p style="font-size:12px;color:#6b7280;margin:8px 0 0">每行生成一个「带金额 VietQR」：手机银行/支付 App 扫码后自动带出收款账号+金额；逐张核对后付款，可标记【已发】留痕；每次生成自动归档为一个批次，可到「批次历史」重开。员工编号须与「直播员工-员工编号」一致，金额为纯整数越南盾（如 3000000）。</p>'
-    +   '</div>'
-    + '</div>'
-    + '<div id="paycodeBody"><p style="color:#9ca3af;font-size:13px">上传文件后点击「生成收款码」，或在「批次历史」查看过往批次。</p></div>';
-
-  $('#paycodeFile').addEventListener('change', () => {
-    $('#paycodeGenBtn').disabled = !$('#paycodeFile').files.length;
-  });
-  $('#paycodeGenBtn').addEventListener('click', paycodeGenerate);
-  $('#paycodeTplBtn').addEventListener('click', paycodeDownloadTpl);
-  $('#payTabGen').addEventListener('click', () => { paycodeTab = 'gen'; setPaycodeTabUI(); $('#paycodeBody').innerHTML = '<p style="color:#9ca3af;font-size:13px">上传文件后点击「生成收款码」。</p>'; });
-  $('#payTabHist').addEventListener('click', () => { paycodeTab = 'hist'; setPaycodeTabUI(); paycodeBatches(); });
-  // viewer（特殊用户）：工资代发仅可查看批次历史（只读），隐藏生成入口
-  if (state.role === 'viewer') {
-    $('#payTabGen').style.display = 'none';
-    paycodeTab = 'hist';
-    setPaycodeTabUI();
-    paycodeBatches();
-  }
-}
-
-function setPaycodeTabUI() {
-  $('#payTabGen').style.cssText = paycodeTab === 'gen' ? PAY_TAB_ACTIVE : '';
-  $('#payTabHist').style.cssText = paycodeTab === 'hist' ? PAY_TAB_ACTIVE : '';
-  $('#payUploadPane').style.display = paycodeTab === 'gen' ? '' : 'none';
-}
-
-function payApplyPaycodeTitle() {
-  const main = $('#adminMain');
-  const h = main.querySelector('.page-title');
-  if (h) h.textContent = '工资代发收款码';
-}
-
-function paycodeDownloadTpl() {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['\uFEFF员工编号,金额\n00001,3000000\n00002,4500000\n'], { type: 'text/csv;charset=utf-8' }));
-  a.download = '工资代发收款码模板.csv';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
-}
-
-async function paycodeGenerate() {
-  const input = $('#paycodeFile');
-  if (!input.files || !input.files.length) { showToast('请先选择文件', 'error'); return; }
-  if (_paycodeBusy) return;
-  _paycodeBusy = true;
-  const btn = $('#paycodeGenBtn');
-  btn.disabled = true; btn.textContent = '生成中…';
-  try {
-    const fd = new FormData();
-    fd.append('file', input.files[0]);
-    const res = await fetch('api/paycode/generate', { method: 'POST', body: fd, credentials: 'same-origin' });
-    const j = await res.json();
-    if (!j.ok) { showToast(j.error || '生成失败', 'error'); return; }
-    paycodeRender(j.data);
-  } catch (e) {
-    showToast('接口异常：' + e.message, 'error');
-  } finally {
-    _paycodeBusy = false;
-    btn.disabled = false; btn.textContent = '生成收款码';
-  }
-}
-
-/* 渲染收款码卡片（生成结果 / 批次详情通用）。d: {batch_id?, batch?批次信息, items:[{id,emp_no,name,bank,account,amount,payload,status,paid_at,paid_by,remark?,ok?,error?}]} */
-async function paycodeRender(d) {
-  const body = $('#paycodeBody');
-  const items = d.items || [];
-  const okItems = items.filter(i => i.payload);
-  const errItems = items.filter(i => !i.payload);
-  const sum = okItems.reduce((s, i) => s + (Number(i.amount) || 0), 0);
-  const paidCount = okItems.filter(i => i.status === 'paid').length;
-  const bBatch = d.batch;
-  body.innerHTML = '';
-  // 头部：批次信息 + 备注编辑 + 打印
-  const head = document.createElement('div');
-  head.style.cssText = 'display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:10px;font-size:13px';
-  const headL = document.createElement('div');
-  headL.style.cssText = 'display:flex;gap:14px;align-items:center;flex-wrap:wrap';
-  if (bBatch) {
-    const rowsN = bBatch.total_rows || 0;
-    const split = items.length > rowsN;
-    headL.innerHTML = '<span style="color:#6b7280">批次 <b>#' + bBatch.id + '</b> · ' + esc(bBatch.created_at || '') + ' · 操作人 ' + esc(bBatch.created_by || '-') + '</span>'
-      + '<span>共 <b>' + rowsN + '</b> 行</span>'
-      + '<span>码 <b>' + items.length + '</b> 张</span>'
-      + (split ? '<span style="color:#b45309">含拆分</span>' : '')
-      + '<span style="color:#16a34a">已发 <b>' + paidCount + '</b> 笔</span>'
-      + '<span>合计 <b style="color:#1d4ed8">' + fmtVND(sum) + '</b> VND</span>';
-  } else if (d.batch_id) {
-    const rowsN = d.total_rows || items.length;
-    const split = okItems.length > (d.ok_count || 0);
-    headL.innerHTML = '<span style="color:#6b7280">新批次 <b>#' + d.batch_id + '</b></span>'
-      + '<span>共 <b>' + rowsN + '</b> 行</span>'
-      + '<span style="color:#16a34a">成功 <b>' + (d.ok_count || 0) + '</b> 行</span>'
-      + (errItems.length ? '<span style="color:#dc2626">失败 <b>' + errItems.length + '</b> 行</span>' : '')
-      + '<span>码 <b>' + okItems.length + '</b> 张</span>'
-      + (split ? '<span style="color:#b45309">含拆分</span>' : '')
-      + '<span>合计 <b style="font-size:15px;color:#1d4ed8">' + fmtVND(sum) + '</b> VND</span>'
-      + '<span style="color:#16a34a">已发 <b>' + paidCount + '</b> 笔</span>';
-  }
-  head.appendChild(headL);
-  // 备注（仅批次详情可编辑）
-  if (bBatch) {
-    const rWrap = document.createElement('div');
-    rWrap.style.cssText = 'display:flex;gap:6px;align-items:center';
-    const ri = document.createElement('input');
-    ri.placeholder = '添加批次备注';
-    ri.value = bBatch.remark || '';
-    ri.style.cssText = 'font-size:12px;width:190px;padding:2px 6px';
-    const sBtn = document.createElement('button');
-    sBtn.className = 'btn btn-write'; sBtn.textContent = '保存备注'; sBtn.style.cssText = 'font-size:11px;padding:1px 8px';
-    sBtn.addEventListener('click', async () => {
-      try { await api('paycode/batches/' + bBatch.id + '/remark', { method: 'POST', json: { remark: ri.value } }); showToast('备注已保存', 'success'); }
-      catch (e) { showToast(e.message, 'error'); }
-    });
-    rWrap.appendChild(ri); rWrap.appendChild(sBtn);
-    head.appendChild(rWrap);
-  }
-  // 打印 + 返回历史
-  const ops = document.createElement('div');
-  ops.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:auto';
-  const pBtn = document.createElement('button');
-  pBtn.className = 'btn btn-sm'; pBtn.textContent = '打印本页';
-  pBtn.addEventListener('click', () => window.print());
-  ops.appendChild(pBtn);
-  const backBtn = document.createElement('button');
-  backBtn.className = 'btn btn-sm'; backBtn.textContent = '批次历史';
-  backBtn.addEventListener('click', () => { paycodeTab = 'hist'; setPaycodeTabUI(); paycodeBatches(); });
-  ops.appendChild(backBtn);
-  head.appendChild(ops);
-  body.appendChild(head);
-
-  const grid = document.createElement('div');
-  grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:14px';
-  let openCard = null;  // 手风琴：同时只展开一张收款码
-  items.forEach(it => {
-    const card = document.createElement('div');
-    card.style.cssText = (it.status === 'paid'
-      ? 'background:#f0fdf4;border:2px solid #16a34a;border-radius:10px;padding:12px;width:230px;display:flex;flex-direction:column;align-items:center;gap:6px'
-      : 'background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;width:230px;display:flex;flex-direction:column;align-items:center;gap:6px');
-    if (!it.payload) {
-      card.innerHTML = '<b style="font-size:13px">' + esc(it.emp_no) + '</b>'
-        + (it.name ? '<span style="font-size:12px;color:#6b7280">' + esc(it.name) + '</span>' : '')
-        + '<span style="font-size:12px;color:#dc2626">' + esc(it.error || '失败') + '</span>'
-        + (it.amount ? '<span style="font-size:13px;font-weight:600">' + fmtVND(it.amount) + ' VND</span>' : '');
-    } else {
-      const qrWrap = document.createElement('div');
-      qrWrap.style.cssText = 'display:none;margin-top:2px;text-align:center';
-      card.appendChild(qrWrap);
-      // 已发提示条（展开二维码时若已发则显示）
-      const paidBanner = document.createElement('div');
-      paidBanner.style.cssText = 'display:none;margin-top:2px;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;color:#065f46;background:#d1fae5;border:1px solid #a7f3d0';
-      paidBanner.textContent = '✓ 该笔已标记已发';
-      card.appendChild(paidBanner);
-      const info = document.createElement('div');
-      info.style.cssText = 'font-size:12px;color:#374151;text-align:center;line-height:1.6';
-      let nameLbl = esc(it.name || it.emp_no);
-      if (it.split) nameLbl += ' <span style="color:#b45309;background:#fef3c7;border-radius:4px;padding:0 4px;font-size:10px">分笔 ' + it.split.idx + '/' + it.split.total + '</span>';
-      info.innerHTML = '<div><b>' + nameLbl + '</b>（' + esc(it.emp_no) + '）</div>'
-        + esc(it.bank) + ' · ' + esc(it.account) + '<br>'
-        + '<span style="font-size:16px;color:#1d4ed8;font-weight:700">' + fmtVND(it.amount) + '</span> VND';
-      card.appendChild(info);
-      const hint = document.createElement('div');
-      hint.style.cssText = 'font-size:11px;color:#8b5cf6;margin-top:2px';
-      hint.textContent = '▸ 点击查看收款码';
-      card.appendChild(hint);
-      card.style.cursor = 'pointer';
-      card.title = '点击展开/收起该收款码';
-      let qrInited = false;
-      card.addEventListener('click', () => {
-        const isPaid = it.status === 'paid';
-        // 自己已展开 -> 收起
-        if (openCard && openCard.card === card) {
-          qrWrap.style.display = 'none'; hint.textContent = '▸ 点击查看收款码';
-          if (isPaid) paidBanner.style.display = 'none';
-          openCard = null;
-          return;
-        }
-        // 收起上一张
-        if (openCard) {
-          openCard.qrWrap.style.display = 'none';
-          openCard.hint.textContent = '▸ 点击查看收款码';
-          if (openCard.isPaid) openCard.paidBanner.style.display = 'none';
-        }
-        // 展开当前
-        if (isPaid) paidBanner.style.display = 'block';
-        if (!qrInited) {
-          qrInited = true;
-          try { new QRCode(qrWrap, { text: it.payload, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M }); }
-          catch (e) { qrWrap.innerHTML = '<p style="font-size:11px;color:#ef4444;margin:0">二维码生成失败</p>'; }
-          if (isPaid) paidBanner.style.display = 'block';
-        }
-        qrWrap.style.display = 'block'; hint.textContent = '▾ 点击收起';
-        openCard = { card: card, qrWrap: qrWrap, hint: hint, paidBanner: paidBanner, isPaid: isPaid };
-      });
-      const stRow = document.createElement('div');
-      stRow.style.cssText = 'margin-top:4px;font-size:11px;display:flex;align-items:center;gap:6px';
-      const stText = document.createElement('span');
-      stText.style.cssText = it.status === 'paid' ? 'color:#16a34a;font-weight:700;background:#d1fae5;padding:2px 8px;border-radius:4px' : 'color:#9ca3af';
-      stText.textContent = it.status === 'paid' ? ('已发 ' + (it.paid_at || '') + ' · ' + (it.paid_by || '')) : '未发';
-      const stBtn = document.createElement('button');
-      stBtn.type = 'button'; stBtn.style.cssText = 'font-size:11px;padding:1px 8px;cursor:pointer';
-      stBtn.className = 'btn btn-xs btn-write';
-      stBtn.textContent = it.status === 'paid' ? '撤销' : '标记已发';
-      stBtn.addEventListener('click', async (ev) => {
-        ev.stopPropagation();
-        const to = it.status === 'paid' ? 'unpaid' : 'paid';
-        try {
-          const r = await api('paycode/records', { method: 'POST', json: { id: it.id, status: to } });
-          it.status = r.status; it.paid_at = r.paid_at || ''; it.paid_by = r.paid_by || '';
-          stText.style.cssText = r.status === 'paid' ? 'color:#16a34a;font-weight:700;background:#d1fae5;padding:2px 8px;border-radius:4px' : 'color:#9ca3af';
-          card.style.border = r.status === 'paid' ? '2px solid #16a34a' : '1px solid #e5e7eb';
-          card.style.background = r.status === 'paid' ? '#f0fdf4' : '#fff';
-          stText.textContent = r.status === 'paid' ? ('已发 ' + (r.paid_at || '') + ' · ' + (r.paid_by || '')) : '未发';
-          stBtn.textContent = r.status === 'paid' ? '撤销' : '标记已发';
-          if (r.status === 'paid') { paidBanner.textContent = '✓ 该笔已标记已发'; showToast('已标记已发：' + it.emp_no, 'success'); }
-          else { paidBanner.style.display = 'none'; showToast('已撤销标记：' + it.emp_no, 'success'); }
-        } catch (e) { showToast(e.message, 'error'); }
-      });
-      stRow.appendChild(stText); stRow.appendChild(stBtn);
-      card.appendChild(stRow);
-    }
-    grid.appendChild(card);
-  });
-  body.appendChild(grid);
-  if (window.matchMedia && window.matchMedia('(min-width:900px)').matches) { /* 便于网格显示 */ }
-}
-
-/* 批次历史列表 */
-async function paycodeBatches() {
-  const body = $('#paycodeBody');
-  body.innerHTML = '<p style="color:#6b7280">加载中…</p>';
-  let list;
-  try { list = await api('paycode/batches'); } catch (e) { body.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
-  if (!list || !list.length) {
-    body.innerHTML = '<p style="color:#9ca3af;margin-bottom:10px">暂无批次记录。</p>'
-      + '<button class="btn btn-sm" onclick="paycodeTab=\'gen\';setPaycodeTabUI()">+ 新建批次</button>';
-    return;
-  }
-  const head = document.createElement('div');
-  head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:10px';
-  head.innerHTML = '<b style="font-size:13px">批次历史（' + list.length + '）</b>';
-  const nb = document.createElement('button');
-  nb.className = 'btn btn-sm'; nb.textContent = '+ 新建批次';
-  nb.addEventListener('click', () => { paycodeTab = 'gen'; setPaycodeTabUI(); });
-  head.appendChild(nb);
-  body.innerHTML = '';
-  body.appendChild(head);
-  const tbl = document.createElement('table');
-  tbl.className = 'tbl';
-  tbl.style.cssText = 'width:100%;border-collapse:collapse;font-size:12px;background:#fff';
-  tbl.innerHTML = '<thead><tr style="background:#f9fafb;text-align:left"><th style="padding:7px">#</th><th>生成时间</th><th>操作人</th><th>行数</th><th>合计</th><th>已发</th><th>备注</th><th></th></tr></thead><tbody></tbody>';
-  const tb = tbl.querySelector('tbody');
-  list.forEach(b => {
-    const hasPaid = (b.paid_rows || 0) > 0;
-    const tr = document.createElement('tr');
-    tr.style.cssText = 'border-bottom:1px solid #f1f3f5';
-    tr.innerHTML = '<td style="padding:7px">#' + b.id + '</td>'
-      + '<td>' + esc(b.created_at || '') + '</td>'
-      + '<td>' + esc(b.created_by || '-') + '</td>'
-      + '<td>' + (b.ok_rows || 0) + '</td>'
-      + '<td><b>' + fmtVND(b.total_amount || 0) + '</b> VND</td>'
-      + '<td style="color:' + (hasPaid ? '#16a34a' : '#9ca3af') + '">' + (b.paid_rows || 0) + '</td>'
-      + '<td>' + (b.remark ? '<span style="color:#374151">' + esc(b.remark) + '</span>' : '<span style="color:#d1d5db">—</span>') + '</td>'
-      + '<td><button class="btn btn-sm" style="font-size:11px" onclick="paycodeBatchOpen(' + b.id + ')">查看</button></td>';
-    tb.appendChild(tr);
-  });
-  body.appendChild(tbl);
-}
-
-/* 打开某个批次（重开二维码） */
-async function paycodeBatchOpen(batchId) {
-  const body = $('#paycodeBody');
-  body.innerHTML = '<p style="color:#6b7280">加载中…</p>';
-  let detail;
-  try { detail = await api('paycode/batches/' + batchId); } catch (e) { body.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
-  paycodeRender({ batch: detail.batch, items: detail.items });
-}
-
-/* ================= 员工表单（self forms）：一次性链接 + 待审核队列 ================= */
-var selfFormsTab = 'gen';
-var selfFormsQueueFilter = 'pending';
-var selfFormsSelectedEmpNo = '';
-
-const SELF_FORM_LABELS = {
-  real_name: '真实姓名', gender: '性别', birth_date: '出生日期', phone_zalo: '手机/Zalo',
-  email: '邮箱', id_card: '身份证',
-  account_holder: '收款人（留空=本人）', bank: '银行', account: '银行账号', payee_phone: '收款人手机号',
-  address: '家庭住址', emergency_contact: '紧急联系人', emergency_relation: '联系人关系', emergency_phone: '紧急联系电话',
-};
-const SELF_FORM_GROUPS = [
-  { title: '👤 个人信息', fields: ['real_name', 'gender', 'birth_date', 'phone_zalo', 'email', 'id_card'] },
-  { title: '🏦 银行账号', fields: ['account_holder', 'bank', 'account', 'payee_phone'] },
-  { title: '🏠 家庭信息', fields: ['address', 'emergency_contact', 'emergency_relation', 'emergency_phone'] },
-];
-const SELF_FORM_STATUS_BADGE = {
-  pending: '<span style="background:#fef3c7;color:#92400e;padding:1px 8px;border-radius:99px;font-size:11px">待审</span>',
-  approved: '<span style="background:#dcfce7;color:#166534;padding:1px 8px;border-radius:99px;font-size:11px">已通过</span>',
-  rejected: '<span style="background:#fee2e2;color:#991b1b;padding:1px 8px;border-radius:99px;font-size:11px">已驳回</span>',
-};
-const SELF_FORM_GENDER_TXT = { '1': '男', '2': '女', '': '（空）' };
-
-function selfFormsSetTab(tab) {
-  selfFormsTab = tab;
-  const g = $('#sfTabGen'), q = $('#sfTabQueue');
-  if (g) g.style.cssText = tab === 'gen' ? PAY_TAB_ACTIVE : '';
-  if (q) q.style.cssText = tab === 'queue' ? PAY_TAB_ACTIVE : '';
-  const pg = $('#sfGenPane'), pq = $('#sfQueuePane');
-  if (pg) pg.style.display = tab === 'gen' ? '' : 'none';
-  if (pq) pq.style.display = tab === 'queue' ? '' : 'none';
-}
-
-function selfFormsEmpLabel(e) {
-  if (!e.emp_no) return e.nickname || '新员工（无编号）';
-  const name = e.nickname || e.real_name || e.emp_no;
-  const cn = e.cn_name ? '（' + e.cn_name + '）' : '';
-  return name + cn + '（' + e.emp_no + '）';
-}
-
-function selfFormsCopyText(text) {
-  const done = () => showToast(t('已复制'), 'success');
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(done).catch(() => { selfFormsCopyFallback(text); done(); });
-  } else { selfFormsCopyFallback(text); done(); }
-}
-function selfFormsCopyFallback(text) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;left:-9999px';
-  document.body.appendChild(ta);
-  ta.select();
-  try { document.execCommand('copy'); } catch (e) {}
-  document.body.removeChild(ta);
-}
-
-async function renderSelfFormsPage() {
-  const el = $('#adminMain');
-  el.innerHTML =
-    '<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">'
-    + '<button class="btn btn-sm" id="sfTabGen">🔗 生成链接</button>'
-    + '<button class="btn btn-sm" id="sfTabQueue">📋 审核队列</button>'
-    + '<span class="muted" style="font-size:12px">管理员生成一次性链接发 Zalo/Discord，员工自助填写，提交后在此审核写入</span>'
-    + '</div>'
-    + '<div id="sfGenPane"></div>'
-    + '<div id="sfQueuePane" style="display:none"></div>';
-  $('#sfTabGen').addEventListener('click', () => selfFormsSetTab('gen'));
-  $('#sfTabQueue').addEventListener('click', () => selfFormsSetTab('queue'));
-  selfFormsSetTab(selfFormsTab);
-  selfFormsRenderGen();
-  selfFormsQueue();
-}
-
-/* ---- Tab1：生成链接 ---- */
-async function selfFormsRenderGen() {
-  const pane = $('#sfGenPane');
-  pane.innerHTML =
-    '<div class="card" style="max-width:760px;padding:16px 18px">'
-    + '<h3 style="margin-bottom:10px">为员工生成一次性邀请链接</h3>'
-    + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'
-    + '<label class="field" style="flex:1;min-width:240px"><span>员工（空=新员工无编号）</span>'
-    + '<div style="display:flex;gap:8px"><input type="text" id="sfEmpNo" placeholder="选择已有员工，或点「新员工」生成无编号链接" readonly style="flex:1">'
-    + '<button class="btn btn-sm" id="sfPickBtn">选择员工</button>'
-    + '<button class="btn btn-sm" id="sfNewEmpBtn" style="background:#059669;color:#fff">新员工</button></div></label>'
-    + '<label class="field"><span>有效期</span><select id="sfDays">'
-    + '<option value="7">7 天</option><option value="1">1 天</option><option value="3">3 天</option><option value="30">30 天</option>'
-    + '</select></label>'
-    + '<button class="btn btn-primary" id="sfGenBtn">生成链接</button>'
-    + '</div>'
-    + '<div id="sfGenResult" style="margin-top:14px"></div>'
-    + '</div>'
-    + '<div class="card" style="max-width:760px;margin-top:14px;padding:16px 18px">'
-    + '<h3 style="margin-bottom:10px">最近生成的链接</h3>'
-    + '<div id="sfTokenList"><p class="muted">加载中...</p></div>'
-    + '</div>';
-  $('#sfPickBtn').addEventListener('click', () => {
-    openRichEmpPicker(emp => {
-      selfFormsSelectedEmpNo = emp.emp_no || '';
-      $('#sfEmpNo').value = selfFormsEmpLabel(emp);
-    });
-  });
-  $('#sfNewEmpBtn').addEventListener('click', () => {
-    selfFormsSelectedEmpNo = 'NEW';
-    $('#sfEmpNo').value = '新员工（无编号，审核通过后建档）';
-  });
-  $('#sfGenBtn').addEventListener('click', selfFormsGenToken);
-  selfFormsTokenList();
-}
-
-async function selfFormsGenToken() {
-  if (!selfFormsSelectedEmpNo) { showToast('请选择员工或点「新员工」生成无编号链接', 'error'); return; }
-  const btn = $('#sfGenBtn');
-  btn.disabled = true;
-  try {
-    const empNo = selfFormsSelectedEmpNo === 'NEW' ? '' : selfFormsSelectedEmpNo;
-    const res = await api('self/forms/tokens', { method: 'POST', json: { emp_no: empNo, days: +$('#sfDays').value } });
-    const d = res.data;
-    const _base = location.origin + (location.pathname.indexOf('/ma-test') === 0 ? '/ma-test-self' : '/ma-self');
-    d.url = _base + '/?token=' + d.token; // 前端拼员工页链接，与复制链接逻辑一致
-    $('#sfGenResult').innerHTML =
-      '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px">'
-      + '<div style="font-size:13px;margin-bottom:8px">✅ 已生成 · <b>' + esc(d.label) + '</b> · 有效期至 ' + esc(d.expires_at) + '</div>'
-      + '<div style="display:flex;gap:8px"><input type="text" id="sfGenUrl" readonly value="' + esc(d.url) + '" style="flex:1;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px">'
-      + '<button class="btn btn-sm" id="sfGenCopyBtn">复制链接</button></div>'
-      + '<div class="muted" style="font-size:12px;margin-top:6px">' + (selfFormsSelectedEmpNo === 'NEW'
-          ? '发给新员工填写入职信息，提交审核通过后自动建档（审核时补充编号/岗位/昵称）。'
-          : '把链接通过 Zalo / Discord 发给该员工，打开后即填写，提交后链接自动失效。') + '</div>'
-      + '</div>';
-    $('#sfGenCopyBtn').addEventListener('click', () => selfFormsCopyText($('#sfGenUrl').value));
-    selfFormsTokenList();
-  } catch (e) { showToast(e.message, 'error'); }
-  btn.disabled = false;
-}
-
-async function selfFormsTokenList() {
-  const box = $('#sfTokenList');
-  if (!box) return;
-  box.innerHTML = '<p class="muted">加载中...</p>';
-  let rows = [];
-  try { rows = (await api('self/forms/tokens')).data || []; } catch (e) { box.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
-  if (!rows.length) { box.innerHTML = '<p class="muted">暂无链接，先生成一个发给员工。</p>'; return; }
-  const stLabel = { unused: '未使用', used: '已提交' };
-  let html = '<div class="table-wrap"><table class="data-table"><thead><tr><th>员工</th><th>状态</th><th>有效期至</th><th>创建人</th><th>操作</th></tr></thead><tbody>';
-  rows.forEach(r => {
-    const expired = r.status === 'unused' && r.expires_at && r.expires_at < new Date().toISOString().slice(0, 19).replace('T', ' ');
-    const st = expired ? '<span style="color:#9ca3af">已过期</span>' : (stLabel[r.status] || r.status);
-    const canUse = r.status === 'unused' && !expired;
-    html += '<tr><td>' + esc(selfFormsEmpLabel(r)) + '</td><td>' + st + '</td><td>' + esc(r.expires_at || '') + '</td><td>' + esc(r.created_by || '') + '</td><td>'
-      + (canUse ? '<button class="btn btn-sm" style="font-size:11px" onclick="selfFormsCopyToken(' + r.id + ')">复制链接</button>' : '<span class="muted" style="font-size:12px">' + (r.status === 'used' ? '已失效' : '') + '</span>')
-      + '</td></tr>';
-  });
-  html += '</tbody></table></div>';
-  box.innerHTML = html;
-}
-
-async function selfFormsCopyToken(id) {
-  let rows = [];
-  try { rows = (await api('self/forms/tokens')).data || []; } catch (e) { showToast(e.message, 'error'); return; }
-  const r = rows.find(x => x.id === id);
-  if (!r) return;
-  const base = location.origin + (location.pathname.indexOf('/ma-test') === 0 ? '/ma-test-self' : '/ma-self');
-  selfFormsCopyText(base + '/?token=' + r.token);
-}
-
-/* ---- Tab2：审核队列 ---- */
-async function selfFormsQueue() {
-  const pane = $('#sfQueuePane');
-  if (!pane) return;
-  pane.innerHTML =
-    '<div class="card" style="max-width:960px;padding:16px 18px">'
-    + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">'
-    + '<h3 style="margin:0 8px 0 0">员工提交</h3>'
-    + ['pending', 'approved', 'rejected'].map(s =>
-        '<button class="btn btn-sm" id="sfQf_' + s + '" style="' + (selfFormsQueueFilter === s ? PAY_TAB_ACTIVE : '') + '">'
-        + ({ pending: '待审', approved: '已通过', rejected: '已驳回' }[s]) + '</button>').join('')
-    + '</div>'
-    + '<div id="sfQueueList"><p class="muted">加载中...</p></div>'
-    + '</div>';
-  ['pending', 'approved', 'rejected'].forEach(s => {
-    $('#sfQf_' + s).addEventListener('click', () => {
-      selfFormsQueueFilter = s;
-      selfFormsQueue();
-    });
-  });
-  selfFormsQueueLoad();
-}
-
-async function selfFormsQueueLoad() {
-  const box = $('#sfQueueList');
-  box.innerHTML = '<p class="muted">加载中...</p>';
-  let rows = [];
-  try { rows = (await api('self/submissions?status=' + selfFormsQueueFilter)).data || []; } catch (e) { box.innerHTML = '<p style="color:#dc2626">加载失败：' + esc(e.message) + '</p>'; return; }
-  if (!rows.length) { box.innerHTML = '<p class="muted">暂无' + ({ pending: '待审', approved: '已通过', rejected: '已驳回' }[selfFormsQueueFilter]) + '提交。</p>'; return; }
-  let html = '<div class="table-wrap"><table class="data-table"><thead><tr><th>员工</th><th>提交时间</th><th>状态</th><th>审核</th><th>操作</th></tr></thead><tbody>';
-  rows.forEach(r => {
-    html += '<tr>'
-      + '<td>' + esc(selfFormsEmpLabel(r)) + '</td>'
-      + '<td>' + esc(r.submitted_at || '') + '</td>'
-      + '<td>' + (SELF_FORM_STATUS_BADGE[r.status] || r.status) + '</td>'
-      + '<td style="font-size:12px">' + esc(r.reviewed_by || '-') + (r.review_remark ? '<br><span class="muted">' + esc(r.review_remark) + '</span>' : '') + '</td>'
-      + '<td style="white-space:nowrap">'
-      + '<button class="btn btn-sm" style="font-size:11px" onclick="selfFormsToggleDetail(' + r.id + ')">查看详情</button> '
-      + (r.status === 'pending'
-          ? '<button class="btn btn-sm" style="font-size:11px;background:#16a34a;color:#fff" onclick="selfFormsReview(' + r.id + ',\'approve\',' + (r.emp_exists ? 1 : 0) + ')">通过</button> '
-            + '<button class="btn btn-sm" style="font-size:11px;background:#dc2626;color:#fff" onclick="selfFormsReview(' + r.id + ',\'reject\')">驳回</button>'
-          : '')
-      + '</td></tr>'
-      + '<tr id="sfDetail_' + r.id + '" style="display:none"><td colspan="5" style="white-space:normal;max-width:none;overflow:visible;padding:10px 12px">' + selfFormsDetailHtml(r) + '</td></tr>';
-  });
-  html += '</tbody></table></div>';
-  box.innerHTML = html;
-}
-
-function selfFormsToggleDetail(id) {
-  const tr = $('#sfDetail_' + id);
-  if (tr) tr.style.display = tr.style.display === 'none' ? '' : 'none';
-}
-
-function selfFormsDetailHtml(r) {
-  let form = {};
-  try { form = JSON.parse(r.form_json || '{}'); } catch (e) {}
-  let html = '';
-  if (!r.emp_exists) html += '<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:8px 10px;font-size:13px;margin-bottom:8px">⚠️ 新员工建档：通过后创建新档案，点击「通过」时补充编号/岗位等字段</div>';
-  html += '<div style="background:#f9fafb;border-radius:8px;padding:10px">';
-  SELF_FORM_GROUPS.forEach(g => {
-    let rowsHtml = '';
-    g.fields.forEach(f => {
-      const v = String(form[f] || '').trim();
-      if (!v) return; // 只显示员工提交的字段
-      const cur = String(r[f] != null ? r[f] : '').trim();
-      const changed = cur !== v;
-      const disp = f === 'gender' ? (SELF_FORM_GENDER_TXT[v] || v) : v;
-      rowsHtml += '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px dashed #e5e7eb;font-size:13px">'
-        + '<span style="width:130px;color:#6b7280;flex-shrink:0">' + esc(SELF_FORM_LABELS[f]) + '</span>'
-        + '<span style="flex:1">' + esc(disp)
-        + (changed ? ' <span style="color:#b45309;font-size:11px">（原值：' + esc(cur || '空') + '）</span>' : '')
-        + '</span></div>';
-    });
-    if (rowsHtml) html += '<div style="margin-bottom:8px"><b style="font-size:13px">' + g.title + '</b>' + rowsHtml + '</div>';
-  });
-  html += '</div>';
-  return html;
-}
-
-async function selfFormsReview(id, action, empExists) {
-  let remark = '', supply = {};
-  if (action === 'reject') {
-    remark = prompt('驳回原因（可选，员工可见）', '') || '';
-  } else if (empExists) {
-    if (!confirm('确认通过？提交中的字段将写入员工档案（未填写字段保持原值）。')) return;
-  } else {
-    supply = await selfFormsBuildForm();
-    if (!supply) return; // 取消建档
-  }
-  try {
-    const body = { action: action, remark: remark };
-    Object.assign(body, supply);
-    const res = await api('self/submissions/' + id + '/review', { method: 'POST', json: body });
-    const changed = (res.data.changed || []).map(f => SELF_FORM_LABELS[f] || f).join('、');
-    if (res.data.created) {
-      showToast('已通过并建档（编号 ' + res.data.emp_no + '）', 'success');
-    } else {
-      showToast(action === 'approve' ? ('已通过' + (changed ? '，更新：' + changed : '（无变更）')) : '已驳回', 'success');
-    }
-  } catch (e) { showToast(e.message, 'error'); }
-  selfFormsQueue();
-}
-
-/* 新员工建档弹窗：补充编号/昵称/岗位/雇佣类型/业务域/状态/入职日期 */
-function selfFormsBuildForm() {
-  return new Promise(async (resolve) => {
-    let nxt = '00001';
-    try { nxt = (await api('next-emp-no')).data.emp_no; } catch (e) {}
-    const today = new Date().toISOString().slice(0, 10);
-    const posOpts = ((state.meta && state.meta.live_positions) || []).map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('');
-    const inp = 'style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"';
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:1070;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)';
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) { overlay.remove(); resolve(null); } });
-    const box = document.createElement('div');
-    box.style.cssText = 'background:#fff;border-radius:10px;max-width:520px;width:94%;max-height:88vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.25)';
-    box.innerHTML =
-      '<div style="padding:12px 16px;border-bottom:1px solid #e5e7eb;background:#fef3c7;border-radius:10px 10px 0 0;font-size:14px"><b>新员工建档</b> — 通过后将创建新档案，请补充：</div>'
-      + '<div style="padding:14px 16px">'
-      + '<label class="field"><span>员工编号 *</span><input id="sfbEmpNo" value="' + esc(nxt) + '" ' + inp + '></label>'
-      + '<label class="field"><span>昵称（中国团队称呼）</span><input id="sfbNick" placeholder="留空=真实姓名" ' + inp + '></label>'
-      + '<label class="field"><span>岗位</span><select id="sfbPos" ' + inp + '><option value="陪玩">陪玩</option>' + posOpts + '</select></label>'
-      + '<label class="field"><span>雇佣类型</span><select id="sfbType" ' + inp + '><option value="全职">全职</option><option value="兼职">兼职</option></select></label>'
-      + '<label class="field"><span>业务域</span><select id="sfbDomain" ' + inp + '><option value="直播">直播</option><option value="游戏">游戏</option></select></label>'
-      + '<label class="field"><span>状态</span><select id="sfbStatus" ' + inp + '><option value="在职">在职</option><option value="离职">离职</option></select></label>'
-      + '<label class="field"><span>入职日期</span><input type="date" id="sfbEntry" value="' + today + '" ' + inp + '></label>'
-      + '</div>'
-      + '<div style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid #e5e7eb;justify-content:flex-end">'
-      + '<button class="btn btn-sm" id="sfbCancel">取消</button>'
-      + '<button class="btn btn-sm btn-primary" id="sfbOk">通过并建档</button></div>';
-    document.body.appendChild(overlay);
-    overlay.appendChild(box);
-    $('#sfbCancel').addEventListener('click', function () { overlay.remove(); resolve(null); });
-    $('#sfbOk').addEventListener('click', function () {
-      const empNo = $('#sfbEmpNo').value.trim();
-      if (!empNo) { showToast('员工编号必填', 'error'); return; }
-      overlay.remove();
-      resolve({
-        emp_no: empNo,
-        nickname: $('#sfbNick').value.trim(),
-        position: $('#sfbPos').value,
-        emp_type: $('#sfbType').value,
-        domain: $('#sfbDomain').value,
-        status: $('#sfbStatus').value,
-        entry_date: $('#sfbEntry').value,
-      });
-    });
-  });
 }
