@@ -4107,7 +4107,7 @@ function enterPortal() {
   document.body.classList.toggle('role-viewer', state.role === 'viewer');
   document.body.classList.toggle('role-operator', state.role === 'operator');
   // 用户管理入口仅 super 可见（游戏/直播组各一个）
-  ['usersNavBtn', 'usersNavBtnLive'].forEach(id =>
+  ['usersNavBtn'].forEach(id =>
     $('#' + id).classList.toggle('hidden', state.role !== 'super'));
   // operator（场控）/ viewer 均无游戏管理入口需要区分：场控隐藏游戏管理卡片（其模块全在直播组）
   $('#gameModuleCard').classList.toggle('hidden', state.role === 'operator');
@@ -4120,11 +4120,11 @@ function enterModuleGroup(group) {
   // 导航分组：game=游戏模块，live=直播模块，互不混显
   state.moduleGroup = group;
   $$('.sidebar-nav .side-btn').forEach(b => {
-    const isUsersBtn = b.id === 'usersNavBtn' || b.id === 'usersNavBtnLive';
+    const isUsersBtn = b.id === 'usersNavBtn';
     // 用户管理：分组 + 角色（仅 super）双重条件；group=all 的按钮两个分组都显示
     // hr/operator：仅白名单模块可见；viewer：全部模块但隐藏 用户管理/操作日志
     const _mods = roleModules(state.role);
-    const roleBlocked = (_mods && !_mods.includes(b.dataset.module)) || (state.role === 'viewer' && (b.dataset.module === 'logs' || b.id === 'usersNavBtn' || b.id === 'usersNavBtnLive'));
+    const roleBlocked = (_mods && !_mods.includes(b.dataset.module)) || (state.role === 'viewer' && (b.dataset.module === 'logs' || b.id === 'usersNavBtn'));
     const hide = (b.dataset.group !== group && b.dataset.group !== 'all') || (isUsersBtn && state.role !== 'super') || roleBlocked;
     b.classList.toggle('hidden', hide);
   });
