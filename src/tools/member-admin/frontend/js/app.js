@@ -286,6 +286,7 @@ const VI_MAP = {
   '消息中心': 'Trung tâm thông báo',
   '排班表': 'Lịch phân ca',
   '工资代发收款码': 'Mã QR trả lương',
+  '员工全景': 'Toàn cảnh nhân sự',
   '← 返回入口': '← Quay lại',
   '当前用户：': 'Người dùng: ',
   '修改密码': 'Đổi mật khẩu',
@@ -320,7 +321,7 @@ const ROLE_HINTS = {
 };
 // 角色可见模块白名单：viewer=全部（仅隐藏用户管理/操作日志），hr/operator 限定范围，admin/super 返回 null（全部可见）
 const OPERATOR_MODULES = ['pids', 'binding', 'checkin', 'schedule'];
-const HR_MODULES = ['live_employees', 'pids', 'checkin', 'inbox', 'binding', 'self_forms'];
+const HR_MODULES = ['live_employees', 'pids', 'checkin', 'inbox', 'binding', 'self_forms', 'pano'];
 function roleModules(role) {
   if (role === 'operator') return OPERATOR_MODULES;
   if (role === 'hr') return HR_MODULES;
@@ -546,10 +547,16 @@ const MODULES = {
       { key: 'emp_no', label: '编号' },
       { key: 'real_name', label: '真实姓名' },
       { key: 'cn_name', label: '中文名' },
+      { key: 'gender', label: '性别', opt: true, render: v => esc(genderLabel(v)) },
+      { key: 'birth_date', label: '出生日期', opt: true },
+      { key: 'phone_zalo', label: '手机/Zalo', opt: true },
+      { key: 'id_card', label: '身份证', opt: true },
       { key: 'position', label: '岗位' },
       { key: 'employment_type', label: '聘用类型' },
       { key: 'status', label: '状态' },
       { key: 'entry_date', label: '入职日期' },
+      { key: 'bank', label: '银行', opt: true },
+      { key: 'account', label: '银行账号', opt: true },
       { key: 'updated_at', label: '修改时间' },
     ],
     filters: [
@@ -572,6 +579,20 @@ const MODULES = {
       { key: 'guild_id', label: '从属军团（GS）', type: 'searchselect', optionsKind: 'guilds' },
       { key: 'entry_date', label: '入职日期', type: 'date' },
       { key: 'leave_date', label: '离职日期', type: 'date' },
+      // 人事信息（2026-09-24：与直播域同名同义，游戏域员工自助表单资料落到本表，不再往直播表写空壳）
+      { key: 'gender', label: '性别', type: 'select', metaKey: 'genders' },
+      { key: 'birth_date', label: '出生日期', type: 'date' },
+      { key: 'phone_zalo', label: '联系电话/zalo', type: 'text' },
+      { key: 'id_card', label: '身份证', type: 'text' },
+      { key: 'email', label: '电子邮箱', type: 'text' },
+      { key: 'address', label: '家庭地址', type: 'text' },
+      { key: 'emergency_contact', label: '紧急联系人', type: 'text' },
+      { key: 'emergency_relation', label: '联系人关系', type: 'select', options: ['父母', '配偶', '兄弟', '其他'] },
+      { key: 'emergency_phone', label: '紧急联系电话', type: 'text' },
+      { key: 'account_holder', label: '账户人', type: 'text' },
+      { key: 'bank', label: '银行', type: 'text' },
+      { key: 'account', label: '银行账号', type: 'text' },
+      { key: 'payee_phone', label: '收款人手机号', type: 'text' },
       { key: 'remark', label: '备注', type: 'textarea', full: true },
     ],
     rowClick: openEmployeeDrawer,
@@ -688,6 +709,7 @@ const MODULES = {
       { key: 'updated_at', label: '修改时间', opt: true },
     ],
     filters: [
+      { key: 'domain', label: '全部业务域', metaKey: 'live_domains', default: '直播' },
       { key: 'position', label: '全部岗位', metaKey: 'live_positions' },
       { key: 'emp_type', label: '全部雇佣类型', metaKey: 'live_emp_types' },
       { key: 'status', label: '全部状态', metaKey: 'live_statuses', default: '在职' },
@@ -848,7 +870,7 @@ async function switchModule(moduleKey) {
   }
   state.module = moduleKey;
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
-  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景', paycode: '工资代发收款码', self_forms: '员工表单' };
+  const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景', paycode: '工资代发收款码', self_forms: '员工表单', pano: '员工全景' };
   $('#adminModuleTitle').textContent = t(titles[moduleKey] || '');
   if (moduleKey === 'users') {
     if (state.role !== 'super') return; // 用户管理仅 super
@@ -870,6 +892,8 @@ async function switchModule(moduleKey) {
     renderCheckinPage();
   } else if (moduleKey === 'binding') {
     renderBindingPage();
+  } else if (moduleKey === 'pano') {
+    renderEmployeePanorama();
   } else if (moduleKey === 'pids') {
     renderPidsPage();
   } else if (moduleKey === 'inbox') {
@@ -6501,6 +6525,223 @@ function _maTipMove(x, y) {
   el.style.top = Math.min(y + pad + 8, Math.max(pad, maxY)) + 'px';
 }
 
+/* ================= 员工全景（直播域 + 游戏域聚合，只读） =================
+   数据源：GET /api/employee-panorama（两表按员工编号聚合，一行一人）
+   2026-09-24 裁定：直播管理只含直播域、游戏管理只含游戏域、交叉两边都有；本页为跨域统一视图。 */
+
+var _panoItems = [];
+var _panoSearch = '';
+var _panoFilter = 'all'; // all / both / live_only / game_only / game_no_no
+
+var PANO_ALIGN_META = {
+  both:       { label: '交叉（双域）', bg: '#dbeafe', fg: '#1e40af', border: '#bfdbfe' },
+  live_only:  { label: '仅直播域',    bg: '#dcfce7', fg: '#166534', border: '#bbf7d0' },
+  game_only:  { label: '仅游戏域',    bg: '#fef9c3', fg: '#854d0e', border: '#fef08a' },
+  game_no_no: { label: '无编号',      bg: '#f3f4f6', fg: '#6b7280', border: '#e5e7eb' },
+};
+
+var PANO_HUMAN_FIELDS = [
+  ['gender', '性别', function (v) { return genderLabel(v); }],
+  ['birth_date', '出生日期'],
+  ['phone_zalo', '手机/Zalo'],
+  ['id_card', '身份证'],
+  ['email', '电子邮箱'],
+  ['address', '家庭地址'],
+  ['emergency_contact', '紧急联系人'],
+  ['emergency_relation', '联系人关系'],
+  ['emergency_phone', '紧急联系电话'],
+  ['account_holder', '账户人'],
+  ['bank', '银行'],
+  ['account', '银行账号'],
+  ['payee_phone', '收款人手机号'],
+];
+
+async function renderEmployeePanorama() {
+  $('#adminModuleTitle').textContent = '员工全景';
+  var main = $('#adminMain');
+  main.innerHTML = '';
+  var bar = document.createElement('div');
+  bar.className = 'filter-bar';
+  bar.innerHTML = ''
+    + '<input id="panoSearch" placeholder="搜索编号 / 昵称 / 姓名 / 手机 / 身份证" value="' + escHtml(_panoSearch) + '" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:280px" oninput="panoOnSearch(this.value)">'
+    + ' <select id="panoFilterSel" onchange="panoOnFilter(this.value)" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px">'
+    + '<option value="all">全部对齐状态</option>'
+    + '<option value="both">交叉（双域都有档案）</option>'
+    + '<option value="live_only">仅直播域</option>'
+    + '<option value="game_only">仅游戏域</option>'
+    + '<option value="game_no_no">游戏域无编号</option>'
+    + '</select>'
+    + ' <button class="btn btn-sm" onclick="panoReload()" style="font-size:11px"><i class="fas fa-refresh"></i> 刷新</button>'
+    + ' <span id="panoHint" style="font-size:11px;color:#999;margin-left:8px"></span>'
+    + ' <div style="font-size:10px;color:#6b7280;margin-top:4px">本页只读聚合：修改请到「直播管理 → 员工」或「游戏管理 → 员工」</div>';
+  main.appendChild(bar);
+  var wrap = document.createElement('div');
+  wrap.id = 'panoBody';
+  wrap.style.marginTop = '10px';
+  main.appendChild(wrap);
+  await panoLoad();
+}
+
+function panoOnSearch(v) {
+  _panoSearch = (v || '').trim();
+  panoRenderBody();
+}
+
+function panoOnFilter(v) {
+  _panoFilter = v || 'all';
+  panoRenderBody();
+}
+
+function panoReload() { panoLoad(); }
+
+async function panoLoad() {
+  var box = document.getElementById('panoBody');
+  var hint = document.getElementById('panoHint');
+  if (!box) return;
+  if (hint) hint.textContent = '加载中...';
+  try {
+    var res = await api('employee-panorama');
+    _panoItems = (res && res.items) || [];
+    if (hint) {
+      var c = _panoItems.reduce(function (a, x) { a[x.align] = (a[x.align] || 0) + 1; return a; }, {});
+      hint.textContent = '共 ' + _panoItems.length + ' 人｜交叉 ' + (c.both || 0)
+        + '｜仅直播 ' + (c.live_only || 0) + '｜仅游戏 ' + (c.game_only || 0)
+        + '｜游戏无编号 ' + (c.game_no_no || 0);
+    }
+    panoRenderBody();
+  } catch (e) {
+    if (hint) hint.textContent = '加载失败: ' + e.message;
+  }
+}
+
+function panoFiltered() {
+  var list = _panoItems;
+  if (_panoFilter !== 'all') list = list.filter(function (x) { return x.align === _panoFilter; });
+  if (!_panoSearch) return list;
+  var q = _panoSearch.toLowerCase();
+  return list.filter(function (x) {
+    var h = x.human || {};
+    return [x.emp_no, x.nickname, x.alias, x.cn_name, x.real_name,
+            h.phone_zalo, h.id_card, h.bank, h.account].some(function (v) {
+      return String(v == null ? '' : v).toLowerCase().indexOf(q) >= 0;
+    });
+  });
+}
+
+function panoAlignBadge(align) {
+  var m = PANO_ALIGN_META[align] || PANO_ALIGN_META.game_no_no;
+  return '<span style="background:' + m.bg + ';color:' + m.fg + ';border:1px solid ' + m.border
+    + ';border-radius:9px;padding:1px 8px;font-size:11px;font-weight:600">' + m.label + '</span>';
+}
+
+function panoRenderBody() {
+  var box = document.getElementById('panoBody');
+  if (!box) return;
+  var list = panoFiltered();
+  if (!list.length) {
+    box.innerHTML = '<p class="muted">没有匹配的员工。</p>';
+    return;
+  }
+  var html = '<div class="table-wrap"><table class="data-table"><thead><tr>'
+    + '<th>编号</th><th>昵称</th><th>别名</th><th>真实姓名</th><th>对齐状态</th>'
+    + '<th>直播岗位</th><th>游戏岗位</th><th>从属军团</th><th>状态</th>'
+    + '</tr></thead><tbody>';
+  list.forEach(function (x, i) {
+    var live = x.live || {}, game = x.game || {};
+    html += '<tr style="cursor:pointer" onclick="panoOpenDetail(' + i + ')">'
+      + '<td>' + esc(x.emp_no || '—') + '</td>'
+      + '<td>' + esc(x.nickname || '') + '</td>'
+      + '<td>' + esc(x.alias || '') + '</td>'
+      + '<td>' + esc(x.real_name || '') + '</td>'
+      + '<td>' + panoAlignBadge(x.align) + '</td>'
+      + '<td>' + esc(live.position || '') + '</td>'
+      + '<td>' + esc(game.position || '') + '</td>'
+      + '<td>' + esc(game.guild_name || '') + '</td>'
+      + '<td>' + esc(x.status || '') + '</td>'
+      + '</tr>';
+  });
+  html += '</tbody></table></div>';
+  box.innerHTML = html;
+  box._panoList = list;
+}
+
+function panoOpenDetail(idx) {
+  var box = document.getElementById('panoBody');
+  var list = (box && box._panoList) || [];
+  var x = list[idx];
+  if (!x) return;
+  var body = $('#drawerBody');
+  $('#drawerTitle').textContent = '员工全景：' + (x.nickname || x.real_name || x.emp_no || '');
+  body.innerHTML = '';
+
+  // ---- 基本 ----
+  var sec1 = document.createElement('div');
+  sec1.className = 'drawer-section';
+  sec1.innerHTML = '<h4>基本 <span style="margin-left:6px">' + panoAlignBadge(x.align) + '</span></h4>';
+  var grid1 = document.createElement('div');
+  grid1.className = 'detail-grid';
+  [['员工编号', x.emp_no || '—'], ['昵称', x.nickname], ['别名', x.alias],
+   ['中文名', x.cn_name], ['真实姓名', x.real_name], ['状态', x.status],
+   ['入职日期', x.entry_date]].forEach(function (kv) {
+    var d = document.createElement('div');
+    d.innerHTML = '<span class="k">' + esc(kv[0]) + '：</span><span class="v">' + esc(kv[1] || '') + '</span>';
+    grid1.appendChild(d);
+  });
+  sec1.appendChild(grid1);
+  body.appendChild(sec1);
+
+  // ---- 人事信息 ----
+  var sec2 = document.createElement('div');
+  sec2.className = 'drawer-section';
+  sec2.innerHTML = '<h4>人事信息</h4>';
+  var grid2 = document.createElement('div');
+  grid2.className = 'detail-grid';
+  var h = x.human || {};
+  PANO_HUMAN_FIELDS.forEach(function (f) {
+    var v = h[f[0]];
+    if (f[2]) v = f[2](v);
+    var d = document.createElement('div');
+    d.innerHTML = '<span class="k">' + esc(f[1]) + '：</span><span class="v">' + esc(v == null ? '' : v) + '</span>';
+    grid2.appendChild(d);
+  });
+  sec2.appendChild(grid2);
+  body.appendChild(sec2);
+
+  // ---- 直播域档案 ----
+  body.appendChild(panoDomainSection('直播域档案', x.live, [
+    ['岗位', 'position'], ['业务域', 'domain'], ['雇佣类型', 'emp_type'],
+    ['状态', 'status'], ['系统角色', 'sys_role'], ['Discord', 'discord'],
+    ['薪资结构', 'salary_mode'], ['入职日期', 'entry_date'], ['离职日期', 'leave_date'],
+  ]));
+  // ---- 游戏域档案 ----
+  body.appendChild(panoDomainSection('游戏域档案', x.game, [
+    ['岗位', 'position'], ['聘用类型', 'employment_type'], ['从属军团', 'guild_name'],
+    ['状态', 'status'], ['入职日期', 'entry_date'], ['离职日期', 'leave_date'],
+  ]));
+
+  openModal('drawer');
+}
+
+function panoDomainSection(title, dom, fields) {
+  var sec = document.createElement('div');
+  sec.className = 'drawer-section';
+  if (!dom) {
+    sec.innerHTML = '<h4>' + esc(title) + '</h4><p class="muted">该域无档案</p>';
+    return sec;
+  }
+  sec.innerHTML = '<h4>' + esc(title) + '</h4>';
+  var grid = document.createElement('div');
+  grid.className = 'detail-grid';
+  fields.forEach(function (f) {
+    var v = dom[f[1]];
+    var d = document.createElement('div');
+    d.innerHTML = '<span class="k">' + esc(f[0]) + '：</span><span class="v">' + esc(v == null ? '' : v) + '</span>';
+    grid.appendChild(d);
+  });
+  sec.appendChild(grid);
+  return sec;
+}
+
 var PIDS_STATUS_META = {
   ok:       { label: '已映射',      bg: '#dcfce7', fg: '#166534', border: '#bbf7d0' },
   no_emp:   { label: '缺员工',      bg: '#fef9c3', fg: '#854d0e', border: '#fef08a' },
@@ -7391,11 +7632,15 @@ async function selfFormsReview(id, action, empExists) {
     const body = { action: action, remark: remark };
     Object.assign(body, supply);
     const res = await api('self/submissions/' + id + '/review', { method: 'POST', json: body });
-    const changed = (res.changed || []).map(f => SELF_FORM_LABELS[f] || f).join('、');
-    if (res.created) {
-      showToast('已通过并建档（编号 ' + res.emp_no + (res.game_emp_id ? '，已同步游戏员工表' : '') + '）', 'success');
+    if (action !== 'approve') {
+      showToast('已驳回', 'success');
     } else {
-      showToast(action === 'approve' ? ('已通过' + (changed ? '，更新：' + changed : '（无变更）')) : '已驳回', 'success');
+      const changed = (res.changed || []).map(f => SELF_FORM_LABELS[f] || f).join('、');
+      const where = (res.tables || []).map(t => t === 'live_employees' ? '直播员工表' : '游戏员工表').join(' + ');
+      let tail = where ? '，写入 ' + where : '';
+      if (!res.created && changed) tail += '，更新：' + changed;
+      if (!res.created && !changed) tail += '（无变更）';
+      showToast((res.created ? '已通过并建档' : '已通过') + (res.emp_no ? '（编号 ' + res.emp_no + '）' : '') + tail, 'success');
     }
   } catch (e) { showToast(e.message, 'error'); }
   selfFormsQueue();

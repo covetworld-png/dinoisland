@@ -253,7 +253,7 @@ ENTITY_CONFIG = {
     "commission_snapshots": {"keyword_fields": ["month", "remark", "created_by"],
                              "filter_fields": ["month"]},
     "live_employees": {"keyword_fields": ["nickname", "emp_no", "real_name", "cn_name", "alias", "remark"],
-                       "filter_fields": ["position", "emp_type", "status"],
+                       "filter_fields": ["position", "emp_type", "status", "domain"],
                        "order_by": "emp_no ASC"},
     "player_mapping": {"keyword_fields": ["player_name", "emp_no", "discord", "remark"],
                        "filter_fields": []},
@@ -3041,10 +3041,14 @@ SELF_FORM_GENDERS = ("1", "2")
 SELF_FORM_RELATIONS = ("父母", "配偶", "兄弟", "其他")
 
 
-SELF_FORM_SELECT_COLS = (
-    "e.nickname, e.cn_name, e.real_name, e.alias, e.gender, e.birth_date, e.phone_zalo,"
-    " e.email, e.id_card, e.account_holder, e.bank, e.account, e.payee_phone,"
-    " e.address, e.emergency_contact, e.emergency_relation, e.emergency_phone")
+# 提交队列 diff 用的「员工当前值」：直播域优先、回落游戏域（2026-09-24 两域分流后，
+# 纯游戏域员工如军团长只在 employees 有档案，diff 必须能取到）
+SELF_FORM_CURRENT_COLS = ["nickname", "cn_name", "real_name", "gender", "birth_date", "phone_zalo",
+                          "email", "id_card", "account_holder", "bank", "account", "payee_phone",
+                          "address", "emergency_contact", "emergency_relation", "emergency_phone"]
+SELF_FORM_SELECT_COLS = (",".join(
+    " COALESCE(NULLIF(e.%s,''), g.%s, '') AS %s" % (c, c, c) for c in SELF_FORM_CURRENT_COLS)
+    + ", e.alias")
 
 
 def _self_token_check(token):
@@ -3215,9 +3219,11 @@ def self_form_submissions_list():
     try:
         sql = ("SELECT s.id, s.emp_no, s.token, s.form_json, s.status, s.review_remark,"
                " s.reviewed_by, s.reviewed_at, s.submitted_at,"
-               " (e.emp_no IS NOT NULL) AS emp_exists,"
+               " ((e.emp_no IS NOT NULL) OR (g.emp_no IS NOT NULL)) AS emp_exists,"
                + SELF_FORM_SELECT_COLS +
-               " FROM self_form_submissions s LEFT JOIN live_employees e ON trim(e.emp_no)=s.emp_no")
+               " FROM self_form_submissions s"
+               " LEFT JOIN live_employees e ON trim(e.emp_no)=trim(s.emp_no)"
+               " LEFT JOIN employees g ON trim(g.emp_no)=trim(s.emp_no)")
         args = []
         if status in ("pending", "approved", "rejected"):
             sql += " WHERE s.status=?"
@@ -3232,14 +3238,18 @@ def self_form_submissions_list():
 @app.post("/api/self/submissions/<int:sub_id>/review")
 @write_required
 def self_form_submission_review(sub_id):
-    """审核：approve 只把提交中非空字段写入 live_employees（未提交字段不动，防覆盖手工维护）；reject 留备注。"""
+    """审核：approve 只把提交中非空字段写入员工档案（未提交字段不动，防覆盖手工维护）；reject 留备注。
+
+    写入目标（2026-09-24 裁定）：编号在直播表→写 live_employees；在游戏表→写 employees；
+    两表都有（真交叉）→两边都写；都没有→按审核弹窗所选业务域新建一张。
+    """
     data = request.get_json(force=True, silent=True) or {}
     action = str(data.get("action") or "").strip()
     remark = str(data.get("remark") or "").strip()
     if action not in ("approve", "reject"):
         return jsonify({"ok": False, "error": "action 仅支持 approve/reject"}), 400
     conn = get_db()
-    game_emp_id = None  # 游戏域员工同步写入的 employees.id
+    writes = []  # [(table, after_row, before_row)]：审核通过后的写入记录（用于审计）
     try:
         sub = conn.execute("SELECT * FROM self_form_submissions WHERE id=?", (sub_id,)).fetchone()
         if not sub:
@@ -3254,81 +3264,205 @@ def self_form_submission_review(sub_id):
             result = {"id": sub_id, "status": "rejected"}
         else:
             form = json.loads(sub["form_json"] or "{}")
-            emp = None
-            if sub["emp_no"]:
-                emp = conn.execute("SELECT * FROM live_employees WHERE trim(emp_no)=?", (sub["emp_no"],)).fetchone()
-            if not emp:
-                # ---- 建档分支（无编号 / 编号未建档 的新员工）----
-                data = {f: str(form.get(f) or "").strip() for f in SELF_FORM_FIELDS if str(form.get(f) or "").strip()}
-                # 管理员审核补充字段（来自审核弹窗提交）
-                SUPPLY = request.get_json(force=True, silent=True) or {}
-                emp_no_final = str(SUPPLY.get("emp_no") or sub["emp_no"] or "").strip()
-                if not emp_no_final:
-                    return jsonify({"ok": False, "error": "建档需填写员工编号（审核弹窗补充）"}), 400
-                data["emp_no"] = emp_no_final
-                if not data.get("domain"): data["domain"] = "直播"
-                if not data.get("status"): data["status"] = "在职"
-                if not data.get("emp_type"): data["emp_type"] = "全职"
-                if not data.get("position"): data["position"] = "陪玩"
-                for f in ("nickname", "position", "emp_type", "domain", "status", "entry_date"):
-                    v = str(SUPPLY.get(f) or "").strip()
-                    if v: data[f] = v
-                if not data.get("nickname"): data["nickname"] = data.get("real_name") or emp_no_final
-                _derive_live_codes(data)
-                row_id = insert_row("live_employees", data)
-                after = get_by_id("live_employees", row_id)
-                # 游戏域员工：同步写入游戏员工表（employees），使「游戏管理 → 员工」直接可见
-                # 字段映射：emp_type(全职/兼职) 不适用，游戏域雇佣类型取审核弹窗的 employment_type(试用期/转正)
-                if data.get("domain") == "游戏":
-                    dup = conn.execute("SELECT id FROM employees WHERE trim(emp_no)=?", (emp_no_final,)).fetchone()
-                    if not dup:
-                        gpos = data.get("position") if data.get("position") in META["positions"] else "其他"
-                        game_emp_id = insert_row("employees", {
-                            "emp_no": emp_no_final,
-                            "nickname": data.get("nickname") or emp_no_final,
-                            "real_name": data.get("real_name", ""),
-                            "position": gpos,
-                            "status": data.get("status") or "在职",
-                            "employment_type": str(SUPPLY.get("employment_type") or "转正").strip() or "转正",
-                            "entry_date": data.get("entry_date", ""),
-                        })
-                result = {"id": sub_id, "status": "approved", "created": True,
-                          "emp_no": emp_no_final, "changed": list(data.keys()),
-                          "game_emp_id": game_emp_id}
-                created_id = row_id
+            SUPPLY = request.get_json(force=True, silent=True) or {}
+            # 提交中非空字段（两域共用的人事字段，两表同名同义）
+            vals = {f: str(form.get(f) or "").strip() for f in SELF_FORM_FIELDS}
+            vals = {f: v for f, v in vals.items() if v}
+            emp_no_final = str(SUPPLY.get("emp_no") or sub["emp_no"] or "").strip()
+            sel_domain = str(SUPPLY.get("domain") or "").strip()
+            # 2026-09-24 裁定：直播域→live_employees，游戏域→employees；同一编号两表都有档案（真交叉）时两边都写；
+            # 两边都没有时按审核弹窗所选域新建一张；游戏域员工不再往直播表写空壳记录。
+            if not emp_no_final:
+                return jsonify({"ok": False, "error": "建档需填写员工编号（审核弹窗补充）"}), 400
+            row_live = conn.execute("SELECT * FROM live_employees WHERE trim(emp_no)=?", (emp_no_final,)).fetchone()
+            row_game = conn.execute("SELECT * FROM employees WHERE trim(emp_no)=?", (emp_no_final,)).fetchone()
+            if row_live or row_game:
+                targets = ([("live_employees", row_live)] if row_live else []) \
+                        + ([("employees", row_game)] if row_game else [])
+            elif sel_domain == "游戏":
+                targets = [("employees", None)]
             else:
-                before = dict(emp)
-                changed = {}
-                for f in SELF_FORM_FIELDS:
-                    v = str(form.get(f) or "").strip()
-                    if v and before.get(f) != v:
-                        changed[f] = v
-                if changed:
-                    sets = ", ".join(f"{f} = ?" for f in changed)
-                    conn.execute(f"UPDATE live_employees SET {sets}, updated_at=? WHERE id=?",
-                                 list(changed.values()) + [now_ts, emp["id"]])
-                after = dict(conn.execute("SELECT * FROM live_employees WHERE id=?", (emp["id"],)).fetchone())
-                result = {"id": sub_id, "status": "approved", "created": False,
-                          "changed": list(changed.keys())}
+                targets = [("live_employees", None)]
+            # 管理员审核补充字段（来自审核弹窗提交）
+            supply_vals = {f: str(SUPPLY.get(f) or "").strip()
+                           for f in ("nickname", "position", "emp_type", "domain", "status", "entry_date")}
+            supply_vals = {f: v for f, v in supply_vals.items() if v}
+            created_any = False
+            changed_all = set()
+            for table, before_row in targets:
+                if before_row is None:
+                    # ---- 建档分支 ----
+                    if table == "live_employees":
+                        data = dict(vals)
+                        data["emp_no"] = emp_no_final
+                        data["domain"] = supply_vals.get("domain") or "直播"
+                        data["emp_type"] = supply_vals.get("emp_type") or "全职"
+                        data["status"] = supply_vals.get("status") or "在职"
+                        data["position"] = supply_vals.get("position") or "陪玩"
+                        data["nickname"] = supply_vals.get("nickname") or data.get("real_name") or emp_no_final
+                        if supply_vals.get("entry_date"):
+                            data["entry_date"] = supply_vals["entry_date"]
+                        _derive_live_codes(data)
+                        rid = insert_row("live_employees", data)
+                        after_row = get_by_id("live_employees", rid)
+                        changed_all |= set(vals.keys())
+                    else:
+                        gpos = supply_vals.get("position") if supply_vals.get("position") in META["positions"] else "其他"
+                        gdata = {"emp_no": emp_no_final,
+                                 "nickname": supply_vals.get("nickname") or vals.get("real_name") or emp_no_final,
+                                 "position": gpos,
+                                 "status": supply_vals.get("status") or "在职",
+                                 # emp_type(全职/兼职) 不适用游戏表，游戏域雇佣类型取审核弹窗值（试用期/转正）
+                                 "employment_type": str(SUPPLY.get("employment_type") or "转正").strip() or "转正",
+                                 "entry_date": supply_vals.get("entry_date", "")}
+                        gdata.update(vals)  # 人事字段同名同义，直接落库
+                        rid = insert_row("employees", gdata)
+                        after_row = get_by_id("employees", rid)
+                        changed_all |= set(vals.keys())
+                    created_any = True
+                else:
+                    # ---- 更新分支：只写提交中非空且发生变化的字段（防覆盖手工维护）----
+                    before_dict = dict(before_row)
+                    changed = {f: v for f, v in vals.items() if f in before_dict.keys() and before_dict.get(f) != v}
+                    if changed:
+                        sets = ", ".join(f"{f} = ?" for f in changed)
+                        conn.execute(f"UPDATE {table} SET {sets}, updated_at=? WHERE id=?",
+                                     list(changed.values()) + [now_ts, before_row["id"]])
+                    after_row = dict(conn.execute(f"SELECT * FROM {table} WHERE id=?", (before_row["id"],)).fetchone())
+                    before_row = before_dict
+                    changed_all |= set(changed.keys())
+                writes.append((table, after_row, before_row))
+            result = {"id": sub_id, "status": "approved", "created": created_any,
+                      "emp_no": emp_no_final,
+                      "changed": sorted(changed_all),
+                      "tables": [t for t, _a, _b in writes],
+                      "live_id": next((a["id"] for t, a, _b in writes if t == "live_employees"), None),
+                      "game_emp_id": next((a["id"] for t, a, _b in writes if t == "employees"), None)}
             conn.execute("UPDATE self_form_submissions SET status='approved', review_remark=?, reviewed_by=?, reviewed_at=? WHERE id=?",
                          (remark, session["user"], now_ts, sub_id))
             conn.commit()
     finally:
         conn.close()
     if action == "approve":
-        label = (after.get("nickname") or after.get("real_name") or sub["emp_no"])
-        if "created_id" in locals() and created_id:
-            log_change(session["user"], "create", "live_employee", created_id, label,
-                       after=after, ip=client_ip())
-            if game_emp_id:
-                gafter = get_by_id("employees", game_emp_id)
-                log_change(session["user"], "create", "employee", game_emp_id,
-                           str(gafter.get("nickname") or ""), after=gafter, ip=client_ip())
-        else:
-            log_change(session["user"], "update", "live_employee", after["id"], label,
-                       before=before, after=after, ip=client_ip())
+        for table, after_row, before_row in writes:
+            etype = "live_employee" if table == "live_employees" else "employee"
+            label = str(after_row.get("nickname") or after_row.get("real_name") or sub["emp_no"] or "")
+            if before_row is None:
+                log_change(session["user"], "create", etype, after_row["id"], label,
+                           after=after_row, ip=client_ip())
+            else:
+                log_change(session["user"], "update", etype, after_row["id"], label,
+                           before=before_row, after=after_row, ip=client_ip())
     return jsonify({"ok": True, "data": result})
 
+
+# ==================== 员工全景（两域聚合） ====================
+
+# 两域同名同义的人事字段（聚合时优先取直播域，缺失回落游戏域）
+PANORAMA_HUMAN_COLS = ["gender", "birth_date", "phone_zalo", "id_card", "email", "address",
+                       "emergency_contact", "emergency_relation", "emergency_phone",
+                       "account_holder", "payee_phone", "bank", "account"]
+
+
+def _pano_first(pair, col):
+    """两域取值：先直播域后游戏域，返回首个非空值。"""
+    for src in ("live", "game"):
+        v = (pair.get(src) or {}).get(col)
+        if v not in (None, ""):
+            return v
+    return ""
+
+
+def _pano_human(pair):
+    return {c: _pano_first(pair, c) for c in PANORAMA_HUMAN_COLS}
+
+
+@app.get("/api/employee-panorama")
+@login_required
+def employee_panorama():
+    """员工全景：直播域（live_employees）与游戏域（employees）按员工编号聚合，一行一人。
+
+    对齐状态 align：
+      both       - 两表同编号都有档案（真交叉：直播侧身份 + 游戏侧身份）
+      live_only  - 仅直播域有档案
+      game_only  - 仅游戏域有档案（纯游戏员工）
+      game_no_no - 游戏域有档案但无员工编号（历史军团长），按 id 单独成行
+    """
+    conn = get_db()
+    try:
+        lives = [dict(r) for r in conn.execute("SELECT * FROM live_employees").fetchall()]
+        games = [dict(r) for r in conn.execute("SELECT * FROM employees").fetchall()]
+        guilds = {r["id"]: dict(r) for r in conn.execute("SELECT * FROM guilds").fetchall()}
+    finally:
+        conn.close()
+
+    by_no = {}
+    for r in lives:
+        no = str(r.get("emp_no") or "").strip()
+        if no:
+            by_no.setdefault(no, {})["live"] = r
+    for r in games:
+        no = str(r.get("emp_no") or "").strip()
+        if no:
+            by_no.setdefault(no, {})["game"] = r
+
+    def _domain_info(src, r, guild_name):
+        if not r:
+            return None
+        if src == "live":
+            return {"id": r["id"], "position": r.get("position", ""), "domain": r.get("domain", ""),
+                    "emp_type": r.get("emp_type", ""), "status": r.get("status", ""),
+                    "entry_date": r.get("entry_date", ""), "leave_date": r.get("leave_date", ""),
+                    "sys_role": r.get("sys_role", ""), "discord": r.get("discord", ""),
+                    "salary_mode": r.get("salary_mode", ""), "guild_name": ""}
+        return {"id": r["id"], "position": r.get("position", ""), "employment_type": r.get("employment_type", ""),
+                "status": r.get("status", ""), "entry_date": r.get("entry_date", ""),
+                "leave_date": r.get("leave_date", ""), "guild_id": r.get("guild_id"),
+                "guild_name": guild_name}
+
+    items = []
+    for no, pair in by_no.items():
+        live, game = pair.get("live"), pair.get("game")
+        align = "both" if (live and game) else ("live_only" if live else "game_only")
+        gname = (guilds.get((game or {}).get("guild_id")) or {}).get("name", "")
+        domains = []
+        if live:
+            domains.append(live.get("domain") or "直播")
+        if game:
+            domains.append("游戏")
+        items.append({
+            "key": no, "align": align, "emp_no": no,
+            "nickname": _pano_first(pair, "nickname"),
+            "alias": (live or {}).get("alias", ""),
+            "cn_name": _pano_first(pair, "cn_name"),
+            "real_name": _pano_first(pair, "real_name"),
+            "human": _pano_human(pair),
+            "status": (live or {}).get("status") or (game or {}).get("status") or "",
+            "entry_date": (live or {}).get("entry_date") or (game or {}).get("entry_date") or "",
+            "live_id": (live or {}).get("id"), "game_id": (game or {}).get("id"),
+            "domains": domains,
+            "live": _domain_info("live", live, ""),
+            "game": _domain_info("game", game, gname),
+        })
+
+    # 游戏域无编号档案（历史军团长）：按 id 单独成行，不参与编号聚合
+    for r in games:
+        if str(r.get("emp_no") or "").strip():
+            continue
+        gname = (guilds.get(r.get("guild_id")) or {}).get("name", "")
+        items.append({
+            "key": "game#%s" % r["id"], "align": "game_no_no", "emp_no": "",
+            "nickname": r.get("nickname", ""), "alias": "",
+            "cn_name": r.get("cn_name", ""), "real_name": r.get("real_name", ""),
+            "human": _pano_human({"game": r}),
+            "status": r.get("status", ""), "entry_date": r.get("entry_date", ""),
+            "live_id": None, "game_id": r["id"], "domains": ["游戏"],
+            "live": None, "game": _domain_info("game", r, gname),
+        })
+
+    order = {"both": 0, "live_only": 1, "game_only": 2, "game_no_no": 3}
+    items.sort(key=lambda x: (order.get(x["align"], 9), x["emp_no"] or "zzzz"))
+    return jsonify({"ok": True, "data": {"items": items, "total": len(items)}})
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)

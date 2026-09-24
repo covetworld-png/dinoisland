@@ -20,6 +20,21 @@ CREATE TABLE IF NOT EXISTS employees (
     commission_rate TEXT DEFAULT '',   -- 分成比例
     entry_date TEXT DEFAULT '',        -- 入职日期 YYYY-MM-DD
     leave_date TEXT DEFAULT '',        -- 离职日期 YYYY-MM-DD（月中离职折算底薪用）
+    -- 人事信息（2026-09-24 新增：与 live_employees 同名同义，使游戏域员工人事资料在本表内自足，
+    -- 无需再往 live_employees 写空壳记录；字段名与 live_employees 对齐以便员工全景按编号聚合）
+    gender TEXT DEFAULT '',            -- 性别：1=男 2=女
+    birth_date TEXT DEFAULT '',        -- 出生日期
+    phone_zalo TEXT DEFAULT '',        -- 联系电话/zalo
+    id_card TEXT DEFAULT '',           -- 身份证
+    email TEXT DEFAULT '',             -- 电子邮箱
+    address TEXT DEFAULT '',           -- 家庭地址
+    emergency_contact TEXT DEFAULT '', -- 紧急联系人
+    emergency_relation TEXT DEFAULT '',-- 联系人关系：父母/配偶/兄弟/其他
+    emergency_phone TEXT DEFAULT '',   -- 紧急联系电话
+    account_holder TEXT DEFAULT '',    -- 账户人（留空=本人账户）
+    payee_phone TEXT DEFAULT '',       -- 收款人手机号
+    bank TEXT DEFAULT '',              -- 银行
+    account TEXT DEFAULT '',           -- 银行账号
     guild_id INTEGER REFERENCES guilds(id) ON DELETE SET NULL,  -- 从属军团（GS 用，非团长）
     remark TEXT DEFAULT '',
     feishu_record_id TEXT DEFAULT '',  -- 飞书导入溯源
@@ -251,7 +266,10 @@ TABLE_FIELDS = {
     "employees": ["nickname", "emp_no", "real_name", "cn_name", "position", "status",
                   "probation_salary", "formal_salary", "employment_type",
                   "position_allowance", "gm_allowance", "commission_rate",
-                  "entry_date", "leave_date", "guild_id", "remark"],
+                  "entry_date", "leave_date", "guild_id", "remark",
+                  "gender", "birth_date", "phone_zalo", "id_card", "email", "address",
+                  "emergency_contact", "emergency_relation", "emergency_phone",
+                  "account_holder", "payee_phone", "bank", "account"],
     "guilds": ["name", "cn_name", "game_guild_id", "server", "leader_employee_id", "status", "operation_type", "remark"],
     "game_accounts": ["employee_id", "game_uid", "nickname", "guild_id", "status",
                       "tiktok_account", "remark"],
@@ -313,6 +331,13 @@ def init_db():
         conn.execute("ALTER TABLE live_employees ADD COLUMN attendance_allowance REAL DEFAULT 0")
     if "discord_id" not in le_cols:  # 绑定模块（/api/binding/*）读取该列，缺列会导致新库 500
         conn.execute("ALTER TABLE live_employees ADD COLUMN discord_id TEXT DEFAULT ''")
+    # 迁移：employees 增加人事信息列（游戏域员工自助表单/全景聚合用，存量库补列）
+    emp_cols = [r["name"] for r in conn.execute("PRAGMA table_info(employees)")]
+    for _col in ("gender", "birth_date", "phone_zalo", "id_card", "email", "address",
+                 "emergency_contact", "emergency_relation", "emergency_phone",
+                 "account_holder", "payee_phone", "bank", "account"):
+        if _col not in emp_cols:
+            conn.execute(f"ALTER TABLE employees ADD COLUMN {_col} TEXT DEFAULT ''")
     # 迁移：工资代发「是否已发」记录（v2：批次+payload 快照+备注）
     pr_cols = [r["name"] for r in conn.execute("PRAGMA table_info(pay_records)")]
     if "batch_id" not in pr_cols:
