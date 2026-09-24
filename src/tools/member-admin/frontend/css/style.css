@@ -248,6 +248,11 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
 }
 .data-table tbody tr:hover { background: #f8fafc; }
 .data-table tbody tr.clickable { cursor: pointer; }
+/* 表头点击排序（sortable 列） */
+.data-table th.sortable-th { cursor: pointer; user-select: none; white-space: nowrap; }
+.data-table th.sortable-th:hover { color: var(--primary); }
+.sort-arrow { margin-left: 4px; font-size: 11px; opacity: .35; }
+.sort-arrow.active { opacity: 1; color: var(--primary); font-weight: 700; }
 .data-table .empty-cell { text-align: center; color: var(--text-secondary); padding: 30px; }
 .row-actions { display: flex; gap: 6px; }
 

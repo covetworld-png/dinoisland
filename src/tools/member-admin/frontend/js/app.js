@@ -961,29 +961,6 @@ async function renderListPage(moduleKey) {
     }
   });
 
-  // 排序下拉（sortable 配置驱动）
-  if (cfg.sortable) {
-    const sortSel = document.createElement('select');
-    sortSel.id = 'listSortSel';
-    cfg.sortable.forEach(s => {
-      ['asc', 'desc'].forEach(o => {
-        const opt = document.createElement('option');
-        opt.value = s.key + ':' + o;
-        opt.textContent = s.label + (o === 'asc' ? ' 升序 ↑' : ' 降序 ↓');
-        sortSel.appendChild(opt);
-      });
-    });
-    sortSel.value = (ls.sort || '') + ':' + (ls.order || '');
-    sortSel.addEventListener('change', () => {
-      const parts = sortSel.value.split(':');
-      ls.sort = parts[0];
-      ls.order = parts[1];
-      ls.page = 1;
-      loadList(moduleKey);
-    });
-    bar.appendChild(sortSel);
-  }
-
   const kwInput = document.createElement('input');
   kwInput.type = 'text';
   kwInput.placeholder = '关键字搜索';
@@ -1011,8 +988,6 @@ async function renderListPage(moduleKey) {
     if (cfg.sortable) {
       ls.sort = cfg.sortable[0].key;
       ls.order = 'asc';
-      const s = document.getElementById('listSortSel');
-      if (s) s.value = ls.sort + ':' + ls.order;
     }
     cfg.filters.forEach(f => {
       if (f.type !== 'searchselect' && f.default) ls.filters[f.key] = f.default;
@@ -1101,9 +1076,31 @@ async function loadList(moduleKey) {
   table.className = 'data-table';
   const thead = document.createElement('thead');
   const headRow = document.createElement('tr');
+  const sortableKeys = (cfg.sortable || []).map(s => s.key);
   cols.forEach(c => {
     const th = document.createElement('th');
     th.textContent = c.label;
+    // 表头点击排序：仅 sortable 声明的列可排序（员工编号）
+    if (sortableKeys.indexOf(c.key) >= 0) {
+      th.classList.add('sortable-th');
+      th.title = '点击切换升序 / 降序';
+      const arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      const isActive = ls.sort === c.key;
+      arrow.textContent = isActive ? (ls.order === 'asc' ? '↑' : '↓') : '⇅';
+      if (isActive) arrow.classList.add('active');
+      th.appendChild(arrow);
+      th.addEventListener('click', () => {
+        if (ls.sort === c.key) {
+          ls.order = (ls.order === 'asc') ? 'desc' : 'asc';
+        } else {
+          ls.sort = c.key;
+          ls.order = 'asc';
+        }
+        ls.page = 1;
+        loadList(moduleKey);
+      });
+    }
     headRow.appendChild(th);
   });
   const thOp = document.createElement('th');
