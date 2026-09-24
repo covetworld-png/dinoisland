@@ -869,6 +869,8 @@ async function switchModule(moduleKey) {
     return;
   }
   state.module = moduleKey;
+  // 员工全景为与分组并列的独立全屏视图：隐藏分组侧边栏避免归属歧义
+  document.body.classList.toggle('pano-full', moduleKey === 'pano');
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
   const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景', paycode: '工资代发收款码', self_forms: '员工表单', pano: '员工全景' };
   $('#adminModuleTitle').textContent = t(titles[moduleKey] || '');
@@ -6579,6 +6581,7 @@ async function renderEmployeePanorama() {
     + '<option value="game_only">仅游戏域</option>'
     + '<option value="game_no_no">游戏域无编号</option>'
     + '</select>'
+    + ' <button class="btn btn-sm" id="panoBackBtn" onclick="showView(\'portalView\')" style="font-size:11px"><i class="fas fa-arrow-left"></i> 返回入口</button>'
     + ' <button class="btn btn-sm" onclick="panoReload()" style="font-size:11px"><i class="fas fa-refresh"></i> 刷新</button>'
     + ' <span id="panoHint" style="font-size:11px;color:#999;margin-left:8px"></span>'
     + ' <div style="font-size:10px;color:#6b7280;margin-top:4px">本页只读聚合：修改请到「直播管理 → 员工」或「游戏管理 → 员工」</div>';

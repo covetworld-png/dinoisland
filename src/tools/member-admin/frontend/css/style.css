@@ -163,6 +163,8 @@ input:checked + .toggle-slider::before { transform: translateX(20px); }
 
 /* ---------- åŽå°å¸ƒå±€ ---------- */
 .admin-layout { display: flex; min-height: 100vh; }
+/* 员工全景：独立全屏视图（与游戏/直播分组并列，不挂靠任何分组侧边栏，避免「直播管理里的全景」歧义） */
+.pano-full .sidebar { display: none; }
 .sidebar {
   width: 200px;
   flex-shrink: 0;
