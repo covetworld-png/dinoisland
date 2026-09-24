@@ -181,6 +181,23 @@ MIGRATIONS = [
         # 新增 Discord user_id，供签到机器人精确匹配主播
         "ALTER TABLE live_employees ADD COLUMN discord_user_id TEXT DEFAULT ''",
     ]),
+    ("20260924_add_employees_hr_fields", [
+        # 游戏域员工人事信息（与 live_employees 同名同义）：使游戏域员工资料在本表自足，
+        # 无需再往 live_employees 写空壳记录；员工全景按 emp_no 聚合两表的人事字段
+        "ALTER TABLE employees ADD COLUMN gender TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN birth_date TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN phone_zalo TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN id_card TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN email TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN address TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN emergency_contact TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN emergency_relation TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN emergency_phone TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN account_holder TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN payee_phone TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN bank TEXT DEFAULT ''",
+        "ALTER TABLE employees ADD COLUMN account TEXT DEFAULT ''",
+    ]),
 ]
 
 
