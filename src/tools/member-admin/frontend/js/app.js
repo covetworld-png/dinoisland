@@ -6580,6 +6580,7 @@ function _maTipMove(x, y) {
 var _panoItems = [];
 var _panoSearch = '';
 var _panoFilter = 'all'; // all / both / live_only / game_only / game_no_no
+var _panoSortDir = 'asc'; // 编号排序方向：asc 升序 / desc 降序（无编号行始终沉底）
 
 var PANO_ALIGN_META = {
   both:       { label: '交叉（双域）', bg: '#dbeafe', fg: '#1e40af', border: '#bfdbfe' },
@@ -6666,15 +6667,31 @@ async function panoLoad() {
 function panoFiltered() {
   var list = _panoItems;
   if (_panoFilter !== 'all') list = list.filter(function (x) { return x.align === _panoFilter; });
-  if (!_panoSearch) return list;
-  var q = _panoSearch.toLowerCase();
-  return list.filter(function (x) {
-    var h = x.human || {};
-    return [x.emp_no, x.nickname, x.alias, x.cn_name, x.real_name,
-            h.phone_zalo, h.id_card, h.bank, h.account].some(function (v) {
-      return String(v == null ? '' : v).toLowerCase().indexOf(q) >= 0;
+  if (_panoSearch) {
+    var q = _panoSearch.toLowerCase();
+    list = list.filter(function (x) {
+      var h = x.human || {};
+      return [x.emp_no, x.nickname, x.alias, x.cn_name, x.real_name,
+              h.phone_zalo, h.id_card, h.bank, h.account].some(function (v) {
+        return String(v == null ? '' : v).toLowerCase().indexOf(q) >= 0;
+      });
     });
+  }
+  // 编号排序（默认升序；无编号行恒沉底，按 id 排）
+  var dir = (_panoSortDir === 'desc') ? -1 : 1;
+  return list.slice().sort(function (a, b) {
+    var x = String(a.emp_no || ''), y = String(b.emp_no || '');
+    if (!x && !y) return (a.game_id || 0) - (b.game_id || 0);
+    if (!x) return 1;
+    if (!y) return -1;
+    if (x === y) return 0;
+    return (x < y ? -1 : 1) * dir;
   });
+}
+
+function panoToggleNoSort() {
+  _panoSortDir = (_panoSortDir === 'asc') ? 'desc' : 'asc';
+  panoRenderBody();
 }
 
 function panoAlignBadge(align) {
@@ -6692,7 +6709,8 @@ function panoRenderBody() {
     return;
   }
   var html = '<div class="table-wrap"><table class="data-table"><thead><tr>'
-    + '<th>编号</th><th>昵称</th><th>别名</th><th>真实姓名</th><th>对齐状态</th>'
+    + '<th class="sortable-th" title="点击切换升序 / 降序" onclick="panoToggleNoSort()">编号 <span class="sort-arrow active">' + (_panoSortDir === 'asc' ? '↑' : '↓') + '</span></th>'
+    + '<th>昵称</th><th>别名</th><th>真实姓名</th><th>对齐状态</th>'
     + '<th>直播岗位</th><th>游戏岗位</th><th>从属军团</th><th>状态</th>'
     + '</tr></thead><tbody>';
   list.forEach(function (x, i) {
