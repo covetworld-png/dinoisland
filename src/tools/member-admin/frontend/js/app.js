@@ -287,6 +287,7 @@ const VI_MAP = {
   '排班表': 'Lịch phân ca',
   '工资代发收款码': 'Mã QR trả lương',
   '员工全景': 'Toàn cảnh nhân sự',
+  '员工中心': 'Trung tâm nhân sự',
   '← 返回入口': '← Quay lại',
   '当前用户：': 'Người dùng: ',
   '修改密码': 'Đổi mật khẩu',
@@ -869,8 +870,6 @@ async function switchModule(moduleKey) {
     return;
   }
   state.module = moduleKey;
-  // 员工全景为与分组并列的独立全屏视图：隐藏分组侧边栏避免归属歧义
-  document.body.classList.toggle('pano-full', moduleKey === 'pano');
   $$('.sidebar-nav .side-btn').forEach(b => b.classList.toggle('active', b.dataset.module === moduleKey));
   const titles = { employees: '员工', guilds: '军团', accounts: '账号', payments: '收款账户', query: '数据查询', commission: '月度分成', logs: '操作日志', users: '用户管理', live_employees: '员工', player_mapping: '陪玩映射表', checkin: '直播场次签到', inbox: '消息中心', schedule: '排班表', pids: 'PID 全景', paycode: '工资代发收款码', self_forms: '员工表单', pano: '员工全景' };
   $('#adminModuleTitle').textContent = t(titles[moduleKey] || '');
@@ -4129,8 +4128,10 @@ function enterModuleGroup(group) {
     const hide = (b.dataset.group !== group && b.dataset.group !== 'all') || (isUsersBtn && state.role !== 'super') || roleBlocked;
     b.classList.toggle('hidden', hide);
   });
-  $('#sidebarBrand').textContent = t(group === 'live' ? '直播管理' : '游戏管理');
-  document.title = t(group === 'live' ? '直播管理' : '游戏管理') + ' - ' + t('员工管理后台');
+  const GROUP_NAMES = { game: '游戏管理', live: '直播管理', staff: '员工中心' };
+  const gname = GROUP_NAMES[group] || '游戏管理';
+  $('#sidebarBrand').textContent = t(gname);
+  document.title = t(gname) + ' - ' + t('员工管理后台');
   showView('adminView');
   if (group === 'live') refreshInboxBadge();
 }
@@ -4145,9 +4146,9 @@ $('#liveModuleCard').addEventListener('click', () => {
   switchModule('live_employees');
 });
 
-// 员工全景与游戏管理/直播管理并列的第三入口（点击后落直播组侧边栏，可自由切回其他模块）
+// 员工全景：第三入口，落入「员工中心」分组侧边栏（含员工全景/员工表单）
 $('#panoModuleCard').addEventListener('click', () => {
-  enterModuleGroup('live');
+  enterModuleGroup('staff');
   switchModule('pano');
 });
 
