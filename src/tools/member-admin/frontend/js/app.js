@@ -6582,6 +6582,7 @@ var _panoSearch = '';
 var _panoFilter = 'all'; // all / both / live_only / game_only / game_no_no
 var _panoSortDir = 'asc'; // 编号排序方向：asc 升序 / desc 降序（无编号行始终沉底）
 var _panoStatus = '在职'; // 状态筛选：默认只看在职
+var _panoPos = '全部'; // 岗位筛选
 var _panoShowNoNo = false; // 是否显示无编号档案（默认隐藏）
 
 var PANO_ALIGN_META = {
@@ -6628,6 +6629,10 @@ async function renderEmployeePanorama() {
     + '<option value="其他"' + (_panoStatus === '其他' ? ' selected' : '') + '>其他</option>'
     + '<option value="全部"' + (_panoStatus === '全部' ? ' selected' : '') + '>全部状态</option>'
     + '</select>'
+    + ' <select id="panoPosSel" onchange="panoOnPos(this.value)" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px">'
+    + '<option value="全部"' + (_panoPos === '全部' ? ' selected' : '') + '>全部岗位</option>'
+    + panoPosOptions().map(function (p) { return '<option value="' + escHtml(p) + '"' + (_panoPos === p ? ' selected' : '') + '>' + escHtml(p) + '</option>'; }).join('')
+    + '</select>'
     + ' <label style="font-size:12px;margin-left:6px;cursor:pointer"><input type="checkbox" id="panoNoNoChk"' + (_panoShowNoNo ? ' checked' : '') + ' onchange="panoOnNoNo(this.checked)" style="vertical-align:middle"> 显示无编号</label>'
     + ' <button class="btn btn-sm" id="panoBackBtn" onclick="showView(\'portalView\')" style="font-size:11px"><i class="fas fa-arrow-left"></i> 返回入口</button>'
     + ' <button class="btn btn-sm" onclick="panoReload()" style="font-size:11px"><i class="fas fa-refresh"></i> 刷新</button>'
@@ -6654,6 +6659,20 @@ function panoOnFilter(v) {
 function panoOnStatus(v) {
   _panoStatus = v || '在职';
   panoRenderBody();
+}
+
+function panoOnPos(v) {
+  _panoPos = v || '全部';
+  panoRenderBody();
+}
+
+function panoPosOptions() {
+  var set = {};
+  _panoItems.forEach(function (x) {
+    if (x.live && x.live.position) set[x.live.position] = 1;
+    if (x.game && x.game.position) set[x.game.position] = 1;
+  });
+  return Object.keys(set).sort();
 }
 
 function panoOnNoNo(checked) {
@@ -6688,6 +6707,11 @@ function panoFiltered() {
   if (_panoFilter !== 'all') list = list.filter(function (x) { return x.align === _panoFilter; });
   // 默认只看在职；想看离职/其他时选状态或全部
   if (_panoStatus !== '全部') list = list.filter(function (x) { return (x.status || '') === _panoStatus; });
+  // 按岗位筛选
+  if (_panoPos !== '全部') list = list.filter(function (x) {
+    var p = (x.live && x.live.position) || (x.game && x.game.position) || '';
+    return p === _panoPos;
+  });
   // 默认隐藏无编号档案；勾选「显示无编号」后出现
   if (!_panoShowNoNo) list = list.filter(function (x) { return x.emp_no; });
   if (_panoSearch) {
