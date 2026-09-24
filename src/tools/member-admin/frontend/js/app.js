@@ -6609,6 +6609,7 @@ var PANO_HUMAN_FIELDS = [
 ];
 
 async function renderEmployeePanorama() {
+  await loadMeta(); // 岗位下拉需要岗位元数据
   $('#adminModuleTitle').textContent = '员工全景';
   var main = $('#adminMain');
   main.innerHTML = '';
@@ -6668,10 +6669,9 @@ function panoOnPos(v) {
 
 function panoPosOptions() {
   var set = {};
-  _panoItems.forEach(function (x) {
-    if (x.live && x.live.position) set[x.live.position] = 1;
-    if (x.game && x.game.position) set[x.game.position] = 1;
-  });
+  // 从系统岗位元数据生成（渲染时数据可能尚未加载，不能用 _panoItems）
+  (state.meta && state.meta.positions || []).forEach(function (p) { set[p] = 1; });
+  (state.meta && state.meta.live_positions || []).forEach(function (p) { set[p] = 1; });
   return Object.keys(set).sort();
 }
 
