@@ -3130,7 +3130,7 @@ def self_form_token_list():
     try:
         sql = ("SELECT t.id, t.emp_no, t.token, t.expires_at, t.status, t.created_by, t.created_at, t.used_at,"
                " e.nickname, e.cn_name, e.real_name"
-               " FROM self_form_tokens t LEFT JOIN live_employees e ON trim(e.emp_no)=t.emp_no")
+               " FROM self_form_tokens t LEFT JOIN live_employees e ON trim(t.emp_no) != '' AND trim(e.emp_no)=trim(t.emp_no)")
         args = []
         if status in ("unused", "used"):
             sql += " WHERE t.status=?"
@@ -3230,8 +3230,8 @@ def self_form_submissions_list():
                " ((e.emp_no IS NOT NULL) OR (g.emp_no IS NOT NULL)) AS emp_exists,"
                + SELF_FORM_SELECT_COLS +
                " FROM self_form_submissions s"
-               " LEFT JOIN live_employees e ON trim(e.emp_no)=trim(s.emp_no)"
-               " LEFT JOIN employees g ON trim(g.emp_no)=trim(s.emp_no)")
+               " LEFT JOIN live_employees e ON trim(s.emp_no) != '' AND trim(e.emp_no)=trim(s.emp_no)"
+               " LEFT JOIN employees g ON trim(s.emp_no) != '' AND trim(g.emp_no)=trim(s.emp_no)")
         args = []
         if status in ("pending", "approved", "rejected"):
             sql += " WHERE s.status=?"
