@@ -4110,6 +4110,8 @@ function enterPortal() {
     $('#' + id).classList.toggle('hidden', state.role !== 'super'));
   // operator（场控）/ viewer 均无游戏管理入口需要区分：场控隐藏游戏管理卡片（其模块全在直播组）
   $('#gameModuleCard').classList.toggle('hidden', state.role === 'operator');
+  // 员工全景含银行/身份证等敏感人事信息：场控不可见（与 HR_MODULES 白名单一致）
+  $('#panoModuleCard').classList.toggle('hidden', state.role === 'operator');
   showView('portalView');
 }
 
@@ -4139,6 +4141,12 @@ $('#gameModuleCard').addEventListener('click', () => {
 $('#liveModuleCard').addEventListener('click', () => {
   enterModuleGroup('live');
   switchModule('live_employees');
+});
+
+// 员工全景与游戏管理/直播管理并列的第三入口（点击后落直播组侧边栏，可自由切回其他模块）
+$('#panoModuleCard').addEventListener('click', () => {
+  enterModuleGroup('live');
+  switchModule('pano');
 });
 
 $('#backToPortalBtn').addEventListener('click', () => showView('portalView'));
