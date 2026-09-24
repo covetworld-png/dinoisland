@@ -429,9 +429,17 @@ def _register_crud(table):
             if val not in (None, "", "all"):
                 join_filters.append((fk_col, ref_table, ref_col, val))
         page, page_size = _page_args()
+        # 排序：sort/order 白名单校验（列名必须是表白名单字段），防 SQL 注入
+        sort = (request.args.get("sort") or "").strip()
+        order = (request.args.get("order") or "asc").strip().lower()
+        sortable_cols = set(TABLE_FIELDS.get(table) or [])
+        if sort in sortable_cols and order in ("asc", "desc"):
+            order_by = f"{sort} {order.upper()}"
+        else:
+            order_by = cfg.get("order_by")
         rows, total = list_rows(table, filters, request.args.get("keyword", "").strip(),
                                 cfg["keyword_fields"], page, page_size, exclude=exclude,
-                                join_filters=join_filters, order_by=cfg.get("order_by"))
+                                join_filters=join_filters, order_by=order_by)
         if table == "player_mapping":
             _attach_pd_ids(rows)
         return jsonify({"ok": True, "data": {"items": rows, "total": total,

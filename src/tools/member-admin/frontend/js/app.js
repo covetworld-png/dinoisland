@@ -564,6 +564,7 @@ const MODULES = {
       { key: 'position', label: '全部岗位', metaKey: 'positions' },
       { key: 'status', label: '全部状态', metaKey: 'employee_statuses' },
     ],
+    sortable: [{ key: 'emp_no', label: '员工编号' }],
     fields: [
       { key: 'nickname', label: '昵称', type: 'text', required: true },
       { key: 'emp_no', label: '编号', type: 'text' },
@@ -715,6 +716,7 @@ const MODULES = {
       { key: 'emp_type', label: '全部雇佣类型', metaKey: 'live_emp_types' },
       { key: 'status', label: '全部状态', metaKey: 'live_statuses', default: '在职' },
     ],
+    sortable: [{ key: 'emp_no', label: '员工编号' }],
     rowClick: (id, item) => openLiveEmployeeDrawer(item),
     fields: [
       { key: 'emp_no', label: '员工编号（5位数字）', type: 'text', required: true },
@@ -920,6 +922,11 @@ async function renderListPage(moduleKey) {
   const bar = document.createElement('div');
   bar.className = 'filter-bar';
   const ls = getListState(moduleKey);
+  // 排序：有 sortable 配置的模块默认按首个字段升序
+  if (cfg.sortable && !ls.sort) {
+    ls.sort = cfg.sortable[0].key;
+    ls.order = 'asc';
+  }
   const filterCtrls = {};
 
   cfg.filters.forEach(f => {
@@ -954,6 +961,29 @@ async function renderListPage(moduleKey) {
     }
   });
 
+  // 排序下拉（sortable 配置驱动）
+  if (cfg.sortable) {
+    const sortSel = document.createElement('select');
+    sortSel.id = 'listSortSel';
+    cfg.sortable.forEach(s => {
+      ['asc', 'desc'].forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = s.key + ':' + o;
+        opt.textContent = s.label + (o === 'asc' ? ' 升序 ↑' : ' 降序 ↓');
+        sortSel.appendChild(opt);
+      });
+    });
+    sortSel.value = (ls.sort || '') + ':' + (ls.order || '');
+    sortSel.addEventListener('change', () => {
+      const parts = sortSel.value.split(':');
+      ls.sort = parts[0];
+      ls.order = parts[1];
+      ls.page = 1;
+      loadList(moduleKey);
+    });
+    bar.appendChild(sortSel);
+  }
+
   const kwInput = document.createElement('input');
   kwInput.type = 'text';
   kwInput.placeholder = '关键字搜索';
@@ -978,6 +1008,12 @@ async function renderListPage(moduleKey) {
     kwInput.value = '';
     ls.keyword = '';
     ls.filters = {};
+    if (cfg.sortable) {
+      ls.sort = cfg.sortable[0].key;
+      ls.order = 'asc';
+      const s = document.getElementById('listSortSel');
+      if (s) s.value = ls.sort + ':' + ls.order;
+    }
     cfg.filters.forEach(f => {
       if (f.type !== 'searchselect' && f.default) ls.filters[f.key] = f.default;
     });
@@ -1038,6 +1074,10 @@ async function loadList(moduleKey) {
   const cfg = MODULES[moduleKey];
   const ls = getListState(moduleKey);
   const params = new URLSearchParams({ page: ls.page, page_size: PAGE_SIZE });
+  if (cfg.sortable && ls.sort) {
+    params.set('sort', ls.sort);
+    params.set('order', ls.order);
+  }
   if (ls.keyword) params.set('keyword', ls.keyword);
   Object.keys(ls.filters).forEach(k => {
     if (ls.filters[k] !== '' && ls.filters[k] !== null && ls.filters[k] !== undefined) {
