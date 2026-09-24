@@ -6581,6 +6581,8 @@ var _panoItems = [];
 var _panoSearch = '';
 var _panoFilter = 'all'; // all / both / live_only / game_only / game_no_no
 var _panoSortDir = 'asc'; // 编号排序方向：asc 升序 / desc 降序（无编号行始终沉底）
+var _panoStatus = '在职'; // 状态筛选：默认只看在职
+var _panoShowNoNo = false; // 是否显示无编号档案（默认隐藏）
 
 var PANO_ALIGN_META = {
   both:       { label: '交叉（双域）', bg: '#dbeafe', fg: '#1e40af', border: '#bfdbfe' },
@@ -6620,6 +6622,13 @@ async function renderEmployeePanorama() {
     + '<option value="game_only">仅游戏域</option>'
     + '<option value="game_no_no">游戏域无编号</option>'
     + '</select>'
+    + ' <select id="panoStatusSel" onchange="panoOnStatus(this.value)" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px">'
+    + '<option value="在职"' + (_panoStatus === '在职' ? ' selected' : '') + '>在职</option>'
+    + '<option value="离职"' + (_panoStatus === '离职' ? ' selected' : '') + '>离职</option>'
+    + '<option value="其他"' + (_panoStatus === '其他' ? ' selected' : '') + '>其他</option>'
+    + '<option value="全部"' + (_panoStatus === '全部' ? ' selected' : '') + '>全部状态</option>'
+    + '</select>'
+    + ' <label style="font-size:12px;margin-left:6px;cursor:pointer"><input type="checkbox" id="panoNoNoChk"' + (_panoShowNoNo ? ' checked' : '') + ' onchange="panoOnNoNo(this.checked)" style="vertical-align:middle"> 显示无编号</label>'
     + ' <button class="btn btn-sm" id="panoBackBtn" onclick="showView(\'portalView\')" style="font-size:11px"><i class="fas fa-arrow-left"></i> 返回入口</button>'
     + ' <button class="btn btn-sm" onclick="panoReload()" style="font-size:11px"><i class="fas fa-refresh"></i> 刷新</button>'
     + ' <span id="panoHint" style="font-size:11px;color:#999;margin-left:8px"></span>'
@@ -6639,6 +6648,16 @@ function panoOnSearch(v) {
 
 function panoOnFilter(v) {
   _panoFilter = v || 'all';
+  panoRenderBody();
+}
+
+function panoOnStatus(v) {
+  _panoStatus = v || '在职';
+  panoRenderBody();
+}
+
+function panoOnNoNo(checked) {
+  _panoShowNoNo = !!checked;
   panoRenderBody();
 }
 
@@ -6667,6 +6686,10 @@ async function panoLoad() {
 function panoFiltered() {
   var list = _panoItems;
   if (_panoFilter !== 'all') list = list.filter(function (x) { return x.align === _panoFilter; });
+  // 默认只看在职；想看离职/其他时选状态或全部
+  if (_panoStatus !== '全部') list = list.filter(function (x) { return (x.status || '') === _panoStatus; });
+  // 默认隐藏无编号档案；勾选「显示无编号」后出现
+  if (!_panoShowNoNo) list = list.filter(function (x) { return x.emp_no; });
   if (_panoSearch) {
     var q = _panoSearch.toLowerCase();
     list = list.filter(function (x) {
