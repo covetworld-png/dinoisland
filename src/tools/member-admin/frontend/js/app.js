@@ -6707,10 +6707,11 @@ function panoFiltered() {
   if (_panoFilter !== 'all') list = list.filter(function (x) { return x.align === _panoFilter; });
   // 默认只看在职；想看离职/其他时选状态或全部
   if (_panoStatus !== '全部') list = list.filter(function (x) { return (x.status || '') === _panoStatus; });
-  // 按岗位筛选
+  // 按岗位筛选（两域任一岗位匹配即命中：如阿发 直播侧=陪玩、游戏侧=GS）
   if (_panoPos !== '全部') list = list.filter(function (x) {
-    var p = (x.live && x.live.position) || (x.game && x.game.position) || '';
-    return p === _panoPos;
+    var lp = (x.live && x.live.position) || '';
+    var gp = (x.game && x.game.position) || '';
+    return lp === _panoPos || gp === _panoPos;
   });
   // 默认隐藏无编号档案；勾选「显示无编号」后出现
   if (!_panoShowNoNo) list = list.filter(function (x) { return x.emp_no; });
