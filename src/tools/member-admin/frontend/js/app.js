@@ -3528,6 +3528,13 @@ function renderCommissionTables(wrap, data, month) {
     { label: '分成金额', key: 'commission', money: true },
     { label: '底薪', key: 'base_salary', money: true },
     { label: '在职天数', get: s => (s.work_days != null && s.month_days ? (s.work_days < s.month_days ? s.work_days + '/' + s.month_days : '整月') : '') },
+    { label: '试用/正式天数', get: s => {
+      const pd = s.probation_days, fd = s.formal_days;
+      if (pd == null || fd == null) return '';  // 旧快照无分段字段
+      if (pd > 0 && fd > 0) return '试用' + pd + ' + 正式' + fd;
+      if (pd > 0) return '试用' + pd;
+      return '';  // 全正式为默认状态，不标注
+    } },
     { label: '岗位津贴', key: 'position_allowance', money: true },
     { label: 'GM津贴', key: 'gm_allowance', money: true },
     { label: '活跃天数', key: 'active_days' },
@@ -3549,7 +3556,7 @@ function renderCommissionTables(wrap, data, month) {
   // 合计行：与 SUMMARY_COLS 对齐
   const sumMoney = key => summary.reduce((n, s) => n + (Number(s[key]) || 0), 0);
   const footer = ['合计（' + summary.length + ' 人）', '', '',
-    sumMoney('revenue'), sumMoney('commission'), sumMoney('base_salary'), '',
+    sumMoney('revenue'), sumMoney('commission'), sumMoney('base_salary'), '', '',
     sumMoney('position_allowance'), sumMoney('gm_allowance'), '', '',
     sumMoney('deduction'), sumMoney('total'), ''];
   sec1.appendChild(buildCommTable(SUMMARY_COLS, summary, {
