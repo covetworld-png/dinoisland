@@ -198,6 +198,11 @@ MIGRATIONS = [
         "ALTER TABLE employees ADD COLUMN bank TEXT DEFAULT ''",
         "ALTER TABLE employees ADD COLUMN account TEXT DEFAULT ''",
     ]),
+    ("20260902_add_employees_regular_date", [
+        # 转正日期：月中转正分段计薪（此前按试用期底薪、此后按正式底薪）。
+        # 为空保持旧行为（整月按 employment_type 二选一），不追溯历史快照
+        "ALTER TABLE employees ADD COLUMN regular_date TEXT DEFAULT ''",
+    ]),
 ]
 
 

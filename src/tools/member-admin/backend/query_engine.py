@@ -56,6 +56,60 @@ def _prorated_base(base_full, month, entry_date, leave_date):
     return round(base_full * wd / md), wd, md
 
 
+def _prorated_base_split(probation_salary, formal_salary, employment_type,
+                         month, entry_date, regular_date, leave_date):
+    """月底薪分段折算。
+    regular_date 非空：在职区间按转正日切两段，试用段 × probation_salary + 正式段 × formal_salary，
+    各乘 段天数/当月天数 后求和（入离职限制仍生效）。
+    regular_date 为空：旧行为——整月按 employment_type 二选一后按在职天数折算。
+    返回 dict：base（折算底薪）, work_days, month_days, probation_days, formal_days,
+    base_full（旧口径整月标准，无转正日期时为二选一标准，有转正日期时取正式底薪）,
+    probation_salary, formal_salary"""
+    from datetime import timedelta
+    ps, fs = probation_salary or 0, formal_salary or 0
+    wd, md = _work_days(month, entry_date, leave_date)
+    rd = _parse_ymd(regular_date)
+
+    if not rd:
+        # 无转正日期：旧行为（整月二选一）
+        base_full = ps if employment_type == "试用期" else fs
+        if wd == md:
+            base = base_full
+        else:
+            base = round(base_full * wd / md)
+        return {"base": base, "work_days": wd, "month_days": md,
+                "probation_days": wd if employment_type == "试用期" else 0,
+                "formal_days": 0 if employment_type == "试用期" else wd,
+                "base_full": base_full, "probation_salary": ps, "formal_salary": fs}
+
+    # 在职区间 [start, end]（_work_days 同口径）
+    y, m = int(month[:4]), int(month[5:7])
+    start, end = date(y, m, 1), date(y, m, md)
+    e, l = _parse_ymd(entry_date), _parse_ymd(leave_date)
+    if e and e > start:
+        start = e
+    if l and l < end:
+        end = l
+    if start > end:
+        return {"base": 0, "work_days": wd, "month_days": md,
+                "probation_days": 0, "formal_days": 0,
+                "base_full": fs, "probation_salary": ps, "formal_salary": fs}
+
+    # 试用段 [start, min(rd-1, end)]；正式段 [max(rd, start), end]
+    prob_end = min(rd - timedelta(days=1), end)
+    form_start = max(rd, start)
+    prob_days = (prob_end - start).days + 1 if prob_end >= start else 0
+    form_days = (end - form_start).days + 1 if end >= form_start else 0
+    if wd == md and (prob_days == md or form_days == md):
+        # 整月单一身份：不折算，直接取对应整月标准
+        base = ps if prob_days == md else fs
+    else:
+        base = round(ps * prob_days / md + fs * form_days / md)
+    return {"base": base, "work_days": prob_days + form_days, "month_days": md,
+            "probation_days": prob_days, "formal_days": form_days,
+            "base_full": fs, "probation_salary": ps, "formal_salary": fs}
+
+
 def _connect():
     import pymysql
     return pymysql.connect(
@@ -369,14 +423,14 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
                e.id AS emp_id, e.nickname, e.commission_rate, e.employment_type,
                e.probation_salary, e.formal_salary, e.position_allowance, e.gm_allowance,
                e.status AS emp_status, e.position AS emp_position,
-               e.entry_date, e.leave_date
+               e.entry_date, e.leave_date, e.regular_date
         FROM guilds g JOIN employees e ON g.leader_employee_id = e.id
         UNION ALL
         SELECT g.id, g.name, g.game_guild_id, g.server, g.operation_type,
                e.id AS emp_id, e.nickname, e.commission_rate, e.employment_type,
                e.probation_salary, e.formal_salary, e.position_allowance, e.gm_allowance,
                e.status AS emp_status, e.position AS emp_position,
-               e.entry_date, e.leave_date
+               e.entry_date, e.leave_date, e.regular_date
         FROM employees e JOIN guilds g ON e.guild_id = g.id AND e.position = 'GS'
     """).fetchall()
     conn.close()
@@ -407,9 +461,11 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
                 matched_sid = sid
                 break
         rate = _parse_rate(g["commission_rate"])
-        base_full = g["probation_salary"] if g["employment_type"] == "试用期" else g["formal_salary"]
-        base, work_days, month_days = _prorated_base(
-            base_full, month, g["entry_date"], g["leave_date"])
+        bs = _prorated_base_split(
+            g["probation_salary"], g["formal_salary"], g["employment_type"],
+            month, g["entry_date"], g["regular_date"], g["leave_date"])
+        base, base_full = bs["base"], bs["base_full"]
+        work_days, month_days = bs["work_days"], bs["month_days"]
         commission = round(amount * rate)
         emp_id = g["emp_id"]
         deduction = deduction_map.get(emp_id, 0)
@@ -423,6 +479,8 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "commission": commission, "employment_type": g["employment_type"],
             "base_salary": base or 0, "base_salary_full": base_full or 0,
             "work_days": work_days, "month_days": month_days,
+            "probation_days": bs["probation_days"], "formal_days": bs["formal_days"],
+            "probation_salary": bs["probation_salary"], "formal_salary": bs["formal_salary"],
             "position_allowance": g["position_allowance"] or 0,
             "gm_allowance": g["gm_allowance"] or 0,
             "deduction": deduction,
@@ -448,9 +506,11 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             continue  # 手动勾选模式下 GM 只在 gm_ids 中勾选才计入
         elif e["status"] == "离职":
             continue
-        base_full = e["probation_salary"] if e["employment_type"] == "试用期" else e["formal_salary"]
-        base, work_days, month_days = _prorated_base(
-            base_full, month, e["entry_date"], e["leave_date"])
+        bs = _prorated_base_split(
+            e["probation_salary"], e["formal_salary"], e["employment_type"],
+            month, e["entry_date"], e["regular_date"], e["leave_date"])
+        base, base_full = bs["base"], bs["base_full"]
+        work_days, month_days = bs["work_days"], bs["month_days"]
         emp_id = e["id"]
         deduction = deduction_map.get(emp_id, 0)
         total = (base or 0) + (e["position_allowance"] or 0) + (e["gm_allowance"] or 0) - deduction
@@ -463,6 +523,8 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "employment_type": e["employment_type"],
             "base_salary": base or 0, "base_salary_full": base_full or 0,
             "work_days": work_days, "month_days": month_days,
+            "probation_days": bs["probation_days"], "formal_days": bs["formal_days"],
+            "probation_salary": bs["probation_salary"], "formal_salary": bs["formal_salary"],
             "position_allowance": e["position_allowance"] or 0,
             "gm_allowance": e["gm_allowance"] or 0,
             "deduction": deduction,
@@ -489,9 +551,11 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             continue  # 手动勾选模式下只在 leader_ids 勾选才计入
         elif e["status"] == "离职":
             continue
-        base_full = e["probation_salary"] if e["employment_type"] == "试用期" else e["formal_salary"]
-        base, work_days, month_days = _prorated_base(
-            base_full, month, e["entry_date"], e["leave_date"])
+        bs = _prorated_base_split(
+            e["probation_salary"], e["formal_salary"], e["employment_type"],
+            month, e["entry_date"], e["regular_date"], e["leave_date"])
+        base, base_full = bs["base"], bs["base_full"]
+        work_days, month_days = bs["work_days"], bs["month_days"]
         emp_id = e["id"]
         deduction = deduction_map.get(emp_id, 0)
         total = (base or 0) + (e["position_allowance"] or 0) + (e["gm_allowance"] or 0) - deduction
@@ -504,6 +568,8 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "employment_type": e["employment_type"],
             "base_salary": base or 0, "base_salary_full": base_full or 0,
             "work_days": work_days, "month_days": month_days,
+            "probation_days": bs["probation_days"], "formal_days": bs["formal_days"],
+            "probation_salary": bs["probation_salary"], "formal_salary": bs["formal_salary"],
             "position_allowance": e["position_allowance"] or 0,
             "gm_allowance": e["gm_allowance"] or 0,
             "deduction": deduction,
@@ -537,6 +603,10 @@ def run_commission(month, db_path, employee_ids=None, guild_ids=None, basis="pai
             "revenue": 0.0, "commission": 0, "base_salary": it["base_salary"],
             "base_salary_full": it["base_salary_full"],
             "work_days": it["work_days"], "month_days": it["month_days"],
+            "probation_days": it.get("probation_days", 0),
+            "formal_days": it.get("formal_days", 0),
+            "probation_salary": it.get("probation_salary", 0),
+            "formal_salary": it.get("formal_salary", 0),
             "position_allowance": it["position_allowance"], "gm_allowance": it["gm_allowance"],
             "total": 0, "guilds": [], "expectations": ""})
         s["revenue"] += it["revenue"]

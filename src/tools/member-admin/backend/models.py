@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS employees (
     commission_rate TEXT DEFAULT '',   -- 分成比例
     entry_date TEXT DEFAULT '',        -- 入职日期 YYYY-MM-DD
     leave_date TEXT DEFAULT '',        -- 离职日期 YYYY-MM-DD（月中离职折算底薪用）
+    regular_date TEXT DEFAULT '',      -- 转正日期 YYYY-MM-DD（月中转正分段计薪：此前按试用期底薪、此后按正式底薪；空=不按转正日分段）
     -- 人事信息（2026-09-24 新增：与 live_employees 同名同义，使游戏域员工人事资料在本表内自足，
     -- 无需再往 live_employees 写空壳记录；字段名与 live_employees 对齐以便员工全景按编号聚合）
     gender TEXT DEFAULT '',            -- 性别：1=男 2=女
@@ -266,7 +267,7 @@ TABLE_FIELDS = {
     "employees": ["nickname", "emp_no", "real_name", "cn_name", "position", "status",
                   "probation_salary", "formal_salary", "employment_type",
                   "position_allowance", "gm_allowance", "commission_rate",
-                  "entry_date", "leave_date", "guild_id", "remark",
+                  "entry_date", "leave_date", "regular_date", "guild_id", "remark",
                   "gender", "birth_date", "phone_zalo", "id_card", "email", "address",
                   "emergency_contact", "emergency_relation", "emergency_phone",
                   "account_holder", "payee_phone", "bank", "account"],

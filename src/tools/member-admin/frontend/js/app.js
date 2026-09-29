@@ -556,6 +556,7 @@ const MODULES = {
       { key: 'employment_type', label: '聘用类型' },
       { key: 'status', label: '状态' },
       { key: 'entry_date', label: '入职日期' },
+      { key: 'regular_date', label: '转正日期', opt: true },
       { key: 'bank', label: '银行', opt: true },
       { key: 'account', label: '银行账号', opt: true },
       { key: 'updated_at', label: '修改时间' },
@@ -580,6 +581,7 @@ const MODULES = {
       { key: 'commission_rate', label: '分成比例', type: 'text' },
       { key: 'guild_id', label: '从属军团（GS）', type: 'searchselect', optionsKind: 'guilds' },
       { key: 'entry_date', label: '入职日期', type: 'date' },
+      { key: 'regular_date', label: '转正日期', type: 'date' },
       { key: 'leave_date', label: '离职日期', type: 'date' },
       // 人事信息（2026-09-24：与直播域同名同义，游戏域员工自助表单资料落到本表，不再往直播表写空壳）
       { key: 'gender', label: '性别', type: 'select', metaKey: 'genders' },
@@ -1709,7 +1711,7 @@ const EMPLOYEE_DETAIL_FIELDS = [
   ['nickname', '昵称'], ['emp_no', '编号'], ['real_name', '真实姓名'], ['cn_name', '中文名'],
   ['position', '岗位'], ['status', '状态'], ['employment_type', '聘用类型'],
   ['probation_salary', '试用期底薪'], ['formal_salary', '正式底薪'], ['position_allowance', '岗位津贴'], ['gm_allowance', 'GM 津贴'],
-  ['commission_rate', '分成比例'], ['entry_date', '入职日期'], ['leave_date', '离职日期'], ['remark', '备注'],
+  ['commission_rate', '分成比例'], ['entry_date', '入职日期'], ['regular_date', '转正日期'], ['leave_date', '离职日期'], ['remark', '备注'],
   ['created_at', '创建时间'], ['updated_at', '更新时间'],
 ];
 

@@ -206,8 +206,20 @@ class PayrollPDF(FPDF):
         base_full = emp_summary.get("base_salary_full", 0) or 0
         wd = emp_summary.get("work_days", 0)
         md = emp_summary.get("month_days", 0)
+        prob_days = emp_summary.get("probation_days") or 0
+        form_days = emp_summary.get("formal_days") or 0
+        prob_sal = emp_summary.get("probation_salary") or 0
+        form_sal = emp_summary.get("formal_salary") or 0
         base_formula = ""
-        if base_full and base_full != base:
+        if prob_days and form_days:
+            # 月中转正分段：试用段 + 正式段
+            base_formula = (f"Thử việc/试用 {_money(prob_sal)} × {prob_days}/{md} + "
+                            f"Chính thức/正式 {_money(form_sal)} × {form_days}/{md}")
+        elif prob_days and prob_days != md:
+            base_formula = f"Thử việc/试用 {_money(prob_sal)} × {prob_days}/{md}"
+        elif form_days and form_days != md and not base_full:
+            base_formula = f"Chính thức/正式 {_money(form_sal)} × {form_days}/{md}"
+        if not base_formula and base_full and base_full != base:
             base_formula = f"{_money(base_full)} × {wd}/{md}"
         rows.append(("Lương cơ bản / 底薪", base_formula, base))
         rows.append(("Thưởng KPI / 绩效分成", "", emp_summary.get("commission", 0) or 0))
