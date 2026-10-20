@@ -170,6 +170,7 @@ const translations = {
     roleAdmin: "Quản trị",
     manualInput: "Nhập thủ công",
     toastSaved: "Đã lưu",
+    toastVipInvalid: "Điểm VIP phải là số không âm",
     toastSelectItemsFirst: "Vui lòng chọn vật phẩm trước",
     toastSelectServer: "Vui lòng chọn máy chủ trước",
     giftPackManage: "Quản Lý Gói Quà",
@@ -367,6 +368,7 @@ const translations = {
     roleAdmin: "管理员",
     manualInput: "手动输入",
     toastSaved: "已保存",
+    toastVipInvalid: "VIP 积分必须是非负数字",
     toastSelectItemsFirst: "请先选择道具",
     toastSelectServer: "请先选择服务器",
     giftPackManage: "礼包管理",
@@ -563,6 +565,7 @@ const translations = {
     roleAdmin: "Admin",
     manualInput: "Manual Input",
     toastSaved: "Saved",
+    toastVipInvalid: "VIP points must be a non-negative number",
     toastSelectItemsFirst: "Please select items first",
     toastSelectServer: "Please select a server first",
     toastSelectRole: "Please select a role first",
@@ -617,6 +620,15 @@ function itemName(it) {
   if (currentLang === "vi") return it.name_vn || it.name_cn;
   if (currentLang === "en") return it.name_en || it.name_cn;
   return it.name_cn;
+}
+
+// 数量+名称文案：中文保留单位（如“10 张 强化卡”）；vi/en 隐藏单位
+//（越南语量词与名词强绑定，固定映射易错；英文无此量词概念，省略最自然）
+function formatItemText(it) {
+  if (it.is_skin) return itemName(it);
+  const name = itemName(it);
+  if (currentLang === "zh") return `${it.quantity} ${it.unit || ""}${name}`;
+  return `${it.quantity} ${name}`;
 }
 
 function updateLangSwitcher() {
@@ -799,15 +811,16 @@ function applyI18n() {
 
   // Admin items table headers
   const itemThs = $$("#itemsTable th");
-  if (itemThs.length >= 9) {
+  if (itemThs.length >= 10) {
     itemThs[1].textContent = t("propId");
     itemThs[2].textContent = t("nameCn");
     itemThs[3].textContent = t("nameVn");
     itemThs[4].textContent = t("nameEn");
     itemThs[5].textContent = t("unit");
-    itemThs[6].textContent = t("category");
-    itemThs[7].textContent = t("enabled");
-    itemThs[8].textContent = t("sort");
+    itemThs[6].textContent = t("vipPoints");
+    itemThs[7].textContent = t("category");
+    itemThs[8].textContent = t("enabled");
+    itemThs[9].textContent = t("sort");
   }
 
   // Admin all apps table headers
@@ -867,10 +880,7 @@ function showToast(message, type = "info") {
 }
 
 function formatItems(items) {
-  return items.map(it => {
-    if (it.is_skin) return itemName(it);
-    return `${it.quantity} ${it.unit}${itemName(it)}`;
-  }).join("、");
+  return items.map(it => formatItemText(it)).join("、");
 }
 
 function formatDate(dt) {
@@ -1726,10 +1736,7 @@ function updatePreview() {
   const previewItems = checkinQty > 0
     ? [...items, { prop_id: "auto-coin", name_cn: "兽币", name_vn: "Xu Thú", name_en: "Beast Coin", unit: "个", quantity: checkinQty * 218, vip_value: 0, is_skin: false }]
     : items;
-  const itemsText = previewItems.map(it => {
-    if (it.is_skin) return itemName(it);
-    return `${it.quantity} ${it.unit}${itemName(it)}`;
-  }).join("，");
+  const itemsText = previewItems.map(it => formatItemText(it)).join("，");
   const hintEl = $("#vipUpgradeHint");
 
   if (!server || !account || !nickname || !itemsText) {
@@ -2572,6 +2579,7 @@ function renderAdminItems() {
       <td>${escapeHtml(it.name_vn)}</td>
       <td>${escapeHtml(it.name_en || "")}</td>
       <td><input type="text" class="unit-input" data-prop="${it.prop_id}" value="${escapeHtml(it.unit)}" size="4"></td>
+      <td><input type="number" class="vip-input" data-prop="${it.prop_id}" value="${it.vip_value || 0}" size="5" min="0"></td>
       <td>${escapeHtml(it.category)}</td>
       <td><input type="checkbox" class="enable-check" data-prop="${it.prop_id}" ${it.enabled ? "checked" : ""}></td>
       <td><input type="number" class="sort-input" data-prop="${it.prop_id}" value="${it.sort_order}" size="4"></td>
@@ -2584,6 +2592,17 @@ function renderAdminItems() {
     tr.querySelector(".unit-input").addEventListener("change", async (e) => {
       await api("PATCH", `/admin/items/${it.prop_id}`, { unit: e.target.value });
       showToast(t("toastSaved"));
+    });
+    tr.querySelector(".vip-input").addEventListener("change", async (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (isNaN(val) || val < 0) {
+        showToast(t("toastVipInvalid"));
+        loadAdminItems();
+        return;
+      }
+      await api("PATCH", `/admin/items/${it.prop_id}`, { vip_value: val });
+      showToast(t("toastSaved"));
+      loadAdminItems();
     });
     tr.querySelector(".sort-input").addEventListener("change", async (e) => {
       await api("PATCH", `/admin/items/${it.prop_id}`, { sort_order: parseInt(e.target.value, 10) || 0 });
